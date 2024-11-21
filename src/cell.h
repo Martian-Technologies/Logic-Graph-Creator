@@ -6,15 +6,12 @@
 
 class Cell {
 public:
-    Cell(const Position& topRightOffset) : topRightOffsetX(topRightOffset.x), topRightOffsetY(topRightOffset.y) {}
+    Cell(block_address_t blockAddress) : blockAddress(blockAddress) {}
 
-    inline Position getOffsetToTopRight() const {return Position(topRightOffsetX, topRightOffsetY);}
-    inline block_size_t getType() const {return type;}
     inline block_address_t getBlockAddress() const {return blockAddress;}
+    inline void setBlockAddress(block_address_t blockAddress) {this->blockAddress = blockAddress;}
 
 private:
-    block_size_t topRightOffsetX, topRightOffsetY;
-    CellType type;
     block_address_t blockAddress;
 };
 

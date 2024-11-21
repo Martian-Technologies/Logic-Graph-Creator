@@ -31,19 +31,18 @@ public:
     inline T* get(const Position& position);
 	inline const T* get(const Position& position) const;
     inline void insert(const Position& position, const T& value);
+    inline void remove(const Position& position);
 
 private:
-    inline const std::pair<cord_t, cord_t> getPair(const Position& position) const {return std::make_pair(position.x, position.y);}
+    std::unordered_map<Position, T> data;
 
-    std::unordered_map<std::pair<cord_t, cord_t>, T> data;
-
-    typedef typename std::unordered_map<std::pair<cord_t, cord_t>, T>::iterator iterator;
-    typedef typename std::unordered_map<std::pair<cord_t, cord_t>, T>::const_iterator const_iterator;
+    typedef typename std::unordered_map<Position, T>::iterator iterator;
+    typedef typename std::unordered_map<Position, T>::const_iterator const_iterator;
 };
 
 template<class T>
 T* Sparse2dArray<T>::get(const Position& position) {
-    iterator iter = data.find(getPair(position));
+    iterator iter = data.find(position);
     if (iter == data.end()) {
         return nullptr;
     } else {
@@ -53,7 +52,7 @@ T* Sparse2dArray<T>::get(const Position& position) {
 
 template<class T>
 const T* Sparse2dArray<T>::get(const Position& position) const {
-    iterator iter = data.find(getPair(position));
+    const_iterator iter = data.find(position);
     if (iter == data.end()) {
         return nullptr;
     } else {
@@ -63,12 +62,18 @@ const T* Sparse2dArray<T>::get(const Position& position) const {
 
 template<class T>
 void Sparse2dArray<T>::insert(const Position& position, const T& value) {
-    iterator iter = data.find(getPair(position));
+    iterator iter = data.find(position);
     if (iter == data.end()) {
-        data.insert(std::make_pair(getPair(position), value));
+        data.insert(std::make_pair(position, value));
     } else {
         iter->second = value;
     }
+}
+
+template<class T>
+void Sparse2dArray<T>::remove(const Position& position) {
+    iterator iter = data.find(position);
+    if (iter != data.end()) data.erase(iter);
 }
 
 #endif /* sparse2d_h */
