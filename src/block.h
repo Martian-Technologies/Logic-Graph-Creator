@@ -16,59 +16,65 @@ enum BlockType {
     TYPE_COUNT
 };
 
+inline const block_size_t getBlockWidth(BlockType type) {
+    // add if not 1
+    switch (type) {
+        default: return 1;
+    }
+}
+
+inline const block_size_t getBlockHeight(BlockType type) {
+    // add if not 1
+    switch (type) {
+        default: return 1;
+    }
+}
+
 class Block {
 public:
+    Block() : blockType(BLOCK) {}
     inline const Position& getPosition() const {return position;}
     inline void setPosition(const Position& position) {this->position = position;}    
 
-    virtual BlockType type() const {return BLOCK;}
-    virtual block_size_t width() const {return 1;}
-    virtual block_size_t height() const {return 1;}
+    BlockType type() const {return blockType;}
+    block_size_t width() const {return getBlockWidth(blockType);}
+    block_size_t height() const {return getBlockHeight(blockType);}
 
 protected:
+    Block(BlockType blockType) : blockType(blockType) {}
+
+    BlockType blockType;
     Position position;
 };
 
 class AndBlock : public Block {
 public:
-    BlockType type() const override {return AND;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    AndBlock() : Block(AND) {}
 };
 
 class OrBlock : public Block {
 public:
-    BlockType type() const override {return OR;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    OrBlock() : Block(OR) {}
 };
 
 class XorBlock : public Block {
 public:
-    BlockType type() const override {return XOR;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    XorBlock() : Block(XOR) {}
 };
 
 class NandBlock : public Block {
 public:
-    BlockType type() const override {return NAND;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    NandBlock() : Block(NAND) {}
 };
 
 class NorBlock : public Block {
 public:
-    BlockType type() const override {return NOR;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    NorBlock() : Block(NOR) {}
 };
 
 class XnorBlock : public Block {
 public:
-    BlockType type() const override {return XNOR;}
-    block_size_t width() const override {return 1;}
-    block_size_t height() const override {return 1;}
+    XnorBlock() : Block(XNOR) {}
 };
 
 
