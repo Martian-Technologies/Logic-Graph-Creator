@@ -36,3 +36,14 @@
 
 # Cmake
 /build
+
+# QT
+/.qtc_clangd
+*.includes
+*.files
+*.cxxflags
+*.cxxflags
+*.user
+*.creator
+*.config
+*.cflags
