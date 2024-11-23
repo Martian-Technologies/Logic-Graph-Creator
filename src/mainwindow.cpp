@@ -1,13 +1,25 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#include <QHBoxLayout>
 
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
-
-#include <QHBoxLayout>
+#include "logicGridWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     setWindowTitle(tr("Example Window"));
+
+    BlockContainer* blockContainer = new BlockContainer();
+
+    blockContainer->tryInsertBlock(Position(0, 0), AndBlock());
+    blockContainer->tryInsertBlock(Position(1, 0), XorBlock());
+
+    LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
+    logicGridWindow->loadTileMap(":/logicTiles.png");
+    logicGridWindow->setBlockContainer(blockContainer);
+
+    QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
+    layout->addWidget(logicGridWindow);
 }
+
+    

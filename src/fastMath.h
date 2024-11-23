@@ -16,6 +16,16 @@ inline int constexpr IntPower(int x) {
     if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
-inline int Abs(int x) {return x < 0 ? -x : x;}
+inline int constexpr Abs(int x) { return x < 0 ? -x : x; }
+
+template <typename T> 
+inline char constexpr signum(T x) {
+    if constexpr (std::is_signed<T>())
+        return (T(0) < x) - (x < T(0));
+    return T(0) < x;
+}
+
+inline float constexpr decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
+
 
 #endif /* fastMath_h */

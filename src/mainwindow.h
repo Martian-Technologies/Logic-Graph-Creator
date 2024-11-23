@@ -1,11 +1,7 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 #ifndef mainWindow_h
 #define mainWindow_h
 
 #include <QWidget>
-
 #include <QGraphicsScene>
 #include <QMainWindow>
 
@@ -23,4 +19,4 @@ private:
     QGraphicsScene* scene;
 };
 
-#endif // mainWindow_h
+#endif /* mainWindow_h */

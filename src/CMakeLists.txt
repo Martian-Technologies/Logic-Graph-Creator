@@ -22,6 +22,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set(images_resource_files
+    "logicTiles.png"
 )
 
 qt_add_resources(${PROJECT_NAME} "images"
