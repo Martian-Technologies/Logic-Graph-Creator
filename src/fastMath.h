@@ -18,7 +18,7 @@ inline int constexpr IntPower(int x) {
 
 inline int constexpr Abs(int x) { return x < 0 ? -x : x; }
 
-template <typename T> 
+template <typename T>
 inline char constexpr signum(T x) {
     if constexpr (std::is_signed<T>())
         return (T(0) < x) - (x < T(0));
@@ -26,6 +26,11 @@ inline char constexpr signum(T x) {
 }
 
 inline float constexpr decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
+
+template <typename T>
+inline int constexpr downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }
+
+inline float constexpr downwardDecPart(float x) { return x - downwardFloor(x); }
 
 
 #endif /* fastMath_h */

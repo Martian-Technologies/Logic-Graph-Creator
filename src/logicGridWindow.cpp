@@ -37,22 +37,24 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     // calculated view sizes
     float viewHeight = getViewHeight();
     float viewToPix = getViewToPix();
-    int blockShiftX = viewToPix * (-decPart(viewCenterX + 0.5) - 1 + decPart(viewWidth / 2.f));
-    int blockShiftY = viewToPix * (-decPart(viewCenterY + 0.5) - 1 + decPart(viewHeight / 2.f));
-    int viewWidthInt = ceil(viewWidth / 2) * 2;
-    int viewHeightInt = ceil(viewHeight / 2) * 2;
-
-    for (int x = 0; x <= viewWidthInt + 1; x++) {
-        for (int y = -1; y <= viewHeightInt; y++) {
-            const Block* block = blockContainer->getBlock(Position(
-                x + (int)(viewCenterX + 0.5) - viewWidthInt / 2,
-                y + (int)(viewCenterY + 0.5) - viewHeightInt / 2
-            ));
+    for (
+        float x = -viewWidth / 2,
+        endX = viewWidth / 2+1;
+        x < endX;
+        x++
+        ) {
+        for (
+            float y = -viewHeight / 2,
+            endY = viewHeight / 2+1;
+            y < endY;
+            y++
+            ) {
+            const Block* block = blockContainer->getBlock(Position(downwardFloor(x + viewCenterX), downwardFloor(y + viewCenterY)));
             int tileIndex = block ? getBlockTileIndex(block->type()) : 0;
             painter.drawPixmap(
                 QRectF(
-                    x * viewToPix + blockShiftX,
-                    y * viewToPix + blockShiftY,
+                    (x - downwardDecPart(x + viewCenterX) + viewWidth / 2) * viewToPix,
+                    (y - downwardDecPart(y + viewCenterY) + viewHeight / 2) * viewToPix,
                     viewToPix,
                     viewToPix
                 ),
@@ -74,8 +76,8 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 
     if (!numPixels.isNull()) {
         float pixToView = getPixToView();
-        viewCenterX -= pixToView * numPixels.x();
-        viewCenterY -= pixToView * numPixels.y();
+        viewCenterX += pixToView * numPixels.x();
+        viewCenterY += pixToView * numPixels.y();
         event->accept();
         update();
     }
@@ -85,14 +87,14 @@ bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
         if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            zoom(2-nge->value());
+            zoom(2 - nge->value());
             return true;
         }
     } else if (event->type() == QEvent::Gesture) {
         QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
         if (gestureEvent) {
             QPinchGesture* gesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            zoom(2-gesture->scaleFactor());
+            zoom(2 - gesture->scaleFactor());
             return true;
         }
     }
