@@ -10,6 +10,7 @@
 #include <QTreeWidget>
 
 #include "blockContainer.h"
+#include "blockContainerTools.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
@@ -20,14 +21,14 @@ public:
     inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewWidth; }
     inline float getViewToPix() const { return (float)size().width() / viewWidth; }
     inline float getPixToView() const { return viewWidth / (float)size().width(); }
-    QString getSelectedItem() const;
     Position gridPos(QPoint point) const;
 
+    void updateSelectedItem();
     void zoom(float amount);
     // setup
     static const QPixmap& loadTileMap(const QString& filePath = QString());
     void setBlockContainer(BlockContainer* blockContainer);
-    inline void setSelector(QTreeWidget* treeWidget) { this->treeWidget = treeWidget; }
+    void setSelector(QTreeWidget* treeWidget);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -35,11 +36,14 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
     bool event(QEvent* event) override;
 
 private:
     void updateLoop();
     BlockContainer* blockContainer;
+    BlockContainerTools blockContainerTools;
     QTreeWidget* treeWidget;
     float viewCenterX;
     float viewCenterY;

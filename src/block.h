@@ -5,6 +5,7 @@
 #include "position.h"
 
 enum BlockType {
+    NONE,
     BLOCK,
     AND,
     OR,
@@ -33,6 +34,7 @@ inline const block_size_t getBlockHeight(BlockType type) {
 class Block {
 public:
     Block() : blockType(BLOCK) {}
+    inline void destroy() {}
     inline const Position& getPosition() const {return position;}
     inline void setPosition(const Position& position) {this->position = position;}    
 
@@ -41,6 +43,7 @@ public:
     block_size_t height() const {return getBlockHeight(blockType);}
 
 protected:
+    friend Block getBlockClass(BlockType type);
     Block(BlockType blockType) : blockType(blockType) {}
 
     BlockType blockType;
@@ -77,5 +80,6 @@ public:
     XnorBlock() : Block(XNOR) {}
 };
 
+inline Block getBlockClass(BlockType type) {return Block(type);}
 
 #endif /* block_h */

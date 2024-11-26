@@ -16,6 +16,14 @@ void BlockContainer::removeBlockCells(const Position& position, const Block& blo
     }
 }
 
+bool BlockContainer::tryRemoveBlock(const Position& position) {
+    Block* block = getBlock(position);
+    if (block == nullptr) return false;
+    removeBlockCells(block->getPosition(), *block);
+    block->destroy();
+    return true;
+}
+
 // makes a copy of block and places it into the grid
 // returns false if the block was not inserted
 bool BlockContainer::tryInsertBlock(const Position& position, const Block& block) {

@@ -18,9 +18,12 @@ public:
     bool checkCollision(const Position& positionSmall, const Position& positionLarge);
 
     bool tryInsertBlock(const Position& position, const Block& block);
+    bool tryInsertBlock(const Position& position, BlockType blockType) {return tryInsertBlock(position, getBlockClass(blockType));};
+    bool tryRemoveBlock(const Position& position);
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
 
 private:
+    inline Block* getBlock(const Position& position);
     inline Cell* getCell(const Position& position) {return grid.get(position);}
     inline void insertCell(const Position& position, Cell cell) {grid.insert(position, cell);}
     inline void removeCell(const Position& position) {grid.remove(position);}
@@ -32,6 +35,11 @@ private:
 };
 
 inline const Block* BlockContainer::getBlock(const Position& position) const {
+    const Cell* cell = grid.get(position);
+    return cell == nullptr ? nullptr : &blocks[cell->getBlockAddress()];
+}
+
+inline Block* BlockContainer::getBlock(const Position& position) {
     const Cell* cell = grid.get(position);
     return cell == nullptr ? nullptr : &blocks[cell->getBlockAddress()];
 }

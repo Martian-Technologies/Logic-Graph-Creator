@@ -19,7 +19,8 @@ inline int getBlockTileIndex(BlockType type) {
     }
 }
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainer(), viewCenterX(0), viewCenterY(0), viewWidth(10) {
+LogicGridWindow::LogicGridWindow(QWidget* parent) :
+    QWidget(parent), blockContainer(), viewCenterX(0), viewCenterY(0), viewWidth(10) {
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     updateLoopTimer = new QTimer(this);
@@ -59,7 +60,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
             y < endY;
             y++
             ) {
-            const Block* block = blockContainer->getBlock(Position(downwardFloor(x + viewCenterX), downwardFloor(y + viewCenterY)));
+            const Block* block = ((const BlockContainer*)blockContainer)->getBlock(Position(downwardFloor(x + viewCenterX), downwardFloor(y + viewCenterY)));
             int tileIndex = block ? getBlockTileIndex(block->type()) : 0;
             painter.drawPixmap(
                 QRectF(
@@ -77,6 +78,8 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
 
 void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
     this->blockContainer = blockContainer;
+    blockContainerTools.setBlockContainer(blockContainer);
+    updateSelectedItem();
     update();
 }
 
@@ -117,40 +120,65 @@ bool LogicGridWindow::event(QEvent* event) {
 }
 
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
-    switch (event->key()) {
-    case Qt::Key_Left:
-        movingLeft = true;
+    if (blockContainerTools.keyPress(event->key())) {
         update();
-        break;
-    case Qt::Key_Right:
-        movingRight = true;
-        update();
-        break;
-    case Qt::Key_Up:
-        movingUp = true;
-        update();
-        break;
-    case Qt::Key_Down:
-        movingDown = true;
-        update();
-        break;
+        event->accept();
+    } else {
+        switch (event->key()) {
+        case Qt::Key_Left:
+            movingLeft = true;
+            event->accept();
+            break;
+        case Qt::Key_Right:
+            movingRight = true;
+            event->accept();
+            break;
+        case Qt::Key_Up:
+            movingUp = true;
+            event->accept();
+            break;
+        case Qt::Key_Down:
+            movingDown = true;
+            event->accept();
+            break;
+        }
     }
 }
 
 void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
     switch (event->key()) {
     case Qt::Key_Left:
-        movingLeft = false;
+        if (movingLeft) {
+            movingLeft = false;
+            event->accept();
+            return;
+        }
         break;
     case Qt::Key_Right:
-        movingRight = false;
+        if (movingRight) {
+            movingRight = false;
+            event->accept();
+            return;
+        }
         break;
     case Qt::Key_Up:
-        movingUp = false;
+        if (movingUp) {
+            movingUp = false;
+            event->accept();
+            return;
+        }
         break;
     case Qt::Key_Down:
-        movingDown = false;
+        if (movingDown) {
+            movingDown = false;
+            event->accept();
+            return;
+        }
         break;
+    }
+    if (blockContainerTools.keyRelease(event->key())) {
+        update();
+        event->accept();
     }
 }
 
@@ -164,69 +192,71 @@ void LogicGridWindow::updateLoop() {
     if (movingLeft || movingRight || movingUp || movingDown) update();
 }
 
-QString LogicGridWindow::getSelectedItem() const {
-    for (QTreeWidgetItem *item : treeWidget->selectedItems()) {
-        if (item) {
-            return item->text(0);
+void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
+    // disconnect the old tree
+    if (this->treeWidget != nullptr)
+        disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+    // connect the new tree
+    this->treeWidget = treeWidget;
+    connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+}
+
+void LogicGridWindow::updateSelectedItem() {
+    if (treeWidget) {
+        for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
+            if (item) {
+                QString str = item->text(0);
+                if (str == "And") blockContainerTools.selectBlock(AND);
+                else if (str == "Or") blockContainerTools.selectBlock(OR);
+                else if (str == "Xor") blockContainerTools.selectBlock(XOR);
+                else if (str == "Nand") blockContainerTools.selectBlock(NAND);
+                else if (str == "Nor") blockContainerTools.selectBlock(NOR);
+                else if (str == "Xnor") blockContainerTools.selectBlock(XNOR);
+            }
+            return;
         }
     }
-    return "None";
 }
 
 Position LogicGridWindow::gridPos(QPoint point) const {
     return Position(
-        downwardFloor(point.x() * getPixToView() - getViewWidth()/2.f + viewCenterX),
-        downwardFloor(point.y() * getPixToView() - getViewHeight()/2.f + viewCenterY)
+        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + viewCenterX),
+        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + viewCenterY)
     );
 }
 
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        QString item = getSelectedItem();
-        if (item == "And") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), AndBlock());
+        if (blockContainerTools.leftPress(gridPos(event->pos()))) {
             update();
-        } else if (item == "Or") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), OrBlock());
-            update();
-        } else if (item == "Xor") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), XorBlock());
-            update();
-        } else if (item == "Nand") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), NandBlock());
-            update();
-        } else if (item == "Nor") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), NorBlock());
-            update();
-        } else if (item == "Xnor") {
-            blockContainer->tryInsertBlock(gridPos(event->pos()), XnorBlock());
-            update();
+            event->accept();
         }
     } else if (event->button() == Qt::RightButton) {
-
+        if (blockContainerTools.rightPress(gridPos(event->pos()))) {
+            update();
+            event->accept();
+        }
     }
 }
 
-/*
-void ScribbleArea::mousePressEvent(QMouseEvent *event)
-{
+void LogicGridWindow::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
-        lastPoint = event->pos();
-        scribbling = true;
+        if (blockContainerTools.leftRelease(gridPos(event->pos()))) {
+            update();
+            event->accept();
+        }
+    } else if (event->button() == Qt::RightButton) {
+        if (blockContainerTools.rightRelease(gridPos(event->pos()))) {
+            update();
+            event->accept();
+        }
     }
 }
 
-void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
-{
-    if ((event->buttons() & Qt::LeftButton) && scribbling)
-        drawLineTo(event->pos());
-}
-
-void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton && scribbling) {
-        drawLineTo(event->pos());
-        scribbling = false;
+void LogicGridWindow::mouseMoveEvent(QMouseEvent *event) {
+    if (blockContainerTools.mouseMove(gridPos(event->pos()))) {
+        update();
+        event->accept();
     }
 }
-*/
+
