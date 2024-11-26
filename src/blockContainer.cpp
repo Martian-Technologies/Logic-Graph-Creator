@@ -19,7 +19,7 @@ void BlockContainer::removeBlockCells(const Position& position, const Block& blo
 // makes a copy of block and places it into the grid
 // returns false if the block was not inserted
 bool BlockContainer::tryInsertBlock(const Position& position, const Block& block) {
-    if (checkCollision(position, position + Position(block.width(), block.height()))) return false;
+    if (checkCollision(position, position + Position(block.width()-1, block.height()-1))) return false;
     placeBlockCells(position, block, blocks.size());
     blocks.push_back(block);
     blocks.back().setPosition(position);

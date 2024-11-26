@@ -1,6 +1,8 @@
 #ifndef position_h
 #define position_h
 
+#include <string>
+
 #include "fastMath.h"
 #include "types.h"
 
@@ -14,7 +16,7 @@ struct Position {
     inline bool operator!=(const Position& other) const { return !operator==(other); }
     inline Position operator+(const Position& position) const {return Position(position.x + x, position.y + y);}
     inline Position operator-(const Position& position) const {return Position(position.x - x, position.y - y);}
-
+    inline std::string toString() const {return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";}
     cord_t x, y;
 };
 

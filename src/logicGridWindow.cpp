@@ -1,6 +1,8 @@
 #include <math.h>
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
+#include <QtLogging>
+#include <QTimer>
 
 #include "logicGridWindow.h"
 
@@ -15,6 +17,14 @@ inline int getBlockTileIndex(BlockType type) {
     case XNOR:  return 7;
     default:    return 1;
     }
+}
+
+LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainer(), viewCenterX(0), viewCenterY(0), viewWidth(10) {
+    setFocusPolicy(Qt::StrongFocus);
+    grabGesture(Qt::PinchGesture);
+    updateLoopTimer = new QTimer(this);
+    connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
+    updateLoopTimer->start(16);
 }
 
 const QPixmap& LogicGridWindow::loadTileMap(const QString& filePath) {
@@ -39,13 +49,13 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     float viewToPix = getViewToPix();
     for (
         float x = -viewWidth / 2,
-        endX = viewWidth / 2+1;
+        endX = viewWidth / 2 + 1;
         x < endX;
         x++
         ) {
         for (
             float y = -viewHeight / 2,
-            endY = viewHeight / 2+1;
+            endY = viewHeight / 2 + 1;
             y < endY;
             y++
             ) {
@@ -75,9 +85,12 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
     if (numPixels.isNull()) numPixels = event->angleDelta() / 120 * /* pixels per step */ 10;
 
     if (!numPixels.isNull()) {
+        // will this work?????
+        bool isTrackpad = event->angleDelta().y() < 120 && event->angleDelta().y() > -120;
+
         float pixToView = getPixToView();
-        viewCenterX += pixToView * numPixels.x();
-        viewCenterY += pixToView * numPixels.y();
+        viewCenterX -= pixToView * numPixels.x();
+        viewCenterY -= pixToView * numPixels.y();
         event->accept();
         update();
     }
@@ -87,21 +100,133 @@ bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
         if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            zoom(2 - nge->value());
+            viewWidth *= 2 - nge->value();
+            update();
             return true;
         }
     } else if (event->type() == QEvent::Gesture) {
         QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
         if (gestureEvent) {
-            QPinchGesture* gesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            zoom(2 - gesture->scaleFactor());
+            QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
+            viewWidth *= 2 - pinchGesture->scaleFactor();
+            update();
             return true;
         }
     }
     return QWidget::event(event);
 }
 
-void LogicGridWindow::zoom(float amount) {
-    viewWidth *= amount;
-    update();
+void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
+    switch (event->key()) {
+    case Qt::Key_Left:
+        movingLeft = true;
+        update();
+        break;
+    case Qt::Key_Right:
+        movingRight = true;
+        update();
+        break;
+    case Qt::Key_Up:
+        movingUp = true;
+        update();
+        break;
+    case Qt::Key_Down:
+        movingDown = true;
+        update();
+        break;
+    }
 }
+
+void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
+    switch (event->key()) {
+    case Qt::Key_Left:
+        movingLeft = false;
+        break;
+    case Qt::Key_Right:
+        movingRight = false;
+        break;
+    case Qt::Key_Up:
+        movingUp = false;
+        break;
+    case Qt::Key_Down:
+        movingDown = false;
+        break;
+    }
+}
+
+void LogicGridWindow::updateLoop() {
+    float speed = 100.0f;
+    float dt = 0.016f;
+    if (movingLeft) viewCenterX -= speed * dt * getPixToView();
+    if (movingRight) viewCenterX += speed * dt * getPixToView();
+    if (movingUp) viewCenterY -= speed * dt * getPixToView();
+    if (movingDown) viewCenterY += speed * dt * getPixToView();
+    if (movingLeft || movingRight || movingUp || movingDown) update();
+}
+
+QString LogicGridWindow::getSelectedItem() const {
+    for (QTreeWidgetItem *item : treeWidget->selectedItems()) {
+        if (item) {
+            return item->text(0);
+        }
+    }
+    return "None";
+}
+
+Position LogicGridWindow::gridPos(QPoint point) const {
+    return Position(
+        downwardFloor(point.x() * getPixToView() - getViewWidth()/2.f + viewCenterX),
+        downwardFloor(point.y() * getPixToView() - getViewHeight()/2.f + viewCenterY)
+    );
+}
+
+void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        QString item = getSelectedItem();
+        if (item == "And") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), AndBlock());
+            update();
+        } else if (item == "Or") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), OrBlock());
+            update();
+        } else if (item == "Xor") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), XorBlock());
+            update();
+        } else if (item == "Nand") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), NandBlock());
+            update();
+        } else if (item == "Nor") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), NorBlock());
+            update();
+        } else if (item == "Xnor") {
+            blockContainer->tryInsertBlock(gridPos(event->pos()), XnorBlock());
+            update();
+        }
+    } else if (event->button() == Qt::RightButton) {
+
+    }
+}
+
+/*
+void ScribbleArea::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        lastPoint = event->pos();
+        scribbling = true;
+    }
+}
+
+void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
+{
+    if ((event->buttons() & Qt::LeftButton) && scribbling)
+        drawLineTo(event->pos());
+}
+
+void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && scribbling) {
+        drawLineTo(event->pos());
+        scribbling = false;
+    }
+}
+*/

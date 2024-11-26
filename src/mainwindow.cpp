@@ -1,4 +1,5 @@
 #include <QHBoxLayout>
+#include <QTreeView>
 
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
@@ -17,9 +18,13 @@ MainWindow::MainWindow(QWidget* parent)
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->loadTileMap(":/logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
+    logicGridWindow->setSelector(ui->treeWidget);
 
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);
+
+    // QTreeView tree;
+    // tree.
 }
 
     

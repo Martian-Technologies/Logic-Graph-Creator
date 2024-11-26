@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
     <item>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="sideBar" native="true">
       <property name="maximumSize">
        <size>
         <width>160</width>
@@ -27,51 +27,54 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QScrollBar" name="verticalScrollBar">
-         <property name="maximumSize">
-          <size>
-           <width>15</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="scrollArea">
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>119</width>
-            <height>372</height>
-           </rect>
+        <widget class="QTreeWidget" name="treeWidget">
+         <column>
+          <property name="text">
+           <string>Blocks</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <property name="leftMargin">
-            <number>0</number>
+         </column>
+         <item>
+          <property name="text">
+           <string>Basic</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>And</string>
            </property>
-           <property name="topMargin">
-            <number>0</number>
+          </item>
+          <item>
+           <property name="text">
+            <string>Or</string>
            </property>
-           <property name="rightMargin">
-            <number>0</number>
+          </item>
+          <item>
+           <property name="text">
+            <string>Xor</string>
            </property>
-           <property name="bottomMargin">
-            <number>0</number>
+          </item>
+          <item>
+           <property name="text">
+            <string>Nand</string>
            </property>
-           <item>
-            <widget class="QTreeView" name="treeView"/>
-           </item>
-          </layout>
-         </widget>
+          </item>
+          <item>
+           <property name="text">
+            <string>Nor</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Xnor</string>
+           </property>
+          </item>
+         </item>
         </widget>
        </item>
       </layout>
