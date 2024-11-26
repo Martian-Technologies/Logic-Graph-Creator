@@ -9,6 +9,8 @@
 class BlockContainerTools {
 private:
     struct Action;
+    struct KeyAction;
+    struct MouseAction;
 public:
     enum ToolTypes {
         SELECT, // We will want to be able to interact will blocks. Maybe some kind of ui on the side.
@@ -16,11 +18,11 @@ public:
         AREA_PLACE,
     };
 
-    inline BlockContainerTools() : blockContainer(nullptr), selectedBlock(NONE), tool(SINGLE_PLACE), actionStack() {}
+    inline BlockContainerTools() : blockContainer(nullptr), selectedBlock(NONE), tool(SINGLE_PLACE), mouseActionStack() {}
 
-    inline void setBlockContainer(BlockContainer* blockContainer) {this->blockContainer = blockContainer; clearActions();}
+    inline void setBlockContainer(BlockContainer* blockContainer) {this->blockContainer = blockContainer; clearAllActions();}
     inline void selectBlock(BlockType selectedBlock) {this->selectedBlock = selectedBlock;}
-    inline void selectTool(ToolTypes tool) {this->tool = tool; clearActions();}
+    inline void selectTool(ToolTypes tool) {this->tool = tool; clearAllActions();}
 
     bool leftPress(Position pos);
     bool rightPress(Position pos);
@@ -31,11 +33,27 @@ public:
     bool keyRelease(int keyId);
 
 private:
+    inline void clearAllActions() {actionStack.clear(); keyActionStack.clear(); mouseActionStack.clear();}
     inline void clearActions() {actionStack.clear();}
-    inline void addAction(std::string name, Position position = Position()) {actionStack.emplace_back(name, position);}
+    inline void clearKeyActions() {keyActionStack.clear();}
+    inline void clearMouseActions() {mouseActionStack.clear();}
+    inline void addAction(std::string name) {actionStack.emplace_back(name);}
+    inline void addKeyAction(std::string name, int key) {keyActionStack.emplace_back(name, key);}
+    inline void addMouseAction(std::string name, Position position) {mouseActionStack.emplace_back(name, position);}
 
     struct Action {
-        inline Action(std::string name, Position position) : name(name), position(position) {}
+        inline Action(std::string name) : name(name) {}
+        std::string name;
+    };
+
+    struct KeyAction {
+        inline KeyAction(std::string name, int key) : name(name), key(key) {}
+        std::string name;
+        int key;
+    };
+
+    struct MouseAction {
+        inline MouseAction(std::string name, Position position) : name(name), position(position) {}
         std::string name;
         Position position;
     };
@@ -44,6 +62,8 @@ private:
     BlockType selectedBlock;
     ToolTypes tool;
     std::vector<Action> actionStack;
+    std::vector<KeyAction> keyActionStack;
+    std::vector<MouseAction> mouseActionStack;
 };
 
 #endif /* blockContainerTools_h */

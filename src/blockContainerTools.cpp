@@ -6,7 +6,7 @@ bool BlockContainerTools::leftPress(Position pos) {
     case SELECT:
         break;
     case SINGLE_PLACE:
-        addAction("place", pos);
+        addMouseAction("place", pos);
         return selectedBlock != NONE && blockContainer->tryInsertBlock(pos, getBlockClass(selectedBlock));
     case AREA_PLACE:
         break;
@@ -22,17 +22,18 @@ bool BlockContainerTools::leftRelease(Position pos) {
     case SELECT:
         break;
     case SINGLE_PLACE:
-        switch (actionStack.size()) {
+        // this logic is to allow holding right then left then releasing left and it to start deleting
+        switch (mouseActionStack.size()) {
         case 1:
-            if (actionStack.back().name == "place") {
-                actionStack.pop_back();
+            if (mouseActionStack.back().name == "place") {
+                mouseActionStack.pop_back();
                 return true;
             }
         case 2:
-            if (actionStack.back().name == "place") actionStack.pop_back();
+            if (mouseActionStack.back().name == "place") mouseActionStack.pop_back();
             else {
-                actionStack.front() = actionStack.back();
-                actionStack.pop_back();
+                mouseActionStack.front() = mouseActionStack.back();
+                mouseActionStack.pop_back();
             }
             return true;
         }
@@ -50,7 +51,7 @@ bool BlockContainerTools::rightPress(Position pos) {
     case SELECT:
         break;
     case SINGLE_PLACE:
-        addAction("remove", pos);
+        addMouseAction("remove", pos);
         return blockContainer->tryRemoveBlock(pos);
     case AREA_PLACE:
         break;
@@ -66,18 +67,19 @@ bool BlockContainerTools::rightRelease(Position pos) {
     case SELECT:
         break;
     case SINGLE_PLACE:
-        switch (actionStack.size()) {
+        // this logic is to allow holding left then right then releasing right and it to start placing
+        switch (mouseActionStack.size()) {
         case 1:
-            if (actionStack.back().name == "remove") {
-                actionStack.pop_back();
+            if (mouseActionStack.back().name == "remove") {
+                mouseActionStack.pop_back();
                 return true;
             }
             break;
         case 2:
-            if (actionStack.back().name == "remove") actionStack.pop_back();
+            if (mouseActionStack.back().name == "remove") mouseActionStack.pop_back();
             else {
-                actionStack.front() = actionStack.back();
-                actionStack.pop_back();
+                mouseActionStack.front() = mouseActionStack.back();
+                mouseActionStack.pop_back();
             }
             return true;
         }
@@ -96,8 +98,8 @@ bool BlockContainerTools::mouseMove(Position pos) {
     case SELECT:
         break;
     case SINGLE_PLACE:
-        if (actionStack.size() > 0) {
-            if (actionStack.back().name == "place")
+        if (mouseActionStack.size() > 0) {
+            if (mouseActionStack.back().name == "place")
                 return selectedBlock != NONE && blockContainer->tryInsertBlock(pos, getBlockClass(selectedBlock));
             return blockContainer->tryRemoveBlock(pos);
         }
@@ -105,18 +107,14 @@ bool BlockContainerTools::mouseMove(Position pos) {
         break;
     default:
         break;
-        return false;
     }
+    return false;
 }
 
 bool BlockContainerTools::keyPress(int keyId) {
     if (!blockContainer) return false; // if the blockContainer has not been set yet
     switch (tool) {
     case SELECT:
-        break;
-    case SINGLE_PLACE:
-        break;
-    case AREA_PLACE:
         break;
     default:
         break;
@@ -128,10 +126,6 @@ bool BlockContainerTools::keyRelease(int keyId) {
     if (!blockContainer) return false; // if the blockContainer has not been set yet
     switch (tool) {
     case SELECT:
-        break;
-    case SINGLE_PLACE:
-        break;
-    case AREA_PLACE:
         break;
     default:
         break;

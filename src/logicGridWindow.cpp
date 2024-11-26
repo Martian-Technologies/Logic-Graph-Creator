@@ -254,9 +254,11 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void LogicGridWindow::mouseMoveEvent(QMouseEvent *event) {
-    if (blockContainerTools.mouseMove(gridPos(event->pos()))) {
-        update();
-        event->accept();
+    QPoint point = event->pos();
+    if (point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height()) { // inside the widget
+        if (blockContainerTools.mouseMove(gridPos(point))) {
+            update();
+            event->accept();
+        }
     }
 }
-
