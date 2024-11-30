@@ -35,6 +35,11 @@
        </property>
        <item>
         <widget class="QTreeWidget" name="treeWidget">
+         <property name="font">
+          <font>
+           <family>.AppleSystemUIFont</family>
+          </font>
+         </property>
          <property name="indentation">
           <number>10</number>
          </property>

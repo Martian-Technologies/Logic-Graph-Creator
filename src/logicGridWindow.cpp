@@ -8,6 +8,7 @@
 
 inline int getBlockTileIndex(BlockType type) {
     switch (type) {
+    case NONE: return 0;
     case BLOCK: return 1;
     case AND:   return 2;
     case OR:    return 3;
@@ -20,7 +21,8 @@ inline int getBlockTileIndex(BlockType type) {
 }
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
-    QWidget(parent), blockContainer(), viewCenterX(0), viewCenterY(0), viewWidth(10) {
+    QWidget(parent), dt(0.016f), updateLoopTimer(),
+    blockContainer(), blockContainerTools(), viewMannager(false) {
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     updateLoopTimer = new QTimer(this);
@@ -47,6 +49,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
 
     // calculated view sizes
     float viewHeight = getViewHeight();
+    float viewWidth = viewMannager.getViewWidth();
     float viewToPix = getViewToPix();
     for (
         float x = -viewWidth / 2,
@@ -60,12 +63,15 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
             y < endY;
             y++
             ) {
-            const Block* block = ((const BlockContainer*)blockContainer)->getBlock(Position(downwardFloor(x + viewCenterX), downwardFloor(y + viewCenterY)));
+            const Block* block = ((const BlockContainer*)blockContainer)->getBlock(Position(
+                downwardFloor(x + viewMannager.getViewCenterX()),
+                downwardFloor(y + viewMannager.getViewCenterY())
+            ));
             int tileIndex = block ? getBlockTileIndex(block->type()) : 0;
             painter.drawPixmap(
                 QRectF(
-                    (x - downwardDecPart(x + viewCenterX) + viewWidth / 2) * viewToPix,
-                    (y - downwardDecPart(y + viewCenterY) + viewHeight / 2) * viewToPix,
+                    (x - downwardDecPart(x + viewMannager.getViewCenterX()) + viewWidth / 2) * viewToPix,
+                    (y - downwardDecPart(y + viewMannager.getViewCenterY()) + viewHeight / 2) * viewToPix,
                     viewToPix,
                     viewToPix
                 ),
@@ -92,8 +98,7 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
         bool isTrackpad = event->angleDelta().y() < 120 && event->angleDelta().y() > -120;
 
         float pixToView = getPixToView();
-        viewCenterX -= pixToView * numPixels.x();
-        viewCenterY -= pixToView * numPixels.y();
+        viewMannager.scroll(numPixels.x(), numPixels.y(), pixToView);
         event->accept();
         update();
     }
@@ -103,7 +108,7 @@ bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
         if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            viewWidth *= 2 - nge->value();
+            viewMannager.pinch(1 - nge->value());
             update();
             return true;
         }
@@ -111,7 +116,7 @@ bool LogicGridWindow::event(QEvent* event) {
         QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
         if (gestureEvent) {
             QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            viewWidth *= 2 - pinchGesture->scaleFactor();
+            viewMannager.pinch(1 - pinchGesture->scaleFactor());
             update();
             return true;
         }
@@ -121,75 +126,26 @@ bool LogicGridWindow::event(QEvent* event) {
 
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
     if (blockContainerTools.keyPress(event->key())) {
+        event->accept();
+    } else if (viewMannager.press(event->key())) {
         update();
         event->accept();
-    } else {
-        switch (event->key()) {
-        case Qt::Key_Left:
-            movingLeft = true;
-            event->accept();
-            break;
-        case Qt::Key_Right:
-            movingRight = true;
-            event->accept();
-            break;
-        case Qt::Key_Up:
-            movingUp = true;
-            event->accept();
-            break;
-        case Qt::Key_Down:
-            movingDown = true;
-            event->accept();
-            break;
-        }
     }
 }
 
 void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
-    switch (event->key()) {
-    case Qt::Key_Left:
-        if (movingLeft) {
-            movingLeft = false;
-            event->accept();
-            return;
-        }
-        break;
-    case Qt::Key_Right:
-        if (movingRight) {
-            movingRight = false;
-            event->accept();
-            return;
-        }
-        break;
-    case Qt::Key_Up:
-        if (movingUp) {
-            movingUp = false;
-            event->accept();
-            return;
-        }
-        break;
-    case Qt::Key_Down:
-        if (movingDown) {
-            movingDown = false;
-            event->accept();
-            return;
-        }
-        break;
-    }
-    if (blockContainerTools.keyRelease(event->key())) {
+    if (viewMannager.release(event->key())) {
+        event->accept();
+    } else if (blockContainerTools.keyRelease(event->key())) {
         update();
         event->accept();
     }
 }
 
 void LogicGridWindow::updateLoop() {
-    float speed = 100.0f;
-    float dt = 0.016f;
-    if (movingLeft) viewCenterX -= speed * dt * getPixToView();
-    if (movingRight) viewCenterX += speed * dt * getPixToView();
-    if (movingUp) viewCenterY -= speed * dt * getPixToView();
-    if (movingDown) viewCenterY += speed * dt * getPixToView();
-    if (movingLeft || movingRight || movingUp || movingDown) update();
+    if (viewMannager.update(dt, getPixToView())) {
+        update();
+    }
 }
 
 void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
@@ -220,8 +176,8 @@ void LogicGridWindow::updateSelectedItem() {
 
 Position LogicGridWindow::gridPos(QPoint point) const {
     return Position(
-        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + viewCenterX),
-        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + viewCenterY)
+        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + viewMannager.getViewCenterX()),
+        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + viewMannager.getViewCenterY())
     );
 }
 
@@ -239,7 +195,7 @@ void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void LogicGridWindow::mouseReleaseEvent(QMouseEvent *event) {
+void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         if (blockContainerTools.leftRelease(gridPos(event->pos()))) {
             update();
@@ -253,7 +209,7 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent *event) {
     }
 }
 
-void LogicGridWindow::mouseMoveEvent(QMouseEvent *event) {
+void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
     QPoint point = event->pos();
     if (point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height()) { // inside the widget
         if (blockContainerTools.mouseMove(gridPos(point))) {

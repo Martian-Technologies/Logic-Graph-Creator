@@ -18,9 +18,12 @@ public:
     bool checkCollision(const Position& positionSmall, const Position& positionLarge);
 
     bool tryInsertBlock(const Position& position, const Block& block);
-    bool tryInsertBlock(const Position& position, BlockType blockType) {return tryInsertBlock(position, getBlockClass(blockType));};
+    inline bool tryInsertBlock(const Position& position, BlockType blockType) {return tryInsertBlock(position, getBlockClass(blockType));};
     bool tryRemoveBlock(const Position& position);
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
+
+    bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
+    bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 
 private:
     inline Block* getBlock(const Position& position);

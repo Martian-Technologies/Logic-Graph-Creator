@@ -11,16 +11,17 @@
 
 #include "blockContainer.h"
 #include "blockContainerTools.h"
+#include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
 public:
     LogicGridWindow(QWidget* parent = nullptr);
 
-    inline float getViewWidth() const { return viewWidth; }
-    inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewWidth; }
-    inline float getViewToPix() const { return (float)size().width() / viewWidth; }
-    inline float getPixToView() const { return viewWidth / (float)size().width(); }
+    inline float getViewWidth() const { return viewMannager.getViewWidth(); }
+    inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewMannager.getViewWidth(); }
+    inline float getViewToPix() const { return (float)size().width() / viewMannager.getViewWidth(); }
+    inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
     Position gridPos(QPoint point) const;
 
     void updateSelectedItem();
@@ -41,18 +42,20 @@ protected:
     bool event(QEvent* event) override;
 
 private:
+    // update loop
+    float dt = 0.016f;
     void updateLoop();
-    BlockContainer* blockContainer;
-    BlockContainerTools blockContainerTools;
-    QTreeWidget* treeWidget;
-    float viewCenterX;
-    float viewCenterY;
-    float viewWidth;
-    bool movingLeft = false;
-    bool movingRight = false;
-    bool movingUp = false;
-    bool movingDown = false;
     QTimer* updateLoopTimer;
+
+    // data
+    BlockContainer* blockContainer;
+
+    // helper classes
+    BlockContainerTools blockContainerTools;
+    ViewMannager viewMannager;
+
+    // ui elements
+    QTreeWidget* treeWidget;
 };
 
 #endif /* logicGridWindow_h */
