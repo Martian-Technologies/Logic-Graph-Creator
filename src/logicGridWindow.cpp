@@ -22,7 +22,7 @@ inline int getBlockTileIndex(BlockType type) {
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(),
-    blockContainer(), blockContainerTools(), viewMannager(false) {
+    blockContainer(), blockContainerTools(), viewMannager(true) { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     updateLoopTimer = new QTimer(this);
@@ -183,7 +183,10 @@ Position LogicGridWindow::gridPos(QPoint point) const {
 
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        if (blockContainerTools.leftPress(gridPos(event->pos()))) {
+        if (viewMannager.mouseDown()) {
+            update();
+            event->accept();
+        } else if (blockContainerTools.leftPress(gridPos(event->pos()))) {
             update();
             event->accept();
         }
@@ -197,7 +200,10 @@ void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
 
 void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        if (blockContainerTools.leftRelease(gridPos(event->pos()))) {
+        if (viewMannager.mouseUp()) {
+            update();
+            event->accept();
+        } else if (blockContainerTools.leftRelease(gridPos(event->pos()))) {
             update();
             event->accept();
         }
@@ -212,7 +218,10 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
 void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
     QPoint point = event->pos();
     if (point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height()) { // inside the widget
-        if (blockContainerTools.mouseMove(gridPos(point))) {
+        if (viewMannager.mouseMove(point.x() * getPixToView(), point.y() * getPixToView())) {
+            update();
+            event->accept();
+        } else if (blockContainerTools.mouseMove(gridPos(point))) {
             update();
             event->accept();
         }

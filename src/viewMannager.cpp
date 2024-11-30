@@ -1,17 +1,47 @@
-#include "viewMannager.h"
-
 #include <QApplication>
 
+#include "viewMannager.h"
 
 void ViewMannager::scroll(float dx, float dy, float pixToView) {
     if (usingMouse) {
-        qDebug() << dx << ", " << dy;
         viewWidth *= 1.f - dy/200.f;
+        lastMouseX = 100.f;
     } else {
         viewCenterX -= dx*pixToView;
         viewCenterY -= dy*pixToView;
     }
     applyLimits();
+}
+
+bool ViewMannager::mouseDown() {
+    if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
+        doMouseMovement = true;
+        lastMouseX = 100.f;
+        return true;
+    }
+    return false;
+}
+
+bool ViewMannager::mouseUp() {
+    if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier) && doMouseMovement) {
+        doMouseMovement = false;
+        return true;
+    }
+    return false;
+}
+
+bool ViewMannager::mouseMove(float x, float y) {
+    if (doMouseMovement) {
+        if (lastMouseX != 100.f) {
+            viewCenterX += lastMouseX - x;
+            viewCenterY += lastMouseY - y;
+            applyLimits();
+        }
+        lastMouseX = x;
+        lastMouseY = y;
+        return true;
+    }
+    return false;
 }
 
 bool ViewMannager::press(int key) {

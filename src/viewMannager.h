@@ -8,10 +8,14 @@ public:
     ViewMannager(bool usingMouse = true) :
         speed(200), usingMouse(usingMouse),
         viewCenterX(0), viewCenterY(0), viewWidth(10),
-        movingLeft(false), movingRight(false), movingUp(false), movingDown(false) {}
+        movingLeft(false), movingRight(false), movingUp(false), movingDown(false),
+        doMouseMovement(false) {}
 
     inline void pinch(float delta) { viewWidth *= 1 + delta; applyLimits(); }
     void scroll(float dx, float dy, float pixToView);
+    bool mouseDown();
+    bool mouseUp();
+    bool mouseMove(float dx, float dy);
     bool press(int key);
     bool release(int key);
 
@@ -42,6 +46,9 @@ private:
     bool movingRight;
     bool movingUp;
     bool movingDown;
+    bool doMouseMovement;
+    float lastMouseX;
+    float lastMouseY;
 };
 
 #endif /* viewMannager_h */
