@@ -1,4 +1,3 @@
-#include <math.h>
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 #include <QtLogging>

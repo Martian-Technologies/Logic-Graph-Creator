@@ -1,10 +1,7 @@
 #include "singlePlaceTool.h"
 
-#include <QApplication>
-
 bool SinglePlaceTool::leftPress(Position pos) {
     if (!blockContainer) return false;
-    qDebug() << clicks[0] << clicks[1];
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'p';

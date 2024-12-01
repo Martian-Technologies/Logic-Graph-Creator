@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget* parent)
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->loadTileMap(":/gui/resources/logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
-    logicGridWindow->setSelector(ui->treeWidget);
+    logicGridWindow->setSelector(ui->selectorTreeWidget);
 
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);

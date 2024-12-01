@@ -1,9 +1,6 @@
 #include <iostream>
 
 #include <QApplication>
-#include <QDir>
-#include <QDebug>
-#include <QResource>
 
 #include "gui/mainWindow.h"
 
