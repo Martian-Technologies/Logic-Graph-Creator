@@ -1,8 +1,11 @@
 #include <iostream>
 
-#include "mainwindow.h"
-
 #include <QApplication>
+#include <QDir>
+#include <QDebug>
+#include <QResource>
+
+#include "gui/mainWindow.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);

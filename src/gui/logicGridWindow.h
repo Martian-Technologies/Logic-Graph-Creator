@@ -9,8 +9,8 @@
 #include <QKeyEvent>
 #include <QTreeWidget>
 
-#include "blockContainer.h"
-#include "blockContainerTools.h"
+#include "../backend/blockContainer.h"
+#include "tools/blockContainerTool.h"
 #include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {
@@ -25,7 +25,7 @@ public:
     Position gridPos(QPoint point) const;
 
     void updateSelectedItem();
-    void zoom(float amount);
+    
     // setup
     static const QPixmap& loadTileMap(const QString& filePath = QString());
     void setBlockContainer(BlockContainer* blockContainer);
@@ -51,7 +51,7 @@ private:
     BlockContainer* blockContainer;
 
     // helper classes
-    BlockContainerTools blockContainerTools;
+    BlockContainerTool* tool;
     ViewMannager viewMannager;
 
     // ui elements

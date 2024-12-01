@@ -8,11 +8,11 @@ find_package(Qt6
 qt_standard_project_setup()
 
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/gui/resources)
 
-file(GLOB SOURCES "*.cpp")
-file(GLOB UIS "ui/*.ui")
+file(GLOB_RECURSE SOURCES "*.cpp")
 
-qt_add_executable(${PROJECT_NAME} ${SOURCES} ${UIS})
+qt_add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 
@@ -21,15 +21,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
-set(images_resource_files
-    "logicTiles.png"
-)
+file(GLOB_RECURSE IMG_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.png")
+
+message(STATUS "Resource files:" ${IMG_SOURCES})
+
 
 qt_add_resources(${PROJECT_NAME} "images"
     PREFIX
         "/"
     FILES
-        ${images_resource_files}
+        ${IMG_SOURCES}
 )
 
 install(TARGETS ${PROJECT_NAME}

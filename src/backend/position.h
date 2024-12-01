@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "fastMath.h"
+#include "../util/fastMath.h"
 #include "types.h"
 
 struct Position {

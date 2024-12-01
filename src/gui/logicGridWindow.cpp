@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include "logicGridWindow.h"
+#include "tools/singlePlaceTool.h"
 
 inline int getBlockTileIndex(BlockType type) {
     switch (type) {
@@ -22,7 +23,7 @@ inline int getBlockTileIndex(BlockType type) {
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(),
-    blockContainer(), blockContainerTools(), viewMannager(true) { // change to false for trackPad Control
+    blockContainer(), tool(new SinglePlaceTool()), viewMannager(true) { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     updateLoopTimer = new QTimer(this);
@@ -34,11 +35,78 @@ const QPixmap& LogicGridWindow::loadTileMap(const QString& filePath) {
     static QPixmap tileMapPixmap;
     if (!filePath.isEmpty()) {
         tileMapPixmap = QPixmap(filePath);
-    }
-    if (tileMapPixmap.isNull()) {
-        exit(1);
+        if (tileMapPixmap.isNull()) {
+            qDebug() << "ERROR (LogicGridWindow::loadTileMap) was not able to load tileMap" << filePath;
+        }
     }
     return tileMapPixmap;
+}
+
+void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
+    // disconnect the old tree
+    if (this->treeWidget != nullptr)
+        disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+    // connect the new tree
+    this->treeWidget = treeWidget;
+    connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+}
+
+void LogicGridWindow::updateLoop() {
+    if (viewMannager.update(dt, getPixToView())) {
+        update();
+    }
+}
+
+Position LogicGridWindow::gridPos(QPoint point) const {
+    return Position(
+        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + viewMannager.getViewCenterX()),
+        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + viewMannager.getViewCenterY())
+    );
+}
+
+void LogicGridWindow::updateSelectedItem() {
+    if (treeWidget) {
+        for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
+            if (item) {
+                QString str = item->text(0);
+                if (str == "And") tool->selectBlock(AND);
+                else if (str == "Or") tool->selectBlock(OR);
+                else if (str == "Xor") tool->selectBlock(XOR);
+                else if (str == "Nand") tool->selectBlock(NAND);
+                else if (str == "Nor") tool->selectBlock(NOR);
+                else if (str == "Xnor") tool->selectBlock(XNOR);
+            }
+            return;
+        }
+    }
+}
+
+void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
+    this->blockContainer = blockContainer;
+    if (tool != nullptr) tool->setBlockContainer(blockContainer);
+    updateSelectedItem();
+    update();
+}
+
+// events
+bool LogicGridWindow::event(QEvent* event) {
+    if (event->type() == QEvent::NativeGesture) {
+        QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
+        if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
+            viewMannager.pinch(1 - nge->value());
+            update();
+            return true;
+        }
+    } else if (event->type() == QEvent::Gesture) {
+        QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
+        if (gestureEvent) {
+            QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
+            viewMannager.pinch(1 - pinchGesture->scaleFactor());
+            update();
+            return true;
+        }
+    }
+    return QWidget::event(event);
 }
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
@@ -46,6 +114,11 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
 
     // Draw each tile from the tilemap onto the widget
     const QPixmap& tileMap = loadTileMap();
+
+    if (tileMap.isNull()) {
+        painter.drawText(rect(), Qt::AlignCenter, "No TileMap Found");
+        return;
+    }
 
     // calculated view sizes
     float viewHeight = getViewHeight();
@@ -82,21 +155,11 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     }
 }
 
-void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
-    this->blockContainer = blockContainer;
-    blockContainerTools.setBlockContainer(blockContainer);
-    updateSelectedItem();
-    update();
-}
-
 void LogicGridWindow::wheelEvent(QWheelEvent* event) {
     QPoint numPixels = event->pixelDelta();
     if (numPixels.isNull()) numPixels = event->angleDelta() / 120 * /* pixels per step */ 10;
 
     if (!numPixels.isNull()) {
-        // will this work?????
-        bool isTrackpad = event->angleDelta().y() < 120 && event->angleDelta().y() > -120;
-
         float pixToView = getPixToView();
         viewMannager.scroll(numPixels.x(), numPixels.y(), pixToView);
         event->accept();
@@ -104,30 +167,11 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
     }
 }
 
-bool LogicGridWindow::event(QEvent* event) {
-    if (event->type() == QEvent::NativeGesture) {
-        QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
-        if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            viewMannager.pinch(1 - nge->value());
-            update();
-            return true;
-        }
-    } else if (event->type() == QEvent::Gesture) {
-        QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
-        if (gestureEvent) {
-            QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            viewMannager.pinch(1 - pinchGesture->scaleFactor());
-            update();
-            return true;
-        }
-    }
-    return QWidget::event(event);
-}
-
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
-    if (blockContainerTools.keyPress(event->key())) {
+    if (viewMannager.press(event->key())) {
+        update();
         event->accept();
-    } else if (viewMannager.press(event->key())) {
+    } else if (tool != nullptr && tool->keyPress(event->key())) {
         update();
         event->accept();
     }
@@ -135,50 +179,12 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
 
 void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
     if (viewMannager.release(event->key())) {
+        update();
         event->accept();
-    } else if (blockContainerTools.keyRelease(event->key())) {
+    } else if (tool != nullptr && tool->keyRelease(event->key())) {
         update();
         event->accept();
     }
-}
-
-void LogicGridWindow::updateLoop() {
-    if (viewMannager.update(dt, getPixToView())) {
-        update();
-    }
-}
-
-void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
-    // disconnect the old tree
-    if (this->treeWidget != nullptr)
-        disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
-    // connect the new tree
-    this->treeWidget = treeWidget;
-    connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
-}
-
-void LogicGridWindow::updateSelectedItem() {
-    if (treeWidget) {
-        for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
-            if (item) {
-                QString str = item->text(0);
-                if (str == "And") blockContainerTools.selectBlock(AND);
-                else if (str == "Or") blockContainerTools.selectBlock(OR);
-                else if (str == "Xor") blockContainerTools.selectBlock(XOR);
-                else if (str == "Nand") blockContainerTools.selectBlock(NAND);
-                else if (str == "Nor") blockContainerTools.selectBlock(NOR);
-                else if (str == "Xnor") blockContainerTools.selectBlock(XNOR);
-            }
-            return;
-        }
-    }
-}
-
-Position LogicGridWindow::gridPos(QPoint point) const {
-    return Position(
-        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + viewMannager.getViewCenterX()),
-        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + viewMannager.getViewCenterY())
-    );
 }
 
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
@@ -186,12 +192,12 @@ void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
         if (viewMannager.mouseDown()) {
             update();
             event->accept();
-        } else if (blockContainerTools.leftPress(gridPos(event->pos()))) {
+        } else if (tool != nullptr && tool->leftPress(gridPos(event->pos()))) {
             update();
             event->accept();
         }
     } else if (event->button() == Qt::RightButton) {
-        if (blockContainerTools.rightPress(gridPos(event->pos()))) {
+        if (tool != nullptr && tool->rightPress(gridPos(event->pos()))) {
             update();
             event->accept();
         }
@@ -203,12 +209,12 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (viewMannager.mouseUp()) {
             update();
             event->accept();
-        } else if (blockContainerTools.leftRelease(gridPos(event->pos()))) {
+        } else if (tool != nullptr && tool->leftRelease(gridPos(event->pos()))) {
             update();
             event->accept();
         }
     } else if (event->button() == Qt::RightButton) {
-        if (blockContainerTools.rightRelease(gridPos(event->pos()))) {
+        if (tool != nullptr && tool->rightRelease(gridPos(event->pos()))) {
             update();
             event->accept();
         }
@@ -221,7 +227,7 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
         if (viewMannager.mouseMove(point.x() * getPixToView(), point.y() * getPixToView())) {
             update();
             event->accept();
-        } else if (blockContainerTools.mouseMove(gridPos(point))) {
+        } else if (tool != nullptr && tool->mouseMove(gridPos(point))) {
             update();
             event->accept();
         }

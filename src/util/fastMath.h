@@ -2,10 +2,6 @@
 #define fastMath_h
 
 #include <cstdint>
-#include <iostream>
-
-#include <bitset>
-
 
 template <unsigned int p>
 inline int constexpr IntPower(int x) {
