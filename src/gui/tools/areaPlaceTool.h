@@ -4,21 +4,21 @@
 #include "blockContainerTool.h"
 #include "../effects/logicGridEffectDisplayer.h"
 
-class SinglePlaceTool : public BlockContainerTool {
+class AreaPlaceTool : public BlockContainerTool {
 public:
-    inline SinglePlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), clicks{'n', 'n'} {}
+    inline AreaPlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), logicGridEffectDisplayer(), click('n') {}
 
-    inline void reset() override final {memset(clicks, 'n', 2);}
+    inline void reset() override final {click = 'n';}
     bool leftPress(Position pos) override final;
     bool rightPress(Position pos) override final;
     bool leftRelease(Position pos) override final;
     bool rightRelease(Position pos) override final;
     bool mouseMove(Position pos) override final;
-    void display(QPainter& painter, const LogicGridWindowData& data) override {logicGridEffectDisplayer.display(painter, data);}
 
 private:
     LogicGridEffectDisplayer logicGridEffectDisplayer;
-    char clicks[2];
+    char click;
+    Position clickPosition;
 };
 
 #endif /* singlePlaceTool_h */
