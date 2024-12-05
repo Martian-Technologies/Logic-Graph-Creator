@@ -9,7 +9,7 @@
 #include <QKeyEvent>
 #include <QTreeWidget>
 
-#include "../backend/blockContainer.h"
+#include "../../backend/blockContainer.h"
 #include "tools/blockContainerTool.h"
 #include "viewMannager.h"
 #include "blockRenderer.h"

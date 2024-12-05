@@ -4,7 +4,7 @@
 #include <QColor>
 #include <QPainter>
 
-#include "../../backend/blockContainer.h"
+#include "../../../backend/blockContainer.h"
 #include "../logicGridWindowData.h"
 
 class BlockContainerTool {

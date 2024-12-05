@@ -6,7 +6,7 @@
 #include <QPoint>
 #include <functional>
 
-#include "../backend/block.h"
+#include "../../backend/block.h"
 
 class BlockRenderer {
 public:

@@ -3,7 +3,7 @@
 #include <QtLogging>
 #include <QTimer>
 
-#include "../util/fastMath.h"
+#include "../../util/fastMath.h"
 #include "logicGridWindow.h"
 #include "tools/singlePlaceTool.h"
 

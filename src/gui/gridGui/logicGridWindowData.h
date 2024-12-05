@@ -3,13 +3,15 @@
 
 #include <QPoint>
 
-#include "../backend/position.h"
+#include "blockRenderer.h"
+#include "../../backend/position.h"
 
 class LogicGridWindowData {
 public:
-    inline LogicGridWindowData(float viewWidth, float width, float height, float viewCenterX, float viewCenterY) :
-        viewWidth(viewWidth), width(width), height(height), viewCenterX(viewCenterX), viewCenterY(viewCenterY) {}
+    inline LogicGridWindowData(float viewWidth, float width, float height, float viewCenterX, float viewCenterY, BlockRenderer* blockRenderer) :
+        viewWidth(viewWidth), width(width), height(height), viewCenterX(viewCenterX), viewCenterY(viewCenterY), blockRenderer(blockRenderer) {}
 
+    inline BlockRenderer* getBlockRenderer() const {return blockRenderer;}
     inline float getViewWidth() const { return viewWidth; }
     inline float getViewHeight() const { return height / width * viewWidth; }
     inline float getViewToPix() const { return width / viewWidth; }
@@ -35,6 +37,7 @@ private:
     float height;
     float viewCenterX;
     float viewCenterY;
+    mutable BlockRenderer* blockRenderer;
 };
 
 #endif /* logicGridWindowData_h */

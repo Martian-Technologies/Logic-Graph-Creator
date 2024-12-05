@@ -3,7 +3,7 @@
 
 #include "mainWindow.h"
 #include "resouces/ui_mainWindow.h"
-#include "logicGridWindow.h"
+#include "gridGui/logicGridWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -20,5 +20,3 @@ MainWindow::MainWindow(QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);
 }
-
-    
