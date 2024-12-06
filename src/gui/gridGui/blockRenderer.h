@@ -1,10 +1,11 @@
 #ifndef blockRenderer_h
 #define blockRenderer_h
 
+#include <functional>
+
 #include <QString>
 #include <QPainter>
 #include <QPoint>
-#include <functional>
 
 #include "../../backend/block.h"
 

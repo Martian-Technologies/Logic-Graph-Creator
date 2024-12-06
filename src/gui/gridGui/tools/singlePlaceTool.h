@@ -1,8 +1,8 @@
 #ifndef singlePlaceTool_h
 #define singlePlaceTool_h
 
-#include "blockContainerTool.h"
 #include "../effects/logicGridEffectDisplayer.h"
+#include "blockContainerTool.h"
 
 class SinglePlaceTool : public BlockContainerTool {
 public:
@@ -14,10 +14,8 @@ public:
     bool leftRelease(Position pos) override final;
     bool rightRelease(Position pos) override final;
     bool mouseMove(Position pos) override final;
-    void display(QPainter& painter, const LogicGridWindowData& data) override {logicGridEffectDisplayer.display(painter, data);}
 
 private:
-    LogicGridEffectDisplayer logicGridEffectDisplayer;
     char clicks[2];
 };
 

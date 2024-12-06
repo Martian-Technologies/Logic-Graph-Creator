@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <QApplication>
 
 #include "gui/mainWindow.h"

@@ -17,12 +17,13 @@ struct Position {
     inline Position operator+(const Position& position) const {return Position(position.x + x, position.y + y);}
     inline Position operator-(const Position& position) const {return Position(position.x - x, position.y - y);}
     inline std::string toString() const {return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";}
+    
     cord_t x, y;
 };
 
 template<>
 struct std::hash<Position> {
-    std::size_t operator()(const Position& pos) const noexcept {
+    inline std::size_t operator()(const Position& pos) const noexcept {
         std::size_t x = std::hash<cord_t>{}(pos.x);
         std::size_t y = std::hash<cord_t>{}(pos.y);
         return x ^ (y << 1);

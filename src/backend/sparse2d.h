@@ -30,6 +30,7 @@ class Sparse2dArray {
 public:
     inline T* get(const Position& position);
 	inline const T* get(const Position& position) const;
+    
     inline void insert(const Position& position, const T& value);
     inline void remove(const Position& position);
 

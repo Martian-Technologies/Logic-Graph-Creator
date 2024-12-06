@@ -1,6 +1,5 @@
 #include "blockContainer.h"
 
-// positionSmall should always be smaller or equal to in x and y than positionLarge
 bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) {
     for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {
         for (cord_t y = positionSmall.y; y <= positionLarge.y; y++) {

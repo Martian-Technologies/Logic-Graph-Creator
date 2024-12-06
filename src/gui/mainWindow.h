@@ -1,9 +1,9 @@
 #ifndef mainWindow_h
 #define mainWindow_h
 
-#include <QWidget>
 #include <QGraphicsScene>
 #include <QMainWindow>
+#include <QWidget>
 
 namespace Ui {
     class MainWindow;

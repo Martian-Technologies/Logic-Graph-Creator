@@ -1,12 +1,12 @@
 #ifndef singlePlaceTool_h
 #define singlePlaceTool_h
 
-#include "blockContainerTool.h"
 #include "../effects/logicGridEffectDisplayer.h"
+#include "blockContainerTool.h"
 
 class AreaPlaceTool : public BlockContainerTool {
 public:
-    inline AreaPlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), logicGridEffectDisplayer(), click('n') {}
+    inline AreaPlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), click('n') {}
 
     inline void reset() override final {click = 'n';}
     bool leftPress(Position pos) override final;
@@ -16,7 +16,6 @@ public:
     bool mouseMove(Position pos) override final;
 
 private:
-    LogicGridEffectDisplayer logicGridEffectDisplayer;
     char click;
     Position clickPosition;
 };

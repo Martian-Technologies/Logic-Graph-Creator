@@ -1,9 +1,9 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 
-#include "mainWindow.h"
+#include "gridGUI/logicGridWindow.h"
 #include "resouces/ui_mainWindow.h"
-#include "gridGui/logicGridWindow.h"
+#include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {

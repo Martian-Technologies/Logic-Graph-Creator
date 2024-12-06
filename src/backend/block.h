@@ -1,8 +1,8 @@
 #ifndef block_h
 #define block_h
 
-#include "types.h"
 #include "position.h"
+#include "types.h"
 
 enum BlockType {
     NONE,

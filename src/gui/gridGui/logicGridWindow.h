@@ -2,17 +2,17 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QWidget>
-#include <QPainter>
-#include <QPixmap>
+#include <QTreeWidget>
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include <QTreeWidget>
+#include <QPainter>
+#include <QWidget>
+#include <QPixmap>
 
 #include "../../backend/blockContainer.h"
 #include "tools/blockContainerTool.h"
-#include "viewMannager.h"
 #include "blockRenderer.h"
+#include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
