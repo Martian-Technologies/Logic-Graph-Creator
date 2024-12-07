@@ -12,6 +12,7 @@
 #include "../../backend/blockContainer.h"
 #include "tools/blockContainerTool.h"
 #include "blockRenderer.h"
+#include "gridRenderer.h"
 #include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {
@@ -27,11 +28,14 @@ public:
     inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
     inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
     const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
+    const BlockContainer* getBlockContainer() const {return blockContainer;}
+
 
     // data checkers
     Position gridPos(const QPoint& point) const;
     QPoint windowPos(const Position& point, bool center = false) const;
     inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
+    bool insideWindow(const Position& point) const {return insideWindow(windowPos(point));}
 
     // dont call this func
     void updateSelectedItem();
@@ -67,6 +71,7 @@ private:
 
     // helper classes
     BlockRenderer blockRenderer;
+    GridRenderer gridRenderer;
     BlockContainerTool* tool;
     ViewMannager viewMannager;
 

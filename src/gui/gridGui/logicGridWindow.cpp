@@ -12,7 +12,7 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
     blockContainer(), lastMousePos(),
     blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
-    tool(new SinglePlaceTool()), viewMannager(false) { // change to false for trackPad Control
+    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(false) { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
@@ -57,6 +57,17 @@ QPoint LogicGridWindow::windowPos(const Position& point, bool center) const {
         ((float)point.y + getViewHeight() / 2.f - getViewCenterY() + center * 0.5f) * getViewToPix()
     );
 }
+
+// if any corner is inside the windows
+// bool LogicGridWindow::insideWindow(const Position& point) const {
+//     QPoint qPoint = windowPos(point);
+//     return (
+//         insideWindow(qPoint) ||
+//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix()) ||
+//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix()) ||
+//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix())
+//     );
+// }
 
 void LogicGridWindow::updateSelectedItem() {
     if (treeWidget) {
@@ -113,26 +124,20 @@ bool LogicGridWindow::event(QEvent* event) {
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
-    blockRenderer.setUp(&painter);
+
+    if (blockContainer == nullptr) {
+        painter.drawText(rect(), Qt::AlignCenter, "No BlockContainer Found");
+        return;
+    }
     
+    blockRenderer.setUp(&painter);
+
     if (!blockRenderer.hasTileMap()) {
         painter.drawText(rect(), Qt::AlignCenter, "No TileMap Found");
         return;
     }
 
-    // Draw each tile from the tilemap onto the widget
-    Position corner1 = gridPos(QPoint(0, 0));
-    Position corner2 = gridPos(QPoint(size().width(), size().height()));
-
-    for (int x = corner1.x; x <= corner2.x; x++) {
-        for (int y = corner1.y; y <= corner2.y; y++) {
-            const Block* block = ((const BlockContainer*)blockContainer)->getBlock(Position(x, y));
-            blockRenderer.displayBlock(
-                Position(x, y),
-                block ? block->type() : NONE
-            );
-        }
-    }
+    gridRenderer.renderGrid();
 
     tool->display(painter, *this);
 }
