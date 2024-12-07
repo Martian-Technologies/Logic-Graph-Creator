@@ -2,15 +2,23 @@
 #define cellSelectionEffect_h
 
 #include "effect.h"
+#include "../blockRenderer.h"
 
 class CellSelectionEffect : public Effect {
 public:
-    CellSelectionEffect(int id, int layer, Pos cellPos) : Effect(id, layer) {}
-    std::unique_ptr<Effect> clone() override {return std::make_unique<CellSelectionEffect>(*this);}
+    inline CellSelectionEffect(int id, int layer, const Position& cell) :
+        Effect(id, layer), cellA(cell), cellB(cell) {}
+    CellSelectionEffect(int id, int layer, const Position& cellA, const Position& cellB);
+    std::unique_ptr<Effect> clone() const override { return std::make_unique<CellSelectionEffect>(*this); }
 
-    virtual void display(QPainter& painter, const LogicGridWindowData& data) {
-        
-    };
-}
+    void changeSelection(const Position& cell) {cellA = cell; cellB = cell;}
+    void changeSelection(const Position& cellA, const Position& cellB);
+
+    void display(QPainter& painter, const LogicGridWindow& gridWindow) override;
+
+private:
+    Position cellA;
+    Position cellB;
+};
 
 #endif /* cellSelectionEffect_h */

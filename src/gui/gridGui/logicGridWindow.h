@@ -26,8 +26,12 @@ public:
     inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
     inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
     inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
+    const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
+
+    // data checkers
     Position gridPos(const QPoint& point) const;
     QPoint windowPos(const Position& point, bool center = false) const;
+    inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
 
     // dont call this func
     void updateSelectedItem();
@@ -46,16 +50,20 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     bool event(QEvent* event) override;
 
 private:
     // update loop
-    float dt = 0.016f;
+    float dt;
     void updateLoop();
     QTimer* updateLoopTimer;
+    bool doUpdate;
 
     // data
     BlockContainer* blockContainer;
+    QPoint lastMousePos;
 
     // helper classes
     BlockRenderer blockRenderer;

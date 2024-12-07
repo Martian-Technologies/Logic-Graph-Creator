@@ -25,14 +25,22 @@ void BlockRenderer::loadTileMap(const QString& filePath) {
     }
 }
 
-void BlockRenderer::displayBlock(Position position, BlockType type) const {
+void BlockRenderer::displayBlock(Position position, BlockType type, float alpha, const QColor& tint) const {
     if (painter == nullptr || tileMap.isNull()) return;
+    painter->save();
+    painter->setOpacity(alpha);
+    QRectF destRect(
+        windowPosFunc(position),
+        windowPosFunc(position + Position(getBlockWidth(type), getBlockHeight(type)))
+    );
     painter->drawPixmap(
-        QRectF(
-            windowPosFunc(position),
-            windowPosFunc(position + Position(getBlockWidth(type), getBlockHeight(type)))
-        ),
+        destRect,
         tileMap,
         QRectF(32 * getBlockTileIndex(type), 0, 32, 32)
     );
+    if (tint.alpha() > 0) {
+        painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+        painter->fillRect(destRect, tint);
+    }
+    painter->restore();
 }

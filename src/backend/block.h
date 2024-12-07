@@ -27,6 +27,7 @@ inline const block_size_t getBlockWidth(BlockType type) {
 inline const block_size_t getBlockHeight(BlockType type) {
     // add if not 1
     switch (type) {
+        case AND: return 2;
         default: return 1;
     }
 }

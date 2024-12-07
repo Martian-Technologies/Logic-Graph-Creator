@@ -1,26 +1,26 @@
 #include "areaPlaceTool.h"
 
-bool AreaPlaceTool::leftPress(Position pos) {
+bool AreaPlaceTool::leftPress(const Position& pos) {
     if (!blockContainer) return false;
     return false;
 }
 
-bool AreaPlaceTool::leftRelease(Position pos) {
+bool AreaPlaceTool::leftRelease(const Position& pos) {
     if (!blockContainer) return false;
     return false;
 }
 
-bool AreaPlaceTool::rightPress(Position pos) {
+bool AreaPlaceTool::rightPress(const Position& pos) {
     if (!blockContainer) return false;
     return false;
 }
 
-bool AreaPlaceTool::rightRelease(Position pos) {
+bool AreaPlaceTool::rightRelease(const Position& pos) {
     if (!blockContainer) return false;
     return false;
 }
 
-bool AreaPlaceTool::mouseMove(Position pos) {
+bool AreaPlaceTool::mouseMove(const Position& pos) {
     if (!blockContainer) return false;
     return false;
 }

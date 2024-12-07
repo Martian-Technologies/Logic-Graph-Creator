@@ -1,6 +1,9 @@
-#include "singlePlaceTool.h"
+#include <iostream>
 
-bool SinglePlaceTool::leftPress(Position pos) {
+#include "singlePlaceTool.h"
+#include "../effects/cellSelectionEffect.h"
+
+bool SinglePlaceTool::leftPress(const Position& pos) {
     if (!blockContainer) return false;
     switch (clicks[0]) {
     case 'n':
@@ -20,7 +23,7 @@ bool SinglePlaceTool::leftPress(Position pos) {
     return false;
 }
 
-bool SinglePlaceTool::leftRelease(Position pos) {
+bool SinglePlaceTool::leftRelease(const Position& pos) {
     if (!blockContainer) return false;
     // this logic is to allow holding right then left then releasing left and it to start deleting
     switch (clicks[0]) {
@@ -44,7 +47,7 @@ bool SinglePlaceTool::leftRelease(Position pos) {
     return false;
 }
 
-bool SinglePlaceTool::rightPress(Position pos) {
+bool SinglePlaceTool::rightPress(const Position& pos) {
     if (!blockContainer) return false;
     switch (clicks[0]) {
     case 'n':
@@ -64,7 +67,7 @@ bool SinglePlaceTool::rightPress(Position pos) {
     return false;
 }
 
-bool SinglePlaceTool::rightRelease(Position pos) {
+bool SinglePlaceTool::rightRelease(const Position& pos) {
     if (!blockContainer) return false;
     // this logic is to allow holding left then right then releasing right and it to start placing
     switch (clicks[0]) {
@@ -88,11 +91,18 @@ bool SinglePlaceTool::rightRelease(Position pos) {
     return false;
 }
 
-bool SinglePlaceTool::mouseMove(Position pos) {
+bool SinglePlaceTool::mouseMove(const Position& pos) {
     if (!blockContainer) return false;
+    bool returnVal = false; // used to make sure it updates the effect
+
+    if (effectDisplayer.hasEffect(0)) {
+        static_cast<CellSelectionEffect*>(effectDisplayer.getEffect(0).get())->changeSelection(pos);
+        returnVal = true;
+    }
+    
     switch (clicks[0]) {
     case 'n':
-        return false;
+        return returnVal;
     case 'r':
         if (clicks[1] == 'p') {
             if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, getBlockClass(selectedBlock));
@@ -108,5 +118,17 @@ bool SinglePlaceTool::mouseMove(Position pos) {
         if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, getBlockClass(selectedBlock));
         return selectedBlock != NONE;
     }
-    return false;
+    return returnVal;
+}
+
+bool SinglePlaceTool::enterBlockView(const Position& pos) {
+    if (effectDisplayer.hasEffect(0)) return false;
+    effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
+    return true;
+}
+
+bool SinglePlaceTool::exitBlockView(const Position& pos) {
+    if (!effectDisplayer.hasEffect(0)) return false;
+    effectDisplayer.removeEffect(0);
+    return true;
 }

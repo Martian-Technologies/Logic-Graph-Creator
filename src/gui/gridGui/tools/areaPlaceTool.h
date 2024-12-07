@@ -9,11 +9,11 @@ public:
     inline AreaPlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), click('n') {}
 
     inline void reset() override final {click = 'n';}
-    bool leftPress(Position pos) override final;
-    bool rightPress(Position pos) override final;
-    bool leftRelease(Position pos) override final;
-    bool rightRelease(Position pos) override final;
-    bool mouseMove(Position pos) override final;
+    bool leftPress(const Position& pos) override final;
+    bool rightPress(const Position& pos) override final;
+    bool leftRelease(const Position& pos) override final;
+    bool rightRelease(const Position& pos) override final;
+    bool mouseMove(const Position& pos) override final;
 
 private:
     char click;
