@@ -21,6 +21,7 @@ public:
     inline int getId() const {return id;}
     inline int getLayer() const {return layer;}
     virtual void display(QPainter& painter, const LogicGridWindow& data) = 0;
+    
     friend LogicGridEffectDisplayer;
 
 private:

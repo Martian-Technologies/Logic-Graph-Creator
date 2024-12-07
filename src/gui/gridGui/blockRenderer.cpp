@@ -25,6 +25,18 @@ void BlockRenderer::loadTileMap(const QString& filePath) {
     }
 }
 
+void BlockRenderer::displayBlock(Position position, BlockType type) const {
+    if (painter == nullptr || tileMap.isNull()) return;
+    painter->drawPixmap(
+        QRectF(
+            windowPosFunc(position),
+            windowPosFunc(position + Position(getBlockWidth(type), getBlockHeight(type)))
+        ),
+        tileMap,
+        QRectF(32 * getBlockTileIndex(type), 0, 32, 32)
+    );
+}
+
 void BlockRenderer::displayBlock(Position position, BlockType type, float alpha, const QColor& tint) const {
     if (painter == nullptr || tileMap.isNull()) return;
     painter->save();
