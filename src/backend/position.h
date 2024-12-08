@@ -30,4 +30,15 @@ struct std::hash<Position> {
     }
 };
 
+
+// ---- we also define block rotation here so ----
+enum BlockRotation {
+    ZERO = 0,
+    NINETY = 1,
+    ONE_EIGHTY = 2,
+    TWO_SEVENTY = 3,
+};
+
+inline bool isRotated(BlockRotation rotation) noexcept {return rotation & 1;}
+
 #endif /* position_h */
