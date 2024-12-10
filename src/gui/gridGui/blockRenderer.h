@@ -18,8 +18,12 @@ public:
 
     inline void setUp(QPainter* painter) {this->painter = painter;}
 
-    void displayBlock(Position position, BlockType type) const;
-    void displayBlock(Position position, BlockType type, float alpha, const QColor& tint = QColor(0, 0, 0, 0)) const;
+    void displayBlock(const Block& block) const;
+    void displayBlock(const Block& block, float alpha, const QColor& tint = QColor(0, 0, 0, 0)) const;
+    inline void displayBlock(const Block* block) const {displayBlock(*block);}
+    inline void displayBlock(const Block* block, float alpha, const QColor& tint = QColor(0, 0, 0, 0)) const {displayBlock(*block, alpha, tint);}
+    void displayBlock(Position position, Rotation rotation, BlockType type) const;
+    void displayBlock(Position position, Rotation rotation, BlockType type, float alpha, const QColor& tint = QColor(0, 0, 0, 0)) const;
 private:
     QPixmap tileMap;
     QPainter* painter;

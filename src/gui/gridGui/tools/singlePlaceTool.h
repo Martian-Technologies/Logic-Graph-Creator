@@ -5,7 +5,8 @@
 
 class SinglePlaceTool : public BlockContainerTool {
 public:
-    inline SinglePlaceTool(BlockContainer* blockContainer = nullptr) : BlockContainerTool(blockContainer), clicks{'n', 'n'} {}
+    inline SinglePlaceTool(BlockContainer* blockContainer = nullptr) :
+        BlockContainerTool(blockContainer), rotation(ZERO), clicks{'n', 'n'} {}
 
     inline void reset() override final {memset(clicks, 'n', 2);}
     bool leftPress(const Position& pos) override final;
@@ -15,8 +16,10 @@ public:
     bool mouseMove(const Position& pos) override final;
     bool enterBlockView(const Position& pos) override final;
     bool exitBlockView(const Position& pos) override final;
+    bool keyPress(int keyId) override final;
 
 private:
+    Rotation rotation;
     char clicks[2];
 };
 

@@ -17,20 +17,20 @@ void GridRenderer::renderGrid() const {
         for (cord_t y = corner1.y; y <= corner2.y; y++) {
             const Block* block = blockContainer->getBlock(Position(x, y));
             if (block == nullptr) {
-                blockRenderer.displayBlock(Position(x, y), NONE);
+                blockRenderer.displayBlock(Position(x, y), ZERO, NONE);
             } else {
                 Position blockPosition = block->getPosition();
                 if (blockPosition == Position(x, y)) {
-                    blockRenderer.displayBlock(Position(x, y), block->type());
+                    blockRenderer.displayBlock(block);
                 } else if (!logicGridWindow->insideWindow(blockPosition)) {
                     if (blockPosition.x != x) {
                         if (!logicGridWindow->insideWindow(Position(x-1, y))) {
-                            blockRenderer.displayBlock(blockPosition, block->type());
+                            blockRenderer.displayBlock(block);
                         } else if (blockPosition.y != y && !logicGridWindow->insideWindow(Position(x, y-1))) {
-                            blockRenderer.displayBlock(blockPosition, block->type());
+                            blockRenderer.displayBlock(block);
                         }
                     } else if (!logicGridWindow->insideWindow(Position(x, y-1))) {
-                        blockRenderer.displayBlock(blockPosition, block->type());
+                        blockRenderer.displayBlock(block);
                     }
                 }
             }

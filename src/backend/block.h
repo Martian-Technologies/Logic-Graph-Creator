@@ -19,7 +19,7 @@ enum BlockType {
     TYPE_COUNT
 };
 
-inline void rotateWidthAndHeight(BlockRotation rotation, block_size_t& width, block_size_t& height) noexcept {
+inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
     if (isRotated(rotation)) std::swap(width, height);
 }
 
@@ -33,28 +33,28 @@ inline block_size_t getBlockWidth(BlockType type) noexcept {
 inline block_size_t getBlockHeight(BlockType type) noexcept {
     // add if not 1
     switch (type) {
-        case AND: return 2;
         default: return 1;
     }
 }
 
-inline block_size_t getBlockWidth(BlockType type, BlockRotation rotation) noexcept {
+inline block_size_t getBlockWidth(BlockType type, Rotation rotation) noexcept {
     return isRotated(rotation) ? getBlockHeight(type) : getBlockWidth(type);
 }
 
-inline block_size_t getBlockHeight(BlockType type, BlockRotation rotation) noexcept {
+inline block_size_t getBlockHeight(BlockType type, Rotation rotation) noexcept {
     return isRotated(rotation) ? getBlockWidth(type) : getBlockHeight(type);
 }
 
 class Block {
 public:
-    Block() : blockType(BLOCK), position(), rotation() {}
+    Block() : blockType(BLOCK), blockId(0), position(), rotation() {}
 
     // getters
+    block_id_t id() const {return blockId;}
     BlockType type() const {return blockType;}
 
     inline const Position& getPosition() const {return position;}
-    inline BlockRotation getRotation() const {return rotation;}
+    inline Rotation getRotation() const {return rotation;}
     
     inline block_size_t width() const {return getBlockWidth(blockType, rotation);}
     inline block_size_t height() const {return getBlockHeight(blockType, rotation);}
@@ -65,17 +65,20 @@ protected:
     friend class BlockContainer;
     inline void destroy() {}
     inline void setPosition(const Position& position) {this->position = position;}    
-    inline void setRotation(BlockRotation rotation) {this->rotation = rotation;}
+    inline void setRotation(Rotation rotation) {this->rotation = rotation;}
+    inline void setId(block_id_t id) {blockId = id;}
 
     friend Block getBlockClass(BlockType type);
-    Block(BlockType blockType) : blockType(blockType), position(), rotation() {}
+    Block(BlockType blockType) : blockType(blockType), blockId(0), position(), rotation() {}
+    Block(BlockType blockType, block_id_t id) : blockType(blockType), blockId(id), position(), rotation() {}
 
     // const data
     BlockType blockType;
+    block_id_t blockId;
     
     // changing data
     Position position;
-    BlockRotation rotation;
+    Rotation rotation;
 };
 
 class AndBlock : public Block {

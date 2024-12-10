@@ -6,14 +6,14 @@
 
 class Cell {
 public:
-    Cell(block_address_t blockAddress) : blockAddress(blockAddress) {}
+    Cell(block_id_t blockId) : blockId(blockId) {}
 
-    inline block_address_t getBlockAddress() const {return blockAddress;}
+    inline block_id_t getBlockId() const {return blockId;}
 
-    inline void setBlockAddress(block_address_t blockAddress) {this->blockAddress = blockAddress;}
+    inline void setBlockId(block_id_t blockId) {this->blockId = blockId;}
 
 private:
-    block_address_t blockAddress;
+    block_id_t blockId;
 };
 
 #endif /* cell_h */

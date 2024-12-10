@@ -23,10 +23,10 @@ public:
     virtual bool leftRelease(const Position& pos) {return false;}
     virtual bool rightRelease(const Position& pos) {return false;}
     virtual bool mouseMove(const Position& pos) {return false;}
-    virtual bool keyPress(int keyId) {return false;}
-    virtual bool keyRelease(int keyId) {return false;}
     virtual bool enterBlockView(const Position& pos) {return false;}
     virtual bool exitBlockView(const Position& pos) {return false;}
+    virtual bool keyPress(int keyId) {return false;}
+    virtual bool keyRelease(int keyId) {return false;}
 
 protected:
     BlockContainer* blockContainer;
