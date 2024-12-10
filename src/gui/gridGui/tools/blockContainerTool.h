@@ -15,6 +15,7 @@ public:
     // This will also tell the tool to reset.
     inline void setBlockContainer(BlockContainer* blockContainer) {this->blockContainer = blockContainer; reset();}
     inline void selectBlock(BlockType selectedBlock) {this->selectedBlock = selectedBlock;}
+    inline BlockType getSelectedBlock() const {return selectedBlock;}
     inline void display(QPainter& painter, const LogicGridWindow& gridWindow) {effectDisplayer.display(painter, gridWindow);}
 
     virtual void reset() {};

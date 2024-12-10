@@ -23,14 +23,19 @@ public:
     inline void addEffect(const Effect& effect) {effects.push_back(std::move(effect.clone())); sorted = false;}
     // This will delete the pointer.
     inline void removeEffect(int id) {for (EffectUniquePtr& effect : effects) if (effect->getId() == id) removeEffect(effect);}
-
     inline const bool hasEffect(int id) {for (EffectUniquePtr& effect : effects) {if (effect->getId() == id) return true;} return false;}
-    inline const EffectUniquePtr& getEffect(int id) {for (EffectUniquePtr& effect : effects) {if (effect->getId() == id) return effect;} assert(false);}
-    inline const EffectUniquePtr& getEffect(int id) const {for (const EffectUniquePtr& effect : effects) {if (effect->getId() == id) return effect;} assert(false);}
+    // gets a effect from a id.
+    template <class T>
+    inline T* getEffect(int id) {for (auto& effect : effects) {if (effect->getId() == id) return static_cast<T*>(effect.get());} assert(false);}
+    // gets a effect from a id.
+    template <class T>
+    inline const T* getEffect(int id) const {for (auto& effect : effects) {if (effect->getId() == id) return static_cast<const T*>(effect.get());} assert(false);}
+    // changes the layer of a effect.
     inline void changeEffectLayer(int id, int layer) {sorted = false; getEffect(id)->setLayer(layer);}
 private:
     inline void removeEffect(EffectUniquePtr& effect) {sorted = false; effect = std::move(effects.back()); effects.pop_back();}
-
+    inline EffectUniquePtr& getEffect(int id) {for (auto& effect : effects) {if (effect->getId() == id) return effect;} assert(false);}
+    inline const EffectUniquePtr& getEffect(int id) const {for (auto& effect : effects) {if (effect->getId() == id) return effect;} assert(false);}
     bool sorted;
     std::vector<EffectUniquePtr> effects;
 };

@@ -7,6 +7,7 @@
 #include "../../util/fastMath.h"
 #include "logicGridWindow.h"
 #include "tools/singlePlaceTool.h"
+#include "tools/areaPlaceTool.h"
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
@@ -80,6 +81,19 @@ void LogicGridWindow::updateSelectedItem() {
                 else if (str == "Nand") tool->selectBlock(NAND);
                 else if (str == "Nor") tool->selectBlock(NOR);
                 else if (str == "Xnor") tool->selectBlock(XNOR);
+                else if (str == "Single Place") {
+                    BlockType type = tool->getSelectedBlock();
+                    delete tool;
+                    tool = new SinglePlaceTool(blockContainer);
+                    tool->selectBlock(type);
+                }
+                else if (str == "Area Place")
+                {
+                    BlockType type = tool->getSelectedBlock();
+                    delete tool;
+                    tool = new AreaPlaceTool(blockContainer);
+                    tool->selectBlock(type);
+                }
             }
             return;
         }

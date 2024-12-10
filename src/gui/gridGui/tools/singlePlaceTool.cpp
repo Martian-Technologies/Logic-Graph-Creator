@@ -98,7 +98,7 @@ bool SinglePlaceTool::mouseMove(const Position& pos) {
     bool returnVal = false; // used to make sure it updates the effect
 
     if (effectDisplayer.hasEffect(0)) {
-        static_cast<CellSelectionEffect*>(effectDisplayer.getEffect(0).get())->changeSelection(pos);
+        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
         returnVal = true;
     }
     
@@ -124,12 +124,14 @@ bool SinglePlaceTool::mouseMove(const Position& pos) {
 }
 
 bool SinglePlaceTool::enterBlockView(const Position& pos) {
+    if (!blockContainer) return false;
     if (effectDisplayer.hasEffect(0)) return false;
     effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
     return true;
 }
 
 bool SinglePlaceTool::exitBlockView(const Position& pos) {
+    if (!blockContainer) return false;
     if (!effectDisplayer.hasEffect(0)) return false;
     effectDisplayer.removeEffect(0);
     return true;
