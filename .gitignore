@@ -37,6 +37,9 @@
 # Cmake
 /build
 
+.cache
+*.DS_Store
+
 # QT
 /.qtc_clangd
 *.includes
