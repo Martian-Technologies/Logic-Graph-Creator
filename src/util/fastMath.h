@@ -2,6 +2,7 @@
 #define fastMath_h
 
 #include <cstdint>
+#include <cmath>
 
 template <unsigned int p>
 inline int constexpr IntPower(int x) {
