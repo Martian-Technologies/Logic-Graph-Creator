@@ -3,10 +3,7 @@
 
 #include <unordered_map>
 
-#include "position.h"
-#include "sparse2d.h"
-#include "block.h"
-#include "types.h"
+#include "../position/sparse2d.h"
 #include "cell.h"
 
 class BlockContainer {

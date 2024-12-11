@@ -1,5 +1,5 @@
 #include "areaPlaceTool.h"
-#include "../../../backend/blockContainerEditor.h"
+#include "../../../backend/container/blockContainerEditor.h"
 #include "../effects/cellSelectionEffect.h"
 
 bool AreaPlaceTool::leftPress(const Position& pos) {
@@ -11,6 +11,7 @@ bool AreaPlaceTool::leftPress(const Position& pos) {
             return true;
         case 'c':
             BlockContainerEditor::tryInsertOverArea(*blockContainer, clickPosition, pos, rotation, selectedBlock);
+            effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
             click = 'n';
             return true;
         default:
@@ -33,6 +34,7 @@ bool AreaPlaceTool::rightPress(const Position& pos) {
             return true;
         case 'c':
             BlockContainerEditor::tryRemoveOverArea(*blockContainer, clickPosition, pos);
+            effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
             click = 'n';
             return true;
         default:

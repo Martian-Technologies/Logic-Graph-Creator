@@ -3,8 +3,10 @@
 
 #include <utility>
 
-#include "position.h"
-#include "types.h"
+#include "../position/position.h"
+
+typedef unsigned char block_size_t;
+typedef unsigned int block_id_t;
 
 enum BlockType {
     NONE,

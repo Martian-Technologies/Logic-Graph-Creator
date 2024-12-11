@@ -3,8 +3,9 @@
 
 #include <string>
 
-#include "../util/fastMath.h"
-#include "types.h"
+#include "../../util/fastMath.h"
+
+typedef int cord_t;
 
 struct Position {
     inline Position() : x(0), y(0) {}
