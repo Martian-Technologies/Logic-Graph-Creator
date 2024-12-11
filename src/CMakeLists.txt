@@ -19,14 +19,13 @@ if(WIN32)
     set(RESOURCE_FILE "${CMAKE_BINARY_DIR}/icon.rc")
     file(WRITE ${RESOURCE_FILE} "IDI_ICON1 ICON \"${ICON_PATH}\"")
     qt_add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${RESOURCE_FILE})
-endif()
-
-# Set icon for macOS
-if(APPLE)
+elseif(APPLE) # Set icon for macOS
     set(ICON_PATH ${CMAKE_SOURCE_DIR}/gui/resources/gateIcon.icns)
     set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
     set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${ICON_PATH})    
+elseif(UNIX)
+    qt_add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
