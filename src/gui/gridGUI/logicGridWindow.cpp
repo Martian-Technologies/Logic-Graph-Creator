@@ -13,7 +13,7 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
     blockContainer(), lastMousePos(),
     blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
-    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(false) { // change to false for trackPad Control
+    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(false), treeWidget(nullptr) { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
