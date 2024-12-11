@@ -5,23 +5,23 @@
 
 #include "connectionEnd.h"
 
-class BlockContainer;
-
 class ConnectionContainer {
 public:
     ConnectionContainer(BlockType blockType);
 
     BlockType getBlockType() const {return blockType;}
-    bool hasConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-    bool hasConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+
+    inline connection_end_id_t getMaxConnectionId() const {return connections.size()}
+    inline const std::vector<ConnectionEnd>& getConnection(connection_end_id_t thisEndId) const {
+        if (thisEndId > getMaxConnectionId()) return std::vector<ConnectionEnd>(); return connections[thisEndId];
+    }
+    bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
     friend BlockContainer;
 
 private:
-    bool tryMakeConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-    bool tryMakeConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-    bool tryRemoveConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-    bool tryRemoveConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+    bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+    bool tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
     BlockType blockType;
     std::vector<std::vector<ConnectionEnd>> connections;
