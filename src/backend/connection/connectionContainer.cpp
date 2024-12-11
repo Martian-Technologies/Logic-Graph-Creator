@@ -5,26 +5,20 @@ ConnectionContainer::ConnectionContainer(BlockType blockType) : blockType(blockT
 
 }
 
-bool ConnectionContainer::tryMakeConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-    
+bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
+    if (thisEndId > getMaxConnectionId()) return false;
+    connections[thisEndId].push_back(otherConnectionEnd);
+    return true;
 }
 
-bool ConnectionContainer::tryMakeConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-
+bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
+    if (thisEndId > getMaxConnectionId()) return false;
+    connections[thisEndId].erase(otherConnectionEnd);
+    return true;
 }
 
-bool ConnectionContainer::tryRemoveConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-
+bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
+    if (thisEndId > getMaxConnectionId()) return false;
+    return true;
 }
 
-bool ConnectionContainer::tryRemoveConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-
-}
-
-bool ConnectionContainer::hasConnectionTo(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-
-}
-
-bool ConnectionContainer::hasConnectionFrom(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-
-}

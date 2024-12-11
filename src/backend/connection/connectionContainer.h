@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "connectionEnd.h"
+#include "../../util/emptyVector.h"
 
 class ConnectionContainer {
 public:
@@ -11,9 +12,10 @@ public:
 
     BlockType getBlockType() const {return blockType;}
 
-    inline connection_end_id_t getMaxConnectionId() const {return connections.size()}
+    inline connection_end_id_t getMaxConnectionId() const {return connections.size();}
+    
     inline const std::vector<ConnectionEnd>& getConnection(connection_end_id_t thisEndId) const {
-        if (thisEndId > getMaxConnectionId()) return std::vector<ConnectionEnd>(); return connections[thisEndId];
+        if (thisEndId > getMaxConnectionId()) return getEmptyVector<ConnectionEnd>(); return connections[thisEndId];
     }
     bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
