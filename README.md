@@ -8,7 +8,9 @@ On Windows you can either build QT yourself, or [download it](https://www.qt.io/
 ### CMake
 This project uses the CMake build system. Make sure that you have CMake and a compiler installed. 
 You can let your IDE manage CMake, or run the commands yourself:
+
 For development - `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
+
 For a "release" - `cmake -B build -DCMAKE_BUILD_TYPE=Release`
 > **Windows**: If you don't want to use msvc, add the -G "Unix Makefiles" arguments to use GNU make and MinGW
 
