@@ -8,7 +8,7 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    setWindowTitle(tr("Example Window"));
+    setWindowTitle(tr("Logic Graph Creator"));
 
     BlockContainer* blockContainer = new BlockContainer();
 
