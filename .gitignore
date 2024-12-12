@@ -35,7 +35,7 @@
 /.vscode
 
 # Cmake
-/build
+/*build*/
 
 .cache
 *.DS_Store
@@ -50,4 +50,6 @@
 *.creator
 *.config
 *.cflags
+
+# IDE Specific
 /.idea
