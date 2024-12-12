@@ -23,26 +23,31 @@ file(GLOB_RECURSE SOURCE_FILES
 
 # Add executable
 
-if(APPLE) # Set icon for MacOS
+if(APPLE) # MacOS specific
+    # Icon
     set(ICON_PATH ${FORMS_DIR}/gateIcon.icns)
     set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
     set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     list(APPEND SOURCE_FILES ${ICON_PATH})
+
+    # Bundle
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${FORMS_DIR} )
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 
-if (WIN32) # Set icon for Windows
+if (WIN32) # Windows specific
+    # Set icon
     target_sources(${PROJECT_NAME} PRIVATE "${FORMS_DIR}/icon.rc")
-endif()
 
-# Set properties
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        WIN32_EXECUTABLE TRUE
-        MACOSX_BUNDLE TRUE
-)
+    # Set WIN32_EXECUTABLE (Disables Console)
+    if (CMAKE_BUILD_TYPE MATCHES Release)
+        set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    endif ()
+
+endif()
 
 # Add resources
 file(GLOB_RECURSE IMG_SOURCES "${FORMS_DIR}/*.png" "${FORMS_DIR}/*.ico")
