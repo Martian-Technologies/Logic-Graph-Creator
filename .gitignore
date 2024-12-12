@@ -50,3 +50,4 @@
 *.creator
 *.config
 *.cflags
+/.idea
