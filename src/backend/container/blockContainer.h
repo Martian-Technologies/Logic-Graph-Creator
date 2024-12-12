@@ -33,7 +33,7 @@ public:
 
     /* ----------- connections ----------- */
     // -- getters --
-    void getConnections(const Position& outputPosition);
+    void getConnections(const Position& position);
 
     // -- setters --
     // Trys to creates a connection. Returns if successful.

@@ -22,7 +22,6 @@ private:
 
     block_id_t blockId;
     connection_end_id_t connectionId;
-
 };
 
 

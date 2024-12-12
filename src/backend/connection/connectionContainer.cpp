@@ -13,7 +13,7 @@ bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, const
 
 bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
     if (thisEndId > getMaxConnectionId()) return false;
-    connections[thisEndId].erase(otherConnectionEnd);
+    // connections[thisEndId].erase(otherConnectionEnd);
     return true;
 }
 
