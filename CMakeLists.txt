@@ -22,6 +22,14 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 # Add executable
+
+if(APPLE) # Set icon for macOS
+    set(ICON_PATH ${FORMS_DIR}/gateIcon.icns)
+    set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+    set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    list(APPEND SOURCE_FILES ${ICON_PATH})
+endif()
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${FORMS_DIR} )
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
@@ -33,13 +41,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Add resources
-file(GLOB_RECURSE IMG_SOURCES RELATIVE src "*.png")
+file(GLOB_RECURSE IMG_SOURCES "${FORMS_DIR}/*.png")
 qt_add_resources(${PROJECT_NAME} "images"
         PREFIX
-        "."
+        "/"
         FILES
         ${IMG_SOURCES}
+        BASE ${FORMS_DIR}
 )
-
-# Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")

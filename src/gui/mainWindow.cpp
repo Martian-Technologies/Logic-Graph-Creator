@@ -1,5 +1,6 @@
 #include <QHBoxLayout>
 #include <QTreeView>
+// #include <QDirIterator>
 
 #include "gridGUI/logicGridWindow.h"
 #include "resouces/ui_mainWindow.h"
@@ -12,8 +13,15 @@ MainWindow::MainWindow(QWidget* parent)
 
     BlockContainer* blockContainer = new BlockContainer();
 
+    // QDirIterator it(":", QDirIterator::Subdirectories);
+    // while (it.hasNext()) {
+    //     QString str = it.next();
+    //     if (!str.contains("qt-project"))
+    //         qDebug() << str;
+    // }
+
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap("src/gui/resources/logicTiles.png");
+    logicGridWindow->loadTileMap(":logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 
