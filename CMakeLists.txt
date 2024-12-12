@@ -23,18 +23,16 @@ file(GLOB_RECURSE SOURCE_FILES
 
 file(GLOB_RECURSE IMG_SOURCES "${FORMS_DIR}/*.png" "${FORMS_DIR}/*.ico")
 
-
 if(APPLE) # MacOS specific (Before add_executable)
     # Icon
-    set(ICON_PATH ${FORMS_DIR}/gateIcon.icns)
+    set(ICON_PATH "${FORMS_DIR}/gateIcon.icns")
     set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
     set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     list(APPEND SOURCE_FILES ${ICON_PATH})
 elseif (WIN32) # Windows specific (Before add_executable)
     # Icon
-    target_sources(${PROJECT_NAME} PRIVATE "${FORMS_DIR}/icon.rc")
-    file(GLOB_RECURSE ICON_PATH "${FORMS_DIR}/*.ico")
-    list(APPEND IMG_SOURCES ${ICON_PATH})
+    set(ICON_PATH "${FORMS_DIR}/icon.rc")
+    list(APPEND SOURCE_FILES ${ICON_PATH})
 endif()
 
 # Add executable
