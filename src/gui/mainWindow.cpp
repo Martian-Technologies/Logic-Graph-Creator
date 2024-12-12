@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget* parent)
     BlockContainer* blockContainer = new BlockContainer();
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap(":/gui/resources/logicTiles.png");
+    logicGridWindow->loadTileMap("src/gui/resources/logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 
