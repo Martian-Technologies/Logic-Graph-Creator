@@ -3,6 +3,7 @@ project(LogicGraphCreator)
 
 # Set directories
 set(FORMS_DIR "${CMAKE_SOURCE_DIR}/src/gui/resources")
+set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/src/gui/resources")
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 
 # Set Qt moc and uic
@@ -21,17 +22,17 @@ file(GLOB_RECURSE SOURCE_FILES
         "${SOURCE_DIR}/*.cpp"
 )
 
-file(GLOB_RECURSE IMG_SOURCES "${FORMS_DIR}/*.png" "${FORMS_DIR}/*.ico")
+file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
 
 if(APPLE) # MacOS specific (Before add_executable)
     # Icon
-    set(ICON_PATH "${FORMS_DIR}/gateIcon.icns")
+    set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
     set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
     set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     list(APPEND SOURCE_FILES ${ICON_PATH})
 elseif (WIN32) # Windows specific (Before add_executable)
     # Icon
-    set(ICON_PATH "${FORMS_DIR}/icon.rc")
+    set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
     list(APPEND SOURCE_FILES ${ICON_PATH})
 endif()
 
@@ -55,5 +56,5 @@ qt_add_resources(${PROJECT_NAME} "images"
         "/"
         FILES
         ${IMG_SOURCES}
-        BASE ${FORMS_DIR}
+        BASE ${RESOURCES_DIR}
 )
