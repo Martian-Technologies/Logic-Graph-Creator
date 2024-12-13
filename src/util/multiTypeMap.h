@@ -11,7 +11,7 @@ Stores all mappings
 template <class K>
 class MultiTypeMap{
 public:
-    MultiTypeMap() : edits(false) {};
+    MultiTypeMap() {};
 
     // -- getters --
     template<class V>
@@ -30,8 +30,8 @@ template<class K>
 template<class V>
 const V* MultiTypeMap<K>::get(const K& key) const {
     auto iter = mappings.find(key);
-    if(iter == mappings.end()) return nullptr; // could remove this if haskey is always called prior
-    return (iter->second);
+    if(iter == mappings.end()) return NULL; // could remove this if haskey is always called prior
+    return std::any_cast<V>(&iter->second);
 }
 
 template<class K>
@@ -39,9 +39,9 @@ template<class V>
 void MultiTypeMap<K>::set(const K& key, const V& value){
     auto iter = mappings.find(key); // auto enjoyer
     if (iter != mappings.end()) {
-        iter->second = std::make_unique<V>(value); // overriding the previous value
+        iter->second = value; // overriding the previous value
     } else {
-        mappings[key] = std::make_unique<V>(value);
+        mappings[key] = value;
     }
 }
 
