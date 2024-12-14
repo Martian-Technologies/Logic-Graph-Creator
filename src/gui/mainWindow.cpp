@@ -2,7 +2,7 @@
 #include <QTreeView>
 
 #include "gridGUI/logicGridWindow.h"
-#include "resouces/ui_mainWindow.h"
+#include "ui_mainWindow.h"
 #include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)

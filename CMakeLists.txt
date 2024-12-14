@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 project(LogicGraphCreator)
 
 # Set directories
-set(FORMS_DIR "${CMAKE_SOURCE_DIR}/src/gui/resources")
-set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/src/gui/resources")
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
+set(FORMS_DIR "${CMAKE_SOURCE_DIR}/src")
+set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Set Qt moc and uic
 set(CMAKE_AUTOMOC ON)
