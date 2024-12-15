@@ -12,6 +12,6 @@ You can let your IDE manage CMake, or run the commands yourself:
 For development - `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
 
 For a "release" - `cmake -B build -DCMAKE_BUILD_TYPE=Release`
-> **Windows**: If you don't want to use msvc, add the -G "Unix Makefiles" arguments to use GNU make and MinGW
+> Tested for MacOS, Windows (MSVC), and Linux
 
 Then (from the build folder) use the generated project files, or GNU make.
