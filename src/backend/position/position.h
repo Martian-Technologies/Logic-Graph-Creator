@@ -27,7 +27,7 @@ struct std::hash<Position> {
     inline std::size_t operator()(const Position& pos) const noexcept {
         std::size_t x = std::hash<cord_t>{}(pos.x);
         std::size_t y = std::hash<cord_t>{}(pos.y);
-        return x ^ (y << 1);
+        return (std::size_t)x ^ ((std::size_t)y << 32);
     }
 };
 
