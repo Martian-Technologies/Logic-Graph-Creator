@@ -17,7 +17,7 @@ public:
     /* ----------- blocks ----------- */
     // -- getters --
     // Gets the cell at that position. Returns nullptr the cell is empty
-    inline const Cell* getCell(const Position& position) const { return grid.get(position); }
+    inline const Cell* getCell(const Position& position) const { return ((BlockContainer*)this)->getCell(position); }
     // Gets the number of cells in the BlockContainer
     inline unsigned int getCellCount() const { return grid.size(); }
     // Gets the block that has a cell at that position. Returns nullptr the cell is empty
