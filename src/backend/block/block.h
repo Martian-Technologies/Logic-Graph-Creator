@@ -90,14 +90,14 @@ public:
 
     inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 
-    inline const ConnectionContainer& getConnections() const { return ((Block*)this)->getConnections(); }
+    inline const ConnectionContainer& getConnectionContainer() const { return ((Block*)this)->getConnectionContainer(); }
     inline const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const {
         auto [connectionId, success] = getInputConnectionId(position);
-        return success ? getConnections().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+        return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
     }
     inline const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const {
         auto [connectionId, success] = getOutputConnectionId(position);
-        return success ? getConnections().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+        return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
     }
     inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Position& position) const {
         return withinBlock(position) ? ::getInputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
@@ -108,7 +108,7 @@ public:
 
 protected:
     inline void destroy() {}
-    inline ConnectionContainer& getConnections() { return connections; }
+    inline ConnectionContainer& getConnectionContainer() { return connections; }
     inline void setPosition(const Position& position) { this->position = position; }
     inline void setRotation(Rotation rotation) { this->rotation = rotation; }
     inline void setId(block_id_t id) { blockId = id; }

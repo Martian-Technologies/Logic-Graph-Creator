@@ -20,9 +20,9 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
     Block& block = iter->second;
     removeBlockCells(block.getPosition(), block);
     // make sure to remove all connections from this block
-    for (unsigned int i = 0; i <= block.getConnections().getMaxConnectionId(); i++) {
-        for (auto& connectionEnd : block.getConnections().getConnections(i)) {
-            getBlock(connectionEnd.getBlockId())->getConnections().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i));
+    for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
+        for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
+            getBlock(connectionEnd.getBlockId())->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i));
         }
     }
     block.destroy();
@@ -65,7 +65,7 @@ bool BlockContainer::connectionExists(const Position& outputPosition, const Posi
     if (!output) return false;
     auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
     if (!outputSuccess) return false;
-    return input->getConnections().hasConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId));
+    return input->getConnectionContainer().hasConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId));
 }
 
 const std::vector<ConnectionEnd>& BlockContainer::getInputConnections(const Position& position) const {
@@ -89,8 +89,8 @@ bool BlockContainer::tryCreateConnection(const Position& outputPosition, const P
     if (!output) return false;
     auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
     if (!outputSuccess) return false;
-    if (input->getConnections().tryMakeConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
-        assert(output->getConnections().tryMakeConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
+    if (input->getConnectionContainer().tryMakeConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
+        assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
         return true;
     }
     return false;
@@ -105,8 +105,8 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
     if (!output) return false;
     auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
     if (!outputSuccess) return false;
-    if (input->getConnections().tryRemoveConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
-        assert(output->getConnections().tryRemoveConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
+    if (input->getConnectionContainer().tryRemoveConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
+        assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
         return true;
     }
     return false;
