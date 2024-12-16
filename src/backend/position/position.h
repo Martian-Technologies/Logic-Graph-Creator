@@ -7,6 +7,9 @@
 
 typedef int cord_t;
 
+struct Position;
+struct FreePosition;
+
 struct Position {
     inline Position() : x(0), y(0) {}
     inline Position(cord_t x, cord_t y) : x(x), y(y) {}
@@ -14,6 +17,7 @@ struct Position {
     inline cord_t manhattenDistanceTo(const Position& other) const { return Abs(x - other.x) + Abs(y - other.y); }
     inline cord_t distanceToSquared(const Position& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
     bool withinArea(const Position& small, const Position& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
+	FreePosition free() const;
     inline bool operator==(const Position& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Position& other) const { return !operator==(other); }
     inline Position operator+(const Position& position) const { return Position(position.x + x, position.y + y); }
@@ -31,6 +35,29 @@ struct std::hash<Position> {
         return (std::size_t)x ^ ((std::size_t)y << 32);
     }
 };
+
+typedef float free_cord_t;
+
+struct FreePosition {
+    inline FreePosition() : x(0.0f), y(0.0f) {}
+    inline FreePosition(free_cord_t x, free_cord_t y) : x(x), y(y) {}
+
+    inline cord_t manhattenDistanceTo(const FreePosition& other) const { return Abs(x - other.x) + Abs(y - other.y); }
+    inline cord_t distanceToSquared(const FreePosition& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    bool withinArea(const FreePosition& small, const FreePosition& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
+	Position snap() const;
+    inline bool operator==(const FreePosition& other) const { return x == other.x && y == other.y; }
+    inline bool operator!=(const FreePosition& other) const { return !operator==(other); }
+    inline FreePosition operator+(const FreePosition& position) const { return FreePosition(position.x + x, position.y + y); }
+    inline FreePosition operator-(const FreePosition& position) const { return FreePosition(position.x - x, position.y - y); }
+    inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+
+    free_cord_t x, y;
+};
+
+// conversion
+inline FreePosition Position::free() const { return FreePosition(x, y); }
+inline Position FreePosition::snap() const { return Position(std::round(x), std::round(y)); }
 
 // ---- we also define block rotation here so ----
 enum Rotation {
