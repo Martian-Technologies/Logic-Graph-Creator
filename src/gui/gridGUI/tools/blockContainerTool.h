@@ -5,7 +5,7 @@
 #include <QColor>
 
 #include "../effects/logicGridEffectDisplayer.h"
-#include "../../../backend/container/blockContainer.h"
+#include "backend/container/blockContainer.h"
 class LogicGridWindow;
 
 

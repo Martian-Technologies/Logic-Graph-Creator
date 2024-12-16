@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../util/fastMath.h"
+#include "util/fastMath.h"
 
 typedef int cord_t;
 

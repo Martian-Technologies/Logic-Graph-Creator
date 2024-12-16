@@ -9,7 +9,7 @@
 #include <QWidget>
 #include <QPixmap>
 
-#include "../../backend/container/blockContainer.h"
+#include "backend/container/blockContainer.h"
 #include "tools/blockContainerTool.h"
 #include "blockRenderer.h"
 #include "gridRenderer.h"

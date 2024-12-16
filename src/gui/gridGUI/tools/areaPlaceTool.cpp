@@ -1,6 +1,6 @@
-#include "areaPlaceTool.h"
-#include "../../../backend/container/blockContainerEditor.h"
+#include "backend/container/blockContainerEditor.h"
 #include "../effects/cellSelectionEffect.h"
+#include "areaPlaceTool.h"
 
 bool AreaPlaceTool::leftPress(const Position& pos) {
     if (!blockContainer) return false;
