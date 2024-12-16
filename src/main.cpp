@@ -7,7 +7,6 @@ int main(int argc, char* argv[]) {
     app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 
     MainWindow window;
-    window.setWindowIcon(QIcon(":/gateIcon.ico"));
     window.show();
 
     return app.exec();

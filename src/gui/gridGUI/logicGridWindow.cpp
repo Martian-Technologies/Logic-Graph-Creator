@@ -4,7 +4,7 @@
 #include <QCursor>
 #include <QTimer>
 
-#include "../../util/fastMath.h"
+#include "util/fastMath.h"
 #include "logicGridWindow.h"
 #include "tools/singlePlaceTool.h"
 #include "tools/areaPlaceTool.h"

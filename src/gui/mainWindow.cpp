@@ -7,8 +7,11 @@
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
+	
     ui->setupUi(this);
+	
     setWindowTitle(tr("Logic Graph Creator"));
+	setWindowIcon(QIcon(":/gateIcon.ico"));
 
     BlockContainer* blockContainer = new BlockContainer();
 

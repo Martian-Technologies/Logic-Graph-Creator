@@ -14,4 +14,4 @@ For development - `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
 For a "release" - `cmake -B build -DCMAKE_BUILD_TYPE=Release`
 > Tested for MacOS, Windows (MSVC), and Linux
 
-Then (from the build folder) use the generated project files, or GNU make.
+Then `cmake --install build` and `cmake --build build`
