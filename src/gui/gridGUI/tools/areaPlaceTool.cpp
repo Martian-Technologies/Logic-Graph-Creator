@@ -1,6 +1,6 @@
-#include "areaPlaceTool.h"
-#include "../../../backend/container/blockContainerEditor.h"
+#include "backend/container/blockContainerEditor.h"
 #include "../effects/cellSelectionEffect.h"
+#include "areaPlaceTool.h"
 // #include <iostream> // needed for stat print
 
 bool AreaPlaceTool::leftPress(const Position& pos) {

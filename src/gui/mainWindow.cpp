@@ -2,13 +2,16 @@
 #include <QTreeView>
 
 #include "gridGUI/logicGridWindow.h"
-#include "resouces/ui_mainWindow.h"
+#include "ui_mainWindow.h"
 #include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
+	
     ui->setupUi(this);
-    setWindowTitle(tr("Example Window"));
+	
+    setWindowTitle(tr("Logic Graph Creator"));
+	setWindowIcon(QIcon(":/gateIcon.ico"));
 
     BlockContainer* blockContainer = new BlockContainer();
 
@@ -17,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
     blockContainer->tryCreateConnection(Position(0, 0), Position(2, 0));
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap(":/gui/resources/logicTiles.png");
+    logicGridWindow->loadTileMap(":logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 

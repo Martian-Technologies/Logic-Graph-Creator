@@ -7,7 +7,7 @@
 #include <QPainter>
 #include <QPoint>
 
-#include "../../backend/block/block.h"
+#include "backend/block/block.h"
 
 class BlockRenderer {
 public:
