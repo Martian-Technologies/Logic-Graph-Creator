@@ -12,7 +12,7 @@
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
-    blockContainer(), lastMousePos(),
+    blockContainer(nullptr), lastMousePos(),
     blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
     connectionRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, true)),
     gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(true), treeWidget(nullptr) { // change to false for trackPad Control
@@ -153,13 +153,13 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
         return;
     }
     
-    blockRenderer.setUp(&painter);
-    connectionRenderer.setUp(&painter);
-
     if (!blockRenderer.hasTileMap()) {
         painter.drawText(rect(), Qt::AlignCenter, "No TileMap Found");
         return;
     }
+
+    blockRenderer.setUp(&painter);
+    connectionRenderer.setUp(&painter);
 
     gridRenderer.renderGrid();
 

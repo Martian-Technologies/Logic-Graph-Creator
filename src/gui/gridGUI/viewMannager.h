@@ -1,8 +1,6 @@
 #ifndef viewMannager_h
 #define viewMannager_h
 
-#include <Qt>
-
 class ViewMannager {
 public:
     ViewMannager(bool usingMouse = true) :
