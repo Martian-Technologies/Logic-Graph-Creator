@@ -8,12 +8,14 @@
 #include "logicGridWindow.h"
 #include "tools/singlePlaceTool.h"
 #include "tools/areaPlaceTool.h"
+#include "tools/singleConnectTool.h"
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
     blockContainer(), lastMousePos(),
     blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
-    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(false), treeWidget(nullptr) { // change to false for trackPad Control
+    connectionRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, true)),
+    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(true), treeWidget(nullptr) { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
@@ -94,6 +96,13 @@ void LogicGridWindow::updateSelectedItem() {
                     tool = new AreaPlaceTool(blockContainer);
                     tool->selectBlock(type);
                 }
+                else if (str == "Simple")
+                {
+                    BlockType type = tool->getSelectedBlock();
+                    delete tool;
+                    tool = new SingleConnectTool(blockContainer);
+                    tool->selectBlock(type);
+                }
             }
             return;
         }
@@ -145,6 +154,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     }
     
     blockRenderer.setUp(&painter);
+    connectionRenderer.setUp(&painter);
 
     if (!blockRenderer.hasTileMap()) {
         painter.drawText(rect(), Qt::AlignCenter, "No TileMap Found");

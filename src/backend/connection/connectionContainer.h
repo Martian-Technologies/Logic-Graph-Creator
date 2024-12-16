@@ -3,23 +3,25 @@
 
 #include <vector>
 
-#include "connectionEnd.h"
 #include "../../util/emptyVector.h"
+#include "connectionEnd.h"
+#include "../defs.h"
+class BlockContainer;
 
 class ConnectionContainer {
+    friend BlockContainer;
 public:
     ConnectionContainer(BlockType blockType);
 
     BlockType getBlockType() const {return blockType;}
 
-    inline connection_end_id_t getMaxConnectionId() const {return connections.size();}
+    inline connection_end_id_t getMaxConnectionId() const {return connections.size()-1;}
     
-    inline const std::vector<ConnectionEnd>& getConnection(connection_end_id_t thisEndId) const {
+    inline const std::vector<ConnectionEnd>& getConnections(connection_end_id_t thisEndId) const {
         if (thisEndId > getMaxConnectionId()) return getEmptyVector<ConnectionEnd>(); return connections[thisEndId];
     }
-    bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
-    friend BlockContainer;
+    bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const;
 
 private:
     bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);

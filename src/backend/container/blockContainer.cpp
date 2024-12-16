@@ -1,4 +1,8 @@
+#include <cassert>
+
 #include "blockContainer.h"
+#include "../../util/emptyVector.h"
+#include "../block/block.h"
 
 bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) {
     for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {
@@ -15,6 +19,12 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
     auto iter = blocks.find(cell->getBlockId());
     Block& block = iter->second;
     removeBlockCells(block.getPosition(), block);
+    // make sure to remove all connections from this block
+    for (unsigned int i = 0; i <= block.getConnections().getMaxConnectionId(); i++) {
+        for (auto& connectionEnd : block.getConnections().getConnections(i)) {
+            getBlock(connectionEnd.getBlockId())->getConnections().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i));
+        }
+    }
     block.destroy();
     blocks.erase(iter);
     return true;
@@ -23,7 +33,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
 // makes a copy of block and places it into the grid
 // returns false if the block was not inserted
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, const Block& block) {
-    if (checkCollision(position, position + Position(getBlockWidth(block.type(), rotation)-1, getBlockHeight(block.type(), rotation)-1))) return false;
+    if (checkCollision(position, position + Position(getBlockWidth(block.type(), rotation) - 1, getBlockHeight(block.type(), rotation) - 1))) return false;
     block_id_t id = getNewId();
     auto iter = blocks.insert(std::make_pair(id, block)).first;
     iter->second.setId(id);
@@ -46,18 +56,58 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
     return true;
 }
 
+bool BlockContainer::connectionExists(const Position& outputPosition, const Position& inputPosition) const {
+    const Block* input = getBlock(inputPosition);
+    if (!input) return false;
+    auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
+    if (!inputSuccess) return false;
+    const Block* output = getBlock(outputPosition);
+    if (!output) return false;
+    auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
+    if (!outputSuccess) return false;
+    return input->getConnections().hasConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId));
+}
+
+const std::vector<ConnectionEnd>& BlockContainer::getInputConnections(const Position& position) const {
+    const Block* block = getBlock(position);
+    if (block == nullptr) return getEmptyVector<ConnectionEnd>();
+    return block->getInputConnections(position);
+}
+
+const std::vector<ConnectionEnd>& BlockContainer::getOutputConnections(const Position& position) const {
+    const Block* block = getBlock(position);
+    if (block == nullptr) return getEmptyVector<ConnectionEnd>();
+    return block->getOutputConnections(position);
+}
+
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
-    if (checkCollision(outputPosition) && checkCollision(inputPosition)) {
-        Block* output = getBlock(outputPosition);
-        Block* input = getBlock(inputPosition);
+    Block* input = getBlock(inputPosition);
+    if (!input) return false;
+    auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
+    if (!inputSuccess) return false;
+    Block* output = getBlock(outputPosition);
+    if (!output) return false;
+    auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
+    if (!outputSuccess) return false;
+    if (input->getConnections().tryMakeConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
+        assert(output->getConnections().tryMakeConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
+        return true;
     }
     return false;
 }
 
 bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const Position& inputPosition) {
-    if (checkCollision(outputPosition) && checkCollision(inputPosition)) {
-        Block* output = getBlock(outputPosition);
-        Block* input = getBlock(inputPosition);
+    Block* input = getBlock(inputPosition);
+    if (!input) return false;
+    auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
+    if (!inputSuccess) return false;
+    Block* output = getBlock(outputPosition);
+    if (!output) return false;
+    auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
+    if (!outputSuccess) return false;
+    if (input->getConnections().tryRemoveConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
+        assert(output->getConnections().tryRemoveConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
+        return true;
     }
     return false;
 }

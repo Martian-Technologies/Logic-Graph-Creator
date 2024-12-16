@@ -11,6 +11,7 @@
 
 #include "../../backend/container/blockContainer.h"
 #include "tools/blockContainerTool.h"
+#include "connectionRenderer.h"
 #include "blockRenderer.h"
 #include "gridRenderer.h"
 #include "viewMannager.h"
@@ -28,6 +29,7 @@ public:
     inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
     inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
     const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
+    const ConnectionRenderer& getConnectionRenderer() const {return connectionRenderer;}
     const BlockContainer* getBlockContainer() const {return blockContainer;}
 
 
@@ -70,6 +72,7 @@ private:
     QPoint lastMousePos;
 
     // helper classes
+    ConnectionRenderer connectionRenderer;
     BlockRenderer blockRenderer;
     GridRenderer gridRenderer;
     BlockContainerTool* tool;

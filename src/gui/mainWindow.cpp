@@ -12,6 +12,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     BlockContainer* blockContainer = new BlockContainer();
 
+    blockContainer->tryInsertBlock(Position(0, 0), ZERO, AND);
+    blockContainer->tryInsertBlock(Position(2, 0), ZERO, AND);
+    blockContainer->tryCreateConnection(Position(0, 0), Position(2, 0));
+
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->loadTileMap(":/gui/resources/logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);

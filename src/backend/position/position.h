@@ -13,12 +13,13 @@ struct Position {
 
     inline cord_t manhattenDistanceTo(const Position& other) const { return Abs(x - other.x) + Abs(y - other.y); }
     inline cord_t distanceToSquared(const Position& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    bool withinArea(const Position& small, const Position& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
     inline bool operator==(const Position& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Position& other) const { return !operator==(other); }
-    inline Position operator+(const Position& position) const {return Position(position.x + x, position.y + y);}
-    inline Position operator-(const Position& position) const {return Position(position.x - x, position.y - y);}
-    inline std::string toString() const {return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";}
-    
+    inline Position operator+(const Position& position) const { return Position(position.x + x, position.y + y); }
+    inline Position operator-(const Position& position) const { return Position(position.x - x, position.y - y); }
+    inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+
     cord_t x, y;
 };
 
@@ -31,7 +32,6 @@ struct std::hash<Position> {
     }
 };
 
-
 // ---- we also define block rotation here so ----
 enum Rotation {
     ZERO = 0,
@@ -40,8 +40,8 @@ enum Rotation {
     TWO_SEVENTY = 3,
 };
 
-inline bool isRotated(Rotation rotation) noexcept {return rotation & 1;}
-inline bool isFlipped(Rotation rotation) noexcept {return rotation > 1;}
+inline bool isRotated(Rotation rotation) noexcept { return rotation & 1; }
+inline bool isFlipped(Rotation rotation) noexcept { return rotation > 1; }
 inline Rotation rotate(Rotation rotation, bool clockWise) {
     if (clockWise) {
         if (rotation == ZERO) return TWO_SEVENTY;

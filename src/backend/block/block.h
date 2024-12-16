@@ -4,22 +4,8 @@
 #include <utility>
 
 #include "../position/position.h"
-
-typedef unsigned char block_size_t;
-typedef unsigned int block_id_t;
-
-enum BlockType {
-    NONE,
-    BLOCK,
-    AND,
-    OR,
-    XOR,
-    NAND,
-    NOR,
-    XNOR,
-    CUSTOM,
-    TYPE_COUNT
-};
+#include "../connection/connectionContainer.h"
+#include "../defs.h"
 
 inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
     if (isRotated(rotation)) std::swap(width, height);
@@ -28,14 +14,14 @@ inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_s
 inline block_size_t getBlockWidth(BlockType type) noexcept {
     // add if not 1
     switch (type) {
-        default: return 1;
+    default: return 1;
     }
 }
 
 inline block_size_t getBlockHeight(BlockType type) noexcept {
     // add if not 1
     switch (type) {
-        default: return 1;
+    default: return 1;
     }
 }
 
@@ -47,37 +33,96 @@ inline block_size_t getBlockHeight(BlockType type, Rotation rotation) noexcept {
     return isRotated(rotation) ? getBlockWidth(type) : getBlockHeight(type);
 }
 
+inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, const Position& relativePos) {
+    switch (type) {
+    default:
+        if (relativePos.x == 0 && relativePos.y == 0) return { 0, true };
+        return { 0, false };
+    }
+}
+
+inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, const Position& relativePos) {
+    switch (type) {
+    default:
+        if (relativePos.x == 0 && relativePos.y == 0) return { 1, true };
+        return { 0, false };
+    }
+}
+
+inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, const Position& relativePos) {
+    if (isRotated(rotation)) {
+        return getInputConnectionId(type, Position(relativePos.y, relativePos.x));
+    }
+    return getInputConnectionId(type, relativePos);
+}
+
+inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, const Position& relativePos) {
+    if (isRotated(rotation)) {
+        return getOutputConnectionId(type, Position(relativePos.y, relativePos.x));
+    }
+    return getOutputConnectionId(type, relativePos);
+}
+
+inline connection_end_id_t getMaxConnectionId(BlockType type) {
+    switch (type) {
+    default: return 1;
+    }
+}
+
 class Block {
+    friend class BlockContainer;
+    friend Block getBlockClass(BlockType type);
 public:
-    Block() : blockType(BLOCK), blockId(0), position(), rotation() {}
+    inline Block() : Block(BLOCK) {}
 
     // getters
-    block_id_t id() const {return blockId;}
-    BlockType type() const {return blockType;}
+    block_id_t id() const { return blockId; }
+    BlockType type() const { return blockType; }
 
-    inline const Position& getPosition() const {return position;}
-    inline Rotation getRotation() const {return rotation;}
-    
-    inline block_size_t width() const {return getBlockWidth(blockType, rotation);}
-    inline block_size_t height() const {return getBlockHeight(blockType, rotation);}
-    inline block_size_t widthNoRotation() const {return getBlockWidth(blockType);}
-    inline block_size_t heightNoRotation() const {return getBlockHeight(blockType);}
+    inline const Position& getPosition() const { return position; }
+    inline Position getLargestPosition() const { return position + Position(width(), height()); }
+    inline Rotation getRotation() const { return rotation; }
+
+    inline block_size_t width() const { return getBlockWidth(type(), getRotation()); }
+    inline block_size_t height() const { return getBlockHeight(type(), getRotation()); }
+    inline block_size_t widthNoRotation() const { return getBlockWidth(type()); }
+    inline block_size_t heightNoRotation() const { return getBlockHeight(type()); }
+
+    inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
+
+    inline const ConnectionContainer& getConnections() const { return ((Block*)this)->getConnections(); }
+    inline const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const {
+        auto [connectionId, success] = getInputConnectionId(position);
+        return success ? getConnections().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+    }
+    inline const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const {
+        auto [connectionId, success] = getOutputConnectionId(position);
+        return success ? getConnections().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+    }
+    inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Position& position) const {
+        return withinBlock(position) ? ::getInputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+    }
+    inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Position& position) const {
+        return withinBlock(position) ? ::getOutputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+    }
 
 protected:
-    friend class BlockContainer;
     inline void destroy() {}
-    inline void setPosition(const Position& position) {this->position = position;}    
-    inline void setRotation(Rotation rotation) {this->rotation = rotation;}
-    inline void setId(block_id_t id) {blockId = id;}
+    inline ConnectionContainer& getConnections() { return connections; }
+    inline void setPosition(const Position& position) { this->position = position; }
+    inline void setRotation(Rotation rotation) { this->rotation = rotation; }
+    inline void setId(block_id_t id) { blockId = id; }
 
-    friend Block getBlockClass(BlockType type);
-    Block(BlockType blockType) : blockType(blockType), blockId(0), position(), rotation() {}
-    Block(BlockType blockType, block_id_t id) : blockType(blockType), blockId(id), position(), rotation() {}
+    inline Block(BlockType blockType) : Block(blockType, 0) {}
+    inline Block(BlockType blockType, block_id_t id) : blockType(blockType), blockId(id), connections(blockType), position(), rotation() {}
 
     // const data
     BlockType blockType;
     block_id_t blockId;
-    
+
+    // helpers
+    ConnectionContainer connections;
+
     // changing data
     Position position;
     Rotation rotation;
@@ -113,6 +158,6 @@ public:
     XnorBlock() : Block(XNOR) {}
 };
 
-inline Block getBlockClass(BlockType type) {return Block(type);}
+inline Block getBlockClass(BlockType type) { return Block(type); }
 
 #endif /* block_h */
