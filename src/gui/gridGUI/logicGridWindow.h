@@ -8,11 +8,11 @@
 #include <QPainter>
 #include <QWidget>
 #include <QPixmap>
+#include <qevent.h>
 
 #include "backend/container/blockContainer.h"
+#include "renderer/QTRenderer.h"
 #include "tools/blockContainerTool.h"
-#include "connectionRenderer.h"
-#include "blockRenderer.h"
 #include "gridRenderer.h"
 #include "viewMannager.h"
 
@@ -28,11 +28,8 @@ public:
     inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
     inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
     inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
-    const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
-    const ConnectionRenderer& getConnectionRenderer() const {return connectionRenderer;}
-    const BlockContainer* getBlockContainer() const {return blockContainer;}
-
-
+    const BlockContainer* getBlockContainer() const {return blockContainer; }
+	
     // data checkers
     Position gridPos(const QPoint& point) const;
     QPoint windowPos(const Position& point, bool center = false) const;
@@ -42,14 +39,15 @@ public:
     // dont call this func
     void updateSelectedItem();
     
-    // setup
-    inline void loadTileMap(const QString& filePath) {blockRenderer.loadTileMap(filePath);};
+    // setnup
+    inline void initializeRenderer(const std::string& filePath) { renderer.initialize(filePath); };
     void setBlockContainer(BlockContainer* blockContainer);
     void setSelector(QTreeWidget* treeWidget);
 
 protected:
     // events
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
@@ -72,10 +70,8 @@ private:
     QPoint lastMousePos;
 
     // helper classes
-    ConnectionRenderer connectionRenderer;
-    BlockRenderer blockRenderer;
-    GridRenderer gridRenderer;
     BlockContainerTool* tool;
+    QTRenderer renderer;
     ViewMannager viewMannager;
 
     // ui elements

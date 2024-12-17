@@ -17,7 +17,7 @@ void CellSelectionEffect::changeSelection(const Position& cellA, const Position&
 void CellSelectionEffect::display(QPainter& painter, const LogicGridWindow& gridWindow) {
     for (int x = cellA.x; x <= cellB.x; x++) {
         for (int y = cellA.y; y <= cellB.y; y++) {
-            gridWindow.getBlockRenderer().displayBlock(Position(x, y), ZERO, NONE, 0.3f, QColor(0, 0, 255, 128));
+            //gridWindow.getBlockRenderer().displayBlock(Position(x, y), ZERO, NONE, 0.3f, QColor(0, 0, 255, 128));
         }
     }
 }

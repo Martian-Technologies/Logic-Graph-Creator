@@ -4,18 +4,17 @@
 #include <QCursor>
 #include <QTimer>
 
-#include "util/fastMath.h"
 #include "logicGridWindow.h"
+#include "util/fastMath.h"
 #include "tools/singlePlaceTool.h"
 #include "tools/areaPlaceTool.h"
 #include "tools/singleConnectTool.h"
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) :
-    QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
-    blockContainer(nullptr), lastMousePos(),
-    blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
-    connectionRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, true)),
-    gridRenderer(this), tool(new SinglePlaceTool()), viewMannager(true), treeWidget(nullptr) { // change to false for trackPad Control
+LogicGridWindow::LogicGridWindow(QWidget *parent)
+    : QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
+      blockContainer(nullptr), tool(new SinglePlaceTool()),
+      viewMannager(true), treeWidget(nullptr)
+{ // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
@@ -146,24 +145,23 @@ bool LogicGridWindow::event(QEvent* event) {
 }
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
-    QPainter painter(this);
+    QPainter* painter = new QPainter(this);
 
-    if (blockContainer == nullptr) {
-        painter.drawText(rect(), Qt::AlignCenter, "No BlockContainer Found");
-        return;
-    }
-    
-    if (!blockRenderer.hasTileMap()) {
-        painter.drawText(rect(), Qt::AlignCenter, "No TileMap Found");
-        return;
-    }
+	renderer.takePainter(painter);
+	renderer.render();
 
-    blockRenderer.setUp(&painter);
-    connectionRenderer.setUp(&painter);
+	//tool->display(painter, *this);
 
-    gridRenderer.renderGrid();
+	delete painter;
+}
 
-    tool->display(painter, *this);
+void LogicGridWindow::resizeEvent(QResizeEvent* event)
+{
+	int w = event->size().width();
+	int h = event->size().height();
+	renderer.resize(w, h);
+
+	// should probably do the same recalculation shit as all the other events
 }
 
 void LogicGridWindow::wheelEvent(QWheelEvent* event) {
