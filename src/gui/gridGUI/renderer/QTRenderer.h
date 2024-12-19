@@ -16,8 +16,8 @@ class QTRenderer : Renderer
 	void resize(int w, int h) override;
 
 	// submission
-	void submitLine(const std::vector<FreePosition>& line, float width) override;
-	void submitSprite(BlockType type, const FreePosition& position) override;
+	void submitLine(const std::vector<FPosition>& line, float width) override;
+	void submitSprite(BlockType type, const FPosition& position) override;
 	void submitBlock(BlockType type, const Position& position) override;
     void submitTint(const Position& position, Color c, float a) override;
 	

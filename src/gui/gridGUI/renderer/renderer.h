@@ -26,8 +26,8 @@ class Renderer
 	virtual void resize(int w, int h) = 0;
 
 	// submission
-	virtual void submitLine(const std::vector<FreePosition>& line, float width) = 0;
-	virtual void submitSprite(BlockType type, const FreePosition& position) = 0;
+	virtual void submitLine(const std::vector<FPosition>& line, float width) = 0;
+	virtual void submitSprite(BlockType type, const FPosition& position) = 0;
 	virtual void submitBlock(BlockType type, const Position& position) = 0;
     virtual void submitTint(const Position& position, Color c, float a) = 0;
 }; 

@@ -22,12 +22,12 @@ void QTRenderer::render()
 	painter = nullptr;
 }
 
-void QTRenderer::submitLine(const std::vector<FreePosition>& line, float width)
+void QTRenderer::submitLine(const std::vector<FPosition>& line, float width)
 {
 	
 }
 
-void QTRenderer::submitSprite(BlockType type, const FreePosition& position)
+void QTRenderer::submitSprite(BlockType type, const FPosition& position)
 {
 	
 }
