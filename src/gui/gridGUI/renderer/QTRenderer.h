@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <qpainter.h>
+#include <qpixmap.h>
 
 #include "renderer.h"
 
@@ -12,14 +13,16 @@
 // - [ ] Coodinate system conversion
 // - [ ] Integration with rest of app
 
-class QTRenderer : Renderer
+class QTRenderer : public Renderer
 {
  public:
+    QTRenderer();
+    
 	// general flow
-	void initialize(const std::string& tileMap);
-	inline void takePainter(QPainter* painter) { this->painter = painter; }
+	void initialize(const std::string& filePath);
 	void render() override;
-	void resize(int w, int h) override;
+	inline void takePainter(QPainter* painter) { this->painter = painter; }
+	inline void resize(int w, int h) override { this->w = w; this->h = h; }
 
 	// submission
 	void submitLine(const std::vector<FPosition>& line, float width) override;
@@ -29,6 +32,9 @@ class QTRenderer : Renderer
 	
  private:
 	QPainter* painter;
+    
+    QPixmap tileMap;
+    int w,h;
 };                
 
 #endif // QTRenderer_h

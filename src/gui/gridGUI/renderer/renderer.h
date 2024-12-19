@@ -10,7 +10,7 @@
 // This is the base class for the renderer objects. Every subclass should
 // probably include its own initalization method.
 
-// placeholder system for submitting sprites, not sure how they will be handled
+// placeholder system for submitting sprites using BlockType, not sure how they will be handled
 
 
 class Renderer
@@ -21,7 +21,7 @@ class Renderer
 	virtual void render() = 0;
 	virtual void resize(int w, int h) = 0;
 
-	// submission
+	// submission (every render)
 	virtual void submitLine(const std::vector<FPosition>& line, float width) = 0;
 	virtual void submitSprite(BlockType type, const FPosition& position) = 0;
 	virtual void submitBlock(BlockType type, const Position& position) = 0;

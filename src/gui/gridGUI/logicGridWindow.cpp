@@ -60,17 +60,6 @@ QPoint LogicGridWindow::windowPos(const Position& point, bool center) const {
     );
 }
 
-// if any corner is inside the windows
-// bool LogicGridWindow::insideWindow(const Position& point) const {
-//     QPoint qPoint = windowPos(point);
-//     return (
-//         insideWindow(qPoint) ||
-//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix()) ||
-//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix()) ||
-//         insideWindow(qPoint + QPoint(0, 0) * getViewToPix())
-//     );
-// }
-
 void LogicGridWindow::updateSelectedItem() {
     if (treeWidget) {
         for (QTreeWidgetItem* item : treeWidget->selectedItems()) {

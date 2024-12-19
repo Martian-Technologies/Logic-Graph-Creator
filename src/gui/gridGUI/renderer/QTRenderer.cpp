@@ -1,22 +1,42 @@
 #include "QTRenderer.h"
 #include <qdebug.h>
 
-void QTRenderer::initialize(const std::string &tileMap) {}
+QTRenderer::QTRenderer()
+    : w(0), h(0)
+{
+}
+
+void QTRenderer::initialize(const std::string &filePath)
+{
+    if (filePath != "") {
+        tileMap = QPixmap(filePath.c_str());
+        
+        if (tileMap.isNull()) {
+            qDebug() << "ERROR (LogicGridWindow::loadTileMap) was not able to load tileMap" << filePath;
+        }
+    }
+}
 
 void QTRenderer::render()
 {
+    // error checking
 	if (!painter)
 	{
-		qDebug() << "ERROR: QTRenderer has no painter, cannot proceed.";
+		qDebug() << "ERROR: QTRenderer has no painter, cannot proceed with render.";
 		return;
 	}
-	// check for tilemap
+    if (!tileMap)
+    {
+        painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileMap found");
+        qDebug() << "ERROR: QTRenderer has no tileMap, cnanot proceed with render.";
+        return;
+    }
 
 	// render grid
 	// render blocks
 	// render sprites
-	// render lines
 	// render tints
+	// render lines
 	
 	// QT painters only work for one frame
 	painter = nullptr;
