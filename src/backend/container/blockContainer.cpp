@@ -30,12 +30,10 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
     return true;
 }
 
-// makes a copy of block and places it into the grid
-// returns false if the block was not inserted
-bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, const Block& block) {
-    if (checkCollision(position, position + Position(getBlockWidth(block.type(), rotation) - 1, getBlockHeight(block.type(), rotation) - 1))) return false;
+bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
+    if (checkCollision(position, position + Position(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))) return false;
     block_id_t id = getNewId();
-    auto iter = blocks.insert(std::make_pair(id, block)).first;
+    auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
     iter->second.setId(id);
     iter->second.setPosition(position);
     iter->second.setRotation(rotation);
@@ -43,7 +41,6 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
     return true;
 }
 
-// returns false if the block was not moved
 bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation) {
     Cell* cell = getCell(positionOfBlock);
     if (cell == nullptr) return false;

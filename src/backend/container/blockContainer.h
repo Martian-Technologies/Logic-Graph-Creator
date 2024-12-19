@@ -29,9 +29,7 @@ public:
 
     // -- setters --
     // Trys to insert a block. Returns if successful.
-    bool tryInsertBlock(const Position& position, Rotation rotation, const Block& block);
-    // Trys to insert a block. Returns if successful.
-    inline bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) { return tryInsertBlock(position, rotation, getBlockClass(blockType)); };
+    bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
     // Trys to remove a block. Returns if successful.
     bool tryRemoveBlock(const Position& position);
     // Trys to move a block. Returns if successful.

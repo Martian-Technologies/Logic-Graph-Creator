@@ -110,7 +110,7 @@ void LogicGridWindow::updateSelectedItem() {
     }
 }
 
-void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
+void LogicGridWindow::setBlockContainer(BlockContainerWrapper* blockContainer) {
     this->blockContainer = blockContainer;
     if (tool != nullptr) tool->setBlockContainer(blockContainer);
     updateSelectedItem();

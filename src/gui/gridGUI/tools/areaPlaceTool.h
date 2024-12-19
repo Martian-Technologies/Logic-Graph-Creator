@@ -5,7 +5,7 @@
 
 class AreaPlaceTool : public BlockContainerTool {
 public:
-    inline AreaPlaceTool(BlockContainer* blockContainer = nullptr) :
+    inline AreaPlaceTool(BlockContainerWrapper* blockContainer = nullptr) :
         BlockContainerTool(blockContainer), rotation(ZERO), clickPosition(), click('n') {}
 
     inline void reset() override final {click = 'n';}

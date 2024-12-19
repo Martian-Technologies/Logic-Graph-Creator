@@ -30,7 +30,7 @@ public:
     inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
     const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
     const ConnectionRenderer& getConnectionRenderer() const {return connectionRenderer;}
-    const BlockContainer* getBlockContainer() const {return blockContainer;}
+    const BlockContainer* getBlockContainer() const {return blockContainer->getBlockContainer();}
 
 
     // data checkers
@@ -44,7 +44,7 @@ public:
     
     // setup
     inline void loadTileMap(const QString& filePath) {blockRenderer.loadTileMap(filePath);};
-    void setBlockContainer(BlockContainer* blockContainer);
+    void setBlockContainer(BlockContainerWrapper* blockContainer);
     void setSelector(QTreeWidget* treeWidget);
 
 protected:
@@ -68,7 +68,7 @@ private:
     bool doUpdate;
 
     // data
-    BlockContainer* blockContainer;
+    BlockContainerWrapper* blockContainer;
     QPoint lastMousePos;
 
     // helper classes

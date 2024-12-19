@@ -2,6 +2,7 @@
 #define blockContainerWrapper_h
 
 #include <functional>
+#include <assert.h>
 #include <vector>
 #include <memory>
 #include <map>
@@ -45,13 +46,15 @@ public:
     /* ----------- blocks ----------- */
 
     // Trys to insert a block. Returns if successful.
-    inline bool tryInsertBlock(const Position& position, Rotation rotation, const Block& block) { return blockContainer->tryInsertBlock(position, rotation, block); }
-    // Trys to insert a block. Returns if successful.
     inline bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) { return blockContainer->tryInsertBlock(position, rotation, blockType); };
     // Trys to remove a block. Returns if successful.
     inline bool tryRemoveBlock(const Position& position) { return blockContainer->tryRemoveBlock(position); }
     // Trys to move a block. Returns if successful.
     inline bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation) { return blockContainer->tryMoveBlock(positionOfBlock, position, rotation); }
+
+    void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
+    void tryRemoveOverArea(Position cellA, Position cellB);
+
 
 
     /* ----------- connections ----------- */
