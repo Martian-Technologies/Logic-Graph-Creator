@@ -22,12 +22,12 @@ public:
     LogicGridWindow(QWidget* parent = nullptr);
 
     // data getter
-    inline float getViewWidth() const { return viewMannager.getViewWidth(); }
-    inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewMannager.getViewWidth(); }
-    inline float getViewToPix() const { return (float)size().width() / viewMannager.getViewWidth(); }
-    inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
-    inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
-    inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
+    // inline float getViewWidth() const { return viewMannager.getViewWidth(); }
+    // inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewMannager.getViewWidth(); }
+    // inline float getViewToPix() const { return (float)size().width() / viewMannager.getViewWidth(); }
+    // inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
+    // inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
+    // inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
     const BlockContainer* getBlockContainer() const {return blockContainer; }
 	
     // data checkers
@@ -61,9 +61,9 @@ protected:
 private:
     // update loop
     float dt;
-    void updateLoop();
-    QTimer* updateLoopTimer;
     bool doUpdate;
+    QTimer* updateLoopTimer;
+    void updateLoop();
 
     // data
     BlockContainer* blockContainer;

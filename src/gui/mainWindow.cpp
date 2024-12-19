@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget* parent)
     setWindowTitle(tr("Logic Graph Creator"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
+	// We have a whole lot of memory leaks that don't matter (but we should probably still fix)
     BlockContainer* blockContainer = new BlockContainer();
 
     blockContainer->tryInsertBlock(Position(0, 0), ZERO, AND);

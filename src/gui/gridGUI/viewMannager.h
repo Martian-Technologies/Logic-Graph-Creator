@@ -3,11 +3,10 @@
 
 class ViewMannager {
 public:
-    ViewMannager(bool usingMouse = true) :
-        speed(200), usingMouse(usingMouse),
-        viewCenterX(0), viewCenterY(0), viewWidth(10),
-        movingLeft(false), movingRight(false), movingUp(false), movingDown(false),
-        doMouseMovement(false) {}
+    ViewMannager(bool usingMouse = true)
+		: usingMouse(usingMouse),
+		  viewCenterX(0), viewCenterY(0), viewWidth(10),
+		  movingLeft(false), movingRight(false), movingUp(false), movingDown(false) {}
 
     inline void pinch(float delta) { viewWidth *= 1 + delta; applyLimits(); }
     void scroll(float dx, float dy, float pixToView);
@@ -32,6 +31,7 @@ private:
 
     // setting
     float speed = 100.0f;
+    bool doMouseMovement = false;
     bool usingMouse;
 
     // view
@@ -44,7 +44,6 @@ private:
     bool movingRight;
     bool movingUp;
     bool movingDown;
-    bool doMouseMovement;
     float lastMouseX;
     float lastMouseY;
 };

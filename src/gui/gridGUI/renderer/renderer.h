@@ -11,10 +11,6 @@
 // probably include its own initalization method.
 
 // placeholder system for submitting sprites, not sure how they will be handled
-// TODO
-// - [ ] Coodinate system conversion
-// - [ ] QT renderer
-// - [ ] Integration with rest of app
 
 
 class Renderer

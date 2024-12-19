@@ -6,6 +6,12 @@
 
 #include "renderer.h"
 
+// TODO
+// - [x] QT renderer
+// - [ ] blockContainer data to renderer
+// - [ ] Coodinate system conversion
+// - [ ] Integration with rest of app
+
 class QTRenderer : Renderer
 {
  public:
