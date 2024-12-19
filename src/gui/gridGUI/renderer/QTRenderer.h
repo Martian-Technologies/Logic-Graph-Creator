@@ -9,9 +9,11 @@
 
 // TODO
 // - [x] QT renderer
-// - [ ] blockContainer data to renderer
-// - [ ] Coodinate system conversion
-// - [ ] Integration with rest of app
+// - [ ] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
+// - [ ] blockContainer data to renderer (placeholder event and internal data structure)
+// - [ ] write rendering logic
+// - [ ] renderer integration with rest of app
+// - [ ] viewmanager loop and event
 
 class QTRenderer : public Renderer
 {
@@ -20,11 +22,12 @@ class QTRenderer : public Renderer
     
 	// general flow
 	void initialize(const std::string& filePath);
-	void render() override;
+    void updateView(ViewMannager* viewManager, int w, int h) override;
 	inline void takePainter(QPainter* painter) { this->painter = painter; }
-	inline void resize(int w, int h) override { this->w = w; this->h = h; }
+	void render() override;
 
 	// submission
+    void resubmitBlockContainer(BlockContainer* blockContainer) override;
 	void submitLine(const std::vector<FPosition>& line, float width) override;
 	void submitSprite(BlockType type, const FPosition& position) override;
 	void submitBlock(BlockType type, const Position& position) override;

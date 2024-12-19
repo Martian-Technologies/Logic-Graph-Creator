@@ -17,6 +17,12 @@ void QTRenderer::initialize(const std::string &filePath)
     }
 }
 
+void QTRenderer::updateView(ViewMannager* viewManager, int w, int h)
+{
+    this->w = w; this->h = h;
+    
+}
+
 void QTRenderer::render()
 {
     // error checking
@@ -25,7 +31,7 @@ void QTRenderer::render()
 		qDebug() << "ERROR: QTRenderer has no painter, cannot proceed with render.";
 		return;
 	}
-    if (!tileMap)
+    if (tileMap.isNull())
     {
         painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileMap found");
         qDebug() << "ERROR: QTRenderer has no tileMap, cnanot proceed with render.";
@@ -40,6 +46,11 @@ void QTRenderer::render()
 	
 	// QT painters only work for one frame
 	painter = nullptr;
+}
+
+void QTRenderer::resubmitBlockContainer(BlockContainer* blockContainer)
+{
+    
 }
 
 void QTRenderer::submitLine(const std::vector<FPosition>& line, float width)
