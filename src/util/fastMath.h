@@ -2,6 +2,7 @@
 #define fastMath_h
 
 #include <cstdint>
+#include <cmath>
 
 template <unsigned int p>
 inline int constexpr IntPower(int x) {
@@ -21,7 +22,11 @@ inline char constexpr signum(T x) {
     return T(0) < x;
 }
 
+#if __APPLE__
 inline float constexpr decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
+#else
+inline float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
+#endif
 
 template <typename T>
 inline int constexpr downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }

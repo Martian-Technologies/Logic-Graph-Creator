@@ -12,6 +12,7 @@ class Effect;
 typedef std::unique_ptr<Effect> EffectUniquePtr;
 
 class Effect {
+    friend LogicGridEffectDisplayer;
 public:
     Effect(int id, int layer) : id(id), layer(layer) {}
     virtual ~Effect() = default;
@@ -22,8 +23,6 @@ public:
     inline int getLayer() const {return layer;}
     virtual void display(QPainter& painter, const LogicGridWindow& data) = 0;
     
-    friend LogicGridEffectDisplayer;
-
 private:
     inline void setLayer(int layer) {this->layer = layer;}
     int id;

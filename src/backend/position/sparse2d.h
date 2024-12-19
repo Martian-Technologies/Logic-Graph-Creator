@@ -15,7 +15,8 @@ public:
     Sparse2d<T>& operator=(const Sparse2d<T>& other)
     T* get(const Position& position);
     const T* get(const Position& position) const;
-    void insert(const Position& position);
+    void insert(const Position& position, const T& value);
+    void remove(const Position& position)
 }
 */
 
@@ -30,6 +31,7 @@ class Sparse2dArray {
 public:
     inline T* get(const Position& position);
 	inline const T* get(const Position& position) const;
+	inline unsigned int size() const {return data.size();}
     
     inline void insert(const Position& position, const T& value);
     inline void remove(const Position& position);

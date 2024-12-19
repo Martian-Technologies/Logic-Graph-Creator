@@ -1,8 +1,8 @@
 #ifndef cellSelectionEffect_h
 #define cellSelectionEffect_h
 
-#include "effect.h"
 #include "../blockRenderer.h"
+#include "effect.h"
 
 class CellSelectionEffect : public Effect {
 public:
