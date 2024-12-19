@@ -12,14 +12,15 @@
 class Action {
     friend class BlockContainerWrapper;
 public:
-    const std::vector<std::tuple<BlockType, Position, Rotation>>& getPlacedBlocks() { return placedBlocks; }
-    const std::vector<std::tuple<BlockType, Position, Rotation>>& getRemovedBlocks() { return removedBlocks; }
+    const std::vector<std::tuple<Position, Rotation, BlockType>>& getPlacedBlocks() { return placedBlocks; }
+    const std::vector<std::tuple<Position, Rotation, BlockType>>& getRemovedBlocks() { return removedBlocks; }
 
 private:
-    void addPlacedBlock(BlockType type, const Position& position, Rotation rotation) { placedBlocks.emplace_back(type, position, rotation); }
-    void addRemovedBlock(BlockType type, const Position& position, Rotation rotation) { placedBlocks.emplace_back(type, position, rotation); }
-    std::vector<std::tuple<BlockType, Position, Rotation>> placedBlocks;
-    std::vector<std::tuple<BlockType, Position, Rotation>> removedBlocks;
+    void addPlacedBlock(const Position& position, Rotation rotation, BlockType type) { placedBlocks.push_back(std::make_tuple(position, rotation, type)); }
+    void addRemovedBlock(const Position& position, Rotation rotation, BlockType type) { removedBlocks.push_back(std::make_tuple(position, rotation, type)); }
+    
+    std::vector<std::tuple<Position, Rotation, BlockType>> placedBlocks;
+    std::vector<std::tuple<Position, Rotation, BlockType>> removedBlocks;
 
 };
 typedef std::shared_ptr<Action> ActionSharedPtr;
@@ -44,25 +45,22 @@ public:
     inline const BlockContainer* getBlockContainer() const { return blockContainer; }
 
     /* ----------- blocks ----------- */
-
     // Trys to insert a block. Returns if successful.
-    inline bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) { return blockContainer->tryInsertBlock(position, rotation, blockType); };
+    bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
     // Trys to remove a block. Returns if successful.
-    inline bool tryRemoveBlock(const Position& position) { return blockContainer->tryRemoveBlock(position); }
+    bool tryRemoveBlock(const Position& position);
     // Trys to move a block. Returns if successful.
-    inline bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation) { return blockContainer->tryMoveBlock(positionOfBlock, position, rotation); }
+    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation);
 
     void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
     void tryRemoveOverArea(Position cellA, Position cellB);
 
 
-
     /* ----------- connections ----------- */
-
     // Trys to creates a connection. Returns if successful.
-    bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition) { return blockContainer->tryCreateConnection(outputPosition, inputPosition); }
+    bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
     // Trys to remove a connection. Returns if successful.
-    bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition) { return blockContainer->tryRemoveConnection(outputPosition, inputPosition); }
+    bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 
 private:
     void sendAction(ActionSharedPtr action) { for (auto pair : listenerFunctions) pair.second(action); }
