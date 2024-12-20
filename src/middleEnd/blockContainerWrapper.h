@@ -8,26 +8,12 @@
 #include <map>
 
 #include "backend/container/blockContainer.h"
-
-class Action {
-    friend class BlockContainerWrapper;
-public:
-    const std::vector<std::tuple<Position, Rotation, BlockType>>& getPlacedBlocks() { return placedBlocks; }
-    const std::vector<std::tuple<Position, Rotation, BlockType>>& getRemovedBlocks() { return removedBlocks; }
-
-private:
-    void addPlacedBlock(const Position& position, Rotation rotation, BlockType type) { placedBlocks.push_back(std::make_tuple(position, rotation, type)); }
-    void addRemovedBlock(const Position& position, Rotation rotation, BlockType type) { removedBlocks.push_back(std::make_tuple(position, rotation, type)); }
-    
-    std::vector<std::tuple<Position, Rotation, BlockType>> placedBlocks;
-    std::vector<std::tuple<Position, Rotation, BlockType>> removedBlocks;
-
-};
-typedef std::shared_ptr<Action> ActionSharedPtr;
+#include "undoSystem.h"
+#include "action.h"
 
 class BlockContainerWrapper {
 public:
-    inline BlockContainerWrapper(BlockContainer* blockContainer) : blockContainer(blockContainer) {
+    inline BlockContainerWrapper(BlockContainer* blockContainer) : blockContainer(blockContainer), listenerFunctions(), undoSystem(), midUndo(false) {
         assert(blockContainer != nullptr);
     }
 
@@ -62,11 +48,18 @@ public:
     // Trys to remove a connection. Returns if successful.
     bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 
+
+    /* ----------- undo ----------- */
+    void undo();
+    void redo();
+
 private:
-    void sendAction(ActionSharedPtr action) { for (auto pair : listenerFunctions) pair.second(action); }
+    void sendAction(ActionSharedPtr action) { if (!midUndo) undoSystem.addAction(action); for (auto pair : listenerFunctions) pair.second(action); }
 
     BlockContainer* blockContainer;
     std::map<void*, ListenerFunction> listenerFunctions;
+    UndoSystem undoSystem;
+    bool midUndo;
 };
 
 #endif /* blockContainerWrapper_h */
