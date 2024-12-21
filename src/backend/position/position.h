@@ -22,6 +22,7 @@ struct Position {
     inline bool operator!=(const Position& other) const { return !operator==(other); }
     inline Position operator+(const Position& position) const { return Position(position.x + x, position.y + y); }
     inline Position operator-(const Position& position) const { return Position(position.x - x, position.y - y); }
+    inline Position operator*(cord_t scalar) const { return Position(x * scalar, y * scalar); }
     inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
     cord_t x, y;
@@ -50,6 +51,7 @@ struct FPosition {
     inline bool operator!=(const FPosition& other) const { return !operator==(other); }
     inline FPosition operator+(const FPosition& position) const { return FPosition(position.x + x, position.y + y); }
     inline FPosition operator-(const FPosition& position) const { return FPosition(position.x - x, position.y - y); }
+    inline FPosition operator*(f_cord_t scalar) const { return FPosition(x * scalar, y * scalar); }
     inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
     f_cord_t x, y;

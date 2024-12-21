@@ -9,32 +9,32 @@
 
 // TODO
 // - [x] QT renderer
-// - [ ] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
+// - [x] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
 // - [ ] blockContainer data to renderer (placeholder event and internal data structure)
 // - [ ] write rendering logic
 // - [ ] renderer integration with rest of app
-// - [ ] viewmanager loop and event
+// - [ ] viewmanager grid cell selection and input loop
 
 class QTRenderer : public Renderer
 {
- public:
+public:
     QTRenderer();
     
-	// general flow
-	void initialize(const std::string& filePath);
+    // general flow
+    void initialize(const std::string& filePath);
     void updateView(ViewMannager* viewManager, int w, int h) override;
-	inline void takePainter(QPainter* painter) { this->painter = painter; }
-	void render() override;
+    inline void takePainter(QPainter* painter) { this->painter = painter; }
+    void render() override;
 
-	// submission
+    // submission
     void resubmitBlockContainer(BlockContainer* blockContainer) override;
-	void submitLine(const std::vector<FPosition>& line, float width) override;
-	void submitSprite(BlockType type, const FPosition& position) override;
-	void submitBlock(BlockType type, const Position& position) override;
+    void submitLine(const std::vector<FPosition>& line, float width) override;
+    void submitSprite(BlockType type, const FPosition& position) override;
+    void submitBlock(BlockType type, const Position& position) override;
     void submitTint(const Position& position, Color c, float a) override;
-	
- private:
-	QPainter* painter;
+    
+private:
+    QPainter* painter;
     
     QPixmap tileMap;
     int w,h;

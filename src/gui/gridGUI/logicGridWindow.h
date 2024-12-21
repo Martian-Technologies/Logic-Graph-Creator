@@ -20,21 +20,11 @@ class LogicGridWindow : public QWidget {
     Q_OBJECT
 public:
     LogicGridWindow(QWidget* parent = nullptr);
-
-    // data getter
-    // inline float getViewWidth() const { return viewMannager.getViewWidth(); }
-    // inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewMannager.getViewWidth(); }
-    // inline float getViewToPix() const { return (float)size().width() / viewMannager.getViewWidth(); }
-    // inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
-    // inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
-    // inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
+    
     const BlockContainer* getBlockContainer() const {return blockContainer; }
 	
     // data checkers
-    Position gridPos(const QPoint& point) const;
-    QPoint windowPos(const Position& point, bool center = false) const;
     inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
-    bool insideWindow(const Position& point) const {return insideWindow(windowPos(point));}
 
     // dont call this func
     void updateSelectedItem();

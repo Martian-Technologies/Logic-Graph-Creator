@@ -1,15 +1,28 @@
 #include <QApplication>
 
 #include "viewMannager.h"
+#include "backend/position/position.h"
 
-void ViewMannager::scroll(float dx, float dy, float pixToView) {
+void ViewMannager::resize(int width, int height)
+{
+    screenWidth = width;
+    screenHeight = height;
+}
+
+void ViewMannager::scroll(float dx, float dy) {
     if (usingMouse) {
-        viewWidth *= 1.f - dy/200.f;
+        viewHeight *= 1.0f - dy/200.0f;
         lastMouseX = 100.f;
     } else {
-        viewCenterX -= dx*pixToView;
-        viewCenterY -= dy*pixToView;
+        viewCenter.x -= dx*getScreenToView();
+        viewCenter.y -= dy*getScreenToView();
     }
+    applyLimits();
+}
+
+void ViewMannager::pinch(float delta)
+{
+    viewHeight *= 1.0f + delta;
     applyLimits();
 }
 
@@ -31,10 +44,13 @@ bool ViewMannager::mouseUp() {
 }
 
 bool ViewMannager::mouseMove(float x, float y) {
+    x *= getScreenToView();
+    y *= getScreenToView();
+    
     if (doMouseMovement) {
-        if (lastMouseX != 100.f) {
-            viewCenterX += lastMouseX - x;
-            viewCenterY += lastMouseY - y;
+        if (lastMouseX != 100.0f) {
+            viewCenter.x += lastMouseX - x;
+            viewCenter.y += lastMouseY - y;
             applyLimits();
         }
         lastMouseX = x;
@@ -92,12 +108,12 @@ bool ViewMannager::release(int key) {
     return false;
 }
 
-bool ViewMannager::update(float dt, float pixToView) {
+bool ViewMannager::update(float dt) {
     if (movingLeft || movingRight || movingUp || movingDown) {
-        if (movingLeft) viewCenterX -= speed * dt * pixToView;
-        if (movingRight) viewCenterX += speed * dt * pixToView;
-        if (movingUp) viewCenterY -= speed * dt * pixToView;
-        if (movingDown) viewCenterY += speed * dt * pixToView;
+        if (movingLeft) viewCenter.x -= speed * dt * getScreenToView();
+        if (movingRight) viewCenter.x += speed * dt * getScreenToView();
+        if (movingUp) viewCenter.y -= speed * dt * getScreenToView();
+        if (movingDown) viewCenter.y += speed * dt * getScreenToView();
         applyLimits();
         return true;
     }
@@ -105,10 +121,18 @@ bool ViewMannager::update(float dt, float pixToView) {
 }
 
 void ViewMannager::applyLimits() {
-    if (viewWidth > 201) viewWidth = 201;
-    if (viewWidth < 0.5f) viewWidth = 0.5f;
-    if (viewCenterX > 10000000) viewCenterX = 10000000;
-    if (viewCenterX < -10000000) viewCenterX = -10000000;
-    if (viewCenterY > 10000000) viewCenterY = 10000000;
-    if (viewCenterY < -10000000) viewCenterY = -10000000;
+    if (viewHeight > 150.0f) viewHeight = 150.0f;
+    if (viewHeight < 0.5f) viewHeight = 0.5f;
+    if (viewCenter.x > 10000000) viewCenter.x = 10000000;
+    if (viewCenter.x < -10000000) viewCenter.x = -10000000;
+    if (viewCenter.y > 10000000) viewCenter.y = 10000000;
+    if (viewCenter.y < -10000000) viewCenter.y = -10000000;
+}
+
+FPosition ViewMannager::viewPos(const FPosition& screenPos) const {
+    return (screenPos - FPosition(screenWidth/2.0f, screenHeight/2.0f)) * getScreenToView() + viewCenter;
+}
+
+FPosition ViewMannager::screenPos(const FPosition& viewPos) const {
+    return (viewPos - viewCenter) * getViewToScreen() + FPosition(screenWidth/2.0f, screenHeight/2.0f);
 }

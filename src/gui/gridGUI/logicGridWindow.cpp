@@ -13,7 +13,7 @@
 LogicGridWindow::LogicGridWindow(QWidget *parent)
     : QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
       blockContainer(nullptr), tool(new SinglePlaceTool()),
-      viewMannager(true), treeWidget(nullptr)
+      viewMannager(true, size().width(), size().height()), treeWidget(nullptr)
 { // change to false for trackPad Control
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
@@ -34,7 +34,7 @@ void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
 
 void LogicGridWindow::updateLoop() {
     Position oldMousePos = gridPos(lastMousePos);
-    if (viewMannager.update(dt, getPixToView())) {
+    if (viewMannager.update(dt)) {
         doUpdate = true;
         if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
             tool->mouseMove(gridPos(lastMousePos));
@@ -44,20 +44,6 @@ void LogicGridWindow::updateLoop() {
         update();
         doUpdate = false;
     }
-}
-
-Position LogicGridWindow::gridPos(const QPoint& point) const {
-    return Position(
-        downwardFloor(point.x() * getPixToView() - getViewWidth() / 2.f + getViewCenterX()),
-        downwardFloor(point.y() * getPixToView() - getViewHeight() / 2.f + getViewCenterY())
-    );
-}
-
-QPoint LogicGridWindow::windowPos(const Position& point, bool center) const {
-    return QPoint(
-        ((float)point.x + getViewWidth() / 2.f - getViewCenterX() + center * 0.5f) * getViewToPix(),
-        ((float)point.y + getViewHeight() / 2.f - getViewCenterY() + center * 0.5f) * getViewToPix()
-    );
 }
 
 void LogicGridWindow::updateSelectedItem() {
@@ -101,6 +87,7 @@ void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
     this->blockContainer = blockContainer;
     if (tool != nullptr) tool->setBlockContainer(blockContainer);
     updateSelectedItem();
+    // update renderer
     doUpdate = true;
 }
 
@@ -136,21 +123,22 @@ bool LogicGridWindow::event(QEvent* event) {
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
 
-	renderer.takePainter(painter);
-	renderer.render();
+    renderer.takePainter(painter);
+    renderer.render();
 
-	//tool->display(painter, *this);
+    //tool->display(painter, *this);
 
-	delete painter;
+    delete painter;
 }
 
 void LogicGridWindow::resizeEvent(QResizeEvent* event)
 {
-	int w = event->size().width();
-	int h = event->size().height();
-	renderer.resize(w, h);
+    int w = event->size().width();
+    int h = event->size().height();
+    viewMannager.resize(w, h);
+    renderer.updateView(&viewMannager, w, h);
 
-	// should probably do the same recalculation shit as all the other events
+    // should probably do the same recalculation shit as all the other events
 }
 
 void LogicGridWindow::wheelEvent(QWheelEvent* event) {
@@ -242,7 +230,7 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
 void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
     QPoint point = event->pos();
     if (insideWindow(point)) { // inside the widget
-        if (viewMannager.mouseMove(point.x() * getPixToView(), point.y() * getPixToView())) {
+        if (viewMannager.mouseMove(point.x(), point.y())) {
             doUpdate = true;
             event->accept();
         } else if (tool != nullptr && tool->mouseMove(gridPos(point))) {
