@@ -1,7 +1,7 @@
-#ifndef action_h
-#define action_h
+#ifndef difference_h
+#define difference_h
 
-class Action {
+class Difference {
     friend class BlockContainerWrapper;
 public:
     const std::vector<std::tuple<Position, Rotation, BlockType>>& getPlacedBlocks() { return placedBlocks; }
@@ -21,6 +21,6 @@ private:
     std::vector<std::pair<Position, Position>> removedConnections;
 
 };
-typedef std::shared_ptr<Action> ActionSharedPtr;
+typedef std::shared_ptr<Difference> DifferenceSharedPtr;
 
-#endif /* action_h */
+#endif /* difference_h */

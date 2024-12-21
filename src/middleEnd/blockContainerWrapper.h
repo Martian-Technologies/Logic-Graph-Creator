@@ -19,7 +19,7 @@ public:
 
     /* ----------- listener ----------- */
 
-    typedef std::function<void(ActionSharedPtr)> ListenerFunction;
+    typedef std::function<void(DifferenceSharedPtr)> ListenerFunction;
 
     // subject to change
     void connectListener(void* object, ListenerFunction func) { listenerFunctions[object] = func; }
@@ -54,7 +54,7 @@ public:
     void redo();
 
 private:
-    void sendAction(ActionSharedPtr action) { if (!midUndo) undoSystem.addAction(action); for (auto pair : listenerFunctions) pair.second(action); }
+    void sendDifference(DifferenceSharedPtr difference) { if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
 
     BlockContainer* blockContainer;
     std::map<void*, ListenerFunction> listenerFunctions;

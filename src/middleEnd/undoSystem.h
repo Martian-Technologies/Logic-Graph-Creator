@@ -7,15 +7,15 @@
 
 class UndoSystem {
 public:
-    inline UndoSystem() : undoPosition(0), actions() {}
+    inline UndoSystem() : undoPosition(0), differences() {}
 
-    inline void addAction(ActionSharedPtr action) { while (undoPosition < actions.size()) actions.pop_back(); ++undoPosition; actions.push_back(action); }
-    inline ActionSharedPtr undoAction() { if (undoPosition == 0) return std::make_shared<Action>(); return actions[--undoPosition]; }
-    inline ActionSharedPtr redoAction() { while (undoPosition == actions.size()) return std::make_shared<Action>(); return actions[undoPosition++];}
+    inline void addDifference(DifferenceSharedPtr difference) { while (undoPosition < differences.size()) differences.pop_back(); ++undoPosition; differences.push_back(difference); }
+    inline DifferenceSharedPtr undoDifference() { if (undoPosition == 0) return std::make_shared<Difference>(); return differences[--undoPosition]; }
+    inline DifferenceSharedPtr redoDifference() { while (undoPosition == differences.size()) return std::make_shared<Difference>(); return differences[undoPosition++];}
 
 private:
     unsigned int undoPosition;
-    std::vector<ActionSharedPtr> actions;
+    std::vector<DifferenceSharedPtr> differences;
 
 };
 
