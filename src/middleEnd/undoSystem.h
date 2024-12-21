@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "action.h"
+#include "difference.h"
 
 class UndoSystem {
 public:

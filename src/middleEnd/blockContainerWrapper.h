@@ -9,7 +9,6 @@
 
 #include "backend/container/blockContainer.h"
 #include "undoSystem.h"
-#include "action.h"
 
 class BlockContainerWrapper {
 public:
