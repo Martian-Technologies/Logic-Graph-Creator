@@ -10,10 +10,10 @@
 // TODO
 // - [x] QT renderer
 // - [x] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
+// - [x] viewmanager grid cell selection and input loop
 // - [ ] blockContainer data to renderer (placeholder event and internal data structure)
 // - [ ] write rendering logic
 // - [ ] renderer integration with rest of app
-// - [ ] viewmanager grid cell selection and input loop
 
 class QTRenderer : public Renderer
 {

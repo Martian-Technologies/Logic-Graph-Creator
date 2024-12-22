@@ -3,24 +3,50 @@
 #include <QtLogging>
 #include <QCursor>
 #include <QTimer>
+#include <functional>
+#include <qnamespace.h>
+#include <qwidget.h>
 
 #include "logicGridWindow.h"
-#include "util/fastMath.h"
+#include "backend/position/position.h"
 #include "tools/singlePlaceTool.h"
 #include "tools/areaPlaceTool.h"
 #include "tools/singleConnectTool.h"
 
+// viewmanager is responsible for saying when the view is changed, which will
+// trigger an update, right now the tool system is not. When the tool system
+// is fed an input, we update. The tool system should work similar to viewMannager
+
 LogicGridWindow::LogicGridWindow(QWidget *parent)
-    : QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
+    : QWidget(parent),
       blockContainer(nullptr), tool(new SinglePlaceTool()),
       viewMannager(true, size().width(), size().height()), treeWidget(nullptr)
-{ // change to false for trackPad Control
+{
+    // QT
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
-    updateLoopTimer = new QTimer(this);
-    connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
-    updateLoopTimer->start(16);
+
+    // ViewManager
+    viewMannager.connectViewChanged(std::bind(&LogicGridWindow::onViewChanged, this));
+    viewMannager.connectHoverChanged(std::bind(&LogicGridWindow::onHoverChanged, this, std::placeholders::_1));
+                                        
+    // Loop
+    keyLoopTimer = new QTimer(this);
+    keyLoopTimer->setInterval((int)(keyInterval * 1000.0f));
+    connect(keyLoopTimer, &QTimer::timeout, this, &LogicGridWindow::keyLoop);
+}
+
+void LogicGridWindow::onViewChanged() {
+    update();
+}
+
+void LogicGridWindow::onHoverChanged(Position hoverPosition)
+{
+    if (tool != nullptr) {
+        tool->mouseMove(hoverPosition);
+        update();
+    }
 }
 
 void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
@@ -32,18 +58,20 @@ void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
     connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
 }
 
-void LogicGridWindow::updateLoop() {
-    Position oldMousePos = gridPos(lastMousePos);
-    if (viewMannager.update(dt)) {
-        doUpdate = true;
-        if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-            tool->mouseMove(gridPos(lastMousePos));
-        }
+void LogicGridWindow::keyLoop()
+{
+    float dx = 0.0f;
+    float dy = 0.0f;
+
+    for (int key : keysPressed)
+    {
+        if (key == Qt::Key_Right) dx += 1.0f;
+        else if (key == Qt::Key_Left) dx -= 1.0f;
+        else if (key == Qt::Key_Up) dy -= 1.0f;
+        else if (key == Qt::Key_Down) dy += 1.0f;
     }
-    if (doUpdate) {
-        update();
-        doUpdate = false;
-    }
+
+    viewMannager.move(dx, dy, keyInterval);
 }
 
 void LogicGridWindow::updateSelectedItem() {
@@ -85,10 +113,13 @@ void LogicGridWindow::updateSelectedItem() {
 
 void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
     this->blockContainer = blockContainer;
+    
     if (tool != nullptr) tool->setBlockContainer(blockContainer);
     updateSelectedItem();
-    // update renderer
-    doUpdate = true;
+    
+    renderer.resubmitBlockContainer(blockContainer);
+
+    update();
 }
 
 // events
@@ -96,24 +127,18 @@ bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
         if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            Position oldMousePos = gridPos(lastMousePos);
-            viewMannager.pinch(1 - nge->value());
-            if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-                tool->mouseMove(gridPos(lastMousePos));
-            }
-            doUpdate = true;
+            
+            if (viewMannager.pinch(1 - nge->value())) event->accept();
+            
             return true;
         }
     } else if (event->type() == QEvent::Gesture) {
         QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
         if (gestureEvent) {
             QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            Position oldMousePos = gridPos(lastMousePos);
-            viewMannager.pinch(1 - pinchGesture->scaleFactor());
-            if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-                tool->mouseMove(gridPos(lastMousePos));
-            }
-            doUpdate = true;
+            
+            if (viewMannager.pinch(1 - pinchGesture->scaleFactor())) event->accept();
+            
             return true;
         }
     }
@@ -146,111 +171,74 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
     if (numPixels.isNull()) numPixels = event->angleDelta() / 120 * /* pixels per step */ 10;
 
     if (!numPixels.isNull()) {
-        float pixToView = getPixToView();
-        Position oldMousePos = gridPos(lastMousePos);
-        viewMannager.scroll(numPixels.x(), numPixels.y(), pixToView);
-        if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-            tool->mouseMove(gridPos(lastMousePos));
-        }
-        event->accept();
-        doUpdate = true;
+        if (viewMannager.scroll(numPixels.x(), numPixels.y())) event->accept();
     }
 }
 
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
-    Position oldMousePos = gridPos(lastMousePos);
-    if (viewMannager.press(event->key())) {
-        if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-            tool->mouseMove(gridPos(lastMousePos));
+    int key = event->key();
+    if (key == Qt::Key_Right || key == Qt::Key_Left || key == Qt::Key_Up || key == Qt::Key_Down)
+    {
+        keysPressed.insert(key);
+
+        if (!keyLoopTimer->isActive())
+        {
+            keyLoop();
+            keyLoopTimer->start();
         }
-        doUpdate = true;
-        event->accept();
-    } else if (tool != nullptr && tool->keyPress(event->key())) {
-        doUpdate = true;
+
         event->accept();
     }
+    else if (viewMannager.press(key)) { event->accept(); }
+    else if (tool != nullptr && tool->keyPress(key)) { event->accept(); update(); }
+    
 }
 
 void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
-    Position oldMousePos = gridPos(lastMousePos);
-    if (viewMannager.release(event->key())) {
-        if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-            tool->mouseMove(gridPos(lastMousePos));
-        }
-        doUpdate = true;
-        event->accept();
-    } else if (tool != nullptr && tool->keyRelease(event->key())) {
-        doUpdate = true;
+    int key = event->key();
+    if (key == Qt::Key_Right || key == Qt::Key_Left || key == Qt::Key_Up || key == Qt::Key_Down)
+    {
+        keysPressed.erase(key);
+
+        if (keysPressed.empty()) { keyLoopTimer->stop(); }
+
         event->accept();
     }
+    else if (viewMannager.release(event->key())) { event->accept(); }
+    else if (tool != nullptr && tool->keyRelease(event->key())) { event->accept(); update(); }
 }
 
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        Position oldMousePos = gridPos(lastMousePos);
-        if (viewMannager.mouseDown()) {
-            if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-                tool->mouseMove(gridPos(lastMousePos));
-            }
-            doUpdate = true;
-            event->accept();
-        } else if (tool != nullptr && tool->leftPress(gridPos(event->pos()))) {
-            doUpdate = true;
-            event->accept();
-        }
+        if (viewMannager.mouseDown()) { event->accept(); }
+        else if (tool != nullptr && tool->leftPress(viewMannager.getHoverPosition())) { event->accept(); update(); }
     } else if (event->button() == Qt::RightButton) {
-        if (tool != nullptr && tool->rightPress(gridPos(event->pos()))) {
-            doUpdate = true;
-            event->accept();
-        }
+        if (tool != nullptr && tool->rightPress(viewMannager.getHoverPosition())) { event->accept(); update(); }
     }
 }
 
 void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        Position oldMousePos = gridPos(lastMousePos);
-        if (viewMannager.mouseUp()) {
-            if (tool != nullptr && gridPos(lastMousePos) != oldMousePos) {
-                tool->mouseMove(gridPos(lastMousePos));
-            }
-            doUpdate = true;
-            event->accept();
-        } else if (tool != nullptr && tool->leftRelease(gridPos(event->pos()))) {
-            doUpdate = true;
-            event->accept();
-        }
+        if (viewMannager.mouseUp()) { event->accept(); }
+        else if (tool != nullptr && tool->leftRelease(viewMannager.getHoverPosition())) { event->accept(); update(); }
     } else if (event->button() == Qt::RightButton) {
-        if (tool != nullptr && tool->rightRelease(gridPos(event->pos()))) {
-            doUpdate = true;
-            event->accept();
-        }
+        if (tool != nullptr && tool->rightRelease(viewMannager.getHoverPosition())) { event->accept(); update(); }
     }
 }
 
 void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
     QPoint point = event->pos();
+    
     if (insideWindow(point)) { // inside the widget
-        if (viewMannager.mouseMove(point.x(), point.y())) {
-            doUpdate = true;
-            event->accept();
-        } else if (tool != nullptr && tool->mouseMove(gridPos(point))) {
-            doUpdate = true;
-            event->accept();
-        }
+        if (viewMannager.mouseMove(FPosition(point.x(), point.y()))) { event->accept(); }
     }
-    lastMousePos = point;
 }
 
 void LogicGridWindow::enterEvent(QEnterEvent* event) {
-    if (tool->enterBlockView(gridPos(mapFromGlobal(QCursor::pos())))) {
-        doUpdate = true;
-    }
-    QWidget::enterEvent(event);
+    QPoint point = mapFromGlobal(QCursor::pos());
+    if (tool->enterBlockView(viewMannager.gridPos(FPosition(point.x(), point.y())))) { event->accept(); update(); }
 }
 
 void LogicGridWindow::leaveEvent(QEvent* event) {
-    if (tool->exitBlockView(gridPos(lastMousePos))) {
-        doUpdate = true;
-    }
-    QWidget::leaveEvent(event);
+    if (tool->exitBlockView(viewMannager.getHoverPosition())) { event->accept(); update(); }
 }

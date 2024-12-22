@@ -7,29 +7,37 @@ void ViewMannager::resize(int width, int height)
 {
     screenWidth = width;
     screenHeight = height;
+
+    processUpdate();
 }
 
-void ViewMannager::scroll(float dx, float dy) {
+bool ViewMannager::scroll(float dx, float dy) {
     if (usingMouse) {
         viewHeight *= 1.0f - dy/200.0f;
-        lastMouseX = 100.f;
     } else {
         viewCenter.x -= dx*getScreenToView();
         viewCenter.y -= dy*getScreenToView();
     }
+
     applyLimits();
+    processUpdate();
+
+    return true;
 }
 
-void ViewMannager::pinch(float delta)
+bool ViewMannager::pinch(float delta)
 {
     viewHeight *= 1.0f + delta;
+
     applyLimits();
+    processUpdate();
+
+    return true;
 }
 
 bool ViewMannager::mouseDown() {
     if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
         doMouseMovement = true;
-        lastMouseX = 100.f;
         return true;
     }
     return false;
@@ -43,81 +51,49 @@ bool ViewMannager::mouseUp() {
     return false;
 }
 
-bool ViewMannager::mouseMove(float x, float y) {
-    x *= getScreenToView();
-    y *= getScreenToView();
+bool ViewMannager::mouseMove(FPosition position) {
+    FPosition oldMousePosition = screenMousePosition;
+    screenMousePosition = position;
     
     if (doMouseMovement) {
-        if (lastMouseX != 100.0f) {
-            viewCenter.x += lastMouseX - x;
-            viewCenter.y += lastMouseY - y;
-            applyLimits();
-        }
-        lastMouseX = x;
-        lastMouseY = y;
+        FPosition diff = (oldMousePosition - screenMousePosition) * getScreenToView();
+        viewCenter += diff;
+
+        applyLimits();
+        processUpdate();
+        
         return true;
     }
-    return false;
+    else
+    {
+        processUpdate(false);
+        return false;
+        
+    }
 }
 
 bool ViewMannager::press(int key) {
     switch (key) {
-    case Qt::Key_Left:
-        movingLeft = true;
-        return true;
-    case Qt::Key_Right:
-        movingRight = true;
-        return true;
-    case Qt::Key_Up:
-        movingUp = true;
-        return true;
-    case Qt::Key_Down:
-        movingDown = true;
-        return true;
+        // check for inputs
     }
     return false;
 }
 
 bool ViewMannager::release(int key) {
     switch (key) {
-    case Qt::Key_Left:
-        if (movingLeft) {
-            movingLeft = false;
-            return true;
-        }
-        break;
-    case Qt::Key_Right:
-        if (movingRight) {
-            movingRight = false;
-            return true;
-        }
-        break;
-    case Qt::Key_Up:
-        if (movingUp) {
-            movingUp = false;
-            return true;
-        }
-        break;
-    case Qt::Key_Down:
-        if (movingDown) {
-            movingDown = false;
-            return true;
-        }
-        break;
+        // check for inputs
     }
+    
     return false;
 }
 
-bool ViewMannager::update(float dt) {
-    if (movingLeft || movingRight || movingUp || movingDown) {
-        if (movingLeft) viewCenter.x -= speed * dt * getScreenToView();
-        if (movingRight) viewCenter.x += speed * dt * getScreenToView();
-        if (movingUp) viewCenter.y -= speed * dt * getScreenToView();
-        if (movingDown) viewCenter.y += speed * dt * getScreenToView();
-        applyLimits();
-        return true;
-    }
-    return false;
+void ViewMannager::move(float dx, float dy, float dt)
+{
+    viewCenter.x += dx * dt;
+    viewCenter.y += dy * dt;
+
+    applyLimits();
+    processUpdate();
 }
 
 void ViewMannager::applyLimits() {
@@ -127,6 +103,19 @@ void ViewMannager::applyLimits() {
     if (viewCenter.x < -10000000) viewCenter.x = -10000000;
     if (viewCenter.y > 10000000) viewCenter.y = 10000000;
     if (viewCenter.y < -10000000) viewCenter.y = -10000000;
+}
+
+void ViewMannager::processUpdate(bool viewChanged) {
+    Position updatedGridPos = gridPos(screenMousePosition);
+    
+    if (updatedGridPos != gridMousePosition)
+    {
+        gridMousePosition = updatedGridPos;
+
+        if (hoverChangedListener) hoverChangedListener(gridMousePosition);
+    }
+    
+    if (viewChanged) viewChangedListener();
 }
 
 FPosition ViewMannager::viewPos(const FPosition& screenPos) const {

@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <qevent.h>
+#include <set>
 
 #include "backend/container/blockContainer.h"
 #include "renderer/QTRenderer.h"
@@ -49,11 +50,14 @@ protected:
     bool event(QEvent* event) override;
 
 private:
+    void onViewChanged();
+    void onHoverChanged(Position hoverPosition);
+    
     // update loop
-    float dt;
-    bool doUpdate;
-    QTimer* updateLoopTimer;
-    void updateLoop();
+    QTimer* keyLoopTimer;
+    std::set<int> keysPressed;
+    float keyInterval = 0.016f;
+    void keyLoop();
 
     // data
     BlockContainer* blockContainer;
