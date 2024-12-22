@@ -62,21 +62,25 @@ bool BlockContainerWrapper::tryRemoveConnection(const Position& outputPosition, 
 }
 
 void BlockContainerWrapper::undo() {
-    midUndo = true;
+    startUndo();
+    DifferenceSharedPtr newDifference = std::make_shared<Difference>();
     DifferenceSharedPtr difference = undoSystem.undoDifference();
-    for (auto removal : difference->getRemovedBlocks()) tryInsertBlock(std::get<0>(removal), std::get<1>(removal), std::get<2>(removal));
-    for (auto placement :   difference->getPlacedBlocks()) tryRemoveBlock(std::get<0>(placement));
-    for (auto connection :  difference->getRemovedConnections()) tryCreateConnection(std::get<0>(connection), std::get<1>(connection));
-    for (auto connection :  difference->getCreatedConnectionss()) tryRemoveConnection(std::get<0>(connection), std::get<1>(connection));
-    midUndo = false;
+    for (auto removal : difference->getRemovedBlocks()) blockContainer->tryInsertBlock(std::get<0>(removal), std::get<1>(removal), std::get<2>(removal), newDifference.get());
+    for (auto placement :   difference->getPlacedBlocks()) blockContainer->tryRemoveBlock(std::get<0>(placement), newDifference.get());
+    for (auto connection :  difference->getRemovedConnections()) blockContainer->tryCreateConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    for (auto connection :  difference->getCreatedConnectionss()) blockContainer->tryRemoveConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    sendDifference(newDifference);
+    endUndo();
 }
 
 void BlockContainerWrapper::redo() {
-    midUndo = true;
+    startUndo();
+    DifferenceSharedPtr newDifference = std::make_shared<Difference>();
     DifferenceSharedPtr difference = undoSystem.redoDifference();
-    for (auto removal : difference->getRemovedBlocks()) tryRemoveBlock(std::get<0>(removal));
-    for (auto placement :   difference->getPlacedBlocks()) tryInsertBlock(std::get<0>(placement), std::get<1>(placement), std::get<2>(placement));
-    for (auto connection :  difference->getRemovedConnections()) tryRemoveConnection(std::get<0>(connection), std::get<1>(connection));
-    for (auto connection :  difference->getCreatedConnectionss()) tryCreateConnection(std::get<0>(connection), std::get<1>(connection));
-    midUndo = false;
+    for (auto removal : difference->getRemovedBlocks()) blockContainer->tryRemoveBlock(std::get<0>(removal), newDifference.get());
+    for (auto placement :   difference->getPlacedBlocks()) blockContainer->tryInsertBlock(std::get<0>(placement), std::get<1>(placement), std::get<2>(placement), newDifference.get());
+    for (auto connection :  difference->getRemovedConnections()) blockContainer->tryRemoveConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    for (auto connection :  difference->getCreatedConnectionss()) blockContainer->tryCreateConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    sendDifference(newDifference);
+    endUndo();
 }

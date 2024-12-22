@@ -53,6 +53,9 @@ public:
     void redo();
 
 private:
+    void startUndo() {midUndo = true;}
+    void endUndo() {midUndo = false;}
+
     void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
 
     BlockContainer* blockContainer;
