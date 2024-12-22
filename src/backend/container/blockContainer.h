@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "../position/sparse2d.h"
+#include "difference.h"
 #include "cell.h"
 
 class BlockContainer {
@@ -28,12 +29,19 @@ public:
     inline unsigned int getBlockCount() const { return blocks.size(); }
 
     // -- setters --
-    // Trys to insert a block. Returns if successful.
+    // Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
-    // Trys to remove a block. Returns if successful.
+    // Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryRemoveBlock(const Position& position);
-    // Trys to move a block. Returns if successful.
+    // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation);
+    // Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
+    bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
+    // Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
+    bool tryRemoveBlock(const Position& position, Difference* difference);
+    // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
+    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation, Difference* difference);
+
 
     /* ----------- connections ----------- */
     // -- getters --
@@ -42,10 +50,14 @@ public:
     const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const;
 
     // -- setters --
-    // Trys to creates a connection. Returns if successful.
+    // Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
-    // Trys to remove a connection. Returns if successful.
+    // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
+    // Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+    bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
+    // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+    bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 
 private:
     inline Block* getBlock(const Position& position);
@@ -54,8 +66,8 @@ private:
     inline void insertCell(const Position& position, Cell cell) { grid.insert(position, cell); }
     inline void removeCell(const Position& position) { grid.remove(position); }
     void placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId);
-    void placeBlockCells(const Block& block);
-    void removeBlockCells(const Position& position, const Block& block);
+    void placeBlockCells(const Block* block);
+    void removeBlockCells(const Block* block);
     block_id_t getNewId() { return ++lastId; }
 
     block_id_t lastId;

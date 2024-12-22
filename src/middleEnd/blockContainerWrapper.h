@@ -13,7 +13,7 @@
 class BlockContainerWrapper {
 public:
     inline BlockContainerWrapper(BlockContainer* blockContainer) : blockContainer(blockContainer), listenerFunctions(), undoSystem(), midUndo(false) {
-        assert(blockContainer != nullptr);
+        assert(blockContainer);
     }
 
     /* ----------- listener ----------- */
@@ -53,7 +53,7 @@ public:
     void redo();
 
 private:
-    void sendDifference(DifferenceSharedPtr difference) { if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
+    void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
 
     BlockContainer* blockContainer;
     std::map<void*, ListenerFunction> listenerFunctions;
