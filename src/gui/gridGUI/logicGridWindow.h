@@ -10,8 +10,8 @@
 #include <QPixmap>
 
 #include "backend/container/blockContainer.h"
-#include "tools/blockContainerTool.h"
 #include "connectionRenderer.h"
+#include "tools/toolManager.h"
 #include "blockRenderer.h"
 #include "gridRenderer.h"
 #include "viewMannager.h"
@@ -75,7 +75,7 @@ private:
     ConnectionRenderer connectionRenderer;
     BlockRenderer blockRenderer;
     GridRenderer gridRenderer;
-    BlockContainerTool* tool;
+    ToolManager toolManager;
     ViewMannager viewMannager;
 
     // ui elements

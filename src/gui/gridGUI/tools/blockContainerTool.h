@@ -2,7 +2,6 @@
 #define blockContainerTool_h
 
 #include <QPainter>
-#include <QColor>
 
 #include "../effects/logicGridEffectDisplayer.h"
 #include "middleEnd/blockContainerWrapper.h"
