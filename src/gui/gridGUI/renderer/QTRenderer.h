@@ -13,7 +13,7 @@
 // - [x] viewmanager grid cell selection and input loop
 // - [ ] blockContainer data to renderer (placeholder event and internal data structure)
 // - [ ] write rendering logic
-// - [ ] renderer integration with rest of app
+// - [ ] connect effects to renderer
 
 class QTRenderer : public Renderer
 {
