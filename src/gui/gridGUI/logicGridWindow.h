@@ -21,19 +21,20 @@ class LogicGridWindow : public QWidget {
     Q_OBJECT
 public:
     LogicGridWindow(QWidget* parent = nullptr);
-    
+
+    // getters
     const BlockContainer* getBlockContainer() const {return blockContainer; }
 	
     // data checkers
     inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
-
-    // dont call this func
-    void updateSelectedItem();
     
-    // setnup
+    // setup
     inline void initializeRenderer(const std::string& filePath) { renderer.initialize(filePath); };
     void setBlockContainer(BlockContainer* blockContainer);
     void setSelector(QTreeWidget* treeWidget);
+
+    // dont call this func
+    void updateSelectedItem();
 
 protected:
     // events
@@ -61,7 +62,6 @@ private:
 
     // data
     BlockContainer* blockContainer;
-    QPoint lastMousePos;
 
     // helper classes
     BlockContainerTool* tool;

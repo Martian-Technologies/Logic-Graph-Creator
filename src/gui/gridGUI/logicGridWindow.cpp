@@ -4,6 +4,7 @@
 #include <QCursor>
 #include <QTimer>
 #include <functional>
+#include <qlogging.h>
 #include <qnamespace.h>
 #include <qwidget.h>
 
@@ -37,8 +38,12 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
     connect(keyLoopTimer, &QTimer::timeout, this, &LogicGridWindow::keyLoop);
 }
 
+// business logic
+
 void LogicGridWindow::onViewChanged() {
     update();
+
+    qDebug() << "view changed";
 }
 
 void LogicGridWindow::onHoverChanged(Position hoverPosition)
@@ -47,15 +52,8 @@ void LogicGridWindow::onHoverChanged(Position hoverPosition)
         tool->mouseMove(hoverPosition);
         update();
     }
-}
 
-void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
-    // disconnect the old tree
-    if (this->treeWidget != nullptr)
-        disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
-    // connect the new tree
-    this->treeWidget = treeWidget;
-    connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+    qDebug() << hoverPosition.toString();
 }
 
 void LogicGridWindow::keyLoop()
@@ -72,6 +70,17 @@ void LogicGridWindow::keyLoop()
     }
 
     viewMannager.move(dx, dy, keyInterval);
+}
+
+// setter functions
+
+void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
+    // disconnect the old tree
+    if (this->treeWidget != nullptr)
+        disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+    // connect the new tree
+    this->treeWidget = treeWidget;
+    connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
 }
 
 void LogicGridWindow::updateSelectedItem() {
@@ -122,7 +131,29 @@ void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
     update();
 }
 
-// events
+// important events
+
+void LogicGridWindow::paintEvent(QPaintEvent* event) {
+    QPainter* painter = new QPainter(this);
+
+    renderer.takePainter(painter);
+    renderer.render();
+
+    //tool->display(painter, *this);
+
+    delete painter;
+}
+
+void LogicGridWindow::resizeEvent(QResizeEvent* event)
+{
+    int w = event->size().width();
+    int h = event->size().height();
+    viewMannager.resize(w, h);
+    renderer.updateView(&viewMannager, w, h);
+}
+
+// input events
+
 bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
@@ -143,27 +174,6 @@ bool LogicGridWindow::event(QEvent* event) {
         }
     }
     return QWidget::event(event);
-}
-
-void LogicGridWindow::paintEvent(QPaintEvent* event) {
-    QPainter* painter = new QPainter(this);
-
-    renderer.takePainter(painter);
-    renderer.render();
-
-    //tool->display(painter, *this);
-
-    delete painter;
-}
-
-void LogicGridWindow::resizeEvent(QResizeEvent* event)
-{
-    int w = event->size().width();
-    int h = event->size().height();
-    viewMannager.resize(w, h);
-    renderer.updateView(&viewMannager, w, h);
-
-    // should probably do the same recalculation shit as all the other events
 }
 
 void LogicGridWindow::wheelEvent(QWheelEvent* event) {

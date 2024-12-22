@@ -8,7 +8,7 @@ void ViewMannager::resize(int width, int height)
     screenWidth = width;
     screenHeight = height;
 
-    processUpdate();
+    processUpdate(false);
 }
 
 bool ViewMannager::scroll(float dx, float dy) {
@@ -121,6 +121,7 @@ void ViewMannager::processUpdate(bool viewChanged) {
 FPosition ViewMannager::viewPos(const FPosition& screenPos) const {
     return (screenPos - FPosition(screenWidth/2.0f, screenHeight/2.0f)) * getScreenToView() + viewCenter;
 }
+
 
 FPosition ViewMannager::screenPos(const FPosition& viewPos) const {
     return (viewPos - viewCenter) * getViewToScreen() + FPosition(screenWidth/2.0f, screenHeight/2.0f);
