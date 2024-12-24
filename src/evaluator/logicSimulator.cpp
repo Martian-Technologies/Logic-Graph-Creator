@@ -11,36 +11,23 @@ LogicSimulator::LogicSimulator(int numGates)
     gateTypes(),
     gateInputs(),
     gateOutputs(),
-    gateInputsUpdated() {
+    currentGateInputsUpdated(),
+    nextGateInputsUpdated() {
 
     currentState.reserve(numGates);
     nextState.reserve(numGates);
     gateTypes.reserve(numGates);
     gateInputs.reserve(numGates);
     gateOutputs.reserve(numGates);
-    gateInputsUpdated.reserve(numGates);
-
-    for (int i = 0; i < numGates; ++i) {
-        currentState.emplace_back(LogicState::LOW);
-        nextState.emplace_back(LogicState::LOW);
-        gateTypes.emplace_back(); // Assumes GateType has a default constructor
-        gateInputs.emplace_back();
-        gateOutputs.emplace_back();
-        gateInputsUpdated.emplace_back(false);
-    }
+    currentGateInputsUpdated.reserve(numGates);
+    nextGateInputsUpdated.reserve(numGates);
 }
 
 void LogicSimulator::initialize() {
     std::fill(currentState.begin(), currentState.end(), LogicState::LOW);
     std::fill(nextState.begin(), nextState.end(), LogicState::LOW);
-
-    for (auto& inputs : gateInputs)
-        inputs.clear();
-
-    for (auto& outputs : gateOutputs)
-        outputs.clear();
-
-    std::fill(gateInputsUpdated.begin(), gateInputsUpdated.end(), false);
+    std::fill(currentGateInputsUpdated.begin(), currentGateInputsUpdated.end(), true);
+    numGates = currentState.size();
 }
 
 int LogicSimulator::addGate(const GateType& gateType) {
@@ -49,7 +36,8 @@ int LogicSimulator::addGate(const GateType& gateType) {
     nextState.emplace_back(LogicState::LOW);
     gateInputs.emplace_back();
     gateOutputs.emplace_back();
-    gateInputsUpdated.emplace_back(false);
+    currentGateInputsUpdated.emplace_back(true);
+    nextGateInputsUpdated.emplace_back(true);
     ++numGates;
     return numGates - 1;
 }
@@ -62,11 +50,11 @@ void LogicSimulator::connectGates(int gate1, int gate2) {
 
     gateOutputs[gate1].push_back(gate2);
     gateInputs[gate2].push_back(gate1);
-    gateInputsUpdated[gate2] = true;
 }
 
 void LogicSimulator::swapStates() {
     std::swap(currentState, nextState);
+    std::swap(currentGateInputsUpdated, nextGateInputsUpdated);
 }
 
 void LogicSimulator::computeNextState(const std::vector<int>& gates) {
@@ -77,8 +65,11 @@ void LogicSimulator::computeNextState(const std::vector<int>& gates) {
         // we don't do in-bounds checks because we are cool like that
 
         // skip the gate if the inputs have not changed
-        if (!gateInputsUpdated[gate]) {
+        if (!currentGateInputsUpdated[gate]) {
             nextState[gate] = currentState[gate];
+            for (int output : gateOutputs[gate]) {
+                nextGateInputsUpdated[output] = false;
+            }
             continue;
         }
 
@@ -92,6 +83,16 @@ void LogicSimulator::computeNextState(const std::vector<int>& gates) {
             }
         }
 
-        nextState[gate] = computeGateState(type, inputCount, numInputs, currentState[gate]);
+        LogicState newState = computeGateState(type, inputCount, numInputs, currentState[gate]);
+
+        if (newState != currentState[gate]) {
+            for (int output : gateOutputs[gate]) {
+                nextGateInputsUpdated[output] = true;
+            }
+        }
+        else {
+            currentGateInputsUpdated[gate] = false; // this will put the gate to sleep after 2 updates
+        }
+        nextState[gate] = newState;
     }
 }

@@ -18,6 +18,9 @@ public:
     void computeNextState(const std::vector<int>& gates);
     void swapStates();
 
+    LogicState getState(int gate) const { return currentState[gate]; }
+    bool willUpdate(int gate) const { return currentGateInputsUpdated[gate]; }
+
 private:
     int numGates;
     std::vector<LogicState> currentState;
@@ -25,7 +28,8 @@ private:
     std::vector<GateType> gateTypes;
     std::vector<std::vector<uint32_t>> gateInputs;
     std::vector<std::vector<uint32_t>> gateOutputs;
-    std::vector<bool> gateInputsUpdated;
+    std::vector<bool> currentGateInputsUpdated;
+    std::vector<bool> nextGateInputsUpdated;
 };
 
 #endif // logicSimulator_h

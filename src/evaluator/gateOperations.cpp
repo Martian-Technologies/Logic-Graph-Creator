@@ -3,6 +3,9 @@
 #include <stdexcept>
 
 LogicState computeGateState(GateType type, unsigned int inputCount, unsigned int numInputs, LogicState currentState) {
+    if (numInputs == 0) {
+        return LogicState::LOW;
+    }
     switch (type) {
     case GateType::NONE:
         throw std::invalid_argument("Gate type cannot be NONE");
