@@ -9,14 +9,14 @@ public:
         BlockContainerTool(blockContainer), rotation(ZERO), clickPosition(), click('n') {}
 
     inline void reset() override final {click = 'n';}
-    bool leftPress(const Position& pos) override final;
-    bool rightPress(const Position& pos) override final;
-    bool leftRelease(const Position& pos) override final;
-    bool rightRelease(const Position& pos) override final;
-    bool mouseMove(const Position& pos) override final;
-    bool enterBlockView(const Position& pos) override final;
-    bool exitBlockView(const Position& pos) override final;
-    bool keyPress(int keyId) override final;
+    bool leftPress(const Position& pos);
+    bool rightPress(const Position& pos);
+    bool leftRelease(const Position& pos);
+    bool rightRelease(const Position& pos);
+    bool mouseMove(const Position& pos);
+    bool enterBlockView(const Position& pos);
+    bool exitBlockView(const Position& pos);
+    bool keyPress(int keyId);
 
 private:
     Rotation rotation;

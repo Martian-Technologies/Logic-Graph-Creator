@@ -1,4 +1,4 @@
-#include "../effects/cellSelectionEffect.h"
+#include "../../gridGUI/effects/cellSelectionEffect.h"
 #include "areaPlaceTool.h"
 // #include <iostream> // needed for stat print
 
