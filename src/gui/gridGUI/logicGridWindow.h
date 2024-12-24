@@ -55,10 +55,10 @@ private:
     void onHoverChanged(Position hoverPosition);
     
     // update loop
-    QTimer* keyLoopTimer;
+    QTimer* updateLoopTimer;
     std::set<int> keysPressed;
-    float keyInterval = 0.016f;
-    void keyLoop();
+    float updateInterval = 0.016f;
+    void updateLoop();
 
     // data
     BlockContainer* blockContainer;

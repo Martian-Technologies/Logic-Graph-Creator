@@ -33,34 +33,31 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
     viewMannager.connectHoverChanged(std::bind(&LogicGridWindow::onHoverChanged, this, std::placeholders::_1));
                                         
     // Loop
-    keyLoopTimer = new QTimer(this);
-    keyLoopTimer->setInterval((int)(keyInterval * 1000.0f));
-    connect(keyLoopTimer, &QTimer::timeout, this, &LogicGridWindow::keyLoop);
+    updateLoopTimer = new QTimer(this);
+    updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
+    connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 }
 
 // business logic
 
 void LogicGridWindow::onViewChanged() {
-    update();
-
-    qDebug() << "view changed";
+    renderer.updateView(&viewMannager);
 }
 
 void LogicGridWindow::onHoverChanged(Position hoverPosition)
 {
     if (tool != nullptr) {
         tool->mouseMove(hoverPosition);
-        update();
     }
 
     qDebug() << hoverPosition.toString();
 }
 
-void LogicGridWindow::keyLoop()
+void LogicGridWindow::updateLoop()
 {
+    // held key input
     float dx = 0.0f;
     float dy = 0.0f;
-
     for (int key : keysPressed)
     {
         if (key == Qt::Key_Right) dx += 1.0f;
@@ -68,8 +65,10 @@ void LogicGridWindow::keyLoop()
         else if (key == Qt::Key_Up) dy -= 1.0f;
         else if (key == Qt::Key_Down) dy += 1.0f;
     }
+    viewMannager.move(dx, dy, updateInterval);
 
-    viewMannager.move(dx, dy, keyInterval);
+    // update for re-render
+    update();
 }
 
 // setter functions
@@ -126,18 +125,14 @@ void LogicGridWindow::setBlockContainer(BlockContainer* blockContainer) {
     if (tool != nullptr) tool->setBlockContainer(blockContainer);
     updateSelectedItem();
     
-    renderer.resubmitBlockContainer(blockContainer);
-
-    update();
+    renderer.setBlockContainer(blockContainer);
 }
 
 // important events
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
-
-    renderer.takePainter(painter);
-    renderer.render();
+    renderer.render(painter);
 
     //tool->display(painter, *this);
 
@@ -148,8 +143,9 @@ void LogicGridWindow::resizeEvent(QResizeEvent* event)
 {
     int w = event->size().width();
     int h = event->size().height();
+    
+    renderer.resize(w, h);
     viewMannager.resize(w, h);
-    renderer.updateView(&viewMannager, w, h);
 }
 
 // input events
@@ -191,16 +187,16 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
     {
         keysPressed.insert(key);
 
-        if (!keyLoopTimer->isActive())
+        if (!updateLoopTimer->isActive())
         {
-            keyLoop();
-            keyLoopTimer->start();
+            updateLoop();
+            updateLoopTimer->start();
         }
 
         event->accept();
     }
     else if (viewMannager.press(key)) { event->accept(); }
-    else if (tool != nullptr && tool->keyPress(key)) { event->accept(); update(); }
+    else if (tool != nullptr && tool->keyPress(key)) { event->accept(); }
     
 }
 
@@ -210,29 +206,29 @@ void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
     {
         keysPressed.erase(key);
 
-        if (keysPressed.empty()) { keyLoopTimer->stop(); }
+        if (keysPressed.empty()) { updateLoopTimer->stop(); }
 
         event->accept();
     }
     else if (viewMannager.release(event->key())) { event->accept(); }
-    else if (tool != nullptr && tool->keyRelease(event->key())) { event->accept(); update(); }
+    else if (tool != nullptr && tool->keyRelease(event->key())) { event->accept(); }
 }
 
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         if (viewMannager.mouseDown()) { event->accept(); }
-        else if (tool != nullptr && tool->leftPress(viewMannager.getHoverPosition())) { event->accept(); update(); }
+        else if (tool != nullptr && tool->leftPress(viewMannager.getHoverPosition())) { event->accept(); }
     } else if (event->button() == Qt::RightButton) {
-        if (tool != nullptr && tool->rightPress(viewMannager.getHoverPosition())) { event->accept(); update(); }
+        if (tool != nullptr && tool->rightPress(viewMannager.getHoverPosition())) { event->accept(); }
     }
 }
 
 void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         if (viewMannager.mouseUp()) { event->accept(); }
-        else if (tool != nullptr && tool->leftRelease(viewMannager.getHoverPosition())) { event->accept(); update(); }
+        else if (tool != nullptr && tool->leftRelease(viewMannager.getHoverPosition())) { event->accept(); }
     } else if (event->button() == Qt::RightButton) {
-        if (tool != nullptr && tool->rightRelease(viewMannager.getHoverPosition())) { event->accept(); update(); }
+        if (tool != nullptr && tool->rightRelease(viewMannager.getHoverPosition())) { event->accept(); }
     }
 }
 
@@ -246,9 +242,11 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
 
 void LogicGridWindow::enterEvent(QEnterEvent* event) {
     QPoint point = mapFromGlobal(QCursor::pos());
-    if (tool->enterBlockView(viewMannager.gridPos(FPosition(point.x(), point.y())))) { event->accept(); update(); }
+    viewMannager.mouseEnterView();
+    if (tool->enterBlockView(viewMannager.gridPos(FPosition(point.x(), point.y())))) { event->accept(); }
 }
 
 void LogicGridWindow::leaveEvent(QEvent* event) {
-    if (tool->exitBlockView(viewMannager.getHoverPosition())) { event->accept(); update(); }
+    viewMannager.mouseExitView();
+    if (tool->exitBlockView(viewMannager.getHoverPosition())) { event->accept(); }
 }

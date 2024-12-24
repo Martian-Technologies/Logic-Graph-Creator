@@ -72,6 +72,14 @@ bool ViewMannager::mouseMove(FPosition position) {
     }
 }
 
+void ViewMannager::mouseEnterView() {
+    mouseInView = true;
+}
+
+void ViewMannager::mouseExitView() {
+    mouseInView = false;
+}
+
 bool ViewMannager::press(int key) {
     switch (key) {
         // check for inputs
@@ -106,13 +114,15 @@ void ViewMannager::applyLimits() {
 }
 
 void ViewMannager::processUpdate(bool viewChanged) {
-    Position updatedGridPos = gridPos(screenMousePosition);
-    
-    if (updatedGridPos != gridMousePosition)
+    if (mouseInView)
     {
-        gridMousePosition = updatedGridPos;
+        Position updatedGridPos = gridPos(screenMousePosition);    
+        if (updatedGridPos != gridMousePosition)
+        {
+            gridMousePosition = updatedGridPos;
 
-        if (hoverChangedListener) hoverChangedListener(gridMousePosition);
+            if (hoverChangedListener) hoverChangedListener(gridMousePosition);
+        }
     }
     
     if (viewChanged) viewChangedListener();

@@ -15,6 +15,8 @@
 // - [ ] write rendering logic
 // - [ ] connect effects to renderer
 
+// This QT renderer is not designed well. The renderer interface is designed to be implemented 
+
 class QTRenderer : public Renderer
 {
 public:
@@ -22,22 +24,36 @@ public:
     
     // general flow
     void initialize(const std::string& filePath);
-    void updateView(ViewMannager* viewManager, int w, int h) override;
-    inline void takePainter(QPainter* painter) { this->painter = painter; }
-    void render() override;
+    void resize(int w, int h);
+    void render(QPainter* painter);
 
-    // submission
-    void resubmitBlockContainer(BlockContainer* blockContainer) override;
-    void submitLine(const std::vector<FPosition>& line, float width) override;
-    void submitSprite(BlockType type, const FPosition& position) override;
-    void submitBlock(BlockType type, const Position& position) override;
-    void submitTint(const Position& position, Color c, float a) override;
+    // updating
+    void setBlockContainer(BlockContainer* blockContainer) override;
+    // virtual void setSimulator(Simulator* simulator) override;
+    
+    void updateView(ViewMannager* viewManager) override;
+    // virtual void updateBlockContainer(Difference diff) override;
+
+    // effects
+    LineID addLine(const std::vector<FPosition>& positions, float width) override;
+    void updateLinePosition(LineID line, int index, FPosition position) override;
+    void updateLinePositions(LineID line, std::vector<FPosition>& positions) override;
+    void updateLineWidth(LineID line, float width) override;
+    void removeLine(LineID line) override;
+
+    TintID addTint(Position position, Color color) override;
+    TintID addTint(FPosition start, float width, float height, Color color) override;
+    void updateTintColor(TintID tint, Color color) override;
+    void updateTintRect(Position start, float width, float height) override;
+    void removeTint(TintID tint) override;
+
+    void addConfetti(FPosition start) override;
     
 private:
-    QPainter* painter;
-    
-    QPixmap tileMap;
     int w,h;
+
+    BlockContainer* blockContainer; // renderers should usually not retain a pointer to block
+    QPixmap tileMap;
 };                
 
 #endif // QTRenderer_h

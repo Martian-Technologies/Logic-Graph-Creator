@@ -13,7 +13,7 @@ public:
     ViewMannager(bool usingMouse, int screenW, int screenH)
 		: usingMouse(usingMouse),
           screenHeight(screenH), screenWidth(screenW),
-		  viewCenter(0.0f,0.0f), viewHeight(8.0f),
+		  viewCenter(0.0f,0.0f), viewHeight(8.0f), mouseInView(false),
           screenMousePosition(0.0f, 0.0f), gridMousePosition(0, 0) {}
 
     // input events, returning true if the event is accepted (all take in screen space values)
@@ -25,6 +25,9 @@ public:
     bool press(int key);
     bool release(int key);
     void move(float dx, float dy, float dt);
+    void mouseEnterView();
+    void mouseExitView();
+    
 
     // screen ----
     void resize(int width, int height);
@@ -62,6 +65,7 @@ private:
     float speed = 100.0f;
     bool doMouseMovement = false;
     bool usingMouse;
+    bool mouseInView;
 
     // view
     FPosition viewCenter;

@@ -2,7 +2,7 @@
 #include <qdebug.h>
 
 QTRenderer::QTRenderer()
-    : w(0), h(0)
+    : w(0), h(0), blockContainer(nullptr)
 {
 }
 
@@ -17,20 +17,15 @@ void QTRenderer::initialize(const std::string &filePath)
     }
 }
 
-void QTRenderer::updateView(ViewMannager* viewManager, int w, int h)
+void QTRenderer::resize(int w, int h)
 {
-    this->w = w; this->h = h;
-    
+    this->w = w;
+    this->h = h;
 }
 
-void QTRenderer::render()
+void QTRenderer::render(QPainter* painter)
 {
     // error checking
-    if (!painter)
-    {
-        qDebug() << "ERROR: QTRenderer has no painter, cannot proceed with render.";
-        return;
-    }
     if (tileMap.isNull())
     {
         painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileMap found");
@@ -43,32 +38,73 @@ void QTRenderer::render()
     // render sprites
     // render tints
     // render lines
-    
-    // QT painters only work for one frame
-    painter = nullptr;
 }
 
-void QTRenderer::resubmitBlockContainer(BlockContainer* blockContainer)
+void QTRenderer::setBlockContainer(BlockContainer* blockContainer)
+{
+    this->blockContainer = blockContainer;
+}
+
+void QTRenderer::updateView(ViewMannager* viewManager)
 {
     
 }
 
-void QTRenderer::submitLine(const std::vector<FPosition>& line, float width)
+// effects -----------------------------
+// line
+LineID QTRenderer::addLine(const std::vector<FPosition>& positions, float width)
 {
     
 }
 
-void QTRenderer::submitSprite(BlockType type, const FPosition& position)
+void QTRenderer::updateLinePosition(LineID line, int index, FPosition position)
 {
     
 }
 
-void QTRenderer::submitBlock(BlockType type, const Position& position)
+void QTRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions)
 {
     
 }
 
-void QTRenderer::submitTint(const Position &position, Color c, float a)
+void QTRenderer::updateLineWidth(LineID line, float width)
+{
+    
+}
+
+void QTRenderer::removeLine(LineID line)
+{
+    
+}
+
+// tint
+TintID QTRenderer::addTint(Position position, Color color)
+{
+    
+}
+
+TintID QTRenderer::addTint(FPosition start, float width, float height, Color color)
+{
+    
+}
+
+void QTRenderer::updateTintColor(TintID tint, Color color)
+{
+    
+}
+
+void QTRenderer::updateTintRect(Position start, float width, float height)
+{
+    
+}
+
+void QTRenderer::removeTint(TintID tint)
+{
+    
+}
+
+// confetti
+void QTRenderer::addConfetti(FPosition start)
 {
     
 }
