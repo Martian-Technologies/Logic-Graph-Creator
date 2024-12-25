@@ -2,9 +2,11 @@
 #define toolManager_h
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "../../events/eventRegister.h"
+#include "toolManagerEventRegister.h"
 #include "blockContainerTool.h"
 #include "singleConnectTool.h"
 #include "singlePlaceTool.h"
@@ -14,7 +16,7 @@ class ToolManager {
 public:
     inline ToolManager(EventRegister* eventRegister) :
         blockContainerWrapper(nullptr), eventRegister(eventRegister), registeredEvents(),
-        tool(nullptr), selectedBlock(NONE), toolType("NONE") {}
+        tool(nullptr), selectedBlock(NONE), toolType("NONE"), toolManagerEventRegister(eventRegister, &registeredEvents) {}
 
     inline ~ToolManager() {
         unregisterEvents();
@@ -29,6 +31,7 @@ public:
         else tool = nullptr;
 
         if (tool) {
+            tool->initialize(toolManagerEventRegister);
             tool->selectBlock(selectedBlock);
             this->toolType = toolType;
         } else {
@@ -57,12 +60,14 @@ private:
         registeredEvents.clear();
     }
 
+
     // current block container
     BlockContainerWrapper* blockContainerWrapper;
 
     // tool function event linking
+    ToolManagerEventRegister toolManagerEventRegister;
     EventRegister* eventRegister;
-    std::vector<std::pair<Event, EventFunction<void>>> registeredEvents;
+    std::vector<std::pair<Event, EventRegistrationSignature>> registeredEvents;
 
     // which tool data
     std::unique_ptr<BlockContainerTool> tool;

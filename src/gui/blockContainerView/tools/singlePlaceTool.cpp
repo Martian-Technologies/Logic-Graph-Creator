@@ -2,11 +2,12 @@
 
 #include <Qt>
 
-#include "singlePlaceTool.h"
 #include "../../gridGUI/effects/cellSelectionEffect.h"
+#include "singlePlaceTool.h"
 
-bool SinglePlaceTool::startPlaceBlock(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::startPlaceBlock(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'p';
@@ -25,8 +26,9 @@ bool SinglePlaceTool::startPlaceBlock(const PositionEvent& positionEvent) {
     return false;
 }
 
-bool SinglePlaceTool::stopPlaceBlock(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::stopPlaceBlock(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     // this logic is to allow holding right then left then releasing left and it to start deleting
     switch (clicks[0]) {
     case 'n':
@@ -49,8 +51,9 @@ bool SinglePlaceTool::stopPlaceBlock(const PositionEvent& positionEvent) {
     return false;
 }
 
-bool SinglePlaceTool::startDeleteBlocks(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::startDeleteBlocks(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'r';
@@ -69,8 +72,9 @@ bool SinglePlaceTool::startDeleteBlocks(const PositionEvent& positionEvent) {
     return false;
 }
 
-bool SinglePlaceTool::stopDeleteBlocks(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::stopDeleteBlocks(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     // this logic is to allow holding left then right then releasing right and it to start placing
     switch (clicks[0]) {
     case 'n':
@@ -93,8 +97,9 @@ bool SinglePlaceTool::stopDeleteBlocks(const PositionEvent& positionEvent) {
     return false;
 }
 
-bool SinglePlaceTool::mouseMove(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::pointerMove(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     bool returnVal = false; // used to make sure it updates the effect
 
     if (effectDisplayer.hasEffect(0)) {
@@ -123,28 +128,30 @@ bool SinglePlaceTool::mouseMove(const PositionEvent& positionEvent) {
     return returnVal;
 }
 
-bool SinglePlaceTool::enterBlockView(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::enterBlockView(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     if (effectDisplayer.hasEffect(0)) return false;
     effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent.getPosition()));
     return true;
 }
 
-bool SinglePlaceTool::exitBlockView(const PositionEvent& positionEvent) {
+bool SinglePlaceTool::exitBlockView(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     if (!effectDisplayer.hasEffect(0)) return false;
     effectDisplayer.removeEffect(0);
     return true;
 }
 
-bool SinglePlaceTool::keyPress(int keyId) {
-    if (keyId == Qt::Key_Q) {
-        rotation = rotate(rotation, false);
-        return true;
-    }
-    if (keyId == Qt::Key_E) {
-        rotation = rotate(rotation, true);
-        return true;
-    }
-    return false;
-}
+// bool SinglePlaceTool::keyPress(int keyId) {
+//     if (keyId == Qt::Key_Q) {
+//         rotation = rotate(rotation, false);
+//         return true;
+//     }
+//     if (keyId == Qt::Key_E) {
+//         rotation = rotate(rotation, true);
+//         return true;
+//     }
+//     return false;
+// }

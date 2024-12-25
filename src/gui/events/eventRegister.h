@@ -1,61 +1,65 @@
 #ifndef eventRegister_h
 #define eventRegister_h
 
-#include <type_traits>
+#include <functional>
 #include <algorithm>
 #include <vector>
 #include <map>
 
 #include "event.h"
 
-template <typename EventType>
-using EventFunction = bool (*)(const EventType* event);
+typedef std::function<bool(const Event& event)> EventFunction;
+typedef unsigned long long EventRegistrationSignature;
 
 class EventRegister {
 public:
-    template<class EventType>
-    void registerFunction(const Event& event, EventFunction<EventType> function) {
+    EventRegister() : sigCounter(0), allEventFunctions() {}
+
+    EventRegistrationSignature registerFunction(const Event& event, EventFunction function) {
         auto iter = std::find_if(
             allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<EventFunction<void>>>& i) { return i.first == event; }
+            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
         );
-
+        auto sigCounter = getNewRegistrationSignature();
         if (iter != allEventFunctions.end())
-            iter->second.push_back(reinterpret_cast<EventFunction<void>>(function));
+            iter->second.push_back({sigCounter, function});
         else
-            allEventFunctions.push_back({ event, {reinterpret_cast<EventFunction<void>>(function)} });
+            allEventFunctions.push_back({ event, {{sigCounter, function}} });
+        return sigCounter;
     }
 
-    template<class EventType>
-    void unregisterFunction(const Event& event, EventFunction<EventType> function) {
+    void unregisterFunction(const Event& event, EventRegistrationSignature signature) {
         auto iter = std::find_if(
             allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<EventFunction<void>>>& i) { return i.first == event; }
+            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
         );
-        auto funcIter = find(iter->second.begin(), iter->second.end(), function);
+        auto funcIter =  std::find_if(
+            iter->second.begin(), iter->second.end(),
+            [&signature](const std::pair<EventRegistrationSignature, EventFunction>& i) { return i.first == signature; }
+        );
         if (funcIter != iter->second.end()) {
             *funcIter = iter->second.back();
             iter->second.pop_back();
         }
     }
 
-    template<class EventType>
-    bool doEvent(const EventType& event) {
+    bool doEvent(const Event& event) {
         auto iter = std::find_if(
             allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<EventFunction<void>>>& i) { return i.first == (const Event)event; }
+            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
         );
         if (iter == allEventFunctions.end()) return false;
         bool used = false;
-        for (EventFunction<void>& func : iter->second) {
-
-            auto function = reinterpret_cast<EventFunction<EventType>>(func);
-            if (function(&event)) used = true;
+        for (std::pair<EventRegistrationSignature, EventFunction>& function : iter->second) {
+            if (function.second(event)) used = true;
         }
         return used;
     }
 private:
-    std::vector<std::pair<Event, std::vector<EventFunction<void>>>> allEventFunctions;
+    EventRegistrationSignature sigCounter;
+    inline EventRegistrationSignature getNewRegistrationSignature() {return ++sigCounter;}
+
+    std::vector<std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>> allEventFunctions;
 };
 
 #endif /* eventRegister_h */
