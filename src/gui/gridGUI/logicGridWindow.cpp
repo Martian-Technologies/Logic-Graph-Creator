@@ -39,6 +39,7 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
     // Loop
     updateLoopTimer = new QTimer(this);
     updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
+    updateLoopTimer->start();
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
     // Renderer
@@ -51,8 +52,6 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
 void LogicGridWindow::onViewChanged() {
     tool->mouseMove(viewMannager.getPointerPosition().snap());
     renderer.updateView(&viewMannager);
-
-    qDebug() << "view changed: " << viewMannager.getViewCenter().snap().toString();
 }
 
 void LogicGridWindow::updateLoop()
@@ -189,12 +188,6 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
     {
         keysPressed.insert(key);
 
-        if (!updateLoopTimer->isActive())
-        {
-            updateLoop();
-            updateLoopTimer->start();
-        }
-
         event->accept();
     }
     else if (viewMannager.press(key)) { event->accept(); }
@@ -207,8 +200,6 @@ void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
     if (key == Qt::Key_Right || key == Qt::Key_Left || key == Qt::Key_Up || key == Qt::Key_Down)
     {
         keysPressed.erase(key);
-
-        if (keysPressed.empty()) { updateLoopTimer->stop(); }
 
         event->accept();
     }

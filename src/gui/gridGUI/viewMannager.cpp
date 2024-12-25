@@ -109,3 +109,12 @@ void ViewMannager::applyLimits() {
     if (viewCenter.y > 10000000) viewCenter.y = 10000000;
     if (viewCenter.y < -10000000) viewCenter.y = -10000000;
 }
+
+std::pair<float, float> ViewMannager::gridToView(FPosition position) const
+{
+    position -= viewCenter;
+    position += FPosition(getViewWidth() / 2.0f, getViewHeight() / 2.0f);
+    position.x /= getViewWidth();
+    position.y /= getViewHeight();
+    return { position.x, position.y };
+}

@@ -5,6 +5,7 @@
 #include <qpainter.h>
 #include <qpixmap.h>
 
+#include "gui/gridGUI/viewMannager.h"
 #include "renderer.h"
 
 // TODO
@@ -14,8 +15,6 @@
 // - [ ] blockContainer data to renderer (placeholder event and internal data structure)
 // - [ ] write rendering logic
 // - [ ] connect effects to renderer
-
-// This QT renderer is not designed well. The renderer interface is designed to be implemented 
 
 class QTRenderer : public Renderer
 {
@@ -52,7 +51,8 @@ public:
 private:
     int w,h;
 
-    BlockContainer* blockContainer; // renderers should usually not retain a pointer to block
+    BlockContainer* blockContainer; // renderers should usually not retain a pointer to blockContainer
+    ViewMannager* viewManager; // or viewManager
     QPixmap tileMap;
 };                
 

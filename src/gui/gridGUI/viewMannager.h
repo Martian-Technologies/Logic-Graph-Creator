@@ -40,6 +40,7 @@ public:
     
     // coordinate system conversion
     inline FPosition viewToGrid(float viewX, float viewY) const { return getTopLeft() + FPosition(getViewWidth() * viewX, getViewHeight() * viewY); }
+    std::pair<float, float> gridToView(FPosition position) const; // temporary until matrix
     // glm::mat4 getViewMatrix() const;
     // glm::mat4 getPerspectiveMatrix() const;
 
@@ -51,7 +52,7 @@ private:
     inline void emitViewChanged() { if (viewChangedListener) viewChangedListener(); }
 
     // setting
-    float moveSpeed = 100.0f;
+    float moveSpeed = 5.0f;
     bool scrollZoom;
 
     // pointer

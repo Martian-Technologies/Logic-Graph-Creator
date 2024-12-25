@@ -1,5 +1,8 @@
 #include "QTRenderer.h"
+#include <qbrush.h>
 #include <qdebug.h>
+#include <qlogging.h>
+#include <qpainter.h>
 
 QTRenderer::QTRenderer()
     : w(0), h(0), blockContainer(nullptr)
@@ -32,7 +35,13 @@ void QTRenderer::render(QPainter* painter)
         qDebug() << "ERROR: QTRenderer has no tileMap, cnanot proceed with render.";
         return;
     }
+    
+    std::pair<float,float> viewPos = viewManager->gridToView({0.0f, 0.0f});
+    painter->drawEllipse(QPoint(viewPos.first * w, viewPos.second * h), 10, 10);
 
+    std::pair<float,float> viewPos2 = viewManager->gridToView({0.0f, 3.0f});
+    painter->drawEllipse(QPoint(viewPos2.first * w, viewPos2.second * h), 10, 10);
+    
     // render grid
     // render blocks
     // render sprites
@@ -47,14 +56,14 @@ void QTRenderer::setBlockContainer(BlockContainer* blockContainer)
 
 void QTRenderer::updateView(ViewMannager* viewManager)
 {
-    
+    this->viewManager = viewManager;
 }
 
 // effects -----------------------------
 // line
 LineID QTRenderer::addLine(const std::vector<FPosition>& positions, float width)
 {
-    
+    return 0;
 }
 
 void QTRenderer::updateLinePosition(LineID line, int index, FPosition position)
@@ -80,12 +89,12 @@ void QTRenderer::removeLine(LineID line)
 // tint
 TintID QTRenderer::addTint(Position position, Color color)
 {
-    
+    return 0;
 }
 
 TintID QTRenderer::addTint(FPosition start, float width, float height, Color color)
 {
-    
+    return 0;
 }
 
 void QTRenderer::updateTintColor(TintID tint, Color color)
