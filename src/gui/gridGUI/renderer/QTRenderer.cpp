@@ -41,6 +41,9 @@ void QTRenderer::render(QPainter* painter)
 
     std::pair<float,float> viewPos2 = viewManager->gridToView({0.0f, 3.0f});
     painter->drawEllipse(QPoint(viewPos2.first * w, viewPos2.second * h), 10, 10);
+
+    std::pair<float,float> viewPos3 = viewManager->gridToView({2.0f, 1.5f});
+    painter->drawEllipse(QPoint(viewPos3.first * w, viewPos3.second * h), 10, 10);
     
     // render grid
     // render blocks

@@ -52,7 +52,7 @@ private:
     inline void emitViewChanged() { if (viewChangedListener) viewChangedListener(); }
 
     // setting
-    float moveSpeed = 5.0f;
+    float moveSpeed = 1.0f;
     bool scrollZoom;
 
     // pointer
