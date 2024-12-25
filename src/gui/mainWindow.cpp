@@ -22,7 +22,6 @@ MainWindow::MainWindow(QWidget* parent)
     blockContainer->tryCreateConnection(Position(0, 0), Position(2, 0));
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->initializeRenderer(":logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainer);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 

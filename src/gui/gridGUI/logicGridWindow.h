@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <qevent.h>
+#include <qvectornd.h>
 #include <set>
 
 #include "backend/container/blockContainer.h"
@@ -29,7 +30,6 @@ public:
     inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
     
     // setup
-    inline void initializeRenderer(const std::string& filePath) { renderer.initialize(filePath); };
     void setBlockContainer(BlockContainer* blockContainer);
     void setSelector(QTreeWidget* treeWidget);
 
@@ -53,6 +53,8 @@ protected:
 private:
     void onViewChanged();
     void onHoverChanged(Position hoverPosition);
+
+    QVector2D pixelsToView(QPoint point);
     
     // update loop
     QTimer* updateLoopTimer;

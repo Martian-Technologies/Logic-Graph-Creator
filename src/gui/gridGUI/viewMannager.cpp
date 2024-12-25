@@ -1,26 +1,19 @@
 #include <QApplication>
+#include <qlogging.h>
 
 #include "viewMannager.h"
 #include "backend/position/position.h"
 
-void ViewMannager::resize(int width, int height)
-{
-    screenWidth = width;
-    screenHeight = height;
-
-    processUpdate(false);
-}
-
 bool ViewMannager::scroll(float dx, float dy) {
-    if (usingMouse) {
+    if (scrollZoom) {
         viewHeight *= 1.0f - dy/200.0f;
     } else {
-        viewCenter.x -= dx*getScreenToView();
-        viewCenter.y -= dy*getScreenToView();
+        viewCenter.x -= dx;
+        viewCenter.y -= dy;
     }
 
     applyLimits();
-    processUpdate();
+    emitViewChanged();
 
     return true;
 }
@@ -30,54 +23,46 @@ bool ViewMannager::pinch(float delta)
     viewHeight *= 1.0f + delta;
 
     applyLimits();
-    processUpdate();
+    emitViewChanged();
 
     return true;
 }
 
-bool ViewMannager::mouseDown() {
+bool ViewMannager::pointerDown() {
     if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
-        doMouseMovement = true;
+        doPointerMovement = true;
         return true;
     }
     return false;
 }
 
-bool ViewMannager::mouseUp() {
-    if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier) && doMouseMovement) {
-        doMouseMovement = false;
+bool ViewMannager::pointerUp() {
+    if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier) && doPointerMovement) {
+        doPointerMovement = false;
         return true;
     }
     return false;
 }
 
-bool ViewMannager::mouseMove(FPosition position) {
-    FPosition oldMousePosition = screenMousePosition;
-    screenMousePosition = position;
+bool ViewMannager::pointerMove(float viewX, float viewY) {
+    if (!pointerActive) return false;
     
-    if (doMouseMovement) {
-        FPosition diff = (oldMousePosition - screenMousePosition) * getScreenToView();
-        viewCenter += diff;
+    float pointerDiffX = pointerViewX - viewX;
+    float pointerDiffY = pointerViewY - viewY;
+    pointerViewX = viewX;
+    pointerViewY = viewY;
+    
+    if (doPointerMovement) {
+        viewCenter.x += pointerDiffX * getViewWidth();
+        viewCenter.y += pointerDiffY * getViewHeight();
 
         applyLimits();
-        processUpdate();
+        emitViewChanged();
         
         return true;
     }
-    else
-    {
-        processUpdate(false);
-        return false;
-        
-    }
-}
-
-void ViewMannager::mouseEnterView() {
-    mouseInView = true;
-}
-
-void ViewMannager::mouseExitView() {
-    mouseInView = false;
+    
+    return false;
 }
 
 bool ViewMannager::press(int key) {
@@ -95,13 +80,25 @@ bool ViewMannager::release(int key) {
     return false;
 }
 
-void ViewMannager::move(float dx, float dy, float dt)
+void ViewMannager::keyMove(float dirX, float dirY, float dt)
 {
-    viewCenter.x += dx * dt;
-    viewCenter.y += dy * dt;
+    viewCenter.x += dirX * moveSpeed * dt;
+    viewCenter.y += dirY * moveSpeed * dt;
 
     applyLimits();
-    processUpdate();
+    emitViewChanged();
+}
+
+void ViewMannager::pointerEnterView(float viewX, float viewY) {
+    pointerActive = true;
+
+    pointerMove(viewX, viewY);
+}
+
+void ViewMannager::pointerExitView(float viewX, float viewY) {
+    pointerActive = false;
+
+    pointerMove(viewX, viewY);
 }
 
 void ViewMannager::applyLimits() {
@@ -111,28 +108,4 @@ void ViewMannager::applyLimits() {
     if (viewCenter.x < -10000000) viewCenter.x = -10000000;
     if (viewCenter.y > 10000000) viewCenter.y = 10000000;
     if (viewCenter.y < -10000000) viewCenter.y = -10000000;
-}
-
-void ViewMannager::processUpdate(bool viewChanged) {
-    if (mouseInView)
-    {
-        Position updatedGridPos = gridPos(screenMousePosition);    
-        if (updatedGridPos != gridMousePosition)
-        {
-            gridMousePosition = updatedGridPos;
-
-            if (hoverChangedListener) hoverChangedListener(gridMousePosition);
-        }
-    }
-    
-    if (viewChanged) viewChangedListener();
-}
-
-FPosition ViewMannager::viewPos(const FPosition& screenPos) const {
-    return (screenPos - FPosition(screenWidth/2.0f, screenHeight/2.0f)) * getScreenToView() + viewCenter;
-}
-
-
-FPosition ViewMannager::screenPos(const FPosition& viewPos) const {
-    return (viewPos - viewCenter) * getViewToScreen() + FPosition(screenWidth/2.0f, screenHeight/2.0f);
 }
