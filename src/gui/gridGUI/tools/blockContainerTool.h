@@ -2,18 +2,17 @@
 #define blockContainerTool_h
 
 #include <QPainter>
-#include <QColor>
 
 #include "../effects/logicGridEffectDisplayer.h"
-#include "backend/container/blockContainer.h"
+#include "middleEnd/blockContainerWrapper.h"
 class LogicGridWindow;
 
 
 class BlockContainerTool {
 public:
-    inline BlockContainerTool(BlockContainer* blockContainer = nullptr) : blockContainer(blockContainer), selectedBlock(NONE), effectDisplayer() {}
+    inline BlockContainerTool(BlockContainerWrapper* blockContainer = nullptr) : blockContainer(blockContainer), selectedBlock(NONE), effectDisplayer() {}
     // This will also tell the tool to reset.
-    inline void setBlockContainer(BlockContainer* blockContainer) {this->blockContainer = blockContainer; reset();}
+    inline void setBlockContainer(BlockContainerWrapper* blockContainer) {this->blockContainer = blockContainer; reset();}
     inline void selectBlock(BlockType selectedBlock) {this->selectedBlock = selectedBlock;}
     inline BlockType getSelectedBlock() const {return selectedBlock;}
     inline void display(QPainter& painter, const LogicGridWindow& gridWindow) {effectDisplayer.display(painter, gridWindow);}
@@ -30,7 +29,7 @@ public:
     virtual bool keyRelease(int keyId) {return false;}
 
 protected:
-    BlockContainer* blockContainer;
+    BlockContainerWrapper* blockContainer;
     BlockType selectedBlock;
     LogicGridEffectDisplayer effectDisplayer;
 };

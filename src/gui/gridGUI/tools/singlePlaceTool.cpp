@@ -10,14 +10,14 @@ bool SinglePlaceTool::leftPress(const Position& pos) {
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'p';
-        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, getBlockClass(selectedBlock));
+        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
         return true;
     case 'p':
         return false;
     case 'r':
         if (clicks[1] == 'n') {
             clicks[1] = 'p';
-            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, getBlockClass(selectedBlock));
+            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
             return true;
         }
         return false;
@@ -107,7 +107,7 @@ bool SinglePlaceTool::mouseMove(const Position& pos) {
         return returnVal;
     case 'r':
         if (clicks[1] == 'p') {
-            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, getBlockClass(selectedBlock));
+            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
             return selectedBlock != NONE;
         }
         blockContainer->tryRemoveBlock(pos);
@@ -117,7 +117,7 @@ bool SinglePlaceTool::mouseMove(const Position& pos) {
             blockContainer->tryRemoveBlock(pos);
             return true;
         }
-        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, getBlockClass(selectedBlock));
+        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
         return selectedBlock != NONE;
     }
     return returnVal;

@@ -1,4 +1,3 @@
-#include "backend/container/blockContainerEditor.h"
 #include "../effects/cellSelectionEffect.h"
 #include "areaPlaceTool.h"
 // #include <iostream> // needed for stat print
@@ -11,7 +10,7 @@ bool AreaPlaceTool::leftPress(const Position& pos) {
             clickPosition = pos;
             return true;
         case 'c':
-            BlockContainerEditor::tryInsertOverArea(*blockContainer, clickPosition, pos, rotation, selectedBlock);
+            blockContainer->tryInsertOverArea(clickPosition, pos, rotation, selectedBlock);
             if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
             effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
             click = 'n';
@@ -38,7 +37,7 @@ bool AreaPlaceTool::rightPress(const Position& pos) {
             clickPosition = pos;
             return true;
         case 'c':
-            BlockContainerEditor::tryRemoveOverArea(*blockContainer, clickPosition, pos);
+            blockContainer->tryRemoveOverArea(clickPosition, pos);
             if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
             effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
             click = 'n';

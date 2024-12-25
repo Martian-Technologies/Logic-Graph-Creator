@@ -63,9 +63,31 @@ inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type
     return getOutputConnectionId(type, relativePos);
 }
 
+inline std::pair<Position, bool> getConnectionPosition(BlockType type, connection_end_id_t connectionId) {
+    switch (type) {
+    default:
+        if (connectionId < 2) return { Position(0, 0), true };
+        return { Position(), false };
+    }
+}
+
+inline std::pair<Position, bool> getConnectionPosition(BlockType type, Rotation rotation, connection_end_id_t connectionId) {
+    if (isRotated(rotation)) {
+        return getConnectionPosition(type, connectionId);
+    }
+    return getConnectionPosition(type, connectionId);
+}
+
 inline connection_end_id_t getMaxConnectionId(BlockType type) {
     switch (type) {
     default: return 1;
+    }
+}
+
+inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) {
+    switch (type) {
+    default:
+        return connectionId == 0;
     }
 }
 
@@ -105,6 +127,12 @@ public:
     inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Position& position) const {
         return withinBlock(position) ? ::getOutputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
     }
+    inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) {
+        auto output = ::getConnectionPosition(type(), getRotation(), connectionId);
+        output.first += getPosition();
+        return output;
+    }
+    inline bool isConnectionInput(connection_end_id_t connectionId) { return ::isConnectionInput(type(), connectionId); }
 
 protected:
     inline void destroy() {}

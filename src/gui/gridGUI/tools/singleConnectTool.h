@@ -5,7 +5,7 @@
 
 class SingleConnectTool : public BlockContainerTool {
 public:
-    inline SingleConnectTool(BlockContainer* blockContainer = nullptr) :
+    inline SingleConnectTool(BlockContainerWrapper* blockContainer = nullptr) :
         BlockContainerTool(blockContainer), clickPosition(), clicked(false) {}
 
     inline void reset() override final {clicked = false;}
