@@ -37,6 +37,7 @@ public:
     inline FPosition getTopLeft() const { return viewCenter - FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
     inline FPosition getBottomRight() const { return viewCenter + FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
     inline FPosition getPointerPosition() const { return viewToGrid(pointerViewX, pointerViewY); }
+    inline float getAspectRatio() const { return aspectRatio; }
     
     // coordinate system conversion
     inline FPosition viewToGrid(float viewX, float viewY) const { return getTopLeft() + FPosition(getViewWidth() * viewX, getViewHeight() * viewY); }

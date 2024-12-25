@@ -1,4 +1,5 @@
 #include "QTRenderer.h"
+#include "backend/position/position.h"
 #include <qbrush.h>
 #include <qdebug.h>
 #include <qlogging.h>
@@ -35,7 +36,8 @@ void QTRenderer::render(QPainter* painter)
         qDebug() << "ERROR: QTRenderer has no tileMap, cnanot proceed with render.";
         return;
     }
-    
+
+    // test grid points
     std::pair<float,float> viewPos = viewManager->gridToView({0.0f, 0.0f});
     painter->drawEllipse(QPoint(viewPos.first * w, viewPos.second * h), 10, 10);
 
@@ -44,6 +46,12 @@ void QTRenderer::render(QPainter* painter)
 
     std::pair<float,float> viewPos3 = viewManager->gridToView({2.0f, 1.5f});
     painter->drawEllipse(QPoint(viewPos3.first * w, viewPos3.second * h), 10, 10);
+
+    // test bounds
+    std::pair<float,float> topLeft = viewManager->gridToView(viewManager->getTopLeft());
+    std::pair<float,float> bottomRight = viewManager->gridToView(viewManager->getBottomRight());
+    painter->drawEllipse(QPoint(topLeft.first * w, topLeft.second * h), 10, 10);
+    painter->drawEllipse(QPoint(bottomRight.first * w, bottomRight.second * h), 10, 10);
     
     // render grid
     // render blocks

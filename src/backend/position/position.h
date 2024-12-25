@@ -20,8 +20,8 @@ struct Position {
 	FPosition free() const;
     inline bool operator==(const Position& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Position& other) const { return !operator==(other); }
-    inline Position operator+(const Position& position) const { return Position(position.x + x, position.y + y); }
-    inline Position operator-(const Position& position) const { return Position(position.x - x, position.y - y); }
+    inline Position operator+(const Position& position) const { return Position(x + position.x, y + position.y); }
+    inline Position operator-(const Position& position) const { return Position(x - position.x, y - position.y); }
     inline Position operator*(cord_t scalar) const { return Position(x * scalar, y * scalar); }
     inline Position& operator+=(const Position& position) { x += position.x; y += position.y; return *this; }
     inline Position& operator-=(const Position& position) { x -= position.x; y -= position.y; return *this; }
@@ -52,8 +52,8 @@ struct FPosition {
 	Position snap() const;
     inline bool operator==(const FPosition& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const FPosition& other) const { return !operator==(other); }
-    inline FPosition operator+(const FPosition& position) const { return FPosition(position.x + x, position.y + y); }
-    inline FPosition operator-(const FPosition& position) const { return FPosition(position.x - x, position.y - y); }
+    inline FPosition operator+(const FPosition& position) const { return FPosition(x + position.x, y + position.y); }
+    inline FPosition operator-(const FPosition& position) const { return FPosition(x - position.x, y - position.y); }
     inline FPosition operator*(f_cord_t scalar) const { return FPosition(x * scalar, y * scalar); }
     inline FPosition& operator+=(const FPosition& position) { x += position.x; y += position.y; return *this; }
     inline FPosition& operator-=(const FPosition& position) { x -= position.x; y -= position.y; return *this; }
