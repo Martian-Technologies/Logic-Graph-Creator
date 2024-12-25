@@ -4,6 +4,8 @@
 #include <qdebug.h>
 #include <qlogging.h>
 #include <qpainter.h>
+#include <qpoint.h>
+#include <qsize.h>
 
 QTRenderer::QTRenderer()
     : w(0), h(0), blockContainer(nullptr)
@@ -37,23 +39,37 @@ void QTRenderer::render(QPainter* painter)
         return;
     }
 
-    // test grid points
-    std::pair<float,float> viewPos = viewManager->gridToView({0.0f, 0.0f});
-    painter->drawEllipse(QPoint(viewPos.first * w, viewPos.second * h), 10, 10);
+    // helper lambda
+    auto gridToQt = [&](FPosition position) -> QPoint {
+        std::pair<float,float> viewPos = viewManager->gridToView(position);
+        return QPoint(viewPos.first * w, viewPos.second * h);
+    };
 
-    std::pair<float,float> viewPos2 = viewManager->gridToView({0.0f, 3.0f});
-    painter->drawEllipse(QPoint(viewPos2.first * w, viewPos2.second * h), 10, 10);
-
-    std::pair<float,float> viewPos3 = viewManager->gridToView({2.0f, 1.5f});
-    painter->drawEllipse(QPoint(viewPos3.first * w, viewPos3.second * h), 10, 10);
-
-    // test bounds
-    std::pair<float,float> topLeft = viewManager->gridToView(viewManager->getTopLeft());
-    std::pair<float,float> bottomRight = viewManager->gridToView(viewManager->getBottomRight());
-    painter->drawEllipse(QPoint(topLeft.first * w, topLeft.second * h), 10, 10);
-    painter->drawEllipse(QPoint(bottomRight.first * w, bottomRight.second * h), 10, 10);
+    // get bounds
+    Position topLeft = viewManager->getTopLeft().snap();
+    Position bottomRight = viewManager->getBottomRight().snap();
     
     // render grid
+    for (int c = topLeft.x; c <= bottomRight.x; ++c)
+    {
+        for (int r = topLeft.y; r <= bottomRight.y; ++r)
+        {
+            QPoint point = gridToQt(FPosition(c, r));
+            QPoint pointBR = gridToQt(FPosition(c+1, r+1));
+
+            QRectF gridTileRect(QPointF(0.0f,0.0f),QSizeF(32.0f,32.0f));
+            
+            painter->drawPixmap(QRectF(point, pointBR),
+                                tileMap,
+                                gridTileRect);
+        }
+    }
+
+    // test grid points
+    painter->drawEllipse(gridToQt({0.0f, 0.0f}), 10, 10);
+    painter->drawEllipse(gridToQt({0.0f, 3.0f}), 10, 10);
+    painter->drawEllipse(gridToQt({2.0f, 1.5f}), 10, 10);
+    
     // render blocks
     // render sprites
     // render tints
