@@ -7,29 +7,29 @@
 #include "../connection/connectionContainer.h"
 #include "../defs.h"
 
-inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
+constexpr void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
     if (isRotated(rotation)) std::swap(width, height);
 }
 
-inline block_size_t getBlockWidth(BlockType type) noexcept {
+constexpr block_size_t getBlockWidth(BlockType type) noexcept {
     // add if not 1
     switch (type) {
     default: return 1;
     }
 }
 
-inline block_size_t getBlockHeight(BlockType type) noexcept {
+constexpr block_size_t getBlockHeight(BlockType type) noexcept {
     // add if not 1
     switch (type) {
     default: return 1;
     }
 }
 
-inline block_size_t getBlockWidth(BlockType type, Rotation rotation) noexcept {
+constexpr block_size_t getBlockWidth(BlockType type, Rotation rotation) noexcept {
     return isRotated(rotation) ? getBlockHeight(type) : getBlockWidth(type);
 }
 
-inline block_size_t getBlockHeight(BlockType type, Rotation rotation) noexcept {
+constexpr block_size_t getBlockHeight(BlockType type, Rotation rotation) noexcept {
     return isRotated(rotation) ? getBlockWidth(type) : getBlockHeight(type);
 }
 
@@ -78,13 +78,13 @@ inline std::pair<Position, bool> getConnectionPosition(BlockType type, Rotation 
     return getConnectionPosition(type, connectionId);
 }
 
-inline connection_end_id_t getMaxConnectionId(BlockType type) {
+constexpr connection_end_id_t getMaxConnectionId(BlockType type) {
     switch (type) {
     default: return 1;
     }
 }
 
-inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) {
+constexpr bool isConnectionInput(BlockType type, connection_end_id_t connectionId) {
     switch (type) {
     default:
         return connectionId == 0;
