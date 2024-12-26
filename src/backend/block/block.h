@@ -112,7 +112,7 @@ public:
 
     inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 
-    inline const ConnectionContainer& getConnectionContainer() const { return ((Block*)this)->getConnectionContainer(); }
+    inline const ConnectionContainer& getConnectionContainer() const { return connections; }
     inline const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const {
         auto [connectionId, success] = getInputConnectionId(position);
         return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();

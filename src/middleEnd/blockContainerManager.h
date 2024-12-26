@@ -10,21 +10,28 @@ class BlockContainerManager {
 public:
     BlockContainerManager() : lastId(0), blockContainers() {}
 
-    std::shared_ptr<BlockContainerWrapper> getContainer(block_container_wrapper_id_t id) {
+    inline std::shared_ptr<BlockContainerWrapper> getContainer(block_container_wrapper_id_t id) {
         auto iter = blockContainers.find(id);
         if (iter == blockContainers.end()) return nullptr;
         return iter->second;
     }
-    const std::shared_ptr<BlockContainerWrapper> getContainer(block_container_wrapper_id_t id) const {
+    inline const std::shared_ptr<BlockContainerWrapper> getContainer(block_container_wrapper_id_t id) const {
         auto iter = blockContainers.find(id);
         if (iter == blockContainers.end()) return nullptr;
         return iter->second;
     }
 
-    block_container_wrapper_id_t createNewContainer() {
+    inline block_container_wrapper_id_t createNewContainer() {
         blockContainers.emplace(getNewContainerId(), std::make_shared<BlockContainerWrapper>(getLastCreatedContainerId()));
         return getLastCreatedContainerId();
     }
+    inline void destroyContainer(block_container_wrapper_id_t id) {
+        auto iter = blockContainers.find(id);
+        if (iter != blockContainers.end()) {
+            blockContainers.erase(iter);
+        }
+    }
+
 
 private:
     block_container_wrapper_id_t getNewContainerId() { return ++lastId; }
