@@ -9,9 +9,8 @@
 #include <QWidget>
 #include <QPixmap>
 
-#include "backend/container/blockContainer.h"
+#include "../blockContainerView/blockContainerView.h"
 #include "connectionRenderer.h"
-#include "tools/toolManager.h"
 #include "blockRenderer.h"
 #include "gridRenderer.h"
 #include "viewMannager.h"
@@ -68,6 +67,7 @@ private:
     bool doUpdate;
 
     // data
+    BlockContainerView blockContainerView;
     BlockContainerWrapper* blockContainer;
     QPoint lastMousePos;
 
@@ -75,7 +75,6 @@ private:
     ConnectionRenderer connectionRenderer;
     BlockRenderer blockRenderer;
     GridRenderer gridRenderer;
-    ToolManager toolManager;
     ViewMannager viewMannager;
 
     // ui elements

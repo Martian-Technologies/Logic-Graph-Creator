@@ -2,20 +2,21 @@
 
 #include <Qt>
 
+#include "../../gridGUI/effects/cellSelectionEffect.h"
 #include "singleConnectTool.h"
-#include "../effects/cellSelectionEffect.h"
 
-bool SingleConnectTool::leftPress(const Position& pos) {
+bool SingleConnectTool::makeConnection(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     if (clicked) {
-        if (!blockContainer->tryRemoveConnection(clickPosition, pos)) {
-            blockContainer->tryCreateConnection(clickPosition, pos);
+        if (!blockContainer->tryRemoveConnection(clickPosition, positionEvent.getPosition())) {
+            blockContainer->tryCreateConnection(clickPosition, positionEvent.getPosition());
         }
         reset();
         return true;
     }
     clicked = true;
-    clickPosition = pos;
+    clickPosition = positionEvent.getPosition();
     return true;
     // switch (clicks[0]) {
     // case 'n':
@@ -35,7 +36,7 @@ bool SingleConnectTool::leftPress(const Position& pos) {
     return false;
 }
 
-bool SingleConnectTool::rightPress(const Position& pos) {
+bool SingleConnectTool::cancelConnection(const Event& event) {
     if (clicked) {
         reset();
         return true;
@@ -60,7 +61,7 @@ bool SingleConnectTool::rightPress(const Position& pos) {
     // return false;
 }
 
-bool SingleConnectTool::mouseMove(const Position& pos) {
+bool SingleConnectTool::pointerMove(const Event& event) {
     if (!blockContainer) return false;
     return false;
     // bool returnVal = false; // used to make sure it updates the effect
@@ -69,7 +70,7 @@ bool SingleConnectTool::mouseMove(const Position& pos) {
     //     effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
     //     returnVal = true;
     // }
-    
+
     // switch (clicks[0]) {
     // case 'n':
     //     return returnVal;
@@ -91,14 +92,14 @@ bool SingleConnectTool::mouseMove(const Position& pos) {
     // return returnVal;
 }
 
-bool SingleConnectTool::enterBlockView(const Position& pos) {
+bool SingleConnectTool::enterBlockView(const Event& event) {
     if (!blockContainer) return false;
     // if (effectDisplayer.hasEffect(0)) return false;
     // effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
     return true;
 }
 
-bool SingleConnectTool::exitBlockView(const Position& pos) {
+bool SingleConnectTool::exitBlockView(const Event& event) {
     if (!blockContainer) return false;
     // if (!effectDisplayer.hasEffect(0)) return false;
     // effectDisplayer.removeEffect(0);
