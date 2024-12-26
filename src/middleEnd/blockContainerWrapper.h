@@ -10,11 +10,14 @@
 #include "backend/container/blockContainer.h"
 #include "undoSystem.h"
 
+typedef unsigned int block_container_wrapper_id_t;
+
 class BlockContainerWrapper {
 public:
-    inline BlockContainerWrapper(BlockContainer* blockContainer) : blockContainer(blockContainer), listenerFunctions(), undoSystem(), midUndo(false) {
-        assert(blockContainer);
-    }
+    inline BlockContainerWrapper(block_container_wrapper_id_t containerId) : containerId(containerId), blockContainer(), listenerFunctions(), undoSystem(), midUndo(false) {}
+
+    block_container_wrapper_id_t getContainerId() const { return containerId; }
+
 
     /* ----------- listener ----------- */
 
@@ -27,7 +30,8 @@ public:
 
 
     // allows accese to BlockContainer getters
-    inline const BlockContainer* getBlockContainer() const { return blockContainer; }
+    inline const BlockContainer* getBlockContainer() const { return &blockContainer; }
+
 
     /* ----------- blocks ----------- */
     // Trys to insert a block. Returns if successful.
@@ -53,12 +57,13 @@ public:
     void redo();
 
 private:
-    void startUndo() {midUndo = true;}
-    void endUndo() {midUndo = false;}
+    void startUndo() { midUndo = true; }
+    void endUndo() { midUndo = false; }
 
     void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
 
-    BlockContainer* blockContainer;
+    block_container_wrapper_id_t containerId;
+    BlockContainer blockContainer;
     std::map<void*, ListenerFunction> listenerFunctions;
     UndoSystem undoSystem;
     bool midUndo;

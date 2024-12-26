@@ -1,21 +1,19 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 
-#include "middleEnd/blockContainerWrapper.h"
 #include "gridGUI/logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-	
-    ui->setupUi(this);
-	
-    setWindowTitle(tr("Logic Graph Creator"));
-	setWindowIcon(QIcon(":/gateIcon.ico"));
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager() {
 
-    BlockContainer* blockContainer = new BlockContainer();
-    BlockContainerWrapper* blockContainerWrapper = new BlockContainerWrapper(blockContainer);
+    ui->setupUi(this);
+
+    setWindowTitle(tr("Logic Graph Creator"));
+    setWindowIcon(QIcon(":/gateIcon.ico"));
+
+    block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
+    BlockContainerWrapper* blockContainerWrapper = blockContainerManager.getContainer(id);
 
     // blockContainerWrapper->tryInsertBlock(Position(0, 0), ZERO, AND);
     // blockContainerWrapper->tryInsertBlock(Position(2, 0), ZERO, AND);

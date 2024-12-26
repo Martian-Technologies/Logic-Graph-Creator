@@ -5,6 +5,8 @@
 #include <QMainWindow>
 #include <QWidget>
 
+#include "middleEnd/blockContainerManager.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -17,6 +19,7 @@ public:
 private:
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
+    BlockContainerManager blockContainerManager;
 };
 
 #endif /* mainWindow_h */
