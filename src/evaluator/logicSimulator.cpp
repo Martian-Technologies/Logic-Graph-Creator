@@ -4,30 +4,20 @@
 #include <stdexcept>
 #include <algorithm>
 
-LogicSimulator::LogicSimulator(int numGates)
-    : numGates(numGates),
-    currentState(),
+LogicSimulator::LogicSimulator()
+    :currentState(),
     nextState(),
     gateTypes(),
     gateInputs(),
     gateOutputs(),
     currentGateInputsUpdated(),
     nextGateInputsUpdated() {
-
-    currentState.reserve(numGates);
-    nextState.reserve(numGates);
-    gateTypes.reserve(numGates);
-    gateInputs.reserve(numGates);
-    gateOutputs.reserve(numGates);
-    currentGateInputsUpdated.reserve(numGates);
-    nextGateInputsUpdated.reserve(numGates);
 }
 
 void LogicSimulator::initialize() {
     std::fill(currentState.begin(), currentState.end(), LogicState::LOW);
     std::fill(nextState.begin(), nextState.end(), LogicState::LOW);
     std::fill(currentGateInputsUpdated.begin(), currentGateInputsUpdated.end(), true);
-    numGates = currentState.size();
 }
 
 int LogicSimulator::addGate(const GateType& gateType) {
@@ -38,18 +28,48 @@ int LogicSimulator::addGate(const GateType& gateType) {
     gateOutputs.emplace_back();
     currentGateInputsUpdated.emplace_back(true);
     nextGateInputsUpdated.emplace_back(true);
-    ++numGates;
-    return numGates - 1;
+    return currentState.size() - 1;
 }
 
 void LogicSimulator::connectGates(int gate1, int gate2) {
-    if (gate1 < 0 || gate1 >= numGates)
+    if (gate1 < 0 || gate1 >= currentState.size())
         throw std::out_of_range("connectGates: gate1 index out of range");
-    if (gate2 < 0 || gate2 >= numGates)
+    if (gate2 < 0 || gate2 >= currentState.size())
         throw std::out_of_range("connectGates: gate2 index out of range");
+
+    // check if the connection already exists
+    for (int output : gateOutputs[gate1]) {
+        if (output == gate2) {
+            return;
+        }
+    }
 
     gateOutputs[gate1].push_back(gate2);
     gateInputs[gate2].push_back(gate1);
+    nextGateInputsUpdated[gate2] = true;
+}
+
+void LogicSimulator::disconnectGates(int gate1, int gate2) {
+    if (gate1 < 0 || gate1 >= currentState.size())
+        throw std::out_of_range("connectGates: gate1 index out of range");
+    if (gate2 < 0 || gate2 >= currentState.size())
+        throw std::out_of_range("connectGates: gate2 index out of range");
+
+    for (auto it = gateOutputs[gate1].begin(); it != gateOutputs[gate1].end(); ++it) {
+        if (*it == gate2) {
+            gateOutputs[gate1].erase(it);
+            break;
+        }
+    }
+
+    for (auto it = gateInputs[gate2].begin(); it != gateInputs[gate2].end(); ++it) {
+        if (*it == gate1) {
+            gateInputs[gate2].erase(it);
+            break;
+        }
+    }
+
+    nextGateInputsUpdated[gate2] = true;
 }
 
 void LogicSimulator::swapStates() {
@@ -58,41 +78,93 @@ void LogicSimulator::swapStates() {
 }
 
 void LogicSimulator::computeNextState(const std::vector<int>& gates) {
-    unsigned int numInputs;
-    unsigned int inputCount;
-    GateType type;
-    for (int gate : gates) {
+    for (size_t gate : gates) {
         // we don't do in-bounds checks because we are cool like that
 
         // skip the gate if the inputs have not changed
         if (!currentGateInputsUpdated[gate]) {
             nextState[gate] = currentState[gate];
-            for (int output : gateOutputs[gate]) {
+            for (const int output : gateOutputs[gate]) {
                 nextGateInputsUpdated[output] = false;
             }
             continue;
         }
+    }
+    for (size_t gate : gates) {
+        if (!currentGateInputsUpdated[gate]) {
+            continue;
+        }
 
-        type = gateTypes[gate];
-        numInputs = gateInputs[gate].size();
-        inputCount = 0;
+        const GateType type = gateTypes[gate];
+        const auto& inputs = gateInputs[gate];
+        const size_t numInputs = inputs.size();
+        unsigned int highInputCount = 0;
 
-        for (int input : gateInputs[gate]) {
+        for (size_t input : gateInputs[gate]) {
             if (currentState[input] == LogicState::HIGH) {
-                ++inputCount;
+                ++highInputCount;
             }
         }
 
-        LogicState newState = computeGateState(type, inputCount, numInputs, currentState[gate]);
+        const LogicState currentGateState = nextState[gate];
 
-        if (newState != currentState[gate]) {
-            for (int output : gateOutputs[gate]) {
-                nextGateInputsUpdated[output] = true;
+        LogicState newState = computeGateState(type, highInputCount, numInputs, currentGateState);
+
+        if (newState != currentGateState) {
+            for (const int outputGate : gateOutputs[gate]) {
+                nextGateInputsUpdated[outputGate] = true;
             }
         }
         else {
             currentGateInputsUpdated[gate] = false; // this will put the gate to sleep after 2 updates
         }
         nextState[gate] = newState;
+    }
+}
+
+void LogicSimulator::setState(int gate, LogicState state) {
+    if (gate < 0 || gate >= currentState.size())
+        throw std::out_of_range("setState: gate index out of range");
+
+    if (state != nextState[gate]) {
+        nextState[gate] = state;
+        for (int output : gateOutputs[gate]) {
+            nextGateInputsUpdated[output] = true;
+        }
+    }
+}
+
+void LogicSimulator::clearGates() {
+    currentState.clear();
+    nextState.clear();
+    gateTypes.clear();
+    gateInputs.clear();
+    gateOutputs.clear();
+    currentGateInputsUpdated.clear();
+    nextGateInputsUpdated.clear();
+}
+
+void LogicSimulator::reserveGates(int numGates) {
+    currentState.reserve(numGates);
+    nextState.reserve(numGates);
+    gateTypes.reserve(numGates);
+    gateInputs.reserve(numGates);
+    gateOutputs.reserve(numGates);
+    currentGateInputsUpdated.reserve(numGates);
+    nextGateInputsUpdated.reserve(numGates);
+}
+
+std::vector<int> LogicSimulator::allGates() const {
+    std::vector<int> gates;
+    for (int i = 0; i < currentState.size(); ++i) {
+        gates.push_back(i);
+    }
+    return gates;
+}
+
+void LogicSimulator::simulateNTicks(int n) {
+    for (int i = 0; i < n; ++i) {
+        computeNextState(allGates());
+        swapStates();
     }
 }

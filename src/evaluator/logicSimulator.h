@@ -8,26 +8,37 @@
 
 class LogicSimulator {
 public:
-    LogicSimulator(int numGates);
+    LogicSimulator();
     ~LogicSimulator() = default; // Destructor can be defaulted
 
     void initialize();
     int addGate(const GateType& gateType);
     void connectGates(int gate1, int gate2);
+    void disconnectGates(int gate1, int gate2);
 
     void computeNextState(const std::vector<int>& gates);
     void swapStates();
 
+    std::vector<LogicState> getCurrentState() const { return currentState; }
+    void clearGates();
+    void reserveGates(int numGates);
+
+    void setState(int gate, LogicState state);
+
+    void simulateNTicks(int n);
+
     LogicState getState(int gate) const { return currentState[gate]; }
     bool willUpdate(int gate) const { return currentGateInputsUpdated[gate]; }
+
+    std::vector<int> allGates() const;
 
 private:
     int numGates;
     std::vector<LogicState> currentState;
     std::vector<LogicState> nextState;
     std::vector<GateType> gateTypes;
-    std::vector<std::vector<uint32_t>> gateInputs;
-    std::vector<std::vector<uint32_t>> gateOutputs;
+    std::vector<std::vector<int>> gateInputs;
+    std::vector<std::vector<int>> gateOutputs;
     std::vector<bool> currentGateInputsUpdated;
     std::vector<bool> nextGateInputsUpdated;
 };
