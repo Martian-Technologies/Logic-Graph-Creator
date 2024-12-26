@@ -1,14 +1,15 @@
 #ifndef areaPlaceTool_h
 #define areaPlaceTool_h
 
-#include "blockContainerTool.h"
+#include "baseBlockPlacementTool.h"
 
-class AreaPlaceTool : public BlockContainerTool {
+class AreaPlaceTool : public BaseBlockPlacementTool {
 public:
     inline AreaPlaceTool(BlockContainerWrapper* blockContainer = nullptr) :
-        BlockContainerTool(blockContainer), rotation(ZERO), clickPosition(), click('n') {}
+        BaseBlockPlacementTool(blockContainer), clickPosition(), click('n') {}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
+        BaseBlockPlacementTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&AreaPlaceTool::startDeleteBlocks, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("pointer move", std::bind(&AreaPlaceTool::pointerMove, this, std::placeholders::_1));
@@ -25,7 +26,6 @@ public:
     // bool keyPress(int keyId);
 
 private:
-    Rotation rotation;
     Position clickPosition;
     char click;
 };

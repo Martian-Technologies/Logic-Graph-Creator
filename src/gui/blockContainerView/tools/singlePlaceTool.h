@@ -1,16 +1,17 @@
 #ifndef singlePlaceTool_h
 #define singlePlaceTool_h
 
-#include "blockContainerTool.h"
+#include "baseBlockPlacementTool.h"
 
-class SinglePlaceTool : public BlockContainerTool {
+class SinglePlaceTool : public BaseBlockPlacementTool {
 public:
     inline SinglePlaceTool(BlockContainerWrapper* blockContainer = nullptr) :
-        BlockContainerTool(blockContainer), rotation(ZERO), clicks{'n', 'n'} {}
+        BaseBlockPlacementTool(blockContainer), clicks{'n', 'n'} {}
 
     inline void reset() override final {memset(clicks, 'n', 2);}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
+        BaseBlockPlacementTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SinglePlaceTool::startPlaceBlock, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&SinglePlaceTool::stopPlaceBlock, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
@@ -34,7 +35,6 @@ public:
     // bool keyPress(int keyId);
 
 private:
-    Rotation rotation;
     char clicks[2];
 };
 

@@ -5,9 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "../../events/eventRegister.h"
 #include "toolManagerEventRegister.h"
+#include "../events/eventRegister.h"
 #include "blockContainerTool.h"
+#include "baseBlockPlacementTool.h"
 #include "singleConnectTool.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
@@ -32,7 +33,8 @@ public:
 
         if (tool) {
             tool->initialize(toolManagerEventRegister);
-            tool->selectBlock(selectedBlock);
+            BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+            if (placementTool) placementTool->selectBlock(selectedBlock);
             this->toolType = toolType;
         } else {
             this->toolType = "NONE";
@@ -45,7 +47,11 @@ public:
     }
     inline void selectBlock(BlockType selectedBlock) {
         this->selectedBlock = selectedBlock;
-        if (tool) tool->selectBlock(selectedBlock);
+        if (tool) {
+            BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+            if (placementTool) placementTool->selectBlock(selectedBlock);
+
+        }
     }
 
     inline void display(QPainter& painter, const LogicGridWindow& gridWindow) { if (tool) tool->display(painter, gridWindow); }

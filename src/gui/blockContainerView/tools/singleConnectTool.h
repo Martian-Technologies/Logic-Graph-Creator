@@ -9,6 +9,7 @@ public:
         BlockContainerTool(blockContainer), clickPosition(), clicked(false) {}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
+        BlockContainerTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SingleConnectTool::makeConnection, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SingleConnectTool::cancelConnection, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("pointer move", std::bind(&SingleConnectTool::pointerMove, this, std::placeholders::_1));

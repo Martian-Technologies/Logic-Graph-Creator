@@ -38,8 +38,6 @@ void LogicGridWindow::updateLoop() {
         doUpdate = true;
         if (gridPos(lastMousePos) != oldMousePos) {
             blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-            // blockContainerView
-                // toolManager.mouseMove(gridPos(lastMousePos));
         }
     }
     if (doUpdate) {
@@ -109,7 +107,6 @@ bool LogicGridWindow::event(QEvent* event) {
             viewMannager.pinch(1 - nge->value());
             if (gridPos(lastMousePos) != oldMousePos) {
                 blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-                // toolManager.mouseMove(gridPos(lastMousePos));
             }
             doUpdate = true;
             return true;
@@ -122,7 +119,6 @@ bool LogicGridWindow::event(QEvent* event) {
             viewMannager.pinch(1 - pinchGesture->scaleFactor());
             if (gridPos(lastMousePos) != oldMousePos) {
                 blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-                // toolManager.mouseMove(gridPos(lastMousePos));
             }
             doUpdate = true;
             return true;
@@ -161,7 +157,6 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
         Position oldMousePos = gridPos(lastMousePos);
         viewMannager.scroll(numPixels.x(), numPixels.y(), pixToView);
         if (gridPos(lastMousePos) != oldMousePos) {
-            // blockContainerView.getToolManager().mouseMove(gridPos(lastMousePos));
             blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
         }
         event->accept();
@@ -199,7 +194,6 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
     if (viewMannager.press(event->key())) {
         if (gridPos(lastMousePos) != oldMousePos) {
             blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-            // toolManager.mouseMove(gridPos(lastMousePos));
         }
         doUpdate = true;
         event->accept();
@@ -214,13 +208,19 @@ void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) {
     if (viewMannager.release(event->key())) {
         if (gridPos(lastMousePos) != oldMousePos) {
             blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-            // toolManager.mouseMove(gridPos(lastMousePos));
         }
         doUpdate = true;
         event->accept();
-    // } else if (toolManager.keyRelease(event->key())) {
-        // doUpdate = true;
-        // event->accept();
+    } else if (event->key() == Qt::Key_Q) {
+        if (blockContainerView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
+            doUpdate = true;
+            event->accept();
+        }
+    } else if (event->key() == Qt::Key_E) {
+        if (blockContainerView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
+            doUpdate = true;
+            event->accept();
+        }
     }
 }
 
@@ -230,18 +230,15 @@ void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
         if (viewMannager.mouseDown()) {
             if (gridPos(lastMousePos) != oldMousePos) {
                 blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-                // toolManager.mouseMove(gridPos(lastMousePos));
             }
             doUpdate = true;
             event->accept();
         } else if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool primary activate", gridPos(event->pos()).free()))) {
-        // } else if (toolManager.leftPress(gridPos(event->pos()))) {
             doUpdate = true;
             event->accept();
         }
     } else if (event->button() == Qt::RightButton) {
         if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool secondary activate", gridPos(event->pos()).free()))) {
-        // if (toolManager.rightPress(gridPos(event->pos()))) {
             doUpdate = true;
             event->accept();
         }
@@ -254,17 +251,14 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (viewMannager.mouseUp()) {
             if (gridPos(lastMousePos) != oldMousePos) {
                 blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
-                // toolManager.mouseMove(gridPos(lastMousePos));
             }
             doUpdate = true;
             event->accept();
         } else if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool primary deactivate", gridPos(event->pos()).free()))) {
-        // } else if (toolManager.leftRelease(gridPos(event->pos()))) {
             doUpdate = true;
             event->accept();
         }
     } else if (event->button() == Qt::RightButton) {
-        // if (toolManager.rightRelease(gridPos(event->pos()))) {
         if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool secondary deactivate", gridPos(event->pos()).free()))) {
             doUpdate = true;
             event->accept();
@@ -288,7 +282,6 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
 
 void LogicGridWindow::enterEvent(QEnterEvent* event) {
     if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", gridPos(mapFromGlobal(QCursor::pos())).free()))) {
-        // toolManager.enterBlockView(gridPos(mapFromGlobal(QCursor::pos())))
         doUpdate = true;
     }
     QWidget::enterEvent(event);
@@ -296,7 +289,6 @@ void LogicGridWindow::enterEvent(QEnterEvent* event) {
 
 void LogicGridWindow::leaveEvent(QEvent* event) {
     if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer exit view", gridPos(lastMousePos).free()))) {
-        // if (toolManager.exitBlockView(gridPos(lastMousePos))) {
         doUpdate = true;
     }
     QWidget::leaveEvent(event);

@@ -1,7 +1,7 @@
 #ifndef toolManagerEventRegister_h
 #define toolManagerEventRegister_h
 
-#include "../../events/eventRegister.h"
+#include "../events/eventRegister.h"
 #include <string>
 
 class ToolManagerEventRegister {

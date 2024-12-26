@@ -2,14 +2,12 @@
 #define blockContainerView_h
 
 #include "middleEnd/blockContainerWrapper.h"
-#include "../events/eventRegister.h"
+#include "events/eventRegister.h"
 #include "tools/toolManager.h"
 
 class BlockContainerView {
 public:
-    BlockContainerView() : eventRegister(), toolManager(&eventRegister) {
-
-    }
+    BlockContainerView() : eventRegister(), toolManager(&eventRegister) {}
 
     inline void setBlockContainer(BlockContainerWrapper* blockContainerWrapper) {
         this->blockContainerWrapper = blockContainerWrapper;
