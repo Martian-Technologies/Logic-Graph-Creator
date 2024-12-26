@@ -82,8 +82,9 @@ bool ViewMannager::release(int key) {
 
 void ViewMannager::keyMove(float dirX, float dirY, float dt)
 {
-    viewCenter.x += dirX * moveSpeed * viewHeight * dt;
-    viewCenter.y += dirY * moveSpeed * viewHeight * dt;
+    float moveAmount = moveSpeed * getViewWidth();
+    viewCenter.x += dirX * moveAmount * dt;
+    viewCenter.y += dirY * moveAmount * dt;
 
     applyLimits();
     emitViewChanged();

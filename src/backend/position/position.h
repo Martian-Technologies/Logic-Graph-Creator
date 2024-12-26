@@ -46,8 +46,8 @@ struct FPosition {
     inline FPosition() : x(0.0f), y(0.0f) {}
     inline FPosition(f_cord_t x, f_cord_t y) : x(x), y(y) {}
 
-    inline f_cord_t manhattenDistanceTo(const FPosition& other) const { return Abs(x - other.x) + Abs(y - other.y); }
-    inline f_cord_t distanceToSquared(const FPosition& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    inline f_cord_t manhattenDistanceTo(const FPosition& other) const { return std::abs(x - other.x) + std::abs(y - other.y); }
+    inline f_cord_t distanceToSquared(const FPosition& other) const { return std::pow(x - other.x, 2.0f) + std::pow(y - other.y, 2.0f); }
     bool withinArea(const FPosition& small, const FPosition& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
 	Position snap() const;
     inline bool operator==(const FPosition& other) const { return x == other.x && y == other.y; }
