@@ -78,20 +78,10 @@ void LogicSimulator::swapStates() {
 }
 
 void LogicSimulator::computeNextState(const std::vector<int>& gates) {
+    std::fill(nextGateInputsUpdated.begin(), nextGateInputsUpdated.end(), false);
     for (size_t gate : gates) {
-        // we don't do in-bounds checks because we are cool like that
-
-        // skip the gate if the inputs have not changed
         if (!currentGateInputsUpdated[gate]) {
             nextState[gate] = currentState[gate];
-            for (const int output : gateOutputs[gate]) {
-                nextGateInputsUpdated[output] = false;
-            }
-            continue;
-        }
-    }
-    for (size_t gate : gates) {
-        if (!currentGateInputsUpdated[gate]) {
             continue;
         }
 
@@ -114,9 +104,6 @@ void LogicSimulator::computeNextState(const std::vector<int>& gates) {
             for (const int outputGate : gateOutputs[gate]) {
                 nextGateInputsUpdated[outputGate] = true;
             }
-        }
-        else {
-            currentGateInputsUpdated[gate] = false; // this will put the gate to sleep after 2 updates
         }
         nextState[gate] = newState;
     }
