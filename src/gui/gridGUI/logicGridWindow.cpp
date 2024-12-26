@@ -11,7 +11,7 @@
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) :
     QWidget(parent), dt(0.016f), updateLoopTimer(), doUpdate(false),
-    blockContainerView(), blockContainer(nullptr), lastMousePos(),
+    blockContainerView(), lastMousePos(),
     blockRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, false)),
     connectionRenderer(std::bind(&LogicGridWindow::windowPos, this, std::placeholders::_1, true)),
     gridRenderer(this), viewMannager(true), treeWidget(nullptr) { // change to false for trackPad Control
@@ -91,8 +91,7 @@ void LogicGridWindow::updateSelectedItem() {
     }
 }
 
-void LogicGridWindow::setBlockContainer(BlockContainerWrapper* blockContainer) {
-    this->blockContainer = blockContainer;
+void LogicGridWindow::setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer) {
     blockContainerView.setBlockContainer(blockContainer);
     updateSelectedItem();
     doUpdate = true;
@@ -130,7 +129,7 @@ bool LogicGridWindow::event(QEvent* event) {
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
 
-    if (blockContainer == nullptr) {
+    if (blockContainerView.getBlockContainer() == nullptr) {
         painter.drawText(rect(), Qt::AlignCenter, "No BlockContainer Found");
         return;
     }
@@ -169,12 +168,12 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
 #ifdef __APPLE__
     // macOS: Command + Z/Y
     if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-        blockContainer->undo();
+        blockContainerView.getBlockContainer()->undo();
         doUpdate = true;
         event->accept();
     }
     if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-        blockContainer->redo();
+        blockContainerView.getBlockContainer()->redo();
         doUpdate = true;
         event->accept();
     }

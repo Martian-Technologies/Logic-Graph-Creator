@@ -1,6 +1,8 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 
+#include <memory>
+
 #include "gridGUI/logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
@@ -13,11 +15,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowIcon(QIcon(":/gateIcon.ico"));
 
     block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
-    BlockContainerWrapper* blockContainerWrapper = blockContainerManager.getContainer(id);
-
-    // blockContainerWrapper->tryInsertBlock(Position(0, 0), ZERO, AND);
-    // blockContainerWrapper->tryInsertBlock(Position(2, 0), ZERO, AND);
-    // blockContainerWrapper->tryCreateConnection(Position(0, 0), Position(2, 0));
+    std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->loadTileMap(":logicTiles.png");
