@@ -21,7 +21,7 @@ void LogicSimulator::initialize() {
     std::fill(currentGateInputsUpdated.begin(), currentGateInputsUpdated.end(), true);
 }
 
-int LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
+block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
     if (allowSubstituteDecomissioned && numDecomissioned > 0) {
         auto it = std::find(gateTypes.begin(), gateTypes.end(), GateType::NONE);
         if (it != gateTypes.end()) {
@@ -45,14 +45,14 @@ int LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomi
     return currentState.size() - 1;
 }
 
-void LogicSimulator::connectGates(int gate1, int gate2) {
+void LogicSimulator::connectGates(block_id_t gate1, block_id_t gate2) {
     if (gate1 < 0 || gate1 >= currentState.size())
         throw std::out_of_range("connectGates: gate1 index out of range");
     if (gate2 < 0 || gate2 >= currentState.size())
         throw std::out_of_range("connectGates: gate2 index out of range");
 
     // check if the connection already exists
-    for (int output : gateOutputs[gate1]) {
+    for (auto output : gateOutputs[gate1]) {
         if (output == gate2) {
             return;
         }
@@ -63,7 +63,7 @@ void LogicSimulator::connectGates(int gate1, int gate2) {
     nextGateInputsUpdated[gate2] = true;
 }
 
-void LogicSimulator::disconnectGates(int gate1, int gate2) {
+void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
     if (gate1 < 0 || gate1 >= currentState.size())
         throw std::out_of_range("connectGates: gate1 index out of range");
     if (gate2 < 0 || gate2 >= currentState.size())
@@ -86,7 +86,7 @@ void LogicSimulator::disconnectGates(int gate1, int gate2) {
     nextGateInputsUpdated[gate2] = true;
 }
 
-void LogicSimulator::decomissionGate(int gate) {
+void LogicSimulator::decomissionGate(block_id_t gate) {
     // disconnect gate from everything
     const auto inputs = gateInputs[gate];
     for (auto input : inputs) {
@@ -105,21 +105,21 @@ void LogicSimulator::decomissionGate(int gate) {
     ++numDecomissioned;
 }
 
-std::unordered_map<int, int> LogicSimulator::compressGates() {
-    std::unordered_map<int, int> gateMap;
+std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
+    std::unordered_map<block_id_t, block_id_t> gateMap;
     int newGateIndex = 0;
-    for (int i = 0; i < currentState.size(); ++i) {
+    for (auto i = 0; i < currentState.size(); ++i) {
         if (gateTypes[i] != GateType::NONE) {
             gateMap[i] = newGateIndex;
             ++newGateIndex;
         }
     }
 
-    for (int i = 0; i < currentState.size(); ++i) {
+    for (auto i = 0; i < currentState.size(); ++i) {
         if (gateTypes[i] == GateType::NONE) {
             continue;
         }
-        const int newGateIndex = gateMap[i];
+        const block_id_t newGateIndex = gateMap[i];
         gateTypes[newGateIndex] = gateTypes[i];
         currentState[newGateIndex] = currentState[i];
         nextState[newGateIndex] = nextState[i];
@@ -137,11 +137,11 @@ std::unordered_map<int, int> LogicSimulator::compressGates() {
     currentGateInputsUpdated.resize(newGateIndex);
     nextGateInputsUpdated.resize(newGateIndex);
 
-    for (int i = 0; i < currentState.size(); ++i) {
-        for (int& input : gateInputs[i]) {
+    for (auto i = 0; i < currentState.size(); ++i) {
+        for (block_id_t& input : gateInputs[i]) {
             input = gateMap[input];
         }
-        for (int& output : gateOutputs[i]) {
+        for (block_id_t& output : gateOutputs[i]) {
             output = gateMap[output];
         }
     }
@@ -156,8 +156,10 @@ void LogicSimulator::swapStates() {
     std::swap(currentGateInputsUpdated, nextGateInputsUpdated);
 }
 
-void LogicSimulator::computeNextState(const std::vector<int>& gates) {
-    std::fill(nextGateInputsUpdated.begin(), nextGateInputsUpdated.end(), false);
+void LogicSimulator::computeNextState(const std::vector<block_id_t>& gates) {
+    for (size_t gate : gates) {
+        nextGateInputsUpdated[gate] = false;
+    }
     for (size_t gate : gates) {
         if (gateTypes[gate] == GateType::NONE) {
             continue;
@@ -191,7 +193,7 @@ void LogicSimulator::computeNextState(const std::vector<int>& gates) {
     }
 }
 
-void LogicSimulator::setState(int gate, logic_state_t state) {
+void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
     if (gate < 0 || gate >= currentState.size())
         throw std::out_of_range("setState: gate index out of range");
 
@@ -214,7 +216,7 @@ void LogicSimulator::clearGates() {
     numDecomissioned = 0;
 }
 
-void LogicSimulator::reserveGates(int numGates) {
+void LogicSimulator::reserveGates(block_id_t numGates) {
     currentState.reserve(numGates);
     nextState.reserve(numGates);
     gateTypes.reserve(numGates);
@@ -224,15 +226,15 @@ void LogicSimulator::reserveGates(int numGates) {
     nextGateInputsUpdated.reserve(numGates);
 }
 
-std::vector<int> LogicSimulator::allGates() const {
-    std::vector<int> gates;
-    for (int i = 0; i < currentState.size(); ++i) {
+std::vector<block_id_t> LogicSimulator::allGates() const {
+    std::vector<block_id_t> gates;
+    for (auto i = 0; i < currentState.size(); ++i) {
         gates.push_back(i);
     }
     return gates;
 }
 
-void LogicSimulator::simulateNTicks(int n) {
+void LogicSimulator::simulateNTicks(unsigned int n) {
     for (int i = 0; i < n; ++i) {
         computeNextState(allGates());
         swapStates();

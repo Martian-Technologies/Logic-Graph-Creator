@@ -5,6 +5,7 @@
 #include "logicSimulator.h"
 #include "logicState.h"
 #include <vector>
+#include <functional>
 
 Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)
     :running(false),
@@ -12,6 +13,11 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
     targetTickrate(0),
     logicSimulator() {
     // TODO: implement initializing from blockcontainer
+
+
+
+    // connect makeEdit to blockContainerWrapper
+    blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1));
 }
 
 void Evaluator::stop() {

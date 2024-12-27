@@ -5,8 +5,8 @@
 bool testTwoGates(LogicSimulator ls) {
     ls.clearGates();
     ls.reserveGates(2);
-    int gate1 = ls.addGate(GateType::AND);
-    int gate2 = ls.addGate(GateType::NOR);
+    auto gate1 = ls.addGate(GateType::AND);
+    auto gate2 = ls.addGate(GateType::NOR);
     ls.connectGates(gate1, gate2);
     ls.initialize();
     ls.simulateNTicks(10);
@@ -18,9 +18,9 @@ bool testTwoGates(LogicSimulator ls) {
 bool testThreeGates(LogicSimulator ls) {
     ls.clearGates();
     ls.reserveGates(3);
-    int gate1 = ls.addGate(GateType::AND);
-    int gate2 = ls.addGate(GateType::NOR);
-    int gate3 = ls.addGate(GateType::AND);
+    auto gate1 = ls.addGate(GateType::AND);
+    auto gate2 = ls.addGate(GateType::NOR);
+    auto gate3 = ls.addGate(GateType::AND);
     ls.connectGates(gate1, gate2);
     ls.connectGates(gate2, gate3);
     ls.connectGates(gate3, gate1);
@@ -34,14 +34,14 @@ bool testThreeGates(LogicSimulator ls) {
 bool testFullAdder(LogicSimulator ls) {
     ls.clearGates();
     ls.reserveGates(8);
-    int gateXOR = ls.addGate(GateType::XOR); // sum
-    int gateAND1 = ls.addGate(GateType::AND);
-    int gateAND2 = ls.addGate(GateType::AND);
-    int gateAND3 = ls.addGate(GateType::AND);
-    int gateOR = ls.addGate(GateType::OR); // carry
-    int gateInput1 = ls.addGate(GateType::INPUT);
-    int gateInput2 = ls.addGate(GateType::INPUT);
-    int gateInput3 = ls.addGate(GateType::INPUT);
+    auto gateXOR = ls.addGate(GateType::XOR); // sum
+    auto gateAND1 = ls.addGate(GateType::AND);
+    auto gateAND2 = ls.addGate(GateType::AND);
+    auto gateAND3 = ls.addGate(GateType::AND);
+    auto gateOR = ls.addGate(GateType::OR); // carry
+    auto gateInput1 = ls.addGate(GateType::INPUT);
+    auto gateInput2 = ls.addGate(GateType::INPUT);
+    auto gateInput3 = ls.addGate(GateType::INPUT);
     ls.connectGates(gateInput1, gateXOR);
     ls.connectGates(gateInput2, gateXOR);
     ls.connectGates(gateInput3, gateXOR);
@@ -146,9 +146,9 @@ bool testFullAdder(LogicSimulator ls) {
 bool testDecomissioning(LogicSimulator ls) {
     ls.clearGates();
     ls.reserveGates(3);
-    int gate1 = ls.addGate(GateType::AND);
-    int gate2 = ls.addGate(GateType::NOR);
-    int gate3 = ls.addGate(GateType::NOR);
+    auto gate1 = ls.addGate(GateType::AND);
+    auto gate2 = ls.addGate(GateType::NOR);
+    auto gate3 = ls.addGate(GateType::NOR);
     ls.connectGates(gate1, gate2);
     ls.connectGates(gate2, gate3);
     ls.connectGates(gate1, gate3);
@@ -168,7 +168,7 @@ bool testDecomissioning(LogicSimulator ls) {
         std::cout << "Decomissioning failed" << std::endl;
         return false;
     }
-    std::unordered_map<int, int> mapping = ls.compressGates();
+    std::unordered_map<block_id_t, block_id_t> mapping = ls.compressGates();
     if (mapping.size() != 2) {
         std::cout << "Compression failed" << std::endl;
         return false;

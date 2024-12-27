@@ -7,6 +7,8 @@
 #include "logicSimulator.h"
 #include "logicState.h"
 #include <vector>
+#include <unordered_map>
+#include "addressTree.h"
 
 class Evaluator {
 public:
@@ -34,7 +36,7 @@ private:
     bool paused;
     unsigned long long targetTickrate;
     LogicSimulator logicSimulator;
-
+    AddressTree<block_id_t> addressTree;
 };
 
 #endif // evaluator_h
