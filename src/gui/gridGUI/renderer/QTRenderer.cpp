@@ -75,6 +75,8 @@ void QTRenderer::render(QPainter* painter)
         {
             QPoint point = gridToQt(FPosition(c, r));
             QPoint pointBR = gridToQt(FPosition(c+1, r+1));
+            
+            // const Block* block = blockContainer->getBlock(Position(c,r));
 
             TileRegion tsRegion = tileSetInfo->getRegion(BlockType::NONE);
             QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),

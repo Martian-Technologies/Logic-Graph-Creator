@@ -8,7 +8,7 @@
 // this class represents a free tileset
 // tiles don't neccesarily need to fit a grid
 // rects are mapped to the type T
-// if flip coordinates is true, regions coordinate systems be flipped
+// it expects coordinates from top-left, and it can't output either top-left or bottom-left
 
 struct TileRegion
 {
@@ -44,6 +44,7 @@ class TileSet
 template <class T>
 void TileSet<T>::addRegion(T key, Vec2Int topLeftPixel, Vec2Int pixelSize)
 {
+    // get the position in "bottom-left" coordinate system
     Vec2Int bottomLeftPixel = Vec2Int(topLeftPixel.x, size.y - topLeftPixel.y - pixelSize.y);
     
     Vec2 topLeftUV = Vec2((float)topLeftPixel.x / size.x, (float)topLeftPixel.y / size.y);
