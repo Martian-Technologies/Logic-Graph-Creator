@@ -7,7 +7,7 @@
 #include "../connection/connectionContainer.h"
 #include "../defs.h"
 
-constexpr void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
+inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
     if (isRotated(rotation)) std::swap(width, height);
 }
 

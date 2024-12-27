@@ -10,7 +10,8 @@ constexpr int FastPower(T x) {
     if constexpr (p == 1) return x;
 
     int tmp = FastPower<p / 2>(x);
-    if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
+    if constexpr ((p % 2) == 0) { return tmp * tmp; }
+    else { return x * tmp * tmp; }
 }
 
 constexpr int Abs(int x) { return x < 0 ? -x : x; }
@@ -25,7 +26,7 @@ constexpr char signum(T x) {
 #if __APPLE__
 constexpr float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
 #else
-constexpr float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
+inline float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
 #endif
 
 template <typename T>
