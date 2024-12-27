@@ -2,6 +2,10 @@
 #define difference_h
 
 #include "../block/block.h"
+#include <vector>
+#include <utility>
+#include <memory>
+
 
 class Difference {
     friend class BlockContainer;
