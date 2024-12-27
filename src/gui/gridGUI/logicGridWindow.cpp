@@ -165,7 +165,7 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
     Position oldMousePos = gridPos(lastMousePos);
-#ifdef __APPLE__
+// #ifdef __APPLE__
     // macOS: Command + Z/Y
     if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
         blockContainerView.getBlockContainer()->undo();
@@ -177,19 +177,19 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
         doUpdate = true;
         event->accept();
     }
-#else
-    // Windows/Linux: Control + Z/Y
-    if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_Z) {
-        blockContainer->undo();
-        doUpdate = true;
-        event->accept();
-    }
-    if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_Y) {
-        blockContainer->redo();
-        doUpdate = true;
-        event->accept();
-    }
-#endif
+// #else
+//     // Windows/Linux: Control + Z/Y
+//     if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_Z) {
+//         blockContainerView.getBlockContainer()->undo();
+//         doUpdate = true;
+//         event->accept();
+//     }
+//     if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_Y) {
+//         blockContainerView.getBlockContainer()->redo();
+//         doUpdate = true;
+//         event->accept();
+//     }
+// #endif
     if (viewMannager.press(event->key())) {
         if (gridPos(lastMousePos) != oldMousePos) {
             blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", gridPos(lastMousePos).free()));
