@@ -127,7 +127,7 @@ public:
     inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Position& position) const {
         return withinBlock(position) ? ::getOutputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
     }
-    inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) {
+    inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) const {
         auto output = ::getConnectionPosition(type(), getRotation(), connectionId);
         output.first += getPosition();
         return output;

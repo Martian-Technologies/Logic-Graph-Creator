@@ -123,6 +123,9 @@ void LogicGridWindow::resizeEvent(QResizeEvent* event) {
     int w = event->size().width();
     int h = event->size().height();
 
+    Difference dif = blockContainerView.getBlockContainer()->getBlockContainer()->getCreationDifference();
+
+
     blockContainerView.getRenderer().resize(w, h);
     blockContainerView.getViewManager().setAspectRatio((float)w / (float)h);
 }
