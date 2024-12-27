@@ -21,7 +21,7 @@ public:
 
     /* ----------- listener ----------- */
 
-    typedef std::function<void(DifferenceSharedPtr)> ListenerFunction;
+    typedef std::function<void(DifferenceSharedPtr, block_container_wrapper_id_t)> ListenerFunction;
 
     // subject to change
     void connectListener(void* object, ListenerFunction func) { listenerFunctions[object] = func; }
@@ -60,7 +60,7 @@ private:
     void startUndo() { midUndo = true; }
     void endUndo() { midUndo = false; }
 
-    void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference); }
+    void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, containerId); }
 
     block_container_wrapper_id_t containerId;
     BlockContainer blockContainer;
