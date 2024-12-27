@@ -2,22 +2,23 @@
 
 #include <Qt>
 
+#include "../../gridGUI/effects/cellSelectionEffect.h"
 #include "singlePlaceTool.h"
-#include "../effects/cellSelectionEffect.h"
 
-bool SinglePlaceTool::leftPress(const Position& pos) {
+bool SinglePlaceTool::startPlaceBlock(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'p';
-        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
+        if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent.getPosition(), rotation, selectedBlock);
         return true;
     case 'p':
         return false;
     case 'r':
         if (clicks[1] == 'n') {
             clicks[1] = 'p';
-            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
+            if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent.getPosition(), rotation, selectedBlock);
             return true;
         }
         return false;
@@ -25,8 +26,9 @@ bool SinglePlaceTool::leftPress(const Position& pos) {
     return false;
 }
 
-bool SinglePlaceTool::leftRelease(const Position& pos) {
+bool SinglePlaceTool::stopPlaceBlock(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     // this logic is to allow holding right then left then releasing left and it to start deleting
     switch (clicks[0]) {
     case 'n':
@@ -49,19 +51,20 @@ bool SinglePlaceTool::leftRelease(const Position& pos) {
     return false;
 }
 
-bool SinglePlaceTool::rightPress(const Position& pos) {
+bool SinglePlaceTool::startDeleteBlocks(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     switch (clicks[0]) {
     case 'n':
         clicks[0] = 'r';
-        blockContainer->tryRemoveBlock(pos);
+        blockContainer->tryRemoveBlock(positionEvent.getPosition());
         return true;
     case 'r':
         return false;
     case 'p':
         if (clicks[1] == 'n') {
             clicks[1] = 'r';
-            blockContainer->tryRemoveBlock(pos);
+            blockContainer->tryRemoveBlock(positionEvent.getPosition());
             return true;
         }
         return false;
@@ -69,8 +72,9 @@ bool SinglePlaceTool::rightPress(const Position& pos) {
     return false;
 }
 
-bool SinglePlaceTool::rightRelease(const Position& pos) {
+bool SinglePlaceTool::stopDeleteBlocks(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     // this logic is to allow holding left then right then releasing right and it to start placing
     switch (clicks[0]) {
     case 'n':
@@ -93,12 +97,13 @@ bool SinglePlaceTool::rightRelease(const Position& pos) {
     return false;
 }
 
-bool SinglePlaceTool::mouseMove(const Position& pos) {
+bool SinglePlaceTool::pointerMove(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     bool returnVal = false; // used to make sure it updates the effect
 
     if (effectDisplayer.hasEffect(0)) {
-        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(pos);
+        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(positionEvent.getPosition());
         returnVal = true;
     }
     
@@ -107,44 +112,46 @@ bool SinglePlaceTool::mouseMove(const Position& pos) {
         return returnVal;
     case 'r':
         if (clicks[1] == 'p') {
-            if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
+            if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent.getPosition(), rotation, selectedBlock);
             return selectedBlock != NONE;
         }
-        blockContainer->tryRemoveBlock(pos);
+        blockContainer->tryRemoveBlock(positionEvent.getPosition());
         return true;
     case 'p':
         if (clicks[1] == 'r') {
-            blockContainer->tryRemoveBlock(pos);
+            blockContainer->tryRemoveBlock(positionEvent.getPosition());
             return true;
         }
-        if (selectedBlock != NONE) blockContainer->tryInsertBlock(pos, rotation, selectedBlock);
+        if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent.getPosition(), rotation, selectedBlock);
         return selectedBlock != NONE;
     }
     return returnVal;
 }
 
-bool SinglePlaceTool::enterBlockView(const Position& pos) {
+bool SinglePlaceTool::enterBlockView(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     if (effectDisplayer.hasEffect(0)) return false;
-    effectDisplayer.addEffect(CellSelectionEffect(0, 0, pos));
+    effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent.getPosition()));
     return true;
 }
 
-bool SinglePlaceTool::exitBlockView(const Position& pos) {
+bool SinglePlaceTool::exitBlockView(const Event& event) {
     if (!blockContainer) return false;
+    const PositionEvent& positionEvent = event.cast<PositionEvent>();
     if (!effectDisplayer.hasEffect(0)) return false;
     effectDisplayer.removeEffect(0);
     return true;
 }
 
-bool SinglePlaceTool::keyPress(int keyId) {
-    if (keyId == Qt::Key_Q) {
-        rotation = rotate(rotation, false);
-        return true;
-    }
-    if (keyId == Qt::Key_E) {
-        rotation = rotate(rotation, true);
-        return true;
-    }
-    return false;
-}
+// bool SinglePlaceTool::keyPress(int keyId) {
+//     if (keyId == Qt::Key_Q) {
+//         rotation = rotate(rotation, false);
+//         return true;
+//     }
+//     if (keyId == Qt::Key_E) {
+//         rotation = rotate(rotation, true);
+//         return true;
+//     }
+//     return false;
+// }

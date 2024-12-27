@@ -7,6 +7,7 @@
 #include "difference.h"
 #include "cell.h"
 
+
 class BlockContainer {
 public:
     inline BlockContainer() : lastId(0), grid(), blocks() {}
@@ -18,13 +19,13 @@ public:
     /* ----------- blocks ----------- */
     // -- getters --
     // Gets the cell at that position. Returns nullptr the cell is empty
-    inline const Cell* getCell(const Position& position) const { return ((BlockContainer*)this)->getCell(position); }
+    inline const Cell* getCell(const Position& position) const { return grid.get(position);; }
     // Gets the number of cells in the BlockContainer
     inline unsigned int getCellCount() const { return grid.size(); }
     // Gets the block that has a cell at that position. Returns nullptr the cell is empty
-    inline const Block* getBlock(const Position& position) const { return ((BlockContainer*)this)->getBlock(position); }
+    inline const Block* getBlock(const Position& position) const;
     // Gets the block that has a id. Returns nullptr if no block has the id
-    inline const Block* getBlock(block_id_t blockId) const { return ((BlockContainer*)this)->getBlock(blockId); };
+    inline const Block* getBlock(block_id_t blockId) const;
     // Gets the number of blocks in the BlockContainer
     inline unsigned int getBlockCount() const { return blocks.size(); }
 
@@ -80,7 +81,17 @@ inline Block* BlockContainer::getBlock(const Position& position) {
     return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
 }
 
+inline const Block* BlockContainer::getBlock(const Position& position) const {
+    const Cell* cell = grid.get(position);
+    return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
+}
+
 inline Block* BlockContainer::getBlock(block_id_t blockId) {
+    auto iter = blocks.find(blockId);
+    return (iter == blocks.end()) ? nullptr : &iter->second;
+}
+
+inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
     auto iter = blocks.find(blockId);
     return (iter == blocks.end()) ? nullptr : &iter->second;
 }

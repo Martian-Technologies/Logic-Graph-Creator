@@ -8,12 +8,15 @@
 #include <QPainter>
 #include <QWidget>
 #include <QPixmap>
+#include <qevent.h>
+#include <qvectornd.h>
+#include <set>
 
+#include <memory>
+
+#include "../blockContainerView/blockContainerView.h"
 #include "backend/container/blockContainer.h"
-#include "connectionRenderer.h"
-#include "tools/toolManager.h"
-#include "blockRenderer.h"
-#include "gridRenderer.h"
+#include "renderer/QTRenderer.h"
 #include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {
@@ -21,35 +24,23 @@ class LogicGridWindow : public QWidget {
 public:
     LogicGridWindow(QWidget* parent = nullptr);
 
-    // data getter
-    inline float getViewWidth() const { return viewMannager.getViewWidth(); }
-    inline float getViewHeight() const { return (float)size().height() / (float)size().width() * viewMannager.getViewWidth(); }
-    inline float getViewToPix() const { return (float)size().width() / viewMannager.getViewWidth(); }
-    inline float getPixToView() const { return viewMannager.getViewWidth() / (float)size().width(); }
-    inline float getViewCenterX() const { return viewMannager.getViewCenterX(); }
-    inline float getViewCenterY() const { return viewMannager.getViewCenterY(); }
-    const BlockRenderer& getBlockRenderer() const {return blockRenderer;}
-    const ConnectionRenderer& getConnectionRenderer() const {return connectionRenderer;}
-    const BlockContainer* getBlockContainer() const {return blockContainer->getBlockContainer();}
-
-
+    // getters
+    const BlockContainer* getBlockContainer() const {return blockContainerView.getBlockContainer()->getBlockContainer();}
+	
     // data checkers
-    Position gridPos(const QPoint& point) const;
-    QPoint windowPos(const Position& point, bool center = false) const;
     inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
-    bool insideWindow(const Position& point) const {return insideWindow(windowPos(point));}
+    
+    // setup
+    void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
+    void setSelector(QTreeWidget* treeWidget);
 
     // dont call this func
     void updateSelectedItem();
-    
-    // setup
-    inline void loadTileMap(const QString& filePath) {blockRenderer.loadTileMap(filePath);};
-    void setBlockContainer(BlockContainerWrapper* blockContainer);
-    void setSelector(QTreeWidget* treeWidget);
 
 protected:
     // events
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
@@ -61,21 +52,22 @@ protected:
     bool event(QEvent* event) override;
 
 private:
+    void onViewChanged();
+    void onHoverChanged(Position hoverPosition);
+
+    QVector2D pixelsToView(QPoint point);
+    
     // update loop
-    float dt;
-    void updateLoop();
     QTimer* updateLoopTimer;
-    bool doUpdate;
+    std::set<int> keysPressed;
+    float updateInterval = 0.016f;
+    void updateLoop();
 
     // data
-    BlockContainerWrapper* blockContainer;
-    QPoint lastMousePos;
+    BlockContainerView blockContainerView;
 
     // helper classes
-    ConnectionRenderer connectionRenderer;
-    BlockRenderer blockRenderer;
-    GridRenderer gridRenderer;
-    ToolManager toolManager;
+    QTRenderer renderer;
     ViewMannager viewMannager;
 
     // ui elements

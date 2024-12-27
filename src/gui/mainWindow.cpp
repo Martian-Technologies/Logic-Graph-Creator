@@ -1,28 +1,22 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 
-#include "middleEnd/blockContainerWrapper.h"
+#include <memory>
+
 #include "gridGUI/logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-	
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager() {
     ui->setupUi(this);
-	
+
     setWindowTitle(tr("Logic Graph Creator"));
-	setWindowIcon(QIcon(":/gateIcon.ico"));
+    setWindowIcon(QIcon(":/gateIcon.ico"));
 
-    BlockContainer* blockContainer = new BlockContainer();
-    BlockContainerWrapper* blockContainerWrapper = new BlockContainerWrapper(blockContainer);
-
-    // blockContainerWrapper->tryInsertBlock(Position(0, 0), ZERO, AND);
-    // blockContainerWrapper->tryInsertBlock(Position(2, 0), ZERO, AND);
-    // blockContainerWrapper->tryCreateConnection(Position(0, 0), Position(2, 0));
+    block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
+    std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap(":logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 

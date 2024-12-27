@@ -15,15 +15,17 @@ struct Position {
     inline Position(cord_t x, cord_t y) : x(x), y(y) {}
 
     inline cord_t manhattenDistanceTo(const Position& other) const { return Abs(x - other.x) + Abs(y - other.y); }
-    inline cord_t distanceToSquared(const Position& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    inline cord_t distanceToSquared(const Position& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     bool withinArea(const Position& small, const Position& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
 	FPosition free() const;
     inline bool operator==(const Position& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Position& other) const { return !operator==(other); }
-    inline Position operator+(const Position& position) const { return Position(position.x + x, position.y + y); }
-    inline Position operator-(const Position& position) const { return Position(position.x - x, position.y - y); }
+    inline Position operator+(const Position& position) const { return Position(x + position.x, y + position.y); }
+    inline Position operator-(const Position& position) const { return Position(x - position.x, y - position.y); }
     inline Position operator*(cord_t scalar) const { return Position(x * scalar, y * scalar); }
     inline Position& operator+=(const Position& position) { x += position.x; y += position.y; return *this; }
+    inline Position& operator-=(const Position& position) { x -= position.x; y -= position.y; return *this; }
+    inline Position& operator/=(cord_t scalar) { x /= scalar; y /= scalar; return *this; }
     inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
     cord_t x, y;
@@ -44,16 +46,18 @@ struct FPosition {
     inline FPosition() : x(0.0f), y(0.0f) {}
     inline FPosition(f_cord_t x, f_cord_t y) : x(x), y(y) {}
 
-    inline f_cord_t manhattenDistanceTo(const FPosition& other) const { return Abs(x - other.x) + Abs(y - other.y); }
-    inline f_cord_t distanceToSquared(const FPosition& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    inline f_cord_t manhattenDistanceTo(const FPosition& other) const { return std::abs(x - other.x) + std::abs(y - other.y); }
+    inline f_cord_t distanceToSquared(const FPosition& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     bool withinArea(const FPosition& small, const FPosition& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
 	Position snap() const;
     inline bool operator==(const FPosition& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const FPosition& other) const { return !operator==(other); }
-    inline FPosition operator+(const FPosition& position) const { return FPosition(position.x + x, position.y + y); }
-    inline FPosition operator-(const FPosition& position) const { return FPosition(position.x - x, position.y - y); }
+    inline FPosition operator+(const FPosition& position) const { return FPosition(x + position.x, y + position.y); }
+    inline FPosition operator-(const FPosition& position) const { return FPosition(x - position.x, y - position.y); }
     inline FPosition operator*(f_cord_t scalar) const { return FPosition(x * scalar, y * scalar); }
     inline FPosition& operator+=(const FPosition& position) { x += position.x; y += position.y; return *this; }
+    inline FPosition& operator-=(const FPosition& position) { x -= position.x; y -= position.y; return *this; }
+    inline FPosition& operator/=(f_cord_t scalar) { x /= scalar; y /= scalar; return *this; }
     inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
     f_cord_t x, y;

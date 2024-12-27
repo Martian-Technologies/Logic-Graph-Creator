@@ -1,6 +1,8 @@
 #ifndef difference_h
 #define difference_h
 
+#include <memory>
+
 #include "../block/block.h"
 #include <vector>
 #include <utility>
