@@ -1,9 +1,9 @@
-#include <QVectornd.h>
-#include <QPainter.h>
-#include <QBrush.h>
-#include <QDebug.h>
-#include <QPoint.h>
-#include <QSize.h>
+#include <qvectornd.h>
+#include <qpainter.h>
+#include <qbrush.h>
+#include <qdebug.h>
+#include <qpoint.h>
+#include <qsize.h>
 
 #include <memory>
 
