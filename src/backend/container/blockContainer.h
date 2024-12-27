@@ -60,6 +60,16 @@ public:
     // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 
+
+    /* ----------- iterators ----------- */
+    // not safe if the container gets modifided (dont worry about it for now)
+    typedef std::unordered_map<block_id_t, Block>::iterator iterator;
+    typedef std::unordered_map<block_id_t, Block>::const_iterator const_iterator;
+    iterator begin() { return blocks.begin(); }
+    iterator end() { return blocks.end(); }
+    const_iterator begin() const { return blocks.begin(); }
+    const_iterator end() const { return blocks.end(); }
+
 private:
     inline Block* getBlock(const Position& position);
     inline Block* getBlock(block_id_t blockId);
