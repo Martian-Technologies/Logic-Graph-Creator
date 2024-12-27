@@ -65,10 +65,27 @@ void BlockContainerWrapper::undo() {
     startUndo();
     DifferenceSharedPtr newDifference = std::make_shared<Difference>();
     DifferenceSharedPtr difference = undoSystem.undoDifference();
-    for (auto removal : difference->getRemovedBlocks()) blockContainer.tryInsertBlock(std::get<0>(removal), std::get<1>(removal), std::get<2>(removal), newDifference.get());
-    for (auto placement :   difference->getPlacedBlocks()) blockContainer.tryRemoveBlock(std::get<0>(placement), newDifference.get());
-    for (auto connection :  difference->getRemovedConnections()) blockContainer.tryCreateConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
-    for (auto connection :  difference->getCreatedConnectionss()) blockContainer.tryRemoveConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    Difference::block_modification_t blockModification;
+    Difference::connection_modification_t connectionModification;
+    for (auto modification : difference->getModifications()) {
+        switch (modification.first) {
+        case Difference::PLACE_BLOCK:
+            blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());
+            break;
+        case Difference::REMOVED_BLOCK:
+            blockModification = std::get<Difference::block_modification_t>(modification.second);
+            blockContainer.tryInsertBlock(std::get<0>(blockModification), std::get<1>(blockModification), std::get<2>(blockModification), newDifference.get());
+            break;
+        case Difference::CREATED_CONNECTION:
+            connectionModification = std::get<Difference::connection_modification_t>(modification.second);
+            blockContainer.tryRemoveConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+        case Difference::REMOVED_CONNECTION:
+            connectionModification = std::get<Difference::connection_modification_t>(modification.second);
+            blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+        }
+    }
     sendDifference(newDifference);
     endUndo();
 }
@@ -77,10 +94,27 @@ void BlockContainerWrapper::redo() {
     startUndo();
     DifferenceSharedPtr newDifference = std::make_shared<Difference>();
     DifferenceSharedPtr difference = undoSystem.redoDifference();
-    for (auto removal : difference->getRemovedBlocks()) blockContainer.tryRemoveBlock(std::get<0>(removal), newDifference.get());
-    for (auto placement :   difference->getPlacedBlocks()) blockContainer.tryInsertBlock(std::get<0>(placement), std::get<1>(placement), std::get<2>(placement), newDifference.get());
-    for (auto connection :  difference->getRemovedConnections()) blockContainer.tryRemoveConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
-    for (auto connection :  difference->getCreatedConnectionss()) blockContainer.tryCreateConnection(std::get<0>(connection), std::get<1>(connection), newDifference.get());
+    Difference::block_modification_t blockModification;
+    Difference::connection_modification_t connectionModification;
+    for (auto modification : difference->getModifications()) {
+        switch (modification.first) {
+        case Difference::REMOVED_BLOCK:
+            blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());
+            break;
+        case Difference::PLACE_BLOCK:
+            blockModification = std::get<Difference::block_modification_t>(modification.second);
+            blockContainer.tryInsertBlock(std::get<0>(blockModification), std::get<1>(blockModification), std::get<2>(blockModification), newDifference.get());
+            break;
+        case Difference::REMOVED_CONNECTION:
+            connectionModification = std::get<Difference::connection_modification_t>(modification.second);
+            blockContainer.tryRemoveConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+        case Difference::CREATED_CONNECTION:
+            connectionModification = std::get<Difference::connection_modification_t>(modification.second);
+            blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+        }
+    }
     sendDifference(newDifference);
     endUndo();
 }

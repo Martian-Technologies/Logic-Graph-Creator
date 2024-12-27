@@ -16,8 +16,10 @@ public:
         REMOVED_CONNECTION,
         CREATED_CONNECTION,
     };
+    typedef std::tuple<Position, Rotation, BlockType> block_modification_t;
+    typedef std::pair<Position, Position> connection_modification_t;
 
-    typedef std::pair<ModificationType, std::variant<std::tuple<Position, Rotation, BlockType>, std::pair<Position, Position>>> Modification;
+    typedef std::pair<ModificationType, std::variant<block_modification_t, connection_modification_t>> Modification;
 
     inline bool empty() const { return modifications.empty(); }
     inline const std::vector<Modification>& getModifications() { return modifications; }
