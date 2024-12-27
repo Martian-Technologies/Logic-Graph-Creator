@@ -2,40 +2,32 @@
 #define eventRegister_h
 
 #include <functional>
-#include <algorithm>
+#include <string>
 #include <vector>
 #include <map>
 
 #include "event.h"
 
-typedef std::function<bool(const Event& event)> EventFunction;
+typedef std::function<bool(const Event* event)> EventFunction;
 typedef unsigned long long EventRegistrationSignature;
 
 class EventRegister {
 public:
     EventRegister() : sigCounter(0), allEventFunctions() {}
 
-    EventRegistrationSignature registerFunction(const Event& event, EventFunction function) {
-        auto iter = std::find_if(
-            allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
-        );
+    typedef std::pair<EventRegistrationSignature, EventFunction> RegistrationPair;
+
+    EventRegistrationSignature registerFunction(const std::string& eventName, EventFunction function) {
         auto sigCounter = getNewRegistrationSignature();
-        if (iter != allEventFunctions.end())
-            iter->second.push_back({sigCounter, function});
-        else
-            allEventFunctions.push_back({ event, {{sigCounter, function}} });
+        allEventFunctions[eventName].push_back({sigCounter, function});
         return sigCounter;
     }
 
-    void unregisterFunction(const Event& event, EventRegistrationSignature signature) {
-        auto iter = std::find_if(
-            allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
-        );
-        auto funcIter =  std::find_if(
+    void unregisterFunction(const std::string& eventName, EventRegistrationSignature signature) {
+        auto iter = allEventFunctions.find(eventName);
+        auto funcIter = std::find_if(
             iter->second.begin(), iter->second.end(),
-            [&signature](const std::pair<EventRegistrationSignature, EventFunction>& i) { return i.first == signature; }
+            [&signature](const RegistrationPair& i) { return i.first == signature; }
         );
         if (funcIter != iter->second.end()) {
             *funcIter = iter->second.back();
@@ -44,14 +36,11 @@ public:
     }
 
     bool doEvent(const Event& event) {
-        auto iter = std::find_if(
-            allEventFunctions.begin(), allEventFunctions.end(),
-            [&event](const std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>& i) { return i.first == event; }
-        );
+        auto iter = allEventFunctions.find(event.getName());
         if (iter == allEventFunctions.end()) return false;
         bool used = false;
-        for (std::pair<EventRegistrationSignature, EventFunction>& function : iter->second) {
-            if (function.second(event)) used = true;
+        for (RegistrationPair& function : iter->second) {
+            if (function.second(&event)) used = true;
         }
         return used;
     }
@@ -59,7 +48,7 @@ private:
     EventRegistrationSignature sigCounter;
     inline EventRegistrationSignature getNewRegistrationSignature() {return ++sigCounter;}
 
-    std::vector<std::pair<Event, std::vector<std::pair<EventRegistrationSignature, EventFunction>>>> allEventFunctions;
+    std::map<std::string, std::vector<RegistrationPair>> allEventFunctions;
 };
 
 #endif /* eventRegister_h */

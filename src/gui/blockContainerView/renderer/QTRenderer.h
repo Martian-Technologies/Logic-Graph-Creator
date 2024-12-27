@@ -6,10 +6,10 @@
 #include <qpainter.h>
 #include <qpixmap.h>
 
+#include "../viewManager/viewManager.h"
 #include "backend/defs.h"
-#include "gui/gridGUI/renderer/tileSet.h"
-#include "gui/gridGUI/viewMannager.h"
 #include "renderer.h"
+#include "tileSet.h"
 
 // TODO
 // - [x] QT renderer
@@ -33,7 +33,7 @@ public:
     void setBlockContainer(BlockContainerWrapper* blockContainer) override;
     // virtual void setSimulator(Simulator* simulator) override;
     
-    void updateView(ViewMannager* viewManager) override;
+    void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
 
     // effects
@@ -55,7 +55,7 @@ private:
     int w,h;
 
     BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
-    ViewMannager* viewManager; // or viewManager
+    ViewManager* viewManager; // or viewManager
     
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;

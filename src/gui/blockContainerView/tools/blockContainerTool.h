@@ -9,7 +9,7 @@
 #include "../../gridGUI/effects/logicGridEffectDisplayer.h"
 #include "middleEnd/blockContainerWrapper.h"
 #include "toolManagerEventRegister.h"
-#include "../events/positionEvent.h"
+#include "../events/customEvents.h"
 class LogicGridWindow;
 
 

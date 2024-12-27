@@ -73,7 +73,7 @@ private:
     // tool function event linking
     ToolManagerEventRegister toolManagerEventRegister;
     EventRegister* eventRegister;
-    std::vector<std::pair<Event, EventRegistrationSignature>> registeredEvents;
+    std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;
 
     // which tool data
     std::unique_ptr<BlockContainerTool> tool;

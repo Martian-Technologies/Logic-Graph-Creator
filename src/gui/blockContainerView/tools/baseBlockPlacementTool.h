@@ -24,11 +24,11 @@ public:
         toolManagerEventRegister.registerFunction("tool rotate block ccw", std::bind(&BaseBlockPlacementTool::rotateBlockCCW, this, std::placeholders::_1));
     }
 
-    bool rotateBlockCW(const Event& event) {
+    bool rotateBlockCW(const Event* event) {
         rotation = rotate(rotation, true);
         return true;
     }
-    bool rotateBlockCCW(const Event& event) {
+    bool rotateBlockCCW(const Event* event) {
         rotation = rotate(rotation, false);
         return true;
     }

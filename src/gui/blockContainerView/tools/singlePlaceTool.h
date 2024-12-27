@@ -21,18 +21,13 @@ public:
         toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&SinglePlaceTool::exitBlockView, this, std::placeholders::_1));
     }
 
-    bool startPlaceBlock(const Event& positionEvent);
-    bool stopPlaceBlock(const Event& positionEvent);
-    bool startDeleteBlocks(const Event& positionEvent);
-    bool stopDeleteBlocks(const Event& positionEvent);
-    // bool leftPress(const Event& positionEvent);
-    // bool rightPress(const Event& positionEvent);
-    // bool leftRelease(const Event& positionEvent);
-    // bool rightRelease(const Event& positionEvent);
-    bool pointerMove(const Event& positionEvent);
-    bool enterBlockView(const Event& positionEvent);
-    bool exitBlockView(const Event& positionEvent);
-    // bool keyPress(int keyId);
+    bool startPlaceBlock(const Event* event);
+    bool stopPlaceBlock(const Event* event);
+    bool startDeleteBlocks(const Event* event);
+    bool stopDeleteBlocks(const Event* event);
+    bool pointerMove(const Event* event);
+    bool enterBlockView(const Event* event);
+    bool exitBlockView(const Event* event);
 
 private:
     char clicks[2];

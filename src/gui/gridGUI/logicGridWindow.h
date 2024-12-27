@@ -4,20 +4,16 @@
 #include <QApplication>
 #include <QTreeWidget>
 #include <QWheelEvent>
+#include <QVectornd.h>
 #include <QKeyEvent>
 #include <QPainter>
 #include <QWidget>
-#include <QPixmap>
-#include <qevent.h>
-#include <qvectornd.h>
-#include <set>
+#include <QTimer>
 
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
-#include "backend/container/blockContainer.h"
-#include "renderer/QTRenderer.h"
-#include "viewMannager.h"
+#include "../blockContainerView/renderer/QTRenderer.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
@@ -25,17 +21,22 @@ public:
     LogicGridWindow(QWidget* parent = nullptr);
 
     // getters
-    const BlockContainer* getBlockContainer() const {return blockContainerView.getBlockContainer()->getBlockContainer();}
-	
+    const BlockContainer* getBlockContainer() const { return blockContainerView.getBlockContainer()->getBlockContainer(); }
+
     // data checkers
-    inline bool insideWindow(const QPoint& point) const {return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height();}
-    
+    inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
+
     // setup
     void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
     void setSelector(QTreeWidget* treeWidget);
 
     // dont call this func
     void updateSelectedItem();
+
+    QVector2D pixelsToView(QPoint point);
+    inline float getPixelsWidth() { return (float)rect().width(); }
+    inline float getPixelsHight() { return (float)rect().height(); }
+
 
 protected:
     // events
@@ -52,23 +53,14 @@ protected:
     bool event(QEvent* event) override;
 
 private:
-    void onViewChanged();
-    void onHoverChanged(Position hoverPosition);
-
-    QVector2D pixelsToView(QPoint point);
-    
     // update loop
     QTimer* updateLoopTimer;
-    std::set<int> keysPressed;
     float updateInterval = 0.016f;
     void updateLoop();
 
     // data
-    BlockContainerView blockContainerView;
-
-    // helper classes
-    QTRenderer renderer;
-    ViewMannager viewMannager;
+    BlockContainerView<QTRenderer> blockContainerView;
+    bool mouseControls;
 
     // ui elements
     QTreeWidget* treeWidget;

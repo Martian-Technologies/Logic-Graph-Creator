@@ -1,16 +1,17 @@
-#include "QTRenderer.h"
-#include "backend/defs.h"
-#include "backend/position/position.h"
-#include "gui/gridGUI/renderer/tileSet.h"
-#include "util/vector2.h"
+#include <QVectornd.h>
+#include <QPainter.h>
+#include <QBrush.h>
+#include <QDebug.h>
+#include <QPoint.h>
+#include <QSize.h>
+
 #include <memory>
-#include <qbrush.h>
-#include <qdebug.h>
-#include <qlogging.h>
-#include <qpainter.h>
-#include <qpoint.h>
-#include <qsize.h>
-#include <qvectornd.h>
+
+#include "backend/position/position.h"
+#include "backend/defs.h"
+#include "util/vector2.h"
+#include "QTRenderer.h"
+
 
 QTRenderer::QTRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr)
@@ -104,7 +105,7 @@ void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer)
     this->blockContainer = blockContainer;
 }
 
-void QTRenderer::updateView(ViewMannager* viewManager)
+void QTRenderer::updateView(ViewManager* viewManager)
 {
     this->viewManager = viewManager;
 }

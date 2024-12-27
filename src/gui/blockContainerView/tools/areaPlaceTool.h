@@ -18,12 +18,11 @@ public:
     }
 
     inline void reset() override final {click = 'n';}
-    bool startPlaceBlock(const Event& event);
-    bool startDeleteBlocks(const Event& event);
-    bool pointerMove(const Event& event);
-    bool enterBlockView(const Event& event);
-    bool exitBlockView(const Event& event);
-    // bool keyPress(int keyId);
+    bool startPlaceBlock(const Event* event);
+    bool startDeleteBlocks(const Event* event);
+    bool pointerMove(const Event* event);
+    bool enterBlockView(const Event* event);
+    bool exitBlockView(const Event* event);
 
 private:
     Position clickPosition;

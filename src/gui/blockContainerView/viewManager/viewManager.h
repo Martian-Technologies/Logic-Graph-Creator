@@ -1,30 +1,36 @@
-#ifndef viewMannager_h
-#define viewMannager_h
+#ifndef viewManager_h
+#define viewManager_h
 
-#include "backend/position/position.h"
 #include <functional>
+
+#include "gui/blockContainerView/events/eventRegister.h"
+#include "backend/position/position.h"
 
 // TODO - there are one million magic numbers that should probably be settings
 // TODO - eliminate traces of QT
 // TODO - clear up difference between usingMouse, doMouseMovement, etc
 
-class ViewMannager {
+class ViewManager {
 public:
-    ViewMannager(bool scrollZoom, int screenW, int screenH)
-		: scrollZoom(scrollZoom),
-		  viewCenter(0.0f,0.0f), viewHeight(8.0f), aspectRatio(16.0f/9.0f) {}
+    ViewManager() : viewCenter(), viewHeight(8.0f), aspectRatio(16.0f/9.0f) {}
 
-    // input events, returning true if the event is accepted
-    bool scroll(float dx, float dy); // TODO - I'm unsure of the coordinate system for scroll + pinch, they should take in something view-adjacent to make sure they feel the same at all screen sizes
-    bool pinch(float delta);
-    bool pointerDown();
-    bool pointerUp();
-    bool press(int key);
-    bool release(int key);
-    bool pointerMove(float viewX, float viewY); // this function takes in view coordinates
-    void keyMove(float dirX, float dirY, float dt); // this function takes in the input direction
-    void pointerEnterView(float viewX, float viewY);
-    void pointerExitView(float viewX, float viewY);
+    inline void initialize(EventRegister& eventRegister) {
+        eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
+        eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
+        eventRegister.registerFunction("view attach anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
+        eventRegister.registerFunction("view dettach anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
+        eventRegister.registerFunction("pointer move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
+        eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
+        eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
+    }
+
+    bool zoom(const Event* event);
+    bool pan(const Event* event);
+    bool attachAnchor(const Event* event);
+    bool dettachAnchor(const Event* event);
+    bool pointerMove(const Event* event);
+    bool pointerEnterView(const Event* event);
+    bool pointerExitView(const Event* event);
 
     // view
     inline void setAspectRatio(float value) { aspectRatio = value; emitViewChanged(); }
@@ -36,7 +42,7 @@ public:
     inline float getViewWidth() const { return viewHeight * aspectRatio; }
     inline FPosition getTopLeft() const { return viewCenter - FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
     inline FPosition getBottomRight() const { return viewCenter + FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
-    inline FPosition getPointerPosition() const { return viewToGrid(pointerViewX, pointerViewY); }
+    inline const FPosition& getPointerPosition() const { return pointerPosition; }
     inline float getAspectRatio() const { return aspectRatio; }
     
     // coordinate system conversion
@@ -52,15 +58,10 @@ private:
     void applyLimits();
     inline void emitViewChanged() { if (viewChangedListener) viewChangedListener(); }
 
-    // setting
-    float moveSpeed = 0.6f; // what percentage of width to move per second
-    bool scrollZoom;
-
     // pointer
     bool doPointerMovement = false;
     bool pointerActive = false;
-    float pointerViewX = 0.0f;
-    float pointerViewY = 0.0f;
+    FPosition pointerPosition;
 
     // view
     FPosition viewCenter;
@@ -71,4 +72,4 @@ private:
     std::function<void()> viewChangedListener;
 };
 
-#endif /* viewMannager_h */
+#endif /* viewManager_h */
