@@ -1,4 +1,6 @@
 #include "addressTree.h"
+#include <stdexcept>
+#include <cassert>
 
 template<class T>
 void AddressTreeNode<T>::addValue(block_id_t blockId, T value) {
@@ -77,7 +79,7 @@ T AddressTreeNode<T>::getValue(const Address& address) const {
     for (int i = 0; i < address.size() - 1; i++) {
         const auto pt = currentBranch.branches.find(address.getBlockId(i));
         if (pt == currentBranch.branches.end()) {
-            throw std::out_of_range("AddressTree::getLeaf: address not found");
+            throw std::out_of_range("AddressTree::getValue: address not found");
         }
         currentBranch = pt->second;
     }
@@ -86,7 +88,7 @@ T AddressTreeNode<T>::getValue(const Address& address) const {
 
 template<class T>
 void AddressTreeNode<T>::remap(const std::unordered_map<T, T>& mapping) {
-    for (auto& [key, value] : leaves) {
+    for (auto& [key, value] : values) {
         if (mapping.find(value) != mapping.end()) {
             value = mapping.at(value);
         }

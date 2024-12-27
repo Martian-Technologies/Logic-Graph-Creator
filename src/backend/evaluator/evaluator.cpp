@@ -11,6 +11,33 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
     // TODO: implement initializing from blockcontainer
 
     const auto& blockContainer = blockContainerWrapper->getBlockContainer();
+    auto it = blockContainer->begin();
+    const auto end = blockContainer->end();
+    for (; it != end; ++it) {
+        const Block& block = it->second;
+        GateType gateType = GateType::NONE;
+        switch (block.type()) {
+        case BlockType::AND:
+            gateType = GateType::AND;
+            break;
+        case BlockType::OR:
+            gateType = GateType::OR;
+            break;
+        case BlockType::XOR:
+            gateType = GateType::XOR;
+            break;
+        case BlockType::NAND:
+            gateType = GateType::NAND;
+            break;
+        case BlockType::NOR:
+            gateType = GateType::NOR;
+            break;
+        case BlockType::XNOR:
+            gateType = GateType::XNOR;
+            break;
+        }
+        addressTree.addValue(block.id(), logicSimulator.addGate(gateType));
+    }
 
     // connect makeEdit to blockContainerWrapper
     blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
