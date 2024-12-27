@@ -4,10 +4,13 @@
 #include <QCursor>
 #include <QTimer>
 #include <functional>
+#include <qdatetime.h>
 #include <qlogging.h>
 #include <qnamespace.h>
+#include <qtypes.h>
 #include <qvectornd.h>
 #include <qwidget.h>
+#include <string>
 
 #include "logicGridWindow.h"
 #include "backend/position/position.h"
@@ -78,6 +81,15 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
     renderer.render(painter);
 
+    static qint64 lastTime = QDateTime::currentMSecsSinceEpoch();
+    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+    if (lastTime != 0)
+    {
+        std::string frameTime = std::to_string(currentTime - lastTime) + "ms";
+        painter->drawText(QRect(QPoint(0,0),size()),Qt::AlignTop,QString(frameTime.c_str()));
+    }
+    lastTime = currentTime;
+    
     //tool->display(painter, *this);
 
     delete painter;
