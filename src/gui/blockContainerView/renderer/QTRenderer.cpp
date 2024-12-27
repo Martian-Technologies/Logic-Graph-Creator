@@ -6,6 +6,7 @@
 #include <qsize.h>
 
 #include <memory>
+#include <unordered_set>
 
 #include "backend/position/position.h"
 #include "backend/defs.h"
@@ -65,28 +66,40 @@ void QTRenderer::render(QPainter* painter)
         return QPoint(viewPos.first * w, viewPos.second * h);
     };
 
+    auto renderCell = [&](FPosition position, BlockType type, Rotation rotation) -> void {
+        QPoint point = gridToQt(position);
+        QPoint pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
+
+        TileRegion tsRegion = tileSetInfo->getRegion(type);
+        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+                           QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+            
+        painter->drawPixmap(QRectF(point, pointBR),
+                            tileSet,
+                            tileSetRect);
+    };
+
     // get bounds
     Position topLeft = viewManager->getTopLeft().snap();
     Position bottomRight = viewManager->getBottomRight().snap();
     
     // render grid
+    std::unordered_set<const Block*> blocksToRender;
     for (int c = topLeft.x; c <= bottomRight.x; ++c)
     {
         for (int r = topLeft.y; r <= bottomRight.y; ++r)
-        {
-            QPoint point = gridToQt(FPosition(c, r));
-            QPoint pointBR = gridToQt(FPosition(c+1, r+1));
-            
-            // const Block* block = blockContainer->getBlock(Position(c,r));
+        {          
+            BlockType type = BlockType::NONE;
+            const Block* block = blockContainer->getBlockContainer()->getBlock(Position(c,r));
+            if (block) type = block->type();
 
-            TileRegion tsRegion = tileSetInfo->getRegion(BlockType::NONE);
-            QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-                        QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-            
-            painter->drawPixmap(QRectF(point, pointBR),
-                                tileSet,
-                                tileSetRect);
+            renderCell(FPosition(c,r), type, Rotation::ZERO);
         }
+    }
+
+    for (const Block* block : blocksToRender)
+    {
+        
     }
 
     // test grid points
