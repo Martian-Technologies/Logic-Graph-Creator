@@ -23,16 +23,16 @@ void LogicSimulator::initialize() {
 
 int LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
     if (allowSubstituteDecomissioned && numDecomissioned > 0) {
-        for (int i = 0; i < currentState.size(); ++i) {
-            if (gateTypes[i] == GateType::NONE) {
-                gateTypes[i] = gateType;
-                currentGateInputsUpdated[i] = true;
-                nextGateInputsUpdated[i] = true;
-                currentState[i] = false;
-                nextState[i] = false;
-                --numDecomissioned;
-                return i;
-            }
+        auto it = std::find(gateTypes.begin(), gateTypes.end(), GateType::NONE);
+        if (it != gateTypes.end()) {
+            const int index = it - gateTypes.begin();
+            gateTypes[index] = gateType;
+            currentGateInputsUpdated[index] = true;
+            nextGateInputsUpdated[index] = true;
+            currentState[index] = false;
+            nextState[index] = false;
+            --numDecomissioned;
+            return index;
         }
     }
     gateTypes.push_back(gateType);
