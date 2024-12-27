@@ -6,29 +6,14 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
     :running(false),
     paused(false),
     targetTickrate(0),
-    logicSimulator() {
+    logicSimulator(),
+    addressTree() {
     // TODO: implement initializing from blockcontainer
 
-
+    const auto& blockContainer = blockContainerWrapper->getBlockContainer();
 
     // connect makeEdit to blockContainerWrapper
-    blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1));
-}
-
-void Evaluator::stop() {
-    running = false;
-    paused = false;
-}
-
-void Evaluator::start() {
-    running = true;
-    paused = false;
-}
-
-void Evaluator::start(unsigned long long tickrate) {
-    running = true;
-    paused = false;
-    targetTickrate = tickrate;
+    blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Evaluator::pause() {
@@ -44,6 +29,7 @@ void Evaluator::reset() {
 }
 
 void Evaluator::setTickrate(unsigned long long tickrate) {
+    assert(tickrate > 0);
     targetTickrate = tickrate;
 }
 
@@ -52,6 +38,6 @@ void Evaluator::runNTicks(unsigned long long n) {
     logicSimulator.simulateNTicks(n);
 }
 
-void Evaluator::makeEdit(DifferenceSharedPtr difference) {
+void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
     assert(false); // TODO: implement accepting a diff and integrating it into the logic simulator
 }

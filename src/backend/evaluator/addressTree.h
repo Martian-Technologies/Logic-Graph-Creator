@@ -5,25 +5,25 @@
 
 #include "../address.h"
 
-template <class T> class AddressTree {
+template <class T> class AddressTreeNode {
 public:
     void addValue(block_id_t blockId, T value);
-    void addValue(const Address& address, T leaf);
-    void makeBranch(block_id_t blockId, AddressTree<T> branch);
-    void makeBranch(const Address& address, AddressTree<T> branch);
-    T getLeaf(block_id_t blockId) const { return leaves.at(blockId); }
-    AddressTree<T> getBranch(block_id_t blockId) const { return branches.at(blockId); }
+    void addValue(const Address& address, T value);
+    void makeBranch(block_id_t blockId);
+    void makeBranch(const Address& address);
+    T getValue(block_id_t blockId) const { return values.at(blockId); }
+    AddressTreeNode<T> getBranch(block_id_t blockId) const { return branches.at(blockId); }
 
-    bool hasLeaf(block_id_t blockId) const { return leaves.find(blockId) != leaves.end(); }
+    bool hasValue(block_id_t blockId) const { return values.find(blockId) != values.end(); }
     bool hasBranch(block_id_t blockId) const { return branches.find(blockId) != branches.end(); }
 
-    AddressTree<T> getBranch(const Address& address) const;
-    T getLeaf(const Address& address) const;
+    AddressTreeNode<T> getBranch(const Address& address) const;
+    T getValue(const Address& address) const;
 
     void remap(const std::unordered_map<T, T>& mapping);
 private:
-    std::unordered_map<block_id_t, T> leaves;
-    std::unordered_map<block_id_t, AddressTree<T>> branches;
+    std::unordered_map<block_id_t, T> values;
+    std::unordered_map<block_id_t, AddressTreeNode<T>> branches;
 };
 
 #endif /* addressTree_h */
