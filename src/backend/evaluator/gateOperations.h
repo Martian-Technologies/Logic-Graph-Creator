@@ -5,6 +5,6 @@
 #include "logicState.h"
 #include "gateType.h"
 
-LogicState computeGateState(GateType type, unsigned int inputCount, unsigned int numInputs, LogicState currentState);
+logic_state_t computeGateState(GateType type, unsigned int inputCount, unsigned int numInputs, logic_state_t currentState);
 
 #endif // gateOperations_h
