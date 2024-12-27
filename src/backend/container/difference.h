@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include <memory>
+#include <variant>
 
 #include "../block/block.h"
 
@@ -27,8 +28,8 @@ public:
 private:
     void addRemovedBlock(const Position& position, Rotation rotation, BlockType type) { modifications.push_back({ REMOVED_BLOCK, std::make_tuple(position, rotation, type) }); }
     void addPlacedBlock(const Position& position, Rotation rotation, BlockType type) { modifications.push_back({ PLACE_BLOCK, std::make_tuple(position, rotation, type) }); }
-    void addRemovedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ REMOVED_CONNECTION, std::make_tuple(outputPosition, inputPosition) }); }
-    void addCreatedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ CREATED_CONNECTION, std::make_tuple(outputPosition, inputPosition) }); }
+    void addRemovedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ REMOVED_CONNECTION, std::make_pair(outputPosition, inputPosition) }); }
+    void addCreatedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ CREATED_CONNECTION, std::make_pair(outputPosition, inputPosition) }); }
 
     std::vector<Modification> modifications;
 };
