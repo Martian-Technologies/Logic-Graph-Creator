@@ -1,11 +1,11 @@
 #ifndef logicSimulator_h
 #define logicSimulator_h
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-#include "gateType.h"
 #include "logicState.h"
+#include "gateType.h"
 #include "../defs.h"
 
 class LogicSimulator {

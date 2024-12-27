@@ -1,6 +1,7 @@
 // gateOperations.cpp
-#include "gateOperations.h"
 #include <stdexcept>
+
+#include "gateOperations.h"
 
 logic_state_t computeGateState(GateType type, unsigned int inputCount, unsigned int numInputs, logic_state_t currentState) {
     if (numInputs == 0) {

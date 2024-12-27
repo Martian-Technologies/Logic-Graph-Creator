@@ -1,8 +1,9 @@
+#include <stdexcept>
+#include <algorithm>
+
 #include "logicSimulator.h"
 #include "gateOperations.h"
 
-#include <stdexcept>
-#include <algorithm>
 
 LogicSimulator::LogicSimulator()
     :currentState(),
