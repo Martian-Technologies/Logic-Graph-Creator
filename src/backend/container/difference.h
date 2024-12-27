@@ -1,6 +1,8 @@
 #ifndef difference_h
 #define difference_h
 
+#include <utility>
+#include <vector>
 #include <memory>
 
 #include "../block/block.h"
@@ -8,23 +10,25 @@
 class Difference {
     friend class BlockContainer;
 public:
-    inline bool empty() const { return removedBlocks.empty() && placedBlocks.empty() && removedConnections.empty() && createdConnections.empty(); }
+    enum ModificationType {
+        REMOVED_BLOCK,
+        PLACE_BLOCK,
+        REMOVED_CONNECTION,
+        CREATED_CONNECTION,
+    };
 
-    const std::vector<std::tuple<Position, Rotation, BlockType>>& getRemovedBlocks() const { return removedBlocks; }
-    const std::vector<std::tuple<Position, Rotation, BlockType>>& getPlacedBlocks() const { return placedBlocks; }
-    const std::vector<std::pair<Position, Position>>& getRemovedConnections() const { return removedConnections; }
-    const std::vector<std::pair<Position, Position>>& getCreatedConnectionss() const { return createdConnections; }
+    typedef std::pair<ModificationType, std::variant<std::tuple<Position, Rotation, BlockType>, std::pair<Position, Position>>> Modification;
+
+    inline bool empty() const { return modifications.empty(); }
+    inline const std::vector<Modification>& getModifications() { return modifications; }
 
 private:
-    void addRemovedBlock(const Position& position, Rotation rotation, BlockType type) { removedBlocks.push_back(std::tuple<Position, Rotation, BlockType>(position, rotation, type)); }
-    void addPlacedBlock(const Position& position, Rotation rotation, BlockType type) { placedBlocks.push_back(std::tuple<Position, Rotation, BlockType>(position, rotation, type)); }
-    void addRemovedConnection(const Position& outputPosition, const Position& inputPosition) { removedConnections.emplace_back(outputPosition, inputPosition); }
-    void addCreatedConnection(const Position& outputPosition, const Position& inputPosition) { createdConnections.emplace_back(outputPosition, inputPosition); }
+    void addRemovedBlock(const Position& position, Rotation rotation, BlockType type) { modifications.push_back({ REMOVED_BLOCK, std::make_tuple(position, rotation, type) }); }
+    void addPlacedBlock(const Position& position, Rotation rotation, BlockType type) { modifications.push_back({ PLACE_BLOCK, std::make_tuple(position, rotation, type) }); }
+    void addRemovedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ REMOVED_CONNECTION, std::make_tuple(outputPosition, inputPosition) }); }
+    void addCreatedConnection(const Position& outputPosition, const Position& inputPosition) { modifications.push_back({ CREATED_CONNECTION, std::make_tuple(outputPosition, inputPosition) }); }
 
-    std::vector<std::tuple<Position, Rotation, BlockType>> removedBlocks;
-    std::vector<std::tuple<Position, Rotation, BlockType>> placedBlocks;
-    std::vector<std::pair<Position, Position>> removedConnections;
-    std::vector<std::pair<Position, Position>> createdConnections;
+    std::vector<Modification> modifications;
 };
 typedef std::shared_ptr<Difference> DifferenceSharedPtr;
 
