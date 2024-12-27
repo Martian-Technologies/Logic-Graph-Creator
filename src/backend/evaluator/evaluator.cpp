@@ -39,6 +39,18 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
         addressTree.addValue(block.id(), logicSimulator.addGate(gateType));
     }
 
+    it = blockContainer->begin();
+    for (; it != end; ++it) {
+        const Block& block = it->second;
+        const block_id_t input = block.id();
+        for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
+            for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
+                const block_id_t output = connectionEnd.getBlockId();
+                logicSimulator.connectGates(addressTree.getValue(input), addressTree.getValue(output));
+            }
+        }
+    }
+
     // connect makeEdit to blockContainerWrapper
     blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -66,5 +78,5 @@ void Evaluator::runNTicks(unsigned long long n) {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
-    assert(false); // TODO: implement accepting a diff and integrating it into the logic simulator
+
 }
