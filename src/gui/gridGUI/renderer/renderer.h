@@ -1,8 +1,7 @@
 #ifndef renderer_h
 #define renderer_h
 
-#include "backend/container/blockContainer.h"
-#include "backend/position/position.h"
+#include "middleEnd/blockContainerManager.h"
 #include "gui/gridGUI/viewMannager.h"
 #include "color.h"
 
@@ -29,7 +28,7 @@ class Renderer
 {
  public:
     // main flow
-    virtual void setBlockContainer(BlockContainer* blockContainer) = 0;
+    virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
     // virtual void setSimulator(Simulator* simulator) = 0;
     
     virtual void updateView(ViewMannager* viewManager) = 0;

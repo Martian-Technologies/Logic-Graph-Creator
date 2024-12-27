@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap(":logicTiles.png");
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 

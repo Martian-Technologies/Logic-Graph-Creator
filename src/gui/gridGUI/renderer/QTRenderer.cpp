@@ -99,7 +99,7 @@ void QTRenderer::render(QPainter* painter)
     // render lines
 }
 
-void QTRenderer::setBlockContainer(BlockContainer* blockContainer)
+void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer)
 {
     this->blockContainer = blockContainer;
 }

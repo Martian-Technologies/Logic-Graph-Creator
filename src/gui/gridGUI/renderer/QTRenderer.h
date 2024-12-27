@@ -30,7 +30,7 @@ public:
     void render(QPainter* painter);
 
     // updating
-    void setBlockContainer(BlockContainer* blockContainer) override;
+    void setBlockContainer(BlockContainerWrapper* blockContainer) override;
     // virtual void setSimulator(Simulator* simulator) override;
     
     void updateView(ViewMannager* viewManager) override;
@@ -54,7 +54,7 @@ public:
 private:
     int w,h;
 
-    BlockContainer* blockContainer; // renderers should usually not retain a pointer to blockContainer
+    BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
     ViewMannager* viewManager; // or viewManager
     
     QPixmap tileSet;

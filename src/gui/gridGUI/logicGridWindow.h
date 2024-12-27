@@ -15,12 +15,8 @@
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
-#include "connectionRenderer.h"
-#include "blockRenderer.h"
-#include "gridRenderer.h"
 #include "backend/container/blockContainer.h"
 #include "renderer/QTRenderer.h"
-#include "tools/blockContainerTool.h"
 #include "viewMannager.h"
 
 class LogicGridWindow : public QWidget {

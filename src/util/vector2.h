@@ -11,7 +11,7 @@ struct Vec2 {
     inline Vec2(vec_cord_t x, vec_cord_t y) : x(x), y(y) {}
 
     inline vec_cord_t manhattenDistanceTo(const Vec2& other) const { return std::abs(x - other.x) + std::abs(y - other.y); }
-    inline vec_cord_t distanceToSquared(const Vec2& other) const { return std::pow(x - other.x, 2.0f) + std::pow(y - other.y, 2.0f); }
+    inline vec_cord_t distanceToSquared(const Vec2& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     bool withinArea(const Vec2& small, const Vec2& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
     inline bool operator==(const Vec2& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Vec2& other) const { return !operator==(other); }
@@ -33,7 +33,7 @@ struct Vec2Int {
     inline Vec2Int(vec_int_cord_t x, vec_int_cord_t y) : x(x), y(y) {}
 
     inline vec_int_cord_t manhattenDistanceTo(const Vec2Int& other) const { return Abs(x - other.x) + Abs(y - other.y); }
-    inline vec_int_cord_t distanceToSquared(const Vec2Int& other) const { return IntPower<2>(x - other.x) + IntPower<2>(y - other.y); }
+    inline vec_int_cord_t distanceToSquared(const Vec2Int& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     bool withinArea(const Vec2Int& small, const Vec2Int& large) const {return small.x <= x && small.y <= y && large.x >= x && large.y >= y;}
     inline bool operator==(const Vec2Int& other) const { return x == other.x && y == other.y; }
     inline bool operator!=(const Vec2Int& other) const { return !operator==(other); }

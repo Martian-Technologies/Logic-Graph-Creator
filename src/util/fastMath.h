@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <cmath>
 
-template <unsigned int p>
-constexpr int  IntPower(int x) {
+template <unsigned int p, class T>
+constexpr int FastPower(T x) {
     if constexpr (p == 0) return 1;
     if constexpr (p == 1) return x;
 
-    int tmp = IntPower<p / 2>(x);
+    int tmp = FastPower<p / 2>(x);
     if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 

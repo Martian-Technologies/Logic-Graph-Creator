@@ -52,7 +52,7 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
 // business logic
 
 void LogicGridWindow::onViewChanged() {
-    tool->mouseMove(viewMannager.getPointerPosition().snap());
+    blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", viewMannager.getPointerPosition()));
     renderer.updateView(&viewMannager);
 }
 
@@ -138,7 +138,7 @@ void LogicGridWindow::setBlockContainer(std::shared_ptr<BlockContainerWrapper> b
     blockContainerView.setBlockContainer(blockContainer);
     updateSelectedItem();
     
-    renderer.setBlockContainer(blockContainer);
+    renderer.setBlockContainer(blockContainer.get());
 }
 
 // input events
