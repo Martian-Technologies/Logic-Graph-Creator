@@ -1,11 +1,12 @@
 #ifndef renderer_h
 #define renderer_h
 
+#include <vector>
+
 #include "middleEnd/blockContainerManager.h"
-#include "gui/gridGUI/viewMannager.h"
+#include "../viewManager/viewManager.h"
 #include "color.h"
 
-#include <vector>
 
 // This is the renderer interface. It defines all the methods that non-windowing
 // or renderer-specific code should be able to call. Each implementation is
@@ -31,7 +32,7 @@ class Renderer
     virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
     // virtual void setSimulator(Simulator* simulator) = 0;
     
-    virtual void updateView(ViewMannager* viewManager) = 0;
+    virtual void updateView(ViewManager* viewManager) = 0;
     // virtual void updateBlockContainer(Difference diff) = 0;
     
     // effect layer

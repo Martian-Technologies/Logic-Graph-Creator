@@ -18,11 +18,11 @@ public:
     }
 
     inline void reset() override final { clicked = false; }
-    bool makeConnection(const Event& positionEvent);
-    bool cancelConnection(const Event& positionEvent);
-    bool pointerMove(const Event& positionEvent);
-    bool enterBlockView(const Event& positionEvent);
-    bool exitBlockView(const Event& positionEvent);
+    bool makeConnection(const Event* event);
+    bool cancelConnection(const Event* event);
+    bool pointerMove(const Event* event);
+    bool enterBlockView(const Event* event);
+    bool exitBlockView(const Event* event);
 
 private:
     bool clicked;
