@@ -9,6 +9,8 @@
 #include <QWidget>
 #include <QPixmap>
 
+#include <memory>
+
 #include "../blockContainerView/blockContainerView.h"
 #include "connectionRenderer.h"
 #include "blockRenderer.h"
