@@ -43,8 +43,8 @@ LogicGridWindow::LogicGridWindow(QWidget *parent)
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
     // Renderer
-    renderer.initialize(":logicTiles.png");
     renderer.resize(w, h);
+    renderer.initializeTileSet(":logicTiles.png");
 }
 
 // business logic

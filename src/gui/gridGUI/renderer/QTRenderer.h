@@ -2,9 +2,12 @@
 #define QTRenderer_h
 
 #include <QPainter>
+#include <memory>
 #include <qpainter.h>
 #include <qpixmap.h>
 
+#include "backend/defs.h"
+#include "gui/gridGUI/renderer/tileSet.h"
 #include "gui/gridGUI/viewMannager.h"
 #include "renderer.h"
 
@@ -22,7 +25,7 @@ public:
     QTRenderer();
     
     // general flow
-    void initialize(const std::string& filePath);
+    void initializeTileSet(const std::string& filePath);
     void resize(int w, int h);
     void render(QPainter* painter);
 
@@ -53,7 +56,9 @@ private:
 
     BlockContainer* blockContainer; // renderers should usually not retain a pointer to blockContainer
     ViewMannager* viewManager; // or viewManager
-    QPixmap tileMap;
+    
+    QPixmap tileSet;
+    std::unique_ptr<TileSet<BlockType>> tileSetInfo;
 };                
 
 #endif // QTRenderer_h

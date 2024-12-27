@@ -1,25 +1,44 @@
 #include "QTRenderer.h"
+#include "backend/defs.h"
 #include "backend/position/position.h"
+#include "gui/gridGUI/renderer/tileSet.h"
+#include "util/vector2.h"
+#include <memory>
 #include <qbrush.h>
 #include <qdebug.h>
 #include <qlogging.h>
 #include <qpainter.h>
 #include <qpoint.h>
 #include <qsize.h>
+#include <qvectornd.h>
 
 QTRenderer::QTRenderer()
-    : w(0), h(0), blockContainer(nullptr)
+    : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr)
 {
+    
 }
 
-void QTRenderer::initialize(const std::string &filePath)
+void QTRenderer::initializeTileSet(const std::string& filePath)
 {
     if (filePath != "") {
-        tileMap = QPixmap(filePath.c_str());
+        tileSet = QPixmap(filePath.c_str());
         
-        if (tileMap.isNull()) {
-            qDebug() << "ERROR (LogicGridWindow::loadTileMap) was not able to load tileMap" << filePath;
+        if (tileSet.isNull()) {
+            qDebug() << "ERROR: tileSet image could not be loaded from file." << filePath;
         }
+
+        // create tileSet
+        tileSetInfo = std::make_unique<TileSet<BlockType>>(Vec2Int(256,128));
+        tileSetInfo->addRegion(BlockType::NONE, {0, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::BLOCK, {32, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::CUSTOM, {32, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::TYPE_COUNT, {32, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::AND, {64, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::OR, {96, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::XOR, {128, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::NAND, {160, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::NOR, {192, 0}, {32, 32});
+        tileSetInfo->addRegion(BlockType::XNOR, {224, 0}, {32, 32});
     }
 }
 
@@ -32,10 +51,10 @@ void QTRenderer::resize(int w, int h)
 void QTRenderer::render(QPainter* painter)
 {
     // error checking
-    if (tileMap.isNull())
+    if (tileSet.isNull() || tileSetInfo == nullptr)
     {
-        painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileMap found");
-        qDebug() << "ERROR: QTRenderer has no tileMap, cnanot proceed with render.";
+        painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileSet found");
+        qDebug() << "ERROR: QTRenderer has no tileSet, cnanot proceed with render.";
         return;
     }
 
@@ -57,11 +76,13 @@ void QTRenderer::render(QPainter* painter)
             QPoint point = gridToQt(FPosition(c, r));
             QPoint pointBR = gridToQt(FPosition(c+1, r+1));
 
-            QRectF gridTileRect(QPointF(0.0f,0.0f),QSizeF(32.0f,32.0f));
+            TileRegion tsRegion = tileSetInfo->getRegion(BlockType::NONE);
+            QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+                        QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
             
             painter->drawPixmap(QRectF(point, pointBR),
-                                tileMap,
-                                gridTileRect);
+                                tileSet,
+                                tileSetRect);
         }
     }
 
