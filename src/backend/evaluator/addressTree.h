@@ -5,12 +5,8 @@
 #include "address.h"
 
 template <class T> class AddressTree {
-private:
-    std::unordered_map<block_id_t, T> leaves;
-    std::unordered_map<block_id_t, AddressTree<T>> branches;
 public:
-    AddressTree() = default;
-    void makeLeaf(block_id_t blockId, T leaf);
+    void addValue(block_id_t blockId, T value);
     void makeLeaf(const Address& address, T leaf);
     void makeBranch(block_id_t blockId, AddressTree<T> branch);
     void makeBranch(const Address& address, AddressTree<T> branch);
@@ -24,6 +20,9 @@ public:
     T getLeaf(const Address& address) const;
 
     void remap(const std::unordered_map<T, T>& mapping);
+private:
+    std::unordered_map<block_id_t, T> leaves;
+    std::unordered_map<block_id_t, AddressTree<T>> branches;
 };
 
 #endif /* addressTree_h */
