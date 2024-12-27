@@ -1,39 +1,66 @@
 #include "addressTree.h"
 
 template<class T>
-void AddressTree<T>::addValue(block_id_t blockId, T leaf) {
-    if (hasBranch(blockId) || hasLeaf(blockId)) {
-        throw std::invalid_argument("AddressTree::addLeaf: blockId already exists");
+void AddressTreeNode<T>::addValue(block_id_t blockId, T value) {
+    if (hasValue(blockId) || hasBranch(blockId)) {
+        throw std::invalid_argument("AddressTree::addValue: blockId already exists");
     }
-    leaves[blockId] = leaf;
+    values[blockId] = value;
 }
 
 template<class T>
-void AddressTree<T>::addValue(const Address& address, T leaf) {
-    // get the branch that the leaf should be added to: the address minus the last blockId. create any necessary branches, but make sure to not overwrite any existing leaves/branches
-    AddressTree<T>* currentBranch = this;
+void AddressTreeNode<T>::addValue(const Address& address, T value) {
+    assert(false); // untested
+    if (address.size() == 0) {
+        throw std::invalid_argument("AddressTree::addValue: address size is 0");
+    }
+    if (address.size() == 1) {
+        addValue(address.getBlockId(0), value);
+        return;
+    }
+    AddressTreeNode<T> currentBranch = *this;
     for (int i = 0; i < address.size() - 1; i++) {
-        if (!currentBranch->hasBranch(address.getBlockId(i))) {
-            currentBranch->branches[address.getBlockId(i)] = AddressTree<T>();
+        if (!currentBranch.hasBranch(address.getBlockId(i))) {
+            currentBranch.makeBranch(address.getBlockId(i));
         }
-        currentBranch = &currentBranch->branches[address.getBlockId(i)];
+        currentBranch = currentBranch.getBranch(address.getBlockId(i));
     }
-    currentBranch->makeLeaf(address.getBlockId(address.size() - 1), leaf);
+    currentBranch.addValue(address.getBlockId(address.size() - 1), value);
 }
 
 template<class T>
-void AddressTree<T>::makeBranch(block_id_t blockId, AddressTree<T> branch) {
-    if (hasBranch(blockId) || hasLeaf(blockId)) {
-        throw std::invalid_argument("AddressTree::addBranch: blockId already exists");
+void AddressTreeNode<T>::makeBranch(block_id_t blockId) {
+    assert(false); // untested
+    if (hasValue(blockId) || hasBranch(blockId)) {
+        throw std::invalid_argument("AddressTree::makeBranch: blockId already exists");
     }
-    branches[blockId] = branch;
+    branches[blockId] = AddressTreeNode<T>();
+}
+
+template<class T>
+void AddressTreeNode<T>::makeBranch(const Address& address) {
+    assert(false); // untested
+    if (address.size() == 0) {
+        throw std::invalid_argument("AddressTree::makeBranch: address size is 0");
+    }
+    if (address.size() == 1) {
+        makeBranch(address.getBlockId(0));
+        return;
+    }
+    AddressTreeNode<T> currentBranch = *this;
+    for (int i = 0; i < address.size() - 1; i++) {
+        if (!currentBranch.hasBranch(address.getBlockId(i))) {
+            currentBranch.makeBranch(address.getBlockId(i));
+        }
+        currentBranch = currentBranch.getBranch(address.getBlockId(i));
+    }
+    currentBranch.makeBranch(address.getBlockId(address.size() - 1));
 }
 
 
-
 template<class T>
-AddressTree<T> AddressTree<T>::getBranch(const Address& address) const {
-    AddressTree<T> currentBranch = *this;
+AddressTreeNode<T> AddressTreeNode<T>::getBranch(const Address& address) const {
+    AddressTreeNode<T> currentBranch = *this;
     for (int i = 0; i < address.size(); i++) {
         const auto pt = currentBranch.branches.find(address.getBlockId(i));
         if (pt == currentBranch.branches.end()) {
@@ -45,8 +72,8 @@ AddressTree<T> AddressTree<T>::getBranch(const Address& address) const {
 }
 
 template<class T>
-T AddressTree<T>::getLeaf(const Address& address) const {
-    AddressTree<T> currentBranch = *this;
+T AddressTreeNode<T>::getValue(const Address& address) const {
+    AddressTreeNode<T> currentBranch = *this;
     for (int i = 0; i < address.size() - 1; i++) {
         const auto pt = currentBranch.branches.find(address.getBlockId(i));
         if (pt == currentBranch.branches.end()) {
@@ -54,11 +81,11 @@ T AddressTree<T>::getLeaf(const Address& address) const {
         }
         currentBranch = pt->second;
     }
-    return currentBranch.getLeaf(address.getBlockId(address.size() - 1));
+    return currentBranch.getValue(address.getBlockId(address.size() - 1));
 }
 
 template<class T>
-void AddressTree<T>::remap(const std::unordered_map<T, T>& mapping) {
+void AddressTreeNode<T>::remap(const std::unordered_map<T, T>& mapping) {
     for (auto& [key, value] : leaves) {
         if (mapping.find(value) != mapping.end()) {
             value = mapping.at(value);
