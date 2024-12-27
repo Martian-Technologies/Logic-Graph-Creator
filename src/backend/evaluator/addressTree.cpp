@@ -1,7 +1,7 @@
 #include "addressTree.h"
 
 template<class T>
-void AddressTree<T>::makeLeaf(block_id_t blockId, T leaf) {
+void AddressTree<T>::addValue(block_id_t blockId, T leaf) {
     if (hasBranch(blockId) || hasLeaf(blockId)) {
         throw std::invalid_argument("AddressTree::addLeaf: blockId already exists");
     }
@@ -9,7 +9,7 @@ void AddressTree<T>::makeLeaf(block_id_t blockId, T leaf) {
 }
 
 template<class T>
-void AddressTree<T>::makeLeaf(const Address& address, T leaf) {
+void AddressTree<T>::addValue(const Address& address, T leaf) {
     // get the branch that the leaf should be added to: the address minus the last blockId. create any necessary branches, but make sure to not overwrite any existing leaves/branches
     AddressTree<T>* currentBranch = this;
     for (int i = 0; i < address.size() - 1; i++) {

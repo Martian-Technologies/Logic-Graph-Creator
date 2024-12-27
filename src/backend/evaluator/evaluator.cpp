@@ -1,11 +1,6 @@
-#include "evaluator.h"
-#include "../container/difference.h"
-#include "../middleEnd/blockContainerWrapper.h"
-#include "../address.h"
-#include "logicSimulator.h"
-#include "logicState.h"
-#include <vector>
 #include <functional>
+
+#include "evaluator.h"
 
 Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)
     :running(false),

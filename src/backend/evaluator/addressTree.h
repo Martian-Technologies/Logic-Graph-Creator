@@ -2,12 +2,13 @@
 #define addressTree_h
 
 #include <unordered_map>
-#include "address.h"
+
+#include "../address.h"
 
 template <class T> class AddressTree {
 public:
     void addValue(block_id_t blockId, T value);
-    void makeLeaf(const Address& address, T leaf);
+    void addValue(const Address& address, T leaf);
     void makeBranch(block_id_t blockId, AddressTree<T> branch);
     void makeBranch(const Address& address, AddressTree<T> branch);
     T getLeaf(block_id_t blockId) const { return leaves.at(blockId); }

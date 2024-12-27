@@ -1,14 +1,15 @@
 #ifndef evaluator_h
 #define evaluator_h
 
-#include "../container/difference.h"
-#include "../middleEnd/blockContainerWrapper.h"
-#include "../address.h"
-#include "logicSimulator.h"
-#include "logicState.h"
-#include <vector>
 #include <unordered_map>
+#include <vector>
+
+#include "middleEnd/blockContainerWrapper.h"
+#include "../container/difference.h"
+#include "logicSimulator.h"
 #include "addressTree.h"
+#include "../address.h"
+#include "logicState.h"
 
 class Evaluator {
 public:
