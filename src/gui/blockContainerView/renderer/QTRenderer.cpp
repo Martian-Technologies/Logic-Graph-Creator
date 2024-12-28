@@ -16,47 +16,42 @@
 
 
 QTRenderer::QTRenderer()
-    : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr)
-{
-    
+    : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
+
 }
 
-void QTRenderer::initializeTileSet(const std::string& filePath)
-{   
+void QTRenderer::initializeTileSet(const std::string& filePath) {
     if (filePath != "") {
         tileSet = QPixmap(filePath.c_str());
-        
+
         if (tileSet.isNull()) {
             qDebug() << "ERROR: tileSet image could not be loaded from file." << filePath;
         }
 
         // create tileSet
-        tileSetInfo = std::make_unique<TileSet<BlockType>>(Vec2Int(256,128));
-        tileSetInfo->addRegion(BlockType::NONE, {0, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::BLOCK, {32, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::CUSTOM, {32, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::TYPE_COUNT, {32, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::AND, {64, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::OR, {96, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::XOR, {128, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::NAND, {160, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::NOR, {192, 0}, {32, 32});
-        tileSetInfo->addRegion(BlockType::XNOR, {224, 0}, {32, 32});
+        tileSetInfo = std::make_unique<TileSet<BlockType>>(Vec2Int(256, 128));
+        tileSetInfo->addRegion(BlockType::NONE, { 0, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::BLOCK, { 32, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::CUSTOM, { 32, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::TYPE_COUNT, { 32, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::AND, { 64, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::OR, { 96, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::XOR, { 128, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::NAND, { 160, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::NOR, { 192, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::XNOR, { 224, 0 }, { 32, 32 });
     }
 }
 
-void QTRenderer::resize(int w, int h)
-{
+void QTRenderer::resize(int w, int h) {
     this->w = w;
     this->h = h;
 }
 
-void QTRenderer::render(QPainter* painter)
-{
+void QTRenderer::render(QPainter* painter) {
     // error checking
     assert(viewManager);
-    if (tileSet.isNull() || tileSetInfo == nullptr)
-    {
+    if (tileSet.isNull() || tileSetInfo == nullptr) {
         painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileSet found");
         qDebug() << "ERROR: QTRenderer has no tileSet, cnanot proceed with render.";
         return;
@@ -72,13 +67,13 @@ void QTRenderer::render(QPainter* painter)
 
         TileRegion tsRegion = tileSetInfo->getRegion(type);
         QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-                           QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-        
+            QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+
         painter->drawPixmap(QRectF(point, pointBR),
-                            tileSet,
-                            tileSetRect);
-    };
-    
+            tileSet,
+            tileSetRect);
+        };
+
     auto renderBlock = [&](const Block* block) -> void {
         Position gridSize(block->widthNoRotation(), block->heightNoRotation());
 
@@ -92,43 +87,40 @@ void QTRenderer::render(QPainter* painter)
         // get tile set coordinate
         TileRegion tsRegion = tileSetInfo->getRegion(block->type());
         QRect tileSetRect(QPoint(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-                           QSize(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-        
+            QSize(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+
         // rotate and position painter to center of block
         painter->save();
         painter->translate(center);
         painter->rotate(getDegrees(block->getRotation()));
 
         // draw the block from the center
-        QRect drawRect = QRect(QPoint(-width/2,-height/2), QSize(width,height));
+        QRect drawRect = QRect(QPoint(-width / 2, -height / 2), QSize(width, height));
         painter->drawPixmap(drawRect,
-                            tileSet,
-                            tileSetRect);
-        
+            tileSet,
+            tileSetRect);
+
         painter->restore();
-    };
+        };
     // --- end of render lambdas
 
     // get bounds
     Position topLeft = viewManager->getTopLeft().snap();
     Position bottomRight = viewManager->getBottomRight().snap();
-    
+
     // render grid and collect blocks + connections
     std::set<const Block*> blocksToRender;
-    for (int x = topLeft.x; x <= bottomRight.x; ++x)
-    {
-        for (int y = topLeft.y; y <= bottomRight.y; ++y)
-        {          
-            const Block* block = blockContainer->getBlockContainer()->getBlock(Position(x,y));
-            
+    for (int x = topLeft.x; x <= bottomRight.x; ++x) {
+        for (int y = topLeft.y; y <= bottomRight.y; ++y) {
+            const Block* block = blockContainer->getBlockContainer()->getBlock(Position(x, y));
+
             if (block) blocksToRender.insert(block);
-            else renderCell(FPosition(x,y), BlockType::NONE);
+            else renderCell(FPosition(x, y), BlockType::NONE);
         }
     }
 
     // render blocks
-    for (const Block* block : blocksToRender)
-    {
+    for (const Block* block : blocksToRender) {
         renderBlock(block);
     }
 
@@ -143,7 +135,7 @@ void QTRenderer::render(QPainter* painter)
                 Position pos1 = block.second.getConnectionPosition(id).first;
                 Position pos2 = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first;
 
-                FPosition centerOffset(0.5,0.5f);
+                FPosition centerOffset(0.5, 0.5f);
                 FPosition socketOffset; // indev socket offset
                 if (block.second.getRotation() == Rotation::ZERO) socketOffset = { 0.5f, 0.0f };
                 if (block.second.getRotation() == Rotation::NINETY) socketOffset = { 0.0f, 0.5f };
@@ -155,84 +147,70 @@ void QTRenderer::render(QPainter* painter)
         }
     }
     painter->restore();
-    
+
     // render tints
     // render lines
 }
 
-void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer)
-{
+void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
     this->blockContainer = blockContainer;
 }
 
-void QTRenderer::updateView(ViewManager* viewManager)
-{
+void QTRenderer::updateView(ViewManager* viewManager) {
     this->viewManager = viewManager;
 }
 
-QPoint QTRenderer::gridToQt(FPosition position)
-{
+QPoint QTRenderer::gridToQt(FPosition position) {
     assert(viewManager);
-    
-    std::pair<float,float> viewPos = viewManager->gridToView(position);
+
+    std::pair<float, float> viewPos = viewManager->gridToView(position);
     return QPoint(viewPos.first * w, viewPos.second * h);
 }
 
 // effects -----------------------------
 // line
-LineID QTRenderer::addLine(const std::vector<FPosition>& positions, float width)
-{
+LineID QTRenderer::addLine(const std::vector<FPosition>& positions, float width) {
     return 0;
 }
 
-void QTRenderer::updateLinePosition(LineID line, int index, FPosition position)
-{
-    
+void QTRenderer::updateLinePosition(LineID line, int index, FPosition position) {
+
 }
 
-void QTRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions)
-{
-    
+void QTRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions) {
+
 }
 
-void QTRenderer::updateLineWidth(LineID line, float width)
-{
-    
+void QTRenderer::updateLineWidth(LineID line, float width) {
+
 }
 
-void QTRenderer::removeLine(LineID line)
-{
-    
+void QTRenderer::removeLine(LineID line) {
+
 }
 
 // tint
-TintID QTRenderer::addTint(Position position, Color color)
-{
+TintID QTRenderer::addTint(Position position, Color color) {
     return 0;
 }
 
-TintID QTRenderer::addTint(FPosition start, float width, float height, Color color)
-{
+TintID QTRenderer::addTint(FPosition start, float width, float height, Color color) {
     return 0;
 }
 
-void QTRenderer::updateTintColor(TintID tint, Color color)
-{
-    
+void QTRenderer::updateTintColor(TintID tint, Color color) {
+
 }
 
-void QTRenderer::updateTintRect(Position start, float width, float height)
-{
-    
+void QTRenderer::updateTintRect(Position start, float width, float height) {
+
 }
 
-void QTRenderer::removeTint(TintID tint)
-{
-    
+void QTRenderer::removeTint(TintID tint) {
+
 }
 
 // confetti
-void QTRenderer::addConfetti(FPosition start)
-{
-    
+void QTRenderer::addConfetti(FPosition start) {
+
 }
