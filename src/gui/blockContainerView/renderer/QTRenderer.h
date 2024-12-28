@@ -57,7 +57,7 @@ private:
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
 
-    QPoint gridToQt(FPosition position);
+    QPointF gridToQt(FPosition position);
 };
 
 #endif // QTRenderer_h

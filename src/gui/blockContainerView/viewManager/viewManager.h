@@ -5,6 +5,7 @@
 
 #include "gui/blockContainerView/events/eventRegister.h"
 #include "backend/position/position.h"
+#include "util/vector2.h"
 
 // TODO - there are one million magic numbers that should probably be settings
 // TODO - eliminate traces of QT
@@ -46,8 +47,8 @@ public:
     inline float getAspectRatio() const { return aspectRatio; }
     
     // coordinate system conversion
-    inline FPosition viewToGrid(float viewX, float viewY) const { return getTopLeft() + FPosition(getViewWidth() * viewX, getViewHeight() * viewY); }
-    std::pair<float, float> gridToView(FPosition position) const; // temporary until matrix
+    inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FPosition(getViewWidth() * view.x, getViewHeight() * view.y); }
+    Vec2 gridToView(FPosition position) const; // temporary until matrix
     // glm::mat4 getViewMatrix() const;
     // glm::mat4 getPerspectiveMatrix() const;
 

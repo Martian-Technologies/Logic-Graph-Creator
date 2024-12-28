@@ -58,12 +58,12 @@ void QTRenderer::render(QPainter* painter) {
     }
 
     // init
-    painter->setRenderHint(QPainter::Antialiasing, true);
+    // painter->setRenderHint(QPainter::Antialiasing, true);
 
     // render lambdas ---
     auto renderCell = [&](FPosition position, BlockType type) -> void {
-        QPoint point = gridToQt(position);
-        QPoint pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
+        QPointF point = gridToQt(position);
+        QPointF pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
 
         TileRegion tsRegion = tileSetInfo->getRegion(type);
         QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
@@ -78,16 +78,16 @@ void QTRenderer::render(QPainter* painter) {
         Position gridSize(block->widthNoRotation(), block->heightNoRotation());
 
         // block
-        QPoint topLeft = gridToQt(block->getPosition().free());
-        QPoint bottomRight = gridToQt((block->getPosition() + gridSize).free());
-        int width = bottomRight.x() - topLeft.x();
-        int height = bottomRight.y() - topLeft.y();
-        QPoint center = topLeft + QPoint(width / 2, height / 2);
+        QPointF topLeft = gridToQt(block->getPosition().free());
+        QPointF bottomRight = gridToQt((block->getPosition() + gridSize).free());
+        float width = bottomRight.x() - topLeft.x();
+        float height = bottomRight.y() - topLeft.y();
+        QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
 
         // get tile set coordinate
         TileRegion tsRegion = tileSetInfo->getRegion(block->type());
-        QRect tileSetRect(QPoint(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-            QSize(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+            QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
 
         // rotate and position painter to center of block
         painter->save();
@@ -95,7 +95,7 @@ void QTRenderer::render(QPainter* painter) {
         painter->rotate(getDegrees(block->getRotation()));
 
         // draw the block from the center
-        QRect drawRect = QRect(QPoint(-width / 2, -height / 2), QSize(width, height));
+        QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
         painter->drawPixmap(drawRect,
             tileSet,
             tileSetRect);
@@ -137,20 +137,22 @@ void QTRenderer::render(QPainter* painter) {
                 Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
 
                 FPosition centerOffset(0.5, 0.5f);
-                FPosition socketOffset; // indev socket offset
+                FPosition socketOffset;
                 FPosition otherSocketOffset;
+
+                // Socket offsets will be retrieved data later, this code will go
 
                 if (block.second.getRotation() == Rotation::ZERO) socketOffset = { 0.5f, 0.0f };
                 if (block.second.getRotation() == Rotation::NINETY) socketOffset = { 0.0f, 0.5f };
                 if (block.second.getRotation() == Rotation::ONE_EIGHTY) socketOffset = { -0.5f, 0.0f };
                 if (block.second.getRotation() == Rotation::TWO_SEVENTY) socketOffset = { 0.0f, -0.5f };
 
-                if (other->getRotation() == Rotation::ZERO) otherSocketOffset = { 0.5f, 0.0f };
-                if (other->getRotation() == Rotation::NINETY) otherSocketOffset = { 0.0f, 0.5f };
-                if (other->getRotation() == Rotation::ONE_EIGHTY) otherSocketOffset = { -0.5f, 0.0f };
-                if (other->getRotation() == Rotation::TWO_SEVENTY) otherSocketOffset = { 0.0f, -0.5f };
+                if (other->getRotation() == Rotation::ZERO) otherSocketOffset = { -0.5f, 0.0f };
+                if (other->getRotation() == Rotation::NINETY) otherSocketOffset = { 0.0f, -0.5f };
+                if (other->getRotation() == Rotation::ONE_EIGHTY) otherSocketOffset = { 0.5f, 0.0f };
+                if (other->getRotation() == Rotation::TWO_SEVENTY) otherSocketOffset = { 0.0f, 0.5f };
 
-                painter->drawLine(gridToQt(pos.free() + centerOffset + socketOffset), gridToQt(otherPos.free() + centerOffset - otherSocketOffset));
+                painter->drawLine(gridToQt(pos.free() + centerOffset + socketOffset), gridToQt(otherPos.free() + centerOffset + otherSocketOffset));
             }
         }
     }
@@ -168,11 +170,11 @@ void QTRenderer::updateView(ViewManager* viewManager) {
     this->viewManager = viewManager;
 }
 
-QPoint QTRenderer::gridToQt(FPosition position) {
+QPointF QTRenderer::gridToQt(FPosition position) {
     assert(viewManager);
 
-    std::pair<float, float> viewPos = viewManager->gridToView(position);
-    return QPoint(viewPos.first * w, viewPos.second * h);
+    Vec2 viewPos = viewManager->gridToView(position);
+    return QPointF(viewPos.x * w, viewPos.y * h);
 }
 
 // effects -----------------------------

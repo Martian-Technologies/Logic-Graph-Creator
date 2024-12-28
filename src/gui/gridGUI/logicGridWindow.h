@@ -14,6 +14,7 @@
 
 #include "../blockContainerView/blockContainerView.h"
 #include "../blockContainerView/renderer/QTRenderer.h"
+#include "util/vector2.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
@@ -33,7 +34,7 @@ public:
     // dont call this func
     void updateSelectedItem();
 
-    QVector2D pixelsToView(QPoint point);
+    Vec2 pixelsToView(QPointF point);
     inline float getPixelsWidth() { return (float)rect().width(); }
     inline float getPixelsHight() { return (float)rect().height(); }
 
