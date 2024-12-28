@@ -19,11 +19,10 @@
 // - [ ] write rendering logic
 // - [ ] connect effects to renderer
 
-class QTRenderer : public Renderer
-{
+class QtRenderer : public Renderer {
 public:
-    QTRenderer();
-    
+    QtRenderer();
+
     // general flow
     void initializeTileSet(const std::string& filePath);
     void resize(int w, int h);
@@ -32,7 +31,7 @@ public:
     // updating
     void setBlockContainer(BlockContainerWrapper* blockContainer) override;
     // virtual void setSimulator(Simulator* simulator) override;
-    
+
     void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
 
@@ -50,15 +49,15 @@ public:
     void removeTint(TintID tint) override;
 
     void addConfetti(FPosition start) override;
-    
-private:
-    int w,h;
 
+private:
+    int w, h;
     BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
-    ViewManager* viewManager; // or viewManager
-    
+    ViewManager* viewManager; // or a viewManager
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
-};                
+
+    QPointF gridToQt(FPosition position);
+};
 
 #endif // QTRenderer_h

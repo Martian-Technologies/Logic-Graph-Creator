@@ -67,7 +67,9 @@ void BlockContainerWrapper::undo() {
     DifferenceSharedPtr difference = undoSystem.undoDifference();
     Difference::block_modification_t blockModification;
     Difference::connection_modification_t connectionModification;
-    for (auto modification : difference->getModifications()) {
+    const std::vector<Difference::Modification>& modifications = difference->getModifications();
+    for (unsigned int i = modifications.size(); i > 0; --i) {
+        const Difference::Modification& modification = modifications[i-1];
         switch (modification.first) {
         case Difference::PLACE_BLOCK:
             blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());

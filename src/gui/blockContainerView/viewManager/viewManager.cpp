@@ -10,7 +10,7 @@ bool ViewManager::zoom(const Event* event) {
     if (!deltaEvent) return false;
     viewHeight *= 1.f - deltaEvent->getDelta();
     applyLimits();
-    emitViewChanged();
+    viewChanged();
     return true;
 }
 
@@ -20,7 +20,7 @@ bool ViewManager::pan(const Event* event) {
     viewCenter.x -= deltaXYEvent->getDeltaX();
     viewCenter.y -= deltaXYEvent->getDeltaY();
     applyLimits();
-    emitViewChanged();
+    viewChanged();
     return true;
 }
 
@@ -41,12 +41,14 @@ bool ViewManager::pointerMove(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
 
+    pointerVec = gridToView(positionEvent->getFPosition());
+
     if (doPointerMovement) {
         FPosition delta = pointerPosition - positionEvent->getFPosition();
         if (std::abs(delta.manhattenDistanceToOrigin()) < 0.001f) return false; // no change in pointer pos
         viewCenter += delta;
         applyLimits();
-        emitViewChanged();
+        viewChanged();
         return true;
     }
 
@@ -75,10 +77,10 @@ void ViewManager::applyLimits() {
     if (viewCenter.y < -10000000) viewCenter.y = -10000000;
 }
 
-std::pair<float, float> ViewManager::gridToView(FPosition position) const {
+Vec2 ViewManager::gridToView(FPosition position) const {
     position -= viewCenter;
     position += FPosition(getViewWidth() / 2.0f, getViewHeight() / 2.0f);
     position.x /= getViewWidth();
     position.y /= getViewHeight();
-    return { position.x, position.y };
+    return Vec2(position.x, position.y);
 }

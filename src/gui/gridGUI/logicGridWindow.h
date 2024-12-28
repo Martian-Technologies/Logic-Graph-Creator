@@ -8,12 +8,12 @@
 #include <QPainter>
 #include <QWidget>
 #include <QTimer>
-#include <qvectornd.h>
 
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
-#include "../blockContainerView/renderer/QTRenderer.h"
+#include "../blockContainerView/renderer/QtRenderer.h"
+#include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT
@@ -33,7 +33,7 @@ public:
     // dont call this func
     void updateSelectedItem();
 
-    QVector2D pixelsToView(QPoint point);
+    Vec2 pixelsToView(QPointF point);
     inline float getPixelsWidth() { return (float)rect().width(); }
     inline float getPixelsHight() { return (float)rect().height(); }
 
@@ -59,7 +59,7 @@ private:
     void updateLoop();
 
     // data
-    BlockContainerView<QTRenderer> blockContainerView;
+    BlockContainerView<QtRenderer> blockContainerView;
     bool mouseControls;
 
     // ui elements

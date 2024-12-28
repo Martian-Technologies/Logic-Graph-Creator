@@ -1,8 +1,8 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 
-#include "../blockContainerView/blockContainerView.h"
 #include "logicGridWindow.h"
+#include "../blockContainerView/blockContainerView.h"
 
 // viewmanager is responsible for saying when the view is changed, which will
 // trigger an update, right now the tool system is not. When the tool system
@@ -41,8 +41,8 @@ void LogicGridWindow::updateLoop() {
 
 // getters
 
-QVector2D LogicGridWindow::pixelsToView(QPoint point) {
-    return QVector2D((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height());
+Vec2 LogicGridWindow::pixelsToView(QPointF point) {
+    return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height());
 }
 
 // setter functions
@@ -187,18 +187,18 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
 void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
     QPoint point = event->pos();
     if (insideWindow(point)) { // inside the widget
-        QVector2D viewPos = pixelsToView(point);
-        if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", blockContainerView.getViewManager().viewToGrid(viewPos.x(), viewPos.y())))) event->accept();
+        Vec2 viewPos = pixelsToView(point);
+        if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
     }
 }
 
 void LogicGridWindow::enterEvent(QEnterEvent* event) {
-    QVector2D viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-    if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", blockContainerView.getViewManager().viewToGrid(viewPos.x(), viewPos.y())))) event->accept();
+    Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+    if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void LogicGridWindow::leaveEvent(QEvent* event) {
-    QVector2D viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-    if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer exit view", blockContainerView.getViewManager().viewToGrid(viewPos.x(), viewPos.y())))) event->accept();
+    Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+    if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer exit view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 

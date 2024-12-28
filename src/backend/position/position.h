@@ -83,10 +83,27 @@ inline bool isRotated(Rotation rotation) noexcept { return rotation & 1; }
 inline bool isFlipped(Rotation rotation) noexcept { return rotation > 1; }
 inline Rotation rotate(Rotation rotation, bool clockWise) {
     if (clockWise) {
-        if (rotation == ZERO) return TWO_SEVENTY;
-        return (Rotation)((int)rotation - 1);
+        if (rotation == TWO_SEVENTY) return ZERO;
+        return (Rotation)((int)rotation + 1);
     }
-    if (rotation == TWO_SEVENTY) return ZERO;
-    return (Rotation)((int)rotation + 1);
+    if (rotation == ZERO) return TWO_SEVENTY;
+    return (Rotation)((int)rotation - 1);
+}
+inline float getDegrees(Rotation rotation) {
+    switch (rotation)
+    {
+    case Rotation::ZERO:
+        return 0.0f;
+        break;
+    case Rotation::NINETY:
+        return 90.0f;
+        break;
+    case Rotation::ONE_EIGHTY:
+        return 180.0f;
+        break;
+    case Rotation::TWO_SEVENTY:
+        return 270.0f;
+        break;
+    }
 }
 #endif /* position_h */
