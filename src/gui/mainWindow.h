@@ -6,6 +6,8 @@
 #include <QWidget>
 
 #include "middleEnd/blockContainerManager.h"
+#include "backend/evaluator/evaluator.h"
+
 
 namespace Ui {
     class MainWindow;
@@ -13,7 +15,7 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-	
+
 public:
     MainWindow(QWidget* parent = nullptr);
 
@@ -21,6 +23,7 @@ private:
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;
+    std::unique_ptr<Evaluator> evaluator;
 };
 
 #endif /* mainWindow_h */

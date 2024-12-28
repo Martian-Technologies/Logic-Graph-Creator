@@ -29,11 +29,12 @@ public:
     void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
 private:
-    bool running;
     bool paused;
     unsigned long long targetTickrate;
     LogicSimulator logicSimulator;
     AddressTreeNode<block_id_t> addressTree;
 };
+
+GateType blockContainerToEvaluatorGatetype(BlockType blockType);
 
 #endif // evaluator_h

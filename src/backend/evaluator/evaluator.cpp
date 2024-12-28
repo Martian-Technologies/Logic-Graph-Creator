@@ -3,53 +3,14 @@
 #include "evaluator.h"
 
 Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)
-    :running(false),
-    paused(false),
+    :paused(false),
     targetTickrate(0),
     logicSimulator(),
     addressTree() {
-    // TODO: implement initializing from blockcontainer
+    const auto blockContainer = blockContainerWrapper->getBlockContainer();
+    const Difference difference = blockContainer->getCreationDifference();
 
-    const auto& blockContainer = blockContainerWrapper->getBlockContainer();
-    auto it = blockContainer->begin();
-    const auto end = blockContainer->end();
-    for (; it != end; ++it) {
-        const Block& block = it->second;
-        GateType gateType = GateType::NONE;
-        switch (block.type()) {
-        case BlockType::AND:
-            gateType = GateType::AND;
-            break;
-        case BlockType::OR:
-            gateType = GateType::OR;
-            break;
-        case BlockType::XOR:
-            gateType = GateType::XOR;
-            break;
-        case BlockType::NAND:
-            gateType = GateType::NAND;
-            break;
-        case BlockType::NOR:
-            gateType = GateType::NOR;
-            break;
-        case BlockType::XNOR:
-            gateType = GateType::XNOR;
-            break;
-        }
-        addressTree.addValue(block.id(), logicSimulator.addGate(gateType));
-    }
-
-    it = blockContainer->begin();
-    for (; it != end; ++it) {
-        const Block& block = it->second;
-        const block_id_t input = block.id();
-        for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
-            for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
-                const block_id_t output = connectionEnd.getBlockId();
-                logicSimulator.connectGates(addressTree.getValue(input), addressTree.getValue(output));
-            }
-        }
-    }
+    makeEdit(std::make_shared<Difference>(difference), blockContainerWrapper->getContainerId());
 
     // connect makeEdit to blockContainerWrapper
     blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
@@ -78,5 +39,66 @@ void Evaluator::runNTicks(unsigned long long n) {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
+    const auto modifications = difference->getModifications();
+    for (const auto& modification : modifications) {
+        const auto& [modificationType, modificationData] = modification;
+        switch (modificationType) {
+        case Difference::REMOVED_BLOCK: {
+            const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+            const auto address = Address(position);
+            const block_id_t blockId = addressTree.getValue(address);
+            logicSimulator.decomissionGate(blockId);
+            addressTree.removeValue(address);
+            break;
+        }
+        case Difference::PLACE_BLOCK: {
+            const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+            const auto address = Address(position);
+            const GateType gateType = blockContainerToEvaluatorGatetype(blockType);
+            const block_id_t blockId = logicSimulator.addGate(gateType, true);
+            addressTree.addValue(address, blockId);
+            break;
+        }
+        case Difference::REMOVED_CONNECTION: {
+            const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+            const auto outputAddress = Address(outputPosition);
+            const auto inputAddress = Address(inputPosition);
+            const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+            const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+            logicSimulator.disconnectGates(outputBlockId, inputBlockId);
+            break;
+        }
+        case Difference::CREATED_CONNECTION: {
+            const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+            const auto outputAddress = Address(outputPosition);
+            const auto inputAddress = Address(inputPosition);
+            const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+            const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+            logicSimulator.connectGates(outputBlockId, inputBlockId);
+            break;
+        }
+        default:
+            throw std::invalid_argument("makeEdit: invalid modificationType");
+        }
+    }
+    logicSimulator.debugPrint();
+}
 
+GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
+    switch (blockType) {
+    case BlockType::AND:
+        return GateType::AND;
+    case BlockType::OR:
+        return GateType::OR;
+    case BlockType::XOR:
+        return GateType::XOR;
+    case BlockType::NAND:
+        return GateType::NAND;
+    case BlockType::NOR:
+        return GateType::NOR;
+    case BlockType::XNOR:
+        return GateType::XNOR;
+    default:
+        throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
+    }
 }

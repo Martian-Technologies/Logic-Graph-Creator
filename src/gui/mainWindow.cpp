@@ -7,7 +7,7 @@
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager() {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager(), evaluator(nullptr) {
     ui->setupUi(this);
 
     setWindowTitle(tr("Logic Graph Creator"));
@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
+    evaluator = std::make_unique<Evaluator>(blockContainerWrapper);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->setBlockContainer(blockContainerWrapper);

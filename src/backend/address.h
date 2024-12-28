@@ -2,18 +2,18 @@
 #define address_h
 
 #include <vector>
-
-#include "backend/defs.h"
+#include "position/position.h"
 
 class Address {
 public:
+    Address(Position position) : addresses({position}) {}
     inline int size() const { return addresses.size(); }
-    inline block_id_t getBlockId(int index) const { return addresses[index]; }
+    inline Position getPosition(int index) const { return addresses[index]; }
 
-    inline void addBlockId(block_id_t blockId) { addresses.push_back(blockId); }
+    inline void addBlockId(Position position) { addresses.push_back(position); }
 
 private:
-    std::vector<block_id_t> addresses;
+    std::vector<Position> addresses;
 
 };
 

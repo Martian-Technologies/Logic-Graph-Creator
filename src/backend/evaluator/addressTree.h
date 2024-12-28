@@ -6,33 +6,45 @@
 
 #include "../address.h"
 
-template <class T> class AddressTreeNode {
+template <class T>
+class AddressTreeNode {
 public:
-    void addValue(block_id_t blockId, T value);
+    void addValue(Position position, T value);
     void addValue(const Address& address, T value);
-    void makeBranch(block_id_t blockId);
+    void makeBranch(Position position);
     void makeBranch(const Address& address);
-    T getValue(block_id_t blockId) const { return values.at(blockId); }
-    AddressTreeNode<T> getBranch(block_id_t blockId) const { return branches.at(blockId); }
 
-    bool hasValue(block_id_t blockId) const { return values.find(blockId) != values.end(); }
-    bool hasBranch(block_id_t blockId) const { return branches.find(blockId) != branches.end(); }
+    void removeValue(Position position) { values.erase(position); }
+    void removeValue(const Address& address) {
+        const_cast<AddressTreeNode<T>&>(getParentBranch(address)).values.erase(address.getPosition(address.size() - 1));
+    }
 
+    T getValue(Position position) const { return values.at(position); }
+    T getValue(const Address& address) const { return getParentBranch(address).getValue(address.getPosition(address.size() - 1)); }
+
+    // Added const overload for getParentBranch
+    AddressTreeNode<T>& getParentBranch(const Address& address);
+    const AddressTreeNode<T>& getParentBranch(const Address& address) const;
+
+    AddressTreeNode<T> getBranch(Position position) const { return branches.at(position); }
     AddressTreeNode<T> getBranch(const Address& address) const;
-    T getValue(const Address& address) const;
+
+    bool hasValue(Position position) const { return values.find(position) != values.end(); }
+    bool hasBranch(Position position) const { return branches.find(position) != branches.end(); }
 
     void remap(const std::unordered_map<T, T>& mapping);
+
 private:
-    std::unordered_map<block_id_t, T> values;
-    std::unordered_map<block_id_t, AddressTreeNode<T>> branches;
+    std::unordered_map<Position, T> values;
+    std::unordered_map<Position, AddressTreeNode<T>> branches;
 };
 
 template<class T>
-void AddressTreeNode<T>::addValue(block_id_t blockId, T value) {
-    if (hasValue(blockId) || hasBranch(blockId)) {
-        throw std::invalid_argument("AddressTree::addValue: blockId already exists");
+void AddressTreeNode<T>::addValue(Position position, T value) {
+    if (hasValue(position) || hasBranch(position)) {
+        throw std::invalid_argument("AddressTree::addValue: position already exists");
     }
-    values[blockId] = value;
+    values[position] = value;
 }
 
 template<class T>
@@ -40,26 +52,17 @@ void AddressTreeNode<T>::addValue(const Address& address, T value) {
     if (address.size() == 0) {
         throw std::invalid_argument("AddressTree::addValue: address size is 0");
     }
-    if (address.size() == 1) {
-        addValue(address.getBlockId(0), value);
-        return;
-    }
-    AddressTreeNode<T> currentBranch = *this;
-    for (int i = 0; i < address.size() - 1; i++) {
-        if (!currentBranch.hasBranch(address.getBlockId(i))) {
-            currentBranch.makeBranch(address.getBlockId(i));
-        }
-        currentBranch = currentBranch.getBranch(address.getBlockId(i));
-    }
-    currentBranch.addValue(address.getBlockId(address.size() - 1), value);
+    AddressTreeNode<T>& parentBranch = getParentBranch(address);
+    const Position finalPosition = address.getPosition(address.size() - 1);
+    parentBranch.addValue(finalPosition, value);
 }
 
 template<class T>
-void AddressTreeNode<T>::makeBranch(block_id_t blockId) {
-    if (hasValue(blockId) || hasBranch(blockId)) {
-        throw std::invalid_argument("AddressTree::makeBranch: blockId already exists");
+void AddressTreeNode<T>::makeBranch(Position position) {
+    if (hasValue(position) || hasBranch(position)) {
+        throw std::invalid_argument("AddressTree::makeBranch: position already exists");
     }
-    branches[blockId] = AddressTreeNode<T>();
+    branches[position] = AddressTreeNode<T>();
 }
 
 template<class T>
@@ -67,57 +70,59 @@ void AddressTreeNode<T>::makeBranch(const Address& address) {
     if (address.size() == 0) {
         throw std::invalid_argument("AddressTree::makeBranch: address size is 0");
     }
-    if (address.size() == 1) {
-        makeBranch(address.getBlockId(0));
-        return;
-    }
-    AddressTreeNode<T> currentBranch = *this;
-    for (int i = 0; i < address.size() - 1; i++) {
-        if (!currentBranch.hasBranch(address.getBlockId(i))) {
-            currentBranch.makeBranch(address.getBlockId(i));
-        }
-        currentBranch = currentBranch.getBranch(address.getBlockId(i));
-    }
-    currentBranch.makeBranch(address.getBlockId(address.size() - 1));
+    getParentBranch(address).makeBranch(address.getPosition(address.size() - 1));
 }
-
 
 template<class T>
 AddressTreeNode<T> AddressTreeNode<T>::getBranch(const Address& address) const {
-    AddressTreeNode<T> currentBranch = *this;
-    for (int i = 0; i < address.size(); i++) {
-        const auto pt = currentBranch.branches.find(address.getBlockId(i));
-        if (pt == currentBranch.branches.end()) {
+    const AddressTreeNode<T>* currentBranch = this;
+    for (size_t i = 0; i < address.size(); i++) {
+        auto it = currentBranch->branches.find(address.getPosition(i));
+        if (it == currentBranch->branches.end()) {
             throw std::out_of_range("AddressTree::getBranch: address not found");
         }
-        currentBranch = pt->second;
+        currentBranch = &(it->second);
     }
-    return currentBranch;
-}
-
-template<class T>
-T AddressTreeNode<T>::getValue(const Address& address) const {
-    AddressTreeNode<T> currentBranch = *this;
-    for (int i = 0; i < address.size() - 1; i++) {
-        const auto pt = currentBranch.branches.find(address.getBlockId(i));
-        if (pt == currentBranch.branches.end()) {
-            throw std::out_of_range("AddressTree::getValue: address not found");
-        }
-        currentBranch = pt->second;
-    }
-    return currentBranch.getValue(address.getBlockId(address.size() - 1));
+    return *currentBranch;
 }
 
 template<class T>
 void AddressTreeNode<T>::remap(const std::unordered_map<T, T>& mapping) {
     for (auto& [key, value] : values) {
-        if (mapping.find(value) != mapping.end()) {
-            value = mapping.at(value);
+        auto it = mapping.find(value);
+        if (it != mapping.end()) {
+            value = it->second;
         }
     }
-    for (auto& [key, value] : branches) {
-        value.remap(mapping);
+    for (auto& [key, branch] : branches) {
+        branch.remap(mapping);
     }
+}
+
+template<class T>
+AddressTreeNode<T>& AddressTreeNode<T>::getParentBranch(const Address& address) {
+    AddressTreeNode<T>* currentBranch = this;
+    for (size_t i = 0; i < address.size() - 1; i++) {
+        auto it = currentBranch->branches.find(address.getPosition(i));
+        if (it == currentBranch->branches.end()) {
+            throw std::out_of_range("AddressTree::getParentBranch: address not found");
+        }
+        currentBranch = &(it->second);
+    }
+    return *currentBranch;
+}
+
+template<class T>
+const AddressTreeNode<T>& AddressTreeNode<T>::getParentBranch(const Address& address) const {
+    const AddressTreeNode<T>* currentBranch = this;
+    for (size_t i = 0; i < address.size() - 1; i++) {
+        auto it = currentBranch->branches.find(address.getPosition(i));
+        if (it == currentBranch->branches.end()) {
+            throw std::out_of_range("AddressTree::getParentBranch: address not found");
+        }
+        currentBranch = &(it->second);
+    }
+    return *currentBranch;
 }
 
 #endif /* addressTree_h */

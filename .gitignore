@@ -53,3 +53,6 @@
 
 # IDE Specific
 /.idea
+
+# MSVC
+*.pdb
