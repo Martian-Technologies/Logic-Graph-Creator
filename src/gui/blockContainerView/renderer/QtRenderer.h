@@ -34,12 +34,12 @@ public:
 
     void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
-
-    // element
+    
+private:
+    // elements
     void removeElement(ElementID id) override;
     
-    ElementID addTint(Position position, Color color) override;
-    ElementID addTint(FPosition start, float width, float height, Color color) override;
+    ElementID addSelectionElement(Position positionA, Position positionB) override;
     
     ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
 

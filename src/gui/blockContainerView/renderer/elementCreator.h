@@ -7,8 +7,11 @@
 
 
 class ElementCreator {
-    friend class Renderer;
 public:
+    ElementCreator(Renderer* renderer) : renderer(renderer), ids() { assert(renderer); }
+
+    ~ElementCreator() { for (ElementID id : ids) renderer->removeElement(id); }
+
     void removeElement(ElementID id) {
         auto iter = ids.find(id);
         if (iter == ids.end()) return;
@@ -16,26 +19,30 @@ public:
         renderer->removeElement(id);
     }
 
-    inline ElementID addTint(Position position, Color color) {
-        ElementID id = renderer->addTint(position, color);
+    inline void clear() { for (ElementID id : ids) renderer->removeElement(id); ids.clear(); }
+
+    inline bool hasElement(ElementID id) { return ids.find(id) != ids.end(); }
+
+    inline ElementID addSelectionElement(Position position) {
+        ElementID id = renderer->addSelectionElement(position, position);
         ids.insert(id);
         return id;
     }
-    
-    inline ElementID addTint(FPosition start, float width, float height, Color color) {
-        ElementID id = renderer->addTint(start, width, height, color);
+
+    inline ElementID addSelectionElement(Position positionA, Position positionB) {
+        ElementID id = renderer->addSelectionElement(positionA, positionB);
         ids.insert(id);
         return id;
     }
 
     ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
-        ElementID id = renderer->addTint(position, rotation, modulate, alpha);
+        ElementID id = renderer->addBlockPreview(position, rotation, modulate, alpha);
         ids.insert(id);
         return id;
     }
 
     ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) {
-        ElementID id = renderer->addTint(inputCellPos, outputCellPos, modulate, alpha);
+        ElementID id = renderer->addConnectionPreview(inputCellPos, outputCellPos, modulate, alpha);
         ids.insert(id);
         return id;
     }
@@ -45,10 +52,8 @@ public:
     }
 
 private:
-    ElementCreator(Renderer* renderer) : renderer(renderer) { assert(renderer); }
-
-    std::set<ElementID> ids;
     Renderer* renderer;
+    std::set<ElementID> ids;
 };
 
 #endif /* elementCreator_h */

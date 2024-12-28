@@ -194,11 +194,7 @@ void QtRenderer::removeElement(ElementID id) {
 }
 
 // tint
-ElementID QtRenderer::addTint(Position position, Color color) {
-    return 0;
-}
-
-ElementID QtRenderer::addTint(FPosition start, float width, float height, Color color) {
+ElementID QtRenderer::addSelectionElement(Position positionA, Position positionB) {
     return 0;
 }
 
