@@ -41,7 +41,7 @@ bool ViewManager::pointerMove(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
 
-    pointerVec = gridToView(positionEvent->getFPosition());
+    pointerViewPosition = gridToView(positionEvent->getFPosition());
 
     if (doPointerMovement) {
         FPosition delta = pointerPosition - positionEvent->getFPosition();

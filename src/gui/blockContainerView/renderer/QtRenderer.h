@@ -37,16 +37,25 @@ public:
 
     // effects
     LineID addLine(const std::vector<FPosition>& positions, float width) override;
-    void updateLinePosition(LineID line, int index, FPosition position) override;
-    void updateLinePositions(LineID line, std::vector<FPosition>& positions) override;
-    void updateLineWidth(LineID line, float width) override;
-    void removeLine(LineID line) override;
+    void updateLinePosition(LineID id, int index, FPosition position) override;
+    void updateLinePositions(LineID id, std::vector<FPosition>& positions) override;
+    void updateLineWidth(LineID id, float width) override;
+    void removeLine(LineID id) override;
 
     TintID addTint(Position position, Color color) override;
     TintID addTint(FPosition start, float width, float height, Color color) override;
-    void updateTintColor(TintID tint, Color color) override;
-    void updateTintRect(Position start, float width, float height) override;
-    void removeTint(TintID tint) override;
+    void updateTintColor(TintID id, Color color) override;
+    void updateTintRect(TintID id, FPosition start, float width, float height) override;
+    void removeTint(TintID id) override;
+    
+    BlockPreviewID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
+    void updateBlockPreviewColor(BlockPreviewID id, Color modulate, float alpha) override;
+    void removeBlockPreview(BlockPreviewID id) override;
+
+    ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) override;
+    void updateConnectionPreviewPositions(ConnectionPreviewID id, std::pair<FPosition, FPosition> positions) override;
+    void updateConnectionPreviewColor(ConnectionPreviewID id, Color modulate, float alpha) override;
+    void removeConnectionPreview(ConnectionPreviewID id) override;
 
     void addConfetti(FPosition start) override;
 

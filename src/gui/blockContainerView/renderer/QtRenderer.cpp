@@ -193,19 +193,19 @@ LineID QtRenderer::addLine(const std::vector<FPosition>& positions, float width)
     return 0;
 }
 
-void QtRenderer::updateLinePosition(LineID line, int index, FPosition position) {
+void QtRenderer::updateLinePosition(LineID id, int index, FPosition position) {
 
 }
 
-void QtRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions) {
+void QtRenderer::updateLinePositions(LineID id, std::vector<FPosition>& positions) {
 
 }
 
-void QtRenderer::updateLineWidth(LineID line, float width) {
+void QtRenderer::updateLineWidth(LineID id, float width) {
 
 }
 
-void QtRenderer::removeLine(LineID line) {
+void QtRenderer::removeLine(LineID id) {
 
 }
 
@@ -218,16 +218,47 @@ TintID QtRenderer::addTint(FPosition start, float width, float height, Color col
     return 0;
 }
 
-void QtRenderer::updateTintColor(TintID tint, Color color) {
+void QtRenderer::updateTintColor(TintID id, Color color) {
 
 }
 
-void QtRenderer::updateTintRect(Position start, float width, float height) {
+void QtRenderer::updateTintRect(TintID id, FPosition start, float width, float height) {
 
 }
 
-void QtRenderer::removeTint(TintID tint) {
+void QtRenderer::removeTint(TintID id) {
 
+}
+
+// block preview
+BlockPreviewID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
+    return 0;
+}
+
+void QtRenderer::updateBlockPreviewColor(BlockPreviewID id, Color modulate, float alpha) {
+    
+}
+
+void QtRenderer::removeBlockPreview(BlockPreviewID id)
+{
+    
+}
+
+// connection preview
+ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) {
+    return 0;
+}
+
+void updateConnectionPreviewPositions(ConnectionPreviewID id, std::pair<FPosition, FPosition> positions) {
+    
+}
+
+void updateConnectionPreviewColor(ConnectionPreviewID id, Color modulate, float alpha) {
+    
+}
+
+void removeConnectionPreview(ConnectionPreviewID id) {
+    
 }
 
 // confetti

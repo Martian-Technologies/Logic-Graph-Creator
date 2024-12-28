@@ -24,6 +24,8 @@
 
 typedef unsigned int LineID;
 typedef unsigned int TintID;
+typedef unsigned int BlockPreviewID;
+typedef unsigned int ConnectionPreviewID;
 
 class Renderer {
 public:
@@ -36,17 +38,26 @@ public:
 
     // effect layer
     virtual LineID addLine(const std::vector<FPosition>& positions, float width) = 0;
-    virtual void updateLinePosition(LineID line, int index, FPosition position) = 0;
-    virtual void updateLinePositions(LineID line, std::vector<FPosition>& positions) = 0;
-    virtual void updateLineWidth(LineID line, float width) = 0;
-    virtual void removeLine(LineID line) = 0;
+    virtual void updateLinePosition(LineID id, int index, FPosition position) = 0;
+    virtual void updateLinePositions(LineID id, std::vector<FPosition>& positions) = 0;
+    virtual void updateLineWidth(LineID id, float width) = 0;
+    virtual void removeLine(LineID id) = 0;
 
     virtual TintID addTint(Position position, Color color) = 0;
     virtual TintID addTint(FPosition start, float width, float height, Color color) = 0;
-    virtual void updateTintColor(TintID tint, Color color) = 0;
-    virtual void updateTintRect(Position start, float width, float height) = 0;
-    virtual void removeTint(TintID tint) = 0;
+    virtual void updateTintColor(TintID id, Color color) = 0;
+    virtual void updateTintRect(TintID id, FPosition start, float width, float height) = 0;
+    virtual void removeTint(TintID id) = 0;
 
+    virtual BlockPreviewID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) = 0;
+    virtual void updateBlockPreviewColor(BlockPreviewID id, Color modulate, float alpha) = 0;
+    virtual void removeBlockPreview(BlockPreviewID id) = 0;
+
+    virtual ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) = 0;
+    virtual void updateConnectionPreviewPositions(ConnectionPreviewID id, std::pair<FPosition, FPosition> positions) = 0;
+    virtual void updateConnectionPreviewColor(ConnectionPreviewID id, Color modulate, float alpha) = 0;
+    virtual void removeConnectionPreview(ConnectionPreviewID id) = 0;
+    
     virtual void addConfetti(FPosition start) = 0;
 };
 
