@@ -194,7 +194,7 @@ void QtRenderer::removeElement(ElementID id) {
 }
 
 // tint
-ElementID QtRenderer::addSelectionElement(Position positionA, Position positionB) {
+ElementID QtRenderer::addSelectionElement(Position positionA, Position positionB, bool inverted) {
     return 0;
 }
 

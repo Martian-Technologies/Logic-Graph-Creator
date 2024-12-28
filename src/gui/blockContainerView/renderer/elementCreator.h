@@ -23,25 +23,25 @@ public:
 
     inline bool hasElement(ElementID id) { return ids.find(id) != ids.end(); }
 
-    inline ElementID addSelectionElement(Position position) {
-        ElementID id = renderer->addSelectionElement(position, position);
+    inline ElementID addSelectionElement(Position position, bool inverted = false) {
+        ElementID id = renderer->addSelectionElement(position, position, inverted);
         ids.insert(id);
         return id;
     }
 
-    inline ElementID addSelectionElement(Position positionA, Position positionB) {
-        ElementID id = renderer->addSelectionElement(positionA, positionB);
+    inline ElementID addSelectionElement(Position positionA, Position positionB, bool inverted = false) {
+        ElementID id = renderer->addSelectionElement(positionA, positionB, inverted);
         ids.insert(id);
         return id;
     }
 
-    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
+    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate = Color(), float alpha = 1.f) {
         ElementID id = renderer->addBlockPreview(position, rotation, modulate, alpha);
         ids.insert(id);
         return id;
     }
 
-    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) {
+    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate = Color(), float alpha = 1.f) {
         ElementID id = renderer->addConnectionPreview(inputCellPos, outputCellPos, modulate, alpha);
         ids.insert(id);
         return id;

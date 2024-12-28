@@ -39,7 +39,7 @@ private:
     // elements
     virtual void removeElement(ElementID id) = 0;
 
-    virtual ElementID addSelectionElement(Position positionA, Position positionB) = 0;
+    virtual ElementID addSelectionElement(Position positionA, Position positionB, bool inverted) = 0;
 
     virtual ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) = 0;
 
