@@ -126,7 +126,7 @@ void QtRenderer::render(QPainter* painter) {
     painter->save();
     // 4e75a6 and 78b5ff
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 40.0f / viewManager->getViewHeight()));
+    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 25.0f / viewManager->getViewHeight()));
     for (const auto& block : *(blockContainer->getBlockContainer())) {
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
