@@ -43,7 +43,6 @@ public:
     // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation, Difference* difference);
 
-
     /* ----------- connections ----------- */
     // -- getters --
     bool connectionExists(const Position& outputPosition, const Position& inputPosition) const;
