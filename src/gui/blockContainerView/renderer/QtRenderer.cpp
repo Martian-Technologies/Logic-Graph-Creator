@@ -1,6 +1,7 @@
+#include <QPainterPath>
+#include <QDateTime>
 #include <QPainter>
 #include <QDebug>
-#include <QDateTime>
 
 #include <memory>
 #include <set>
@@ -124,7 +125,7 @@ void QtRenderer::render(QPainter* painter) {
     // render connections
     painter->save();
     // 4e75a6 and 78b5ff
-    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 40.0f / viewManager->getViewHeight()));
+    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 3) ? 2507161 : 7910911 ), 40.0f / viewManager->getViewHeight()));
     for (const auto& block : *(blockContainer->getBlockContainer())) {
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
@@ -150,7 +151,17 @@ void QtRenderer::render(QPainter* painter) {
                 if (other->getRotation() == Rotation::ONE_EIGHTY) otherSocketOffset = { 0.5f, 0.0f };
                 if (other->getRotation() == Rotation::TWO_SEVENTY) otherSocketOffset = { 0.0f, 0.5f };
 
-                painter->drawLine(gridToQt(pos.free() + centerOffset + socketOffset), gridToQt(otherPos.free() + centerOffset + otherSocketOffset));
+                QPointF start = gridToQt(pos.free() + centerOffset + socketOffset);
+                QPointF end = gridToQt(otherPos.free() + centerOffset + otherSocketOffset);
+                QPointF c1 = gridToQt(pos.free() + centerOffset + socketOffset*2.8f);
+                QPointF c2 = gridToQt(otherPos.free() + centerOffset + otherSocketOffset*2.8f);
+
+                QPainterPath myPath;
+                myPath.moveTo(start);
+                myPath.cubicTo(c1, c2, end);
+                painter->drawPath(myPath);
+
+                // painter->drawLine(gridToQt(pos.free() + centerOffset + socketOffset), gridToQt(otherPos.free() + centerOffset + otherSocketOffset));
             }
         }
     }
