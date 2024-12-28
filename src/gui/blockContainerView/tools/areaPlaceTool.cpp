@@ -6,21 +6,21 @@ bool AreaPlaceTool::startPlaceBlock(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
     switch (click) {
-        case 'n':
-            click = 'c';
-            clickPosition = positionEvent->getPosition();
-            return true;
-        case 'c':
-            blockContainer->tryInsertOverArea(clickPosition, positionEvent->getPosition(), rotation, selectedBlock);
-            if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
-            effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(positionEvent->getPosition());
-            click = 'n';
-            // left here for stats when needed
-            // TODO: make a stat tool
-            // std::cout << "blocks: " << blockContainer->getBlockCount() << "    cells: " << blockContainer->getCellCount() << std::endl;
-            return true;
-        default:
-            return false;
+    case 'n':
+        click = 'c';
+        clickPosition = positionEvent->getPosition();
+        return true;
+    case 'c':
+        blockContainer->tryInsertOverArea(clickPosition, positionEvent->getPosition(), rotation, selectedBlock);
+        elementCreator.clear();
+        elementCreator.addSelectionElement(positionEvent->getPosition());
+        click = 'n';
+        // left here for stats when needed
+        // TODO: make a stat tool
+        // std::cout << "blocks: " << blockContainer->getBlockCount() << "    cells: " << blockContainer->getCellCount() << std::endl;
+        return true;
+    default:
+        return false;
     }
     return false;
 }
@@ -30,18 +30,18 @@ bool AreaPlaceTool::startDeleteBlocks(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
     switch (click) {
-        case 'n':
-            click = 'c';
-            clickPosition = positionEvent->getPosition();
-            return true;
-        case 'c':
-            blockContainer->tryRemoveOverArea(clickPosition, positionEvent->getPosition());
-            if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
-            effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(positionEvent->getPosition());
-            click = 'n';
-            return true;
-        default:
-            return false;
+    case 'n':
+        click = 'c';
+        clickPosition = positionEvent->getPosition();
+        return true;
+    case 'c':
+        blockContainer->tryRemoveOverArea(clickPosition, positionEvent->getPosition());
+        elementCreator.clear();
+        elementCreator.addSelectionElement(positionEvent->getPosition());
+        click = 'n';
+        return true;
+    default:
+        return false;
     }
     return false;
 }
@@ -52,12 +52,12 @@ bool AreaPlaceTool::pointerMove(const Event* event) {
     if (!positionEvent) return false;
     switch (click) {
     case 'n':
-        if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
-        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(positionEvent->getPosition());
+        elementCreator.clear();
+        elementCreator.addSelectionElement(positionEvent->getPosition());
         return true;
     default:
-        if (!effectDisplayer.hasEffect(0)) effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
-        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(clickPosition, positionEvent->getPosition());
+        elementCreator.clear();
+        elementCreator.addSelectionElement(clickPosition, positionEvent->getPosition());
         return true;
     }
     return false;
@@ -67,8 +67,13 @@ bool AreaPlaceTool::enterBlockView(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
-    if (effectDisplayer.hasEffect(0)) return false;
-    effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
+    elementCreator.clear();
+    switch (click) {
+    case 'n':
+        elementCreator.addSelectionElement(positionEvent->getPosition());
+    default:
+        elementCreator.addSelectionElement(clickPosition, positionEvent->getPosition());
+    }
     return true;
 }
 
@@ -76,7 +81,6 @@ bool AreaPlaceTool::exitBlockView(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
-    if (!effectDisplayer.hasEffect(0)) return false;
-    effectDisplayer.removeEffect(0);
+    elementCreator.clear();
     return true;
 }

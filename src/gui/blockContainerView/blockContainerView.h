@@ -14,7 +14,7 @@ template <class RENDERER_TYPE>
 // typename std::enable_if<std::is_base_of<Renderer, RENDERER_TYPE>::value, void>::type // idk if we can get this working
 class BlockContainerView {
 public:
-    BlockContainerView() : blockContainerWrapper(), eventRegister(), toolManager(&eventRegister), viewManager(), renderer() {
+    BlockContainerView() : blockContainerWrapper(), eventRegister(), viewManager(), renderer(), toolManager(&eventRegister, &renderer) {
         viewManager.initialize(eventRegister);
         viewManager.connectViewChanged(std::bind(&BlockContainerView::viewChanged, this));
     }
@@ -50,9 +50,9 @@ public:
 private:
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper;
     EventRegister eventRegister;
-    ToolManager toolManager;
     ViewManager viewManager;
     RENDERER_TYPE renderer;
+    ToolManager toolManager;
 };
 
 #endif /* blockContainerView_h */
