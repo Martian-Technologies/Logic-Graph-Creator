@@ -7,16 +7,17 @@
 
 #include "toolManagerEventRegister.h"
 #include "../events/eventRegister.h"
-#include "blockContainerTool.h"
 #include "baseBlockPlacementTool.h"
+#include "../renderer/renderer.h"
+#include "blockContainerTool.h"
 #include "singleConnectTool.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
 
 class ToolManager {
 public:
-    inline ToolManager(EventRegister* eventRegister) :
-        blockContainerWrapper(nullptr), eventRegister(eventRegister), registeredEvents(),
+    inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
+        blockContainerWrapper(nullptr), eventRegister(eventRegister), registeredEvents(), renderer(renderer),
         tool(nullptr), selectedBlock(NONE), toolType("NONE"), toolManagerEventRegister(eventRegister, &registeredEvents) {}
 
     inline ~ToolManager() {
@@ -32,6 +33,7 @@ public:
         else tool = nullptr;
 
         if (tool) {
+            tool->setElementCreator(ElementCreator(renderer));
             tool->initialize(toolManagerEventRegister);
             BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
             if (placementTool) placementTool->selectBlock(selectedBlock);
@@ -54,8 +56,6 @@ public:
         }
     }
 
-    inline void display(QPainter& painter, const LogicGridWindow& gridWindow) { if (tool) tool->display(painter, gridWindow); }
-
     inline void reset() { if (tool) tool->reset(); }
 
 private:
@@ -74,6 +74,8 @@ private:
     ToolManagerEventRegister toolManagerEventRegister;
     EventRegister* eventRegister;
     std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;
+
+    Renderer* renderer;
 
     // which tool data
     std::unique_ptr<BlockContainerTool> tool;

@@ -67,4 +67,4 @@ const TileRegion& TileSet<T>::getRegion(T key, bool topLeft) const {
 }
 
 
-#endif
+#endif /* tileSet_h */

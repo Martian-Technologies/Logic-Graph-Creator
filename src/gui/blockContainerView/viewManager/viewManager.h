@@ -57,13 +57,13 @@ public:
 
 private:
     void applyLimits();
-    inline void viewChanged() { pointerPosition = viewToGrid(pointerVec); if (viewChangedListener) viewChangedListener(); }
+    inline void viewChanged() { pointerPosition = viewToGrid(pointerViewPosition); if (viewChangedListener) viewChangedListener(); }
 
     // pointer
     bool doPointerMovement = false;
     bool pointerActive = false;
     FPosition pointerPosition;
-    Vec2 pointerVec;
+    Vec2 pointerViewPosition;
 
     // view
     FPosition viewCenter;

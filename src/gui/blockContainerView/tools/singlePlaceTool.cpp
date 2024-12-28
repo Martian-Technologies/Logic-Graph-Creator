@@ -106,11 +106,8 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
     bool returnVal = false; // used to make sure it updates the effect
-
-    if (effectDisplayer.hasEffect(0)) {
-        effectDisplayer.getEffect<CellSelectionEffect>(0)->changeSelection(positionEvent->getPosition());
-        returnVal = true;
-    }
+    elementCreator.clear();
+    elementCreator.addSelectionElement(positionEvent->getPosition());
     
     switch (clicks[0]) {
     case 'n':
@@ -137,14 +134,13 @@ bool SinglePlaceTool::enterBlockView(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
-    if (effectDisplayer.hasEffect(0)) return false;
-    effectDisplayer.addEffect(CellSelectionEffect(0, 0, positionEvent->getPosition()));
+    elementCreator.clear();
+    elementCreator.addSelectionElement(positionEvent->getPosition());
     return true;
 }
 
 bool SinglePlaceTool::exitBlockView(const Event* event) {
     if (!blockContainer) return false;
-    if (!effectDisplayer.hasEffect(0)) return false;
-    effectDisplayer.removeEffect(0);
+    elementCreator.clear();
     return true;
 }

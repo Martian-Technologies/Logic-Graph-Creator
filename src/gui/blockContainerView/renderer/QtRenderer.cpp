@@ -126,7 +126,7 @@ void QtRenderer::render(QPainter* painter) {
     painter->save();
     // 4e75a6 and 78b5ff
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 40.0f / viewManager->getViewHeight()));
+    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 25.0f / viewManager->getViewHeight()));
     for (const auto& block : *(blockContainer->getBlockContainer())) {
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
@@ -187,50 +187,36 @@ QPointF QtRenderer::gridToQt(FPosition position) {
     return QPointF(viewPos.x * w, viewPos.y * h);
 }
 
-// effects -----------------------------
-// line
-LineID QtRenderer::addLine(const std::vector<FPosition>& positions, float width) {
+// element -----------------------------
+
+// selection
+ElementID QtRenderer::addSelectionElement(Position topLeft, Position bottomRight, bool inverted) {
     return 0;
 }
 
-void QtRenderer::updateLinePosition(LineID line, int index, FPosition position) {
-
+void QtRenderer::removeSelectionElement(ElementID selection) {
+    
 }
 
-void QtRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions) {
-
-}
-
-void QtRenderer::updateLineWidth(LineID line, float width) {
-
-}
-
-void QtRenderer::removeLine(LineID line) {
-
-}
-
-// tint
-TintID QtRenderer::addTint(Position position, Color color) {
+// block preview
+ElementID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
     return 0;
 }
 
-TintID QtRenderer::addTint(FPosition start, float width, float height, Color color) {
+void QtRenderer::removeBlockPreview(ElementID blockPreview) {
+    
+}
+
+// connection preview
+ElementID QtRenderer::addConnectionPreview(Position input, Position output, Color modulate, float alpha) {
     return 0;
 }
 
-void QtRenderer::updateTintColor(TintID tint, Color color) {
-
-}
-
-void QtRenderer::updateTintRect(Position start, float width, float height) {
-
-}
-
-void QtRenderer::removeTint(TintID tint) {
-
+void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
+    
 }
 
 // confetti
-void QtRenderer::addConfetti(FPosition start) {
-
+void QtRenderer::spawnConfetti(FPosition start) {
+    
 }

@@ -11,14 +11,6 @@
 #include "renderer.h"
 #include "tileSet.h"
 
-// TODO
-// - [x] QT renderer
-// - [x] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
-// - [x] viewmanager grid cell selection and input loop
-// - [ ] blockContainer data to renderer (placeholder event and internal data structure)
-// - [ ] write rendering logic
-// - [ ] connect effects to renderer
-
 class QtRenderer : public Renderer {
 public:
     QtRenderer();
@@ -35,20 +27,18 @@ public:
     void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
 
-    // effects
-    LineID addLine(const std::vector<FPosition>& positions, float width) override;
-    void updateLinePosition(LineID line, int index, FPosition position) override;
-    void updateLinePositions(LineID line, std::vector<FPosition>& positions) override;
-    void updateLineWidth(LineID line, float width) override;
-    void removeLine(LineID line) override;
-
-    TintID addTint(Position position, Color color) override;
-    TintID addTint(FPosition start, float width, float height, Color color) override;
-    void updateTintColor(TintID tint, Color color) override;
-    void updateTintRect(Position start, float width, float height) override;
-    void removeTint(TintID tint) override;
-
-    void addConfetti(FPosition start) override;
+private:
+    // elements
+    ElementID addSelectionElement(Position topLeft, Position bottomRight, bool inverted) override;
+    void removeSelectionElement(ElementID selection) override;
+    
+    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
+    void removeBlockPreview(ElementID blockPreview) override;
+    
+    ElementID addConnectionPreview(Position input, Position output, Color modulate, float alpha) override;
+    void removeConnectionPreview(ElementID connectionPreview) override;
+    
+    void spawnConfetti(FPosition start) override;
 
 private:
     int w, h;
@@ -60,4 +50,4 @@ private:
     QPointF gridToQt(FPosition position);
 };
 
-#endif // QTRenderer_h
+#endif /* QTRenderer_h */
