@@ -5,19 +5,19 @@
 #include <memory>
 #include <set>
 
-#include "QTRenderer.h"
+#include "QtRenderer.h"
 #include "backend/connection/connectionEnd.h"
 #include "backend/position/position.h"
 #include "backend/defs.h"
 #include "util/vec2.h"
 
 
-QTRenderer::QTRenderer()
+QtRenderer::QtRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
 
 }
 
-void QTRenderer::initializeTileSet(const std::string& filePath) {
+void QtRenderer::initializeTileSet(const std::string& filePath) {
     if (filePath != "") {
         tileSet = QPixmap(filePath.c_str());
 
@@ -40,12 +40,12 @@ void QTRenderer::initializeTileSet(const std::string& filePath) {
     }
 }
 
-void QTRenderer::resize(int w, int h) {
+void QtRenderer::resize(int w, int h) {
     this->w = w;
     this->h = h;
 }
 
-void QTRenderer::render(QPainter* painter) {
+void QtRenderer::render(QPainter* painter) {
     // error checking
     assert(viewManager);
     if (tileSet.isNull() || tileSetInfo == nullptr) {
@@ -160,15 +160,15 @@ void QTRenderer::render(QPainter* painter) {
     // render lines
 }
 
-void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
+void QtRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
     this->blockContainer = blockContainer;
 }
 
-void QTRenderer::updateView(ViewManager* viewManager) {
+void QtRenderer::updateView(ViewManager* viewManager) {
     this->viewManager = viewManager;
 }
 
-QPointF QTRenderer::gridToQt(FPosition position) {
+QPointF QtRenderer::gridToQt(FPosition position) {
     assert(viewManager);
 
     Vec2 viewPos = viewManager->gridToView(position);
@@ -177,48 +177,48 @@ QPointF QTRenderer::gridToQt(FPosition position) {
 
 // effects -----------------------------
 // line
-LineID QTRenderer::addLine(const std::vector<FPosition>& positions, float width) {
+LineID QtRenderer::addLine(const std::vector<FPosition>& positions, float width) {
     return 0;
 }
 
-void QTRenderer::updateLinePosition(LineID line, int index, FPosition position) {
+void QtRenderer::updateLinePosition(LineID line, int index, FPosition position) {
 
 }
 
-void QTRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions) {
+void QtRenderer::updateLinePositions(LineID line, std::vector<FPosition>& positions) {
 
 }
 
-void QTRenderer::updateLineWidth(LineID line, float width) {
+void QtRenderer::updateLineWidth(LineID line, float width) {
 
 }
 
-void QTRenderer::removeLine(LineID line) {
+void QtRenderer::removeLine(LineID line) {
 
 }
 
 // tint
-TintID QTRenderer::addTint(Position position, Color color) {
+TintID QtRenderer::addTint(Position position, Color color) {
     return 0;
 }
 
-TintID QTRenderer::addTint(FPosition start, float width, float height, Color color) {
+TintID QtRenderer::addTint(FPosition start, float width, float height, Color color) {
     return 0;
 }
 
-void QTRenderer::updateTintColor(TintID tint, Color color) {
+void QtRenderer::updateTintColor(TintID tint, Color color) {
 
 }
 
-void QTRenderer::updateTintRect(Position start, float width, float height) {
+void QtRenderer::updateTintRect(Position start, float width, float height) {
 
 }
 
-void QTRenderer::removeTint(TintID tint) {
+void QtRenderer::removeTint(TintID tint) {
 
 }
 
 // confetti
-void QTRenderer::addConfetti(FPosition start) {
+void QtRenderer::addConfetti(FPosition start) {
 
 }

@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
-#include "../blockContainerView/renderer/QTRenderer.h"
+#include "../blockContainerView/renderer/QtRenderer.h"
 #include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
@@ -59,7 +59,7 @@ private:
     void updateLoop();
 
     // data
-    BlockContainerView<QTRenderer> blockContainerView;
+    BlockContainerView<QtRenderer> blockContainerView;
     bool mouseControls;
 
     // ui elements

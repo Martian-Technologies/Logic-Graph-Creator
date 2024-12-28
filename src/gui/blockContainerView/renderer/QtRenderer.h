@@ -19,9 +19,9 @@
 // - [ ] write rendering logic
 // - [ ] connect effects to renderer
 
-class QTRenderer : public Renderer {
+class QtRenderer : public Renderer {
 public:
-    QTRenderer();
+    QtRenderer();
 
     // general flow
     void initializeTileSet(const std::string& filePath);
