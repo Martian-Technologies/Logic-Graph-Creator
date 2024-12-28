@@ -132,17 +132,25 @@ void QTRenderer::render(QPainter* painter) {
             // return if input, we only want outputs
             if (block.second.isConnectionInput(id)) continue;
             for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
-                Position pos1 = block.second.getConnectionPosition(id).first;
-                Position pos2 = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first;
+                const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
+                Position pos = block.second.getConnectionPosition(id).first;
+                Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
 
                 FPosition centerOffset(0.5, 0.5f);
                 FPosition socketOffset; // indev socket offset
+                FPosition otherSocketOffset;
+
                 if (block.second.getRotation() == Rotation::ZERO) socketOffset = { 0.5f, 0.0f };
                 if (block.second.getRotation() == Rotation::NINETY) socketOffset = { 0.0f, 0.5f };
                 if (block.second.getRotation() == Rotation::ONE_EIGHTY) socketOffset = { -0.5f, 0.0f };
                 if (block.second.getRotation() == Rotation::TWO_SEVENTY) socketOffset = { 0.0f, -0.5f };
 
-                painter->drawLine(gridToQt(pos1.free() + centerOffset + socketOffset), gridToQt(pos2.free() + centerOffset - socketOffset));
+                if (other->getRotation() == Rotation::ZERO) otherSocketOffset = { 0.5f, 0.0f };
+                if (other->getRotation() == Rotation::NINETY) otherSocketOffset = { 0.0f, 0.5f };
+                if (other->getRotation() == Rotation::ONE_EIGHTY) otherSocketOffset = { -0.5f, 0.0f };
+                if (other->getRotation() == Rotation::TWO_SEVENTY) otherSocketOffset = { 0.0f, -0.5f };
+
+                painter->drawLine(gridToQt(pos.free() + centerOffset + socketOffset), gridToQt(otherPos.free() + centerOffset - otherSocketOffset));
             }
         }
     }
