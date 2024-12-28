@@ -187,13 +187,9 @@ QPointF QtRenderer::gridToQt(FPosition position) {
     return QPointF(viewPos.x * w, viewPos.y * h);
 }
 
-// effects -----------------------------
-// line
-ElementID QtRenderer::addLine(const std::vector<FPosition>& positions, float width) {
-    return 0;
-}
+// element -----------------------------
 
-void QtRenderer::removeLine(ElementID id) {
+void QtRenderer::removeElement(ElementID id) {
 
 }
 
@@ -206,27 +202,14 @@ ElementID QtRenderer::addTint(FPosition start, float width, float height, Color 
     return 0;
 }
 
-void QtRenderer::removeTint(ElementID id) {
-
-}
-
 // block preview
-BlockPreviewID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
+ElementID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
     return 0;
-}
-
-void QtRenderer::removeBlockPreview(BlockPreviewID id)
-{
-    
 }
 
 // connection preview
-ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) {
+ElementID QtRenderer::addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) {
     return 0;
-}
-
-void removeConnectionPreview(ConnectionPreviewID id) {
-    
 }
 
 // confetti

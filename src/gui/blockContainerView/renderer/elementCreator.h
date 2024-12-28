@@ -4,31 +4,45 @@
 #include <set>
 
 #include "renderer.h"
-class Renderer;
 
 
 class ElementCreator {
     friend class Renderer;
 public:
-    inline ElementID addLine(const std::vector<FPosition>& positions, float width) {
-        ElementID id = renderer->addLine(positions, width);
-        ids.insert(id);
-        return id;
+    void removeElement(ElementID id) {
+        auto iter = ids.find(id);
+        if (iter == ids.end()) return;
+        ids.erase(iter);
+        renderer->removeElement(id);
     }
-    inline void updateLinePosition(ElementID line, int index, FPosition position);
-    inline void updateLinePositions(ElementID line, std::vector<FPosition>& positions);
-    inline void updateLineWidth(ElementID line, float width);
-    inline void removeLine(ElementID line);
 
     inline ElementID addTint(Position position, Color color) {
-        ElementID id = renderer->addTint(positions, width);
+        ElementID id = renderer->addTint(position, color);
         ids.insert(id);
         return id;
     }
-    inline ElementID addTint(FPosition start, float width, float height, Color color);
-    inline void updateTintColor(ElementID tint, Color color);
-    inline void updateTintRect(Position start, float width, float height);
-    inline void removeTint(ElementID tint);
+    
+    inline ElementID addTint(FPosition start, float width, float height, Color color) {
+        ElementID id = renderer->addTint(start, width, height, color);
+        ids.insert(id);
+        return id;
+    }
+
+    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
+        ElementID id = renderer->addTint(position, rotation, modulate, alpha);
+        ids.insert(id);
+        return id;
+    }
+
+    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) {
+        ElementID id = renderer->addTint(inputCellPos, outputCellPos, modulate, alpha);
+        ids.insert(id);
+        return id;
+    }
+
+    void addConfetti(FPosition start) {
+        renderer->addConfetti(start);
+    }
 
 private:
     ElementCreator(Renderer* renderer) : renderer(renderer) { assert(renderer); }

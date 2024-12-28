@@ -8,8 +8,6 @@ typedef unsigned int ElementID;
 #include "middleEnd/blockContainerWrapper.h"
 #include "../viewManager/viewManager.h"
 #include "color.h"
-#include "elementCreator.h"
-class ElementCreator;
 
 
 
@@ -33,24 +31,18 @@ public:
     virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
     // virtual void setSimulator(Simulator* simulator) = 0;
 
-    ElementCreator getElementCreator() {return ElementCreator(this);}
-
     virtual void updateView(ViewManager* viewManager) = 0;
     // virtual void updateBlockContainer(Difference diff) = 0;
 
     // effect layer
-    virtual ElementID addLine(const std::vector<FPosition>& positions, float width) = 0;
-    virtual void removeLine(ElementID id) = 0;
+    virtual void removeElement(ElementID id) = 0;
 
     virtual ElementID addTint(Position position, Color color) = 0;
     virtual ElementID addTint(FPosition start, float width, float height, Color color) = 0;
-    virtual void removeTint(ElementID id) = 0;
 
     virtual ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) = 0;
-    virtual void removeBlockPreview(ElementID id) = 0;
 
-    virtual ElementID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) = 0;
-    virtual void removeConnectionPreview(ElementID id) = 0;
+    virtual ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) = 0;
     
     virtual void addConfetti(FPosition start) = 0;
 };

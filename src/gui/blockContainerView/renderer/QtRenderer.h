@@ -35,19 +35,15 @@ public:
     void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
 
-    // effects
-    ElementID addLine(const std::vector<FPosition>& positions, float width) override;
-    void removeLine(ElementID id) override;
-
+    // element
+    void removeElement(ElementID id) override;
+    
     ElementID addTint(Position position, Color color) override;
     ElementID addTint(FPosition start, float width, float height, Color color) override;
-    void removeTint(ElementID id) override;
     
     ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
-    void removeBlockPreview(ElementID id) override;
 
-    ElementID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) override;
-    void removeConnectionPreview(ElementID id) override;
+    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) override;
 
     void addConfetti(FPosition start) override;
 
