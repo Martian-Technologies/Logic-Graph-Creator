@@ -55,7 +55,7 @@ public:
 
     void addConfetti(FPosition start) {
         assert(renderer);
-        renderer->addConfetti(start);
+        renderer->spawnConfetti(start);
     }
 
 private:

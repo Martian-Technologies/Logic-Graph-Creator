@@ -11,14 +11,6 @@
 #include "renderer.h"
 #include "tileSet.h"
 
-// TODO
-// - [x] QT renderer
-// - [x] Coodinate system conversion (viewmanager handles conversions, gives renderer what it needs)
-// - [x] viewmanager grid cell selection and input loop
-// - [ ] blockContainer data to renderer (placeholder event and internal data structure)
-// - [ ] write rendering logic
-// - [ ] connect effects to renderer
-
 class QtRenderer : public Renderer {
 public:
     QtRenderer();
@@ -37,15 +29,16 @@ public:
 
 private:
     // elements
-    void removeElement(ElementID id) override;
-    
-    ElementID addSelectionElement(Position positionA, Position positionB, bool inverted) override;
+    ElementID addSelectionElement(Position topLeft, Position bottomRight, bool inverted) override;
+    void removeSelectionElement(ElementID selection) override;
     
     ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
-
-    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) override;
-
-    void addConfetti(FPosition start) override;
+    void removeBlockPreview(ElementID blockPreview) override;
+    
+    ElementID addConnectionPreview(Position input, Position output, Color modulate, float alpha) override;
+    void removeConnectionPreview(ElementID connectionPreview) override;
+    
+    void spawnConfetti(FPosition start) override;
 
 private:
     int w, h;

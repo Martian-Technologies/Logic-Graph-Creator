@@ -37,15 +37,16 @@ public:
 
 private:
     // elements
-    virtual void removeElement(ElementID id) = 0;
-
-    virtual ElementID addSelectionElement(Position positionA, Position positionB, bool inverted) = 0;
-
-    virtual ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) = 0;
-
-    virtual ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) = 0;
+    virtual ElementID addSelectionElement(Position topLeft, Position bottomRight, bool inverted) = 0;
+    virtual void removeSelectionElement(ElementID selection) = 0;
     
-    virtual void addConfetti(FPosition start) = 0;
+    virtual ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) = 0;
+    virtual void removeBlockPreview(ElementID blockPreview) = 0;
+    
+    virtual ElementID addConnectionPreview(Position input, Position output, Color modulate, float alpha) = 0;
+    virtual void removeConnectionPreview(ElementID connectionPreview) = 0;
+    
+    virtual void spawnConfetti(FPosition start) = 0;
 };
 
 #endif /* renderer_h */

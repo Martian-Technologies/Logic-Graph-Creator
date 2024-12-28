@@ -189,13 +189,13 @@ QPointF QtRenderer::gridToQt(FPosition position) {
 
 // element -----------------------------
 
-void QtRenderer::removeElement(ElementID id) {
-
+// selection
+ElementID QtRenderer::addSelectionElement(Position topLeft, Position bottomRight, bool inverted) {
+    return 0;
 }
 
-// tint
-ElementID QtRenderer::addSelectionElement(Position positionA, Position positionB, bool inverted) {
-    return 0;
+void QtRenderer::removeSelectionElement(ElementID selection) {
+    
 }
 
 // block preview
@@ -203,12 +203,20 @@ ElementID QtRenderer::addBlockPreview(Position position, Rotation rotation, Colo
     return 0;
 }
 
+void QtRenderer::removeBlockPreview(ElementID blockPreview) {
+    
+}
+
 // connection preview
-ElementID QtRenderer::addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate, float alpha) {
+ElementID QtRenderer::addConnectionPreview(Position input, Position output, Color modulate, float alpha) {
     return 0;
 }
 
-// confetti
-void QtRenderer::addConfetti(FPosition start) {
+void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
+    
+}
 
+// confetti
+void QtRenderer::spawnConfetti(FPosition start) {
+    
 }
