@@ -1,6 +1,8 @@
+#include <QPushButton>
 #include <QHBoxLayout>
 #include <QTreeView>
 
+#include <iostream>
 #include <memory>
 
 #include "gridGUI/logicGridWindow.h"
@@ -20,6 +22,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 
+    connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
+
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);
+}
+
+void MainWindow::setSimState(bool state) {
+    std::cout << state << std::endl;
 }
