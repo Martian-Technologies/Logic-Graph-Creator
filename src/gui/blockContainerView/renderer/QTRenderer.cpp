@@ -126,7 +126,7 @@ void QTRenderer::render(QPainter* painter) {
 
     // render connections
     painter->save();
-    painter->setPen(QPen(Qt::blue, 4));
+    painter->setPen(QPen(Qt::blue, 40.0f / viewManager->getViewHeight()));
     for (const auto& block : *(blockContainer->getBlockContainer())) {
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
