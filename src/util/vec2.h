@@ -1,5 +1,5 @@
-#ifndef vector2_h
-#define vector2_h
+#ifndef vec2_h
+#define vec2_h
 
 #include "fastMath.h"
 #include <string>

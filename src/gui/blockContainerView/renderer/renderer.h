@@ -25,16 +25,15 @@
 typedef unsigned int LineID;
 typedef unsigned int TintID;
 
-class Renderer
-{
- public:
+class Renderer {
+public:
     // main flow
     virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
     // virtual void setSimulator(Simulator* simulator) = 0;
-    
+
     virtual void updateView(ViewManager* viewManager) = 0;
     // virtual void updateBlockContainer(Difference diff) = 0;
-    
+
     // effect layer
     virtual LineID addLine(const std::vector<FPosition>& positions, float width) = 0;
     virtual void updateLinePosition(LineID line, int index, FPosition position) = 0;
@@ -49,6 +48,6 @@ class Renderer
     virtual void removeTint(TintID tint) = 0;
 
     virtual void addConfetti(FPosition start) = 0;
-}; 
+};
 
 #endif // renderer_h
