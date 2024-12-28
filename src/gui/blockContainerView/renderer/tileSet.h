@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include "util/vector2.h"
+#include "util/vec2.h"
 
 // this class represents a free tileset
 // tiles don't neccesarily need to fit a grid

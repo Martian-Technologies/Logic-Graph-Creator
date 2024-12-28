@@ -8,13 +8,12 @@
 #include <QPainter>
 #include <QWidget>
 #include <QTimer>
-#include <qvectornd.h>
 
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
 #include "../blockContainerView/renderer/QTRenderer.h"
-#include "util/vector2.h"
+#include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
     Q_OBJECT

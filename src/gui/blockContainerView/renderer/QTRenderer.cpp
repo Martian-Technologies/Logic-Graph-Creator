@@ -1,19 +1,15 @@
-#include <qvectornd.h>
-#include <qpainter.h>
+#include <QPainter>
+#include <QDebug>
 #include <QDateTime>
-#include <qbrush.h>
-#include <qdebug.h>
-#include <qpoint.h>
-#include <qsize.h>
 
 #include <memory>
 #include <set>
 
+#include "QTRenderer.h"
 #include "backend/connection/connectionEnd.h"
 #include "backend/position/position.h"
 #include "backend/defs.h"
-#include "util/vector2.h"
-#include "QTRenderer.h"
+#include "util/vec2.h"
 
 
 QTRenderer::QTRenderer()

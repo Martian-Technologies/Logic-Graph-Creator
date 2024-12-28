@@ -1,9 +1,8 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 
-#include "../blockContainerView/blockContainerView.h"
-#include "util/vector2.h"
 #include "logicGridWindow.h"
+#include "../blockContainerView/blockContainerView.h"
 
 // viewmanager is responsible for saying when the view is changed, which will
 // trigger an update, right now the tool system is not. When the tool system

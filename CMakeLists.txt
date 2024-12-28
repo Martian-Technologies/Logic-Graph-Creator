@@ -6,13 +6,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
-set(FORMS_DIR "${CMAKE_SOURCE_DIR}/src")
+set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Set Qt moc and uic
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${FORMS_DIR})
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
 
 # Initialize QT
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -20,8 +20,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 # Find source files
 set(SOURCE_FILES)
 file(GLOB_RECURSE SOURCE_FILES
-        "${FORMS_DIR}/*.ui"
-        "${FORMS_DIR}/*.qrc"
+        "${UI_DIR}/*.ui"
+        "${UI_DIR}/*.qrc"
         "${SOURCE_DIR}/*.cpp"
 )
 
@@ -41,7 +41,7 @@ endif()
 
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${FORMS_DIR} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} )
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 
 if(APPLE) # MacOS specific (After add_executable)
