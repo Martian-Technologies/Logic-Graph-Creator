@@ -17,7 +17,7 @@ public:
         toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&SingleConnectTool::exitBlockView, this, std::placeholders::_1));
     }
 
-    inline void reset() override final { clicked = false; }
+    inline void reset() override final { clicked = false; elementCreator.clear(); }
     bool makeConnection(const Event* event);
     bool cancelConnection(const Event* event);
     bool pointerMove(const Event* event);
