@@ -13,7 +13,7 @@
 
 class ViewManager {
 public:
-    ViewManager() : viewCenter(), viewHeight(8.0f), aspectRatio(16.0f/9.0f) {}
+    ViewManager() : viewCenter(), viewHeight(8.0f), aspectRatio(16.0f / 9.0f) {}
 
     inline void initialize(EventRegister& eventRegister) {
         eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
@@ -34,9 +34,9 @@ public:
     bool pointerExitView(const Event* event);
 
     // view
-    inline void setAspectRatio(float value) { aspectRatio = value; emitViewChanged(); }
-    inline void setViewCenter(FPosition value) { viewCenter = value; emitViewChanged(); }
-    inline void setViewHeight(float value) { viewHeight = value; emitViewChanged(); }
+    inline void setAspectRatio(float value) { aspectRatio = value; viewChanged(); }
+    inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
+    inline void setViewHeight(float value) { viewHeight = value; viewChanged(); }
 
     inline FPosition getViewCenter() const { return viewCenter; }
     inline float getViewHeight() const { return viewHeight; }
@@ -45,7 +45,7 @@ public:
     inline FPosition getBottomRight() const { return viewCenter + FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
     inline const FPosition& getPointerPosition() const { return pointerPosition; }
     inline float getAspectRatio() const { return aspectRatio; }
-    
+
     // coordinate system conversion
     inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FPosition(getViewWidth() * view.x, getViewHeight() * view.y); }
     Vec2 gridToView(FPosition position) const; // temporary until matrix
@@ -57,18 +57,19 @@ public:
 
 private:
     void applyLimits();
-    inline void emitViewChanged() { if (viewChangedListener) viewChangedListener(); }
+    inline void viewChanged() { pointerPosition = viewToGrid(pointerVec); if (viewChangedListener) viewChangedListener(); }
 
     // pointer
     bool doPointerMovement = false;
     bool pointerActive = false;
     FPosition pointerPosition;
+    Vec2 pointerVec;
 
     // view
     FPosition viewCenter;
     float viewHeight;
     float aspectRatio;
-    
+
     // event
     std::function<void()> viewChangedListener;
 };
