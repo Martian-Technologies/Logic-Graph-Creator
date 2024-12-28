@@ -16,4 +16,4 @@ struct Color {
     float r, g, b;
 };
 
-#endif // color_h
+#endif /* color_h */

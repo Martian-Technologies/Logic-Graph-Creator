@@ -36,26 +36,18 @@ public:
     // virtual void updateBlockContainer(Difference diff) override;
 
     // effects
-    LineID addLine(const std::vector<FPosition>& positions, float width) override;
-    void updateLinePosition(LineID id, int index, FPosition position) override;
-    void updateLinePositions(LineID id, std::vector<FPosition>& positions) override;
-    void updateLineWidth(LineID id, float width) override;
-    void removeLine(LineID id) override;
+    ElementID addLine(const std::vector<FPosition>& positions, float width) override;
+    void removeLine(ElementID id) override;
 
-    TintID addTint(Position position, Color color) override;
-    TintID addTint(FPosition start, float width, float height, Color color) override;
-    void updateTintColor(TintID id, Color color) override;
-    void updateTintRect(TintID id, FPosition start, float width, float height) override;
-    void removeTint(TintID id) override;
+    ElementID addTint(Position position, Color color) override;
+    ElementID addTint(FPosition start, float width, float height, Color color) override;
+    void removeTint(ElementID id) override;
     
-    BlockPreviewID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
-    void updateBlockPreviewColor(BlockPreviewID id, Color modulate, float alpha) override;
-    void removeBlockPreview(BlockPreviewID id) override;
+    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
+    void removeBlockPreview(ElementID id) override;
 
-    ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) override;
-    void updateConnectionPreviewPositions(ConnectionPreviewID id, std::pair<FPosition, FPosition> positions) override;
-    void updateConnectionPreviewColor(ConnectionPreviewID id, Color modulate, float alpha) override;
-    void removeConnectionPreview(ConnectionPreviewID id) override;
+    ElementID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) override;
+    void removeConnectionPreview(ElementID id) override;
 
     void addConfetti(FPosition start) override;
 
@@ -69,4 +61,4 @@ private:
     QPointF gridToQt(FPosition position);
 };
 
-#endif // QTRenderer_h
+#endif /* QTRenderer_h */

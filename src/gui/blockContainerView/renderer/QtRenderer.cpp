@@ -189,54 +189,30 @@ QPointF QtRenderer::gridToQt(FPosition position) {
 
 // effects -----------------------------
 // line
-LineID QtRenderer::addLine(const std::vector<FPosition>& positions, float width) {
+ElementID QtRenderer::addLine(const std::vector<FPosition>& positions, float width) {
     return 0;
 }
 
-void QtRenderer::updateLinePosition(LineID id, int index, FPosition position) {
-
-}
-
-void QtRenderer::updateLinePositions(LineID id, std::vector<FPosition>& positions) {
-
-}
-
-void QtRenderer::updateLineWidth(LineID id, float width) {
-
-}
-
-void QtRenderer::removeLine(LineID id) {
+void QtRenderer::removeLine(ElementID id) {
 
 }
 
 // tint
-TintID QtRenderer::addTint(Position position, Color color) {
+ElementID QtRenderer::addTint(Position position, Color color) {
     return 0;
 }
 
-TintID QtRenderer::addTint(FPosition start, float width, float height, Color color) {
+ElementID QtRenderer::addTint(FPosition start, float width, float height, Color color) {
     return 0;
 }
 
-void QtRenderer::updateTintColor(TintID id, Color color) {
-
-}
-
-void QtRenderer::updateTintRect(TintID id, FPosition start, float width, float height) {
-
-}
-
-void QtRenderer::removeTint(TintID id) {
+void QtRenderer::removeTint(ElementID id) {
 
 }
 
 // block preview
 BlockPreviewID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
     return 0;
-}
-
-void QtRenderer::updateBlockPreviewColor(BlockPreviewID id, Color modulate, float alpha) {
-    
 }
 
 void QtRenderer::removeBlockPreview(BlockPreviewID id)
@@ -247,14 +223,6 @@ void QtRenderer::removeBlockPreview(BlockPreviewID id)
 // connection preview
 ConnectionPreviewID addConnectionPreview(std::pair<FPosition, FPosition> positions, Color modulate, float alpha) {
     return 0;
-}
-
-void updateConnectionPreviewPositions(ConnectionPreviewID id, std::pair<FPosition, FPosition> positions) {
-    
-}
-
-void updateConnectionPreviewColor(ConnectionPreviewID id, Color modulate, float alpha) {
-    
 }
 
 void removeConnectionPreview(ConnectionPreviewID id) {
