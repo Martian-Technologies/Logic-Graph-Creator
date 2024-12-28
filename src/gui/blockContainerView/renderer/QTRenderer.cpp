@@ -6,8 +6,9 @@
 #include <qsize.h>
 
 #include <memory>
-#include <unordered_set>
+#include <set>
 
+#include "backend/connection/connectionEnd.h"
 #include "backend/position/position.h"
 #include "backend/defs.h"
 #include "util/vector2.h"
@@ -53,6 +54,7 @@ void QTRenderer::resize(int w, int h)
 void QTRenderer::render(QPainter* painter)
 {
     // error checking
+    assert(viewManager);
     if (tileSet.isNull() || tileSetInfo == nullptr)
     {
         painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileSet found");
@@ -60,14 +62,23 @@ void QTRenderer::render(QPainter* painter)
         return;
     }
 
+    // init
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    // helper lambda
-    auto gridToQt = [&](FPosition position) -> QPoint {
-        std::pair<float,float> viewPos = viewManager->gridToView(position);
-        return QPoint(viewPos.first * w, viewPos.second * h);
-    };
+    // render lambdas ---
+    auto renderCell = [&](FPosition position, BlockType type) -> void {
+        QPoint point = gridToQt(position);
+        QPoint pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
 
+        TileRegion tsRegion = tileSetInfo->getRegion(type);
+        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+                           QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+        
+        painter->drawPixmap(QRectF(point, pointBR),
+                            tileSet,
+                            tileSetRect);
+    };
+    
     auto renderBlock = [&](const Block* block) -> void {
         Position gridSize(block->widthNoRotation(), block->heightNoRotation());
 
@@ -82,32 +93,11 @@ void QTRenderer::render(QPainter* painter)
         TileRegion tsRegion = tileSetInfo->getRegion(block->type());
         QRect tileSetRect(QPoint(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
                            QSize(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-
-        // get rotation angle
-        // TODO - maybe this should be moved somewhere for util, or maybe not
-        qreal angle = 0.0;
-        switch (block->getRotation())
-        {
-        case Rotation::ZERO:
-            angle = 0.0f;
-            break;
-        case Rotation::NINETY:
-            angle = 90.0f;
-            break;
-        case Rotation::ONE_EIGHTY:
-            angle = 180.0f;
-            break;
-        case Rotation::TWO_SEVENTY:
-            angle = 270.0f;
-            break;
-        }
-
-        qDebug() << block->getRotation();
         
         // rotate and position painter to center of block
         painter->save();
         painter->translate(center);
-        painter->rotate(angle);
+        painter->rotate(getDegrees(block->getRotation()));
 
         // draw the block from the center
         QRect drawRect = QRect(QPoint(-width/2,-height/2), QSize(width,height));
@@ -117,44 +107,55 @@ void QTRenderer::render(QPainter* painter)
         
         painter->restore();
     };
-    
-    auto renderCell = [&](FPosition position, BlockType type) -> void {
-        QPoint point = gridToQt(position);
-        QPoint pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
-
-        TileRegion tsRegion = tileSetInfo->getRegion(type);
-        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-                           QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-        
-        painter->drawPixmap(QRectF(point, pointBR),
-                            tileSet,
-                            tileSetRect);
-    };
+    // --- end of render lambdas
 
     // get bounds
     Position topLeft = viewManager->getTopLeft().snap();
     Position bottomRight = viewManager->getBottomRight().snap();
     
-    // render grid
-    std::unordered_set<const Block*> blocksToRender;
-    for (int c = topLeft.x; c <= bottomRight.x; ++c)
+    // render grid and collect blocks + connections
+    std::set<const Block*> blocksToRender;
+    for (int x = topLeft.x; x <= bottomRight.x; ++x)
     {
-        for (int r = topLeft.y; r <= bottomRight.y; ++r)
+        for (int y = topLeft.y; y <= bottomRight.y; ++y)
         {          
-            const Block* block = blockContainer->getBlockContainer()->getBlock(Position(c,r));
+            const Block* block = blockContainer->getBlockContainer()->getBlock(Position(x,y));
             
             if (block) blocksToRender.insert(block);
-            else renderCell(FPosition(c,r), BlockType::NONE);
+            else renderCell(FPosition(x,y), BlockType::NONE);
         }
     }
 
+    // render blocks
     for (const Block* block : blocksToRender)
     {
         renderBlock(block);
     }
+
+    // render connections
+    painter->save();
+    painter->setPen(QPen(Qt::blue, 4));
+    for (const auto& block : *(blockContainer->getBlockContainer())) {
+        for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
+            // return if input, we only want outputs
+            if (block.second.isConnectionInput(id)) continue;
+            for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
+                Position pos1 = block.second.getConnectionPosition(id).first;
+                Position pos2 = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first;
+
+                FPosition centerOffset(0.5,0.5f);
+                FPosition socketOffset; // indev socket offset
+                if (block.second.getRotation() == Rotation::ZERO) socketOffset = { 0.5f, 0.0f };
+                if (block.second.getRotation() == Rotation::NINETY) socketOffset = { 0.0f, 0.5f };
+                if (block.second.getRotation() == Rotation::ONE_EIGHTY) socketOffset = { -0.5f, 0.0f };
+                if (block.second.getRotation() == Rotation::TWO_SEVENTY) socketOffset = { 0.0f, -0.5f };
+
+                painter->drawLine(gridToQt(pos1.free() + centerOffset + socketOffset), gridToQt(pos2.free() + centerOffset - socketOffset));
+            }
+        }
+    }
+    painter->restore();
     
-    // render blocks
-    // render sprites
     // render tints
     // render lines
 }
@@ -167,6 +168,14 @@ void QTRenderer::setBlockContainer(BlockContainerWrapper* blockContainer)
 void QTRenderer::updateView(ViewManager* viewManager)
 {
     this->viewManager = viewManager;
+}
+
+QPoint QTRenderer::gridToQt(FPosition position)
+{
+    assert(viewManager);
+    
+    std::pair<float,float> viewPos = viewManager->gridToView(position);
+    return QPoint(viewPos.first * w, viewPos.second * h);
 }
 
 // effects -----------------------------

@@ -12,3 +12,5 @@ Case Sensitive Includes
 ### Pointers
 
 ### Enums
+
+### Class Declaration Order

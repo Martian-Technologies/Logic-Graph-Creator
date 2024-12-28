@@ -53,12 +53,12 @@ public:
     
 private:
     int w,h;
-
     BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
-    ViewManager* viewManager; // or viewManager
-    
+    ViewManager* viewManager; // or a viewManager
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
+
+    QPoint gridToQt(FPosition position);
 };                
 
 #endif // QTRenderer_h
