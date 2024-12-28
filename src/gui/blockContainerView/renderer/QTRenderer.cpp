@@ -21,7 +21,7 @@ QTRenderer::QTRenderer()
 }
 
 void QTRenderer::initializeTileSet(const std::string& filePath)
-{
+{   
     if (filePath != "") {
         tileSet = QPixmap(filePath.c_str());
         
@@ -60,20 +60,72 @@ void QTRenderer::render(QPainter* painter)
         return;
     }
 
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
     // helper lambda
     auto gridToQt = [&](FPosition position) -> QPoint {
         std::pair<float,float> viewPos = viewManager->gridToView(position);
         return QPoint(viewPos.first * w, viewPos.second * h);
     };
 
-    auto renderCell = [&](FPosition position, BlockType type, Rotation rotation) -> void {
+    auto renderBlock = [&](const Block* block) -> void {
+        Position gridSize(block->widthNoRotation(), block->heightNoRotation());
+
+        // block
+        QPoint topLeft = gridToQt(block->getPosition().free());
+        QPoint bottomRight = gridToQt((block->getPosition() + gridSize).free());
+        int width = bottomRight.x() - topLeft.x();
+        int height = bottomRight.y() - topLeft.y();
+        QPoint center = topLeft + QPoint(width / 2, height / 2);
+
+        // get tile set coordinate
+        TileRegion tsRegion = tileSetInfo->getRegion(block->type());
+        QRect tileSetRect(QPoint(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+                           QSize(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+
+        // get rotation angle
+        // TODO - maybe this should be moved somewhere for util, or maybe not
+        qreal angle = 0.0;
+        switch (block->getRotation())
+        {
+        case Rotation::ZERO:
+            angle = 0.0f;
+            break;
+        case Rotation::NINETY:
+            angle = 90.0f;
+            break;
+        case Rotation::ONE_EIGHTY:
+            angle = 180.0f;
+            break;
+        case Rotation::TWO_SEVENTY:
+            angle = 270.0f;
+            break;
+        }
+
+        qDebug() << block->getRotation();
+        
+        // rotate and position painter to center of block
+        painter->save();
+        painter->translate(center);
+        painter->rotate(angle);
+
+        // draw the block from the center
+        QRect drawRect = QRect(QPoint(-width/2,-height/2), QSize(width,height));
+        painter->drawPixmap(drawRect,
+                            tileSet,
+                            tileSetRect);
+        
+        painter->restore();
+    };
+    
+    auto renderCell = [&](FPosition position, BlockType type) -> void {
         QPoint point = gridToQt(position);
         QPoint pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
 
         TileRegion tsRegion = tileSetInfo->getRegion(type);
         QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
                            QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-            
+        
         painter->drawPixmap(QRectF(point, pointBR),
                             tileSet,
                             tileSetRect);
@@ -89,23 +141,17 @@ void QTRenderer::render(QPainter* painter)
     {
         for (int r = topLeft.y; r <= bottomRight.y; ++r)
         {          
-            BlockType type = BlockType::NONE;
             const Block* block = blockContainer->getBlockContainer()->getBlock(Position(c,r));
-            if (block) type = block->type();
-
-            renderCell(FPosition(c,r), type, Rotation::ZERO);
+            
+            if (block) blocksToRender.insert(block);
+            else renderCell(FPosition(c,r), BlockType::NONE);
         }
     }
 
     for (const Block* block : blocksToRender)
     {
-        
+        renderBlock(block);
     }
-
-    // test grid points
-    painter->drawEllipse(gridToQt({0.0f, 0.0f}), 10, 10);
-    painter->drawEllipse(gridToQt({0.0f, 3.0f}), 10, 10);
-    painter->drawEllipse(gridToQt({2.0f, 1.5f}), 10, 10);
     
     // render blocks
     // render sprites
