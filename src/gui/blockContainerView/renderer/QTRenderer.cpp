@@ -1,5 +1,6 @@
 #include <qvectornd.h>
 #include <qpainter.h>
+#include <QDateTime>
 #include <qbrush.h>
 #include <qdebug.h>
 #include <qpoint.h>
@@ -126,7 +127,8 @@ void QTRenderer::render(QPainter* painter) {
 
     // render connections
     painter->save();
-    painter->setPen(QPen(Qt::blue, 40.0f / viewManager->getViewHeight()));
+    // 4e75a6 and 78b5ff
+    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 40.0f / viewManager->getViewHeight()));
     for (const auto& block : *(blockContainer->getBlockContainer())) {
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
