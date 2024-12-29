@@ -81,6 +81,10 @@ void LogicGridWindow::setBlockContainer(std::shared_ptr<BlockContainerWrapper> b
     updateSelectedItem();
 }
 
+void LogicGridWindow::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+    blockContainerView.setEvaluator(evaluator);
+}
+
 // input events
 
 bool LogicGridWindow::event(QEvent* event) {

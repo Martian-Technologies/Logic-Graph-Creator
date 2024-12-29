@@ -24,7 +24,7 @@ private:
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;
-    std::unique_ptr<Evaluator> evaluator;
+    std::shared_ptr<Evaluator> evaluator;
 };
 
 #endif /* mainWindow_h */

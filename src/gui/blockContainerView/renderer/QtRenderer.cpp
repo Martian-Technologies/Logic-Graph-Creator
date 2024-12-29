@@ -53,6 +53,10 @@ void QtRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
     this->blockContainer = blockContainer;
 }
 
+void QtRenderer::setEvaluator(Evaluator* evaluator) {
+    this->evaluator = evaluator;
+}
+
 void QtRenderer::updateView(ViewManager* viewManager) {
     this->viewManager = viewManager;
 }
@@ -87,25 +91,37 @@ void QtRenderer::render(QPainter* painter) {
 
     // render grid and collect blocks + connections
     std::set<const Block*> blocksToRender;
+    std::vector<const Block*> blocksToRenderVec;
     for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
         for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
             const Block* block = blockContainer->getBlockContainer()->getBlock(Position(x, y));
 
-            if (block) blocksToRender.insert(block);
+            if (block) {
+                if (blocksToRender.find(block) == blocksToRender.end()) {
+                    blocksToRender.insert(block);
+                    blocksToRenderVec.push_back(block);
+                }
+            }
             else renderCell(FPosition(x, y), BlockType::NONE);
         }
     }
-    // get a list of positions of blocks we are rendering to get their states
-    std::vector<Address> blockAddresses;
-    for (const Block* block : blocksToRender) {
-        blockAddresses.push_back(Address(block->getPosition()));
-    }
-
-    // get the states from the mainWindow's evaluator
-
-    // render blocks
-    for (const Block* block : blocksToRender) {
-        renderBlock(painter, block->type(), block->getPosition(), block->getRotation());
+    std::vector<logic_state_t> states;
+    if (evaluator) {
+        // get a list of positions of blocks we are rendering to get their states
+        std::vector<Address> blockAddresses;
+        for (const auto& block : *(blockContainer->getBlockContainer())) {
+            blockAddresses.push_back(Address(block.second.getPosition()));
+        }
+        states = evaluator->getBulkStates(blockAddresses);
+        // render blocks
+        for (unsigned int i = 0; i < blocksToRender.size(); i++) {
+            renderBlock(painter, blocksToRenderVec[i]->type(), blocksToRenderVec[i]->getPosition(), blocksToRenderVec[i]->getRotation(), states[i]);
+        }
+    } else {
+        // render blocks
+        for (auto block : blocksToRenderVec) {
+            renderBlock(painter, block->type(), block->getPosition(), block->getRotation());
+        }
     }
 
     // render block previews
@@ -116,7 +132,9 @@ void QtRenderer::render(QPainter* painter) {
     // render connections
     painter->save();
     setUpConnectionPainter(painter);
+    int i = 0;
     for (const auto& block : *(blockContainer->getBlockContainer())) {
+        bool state = evaluator ? states[i] : false;
         for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
             // return if input, we only want outputs
             if (block.second.isConnectionInput(id)) continue;
@@ -125,9 +143,10 @@ void QtRenderer::render(QPainter* painter) {
                 Position pos = block.second.getConnectionPosition(id).first;
                 Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
 
-                renderConnection(painter, &block.second, pos, other, otherPos, false);
+                renderConnection(painter, &block.second, pos, other, otherPos, false, state);
             }
         }
+        i++;
     }
     painter->restore();
 
@@ -166,10 +185,9 @@ void QtRenderer::render(QPainter* painter) {
 void QtRenderer::setUpConnectionPainter(QPainter* painter) {
     // 4e75a6 and 78b5ff
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor((QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911), 25.0f / viewManager->getViewHeight()));
 }
 
-void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation) {
+void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
 
     Position gridSize(getBlockWidth(type), getBlockHeight(type));
 
@@ -182,7 +200,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 
     // get tile set coordinate
     TileRegion tsRegion = tileSetInfo->getRegion(type);
-    QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+    QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y + state * 32),
         QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
 
     // rotate and position painter to center of block
@@ -199,7 +217,9 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     painter->restore();
 }
 
-void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setupPainter) {
+void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setupPainter, bool state) {
+    painter->setPen(QPen(QColor(state ? 2507161 : 7910911), 25.0f / viewManager->getViewHeight()));
+
     FPosition centerOffset(0.5, 0.5f);
     FPosition aSocketOffset;
     FPosition bSocketOffset;

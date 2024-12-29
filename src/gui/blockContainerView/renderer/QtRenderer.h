@@ -21,6 +21,7 @@ public:
 
     // updating
     void setBlockContainer(BlockContainerWrapper* blockContainer) override;
+    void setEvaluator(Evaluator* evaluator) override;
     // virtual void setSimulator(Simulator* simulator) override;
 
     void updateView(ViewManager* viewManager) override;
@@ -42,12 +43,13 @@ private:
 private:
     QPointF gridToQt(FPosition position);
     
-    void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation);
+    void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);
     void setUpConnectionPainter(QPainter* painter);
-    void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true);
+    void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true, bool state = false);
     
     int w, h;
     BlockContainerWrapper* blockContainer;
+    Evaluator* evaluator;
     ViewManager* viewManager;
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;

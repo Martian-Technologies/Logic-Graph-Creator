@@ -29,6 +29,7 @@ public:
 
     // setup
     void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
+    void setEvaluator(std::shared_ptr<Evaluator> evaluator);
     void setSelector(QTreeWidget* treeWidget);
 
     // dont call this func

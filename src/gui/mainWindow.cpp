@@ -17,10 +17,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
-    evaluator = std::make_unique<Evaluator>(blockContainerWrapper);
+    evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
     logicGridWindow->setBlockContainer(blockContainerWrapper);
+    logicGridWindow->setEvaluator(evaluator);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 
     connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);

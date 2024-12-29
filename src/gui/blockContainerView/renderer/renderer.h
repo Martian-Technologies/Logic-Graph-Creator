@@ -5,6 +5,7 @@ typedef unsigned int ElementID;
 
 #include "middleEnd/blockContainerWrapper.h"
 #include "../viewManager/viewManager.h"
+#include "backend/evaluator/evaluator.h"
 
 // This is the renderer interface. It defines all the methods that non-windowing
 // or renderer-specific code should be able to call. Each implementation is
@@ -60,6 +61,7 @@ class Renderer {
 public:
     // main flow
     virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
+    virtual void setEvaluator(Evaluator* evaluator) = 0;
     // virtual void setSimulator(Simulator* simulator) = 0;
 
     virtual void updateView(ViewManager* viewManager) = 0;
