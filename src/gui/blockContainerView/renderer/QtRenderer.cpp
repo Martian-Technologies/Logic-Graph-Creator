@@ -1,6 +1,5 @@
 #include <QPainterPath>
 #include <QDateTime>
-#include <QPainter>
 #include <QDebug>
 
 #include <memory>
@@ -118,19 +117,20 @@ void QtRenderer::render(QPainter* painter) {
         }
 
         painter->save();
-        setUpConnectionPainter(painter);
+        painter->setRenderHint(QPainter::Antialiasing);
         i = 0;
         for (const auto& block : *(blockContainer->getBlockContainer())) {
             bool state = blockStates[i];
             for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
                 // continue if input, we only want outputs
                 if (block.second.isConnectionInput(id)) continue;
+                // 4e75a6 and 78b5ff
 
                 Position pos = block.second.getConnectionPosition(id).first;
                 for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, &block.second, pos, other, otherPos, false, state);
+                    renderConnection(painter, pos, otherPos, state);
                 }
             }
             i++;
@@ -149,7 +149,7 @@ void QtRenderer::render(QPainter* painter) {
         }
         
         painter->save();
-        setUpConnectionPainter(painter);
+        painter->setRenderHint(QPainter::Antialiasing);
         for (const auto& block : *(blockContainer->getBlockContainer())) {
             for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
                 // return if input, we only want outputs
@@ -160,7 +160,7 @@ void QtRenderer::render(QPainter* painter) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
 
-                    renderConnection(painter, &block.second, pos, other, otherPos, false);
+                    renderConnection(painter, pos, otherPos);
                 }
             }
         }
@@ -169,14 +169,18 @@ void QtRenderer::render(QPainter* painter) {
 
     // render connection previews
     painter->save();
-    setUpConnectionPainter(painter);
-    for (const auto& preview : connectionPreviews) {
-        const Block* inputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.input);
-        const Block* outputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.output);
-        renderConnection(painter, inputBlock, preview.second.input, outputBlock, preview.second.output);
+    painter->setRenderHint(QPainter::Antialiasing);
+    for (const auto& preview : connectionPreviews)
+    {
+        renderConnection(painter, preview.second.input, preview.second.output);
+    }
+    // render half connection previews
+    for (const auto& preview : halfConnectionPreviews)
+    {
+        renderConnection(painter, preview.second.input, preview.second.output);
     }
     painter->restore();
-
+    
     // render selections
     painter->save();
     painter->setPen(Qt::NoPen);
@@ -197,11 +201,6 @@ void QtRenderer::render(QPainter* painter) {
         painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
     }
     painter->restore();
-}
-
-void QtRenderer::setUpConnectionPainter(QPainter* painter) {
-    // 4e75a6 and 78b5ff
-    painter->setRenderHint(QPainter::Antialiasing);
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
@@ -234,21 +233,35 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     painter->restore();
 }
 
-void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setupPainter, bool state) {
+void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
     painter->setPen(QPen(QColor(state ? 7910911 : 2507161), 25.0f / viewManager->getViewHeight()));
 
-    FPosition centerOffset(0.5, 0.5f);
-    FPosition aSocketOffset;
-    FPosition bSocketOffset;
+    QPointF start = gridToQt(aPos);
+    QPointF end = gridToQt(bPos);
+    QPointF c1 = gridToQt(aPos + aControlOffset);
+    QPointF c2 = gridToQt(bPos + bControlOffset);
+
+    QPainterPath myPath;
+    myPath.moveTo(start);
+    myPath.cubicTo(c1, c2, end);
+    painter->drawPath(myPath);
+}
+
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPos, bool state) {
+    FPosition centerOffset(0.5f, 0.5f);
+    FPosition aSocketOffset(0.0f, 0.0f);
+    FPosition bSocketOffset(0.0f, 0.0f);
 
     // Socket offsets will be retrieved data later, this code will go
+    const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
+    const Block* b = blockContainer->getBlockContainer()->getBlock(bPos);
+    
     if (a) {
         if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
         if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
         if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
     }
-    else { aSocketOffset = { 0.0f, 0.0f }; }
 
     if (b) {
         if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
@@ -256,18 +269,25 @@ void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aP
         if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
         if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };
     }
-    else { bSocketOffset = { 0.0f, 0.0f }; }
 
+    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos.free() + centerOffset + bSocketOffset, aSocketOffset, bSocketOffset, state);
+}
 
-    QPointF start = gridToQt(aPos.free() + centerOffset + aSocketOffset);
-    QPointF end = gridToQt(bPos.free() + centerOffset + bSocketOffset);
-    QPointF c1 = gridToQt(aPos.free() + centerOffset + aSocketOffset * 2);
-    QPointF c2 = gridToQt(bPos.free() + centerOffset + bSocketOffset * 2);
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state) {
+    FPosition centerOffset(0.5f, 0.5f);
+    FPosition aSocketOffset(0.0f, 0.0f);
 
-    QPainterPath myPath;
-    myPath.moveTo(start);
-    myPath.cubicTo(c1, c2, end);
-    painter->drawPath(myPath);
+    // Socket offsets will be retrieved data later, this code will go
+    const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
+    
+    if (a) {
+        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
+        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
+        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
+    }
+
+    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), state);
 }
 
 QPointF QtRenderer::gridToQt(FPosition position) {
@@ -334,6 +354,19 @@ ElementID QtRenderer::addConnectionPreview(const ConnectionPreview& connectionPr
 
 void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
     connectionPreviews.erase(connectionPreview);
+}
+
+// half connection preview
+ElementID QtRenderer::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
+    ElementID newID = currentID++;
+
+    halfConnectionPreviews[newID] = {halfConnectionPreview.input, halfConnectionPreview.output};
+
+    return newID;
+}
+
+void QtRenderer::removeHalfConnectionPreview(ElementID halfConnectionPreview) {
+    halfConnectionPreviews.erase(halfConnectionPreview);
 }
 
 // confetti
