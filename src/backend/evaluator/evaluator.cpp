@@ -136,3 +136,12 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
     }
     return states;
 }
+
+void Evaluator::setState(const Address& address, logic_state_t state) {
+    const block_id_t blockId = addressTree.getValue(address);
+    logicSimulator.signalToPause();
+    logicSimulator.setState(blockId, state);
+    if (!paused) {
+        logicSimulator.signalToProceed();
+    }
+}

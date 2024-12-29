@@ -12,8 +12,8 @@ LogicSimulator::LogicSimulator()
     gateTypes(),
     gateInputs(),
     gateOutputs(),
-    currentGateInputsUpdated(),
-    nextGateInputsUpdated(),
+    gateInputCountTotal(),
+    gateInputCountPowered(),
     numDecomissioned(0),
     running(true),
     proceedFlag(false),
@@ -33,7 +33,7 @@ LogicSimulator::~LogicSimulator() {
 void LogicSimulator::initialize() {
     std::fill(currentState.begin(), currentState.end(), false);
     std::fill(nextState.begin(), nextState.end(), false);
-    std::fill(currentGateInputsUpdated.begin(), currentGateInputsUpdated.end(), true);
+    std::fill(gateInputCountPowered.begin(), gateInputCountPowered.end(), 0);
 }
 
 block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
@@ -42,8 +42,8 @@ block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstitut
         if (it != gateTypes.end()) {
             const int index = it - gateTypes.begin();
             gateTypes[index] = gateType;
-            currentGateInputsUpdated[index] = true;
-            nextGateInputsUpdated[index] = true;
+            gateInputCountTotal[index] = 0;
+            gateInputCountPowered[index] = 0;
             currentState[index] = false;
             nextState[index] = false;
             --numDecomissioned;
@@ -55,8 +55,8 @@ block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstitut
     nextState.emplace_back(false);
     gateInputs.emplace_back();
     gateOutputs.emplace_back();
-    currentGateInputsUpdated.emplace_back(true);
-    nextGateInputsUpdated.emplace_back(true);
+    gateInputCountTotal.push_back(0);
+    gateInputCountPowered.push_back(0);
     return currentState.size() - 1;
 }
 
@@ -75,7 +75,10 @@ void LogicSimulator::connectGates(block_id_t gate1, block_id_t gate2) {
 
     gateOutputs[gate1].push_back(gate2);
     gateInputs[gate2].push_back(gate1);
-    nextGateInputsUpdated[gate2] = true;
+    ++gateInputCountTotal[gate2];
+    if (currentState[gate1]) {
+        ++gateInputCountPowered[gate2];
+    }
 }
 
 void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
@@ -98,7 +101,10 @@ void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
         }
     }
 
-    nextGateInputsUpdated[gate2] = true;
+    --gateInputCountTotal[gate2];
+    if (currentState[gate1]) {
+        --gateInputCountPowered[gate2];
+    }
 }
 
 void LogicSimulator::decomissionGate(block_id_t gate) {
@@ -110,11 +116,10 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
     const auto outputs = gateOutputs[gate];
     for (auto output : outputs) {
         disconnectGates(gate, output);
-        nextGateInputsUpdated[output] = true;
     }
     gateTypes[gate] = GateType::NONE;
-    currentGateInputsUpdated[gate] = false;
-    nextGateInputsUpdated[gate] = false;
+    gateInputCountTotal[gate] = 0;
+    gateInputCountPowered[gate] = 0;
     currentState[gate] = false;
     nextState[gate] = false;
     ++numDecomissioned;
@@ -140,8 +145,8 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
         nextState[newGateIndex] = nextState[i];
         gateInputs[newGateIndex] = gateInputs[i];
         gateOutputs[newGateIndex] = gateOutputs[i];
-        currentGateInputsUpdated[newGateIndex] = currentGateInputsUpdated[i];
-        nextGateInputsUpdated[newGateIndex] = nextGateInputsUpdated[i];
+        gateInputCountTotal[newGateIndex] = gateInputCountTotal[i];
+        gateInputCountPowered[newGateIndex] = gateInputCountPowered[i];
     }
 
     currentState.resize(newGateIndex);
@@ -149,8 +154,8 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
     gateTypes.resize(newGateIndex);
     gateInputs.resize(newGateIndex);
     gateOutputs.resize(newGateIndex);
-    currentGateInputsUpdated.resize(newGateIndex);
-    nextGateInputsUpdated.resize(newGateIndex);
+    gateInputCountTotal.resize(newGateIndex);
+    gateInputCountPowered.resize(newGateIndex);
 
     for (auto i = 0; i < currentState.size(); ++i) {
         for (block_id_t& input : gateInputs[i]) {
@@ -166,45 +171,33 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
     return gateMap;
 }
 
-void LogicSimulator::swapStates() {
-    std::swap(currentState, nextState);
-    std::swap(currentGateInputsUpdated, nextGateInputsUpdated);
+void LogicSimulator::propagatePowered() {
+    for (int i = 0; i < currentState.size(); ++i) {
+        if (nextState[i] && !currentState[i]) {
+            for (int output : gateOutputs[i]) {
+                ++gateInputCountPowered[output];
+            }
+        }
+        else if (!nextState[i] && currentState[i]) {
+            for (int output : gateOutputs[i]) {
+                --gateInputCountPowered[output];
+            }
+        }
+    }
 }
 
-void LogicSimulator::computeNextState(const std::vector<block_id_t>& gates) {
-    for (size_t gate : gates) {
-        nextGateInputsUpdated[gate] = false;
-    }
-    for (size_t gate : gates) {
+void LogicSimulator::swapStates() {
+    std::swap(currentState, nextState);
+}
+
+void LogicSimulator::computeNextState() {
+    std::fill(nextState.begin(), nextState.end(), false);
+    for (block_id_t gate = 0; gate < currentState.size(); ++gate) {
         if (gateTypes[gate] == GateType::NONE) {
             continue;
         }
-        if (!currentGateInputsUpdated[gate]) {
-            nextState[gate] = currentState[gate];
-            continue;
-        }
 
-        const GateType type = gateTypes[gate];
-        const auto& inputs = gateInputs[gate];
-        const size_t numInputs = inputs.size();
-        unsigned int highInputCount = 0;
-
-        for (size_t input : gateInputs[gate]) {
-            if (currentState[input] == true) {
-                ++highInputCount;
-            }
-        }
-
-        const logic_state_t currentGateState = nextState[gate];
-
-        logic_state_t newState = computeGateState(type, highInputCount, numInputs, currentGateState);
-
-        if (newState != currentGateState) {
-            for (const int outputGate : gateOutputs[gate]) {
-                nextGateInputsUpdated[outputGate] = true;
-            }
-        }
-        nextState[gate] = newState;
+        nextState[gate] = computeGateState(gateTypes[gate], gateInputCountPowered[gate], gateInputCountTotal[gate], nextState[gate]);
     }
 }
 
@@ -214,9 +207,6 @@ void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
 
     if (state != nextState[gate]) {
         nextState[gate] = state;
-        for (int output : gateOutputs[gate]) {
-            nextGateInputsUpdated[output] = true;
-        }
     }
 }
 
@@ -226,8 +216,8 @@ void LogicSimulator::clearGates() {
     gateTypes.clear();
     gateInputs.clear();
     gateOutputs.clear();
-    currentGateInputsUpdated.clear();
-    nextGateInputsUpdated.clear();
+    gateInputCountTotal.clear();
+    gateInputCountPowered.clear();
     numDecomissioned = 0;
 }
 
@@ -237,21 +227,14 @@ void LogicSimulator::reserveGates(block_id_t numGates) {
     gateTypes.reserve(numGates);
     gateInputs.reserve(numGates);
     gateOutputs.reserve(numGates);
-    currentGateInputsUpdated.reserve(numGates);
-    nextGateInputsUpdated.reserve(numGates);
-}
-
-std::vector<block_id_t> LogicSimulator::allGates() const {
-    std::vector<block_id_t> gates;
-    for (auto i = 0; i < currentState.size(); ++i) {
-        gates.push_back(i);
-    }
-    return gates;
+    gateInputCountTotal.reserve(numGates);
+    gateInputCountPowered.reserve(numGates);
 }
 
 void LogicSimulator::simulateNTicks(unsigned int n) {
     for (int i = 0; i < n; ++i) {
-        computeNextState(allGates());
+        computeNextState();
+        propagatePowered();
         swapStates();
     }
 }
@@ -290,7 +273,8 @@ void LogicSimulator::debugPrint() {
 
 void LogicSimulator::simulationLoop() {
     while (running.load(std::memory_order_acquire)) {
-        computeNextState(allGates());
+        computeNextState();
+        propagatePowered();
 
         bool waiting = false;
 
