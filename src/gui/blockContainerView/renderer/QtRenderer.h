@@ -9,21 +9,6 @@
 #include "backend/defs.h"
 #include "renderer.h"
 #include "tileSet.h"
-
-struct SelectionElement
-{
-    Position topLeft;
-    Position bottomRight;
-    bool inverted;
-};
-
-struct ConnectionPreview
-{
-    Position a;
-    Position b;
-    Color modulate;
-    float alpha;
-};
     
 class QtRenderer : public Renderer {
 public:
@@ -43,13 +28,13 @@ public:
 
 private:
     // elements
-    ElementID addSelectionElement(Position topLeft, Position bottomRight, bool inverted) override;
+    ElementID addSelectionElement(const SelectionElement& selection) override;
     void removeSelectionElement(ElementID selection) override;
     
-    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
+    ElementID addBlockPreview(const BlockPreview& blockPreview) override;
     void removeBlockPreview(ElementID blockPreview) override;
     
-    ElementID addConnectionPreview(Position input, Position output, Color modulate, float alpha) override;
+    ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override;
     void removeConnectionPreview(ElementID connectionPreview) override;
     
     void spawnConfetti(FPosition start) override;

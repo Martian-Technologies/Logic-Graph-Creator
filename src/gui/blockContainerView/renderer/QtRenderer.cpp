@@ -147,9 +147,9 @@ void QtRenderer::render(QPainter* painter) {
     setUpConnectionPainter(painter);
     for (const auto& preview : connectionPreviews)
     {
-        const Block* a = blockContainer->getBlockContainer()->getBlock(preview.second.a);
-        const Block* b = blockContainer->getBlockContainer()->getBlock(preview.second.b);
-        renderConnection(painter, a, preview.second.a, b, preview.second.b);
+        const Block* inputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.input);
+        const Block* outputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.output);
+        renderConnection(painter,inputBlock, preview.second.input, outputBlock, preview.second.output);
     }
     painter->restore();
 
@@ -233,9 +233,12 @@ QPointF QtRenderer::gridToQt(FPosition position) {
 // element -----------------------------
 
 // selection
-ElementID QtRenderer::addSelectionElement(Position topLeft, Position bottomRight, bool inverted) {
+ElementID QtRenderer::addSelectionElement(const SelectionElement& selection) {
     ElementID newID = currentID++;
 
+    Position topLeft = selection.topLeft;
+    Position bottomRight = selection.bottomRight;
+    
     // fix coordinates if incorrect
     if (topLeft.x > bottomRight.x) {
         int temp = topLeft.x;
@@ -249,8 +252,8 @@ ElementID QtRenderer::addSelectionElement(Position topLeft, Position bottomRight
     }
 
     // add to lists
-    if (!inverted) selectionElements[newID] = {topLeft, bottomRight, inverted};
-    else invertedSelectionElements[newID] = {topLeft, bottomRight, inverted};
+    if (!selection.inverted) selectionElements[newID] = {topLeft, bottomRight, selection.inverted};
+    else invertedSelectionElements[newID] = {topLeft, bottomRight, selection.inverted};
 
     return newID;
 }
@@ -261,7 +264,7 @@ void QtRenderer::removeSelectionElement(ElementID selection) {
 }
 
 // block preview
-ElementID QtRenderer::addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) {
+ElementID QtRenderer::addBlockPreview(const BlockPreview& blockPreview) {
     return 0;
 }
 
@@ -270,10 +273,10 @@ void QtRenderer::removeBlockPreview(ElementID blockPreview) {
 }
 
 // connection preview
-ElementID QtRenderer::addConnectionPreview(Position input, Position output, Color modulate, float alpha) {
+ElementID QtRenderer::addConnectionPreview(const ConnectionPreview& connectionPreview) {
     ElementID newID = currentID++;
 
-    connectionPreviews[newID] = {input, output, modulate, alpha};
+    connectionPreviews[newID] = {connectionPreview.input, connectionPreview.output};
 
     return newID;
 }

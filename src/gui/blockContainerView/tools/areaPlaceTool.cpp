@@ -1,4 +1,5 @@
 #include "areaPlaceTool.h"
+#include "gui/blockContainerView/renderer/renderer.h"
 
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {
     if (!blockContainer) return false;
@@ -52,11 +53,11 @@ bool AreaPlaceTool::pointerMove(const Event* event) {
     switch (click) {
     case 'n':
         elementCreator.clear();
-        elementCreator.addSelectionElement(positionEvent->getPosition());
+        elementCreator.addSelectionElement(SelectionElement(positionEvent->getPosition()));
         return true;
     default:
         elementCreator.clear();
-        elementCreator.addSelectionElement(clickPosition, positionEvent->getPosition());
+        elementCreator.addSelectionElement(SelectionElement(clickPosition, positionEvent->getPosition()));
         return true;
     }
     return false;
@@ -69,9 +70,9 @@ bool AreaPlaceTool::enterBlockView(const Event* event) {
     elementCreator.clear();
     switch (click) {
     case 'n':
-        elementCreator.addSelectionElement(positionEvent->getPosition());
+        elementCreator.addSelectionElement(SelectionElement(positionEvent->getPosition()));
     default:
-        elementCreator.addSelectionElement(clickPosition, positionEvent->getPosition());
+        elementCreator.addSelectionElement(SelectionElement(clickPosition, positionEvent->getPosition()));
     }
     return true;
 }

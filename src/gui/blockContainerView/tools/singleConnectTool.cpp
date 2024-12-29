@@ -3,6 +3,7 @@
 #include <Qt>
 
 #include "singleConnectTool.h"
+#include "gui/blockContainerView/renderer/renderer.h"
 
 bool SingleConnectTool::makeConnection(const Event* event) {
     if (!blockContainer) return false;
@@ -64,15 +65,14 @@ bool SingleConnectTool::exitBlockView(const Event* event) {
 void SingleConnectTool::updateElements(Position pointerPosition) {
     elementCreator.clear();
     
-    
     if (clicked) {
-        elementCreator.addConnectionPreview(clickPosition, pointerPosition);
+        elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, pointerPosition));
         bool valid = blockContainer->getBlockContainer()->getInputConnectionEnd(pointerPosition).has_value();
-        elementCreator.addSelectionElement(pointerPosition, !valid);
+        elementCreator.addSelectionElement(SelectionElement(pointerPosition, !valid));
     }
     else {
         // TODO - change to use isvalid function
         bool valid = blockContainer->getBlockContainer()->getOutputConnectionEnd(pointerPosition).has_value();
-        elementCreator.addSelectionElement(pointerPosition, !valid);
+        elementCreator.addSelectionElement(SelectionElement(pointerPosition, !valid));
     }
 }

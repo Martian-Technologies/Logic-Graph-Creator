@@ -1,8 +1,7 @@
-#include <iostream>
-
 #include <Qt>
 
 #include "singlePlaceTool.h"
+#include "gui/blockContainerView/renderer/renderer.h"
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {
     if (!blockContainer) return false;
@@ -134,7 +133,7 @@ bool SinglePlaceTool::enterBlockView(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
     elementCreator.clear();
-    elementCreator.addSelectionElement(positionEvent->getPosition());
+    elementCreator.addSelectionElement(SelectionElement(positionEvent->getPosition()));
     return true;
 }
 
