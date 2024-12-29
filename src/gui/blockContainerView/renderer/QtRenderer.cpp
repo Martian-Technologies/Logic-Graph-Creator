@@ -120,9 +120,11 @@ void QtRenderer::render(QPainter* painter) {
     }
         
     // render block previews
+    painter->setOpacity(0.4f);
     for (const auto& preview : blockPreviews) {
         renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
     }
+    painter->setOpacity(1.0f);
 
     // render connections
     painter->save();
