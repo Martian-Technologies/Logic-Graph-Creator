@@ -16,5 +16,7 @@ For a "release" - `cmake -B build -DCMAKE_BUILD_TYPE=Release`
 
 Then `cmake --install build` and `cmake --build build`
 
+For using XCode you should use the command `cmake -G Xcode <dir of CMakeLists.txt>`
+
 ### Notes
 If your error highlighting or IDE integration is showing red, make sure you have already compiled the project (to generate QT moc header files) and the compile_commands.json in the build folder is being recognized (default for most lsp)
