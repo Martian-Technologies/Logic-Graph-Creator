@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 
-#include "../../gridGUI/effects/logicGridEffectDisplayer.h"
 #include "middleEnd/blockContainerWrapper.h"
 #include "toolManagerEventRegister.h"
 #include "../events/customEvents.h"

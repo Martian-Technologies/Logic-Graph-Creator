@@ -1,4 +1,3 @@
-#include "../../gridGUI/effects/cellSelectionEffect.h"
 #include "areaPlaceTool.h"
 
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {

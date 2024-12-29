@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <cstdint>
 #include <memory>
 
 #include "../blockContainerView/blockContainerView.h"
@@ -64,6 +65,9 @@ private:
 
     // ui elements
     QTreeWidget* treeWidget;
+
+    // debug
+    uint64_t lastFrameTime = 0;
 };
 
 #endif /* logicGridWindow_h */

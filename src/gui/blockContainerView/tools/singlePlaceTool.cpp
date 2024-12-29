@@ -2,7 +2,6 @@
 
 #include <Qt>
 
-#include "../../gridGUI/effects/cellSelectionEffect.h"
 #include "singlePlaceTool.h"
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {

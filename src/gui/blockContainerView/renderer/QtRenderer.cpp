@@ -168,7 +168,9 @@ void QtRenderer::render(QPainter* painter) {
     QColor transparentRed(255, 0, 0, 64);
     painter->setBrush(transparentRed);
     for (const auto& selection : invertedSelectionElements) {
-        painter->drawRect(QRectF(gridToQt(selection.second.topLeft.free()),gridToQt(selection.second.bottomRight.free())));
+        FPosition topLeft = selection.second.topLeft.free();
+        FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f,1.0f);
+        painter->drawRect(QRectF(gridToQt(topLeft),gridToQt(bottomRight)));
     }
     painter->restore();
     

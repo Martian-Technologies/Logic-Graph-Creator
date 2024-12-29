@@ -106,15 +106,12 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
     blockContainerView.getRenderer().render(painter);
 
-    static qint64 lastTime = QDateTime::currentMSecsSinceEpoch();
-    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
-    if (lastTime != 0) {
-        std::string frameTime = std::to_string(currentTime - lastTime) + "ms";
+    uint64_t currentTime = QDateTime::currentMSecsSinceEpoch();
+    if (lastFrameTime != 0) {
+        std::string frameTime = std::to_string(currentTime - lastFrameTime) + "ms";
         painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTime.c_str()));
     }
-    lastTime = currentTime;
-
-    //tool->display(painter, *this);
+    lastFrameTime = currentTime;
 
     delete painter;
 }
