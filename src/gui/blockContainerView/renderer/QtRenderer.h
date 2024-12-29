@@ -1,9 +1,9 @@
 #ifndef QTRenderer_h
 #define QTRenderer_h
 
-#include <QPainter>
 #include <memory>
 #include <unordered_map>
+#include <QPainter>
 
 #include "../viewManager/viewManager.h"
 #include "backend/defs.h"
@@ -36,6 +36,9 @@ private:
     
     ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override;
     void removeConnectionPreview(ElementID connectionPreview) override;
+
+    ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override;
+    void removeHalfConnectionPreview(ElementID halfConnectionPreview) override;
     
     void spawnConfetti(FPosition start) override;
 
@@ -44,7 +47,9 @@ private:
     
     void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation);
     void setUpConnectionPainter(QPainter* painter);
-    void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true);
+    void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset);
+    void renderConnection(QPainter* painter, Position aPos, Position bPos);
+    void renderConnection(QPainter* painter, Position aPos, FPosition bPos);
     
     int w, h;
     BlockContainerWrapper* blockContainer;
@@ -58,6 +63,7 @@ private:
     std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
     std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
+    std::unordered_map<ElementID, HalfConnectionPreview> halfConnectionPreviews;
 };
 
 #endif /* QTRenderer_h */
