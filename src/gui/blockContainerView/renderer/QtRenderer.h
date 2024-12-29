@@ -57,7 +57,7 @@ private:
     Evaluator* evaluator;
     ViewManager* viewManager;
     QPixmap tileSet;
-    std::unique_ptr<TileSet<BlockType>> tileSetInfo;
+    std::unique_ptr<TileSetInfo> tileSetInfo;
 
     // Elements
     ElementID currentID = 0;

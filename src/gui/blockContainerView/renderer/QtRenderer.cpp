@@ -30,17 +30,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
         }
 
         // create tileSet
-        tileSetInfo = std::make_unique<TileSet<BlockType>>(Vec2Int(256, 128));
-        tileSetInfo->addRegion(BlockType::NONE, { 0, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::BLOCK, { 32, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::CUSTOM, { 32, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::TYPE_COUNT, { 32, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::AND, { 64, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::OR, { 96, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::XOR, { 128, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::NAND, { 160, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::NOR, { 192, 0 }, { 32, 32 });
-        tileSetInfo->addRegion(BlockType::XNOR, { 224, 0 }, { 32, 32 });
+        tileSetInfo = std::make_unique<TileSetInfo>(32, 10);
     }
 }
 
@@ -75,9 +65,11 @@ void QtRenderer::render(QPainter* painter) {
         QPointF point = gridToQt(position);
         QPointF pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
 
-        TileRegion tsRegion = tileSetInfo->getRegion(type);
-        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-            QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+        Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, false);
+        Vec2Int tileSize = tileSetInfo->getCellPixelSize();
+        
+        QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
+            QSizeF(tileSize.x, tileSize.y));
 
         painter->drawPixmap(QRectF(point, pointBR),
             tileSet,
@@ -195,9 +187,11 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
 
     // get tile set coordinate
-    TileRegion tsRegion = tileSetInfo->getRegion(type);
-    QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y + state * 32),
-        QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+    Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, state);
+    Vec2Int tileSize = tileSetInfo->getCellPixelSize();
+        
+    QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
+                       QSizeF(tileSize.x, tileSize.y));
 
     // rotate and position painter to center of block
     painter->translate(center);
