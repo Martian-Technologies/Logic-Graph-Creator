@@ -30,7 +30,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
         }
 
         // create tileSet
-        tileSetInfo = std::make_unique<TileSetInfo>(32, 10);
+        tileSetInfo = std::make_unique<TileSetInfo>(32, 13);
     }
 }
 

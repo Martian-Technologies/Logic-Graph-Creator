@@ -162,6 +162,21 @@
              <string>Xnor</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Switch</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Button</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Tick Button</string>
+            </property>
+           </item>
           </item>
          </item>
          <item>

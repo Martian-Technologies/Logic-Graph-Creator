@@ -35,6 +35,9 @@ constexpr block_size_t getBlockHeight(BlockType type, Rotation rotation) noexcep
 
 inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, const Position& relativePos) {
     switch (type) {
+    case BlockType::SWITCH: return { 0, false };
+    case BlockType::BUTTON: return { 0, false };
+    case BlockType::TICK_BUTTON: return { 0, false };
     default:
         if (relativePos.x == 0 && relativePos.y == 0) return { 0, true };
         return { 0, false };
@@ -43,6 +46,9 @@ inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type,
 
 inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, const Position& relativePos) {
     switch (type) {
+    case BlockType::SWITCH: return { 0, true };
+    case BlockType::BUTTON: return { 0, true };
+    case BlockType::TICK_BUTTON: return { 0, true };
     default:
         if (relativePos.x == 0 && relativePos.y == 0) return { 1, true };
         return { 0, false };
@@ -65,6 +71,9 @@ inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type
 
 inline std::pair<Position, bool> getConnectionPosition(BlockType type, connection_end_id_t connectionId) {
     switch (type) {
+    case BlockType::SWITCH: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
+    case BlockType::BUTTON: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
+    case BlockType::TICK_BUTTON: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
     default:
         if (connectionId < 2) return { Position(0, 0), true };
         return { Position(), false };
@@ -80,12 +89,18 @@ inline std::pair<Position, bool> getConnectionPosition(BlockType type, Rotation 
 
 constexpr connection_end_id_t getMaxConnectionId(BlockType type) {
     switch (type) {
+    case BlockType::SWITCH: return 0;
+    case BlockType::BUTTON: return 0;
+    case BlockType::TICK_BUTTON: return 0;
     default: return 1;
     }
 }
 
 constexpr bool isConnectionInput(BlockType type, connection_end_id_t connectionId) {
     switch (type) {
+    case BlockType::SWITCH: return false;
+    case BlockType::BUTTON: return false;
+    case BlockType::TICK_BUTTON: return false;
     default:
         return connectionId == 0;
     }
@@ -154,36 +169,6 @@ protected:
     // changing data
     Position position;
     Rotation rotation;
-};
-
-class AndBlock : public Block {
-public:
-    AndBlock() : Block(AND) {}
-};
-
-class OrBlock : public Block {
-public:
-    OrBlock() : Block(OR) {}
-};
-
-class XorBlock : public Block {
-public:
-    XorBlock() : Block(XOR) {}
-};
-
-class NandBlock : public Block {
-public:
-    NandBlock() : Block(NAND) {}
-};
-
-class NorBlock : public Block {
-public:
-    NorBlock() : Block(NOR) {}
-};
-
-class XnorBlock : public Block {
-public:
-    XnorBlock() : Block(XNOR) {}
 };
 
 inline Block getBlockClass(BlockType type) { return Block(type); }

@@ -95,18 +95,15 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
 
 GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
     switch (blockType) {
-    case BlockType::AND:
-        return GateType::AND;
-    case BlockType::OR:
-        return GateType::OR;
-    case BlockType::XOR:
-        return GateType::XOR;
-    case BlockType::NAND:
-        return GateType::NAND;
-    case BlockType::NOR:
-        return GateType::NOR;
-    case BlockType::XNOR:
-        return GateType::XNOR;
+    case BlockType::AND: return GateType::AND;
+    case BlockType::OR: return GateType::OR;
+    case BlockType::XOR: return GateType::XOR;
+    case BlockType::NAND: return GateType::NAND;
+    case BlockType::NOR: return GateType::NOR;
+    case BlockType::XNOR: return GateType::XNOR;
+    case BlockType::SWITCH: return GateType::CONTINUOUS_INPUT;
+    case BlockType::BUTTON: return GateType::CONTINUOUS_INPUT;
+    case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
     default:
         throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
     }
@@ -135,4 +132,13 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
         logicSimulator.signalToProceed();
     }
     return states;
+}
+
+void Evaluator::setState(const Address& address, logic_state_t state) {
+    const block_id_t blockId = addressTree.getValue(address);
+    logicSimulator.signalToPause();
+    logicSimulator.setState(blockId, state);
+    if (!paused) {
+        logicSimulator.signalToProceed();
+    }
 }

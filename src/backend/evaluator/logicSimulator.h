@@ -23,7 +23,8 @@ public:
 
     std::unordered_map<block_id_t, block_id_t> compressGates();
 
-    void computeNextState(const std::vector<block_id_t>& gates);
+    void computeNextState();
+    void propagatePowered();
     void swapStates();
 
     std::vector<logic_state_t> getCurrentState() const { return currentState; }
@@ -34,10 +35,7 @@ public:
 
     void simulateNTicks(unsigned int n);
 
-    logic_state_t getState(block_id_t gate) const { return currentState[gate]; }
-    bool willUpdate(block_id_t gate) const { return currentGateInputsUpdated[gate]; }
-
-    std::vector<block_id_t> allGates() const;
+    logic_state_t getState(block_id_t gate) const { return currentState.at(gate); }
 
     void debugPrint();
     void signalToPause();
@@ -49,7 +47,7 @@ private:
     std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
     std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
-    std::vector<bool> currentGateInputsUpdated, nextGateInputsUpdated;
+    std::vector<int> gateInputCountTotal, gateInputCountPowered;
     int numDecomissioned;
 
     // shit for threading
