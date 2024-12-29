@@ -53,3 +53,12 @@
 
 # IDE Specific
 /.idea
+
+# XCode
+/.qt
+/CMakeFiles
+CMakeCache.txt
+CMakeScripts/ReRunCMake.make
+*.pbxproj
+*.xcsettings
+cmake_install.cmake
