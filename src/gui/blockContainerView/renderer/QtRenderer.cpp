@@ -148,7 +148,6 @@ void QtRenderer::render(QPainter* painter) {
     for (const auto& preview : connectionPreviews)
     {
         const Block* a = blockContainer->getBlockContainer()->getBlock(preview.second.a);
-        assert (a);
         const Block* b = blockContainer->getBlockContainer()->getBlock(preview.second.b);
         renderConnection(painter, a, preview.second.a, b, preview.second.b);
     }
@@ -199,7 +198,7 @@ void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aP
         if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
         if (b->getRotation() == Rotation::NINETY) bSocketOffset = { 0.0f, -0.5f };
         if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
-        if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };        
+        if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };
     } else { bSocketOffset = {0.0f, 0.0f}; }
     
 
