@@ -5,7 +5,7 @@
 #include <iostream>
 #include <memory>
 
-#include "gridGUI/logicGridWindow.h"
+#include "logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 

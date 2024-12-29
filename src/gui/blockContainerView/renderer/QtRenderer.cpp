@@ -8,12 +8,12 @@
 #include <set>
 
 #include "QtRenderer.h"
+#include "backend/block/block.h"
 #include "backend/connection/connectionEnd.h"
 #include "backend/position/position.h"
 #include "backend/defs.h"
 #include "gui/blockContainerView/renderer/renderer.h"
 #include "util/vec2.h"
-
 
 QtRenderer::QtRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
@@ -48,6 +48,14 @@ void QtRenderer::resize(int w, int h) {
     this->h = h;
 }
 
+void QtRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
+    this->blockContainer = blockContainer;
+}
+
+void QtRenderer::updateView(ViewManager* viewManager) {
+    this->viewManager = viewManager;
+}
+
 void QtRenderer::render(QPainter* painter) {
     // error checking
     assert(viewManager);
@@ -56,9 +64,6 @@ void QtRenderer::render(QPainter* painter) {
         qDebug() << "ERROR: QTRenderer has no tileSet, cnanot proceed with render.";
         return;
     }
-
-    // init
-    // painter->setRenderHint(QPainter::Antialiasing, true);
 
     // render lambdas ---
     auto renderCell = [&](FPosition position, BlockType type) -> void {
@@ -72,35 +77,6 @@ void QtRenderer::render(QPainter* painter) {
         painter->drawPixmap(QRectF(point, pointBR),
             tileSet,
             tileSetRect);
-        };
-
-    auto renderBlock = [&](const Block* block) -> void {
-        Position gridSize(block->widthNoRotation(), block->heightNoRotation());
-
-        // block
-        QPointF topLeft = gridToQt(block->getPosition().free());
-        QPointF bottomRight = gridToQt((block->getPosition() + gridSize).free());
-        float width = bottomRight.x() - topLeft.x();
-        float height = bottomRight.y() - topLeft.y();
-        QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
-
-        // get tile set coordinate
-        TileRegion tsRegion = tileSetInfo->getRegion(block->type());
-        QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-            QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
-
-        // rotate and position painter to center of block
-        painter->save();
-        painter->translate(center);
-        painter->rotate(getDegrees(block->getRotation()));
-
-        // draw the block from the center
-        QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
-        painter->drawPixmap(drawRect,
-            tileSet,
-            tileSetRect);
-
-        painter->restore();
         };
     // --- end of render lambdas
 
@@ -121,9 +97,14 @@ void QtRenderer::render(QPainter* painter) {
 
     // render blocks
     for (const Block* block : blocksToRender) {
-        renderBlock(block);
+        renderBlock(painter, block->type(), block->getPosition(), block->getRotation());
     }
 
+    // render block previews
+    for (const auto& preview : blockPreviews) {
+        renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
+    }
+    
     // render connections
     painter->save();
     setUpConnectionPainter(painter);
@@ -173,14 +154,42 @@ void QtRenderer::render(QPainter* painter) {
         painter->drawRect(QRectF(gridToQt(topLeft),gridToQt(bottomRight)));
     }
     painter->restore();
-    
-    // render lines
 }
 
 void QtRenderer::setUpConnectionPainter(QPainter* painter) {
     // 4e75a6 and 78b5ff
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 25.0f / viewManager->getViewHeight()));
+}
+
+void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation) {
+    
+    Position gridSize(getBlockWidth(type), getBlockHeight(type));
+
+    // block
+    QPointF topLeft = gridToQt(position.free());
+    QPointF bottomRight = gridToQt((position + gridSize).free());
+    float width = bottomRight.x() - topLeft.x();
+    float height = bottomRight.y() - topLeft.y();
+    QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
+
+    // get tile set coordinate
+    TileRegion tsRegion = tileSetInfo->getRegion(type);
+    QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
+                       QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+
+    // rotate and position painter to center of block
+    painter->save();
+    painter->translate(center);
+    painter->rotate(getDegrees(rotation));
+
+    // draw the block from the center
+    QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
+    painter->drawPixmap(drawRect,
+                        tileSet,
+                        tileSetRect);
+
+    painter->restore();
 }
 
 void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setupPainter) {
@@ -213,14 +222,6 @@ void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aP
     myPath.moveTo(start);
     myPath.cubicTo(c1, c2, end);
     painter->drawPath(myPath);
-}
-
-void QtRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
-    this->blockContainer = blockContainer;
-}
-
-void QtRenderer::updateView(ViewManager* viewManager) {
-    this->viewManager = viewManager;
 }
 
 QPointF QtRenderer::gridToQt(FPosition position) {
@@ -265,11 +266,15 @@ void QtRenderer::removeSelectionElement(ElementID selection) {
 
 // block preview
 ElementID QtRenderer::addBlockPreview(const BlockPreview& blockPreview) {
-    return 0;
+    ElementID newID = currentID++;
+
+    blockPreviews[newID] = blockPreview;
+
+    return newID;
 }
 
 void QtRenderer::removeBlockPreview(ElementID blockPreview) {
-    
+    blockPreviews.erase(blockPreview);
 }
 
 // connection preview

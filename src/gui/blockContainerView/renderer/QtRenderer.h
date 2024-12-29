@@ -42,18 +42,21 @@ private:
 private:
     QPointF gridToQt(FPosition position);
     
+    void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation);
     void setUpConnectionPainter(QPainter* painter);
     void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true);
     
     int w, h;
-    ElementID currentID = 0;
-    BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
-    ViewManager* viewManager; // or a viewManager
+    BlockContainerWrapper* blockContainer;
+    ViewManager* viewManager;
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
 
+    // Elements
+    ElementID currentID = 0;
     std::unordered_map<ElementID, SelectionElement> selectionElements;
     std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
+    std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
 };
 
