@@ -3,14 +3,20 @@
 
 #include <QPainter>
 #include <memory>
-#include <qpainter.h>
-#include <qpixmap.h>
+#include <unordered_map>
 
 #include "../viewManager/viewManager.h"
 #include "backend/defs.h"
 #include "renderer.h"
 #include "tileSet.h"
 
+struct SelectionElement
+{
+    Position topLeft;
+    Position bottomRight;
+    bool inverted;
+};
+    
 class QtRenderer : public Renderer {
 public:
     QtRenderer();
@@ -41,13 +47,20 @@ private:
     void spawnConfetti(FPosition start) override;
 
 private:
+    QPointF gridToQt(FPosition position);
+    
+    void setUpConnectionPainter(QPainter* painter);
+    void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true);
+    
     int w, h;
+    ElementID currentID = 0;
     BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
     ViewManager* viewManager; // or a viewManager
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
 
-    QPointF gridToQt(FPosition position);
+    std::unordered_map<ElementID, SelectionElement> selectionElements;
+    std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
 };
 
 #endif /* QTRenderer_h */
