@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 #include "logicSimulator.h"
 #include "gateOperations.h"
@@ -13,7 +14,20 @@ LogicSimulator::LogicSimulator()
     gateOutputs(),
     currentGateInputsUpdated(),
     nextGateInputsUpdated(),
-    numDecomissioned(0) {
+    numDecomissioned(0),
+    running(true),
+    proceedFlag(false),
+    isWaiting(false) {
+    simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
+}
+
+LogicSimulator::~LogicSimulator() {
+    running.store(false, std::memory_order_release);
+    // Signal to proceed in case thread is waiting
+    signalToProceed();
+    if (simulationThread.joinable()) {
+        simulationThread.join();
+    }
 }
 
 void LogicSimulator::initialize() {
@@ -240,4 +254,72 @@ void LogicSimulator::simulateNTicks(unsigned int n) {
         computeNextState(allGates());
         swapStates();
     }
+}
+
+void LogicSimulator::debugPrint() {
+    std::cout << "ID:        ";
+    for (int i = 0; i < currentState.size(); ++i) {
+        std::cout << i << " ";
+    }
+    std::cout << "\nGate type: ";
+    for (auto type : gateTypes) {
+        std::cout << static_cast<int>(type) << " ";
+    }
+    std::cout << "\nOutputs:   ";
+    // find longest number of updates
+    int maxOutputs = 0;
+    for (auto outputs : gateOutputs) {
+        maxOutputs = std::max(maxOutputs, static_cast<int>(outputs.size()));
+    }
+    for (int i = 0; i < maxOutputs; ++i) {
+        if (i != 0) {
+            std::cout << "           ";
+        }
+        for (auto outputs : gateOutputs) {
+            if (i < outputs.size()) {
+                std::cout << outputs[i] << " ";
+            }
+            else {
+                std::cout << "  ";
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
+}
+
+void LogicSimulator::simulationLoop() {
+    while (running.load(std::memory_order_acquire)) {
+        computeNextState(allGates());
+
+        bool waiting = false;
+
+        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire)) {
+            if (!waiting) {
+                isWaiting.store(true, std::memory_order_release);
+                waiting = true;
+            }
+            std::this_thread::yield();
+        }
+        if (waiting) {
+            isWaiting.store(false, std::memory_order_release);
+        }
+
+        if (!running.load(std::memory_order_acquire)) {
+            break;
+        }
+        swapStates();
+    }
+}
+
+void LogicSimulator::signalToPause() {
+    proceedFlag.store(false, std::memory_order_release);
+}
+
+void LogicSimulator::signalToProceed() {
+    proceedFlag.store(true, std::memory_order_release);
+}
+
+bool LogicSimulator::threadIsWaiting() const {
+    return isWaiting.load(std::memory_order_acquire);
 }

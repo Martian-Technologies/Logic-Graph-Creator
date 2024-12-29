@@ -14,6 +14,7 @@
 #include "backend/defs.h"
 #include "gui/blockContainerView/renderer/renderer.h"
 #include "util/vec2.h"
+#include "backend/address.h"
 
 QtRenderer::QtRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
@@ -94,6 +95,13 @@ void QtRenderer::render(QPainter* painter) {
             else renderCell(FPosition(x, y), BlockType::NONE);
         }
     }
+    // get a list of positions of blocks we are rendering to get their states
+    std::vector<Address> blockAddresses;
+    for (const Block* block : blocksToRender) {
+        blockAddresses.push_back(Address(block->getPosition()));
+    }
+
+    // get the states from the mainWindow's evaluator
 
     // render blocks
     for (const Block* block : blocksToRender) {
@@ -104,7 +112,7 @@ void QtRenderer::render(QPainter* painter) {
     for (const auto& preview : blockPreviews) {
         renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
     }
-    
+
     // render connections
     painter->save();
     setUpConnectionPainter(painter);
@@ -126,11 +134,10 @@ void QtRenderer::render(QPainter* painter) {
     // render connection previews
     painter->save();
     setUpConnectionPainter(painter);
-    for (const auto& preview : connectionPreviews)
-    {
+    for (const auto& preview : connectionPreviews) {
         const Block* inputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.input);
         const Block* outputBlock = blockContainer->getBlockContainer()->getBlock(preview.second.output);
-        renderConnection(painter,inputBlock, preview.second.input, outputBlock, preview.second.output);
+        renderConnection(painter, inputBlock, preview.second.input, outputBlock, preview.second.output);
     }
     painter->restore();
 
@@ -142,16 +149,16 @@ void QtRenderer::render(QPainter* painter) {
     painter->setBrush(transparentBlue);
     for (const auto& selection : selectionElements) {
         FPosition topLeft = selection.second.topLeft.free();
-        FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f,1.0f);
-        painter->drawRect(QRectF(gridToQt(topLeft),gridToQt(bottomRight)));
+        FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f, 1.0f);
+        painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
     }
     // inverted selections
     QColor transparentRed(255, 0, 0, 64);
     painter->setBrush(transparentRed);
     for (const auto& selection : invertedSelectionElements) {
         FPosition topLeft = selection.second.topLeft.free();
-        FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f,1.0f);
-        painter->drawRect(QRectF(gridToQt(topLeft),gridToQt(bottomRight)));
+        FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f, 1.0f);
+        painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
     }
     painter->restore();
 }
@@ -159,11 +166,11 @@ void QtRenderer::render(QPainter* painter) {
 void QtRenderer::setUpConnectionPainter(QPainter* painter) {
     // 4e75a6 and 78b5ff
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor( (QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911 ), 25.0f / viewManager->getViewHeight()));
+    painter->setPen(QPen(QColor((QDateTime::currentSecsSinceEpoch() % 2 == 1) ? 2507161 : 7910911), 25.0f / viewManager->getViewHeight()));
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation) {
-    
+
     Position gridSize(getBlockWidth(type), getBlockHeight(type));
 
     // block
@@ -176,7 +183,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     // get tile set coordinate
     TileRegion tsRegion = tileSetInfo->getRegion(type);
     QRectF tileSetRect(QPointF(tsRegion.pixelPosition.x, tsRegion.pixelPosition.y),
-                       QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
+        QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
 
     // rotate and position painter to center of block
     painter->save();
@@ -186,8 +193,8 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     // draw the block from the center
     QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
     painter->drawPixmap(drawRect,
-                        tileSet,
-                        tileSetRect);
+        tileSet,
+        tileSetRect);
 
     painter->restore();
 }
@@ -202,21 +209,23 @@ void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aP
         if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
         if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
         if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
-    } else { aSocketOffset = {0.0f, 0.0f}; }
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
+    }
+    else { aSocketOffset = { 0.0f, 0.0f }; }
 
     if (b) {
         if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
         if (b->getRotation() == Rotation::NINETY) bSocketOffset = { 0.0f, -0.5f };
         if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
         if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };
-    } else { bSocketOffset = {0.0f, 0.0f}; }
-    
+    }
+    else { bSocketOffset = { 0.0f, 0.0f }; }
+
 
     QPointF start = gridToQt(aPos.free() + centerOffset + aSocketOffset);
     QPointF end = gridToQt(bPos.free() + centerOffset + bSocketOffset);
-    QPointF c1 = gridToQt(aPos.free() + centerOffset + aSocketOffset*2);
-    QPointF c2 = gridToQt(bPos.free() + centerOffset + bSocketOffset*2);
+    QPointF c1 = gridToQt(aPos.free() + centerOffset + aSocketOffset * 2);
+    QPointF c2 = gridToQt(bPos.free() + centerOffset + bSocketOffset * 2);
 
     QPainterPath myPath;
     myPath.moveTo(start);
@@ -239,7 +248,7 @@ ElementID QtRenderer::addSelectionElement(const SelectionElement& selection) {
 
     Position topLeft = selection.topLeft;
     Position bottomRight = selection.bottomRight;
-    
+
     // fix coordinates if incorrect
     if (topLeft.x > bottomRight.x) {
         int temp = topLeft.x;
@@ -253,8 +262,8 @@ ElementID QtRenderer::addSelectionElement(const SelectionElement& selection) {
     }
 
     // add to lists
-    if (!selection.inverted) selectionElements[newID] = {topLeft, bottomRight, selection.inverted};
-    else invertedSelectionElements[newID] = {topLeft, bottomRight, selection.inverted};
+    if (!selection.inverted) selectionElements[newID] = { topLeft, bottomRight, selection.inverted };
+    else invertedSelectionElements[newID] = { topLeft, bottomRight, selection.inverted };
 
     return newID;
 }
@@ -281,7 +290,7 @@ void QtRenderer::removeBlockPreview(ElementID blockPreview) {
 ElementID QtRenderer::addConnectionPreview(const ConnectionPreview& connectionPreview) {
     ElementID newID = currentID++;
 
-    connectionPreviews[newID] = {connectionPreview.input, connectionPreview.output};
+    connectionPreviews[newID] = { connectionPreview.input, connectionPreview.output };
 
     return newID;
 }
@@ -292,5 +301,5 @@ void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
 
 // confetti
 void QtRenderer::spawnConfetti(FPosition start) {
-    
+
 }

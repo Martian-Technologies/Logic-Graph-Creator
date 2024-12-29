@@ -30,5 +30,5 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::setSimState(bool state) {
-    std::cout << state << std::endl;
+    evaluator->setPause(!state);
 }

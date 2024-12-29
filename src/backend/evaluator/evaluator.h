@@ -15,16 +15,15 @@ class Evaluator {
 public:
     Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper);
     // pause/unpause used once the evaluator is "started" 
-    void pause();
-    void unpause();
+    void setPause(bool pause);
     void reset();
     void setTickrate(unsigned long long tickrate);
     void runNTicks(unsigned long long n);
     void makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId);
-    logic_state_t getState(const Address& address) const;
+    logic_state_t getState(const Address& address);
     void setState(const Address& address, logic_state_t state);
-    std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) const;
-    std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) const;
+    std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses);
+    std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
     void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
     void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 

@@ -3,7 +3,7 @@
 #include "evaluator.h"
 
 Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)
-    :paused(false),
+    :paused(true),
     targetTickrate(0),
     logicSimulator(),
     addressTree() {
@@ -16,12 +16,14 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
     blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void Evaluator::pause() {
-    paused = true;
-}
-
-void Evaluator::unpause() {
-    paused = false;
+void Evaluator::setPause(bool pause) {
+    paused = pause;
+    if (pause) {
+        logicSimulator.signalToPause();
+    }
+    else {
+        logicSimulator.signalToProceed();
+    }
 }
 
 void Evaluator::reset() {
@@ -39,6 +41,11 @@ void Evaluator::runNTicks(unsigned long long n) {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
+    logicSimulator.signalToPause();
+    // wait for the thread to pause
+    while (!logicSimulator.threadIsWaiting()) {
+        std::this_thread::yield();
+    }
     const auto modifications = difference->getModifications();
     for (const auto& modification : modifications) {
         const auto& [modificationType, modificationData] = modification;
@@ -81,7 +88,9 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             throw std::invalid_argument("makeEdit: invalid modificationType");
         }
     }
-    logicSimulator.debugPrint();
+    if (!paused) {
+        logicSimulator.signalToProceed();
+    }
 }
 
 GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
@@ -101,4 +110,29 @@ GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
     default:
         throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
     }
+}
+
+logic_state_t Evaluator::getState(const Address& address) {
+    const block_id_t blockId = addressTree.getValue(address);
+
+    logicSimulator.signalToPause();
+    const logic_state_t state = logicSimulator.getState(blockId);
+    if (!paused) {
+        logicSimulator.signalToProceed();
+    }
+    return state;
+}
+
+std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses) {
+    std::vector<logic_state_t> states;
+    states.reserve(addresses.size());
+    logicSimulator.signalToPause();
+    for (const auto& address : addresses) {
+        const block_id_t blockId = addressTree.getValue(address);
+        states.push_back(logicSimulator.getState(blockId));
+    }
+    if (!paused) {
+        logicSimulator.signalToProceed();
+    }
+    return states;
 }

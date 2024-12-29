@@ -3,6 +3,9 @@
 
 #include <unordered_map>
 #include <vector>
+#include <atomic>
+#include <chrono>
+#include <thread>
 
 #include "logicState.h"
 #include "gateType.h"
@@ -11,8 +14,7 @@
 class LogicSimulator {
 public:
     LogicSimulator();
-    ~LogicSimulator() = default; // Destructor can be defaulted
-
+    ~LogicSimulator();
     void initialize();
     block_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
     void connectGates(block_id_t gate1, block_id_t gate2);
@@ -37,16 +39,26 @@ public:
 
     std::vector<block_id_t> allGates() const;
 
+    void debugPrint();
+    void signalToPause();
+    void signalToProceed();
+    bool threadIsWaiting() const;
+
 private:
     int numGates;
-    std::vector<logic_state_t> currentState;
-    std::vector<logic_state_t> nextState;
+    std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
-    std::vector<std::vector<block_id_t>> gateInputs;
-    std::vector<std::vector<block_id_t>> gateOutputs;
-    std::vector<bool> currentGateInputsUpdated;
-    std::vector<bool> nextGateInputsUpdated;
+    std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
+    std::vector<bool> currentGateInputsUpdated, nextGateInputsUpdated;
     int numDecomissioned;
+
+    // shit for threading
+    std::thread simulationThread;
+    std::atomic<bool> running;
+    std::atomic<bool> proceedFlag;
+    std::atomic<bool> isWaiting;
+
+    void simulationLoop();
 };
 
 #endif // logicSimulator_h

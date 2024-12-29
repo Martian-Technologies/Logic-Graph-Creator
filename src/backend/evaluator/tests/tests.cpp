@@ -2,7 +2,7 @@
 #include <iostream>
 #include "tests.h"
 
-bool testTwoGates(LogicSimulator ls) {
+bool testTwoGates(LogicSimulator& ls) {
     ls.clearGates();
     ls.reserveGates(2);
     auto gate1 = ls.addGate(GateType::AND);
@@ -15,7 +15,7 @@ bool testTwoGates(LogicSimulator ls) {
     return states[gate2] && !states[gate1];
 }
 
-bool testThreeGates(LogicSimulator ls) {
+bool testThreeGates(LogicSimulator& ls) {
     ls.clearGates();
     ls.reserveGates(3);
     auto gate1 = ls.addGate(GateType::AND);
@@ -31,7 +31,7 @@ bool testThreeGates(LogicSimulator ls) {
     return states[gate1] && !states[gate2] && states[gate3];
 }
 
-bool testFullAdder(LogicSimulator ls) {
+bool testFullAdder(LogicSimulator& ls) {
     ls.clearGates();
     ls.reserveGates(8);
     auto gateXOR = ls.addGate(GateType::XOR); // sum
@@ -143,7 +143,7 @@ bool testFullAdder(LogicSimulator ls) {
     return !fail;
 }
 
-bool testDecomissioning(LogicSimulator ls) {
+bool testDecomissioning(LogicSimulator& ls) {
     ls.clearGates();
     ls.reserveGates(3);
     auto gate1 = ls.addGate(GateType::AND);
@@ -181,7 +181,7 @@ bool testDecomissioning(LogicSimulator ls) {
 
 bool runSimulatorTests() {
 
-    LogicSimulator ls;
+    LogicSimulator ls = LogicSimulator();
     bool fail = false;
     if (!testTwoGates(ls)) {
         std::cout << "Test \"two gates\" failed" << std::endl;
