@@ -34,8 +34,10 @@ bool SingleConnectTool::pointerMove(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
+    
+    elementCreator.clear();
+    elementCreator.addSelectionElement(positionEvent->getPosition());
     if (clicked) {
-        elementCreator.clear();
         elementCreator.addConnectionPreview(clickPosition, positionEvent->getPosition());
     }
     return false;
@@ -45,8 +47,10 @@ bool SingleConnectTool::enterBlockView(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
+    
+    elementCreator.clear();
+    elementCreator.addSelectionElement(positionEvent->getPosition());
     if (clicked) {
-        elementCreator.clear();
         elementCreator.addConnectionPreview(clickPosition, positionEvent->getPosition());
     }
     return true;

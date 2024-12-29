@@ -142,6 +142,18 @@ void QtRenderer::render(QPainter* painter) {
     }
     painter->restore();
 
+    // render connection previews
+    painter->save();
+    setUpConnectionPainter(painter);
+    for (const auto& preview : connectionPreviews)
+    {
+        const Block* a = blockContainer->getBlockContainer()->getBlock(preview.second.a);
+        assert (a);
+        const Block* b = blockContainer->getBlockContainer()->getBlock(preview.second.b);
+        renderConnection(painter, a, preview.second.a, b, preview.second.b);
+    }
+    painter->restore();
+
     // render selections
     painter->save();
     painter->setPen(Qt::NoPen);
@@ -171,39 +183,35 @@ void QtRenderer::setUpConnectionPainter(QPainter* painter) {
 }
 
 void QtRenderer::renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setupPainter) {
-    if (setupPainter)
-    {
-        painter->save();
-        setUpConnectionPainter(painter);
-    }
-    
     FPosition centerOffset(0.5, 0.5f);
-    FPosition socketOffset;
+    FPosition aSocketOffset;
     FPosition bSocketOffset;
 
     // Socket offsets will be retrieved data later, this code will go
+    if (a) {
+        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
+        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
+        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
+    } else { aSocketOffset = {0.0f, 0.0f}; }
 
-    if (a->getRotation() == Rotation::ZERO) socketOffset = { 0.5f, 0.0f };
-    if (a->getRotation() == Rotation::NINETY) socketOffset = { 0.0f, 0.5f };
-    if (a->getRotation() == Rotation::ONE_EIGHTY) socketOffset = { -0.5f, 0.0f };
-    if (a->getRotation() == Rotation::TWO_SEVENTY) socketOffset = { 0.0f, -0.5f };
+    if (b) {
+        if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
+        if (b->getRotation() == Rotation::NINETY) bSocketOffset = { 0.0f, -0.5f };
+        if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
+        if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };        
+    } else { bSocketOffset = {0.0f, 0.0f}; }
+    
 
-    if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
-    if (b->getRotation() == Rotation::NINETY) bSocketOffset = { 0.0f, -0.5f };
-    if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
-    if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };
-
-    QPointF start = gridToQt(aPos.free() + centerOffset + socketOffset);
+    QPointF start = gridToQt(aPos.free() + centerOffset + aSocketOffset);
     QPointF end = gridToQt(bPos.free() + centerOffset + bSocketOffset);
-    QPointF c1 = gridToQt(aPos.free() + centerOffset + socketOffset*2);
+    QPointF c1 = gridToQt(aPos.free() + centerOffset + aSocketOffset*2);
     QPointF c2 = gridToQt(bPos.free() + centerOffset + bSocketOffset*2);
 
     QPainterPath myPath;
     myPath.moveTo(start);
     myPath.cubicTo(c1, c2, end);
     painter->drawPath(myPath);
-
-    if (setupPainter) painter->restore();
 }
 
 void QtRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
@@ -262,11 +270,15 @@ void QtRenderer::removeBlockPreview(ElementID blockPreview) {
 
 // connection preview
 ElementID QtRenderer::addConnectionPreview(Position input, Position output, Color modulate, float alpha) {
-    return 0;
+    ElementID newID = currentID++;
+
+    connectionPreviews[newID] = {input, output, modulate, alpha};
+
+    return newID;
 }
 
 void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
-    
+    connectionPreviews.erase(connectionPreview);
 }
 
 // confetti

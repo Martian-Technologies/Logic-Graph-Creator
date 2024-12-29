@@ -16,6 +16,14 @@ struct SelectionElement
     Position bottomRight;
     bool inverted;
 };
+
+struct ConnectionPreview
+{
+    Position a;
+    Position b;
+    Color modulate;
+    float alpha;
+};
     
 class QtRenderer : public Renderer {
 public:
@@ -61,6 +69,7 @@ private:
 
     std::unordered_map<ElementID, SelectionElement> selectionElements;
     std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
+    std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
 };
 
 #endif /* QTRenderer_h */
