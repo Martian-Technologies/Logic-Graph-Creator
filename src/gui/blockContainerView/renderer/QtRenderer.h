@@ -3,14 +3,13 @@
 
 #include <QPainter>
 #include <memory>
-#include <qpainter.h>
-#include <qpixmap.h>
+#include <unordered_map>
 
 #include "../viewManager/viewManager.h"
 #include "backend/defs.h"
 #include "renderer.h"
 #include "tileSet.h"
-
+    
 class QtRenderer : public Renderer {
 public:
     QtRenderer();
@@ -29,25 +28,36 @@ public:
 
 private:
     // elements
-    ElementID addSelectionElement(Position topLeft, Position bottomRight, bool inverted) override;
+    ElementID addSelectionElement(const SelectionElement& selection) override;
     void removeSelectionElement(ElementID selection) override;
     
-    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate, float alpha) override;
+    ElementID addBlockPreview(const BlockPreview& blockPreview) override;
     void removeBlockPreview(ElementID blockPreview) override;
     
-    ElementID addConnectionPreview(Position input, Position output, Color modulate, float alpha) override;
+    ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override;
     void removeConnectionPreview(ElementID connectionPreview) override;
     
     void spawnConfetti(FPosition start) override;
 
 private:
+    QPointF gridToQt(FPosition position);
+    
+    void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation);
+    void setUpConnectionPainter(QPainter* painter);
+    void renderConnection(QPainter* painter, const Block* a, Position aPos, const Block* b, Position bPos, bool setUpPainter = true);
+    
     int w, h;
-    BlockContainerWrapper* blockContainer; // renderers should usually not retain a pointer to blockContainer
-    ViewManager* viewManager; // or a viewManager
+    BlockContainerWrapper* blockContainer;
+    ViewManager* viewManager;
     QPixmap tileSet;
     std::unique_ptr<TileSet<BlockType>> tileSetInfo;
 
-    QPointF gridToQt(FPosition position);
+    // Elements
+    ElementID currentID = 0;
+    std::unordered_map<ElementID, SelectionElement> selectionElements;
+    std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
+    std::unordered_map<ElementID, BlockPreview> blockPreviews;
+    std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
 };
 
 #endif /* QTRenderer_h */

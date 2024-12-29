@@ -30,6 +30,9 @@ public:
     bool exitBlockView(const Event* event);
 
 private:
+    void updateElements() override;
+
+    Position position;
     char clicks[2];
 };
 

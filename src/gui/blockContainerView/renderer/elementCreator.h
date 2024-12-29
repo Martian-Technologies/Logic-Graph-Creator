@@ -5,7 +5,6 @@
 
 #include "renderer.h"
 
-
 class ElementCreator {
 public:
     ElementCreator() : renderer(nullptr) {}
@@ -51,25 +50,23 @@ public:
 
     inline bool hasElement(ElementID id) { return ids.find(id) != ids.end(); }
 
-    inline ElementID addSelectionElement(Position position, bool inverted = false) {return addSelectionElement(position, position, inverted);}
-
-    inline ElementID addSelectionElement(Position positionA, Position positionB, bool inverted = false) {
+    inline ElementID addSelectionElement(const SelectionElement& selection) {
         assert(renderer);
-        ElementID id = renderer->addSelectionElement(positionA, positionB, inverted);
+        ElementID id = renderer->addSelectionElement(selection);
         ids[id] = SelectionElement;
         return id;
     }
 
-    ElementID addBlockPreview(Position position, Rotation rotation, Color modulate = Color(), float alpha = 1.f) {
+    ElementID addBlockPreview(const BlockPreview& blockPreview) {
         assert(renderer);
-        ElementID id = renderer->addBlockPreview(position, rotation, modulate, alpha);
+        ElementID id = renderer->addBlockPreview(blockPreview);
         ids[id] = BlockPreview;
         return id;
     }
 
-    ElementID addConnectionPreview(Position inputCellPos, Position outputCellPos, Color modulate = Color(), float alpha = 1.f) {
+    ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) {
         assert(renderer);
-        ElementID id = renderer->addConnectionPreview(inputCellPos, outputCellPos, modulate, alpha);
+        ElementID id = renderer->addConnectionPreview(connectionPreview);
         ids[id] = ConnectionPreview;
         return id;
     }

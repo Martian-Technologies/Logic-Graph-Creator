@@ -25,6 +25,8 @@ public:
     bool exitBlockView(const Event* event);
 
 private:
+    void updateElements(Position pointerPosition);
+    
     bool clicked;
     Position clickPosition;
 };

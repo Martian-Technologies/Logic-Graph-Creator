@@ -9,10 +9,11 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <cstdint>
 #include <memory>
 
-#include "../blockContainerView/blockContainerView.h"
-#include "../blockContainerView/renderer/QtRenderer.h"
+#include "blockContainerView/blockContainerView.h"
+#include "blockContainerView/renderer/QtRenderer.h"
 #include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
@@ -64,6 +65,9 @@ private:
 
     // ui elements
     QTreeWidget* treeWidget;
+
+    // debug
+    uint64_t lastFrameTime = 0;
 };
 
 #endif /* logicGridWindow_h */

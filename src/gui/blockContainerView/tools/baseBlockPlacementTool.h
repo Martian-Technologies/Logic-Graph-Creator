@@ -26,14 +26,20 @@ public:
 
     bool rotateBlockCW(const Event* event) {
         rotation = rotate(rotation, true);
+        updateElements();
+        
         return true;
     }
     bool rotateBlockCCW(const Event* event) {
         rotation = rotate(rotation, false);
+        updateElements();
+        
         return true;
     }
 
 protected:
+    inline virtual void updateElements() {};
+    
     BlockType selectedBlock;
     Rotation rotation;
 };

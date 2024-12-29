@@ -4,7 +4,7 @@
 #include <string>
 
 struct Color {
-    inline Color() : r(0.0f), g(0.0f), b(0.0f) {}
+    inline Color() : r(1.0f), g(1.0f), b(1.0f) {}
     inline Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
     inline bool operator==(const Color& other) const { return r == other.r && g == other.g && b == other.b; }
