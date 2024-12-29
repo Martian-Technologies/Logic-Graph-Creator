@@ -2,13 +2,14 @@
 #include <QDateTime>
 #include <QDebug>
 
+#include <algorithm>
 #include <memory>
-#include <qnamespace.h>
 #include <set>
 
 #include "QtRenderer.h"
 #include "backend/block/block.h"
 #include "backend/connection/connectionEnd.h"
+#include "backend/evaluator/logicState.h"
 #include "backend/position/position.h"
 #include "backend/defs.h"
 #include "gui/blockContainerView/renderer/renderer.h"
@@ -84,11 +85,24 @@ void QtRenderer::render(QPainter* painter) {
         };
     // --- end of render lambdas
 
+    // get states
+    std::vector<Address> blockAddresses;
+    for (const auto& block : *(blockContainer->getBlockContainer())) {
+        blockAddresses.push_back(Address(block.second.getPosition()));
+    }
+    std::vector<logic_state_t> blockStates;
+    if (evaluator) {
+        blockStates = evaluator->getBulkStates(blockAddresses);
+    } else {
+        blockStates = std::vector<logic_state_t>(blockAddresses.size());
+        std::fill(blockStates.begin(), blockStates.end(), false);
+    }
+    
     // get bounds
     Position topLeftBound = viewManager->getTopLeft().snap();
     Position bottomRightBound = viewManager->getBottomRight().snap();
 
-    // render grid and collect blocks + connections
+    // render grid
     std::set<const Block*> blocksToRender;
     for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
         for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
@@ -96,76 +110,40 @@ void QtRenderer::render(QPainter* painter) {
         }
     }
 
-    if (evaluator) {
-        std::vector<Address> blockAddresses;
-        for (const auto& block : *(blockContainer->getBlockContainer())) {
-            blockAddresses.push_back(Address(block.second.getPosition()));
+    // render blocks
+    int stateIndex = 0;
+    for (const auto& block : *(blockContainer->getBlockContainer())) { 
+        if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
+            renderBlock(painter, block.second.type(), block.second.getPosition(), block.second.getRotation(), blockStates[stateIndex]);
         }
-        std::vector<logic_state_t> blockStates = evaluator->getBulkStates(blockAddresses);
-
-        int i = 0;
-        for (const auto& block : *(blockContainer->getBlockContainer())) { 
-            if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
-                renderBlock(painter, block.second.type(), block.second.getPosition(), block.second.getRotation(), blockStates[i]);
-            }
-            i++;
-        }
-        
-        // render block previews
-        for (const auto& preview : blockPreviews) {
-            renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
-        }
-
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        i = 0;
-        for (const auto& block : *(blockContainer->getBlockContainer())) {
-            bool state = blockStates[i];
-            for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
-                // continue if input, we only want outputs
-                if (block.second.isConnectionInput(id)) continue;
-                // 4e75a6 and 78b5ff
-
-                Position pos = block.second.getConnectionPosition(id).first;
-                for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
-                    const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
-                    Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, pos, otherPos, state);
-                }
-            }
-            i++;
-        }
-        painter->restore();
-    } else {
-        for (const auto& block : *(blockContainer->getBlockContainer())) {
-            if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
-                renderBlock(painter, block.second.type(), block.second.getPosition(), block.second.getRotation());
-            }
-        }
-
-        // render block previews
-        for (const auto& preview : blockPreviews) {
-            renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
-        }
-        
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        for (const auto& block : *(blockContainer->getBlockContainer())) {
-            for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
-                // return if input, we only want outputs
-                if (block.second.isConnectionInput(id)) continue;
-
-                Position pos = block.second.getConnectionPosition(id).first;
-                for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
-                    const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
-                    Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-
-                    renderConnection(painter, pos, otherPos);
-                }
-            }
-        }
-        painter->restore();
+        stateIndex++;
     }
+        
+    // render block previews
+    for (const auto& preview : blockPreviews) {
+        renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
+    }
+
+    // render connections
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    stateIndex = 0;
+    for (const auto& block : *(blockContainer->getBlockContainer())) {
+        bool state = blockStates[stateIndex];
+        for (connection_end_id_t id = 0; id <= block.second.getConnectionContainer().getMaxConnectionId(); id++) {
+            // continue if input, we only want outputs
+            if (block.second.isConnectionInput(id)) continue;
+
+            Position pos = block.second.getConnectionPosition(id).first;
+            for (auto connectionIter : block.second.getConnectionContainer().getConnections(id)) {
+                const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
+                Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
+                renderConnection(painter, pos, otherPos, state);
+            }
+        }
+        stateIndex++;
+    }
+    painter->restore();
 
     // render connection previews
     painter->save();
@@ -220,7 +198,6 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
         QSizeF(tsRegion.pixelSize.x, tsRegion.pixelSize.y));
 
     // rotate and position painter to center of block
-    painter->save();
     painter->translate(center);
     painter->rotate(getDegrees(rotation));
 
@@ -230,7 +207,9 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
         tileSet,
         tileSetRect);
 
-    painter->restore();
+    // undo transformations
+    painter->rotate(-getDegrees(rotation));
+    painter->translate(-center);
 }
 
 void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
