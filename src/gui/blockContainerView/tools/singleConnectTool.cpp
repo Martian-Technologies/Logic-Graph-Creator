@@ -41,7 +41,7 @@ bool SingleConnectTool::pointerMove(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
     
-    updateElements(positionEvent->getPosition());
+    updateElements(positionEvent->getFPosition());
     
     return false;
 }
@@ -51,7 +51,7 @@ bool SingleConnectTool::enterBlockView(const Event* event) {
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
 
-    updateElements(positionEvent->getPosition());
+    updateElements(positionEvent->getFPosition());
     
     return true;
 }
@@ -62,17 +62,20 @@ bool SingleConnectTool::exitBlockView(const Event* event) {
     return true;
 }
 
-void SingleConnectTool::updateElements(Position pointerPosition) {
+void SingleConnectTool::updateElements(FPosition pointerPosition) {
     elementCreator.clear();
     
     if (clicked) {
-        elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, pointerPosition));
-        bool valid = blockContainer->getBlockContainer()->getInputConnectionEnd(pointerPosition).has_value();
-        elementCreator.addSelectionElement(SelectionElement(pointerPosition, !valid));
+        bool valid = blockContainer->getBlockContainer()->getInputConnectionEnd(pointerPosition.snap()).has_value();
+        
+        if (valid) elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, pointerPosition.snap()));
+        else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(clickPosition, pointerPosition));
+        
+        elementCreator.addSelectionElement(SelectionElement(pointerPosition.snap(), !valid));
     }
     else {
         // TODO - change to use isvalid function
-        bool valid = blockContainer->getBlockContainer()->getOutputConnectionEnd(pointerPosition).has_value();
-        elementCreator.addSelectionElement(SelectionElement(pointerPosition, !valid));
+        bool valid = blockContainer->getBlockContainer()->getOutputConnectionEnd(pointerPosition.snap()).has_value();
+        elementCreator.addSelectionElement(SelectionElement(pointerPosition.snap(), !valid));
     }
 }

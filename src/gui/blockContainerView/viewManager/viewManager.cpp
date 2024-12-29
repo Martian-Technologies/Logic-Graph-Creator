@@ -1,9 +1,8 @@
 #include <QApplication>
 #include <qlogging.h>
 
-#include "gui/blockContainerView/events/customEvents.h"
-#include "backend/position/position.h"
 #include "viewManager.h"
+#include "gui/blockContainerView/events/customEvents.h"
 
 bool ViewManager::zoom(const Event* event) {
     const DeltaEvent* deltaEvent = event->cast<DeltaEvent>();
