@@ -179,10 +179,10 @@ void LogicSimulator::computeNextState(const std::vector<block_id_t>& gates) {
         if (gateTypes[gate] == GateType::NONE) {
             continue;
         }
-        if (!currentGateInputsUpdated[gate]) {
-            nextState[gate] = currentState[gate];
-            continue;
-        }
+        // if (!currentGateInputsUpdated[gate]) {
+        //     nextState[gate] = currentState[gate];
+        //     continue;
+        // }
 
         const GateType type = gateTypes[gate];
         const auto& inputs = gateInputs[gate];
