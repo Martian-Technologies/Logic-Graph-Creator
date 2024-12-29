@@ -62,3 +62,5 @@ CMakeScripts/ReRunCMake.make
 *.pbxproj
 *.xcsettings
 cmake_install.cmake
+/LogicGraphCreator_autogen
+/LogicGraphCreator.xcodeproj
