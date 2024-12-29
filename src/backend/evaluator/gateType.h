@@ -9,8 +9,8 @@ enum class GateType {
     NAND = 4,
     NOR = 5,
     XNOR = 6,
-    CONTINUOUSINPUT = 7,
-    TICKINPUT = 8,
+    CONTINUOUS_INPUT = 7,
+    TICK_INPUT = 8,
     CONSTANT_ON = 9,
 };
 

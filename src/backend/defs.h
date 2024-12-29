@@ -13,6 +13,9 @@ enum BlockType {
     NAND,
     NOR,
     XNOR,
+    SWITCH,
+    BUTTON,
+    TICK_BUTTON,
     CUSTOM,
     TYPE_COUNT
 };
