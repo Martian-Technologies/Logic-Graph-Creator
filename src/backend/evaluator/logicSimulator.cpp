@@ -15,10 +15,13 @@ LogicSimulator::LogicSimulator()
     gateInputCountTotal(),
     gateInputCountPowered(),
     numDecomissioned(0),
+    ticksRun(0),
+    realTickrate(0),
     running(true),
     proceedFlag(false),
     isWaiting(false) {
     simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
+    tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
 }
 
 LogicSimulator::~LogicSimulator() {
@@ -27,6 +30,9 @@ LogicSimulator::~LogicSimulator() {
     signalToProceed();
     if (simulationThread.joinable()) {
         simulationThread.join();
+    }
+    if (tickrateMonitorThread.joinable()) {
+        tickrateMonitorThread.join();
     }
 }
 
@@ -275,6 +281,7 @@ void LogicSimulator::simulationLoop() {
     while (running.load(std::memory_order_acquire)) {
         computeNextState();
         propagatePowered();
+        ++ticksRun;
 
         bool waiting = false;
 
@@ -306,4 +313,12 @@ void LogicSimulator::signalToProceed() {
 
 bool LogicSimulator::threadIsWaiting() const {
     return isWaiting.load(std::memory_order_acquire);
+}
+
+void LogicSimulator::tickrateMonitor() {
+    while (running.load(std::memory_order_acquire)) {
+        const long long int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
+        realTickrate.store(ticks, std::memory_order_release);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
