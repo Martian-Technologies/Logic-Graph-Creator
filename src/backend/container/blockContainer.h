@@ -2,6 +2,7 @@
 #define blockContainer_h
 
 #include <unordered_map>
+#include <optional>
 
 #include "../position/sparse2d.h"
 #include "difference.h"
@@ -49,6 +50,8 @@ public:
     bool connectionExists(const Position& outputPosition, const Position& inputPosition) const;
     const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const;
     const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const;
+    const std::optional<ConnectionEnd> getInputConnectionEnd(const Position& position) const;
+    const std::optional<ConnectionEnd> getOutputConnectionEnd(const Position& position) const;
 
     // -- setters --
     // Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.

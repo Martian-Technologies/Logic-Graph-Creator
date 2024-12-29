@@ -135,14 +135,30 @@ bool BlockContainer::connectionExists(const Position& outputPosition, const Posi
 
 const std::vector<ConnectionEnd>& BlockContainer::getInputConnections(const Position& position) const {
     const Block* block = getBlock(position);
-    if (block == nullptr) return getEmptyVector<ConnectionEnd>();
+    if (!block) return getEmptyVector<ConnectionEnd>();
     return block->getInputConnections(position);
 }
 
 const std::vector<ConnectionEnd>& BlockContainer::getOutputConnections(const Position& position) const {
     const Block* block = getBlock(position);
-    if (block == nullptr) return getEmptyVector<ConnectionEnd>();
+    if (!block) return getEmptyVector<ConnectionEnd>();
     return block->getOutputConnections(position);
+}
+
+const std::optional<ConnectionEnd> BlockContainer::getInputConnectionEnd(const Position& position) const {
+    const Block* block = getBlock(position);
+    if (!block) return std::nullopt;
+    auto connectionData = block->getInputConnectionId(position);
+    if (!connectionData.second) return std::nullopt;
+    return std::make_optional(ConnectionEnd(block->id(), connectionData.first));
+}
+
+const std::optional<ConnectionEnd> BlockContainer::getOutputConnectionEnd(const Position& position) const {
+    const Block* block = getBlock(position);
+    if (!block) return std::nullopt;
+    auto connectionData = block->getOutputConnectionId(position);
+    if (!connectionData.second) return std::nullopt;
+    return std::make_optional(ConnectionEnd(block->id(), connectionData.first));
 }
 
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
