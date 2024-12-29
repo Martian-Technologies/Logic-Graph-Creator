@@ -19,7 +19,7 @@ logic_state_t computeGateState(GateType type, unsigned int inputCount, unsigned 
         return inputCount == 0 && numInputs > 0;
     case GateType::XNOR:
         return inputCount % 2 == 0 && numInputs > 0;
-    case GateType::TICKINPUT:
+    case GateType::TICK_INPUT:
         return false;
     case GateType::CONSTANT_ON:
         return true;

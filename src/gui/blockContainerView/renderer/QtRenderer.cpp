@@ -40,6 +40,9 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
         tileSetInfo->addRegion(BlockType::NAND, { 160, 0 }, { 32, 32 });
         tileSetInfo->addRegion(BlockType::NOR, { 192, 0 }, { 32, 32 });
         tileSetInfo->addRegion(BlockType::XNOR, { 224, 0 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::BUTTON, { 0, 64 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::TICK_BUTTON, { 32, 64 }, { 32, 32 });
+        tileSetInfo->addRegion(BlockType::SWITCH, { 64, 64 }, { 32, 32 });
     }
 }
 

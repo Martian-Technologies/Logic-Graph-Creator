@@ -61,12 +61,15 @@ void LogicGridWindow::updateSelectedItem() {
         for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
             if (item) {
                 QString str = item->text(0);
-                if (str == "And") blockContainerView.getToolManager().selectBlock(AND);
-                else if (str == "Or") blockContainerView.getToolManager().selectBlock(OR);
-                else if (str == "Xor") blockContainerView.getToolManager().selectBlock(XOR);
-                else if (str == "Nand") blockContainerView.getToolManager().selectBlock(NAND);
-                else if (str == "Nor") blockContainerView.getToolManager().selectBlock(NOR);
-                else if (str == "Xnor") blockContainerView.getToolManager().selectBlock(XNOR);
+                if (str == "And") blockContainerView.getToolManager().selectBlock(BlockType::AND);
+                else if (str == "Or") blockContainerView.getToolManager().selectBlock(BlockType::OR);
+                else if (str == "Xor") blockContainerView.getToolManager().selectBlock(BlockType::XOR);
+                else if (str == "Nand") blockContainerView.getToolManager().selectBlock(BlockType::NAND);
+                else if (str == "Nor") blockContainerView.getToolManager().selectBlock(BlockType::NOR);
+                else if (str == "Xnor") blockContainerView.getToolManager().selectBlock(BlockType::XNOR);
+                else if (str == "Switch") blockContainerView.getToolManager().selectBlock(BlockType::SWITCH);
+                else if (str == "Button") blockContainerView.getToolManager().selectBlock(BlockType::BUTTON);
+                else if (str == "Tick Button") blockContainerView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
                 else {
                     blockContainerView.getToolManager().changeTool(str.toStdString());
                 }
