@@ -45,7 +45,6 @@ public:
     long long int getRealTickrate() const { return realTickrate.load(std::memory_order_acquire); }
 
 private:
-    int numGates;
     std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
     std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
