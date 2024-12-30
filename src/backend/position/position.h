@@ -79,9 +79,9 @@ enum Rotation {
     TWO_SEVENTY = 3,
 };
 
-inline bool isRotated(Rotation rotation) noexcept { return rotation & 1; }
-inline bool isFlipped(Rotation rotation) noexcept { return rotation > 1; }
-inline Rotation rotate(Rotation rotation, bool clockWise) {
+inline constexpr bool isRotated(Rotation rotation) noexcept { return rotation & 1; }
+inline constexpr bool isFlipped(Rotation rotation) noexcept { return rotation > 1; }
+inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
     if (clockWise) {
         if (rotation == TWO_SEVENTY) return ZERO;
         return (Rotation)((int)rotation + 1);
@@ -89,7 +89,7 @@ inline Rotation rotate(Rotation rotation, bool clockWise) {
     if (rotation == ZERO) return TWO_SEVENTY;
     return (Rotation)((int)rotation - 1);
 }
-inline float getDegrees(Rotation rotation) {
+inline constexpr float getDegrees(Rotation rotation) {
     switch (rotation)
     {
     case Rotation::ZERO:
@@ -105,5 +105,6 @@ inline float getDegrees(Rotation rotation) {
         return 270.0f;
         break;
     }
+    return 0.0f;
 }
 #endif /* position_h */
