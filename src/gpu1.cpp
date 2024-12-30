@@ -19,7 +19,7 @@ BlockType strToType(QString str) {
 void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
    
     // Load JSON data using Qt
-    QFile file(":gpu1.json");
+    QFile file("scripts/gpu1.json");
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open JSON file.");
         return;
