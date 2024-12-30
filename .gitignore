@@ -61,6 +61,7 @@ compile_commands.json
 /.qt
 /CMakeFiles
 CMakeCache.txt
+CMakeUserPresets.json
 CMakeScripts/ReRunCMake.make
 *.pbxproj
 *.xcsettings

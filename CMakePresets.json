@@ -1,82 +1,70 @@
 {
-    "version": 6,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 16,
-        "patch": 0
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 16,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+      }
     },
-    "configurePresets": [
+    {
+      "name": "release",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS": "-O3"
+      }
+    },
+    {
+      "name": "debug-clang",
+      "inherits": "debug",
+      "cacheVariables": {
+	"CMAKE_C_COMPILER": "/usr/bin/clang",
+	"CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+      }
+    },
+    {
+      "name": "Custom configure preset",
+      "displayName": "Custom configure preset",
+      "description": "Sets Ninja generator, build and install directory",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "jobs": 8
+    },
+    {
+      "name": "release",
+      "jobs": 8
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "dist",
+      "steps": [
         {
-            "name": "debug",
-            "binaryDir": "${sourceDir}/build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
-            }
+          "type": "configure",
+          "name": "release"
         },
         {
-            "name": "release",
-            "binaryDir": "${sourceDir}/build-release",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_FLAGS": "-O3"
-            }
-        },
-        {
-            "name": "Custom configure preset",
-            "displayName": "Custom configure preset",
-            "description": "Sets Ninja generator, build and install directory",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
-            }
+          "type": "build",
+          "name": "default"
         }
-    ],
-    "buildPresets": [
-        {
-            "name": "default",
-            "hidden": true,
-            "jobs": 8
-        },
-        {
-            "name": "debug",
-            "inherits": "default",
-            "configurePreset": "debug"
-        },
-        {
-            "name": "release",
-            "inherits": "default",
-            "configurePreset": "release"
-        }
-    ],
-    "workflowPresets": [
-        {
-            "name": "debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "debug"
-                },
-                {
-                    "type": "build",
-                    "name": "debug"
-                }
-            ]
-        },
-        {
-            "name": "release",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "release"
-                },
-                {
-                    "type": "build",
-                    "name": "release"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }

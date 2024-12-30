@@ -7,6 +7,8 @@
 #include <functional>
 #include <optional>
 
+#include <cstdint>
+
 #include <string>
 #include <vector>
 #include <map>
@@ -17,5 +19,6 @@
 
 #include <sstream>
 #include <ostream>
+#include <iomanip>
 
 #endif

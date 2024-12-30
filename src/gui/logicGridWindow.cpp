@@ -1,8 +1,5 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
-#include <sstream>
-#include <iomanip>
-#include <iostream>
 
 #include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
