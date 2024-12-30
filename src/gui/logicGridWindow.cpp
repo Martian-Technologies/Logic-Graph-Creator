@@ -114,7 +114,7 @@ bool LogicGridWindow::event(QEvent* event) {
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
-    
+
     blockContainerView.getRenderer().render(painter);
 
     // rolling average for frame time
@@ -124,7 +124,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
         pastFrameTimes.pop_front();
     }
     float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
-    
+
     // avg frame
     std::stringstream stream1;
     stream1 << std::fixed << std::setprecision(3) << average;
@@ -154,7 +154,7 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 
     if (!numPixels.isNull()) {
         if (mouseControls) {
-            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y())/200.f))) event->accept();
+            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
         } else {
             if (blockContainerView.getEventRegister().doEvent(DeltaXYEvent(
                 "view pan",

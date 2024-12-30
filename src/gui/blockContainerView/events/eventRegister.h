@@ -20,7 +20,7 @@ public:
 
     EventRegistrationSignature registerFunction(const std::string& eventName, EventFunction function) {
         auto sigCounter = getNewRegistrationSignature();
-        allEventFunctions[eventName].push_back({sigCounter, function});
+        allEventFunctions[eventName].push_back({ sigCounter, function });
         return sigCounter;
     }
 
@@ -47,7 +47,7 @@ public:
     }
 private:
     EventRegistrationSignature sigCounter;
-    inline EventRegistrationSignature getNewRegistrationSignature() {return ++sigCounter;}
+    inline EventRegistrationSignature getNewRegistrationSignature() { return ++sigCounter; }
 
     std::map<std::string, std::vector<RegistrationPair>> allEventFunctions;
 };

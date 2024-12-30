@@ -53,7 +53,7 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
                 getBlockHeight(block->type(), rotation)
             )
         )
-    ) return false;
+        ) return false;
     removeBlockCells(block);
     block->setPosition(position);
     block->setRotation(rotation);
@@ -112,7 +112,7 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
                 getBlockHeight(block->type(), rotation)
             )
         )
-    ) return false;
+        ) return false;
     removeBlockCells(block);
     block->setPosition(position);
     block->setRotation(rotation);

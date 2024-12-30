@@ -21,8 +21,7 @@ void Evaluator::setPause(bool pause) {
     paused = pause;
     if (pause) {
         logicSimulator.signalToPause();
-    }
-    else {
+    } else {
         logicSimulator.signalToProceed();
     }
 }
@@ -57,7 +56,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
     for (const auto& modification : modifications) {
         const auto& [modificationType, modificationData] = modification;
         switch (modificationType) {
-        case Difference::REMOVED_BLOCK: {
+        case Difference::REMOVED_BLOCK:
+        {
             deletedBlocks = true;
             const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
             const auto address = Address(position);
@@ -66,7 +66,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             addressTree.removeValue(address);
             break;
         }
-        case Difference::PLACE_BLOCK: {
+        case Difference::PLACE_BLOCK:
+        {
             const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
             const auto address = Address(position);
             const GateType gateType = blockContainerToEvaluatorGatetype(blockType);
@@ -74,7 +75,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             addressTree.addValue(address, blockId);
             break;
         }
-        case Difference::REMOVED_CONNECTION: {
+        case Difference::REMOVED_CONNECTION:
+        {
             const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
             const auto outputAddress = Address(outputPosition);
             const auto inputAddress = Address(inputPosition);
@@ -83,7 +85,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             logicSimulator.disconnectGates(outputBlockId, inputBlockId);
             break;
         }
-        case Difference::CREATED_CONNECTION: {
+        case Difference::CREATED_CONNECTION:
+        {
             const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
             const auto outputAddress = Address(outputPosition);
             const auto inputAddress = Address(inputPosition);

@@ -183,8 +183,7 @@ void LogicSimulator::propagatePowered() {
             for (int output : gateOutputs[i]) {
                 ++gateInputCountPowered[output];
             }
-        }
-        else if (!nextState.at(i) && currentState.at(i)) {
+        } else if (!nextState.at(i) && currentState.at(i)) {
             for (int output : gateOutputs[i]) {
                 --gateInputCountPowered[output];
             }
@@ -217,8 +216,7 @@ void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
             for (int output : gateOutputs[gate]) {
                 ++gateInputCountPowered[output];
             }
-        }
-        else {
+        } else {
             for (int output : gateOutputs[gate]) {
                 --gateInputCountPowered[output];
             }
@@ -277,8 +275,7 @@ void LogicSimulator::debugPrint() {
         for (auto outputs : gateOutputs) {
             if (i < outputs.size()) {
                 std::cout << outputs[i] << " ";
-            }
-            else {
+            } else {
                 std::cout << "  ";
             }
         }

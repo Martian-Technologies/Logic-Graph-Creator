@@ -59,7 +59,7 @@ private:
     QTimer* updateLoopTimer;
     const float updateInterval = 0.0001f;
     void updateLoop();
-    
+
     std::list<float> pastFrameTimes;
     const int numTimesInAverage = 20;
 

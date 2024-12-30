@@ -13,10 +13,10 @@ class ConnectionContainer {
 public:
     ConnectionContainer(BlockType blockType);
 
-    BlockType getBlockType() const {return blockType;}
+    BlockType getBlockType() const { return blockType; }
 
-    inline connection_end_id_t getMaxConnectionId() const {return connections.size()-1;}
-    
+    inline connection_end_id_t getMaxConnectionId() const { return connections.size() - 1; }
+
     inline const std::vector<ConnectionEnd>& getConnections(connection_end_id_t thisEndId) const {
         if (thisEndId > getMaxConnectionId()) return getEmptyVector<ConnectionEnd>(); return connections[thisEndId];
     }

@@ -52,7 +52,7 @@ void QtRenderer::updateView(ViewManager* viewManager) {
 }
 
 void QtRenderer::updateBlockContainer(DifferenceSharedPtr diff) {
-    
+
 }
 
 void QtRenderer::render(QPainter* painter) {
@@ -74,7 +74,7 @@ void QtRenderer::render(QPainter* painter) {
 
         Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, false);
         Vec2Int tileSize = tileSetInfo->getCellPixelSize();
-        
+
         QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
             QSizeF(tileSize.x, tileSize.y));
 
@@ -93,7 +93,7 @@ void QtRenderer::render(QPainter* painter) {
             blocks.push_back(&(block.second));
         }
         std::vector<logic_state_t> blockStates = evaluator->getBulkStates(blockAddresses);
-        
+
         // get bounds
         Position topLeftBound = viewManager->getTopLeft().snap();
         Position bottomRightBound = viewManager->getBottomRight().snap();
@@ -107,12 +107,12 @@ void QtRenderer::render(QPainter* painter) {
         }
 
         // render blocks
-        for (unsigned int i = 0; i < blocks.size(); i++) { 
+        for (unsigned int i = 0; i < blocks.size(); i++) {
             if (blocks[i]->getPosition().withinArea(topLeftBound, bottomRightBound) || blocks[i]->getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
                 renderBlock(painter, blocks[i]->type(), blocks[i]->getPosition(), blocks[i]->getRotation(), blockStates[i]);
             }
         }
-            
+
         // render block previews
         painter->setOpacity(0.4f);
         for (const auto& preview : blockPreviews) {
@@ -124,7 +124,7 @@ void QtRenderer::render(QPainter* painter) {
         // render connections
         std::vector<QLineF> connectionLinesOff;
         std::vector<QLineF> connectionLinesOn;
-        for (unsigned int i = 0; i < blocks.size(); i++) { 
+        for (unsigned int i = 0; i < blocks.size(); i++) {
             if (connectionLinesOff.size() + connectionLinesOn.size() >= lineRendingLimit) break;
             bool state = blockStates[i];
             for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
@@ -132,7 +132,7 @@ void QtRenderer::render(QPainter* painter) {
                 if (blocks[i]->isConnectionInput(id)) continue;
 
                 Position pos = blocks[i]->getConnectionPosition(id).first;
-                for (auto connectionIter :blocks[i]->getConnectionContainer().getConnections(id)) {
+                for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
                     renderConnection(painter, pos, blocks[i], otherPos, other, state ? connectionLinesOn : connectionLinesOff);
@@ -140,13 +140,11 @@ void QtRenderer::render(QPainter* painter) {
             }
         }
         // render connection previews
-        for (const auto& preview : connectionPreviews)
-        {
+        for (const auto& preview : connectionPreviews) {
             renderConnection(painter, preview.second.input, preview.second.output, connectionLinesOff);
         }
         // render half connection previews
-        for (const auto& preview : halfConnectionPreviews)
-        {
+        for (const auto& preview : halfConnectionPreviews) {
             renderConnection(painter, preview.second.input, preview.second.output, connectionLinesOff);
         }
         painter->save();
@@ -178,7 +176,7 @@ void QtRenderer::render(QPainter* painter) {
             }
             blocks.push_back(&(block.second));
         }
-            
+
         // render block previews
         painter->setOpacity(0.4f);
         for (const auto& preview : blockPreviews) {
@@ -189,7 +187,7 @@ void QtRenderer::render(QPainter* painter) {
 
         // render connections
         std::vector<QLineF> connectionLines;
-         for (unsigned int i = 0; i < blocks.size(); i++) {
+        for (unsigned int i = 0; i < blocks.size(); i++) {
             if (connectionLines.size() >= lineRendingLimit) break;
             for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
                 // continue if input, we only want outputs
@@ -204,13 +202,11 @@ void QtRenderer::render(QPainter* painter) {
             }
         }
         // render connection previews
-        for (const auto& preview : connectionPreviews)
-        {
+        for (const auto& preview : connectionPreviews) {
             renderConnection(painter, preview.second.input, preview.second.output, connectionLines);
         }
         // render half connection previews
-        for (const auto& preview : halfConnectionPreviews)
-        {
+        for (const auto& preview : halfConnectionPreviews) {
             renderConnection(painter, preview.second.input, preview.second.output, connectionLines);
         }
         painter->save();
@@ -259,9 +255,9 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     // get tile set coordinate
     Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, state);
     Vec2Int tileSize = tileSetInfo->getCellPixelSize();
-        
+
     QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
-                       QSizeF(tileSize.x, tileSize.y));
+        QSizeF(tileSize.x, tileSize.y));
 
     // rotate and position painter to center of block
     painter->translate(center);
@@ -281,7 +277,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, std::vector<QLineF>& lines) {
     QPointF start = gridToQt(aPos);
     QPointF end = gridToQt(bPos);
-    
+
 
     // QPointF c1 = gridToQt(aPos + aControlOffset);
     // QPointF c2 = gridToQt(bPos + bControlOffset);
@@ -300,7 +296,7 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block*
     FPosition centerOffset(0.5f, 0.5f);
     FPosition aSocketOffset(0.0f, 0.0f);
     FPosition bSocketOffset(0.0f, 0.0f);
-    
+
     if (a) {
         switch (a->getRotation()) {
         case Rotation::ZERO: aSocketOffset = { 0.5f, 0.0f }; break;
@@ -330,12 +326,12 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPo
     // Socket offsets will be retrieved data later, this code will go
     const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
     const Block* b = blockContainer->getBlockContainer()->getBlock(bPos);
-    
+
     if (a) {
         if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
         if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
         if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
     }
 
     if (b) {
@@ -354,12 +350,12 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bP
 
     // Socket offsets will be retrieved data later, this code will go
     const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
-    
+
     if (a) {
         if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
         if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
         if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };        
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
     }
 
     renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), lines);
@@ -435,7 +431,7 @@ void QtRenderer::removeConnectionPreview(ElementID connectionPreview) {
 ElementID QtRenderer::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
     ElementID newID = currentID++;
 
-    halfConnectionPreviews[newID] = {halfConnectionPreview.input, halfConnectionPreview.output};
+    halfConnectionPreviews[newID] = { halfConnectionPreview.input, halfConnectionPreview.output };
 
     return newID;
 }
