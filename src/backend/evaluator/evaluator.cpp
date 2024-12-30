@@ -1,4 +1,5 @@
 #include <functional>
+#include <iostream>
 
 #include "evaluator.h"
 
@@ -143,6 +144,9 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 void Evaluator::setState(const Address& address, logic_state_t state) {
     const block_id_t blockId = addressTree.getValue(address);
     logicSimulator.signalToPause();
+    while (!logicSimulator.threadIsWaiting()) {
+        std::this_thread::yield();
+    }
     logicSimulator.setState(blockId, state);
     if (!paused) {
         logicSimulator.signalToProceed();

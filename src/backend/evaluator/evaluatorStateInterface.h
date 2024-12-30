@@ -9,7 +9,7 @@ public:
     EvaluatorStateInterface(Evaluator* evaluator) : evaluator(evaluator) { assert(evaluator); }
     
     inline logic_state_t getState(const Address& address) {
-        if (evaluator) evaluator->getState(address); return false;
+        if (evaluator) return evaluator->getState(address); return false;
     }
     inline void setState(const Address& address, logic_state_t state) {
         if (evaluator) evaluator->setState(address, state);

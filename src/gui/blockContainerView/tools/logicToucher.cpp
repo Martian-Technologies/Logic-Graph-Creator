@@ -7,14 +7,19 @@ bool LogicToucher::press(const Event* event) {
     if (!blockContainer || !evaluatorStateInterface) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
-    
+
     if (clicked) {
         return false;
-    } else {
+    }
+    else {
         clickPosition = positionEvent->getPosition();
         const Block* block = blockContainer->getBlockContainer()->getBlock(clickPosition);
         if (block) {
-            evaluatorStateInterface->setState(Address(clickPosition), true);
+            bool stateToSet = true;
+            if (block->type() == BlockType::SWITCH) {
+                stateToSet = !evaluatorStateInterface->getState(Address(clickPosition));
+            }
+            evaluatorStateInterface->setState(Address(clickPosition), stateToSet);
             // std::cout << "press " << positionEvent->getPosition().toString() << std::endl;
         }
         clicked = true;
@@ -40,7 +45,7 @@ bool LogicToucher::pointerMove(const Event* event) {
     if (!blockContainer || !evaluatorStateInterface) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
-    
+
     if (clicked && positionEvent->getPosition() != clickPosition) {
         const Block* block = blockContainer->getBlockContainer()->getBlock(clickPosition);
         if (block && block->type() == BlockType::BUTTON) {
@@ -55,6 +60,6 @@ bool LogicToucher::pointerMove(const Event* event) {
         }
         return true;
     }
-    
+
     return false;
 }

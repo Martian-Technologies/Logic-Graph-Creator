@@ -203,16 +203,28 @@ void LogicSimulator::computeNextState() {
             continue;
         }
 
-        nextState[gate] = computeGateState(gateTypes[gate], gateInputCountPowered[gate], gateInputCountTotal[gate], nextState[gate]);
+        nextState[gate] = computeGateState(gateTypes[gate], gateInputCountPowered[gate], gateInputCountTotal[gate], currentState[gate]);
     }
 }
 
 void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
     if (gate < 0 || gate >= currentState.size())
         throw std::out_of_range("setState: gate index out of range");
-
+    currentState[gate] = state;
     if (state != nextState[gate]) {
         nextState[gate] = state;
+        if (state) {
+            for (int output : gateOutputs[gate]) {
+                std::cout << "Incrementing " << output << std::endl;
+                ++gateInputCountPowered[output];
+            }
+        }
+        else {
+            for (int output : gateOutputs[gate]) {
+                std::cout << "Decrementing " << output << std::endl;
+                --gateInputCountPowered[output];
+            }
+        }
     }
 }
 
@@ -284,6 +296,14 @@ void LogicSimulator::debugPrint() {
     for (auto inputCount : gateInputCountPowered) {
         std::cout << inputCount << " ";
     }
+    std::cout << "\nC State:   ";
+    for (auto state : currentState) {
+        std::cout << state << " ";
+    }
+    std::cout << "\nN State:   ";
+    for (auto state : nextState) {
+        std::cout << state << " ";
+    }
     std::cout << "\n" << std::endl;
 }
 
@@ -302,6 +322,7 @@ void LogicSimulator::simulationLoop() {
             }
             std::this_thread::yield();
         }
+
         if (waiting) {
             isWaiting.store(false, std::memory_order_release);
         }
