@@ -13,6 +13,7 @@ BlockType strToType(QString str) {
     else if (str == "nor") return BlockType::NOR;
     else if (str == "xnor") return BlockType::XNOR;
     else if (str == "switch") return BlockType::SWITCH;
+    return BlockType::NONE;
 }
 
 void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
