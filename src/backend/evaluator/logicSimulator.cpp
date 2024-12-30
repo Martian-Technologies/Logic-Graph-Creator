@@ -215,13 +215,11 @@ void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
         nextState[gate] = state;
         if (state) {
             for (int output : gateOutputs[gate]) {
-                std::cout << "Incrementing " << output << std::endl;
                 ++gateInputCountPowered[output];
             }
         }
         else {
             for (int output : gateOutputs[gate]) {
-                std::cout << "Decrementing " << output << std::endl;
                 --gateInputCountPowered[output];
             }
         }
