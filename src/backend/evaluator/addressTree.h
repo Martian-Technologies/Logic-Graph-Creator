@@ -88,13 +88,13 @@ AddressTreeNode<T> AddressTreeNode<T>::getBranch(const Address& address) const {
 
 template<class T>
 void AddressTreeNode<T>::remap(const std::unordered_map<T, T>& mapping) {
-    for (auto& [key, value] : values) {
+    for (auto& [position, value] : values) {
         auto it = mapping.find(value);
         if (it != mapping.end()) {
             value = it->second;
         }
     }
-    for (auto& [key, branch] : branches) {
+    for (auto& [position, branch] : branches) {
         branch.remap(mapping);
     }
 }

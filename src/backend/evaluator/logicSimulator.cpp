@@ -82,7 +82,7 @@ void LogicSimulator::connectGates(block_id_t gate1, block_id_t gate2) {
     gateOutputs[gate1].push_back(gate2);
     gateInputs[gate2].push_back(gate1);
     ++gateInputCountTotal[gate2];
-    if (currentState[gate1]) {
+    if (nextState[gate1]) {
         ++gateInputCountPowered[gate2];
     }
 }
@@ -108,13 +108,12 @@ void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
     }
 
     --gateInputCountTotal[gate2];
-    if (currentState[gate1]) {
+    if (nextState[gate1]) {
         --gateInputCountPowered[gate2];
     }
 }
 
 void LogicSimulator::decomissionGate(block_id_t gate) {
-    // disconnect gate from everything
     const auto inputs = gateInputs[gate];
     for (auto input : inputs) {
         disconnectGates(input, gate);
@@ -153,6 +152,7 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
         gateOutputs[newGateIndex] = gateOutputs[i];
         gateInputCountTotal[newGateIndex] = gateInputCountTotal[i];
         gateInputCountPowered[newGateIndex] = gateInputCountPowered[i];
+
     }
 
     currentState.resize(newGateIndex);
@@ -179,12 +179,12 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
 
 void LogicSimulator::propagatePowered() {
     for (int i = 0; i < currentState.size(); ++i) {
-        if (nextState[i] && !currentState[i]) {
+        if (nextState.at(i) && !currentState.at(i)) {
             for (int output : gateOutputs[i]) {
                 ++gateInputCountPowered[output];
             }
         }
-        else if (!nextState[i] && currentState[i]) {
+        else if (!nextState.at(i) && currentState.at(i)) {
             for (int output : gateOutputs[i]) {
                 --gateInputCountPowered[output];
             }
@@ -272,9 +272,19 @@ void LogicSimulator::debugPrint() {
                 std::cout << "  ";
             }
         }
-        std::cout << "\n";
+        if (i != maxOutputs - 1) {
+            std::cout << "\n";
+        }
     }
-    std::cout << std::endl;
+    std::cout << "\nInputCnt:  ";
+    for (auto inputCount : gateInputCountTotal) {
+        std::cout << inputCount << " ";
+    }
+    std::cout << "\nPowered:   ";
+    for (auto inputCount : gateInputCountPowered) {
+        std::cout << inputCount << " ";
+    }
+    std::cout << "\n" << std::endl;
 }
 
 void LogicSimulator::simulationLoop() {
@@ -285,7 +295,7 @@ void LogicSimulator::simulationLoop() {
 
         bool waiting = false;
 
-        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire)) {
+        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire) || !waiting) {
             if (!waiting) {
                 isWaiting.store(true, std::memory_order_release);
                 waiting = true;
@@ -319,6 +329,7 @@ void LogicSimulator::tickrateMonitor() {
     while (running.load(std::memory_order_acquire)) {
         const long long int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
         realTickrate.store(ticks, std::memory_order_release);
+        // std::cout << "Tickrate: " << ticks << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
