@@ -25,7 +25,7 @@ public:
     void setEvaluator(Evaluator* evaluator) override;
 
     void updateView(ViewManager* viewManager) override;
-    // virtual void updateBlockContainer(Difference diff) override;
+    virtual void updateBlockContainer(DifferenceSharedPtr diff) override;
 
     inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 

@@ -56,7 +56,7 @@ elseif (WIN32) # Windows specific (After add_executable)
 endif()
 
 # Add resources
-qt_add_resources(${PROJECT_NAME} "images"
+qt_add_resources(${PROJECT_NAME} "mainResources"
         PREFIX
         "/"
         FILES

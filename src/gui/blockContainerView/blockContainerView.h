@@ -28,14 +28,21 @@ public:
     }
 
     inline void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper) {
+        if (this->blockContainerWrapper) this->blockContainerWrapper->disconnectListener(this);
+        
         this->blockContainerWrapper = blockContainerWrapper;
         toolManager.setBlockContainer(blockContainerWrapper.get());
         renderer.setBlockContainer(blockContainerWrapper.get());
+        blockContainerWrapper->connectListener(this, std::bind(&BlockContainerView<RENDERER_TYPE>::blockContainerChanged, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     void viewChanged() {
         renderer.updateView(&viewManager);
         eventRegister.doEvent(PositionEvent("pointer move", viewManager.getPointerPosition()));
+    }
+
+    void blockContainerChanged(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
+        renderer.updateBlockContainer(difference);
     }
 
     // --------------- Gettters ---------------

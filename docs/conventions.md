@@ -24,3 +24,5 @@ Case Sensitive Includes
 ### Class Declaration Order
 
 ### Assertions and Returning "Failed"
+
+### Types and Sizes

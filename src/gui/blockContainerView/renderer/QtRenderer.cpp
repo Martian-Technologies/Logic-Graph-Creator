@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include <algorithm>
 #include <memory>
 #include <set>
 
@@ -50,6 +49,10 @@ void QtRenderer::setEvaluator(Evaluator* evaluator) {
 
 void QtRenderer::updateView(ViewManager* viewManager) {
     this->viewManager = viewManager;
+}
+
+void QtRenderer::updateBlockContainer(DifferenceSharedPtr diff) {
+    
 }
 
 void QtRenderer::render(QPainter* painter) {
