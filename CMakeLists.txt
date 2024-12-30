@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(LogicGraphCreator)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
