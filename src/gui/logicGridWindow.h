@@ -7,6 +7,8 @@
 #include <QKeyEvent>
 #include <QPainter>
 #include <QWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 #include <QTimer>
 
 #include <cstdint>
@@ -16,7 +18,7 @@
 #include "blockContainerView/renderer/QtRenderer.h"
 #include "util/vec2.h"
 
-class LogicGridWindow : public QWidget {
+class LogicGridWindow : public QOpenGLWidget, public QOpenGLFunctions {
     Q_OBJECT
 public:
     LogicGridWindow(QWidget* parent = nullptr);
@@ -42,7 +44,11 @@ public:
 
 protected:
     // events
-    void paintEvent(QPaintEvent* event) override;
+    void paintGL() override;
+
+    void initializeGL() override;
+    void resizeGL(int w, int h) override { glViewport(0, 0, w, h); }
+    // void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
@@ -59,7 +65,7 @@ private:
     QTimer* updateLoopTimer;
     const float updateInterval = 0.016f;
     void updateLoop();
-    
+
     std::list<float> pastFrameTimes;
     const int numTimesInAverage = 60;
 
