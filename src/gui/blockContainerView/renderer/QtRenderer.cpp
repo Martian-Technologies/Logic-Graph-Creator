@@ -12,8 +12,8 @@
 #include "backend/position/position.h"
 #include "backend/defs.h"
 #include "gui/blockContainerView/renderer/renderer.h"
-#include "util/vec2.h"
 #include "backend/address.h"
+#include "util/vec2.h"
 
 QtRenderer::QtRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {

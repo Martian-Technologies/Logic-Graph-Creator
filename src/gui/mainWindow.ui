@@ -224,6 +224,16 @@
             <string>Selection</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Other</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>State Changer</string>
+            </property>
+           </item>
+          </item>
          </item>
         </widget>
        </item>

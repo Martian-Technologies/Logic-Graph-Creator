@@ -12,7 +12,7 @@ class LogicGridWindow;
 
 class BaseBlockPlacementTool : public BlockContainerTool {
 public:
-    inline BaseBlockPlacementTool(BlockContainerWrapper* blockContainer = nullptr) : BlockContainerTool(blockContainer), selectedBlock(NONE), rotation(ZERO) {}
+    inline BaseBlockPlacementTool() : BlockContainerTool(), selectedBlock(NONE), rotation(ZERO) {}
     virtual ~BaseBlockPlacementTool() {}
 
     // This will also tell the tool to reset.

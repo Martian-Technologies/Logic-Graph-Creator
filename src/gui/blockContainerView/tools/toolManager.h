@@ -5,11 +5,13 @@
 #include <string>
 #include <vector>
 
+#include "backend/evaluator/evaluatorStateInterface.h"
 #include "toolManagerEventRegister.h"
 #include "../events/eventRegister.h"
 #include "baseBlockPlacementTool.h"
 #include "../renderer/renderer.h"
 #include "blockContainerTool.h"
+#include "logicToucher.h"
 #include "singleConnectTool.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
@@ -27,19 +29,21 @@ public:
     inline void changeTool(const std::string& toolType) {
         if (this->toolType == toolType) return;
         unregisterEvents();
-        if (toolType == "Single Place") tool = std::make_unique<SinglePlaceTool>(blockContainerWrapper);
-        else if (toolType == "Area Place") tool = std::make_unique<AreaPlaceTool>(blockContainerWrapper);
-        else if (toolType == "Simple") tool = std::make_unique<SingleConnectTool>(blockContainerWrapper);
-        else tool = nullptr;
+        bool noChange = false;
+        if (toolType == "Single Place") tool = std::make_unique<SinglePlaceTool>();
+        else if (toolType == "Area Place") tool = std::make_unique<AreaPlaceTool>();
+        else if (toolType == "Simple") tool = std::make_unique<SingleConnectTool>();
+        else if (toolType == "State Changer") tool = std::make_unique<LogicToucher>();
+        else noChange = true;
 
-        if (tool) {
+        if (!noChange) {
+            tool->setEvaluatorStateInterface(evaluatorStateInterface);
+            tool->setBlockContainer(blockContainerWrapper);
             tool->setElementCreator(ElementCreator(renderer));
             tool->initialize(toolManagerEventRegister);
             BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
             if (placementTool) placementTool->selectBlock(selectedBlock);
             this->toolType = toolType;
-        } else {
-            this->toolType = "NONE";
         }
     }
 
@@ -47,6 +51,12 @@ public:
         this->blockContainerWrapper = blockContainerWrapper;
         if (tool) tool->setBlockContainer(blockContainerWrapper);
     }
+
+    inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { 
+        this->evaluatorStateInterface = evaluatorStateInterface;
+        if (tool) tool->setEvaluatorStateInterface(evaluatorStateInterface);
+    }
+
     inline void selectBlock(BlockType selectedBlock) {
         this->selectedBlock = selectedBlock;
         if (tool) {
@@ -76,6 +86,7 @@ private:
     std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;
 
     Renderer* renderer;
+    EvaluatorStateInterface* evaluatorStateInterface;
 
     // which tool data
     std::unique_ptr<BlockContainerTool> tool;
