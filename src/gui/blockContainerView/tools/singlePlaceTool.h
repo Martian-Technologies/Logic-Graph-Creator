@@ -5,8 +5,7 @@
 
 class SinglePlaceTool : public BaseBlockPlacementTool {
 public:
-    inline SinglePlaceTool(BlockContainerWrapper* blockContainer = nullptr) :
-        BaseBlockPlacementTool(blockContainer), clicks{'n', 'n'} {}
+    inline SinglePlaceTool() : BaseBlockPlacementTool(), clicks{'n', 'n'} {}
 
     inline void reset() override final {memset(clicks, 'n', 2);}
 
