@@ -3,6 +3,13 @@ project(LogicGraphCreator)
 
 # Options
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# hack to avoid DNDEBUG which removes wires for some reason
+if (MSVC)
+  # also do it for MSVC, not sure if needed
+  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+else()
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
