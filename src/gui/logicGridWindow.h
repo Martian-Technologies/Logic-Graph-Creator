@@ -57,8 +57,11 @@ protected:
 private:
     // update loop
     QTimer* updateLoopTimer;
-    float updateInterval = 0.016f;
+    const float updateInterval = 0.016f;
     void updateLoop();
+    
+    std::list<float> pastFrameTimes;
+    const int numTimesInAverage = 60;
 
     // data
     BlockContainerView<QtRenderer> blockContainerView;
@@ -66,9 +69,6 @@ private:
 
     // ui elements
     QTreeWidget* treeWidget;
-
-    // debug
-    uint64_t lastFrameTime = 0;
 };
 
 #endif /* logicGridWindow_h */

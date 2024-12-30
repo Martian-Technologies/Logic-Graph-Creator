@@ -1,6 +1,7 @@
 #include <QPainterPath>
 #include <QDateTime>
 #include <QDebug>
+#include <QElapsedTimer>
 
 #include <algorithm>
 #include <memory>
@@ -56,9 +57,12 @@ void QtRenderer::render(QPainter* painter) {
     assert(viewManager);
     if (tileSet.isNull() || tileSetInfo == nullptr) {
         painter->drawText(QRect(0, 0, w, h), Qt::AlignCenter, "No tileSet found");
-        qDebug() << "ERROR: QTRenderer has no tileSet, cnanot proceed with render.";
+        qDebug() << "ERROR: QTRenderer has no tileSet, can not proceed with render.";
         return;
     }
+
+    QElapsedTimer timer;
+    timer.start();
 
     // render lambdas ---
     auto renderCell = [&](FPosition position, BlockType type) -> void {
@@ -173,6 +177,8 @@ void QtRenderer::render(QPainter* painter) {
         painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
     }
     painter->restore();
+
+    lastFrameTime = timer.nsecsElapsed() / 1e6f;
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {

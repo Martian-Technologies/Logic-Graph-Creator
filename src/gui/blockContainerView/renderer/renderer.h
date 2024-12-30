@@ -68,10 +68,11 @@ public:
     // main flow
     virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
     virtual void setEvaluator(Evaluator* evaluator) = 0;
-    // virtual void setSimulator(Simulator* simulator) = 0;
 
     virtual void updateView(ViewManager* viewManager) = 0;
     // virtual void updateBlockContainer(Difference diff) = 0;
+
+    virtual float getLastFrameTimeMs() const = 0;
 
 private:
     // elements

@@ -1,5 +1,7 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
+#include <sstream>
+#include <iomanip>
 
 #include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
@@ -111,14 +113,22 @@ bool LogicGridWindow::event(QEvent* event) {
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
+    
     blockContainerView.getRenderer().render(painter);
 
-    uint64_t currentTime = QDateTime::currentMSecsSinceEpoch();
-    if (lastFrameTime != 0) {
-        std::string frameTime = std::to_string(currentTime - lastFrameTime) + "ms";
-        painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTime.c_str()));
+    // rolling average for frame time
+    pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
+    int numPops = pastFrameTimes.size() - numTimesInAverage;
+    for (int i = 0; i < numPops; ++i) {
+        pastFrameTimes.pop_front();
     }
-    lastFrameTime = currentTime;
+    float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(3) << average;
+    std::string frameTimeStr = "avg frame: " + stream.str() + "ms";
+
+    // draw average from time
+    painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
 
     delete painter;
 }

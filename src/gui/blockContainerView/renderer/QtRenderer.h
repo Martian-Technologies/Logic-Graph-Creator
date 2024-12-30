@@ -22,10 +22,11 @@ public:
     // updating
     void setBlockContainer(BlockContainerWrapper* blockContainer) override;
     void setEvaluator(Evaluator* evaluator) override;
-    // virtual void setSimulator(Simulator* simulator) override;
 
     void updateView(ViewManager* viewManager) override;
     // virtual void updateBlockContainer(Difference diff) override;
+
+    inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 
 private:
     // elements
@@ -66,6 +67,9 @@ private:
     std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
     std::unordered_map<ElementID, HalfConnectionPreview> halfConnectionPreviews;
+
+    // info
+    float lastFrameTime = 0.0f;
 };
 
 #endif /* QTRenderer_h */
