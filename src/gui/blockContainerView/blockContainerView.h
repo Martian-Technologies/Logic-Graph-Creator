@@ -4,8 +4,8 @@
 #include <type_traits>
 #include <memory>
 
-#include "middleEnd/blockContainerWrapper.h"
 #include "backend/evaluator/evaluatorStateInterface.h"
+#include "middleEnd/blockContainerWrapper.h"
 #include "backend/evaluator/evaluator.h"
 #include "events/eventRegister.h"
 #include "tools/toolManager.h"
@@ -42,6 +42,9 @@ public:
 
     inline BlockContainerWrapper* getBlockContainer() { return blockContainerWrapper.get(); }
     inline const BlockContainerWrapper* getBlockContainer() const { return blockContainerWrapper.get(); }
+
+    inline EvaluatorStateInterface& getEvaluator() { return evaluatorStateInterface; }
+    inline const EvaluatorStateInterface& getEvaluatorStateInterface() const { return evaluatorStateInterface; }
 
     inline EventRegister& getEventRegister() { return eventRegister; }
     inline const EventRegister& getEventRegister() const { return eventRegister; }

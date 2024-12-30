@@ -18,6 +18,7 @@ public:
     void setPause(bool pause);
     void reset();
     void setTickrate(unsigned long long tickrate);
+    long long int getRealTickrate() const;
     void runNTicks(unsigned long long n);
     void makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId);
     logic_state_t getState(const Address& address);

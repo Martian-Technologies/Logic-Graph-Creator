@@ -1,6 +1,7 @@
 #ifndef QTRenderer_h
 #define QTRenderer_h
 
+#include <QLineF>
 #include <memory>
 #include <unordered_map>
 #include <QPainter>
@@ -9,7 +10,7 @@
 #include "backend/defs.h"
 #include "renderer.h"
 #include "tileSet.h"
-    
+
 class QtRenderer : public Renderer {
 public:
     QtRenderer();
@@ -32,27 +33,27 @@ private:
     // elements
     ElementID addSelectionElement(const SelectionElement& selection) override;
     void removeSelectionElement(ElementID selection) override;
-    
+
     ElementID addBlockPreview(const BlockPreview& blockPreview) override;
     void removeBlockPreview(ElementID blockPreview) override;
-    
+
     ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override;
     void removeConnectionPreview(ElementID connectionPreview) override;
 
     ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override;
     void removeHalfConnectionPreview(ElementID halfConnectionPreview) override;
-    
+
     void spawnConfetti(FPosition start) override;
 
 private:
     QPointF gridToQt(FPosition position);
-    
+
     void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);
-    void setUpConnectionPainter(QPainter* painter);
-    void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state = false);
-    void renderConnection(QPainter* painter, Position aPos, Position bPos, bool state = false);
-    void renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state = false);
-    
+    void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, std::vector<QLineF>& lines);
+    void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, std::vector<QLineF>& lines);
+    void renderConnection(QPainter* painter, Position aPos, Position bPos, std::vector<QLineF>& lines);
+    void renderConnection(QPainter* painter, Position aPos, FPosition bPos, std::vector<QLineF>& lines);
+
     int w, h;
     BlockContainerWrapper* blockContainer;
     Evaluator* evaluator;
@@ -67,6 +68,8 @@ private:
     std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
     std::unordered_map<ElementID, HalfConnectionPreview> halfConnectionPreviews;
+
+    unsigned int lineRendingLimit = 200000;
 
     // info
     float lastFrameTime = 0.0f;

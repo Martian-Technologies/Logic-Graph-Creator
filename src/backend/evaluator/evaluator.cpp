@@ -36,6 +36,11 @@ void Evaluator::setTickrate(unsigned long long tickrate) {
     targetTickrate = tickrate;
 }
 
+long long int Evaluator::getRealTickrate() const {
+    return paused ? 0 : logicSimulator.getRealTickrate();
+}
+
+
 void Evaluator::runNTicks(unsigned long long n) {
     // TODO: make this happen in the thread via leaky bucket
     logicSimulator.simulateNTicks(n);

@@ -57,11 +57,11 @@ protected:
 private:
     // update loop
     QTimer* updateLoopTimer;
-    const float updateInterval = 0.016f;
+    const float updateInterval = 0.0001f;
     void updateLoop();
     
     std::list<float> pastFrameTimes;
-    const int numTimesInAverage = 60;
+    const int numTimesInAverage = 20;
 
     // data
     BlockContainerView<QtRenderer> blockContainerView;

@@ -2,6 +2,7 @@
 #include <QGestureEvent>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 #include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
@@ -123,12 +124,18 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
         pastFrameTimes.pop_front();
     }
     float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(3) << average;
-    std::string frameTimeStr = "avg frame: " + stream.str() + "ms";
-
-    // draw average from time
+    
+    // avg frame
+    std::stringstream stream1;
+    stream1 << std::fixed << std::setprecision(3) << average;
+    std::string frameTimeStr = "avg frame: " + stream1.str() + "ms";
     painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
+
+    // tps
+    std::stringstream stream2;
+    stream2 << std::fixed << std::setprecision(3) << blockContainerView.getEvaluatorStateInterface().getRealTickrate();
+    std::string tpsStr = "tps: " + stream2.str();
+    painter->drawText(QRect(QPoint(0, 16), size()), Qt::AlignTop, QString(tpsStr.c_str()));
 
     delete painter;
 }

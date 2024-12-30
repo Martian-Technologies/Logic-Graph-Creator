@@ -3,6 +3,7 @@ project(LogicGraphCreator)
 
 # Settings and util
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -26,6 +27,7 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
+file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
 
 if(APPLE) # MacOS specific (Before add_executable)
     # Icon
@@ -59,5 +61,6 @@ qt_add_resources(${PROJECT_NAME} "images"
         "/"
         FILES
         ${IMG_SOURCES}
+        ${JSON_SOURCES}
         BASE ${RESOURCES_DIR}
 )
