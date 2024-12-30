@@ -5,8 +5,7 @@
 
 class SingleConnectTool : public BlockContainerTool {
 public:
-    inline SingleConnectTool(BlockContainerWrapper* blockContainer = nullptr) :
-        BlockContainerTool(blockContainer), clickPosition(), clicked(false) {}
+    inline SingleConnectTool() : BlockContainerTool(), clickPosition(), clicked(false) {}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BlockContainerTool::initialize(toolManagerEventRegister);

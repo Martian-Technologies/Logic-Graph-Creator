@@ -4,8 +4,9 @@
 #include <type_traits>
 #include <memory>
 
-#include "backend/evaluator/evaluator.h"
 #include "middleEnd/blockContainerWrapper.h"
+#include "backend/evaluator/evaluatorStateInterface.h"
+#include "backend/evaluator/evaluator.h"
 #include "events/eventRegister.h"
 #include "tools/toolManager.h"
 #include "renderer/renderer.h"
@@ -15,13 +16,15 @@ template <class RENDERER_TYPE>
 // typename std::enable_if<std::is_base_of<Renderer, RENDERER_TYPE>::value, void>::type // idk if we can get this working
 class BlockContainerView {
 public:
-    BlockContainerView() : blockContainerWrapper(), evaluator(), eventRegister(), viewManager(), renderer(), toolManager(&eventRegister, &renderer) {
+    BlockContainerView() : blockContainerWrapper(), evaluator(), evaluatorStateInterface(), eventRegister(), viewManager(), renderer(), toolManager(&eventRegister, &renderer) {
         viewManager.initialize(eventRegister);
         viewManager.connectViewChanged(std::bind(&BlockContainerView::viewChanged, this));
     }
 
     inline void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
         renderer.setEvaluator(evaluator.get());
+        evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
+        toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
     }
 
     inline void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper) {
@@ -55,6 +58,7 @@ public:
 private:
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper;
     std::shared_ptr<Evaluator> evaluator;
+    EvaluatorStateInterface evaluatorStateInterface;
     EventRegister eventRegister;
     ViewManager viewManager;
     RENDERER_TYPE renderer;

@@ -1,4 +1,5 @@
 #include <functional>
+#include <iostream>
 
 #include "evaluator.h"
 
@@ -47,10 +48,12 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
         std::this_thread::yield();
     }
     const auto modifications = difference->getModifications();
+    bool deletedBlocks = false;
     for (const auto& modification : modifications) {
         const auto& [modificationType, modificationData] = modification;
         switch (modificationType) {
         case Difference::REMOVED_BLOCK: {
+            deletedBlocks = true;
             const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
             const auto address = Address(position);
             const block_id_t blockId = addressTree.getValue(address);
@@ -87,6 +90,10 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
         default:
             throw std::invalid_argument("makeEdit: invalid modificationType");
         }
+    }
+    if (deletedBlocks) {
+        const auto gateMap = logicSimulator.compressGates();
+        addressTree.remap(gateMap);
     }
     if (!paused) {
         logicSimulator.signalToProceed();
@@ -137,6 +144,9 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 void Evaluator::setState(const Address& address, logic_state_t state) {
     const block_id_t blockId = addressTree.getValue(address);
     logicSimulator.signalToPause();
+    while (!logicSimulator.threadIsWaiting()) {
+        std::this_thread::yield();
+    }
     logicSimulator.setState(blockId, state);
     if (!paused) {
         logicSimulator.signalToProceed();

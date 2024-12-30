@@ -42,8 +42,9 @@ public:
     void signalToProceed();
     bool threadIsWaiting() const;
 
+    long long int getRealTickrate() const { return realTickrate.load(std::memory_order_acquire); }
+
 private:
-    int numGates;
     std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
     std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
@@ -51,12 +52,16 @@ private:
     int numDecomissioned;
 
     // shit for threading
+    std::thread tickrateMonitorThread;
     std::thread simulationThread;
     std::atomic<bool> running;
     std::atomic<bool> proceedFlag;
     std::atomic<bool> isWaiting;
+    std::atomic<int> ticksRun;
+    std::atomic<long long int> realTickrate;
 
     void simulationLoop();
+    void tickrateMonitor();
 };
 
 #endif // logicSimulator_h

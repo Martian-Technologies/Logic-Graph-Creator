@@ -5,8 +5,7 @@
 
 class AreaPlaceTool : public BaseBlockPlacementTool {
 public:
-    inline AreaPlaceTool(BlockContainerWrapper* blockContainer = nullptr) :
-        BaseBlockPlacementTool(blockContainer), clickPosition(), click('n') {}
+    inline AreaPlaceTool() : BaseBlockPlacementTool(), clickPosition(), click('n') {}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BaseBlockPlacementTool::initialize(toolManagerEventRegister);
