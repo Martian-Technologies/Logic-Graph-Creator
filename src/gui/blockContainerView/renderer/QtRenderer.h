@@ -2,8 +2,6 @@
 #define QTRenderer_h
 
 #include <QLineF>
-#include <memory>
-#include <unordered_map>
 #include <QPainter>
 
 #include "../viewManager/viewManager.h"

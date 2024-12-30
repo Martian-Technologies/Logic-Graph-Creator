@@ -1,8 +1,6 @@
 #ifndef logicSimulator_h
 #define logicSimulator_h
 
-#include <unordered_map>
-#include <vector>
 #include <atomic>
 #include <chrono>
 #include <thread>

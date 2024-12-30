@@ -3,9 +3,6 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include <memory>
-#include <set>
-
 #include "QtRenderer.h"
 #include "backend/block/block.h"
 #include "backend/connection/connectionEnd.h"

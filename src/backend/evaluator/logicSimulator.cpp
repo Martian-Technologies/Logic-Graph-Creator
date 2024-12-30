@@ -1,6 +1,4 @@
 #include <stdexcept>
-#include <algorithm>
-#include <iostream>
 
 #include "logicSimulator.h"
 #include "gateOperations.h"

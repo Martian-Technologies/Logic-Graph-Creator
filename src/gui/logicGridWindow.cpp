@@ -20,7 +20,6 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContai
     updateLoopTimer->start();
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
-
     float w = size().width();
     float h = size().height();
 

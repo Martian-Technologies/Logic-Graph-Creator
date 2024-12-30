@@ -1,11 +1,7 @@
 #ifndef blockContainerWrapper_h
 #define blockContainerWrapper_h
 
-#include <functional>
 #include <assert.h>
-#include <vector>
-#include <memory>
-#include <map>
 
 #include "backend/container/blockContainer.h"
 #include "undoSystem.h"

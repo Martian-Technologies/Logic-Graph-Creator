@@ -1,9 +1,6 @@
 #ifndef blockContainerManager_h
 #define blockContainerManager_h
 
-#include <memory>
-#include <map>
-
 #include "blockContainerWrapper.h"
 
 class BlockContainerManager {

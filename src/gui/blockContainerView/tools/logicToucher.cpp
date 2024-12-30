@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "logicToucher.h"
 #include "gui/blockContainerView/renderer/renderer.h"
 

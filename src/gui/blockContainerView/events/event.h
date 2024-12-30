@@ -1,8 +1,6 @@
 #ifndef event_h
 #define event_h
 
-#include <string>
-
 class Event {
 public:
     Event(std::string name) : name(name) {}

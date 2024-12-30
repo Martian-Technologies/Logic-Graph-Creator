@@ -1,14 +1,8 @@
 #ifndef baseBlockPlacementTool_h
 #define baseBlockPlacementTool_h
 
-#include <QPainter>
-
-#include <vector>
-#include <string>
-
 #include "blockContainerTool.h"
 class LogicGridWindow;
-
 
 class BaseBlockPlacementTool : public BlockContainerTool {
 public:

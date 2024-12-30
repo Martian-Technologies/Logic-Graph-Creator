@@ -1,9 +1,6 @@
 #ifndef evaluator_h
 #define evaluator_h
 
-#include <unordered_map>
-#include <vector>
-
 #include "middleEnd/blockContainerWrapper.h"
 #include "../container/difference.h"
 #include "logicSimulator.h"

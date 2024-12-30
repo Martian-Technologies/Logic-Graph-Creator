@@ -1,7 +1,3 @@
-#include <iostream>
-
-#include <Qt>
-
 #include "singleConnectTool.h"
 #include "gui/blockContainerView/renderer/renderer.h"
 

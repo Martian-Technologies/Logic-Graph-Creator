@@ -1,7 +1,6 @@
 #ifndef addressTree_h
 #define addressTree_h
 
-#include <unordered_map>
 #include <stdexcept>
 
 #include "../address.h"
