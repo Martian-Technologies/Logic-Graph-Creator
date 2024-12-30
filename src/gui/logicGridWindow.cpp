@@ -10,23 +10,11 @@
 // trigger an update, right now the tool system is not. When the tool system
 // is fed an input, we update. The tool system should work similar to viewManager
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QOpenGLWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
+LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
     // QT
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
-
-    // glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // setFormat(QSurfaceFormat::defaultFormat());
-    QSurfaceFormat format;
-    format.setVersion(3, 3);  // Set OpenGL version (e.g., OpenGL 3.3)
-    format.setProfile(QSurfaceFormat::CoreProfile); // Use the core profile
-    format.setSamples(4); // Optional: set multisampling for better quality
-
-    // Apply the format to the widget
-    QSurfaceFormat::setDefaultFormat(format);
 
     // Loop
     updateLoopTimer = new QTimer(this);
@@ -102,14 +90,7 @@ void LogicGridWindow::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
     blockContainerView.setEvaluator(evaluator);
 }
 
-// events
-
-void LogicGridWindow::initializeGL() {
-    initializeOpenGLFunctions();
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
+// input events
 
 bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
@@ -130,13 +111,10 @@ bool LogicGridWindow::event(QEvent* event) {
     return QWidget::event(event);
 }
 
-void LogicGridWindow::paintGL() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    QPainter painter(this);
+void LogicGridWindow::paintEvent(QPaintEvent* event) {
+    QPainter* painter = new QPainter(this);
     
-    blockContainerView.getRenderer().render(&painter);
+    blockContainerView.getRenderer().render(painter);
 
     // rolling average for frame time
     pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
@@ -150,9 +128,9 @@ void LogicGridWindow::paintGL() {
     std::string frameTimeStr = "avg frame: " + stream.str() + "ms";
 
     // draw average from time
-    painter.drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
+    painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
 
-    painter.end();
+    delete painter;
 }
 
 void LogicGridWindow::resizeEvent(QResizeEvent* event) {
