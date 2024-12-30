@@ -28,23 +28,12 @@ public:
 
     inline void changeTool(const std::string& toolType) {
         if (this->toolType == toolType) return;
-        unregisterEvents();
-        bool noChange = false;
-        if (toolType == "Single Place") tool = std::make_unique<SinglePlaceTool>();
-        else if (toolType == "Area Place") tool = std::make_unique<AreaPlaceTool>();
-        else if (toolType == "Simple") tool = std::make_unique<SingleConnectTool>();
-        else if (toolType == "State Changer") tool = std::make_unique<LogicToucher>();
-        else noChange = true;
-
-        if (!noChange) {
-            tool->setEvaluatorStateInterface(evaluatorStateInterface);
-            tool->setBlockContainer(blockContainerWrapper);
-            tool->setElementCreator(ElementCreator(renderer));
-            tool->initialize(toolManagerEventRegister);
-            BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
-            if (placementTool) placementTool->selectBlock(selectedBlock);
-            this->toolType = toolType;
-        }
+        if (toolType == "Single Place") changeTool<SinglePlaceTool>();
+        else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
+        else if (toolType == "Simple") changeTool<SingleConnectTool>();
+        else if (toolType == "State Changer") changeTool<LogicToucher>();
+        else return;
+        this->toolType = toolType;
     }
 
     inline void setBlockContainer(BlockContainerWrapper* blockContainerWrapper) {
@@ -52,7 +41,7 @@ public:
         if (tool) tool->setBlockContainer(blockContainerWrapper);
     }
 
-    inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { 
+    inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
         this->evaluatorStateInterface = evaluatorStateInterface;
         if (tool) tool->setEvaluatorStateInterface(evaluatorStateInterface);
     }
@@ -69,6 +58,18 @@ public:
     inline void reset() { if (tool) tool->reset(); }
 
 private:
+    template<class ToolType>
+    inline void changeTool() {
+        unregisterEvents();
+        tool = std::make_unique<ToolType>();
+        tool->setEvaluatorStateInterface(evaluatorStateInterface);
+        tool->setBlockContainer(blockContainerWrapper);
+        tool->setElementCreator(ElementCreator(renderer));
+        tool->initialize(toolManagerEventRegister);
+        BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+        if (placementTool) placementTool->selectBlock(selectedBlock);
+    }
+
     void unregisterEvents() {
         for (auto eventFuncPair : registeredEvents) {
             eventRegister->unregisterFunction(eventFuncPair.first, eventFuncPair.second);
