@@ -44,7 +44,6 @@ public:
     void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
     void tryRemoveOverArea(Position cellA, Position cellB);
 
-
     /* ----------- connections ----------- */
     // Trys to creates a connection. Returns if successful.
     bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
