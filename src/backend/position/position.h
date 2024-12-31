@@ -18,6 +18,8 @@ struct Position {
     inline cord_t manhattenDistanceToOrigin() const { return Abs(x) + Abs(y); }
     inline cord_t distanceToSquared(const Position& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     inline cord_t distanceToOriginSquared() const { return FastPower<2>(x) + FastPower<2>(y); }
+    inline cord_t distanceTo(const Position& other) const { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }
+    inline cord_t distanceToOrigin() const { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
     bool withinArea(const Position& small, const Position& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
     FPosition free() const;
     inline bool operator==(const Position& other) const { return x == other.x && y == other.y; }
@@ -52,6 +54,8 @@ struct FPosition {
     inline f_cord_t manhattenDistanceToOrigin() const { return std::abs(x) + std::abs(y); }
     inline f_cord_t distanceToSquared(const FPosition& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
     inline f_cord_t distanceToOriginSquared() const { return FastPower<2>(x) + FastPower<2>(y); }
+    inline f_cord_t distanceTo(const FPosition& other) const { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }
+    inline f_cord_t distanceToOrigin() const { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
     bool withinArea(const FPosition& small, const FPosition& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
     Position snap() const;
     inline bool operator==(const FPosition& other) const { return x == other.x && y == other.y; }
@@ -63,6 +67,14 @@ struct FPosition {
     inline FPosition& operator-=(const FPosition& position) { x -= position.x; y -= position.y; return *this; }
     inline FPosition& operator/=(f_cord_t scalar) { x /= scalar; y /= scalar; return *this; }
     inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+    inline f_cord_t lengthAlongProjectToVec(const FPosition& orginOfVec, const FPosition& endOfVec) const {
+        FPosition vec = (endOfVec - orginOfVec);
+        return ((this->x - orginOfVec.x) * vec.x + (this->y - orginOfVec.y) * vec.y) / vec.distanceToOrigin();
+    }
+    inline FPosition projectToVec(const FPosition& orginOfVec, const FPosition& endOfVec) const {
+        FPosition vec = endOfVec - orginOfVec;
+        return  vec * (((this->x - orginOfVec.x) * vec.x + (this->y - orginOfVec.y) * vec.y) / vec.distanceToOriginSquared());
+    }
 
     f_cord_t x, y;
 };

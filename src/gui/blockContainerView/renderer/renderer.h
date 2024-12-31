@@ -4,6 +4,7 @@
 typedef unsigned int ElementID;
 
 #include "middleEnd/blockContainerWrapper.h"
+#include "middleEnd/selection/selection.h"
 #include "../viewManager/viewManager.h"
 #include "backend/evaluator/evaluator.h"
 
@@ -76,6 +77,8 @@ public:
 
 private:
     // elements
+
+    virtual ElementID addSelectionElement(const SharedSelection selection) = 0;
     virtual ElementID addSelectionElement(const SelectionElement& selection) = 0;
     virtual void removeSelectionElement(ElementID selection) = 0;
     

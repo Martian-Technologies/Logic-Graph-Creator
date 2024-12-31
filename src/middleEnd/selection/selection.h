@@ -7,18 +7,25 @@
 
 typedef unsigned int dimensional_selection_size_t;
 
+template<class OutputSelectionType, class InputSelectionType>
+std::shared_ptr<const OutputSelectionType> selectionCast(std::shared_ptr<const InputSelectionType> selection) {
+    return std::dynamic_pointer_cast<const OutputSelectionType>(selection);
+}
+
 // base
 class Selection {
 public:
     virtual ~Selection() = default;
 };
+typedef std::shared_ptr<const Selection> SharedSelection;
 
 // DimensionalSelection which stores more selection
 class DimensionalSelection : public Selection {
 public:
-    virtual std::shared_ptr<Selection> getSelection(dimensional_selection_size_t index) const = 0;
+    virtual SharedSelection getSelection(dimensional_selection_size_t index) const = 0;
     virtual dimensional_selection_size_t size() const = 0;
 };
+typedef std::shared_ptr<const DimensionalSelection> SharedDimensionalSelection;
 
 // SingleSelection which stores a position
 class CellSelection : public Selection {
@@ -30,6 +37,7 @@ public:
 private:
     Position position;
 };
+typedef std::shared_ptr<const CellSelection> SharedCellSelection;
 
 
 #endif /* selection_h */

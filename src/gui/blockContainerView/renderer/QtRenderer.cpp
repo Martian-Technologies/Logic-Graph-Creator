@@ -236,9 +236,29 @@ void QtRenderer::render(QPainter* painter) {
         FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f, 1.0f);
         painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
     }
+    // selection object
+    for (const auto selection : selectionObjectElements) {
+        renderSelection(painter, selection.second);
+    }
     painter->restore();
 
     lastFrameTime = timer.nsecsElapsed() / 1e6f;
+}
+
+void QtRenderer::renderSelection(QPainter* painter, const SharedSelection selection) {
+    SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+    if (cellSelection) {
+        painter->setBrush(QColor(255, 0, 0, 64));
+        painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+        return;
+    }
+    SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+    if (dimensionalSelection) {
+        for (int i = 0; i < dimensionalSelection->size(); i++) {
+            renderSelection(painter, dimensionalSelection->getSelection(i));
+        }
+        return;
+    }
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
@@ -396,7 +416,14 @@ ElementID QtRenderer::addSelectionElement(const SelectionElement& selection) {
     return newID;
 }
 
+ElementID QtRenderer::addSelectionElement(const SharedSelection selection) {
+    ElementID newID = currentID++;
+    selectionObjectElements[newID] = selection;
+    return newID;
+}
+
 void QtRenderer::removeSelectionElement(ElementID selection) {
+    selectionObjectElements.erase(selection);
     selectionElements.erase(selection);
     invertedSelectionElements.erase(selection);
 }
@@ -404,9 +431,7 @@ void QtRenderer::removeSelectionElement(ElementID selection) {
 // block preview
 ElementID QtRenderer::addBlockPreview(const BlockPreview& blockPreview) {
     ElementID newID = currentID++;
-
     blockPreviews[newID] = blockPreview;
-
     return newID;
 }
 

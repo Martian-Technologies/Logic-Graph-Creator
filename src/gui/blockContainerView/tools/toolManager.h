@@ -11,10 +11,11 @@
 #include "baseBlockPlacementTool.h"
 #include "../renderer/renderer.h"
 #include "blockContainerTool.h"
-#include "logicToucher.h"
+#include "tensorConnectTool.h"
 #include "singleConnectTool.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
+#include "logicToucher.h"
 
 class ToolManager {
 public:
@@ -31,6 +32,7 @@ public:
         if (toolType == "Single Place") changeTool<SinglePlaceTool>();
         else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
         else if (toolType == "Simple") changeTool<SingleConnectTool>();
+        else if (toolType == "Tensor") changeTool<TensorConnectTool>();
         else if (toolType == "State Changer") changeTool<LogicToucher>();
         else return;
         this->toolType = toolType;
