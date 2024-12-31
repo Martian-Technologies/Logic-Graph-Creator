@@ -3,15 +3,15 @@
 
 enum class GateType {
     NONE = 0,
-    AND = 1,
-    OR = 2,
-    XOR = 3,
-    NAND = 4,
-    NOR = 5,
+    AND = 8,
+    OR = 5,
+    XOR = 4,
+    NAND = 9,
+    NOR = 7,
     XNOR = 6,
-    DEFAULT_RETURN_CURRENTSTATE = 7,
-    TICK_INPUT = 8,
-    CONSTANT_ON = 9,
+    DEFAULT_RETURN_CURRENTSTATE = 1,
+    TICK_INPUT = 2,
+    CONSTANT_ON = 3,
 };
 
 #endif // gateType_h

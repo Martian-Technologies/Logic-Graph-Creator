@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(LogicGraphCreator)
 
+# hack to avoid DNDEBUG which removes wires for some reason
+if (MSVC)
+  # also do it for MSVC, not sure if needed
+  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+else()
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")

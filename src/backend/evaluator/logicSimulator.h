@@ -48,7 +48,7 @@ private:
     std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
     std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
-    std::vector<int> gateInputCountTotal, gateInputCountPowered;
+    std::vector<unsigned int> gateInputCountTotal, gateInputCountPowered;
     int numDecomissioned;
 
     // shit for threading
