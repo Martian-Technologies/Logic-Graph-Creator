@@ -179,13 +179,10 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
 
 void LogicSimulator::propagatePowered() {
     for (int i = 0; i < currentState.size(); ++i) {
-        if (nextState.at(i) && !currentState.at(i)) {
+        int dif = nextState[i] - currentState[i];
+        if (dif) {
             for (int output : gateOutputs[i]) {
-                ++gateInputCountPowered[output];
-            }
-        } else if (!nextState.at(i) && currentState.at(i)) {
-            for (int output : gateOutputs[i]) {
-                --gateInputCountPowered[output];
+                gateInputCountPowered[output] += dif;
             }
         }
     }
@@ -196,12 +193,7 @@ void LogicSimulator::swapStates() {
 }
 
 void LogicSimulator::computeNextState() {
-    std::fill(nextState.begin(), nextState.end(), false);
     for (block_id_t gate = 0; gate < currentState.size(); ++gate) {
-        if (gateTypes[gate] == GateType::NONE) {
-            continue;
-        }
-
         nextState[gate] = computeGateState(gateTypes[gate], gateInputCountPowered[gate], gateInputCountTotal[gate], currentState[gate]);
     }
 }

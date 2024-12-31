@@ -1,9 +1,12 @@
-#include "gpu1.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QString>
+
+// #include <iostream>
+
+#include "gpu1.h"
 
 BlockType strToType(QString str) {
     if (str == "and") return BlockType::AND;
@@ -17,7 +20,6 @@ BlockType strToType(QString str) {
 }
 
 void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
-   
     // Load JSON data using Qt
     QFile file(":gpu1.json");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -34,10 +36,11 @@ void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
     }
     QJsonArray data = jsonDoc.array();
 
+    // int gc = 0;
     for (const QJsonValue& value : data) {
         QJsonObject block = value.toObject();
         QString blockType = block["type"].toString();
-
+        // gc++;
         if (blockType == "gate") {
             QJsonObject position = block["position"].toObject();
             container->tryInsertBlock(Position(position["x"].toInt(), position["y"].toInt()), Rotation::ZERO, strToType(block["mode"].toString()));
@@ -46,8 +49,11 @@ void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
             container->tryInsertBlock(Position(position["x"].toInt(), position["y"].toInt()), Rotation::ZERO, BlockType::SWITCH);
         }
     }
+    // std::cout << gc << std::endl;
 
     if (doConnections) {
+        // int c1 = 0;
+        // int c2 = 0;
         for (const QJsonValue& value : data) {
             QJsonObject block = value.toObject();
             QJsonObject position = block["position"].toObject();
@@ -55,10 +61,20 @@ void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
             int startY = position["y"].toInt();
 
             QJsonArray outputs = block["outputs"].toArray();
+            // int cc = 0;
             for (const QJsonValue& outputValue : outputs) {
+                // cc++;
                 QJsonObject end = outputValue.toObject();
                 container->tryCreateConnection(Position(startX, startY), Position(end["x"].toInt(), end["y"].toInt()));
             }
+            // if (cc == 1) {
+            //     c1++;
+            // }
+            // else if (cc == 2) {
+            //     c2++;
+            // }
         }
+        // std::cout << c1 << std::endl;
+        // std::cout << c2 << std::endl;
     }
 }
