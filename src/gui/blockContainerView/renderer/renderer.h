@@ -4,7 +4,7 @@
 typedef unsigned int ElementID;
 
 #include "middleEnd/blockContainerWrapper.h"
-#include "middleEnd/selection/selection.h"
+#include "middleEnd/selection.h"
 #include "../viewManager/viewManager.h"
 #include "backend/evaluator/evaluator.h"
 

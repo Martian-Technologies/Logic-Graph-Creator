@@ -2,7 +2,7 @@
 #define tensorConnectTool_h
 
 #include "blockContainerTool.h"
-#include "middleEnd/selection/selection.h"
+#include "middleEnd/selection.h"
 
 class TensorConnectTool : public BlockContainerTool {
 public:

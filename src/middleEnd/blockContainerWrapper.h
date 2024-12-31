@@ -8,6 +8,7 @@
 #include <map>
 
 #include "backend/container/blockContainer.h"
+#include "selection.h"
 #include "undoSystem.h"
 
 typedef unsigned int block_container_wrapper_id_t;
@@ -49,6 +50,10 @@ public:
     bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
     // Trys to remove a connection. Returns if successful.
     bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
+    // Trys to creates connections.
+    bool tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection);
+    // Trys to remove connections.
+    bool tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection);
 
 
     /* ----------- undo ----------- */
@@ -56,6 +61,10 @@ public:
     void redo();
 
 private:
+    void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
+    // Trys to remove connections.
+    void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
+
     void startUndo() { midUndo = true; }
     void endUndo() { midUndo = false; }
 

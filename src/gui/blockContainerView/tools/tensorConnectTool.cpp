@@ -1,4 +1,4 @@
-#include <iostream>
+// #include <iostream>
 
 #include "tensorConnectTool.h"
 
@@ -110,7 +110,6 @@ bool TensorConnectTool::unclick(const Event* event) {
                     inputSelection = projectionSelection->getSelection(0);
                     inputStage -= 2;
                 }
-                
             }
         }
     }
@@ -128,7 +127,9 @@ bool TensorConnectTool::confirm(const Event* event) {
     } else {
         if (inputStage != outputStage) return false;
         if (!sameSelectionShape(inputSelection, outputSelection)) return false;
-        std::cout << "DONE" << std::endl;
+        // std::cout << "DONE" << std::endl;
+        blockContainer->tryCreateConnection(outputSelection, inputSelection);
+        reset();
         return true;
     }
 
