@@ -35,7 +35,7 @@ public:
 
     void simulateNTicks(unsigned int n);
 
-    logic_state_t getState(block_id_t gate) const { return currentState.at(gate); }
+    logic_state_t getState(block_id_t gate) const { return currentState[gate]; }
 
     void debugPrint();
     void signalToPause();

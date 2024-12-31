@@ -302,7 +302,7 @@ void LogicSimulator::simulationLoop() {
 
         bool waiting = false;
 
-        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire) || !waiting) {
+        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire)) {
             if (!waiting) {
                 isWaiting.store(true, std::memory_order_release);
                 waiting = true;

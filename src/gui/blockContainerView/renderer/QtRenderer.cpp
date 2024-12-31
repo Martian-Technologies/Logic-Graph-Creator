@@ -150,10 +150,14 @@ void QtRenderer::render(QPainter* painter) {
         painter->save();
         painter->setOpacity(0.8f);
         // painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(QPen(QColor(2507161), 25.0f / viewManager->getViewHeight()));
-        painter->drawLines(&connectionLinesOff[0], connectionLinesOff.size());
-        painter->setPen(QPen(QColor(7910911), 25.0f / viewManager->getViewHeight()));
-        painter->drawLines(&connectionLinesOn[0], connectionLinesOn.size());
+        if (connectionLinesOff.size() > 0) {
+            painter->setPen(QPen(QColor(2507161), 25.0f / viewManager->getViewHeight()));
+            painter->drawLines(&connectionLinesOff[0], connectionLinesOff.size());
+        }
+        if (connectionLinesOn.size() > 0) {
+            painter->setPen(QPen(QColor(7910911), 25.0f / viewManager->getViewHeight()));
+            painter->drawLines(&connectionLinesOn[0], connectionLinesOn.size());
+        }
         painter->restore();
     } else {
         // get bounds
