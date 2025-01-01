@@ -14,7 +14,11 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 }
 
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
-    if (checkCollision(position, position + Position(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))) return false;
+    if (
+        blockType == BlockType::NONE ||
+        blockType == BlockType::TYPE_COUNT ||
+        checkCollision(position, position + Position(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
+        ) return false;
     block_id_t id = getNewId();
     auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
     iter->second.setId(id);
@@ -62,7 +66,11 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 }
 
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
-    if (checkCollision(position, position + Position(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))) return false;
+    if (
+        blockType == BlockType::NONE ||
+        blockType == BlockType::TYPE_COUNT ||
+        checkCollision(position, position + Position(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
+        ) return false;
     block_id_t id = getNewId();
     auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
     iter->second.setId(id);
