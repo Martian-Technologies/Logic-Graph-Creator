@@ -5,5 +5,5 @@ Logic Graph Creator is a desktop application which allows users to design and si
 ## Developer Documentation
 - [Build instructions and information](docs/building.md)
 - [Explanation of major systems](docs/systems.md)
-- [Coding conventions and style](docs/conventions.md)
+- [Coding conventions, style, and feature usage guidelines](docs/conventions.md)
 - [Processes that should be followed when developing](docs/processes.md)

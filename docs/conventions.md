@@ -1,4 +1,4 @@
-# Conventions
+# Conventions and feature usage guidelines
 
 ### Includes
 Usage
@@ -31,3 +31,5 @@ Info on where to put public/private variables and function, and in what order
 ### Types and Sizes
 
 ### Tabs vs. Spaces
+
+### Small TODO comments
