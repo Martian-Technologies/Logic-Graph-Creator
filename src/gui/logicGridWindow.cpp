@@ -201,6 +201,9 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void LogicGridWindow::enterEvent(QEnterEvent* event) {
+    // grab focus so key inputs work without clicking
+    setFocus(Qt::MouseFocusReason);
+    
     Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
     if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }

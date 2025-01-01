@@ -17,6 +17,8 @@ QT Includes
 Case Sensitive Includes
 - 
 
+### Header Guards
+
 ### Naming
 
 ### Pointers
