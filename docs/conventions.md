@@ -35,3 +35,9 @@ Info on where to put public/private variables and function, and in what order
 ### Tabs vs. Spaces
 
 ### Small TODO comments
+
+### Header vs. CPP and function inlining
+
+### Curly Brackets
+
+### Constructor initializer lists
