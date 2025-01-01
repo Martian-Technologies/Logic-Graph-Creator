@@ -1,6 +1,6 @@
 # Logic Graph Creator
  
-Logic Graph Creator is a desktop application which allows users to design and simulate logic graph systems.
+Logic Graph Creator is a desktop application for designing and simulating logic graph systems.
 
 ## Developer Documentation
 - [Build instructions and information](docs/building.md)
