@@ -24,6 +24,7 @@ Case Sensitive Includes
 ### Enums
 
 ### Class Declaration Order
+Info on where to put public/private variables and function, and in what order
 
 ### Assertions and Returning "Failed"
 

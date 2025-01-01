@@ -7,48 +7,35 @@
 #include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
 
-// viewmanager is responsible for saying when the view is changed, which will
-// trigger an update, right now the tool system is not. When the tool system
-// is fed an input, we update. The tool system should work similar to viewManager
-
 LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
-    // QT
+    // qt settings
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
     setMouseTracking(true);
 
-    // Loop
+    // set up update loop
     updateLoopTimer = new QTimer(this);
     updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
     updateLoopTimer->start();
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
-
     float w = size().width();
     float h = size().height();
 
-    // ViewManager
+    // set viewmanager aspect ratio to begin with
     blockContainerView.getViewManager().setAspectRatio(w / h);
 
-    // Renderer
+    // initialize QTRenderer with width and height + tileset
     blockContainerView.getRenderer().resize(w, h);
     blockContainerView.getRenderer().initializeTileSet(":logicTiles.png");
 }
-
-// update loop
 
 void LogicGridWindow::updateLoop() {
     // update for re-render
     update();
 }
 
-// getters
-
-Vec2 LogicGridWindow::pixelsToView(QPointF point) {
-    return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height());
-}
-
-// setter functions
+// setter functions -----------------------------------------------------------------------------
 
 void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
     // disconnect the old tree
@@ -91,7 +78,7 @@ void LogicGridWindow::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
     blockContainerView.setEvaluator(evaluator);
 }
 
-// input events
+// input events ------------------------------------------------------------------------------
 
 bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
@@ -223,3 +210,5 @@ void LogicGridWindow::leaveEvent(QEvent* event) {
     if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer exit view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
+
+// Utility fun

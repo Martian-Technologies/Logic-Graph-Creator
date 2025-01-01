@@ -15,5 +15,7 @@ For a "release" - `cmake --workflow --preset release`
 
 Temp: for using XCode you should use the command `cmake -G Xcode <dir of CMakeLists.txt>`
 
+## Setting up CMake in an IDE
+
 ## Notes
 If your error highlighting or IDE integration is showing red, make sure you have already compiled the project (to generate QT moc header files) and the compile_commands.json in the build folder is being recognized (default for most lsp)
