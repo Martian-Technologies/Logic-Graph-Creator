@@ -1,3 +1,5 @@
+# Conventions and feature usage guidelines
+
 ### Includes
 Usage
 - Angle brackets <> when including from libraries.
@@ -22,7 +24,12 @@ Case Sensitive Includes
 ### Enums
 
 ### Class Declaration Order
+Info on where to put public/private variables and function, and in what order
 
 ### Assertions and Returning "Failed"
 
 ### Types and Sizes
+
+### Tabs vs. Spaces
+
+### Small TODO comments

@@ -61,6 +61,78 @@ bool BlockContainerWrapper::tryRemoveConnection(const Position& outputPosition, 
     return out;
 }
 
+bool BlockContainerWrapper::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+    if (!sameSelectionShape(outputSelection, inputSelection)) return false;
+    DifferenceSharedPtr difference = std::make_shared<Difference>();
+    createConnection(outputSelection, inputSelection, difference.get());
+    sendDifference(difference);
+    return true;
+}
+
+bool BlockContainerWrapper::tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+    if (!sameSelectionShape(outputSelection, inputSelection)) return false;
+    DifferenceSharedPtr difference = std::make_shared<Difference>();
+    removeConnection(outputSelection, inputSelection, difference.get());
+    sendDifference(difference);
+    return true;
+}
+
+void BlockContainerWrapper::createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference) {
+    // Cell Selection
+    SharedCellSelection outputCellSelection = selectionCast<CellSelection>(outputSelection);
+    if (outputCellSelection) {
+        blockContainer.tryCreateConnection(outputCellSelection->getPosition(), selectionCast<CellSelection>(inputSelection)->getPosition(), difference);
+        return;
+    }
+
+    // Dimensional Selection
+    SharedDimensionalSelection outputDimensionalSelection = selectionCast<DimensionalSelection>(outputSelection);
+    SharedDimensionalSelection inputDimensionalSelection = selectionCast<DimensionalSelection>(inputSelection);
+    if (outputDimensionalSelection && inputDimensionalSelection) {
+        if (outputDimensionalSelection->size() == 1) {
+            for (dimensional_selection_size_t i = inputDimensionalSelection->size(); i > 0; i--) {
+                createConnection(outputDimensionalSelection->getSelection(0), inputDimensionalSelection->getSelection(i - 1), difference);
+            }
+        } else if (inputDimensionalSelection->size() == 1) {
+            for (dimensional_selection_size_t i = outputDimensionalSelection->size(); i > 0; i--) {
+                createConnection(outputDimensionalSelection->getSelection(i - 1), inputDimensionalSelection->getSelection(0), difference);
+            }
+        } else {
+            for (dimensional_selection_size_t i = inputDimensionalSelection->size(); i > 0; i--) {
+                createConnection(outputDimensionalSelection->getSelection(i - 1), inputDimensionalSelection->getSelection(i - 1), difference);
+            }
+        }
+    }
+}
+
+void BlockContainerWrapper::removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference) {
+    // Cell Selection
+    SharedCellSelection outputCellSelection = selectionCast<CellSelection>(outputSelection);
+    if (outputCellSelection) {
+        blockContainer.tryRemoveConnection(outputCellSelection->getPosition(), selectionCast<CellSelection>(inputSelection)->getPosition(), difference);
+        return;
+    }
+
+    // Dimensional Selection
+    SharedDimensionalSelection outputDimensionalSelection = selectionCast<DimensionalSelection>(outputSelection);
+    SharedDimensionalSelection inputDimensionalSelection = selectionCast<DimensionalSelection>(outputSelection);
+    if (outputDimensionalSelection && inputDimensionalSelection) {
+        if (outputDimensionalSelection->size() == 1) {
+            for (dimensional_selection_size_t i = inputDimensionalSelection->size(); i > 0; i--) {
+                removeConnection(outputDimensionalSelection->getSelection(0), inputDimensionalSelection->getSelection(i - 1), difference);
+            }
+        } else if (inputDimensionalSelection->size() == 1) {
+            for (dimensional_selection_size_t i = outputDimensionalSelection->size(); i > 0; i--) {
+                removeConnection(outputDimensionalSelection->getSelection(i - 1), inputDimensionalSelection->getSelection(0), difference);
+            }
+        } else {
+            for (dimensional_selection_size_t i = inputDimensionalSelection->size(); i > 0; i--) {
+                removeConnection(outputDimensionalSelection->getSelection(i - 1), inputDimensionalSelection->getSelection(i - 1), difference);
+            }
+        }
+    }
+}
+
 void BlockContainerWrapper::undo() {
     startUndo();
     DifferenceSharedPtr newDifference = std::make_shared<Difference>();
@@ -69,7 +141,7 @@ void BlockContainerWrapper::undo() {
     Difference::connection_modification_t connectionModification;
     const std::vector<Difference::Modification>& modifications = difference->getModifications();
     for (unsigned int i = modifications.size(); i > 0; --i) {
-        const Difference::Modification& modification = modifications[i-1];
+        const Difference::Modification& modification = modifications[i - 1];
         switch (modification.first) {
         case Difference::PLACE_BLOCK:
             blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());
