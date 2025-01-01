@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <QPainter>
+#include <QColor>
 
 #include "../viewManager/viewManager.h"
 #include "backend/defs.h"
@@ -31,7 +32,7 @@ public:
 
 private:
     // elements
-    ElementID addSelectionElement(const SharedSelection selection) override;
+    ElementID addSelectionElement(const SelectionObjectElement& selection) override;
     ElementID addSelectionElement(const SelectionElement& selection) override;
     void removeSelectionElement(ElementID selection) override;
 
@@ -49,12 +50,14 @@ private:
 private:
     QPointF gridToQt(FPosition position);
 
-    void renderSelection(QPainter* painter, const SharedSelection selection);
+    void renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth = 0);
     void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);
     void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, std::vector<QLineF>& lines);
     void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, std::vector<QLineF>& lines);
     void renderConnection(QPainter* painter, Position aPos, Position bPos, std::vector<QLineF>& lines);
     void renderConnection(QPainter* painter, Position aPos, FPosition bPos, std::vector<QLineF>& lines);
+
+    void drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float scale, const QColor& color);
 
     int w, h;
     BlockContainerWrapper* blockContainer;
@@ -67,7 +70,7 @@ private:
     ElementID currentID = 0;
     std::unordered_map<ElementID, SelectionElement> selectionElements;
     std::unordered_map<ElementID, SelectionElement> invertedSelectionElements;
-    std::unordered_map<ElementID, SharedSelection> selectionObjectElements;
+    std::unordered_map<ElementID, SelectionObjectElement> selectionObjectElements;
     std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
     std::unordered_map<ElementID, HalfConnectionPreview> halfConnectionPreviews;

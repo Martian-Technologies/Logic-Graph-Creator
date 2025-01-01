@@ -195,9 +195,9 @@ bool TensorConnectTool::pointerMove(const Event* event) {
 void TensorConnectTool::updateElements(SharedSelection selection) {
     elementCreator.clear();
     if (makingOutput) {
-        elementCreator.addSelectionElement(selection);
+        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
     } else {
-        elementCreator.addSelectionElement(selection);
-        elementCreator.addSelectionElement(outputSelection);
+        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
+        elementCreator.addSelectionElement(SelectionObjectElement(outputSelection, SelectionObjectElement::RenderMode::ARROWS));
     }
 }

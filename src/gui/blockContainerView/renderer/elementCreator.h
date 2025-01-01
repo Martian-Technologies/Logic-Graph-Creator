@@ -56,7 +56,7 @@ public:
 
     inline bool hasElement(ElementID id) { return ids.find(id) != ids.end(); }
 
-    inline ElementID addSelectionElement(const SharedSelection selection) {
+    inline ElementID addSelectionElement(const SelectionObjectElement selection) {
         assert(renderer);
         ElementID id = renderer->addSelectionElement(selection);
         ids[id] = ElementType::SelectionElement;

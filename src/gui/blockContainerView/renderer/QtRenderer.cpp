@@ -1,7 +1,8 @@
+#include <QElapsedTimer>
 #include <QPainterPath>
 #include <QDateTime>
+#include <QVector2D>
 #include <QDebug>
-#include <QElapsedTimer>
 
 #include <memory>
 #include <set>
@@ -238,26 +239,121 @@ void QtRenderer::render(QPainter* painter) {
     }
     // selection object
     for (const auto selection : selectionObjectElements) {
-        renderSelection(painter, selection.second);
+        renderSelection(painter, selection.second.selection, selection.second.renderMode);
     }
     painter->restore();
 
     lastFrameTime = timer.nsecsElapsed() / 1e6f;
 }
 
-void QtRenderer::renderSelection(QPainter* painter, const SharedSelection selection) {
-    SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
-    if (cellSelection) {
-        painter->setBrush(QColor(255, 0, 0, 64));
-        painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
-        return;
-    }
-    SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
-    if (dimensionalSelection) {
-        for (int i = 0; i < dimensionalSelection->size(); i++) {
-            renderSelection(painter, dimensionalSelection->getSelection(i));
+const QColor arrowColorOrder[] = {
+    QColor(255, 0, 0, 60),
+    QColor(0, 255, 0, 60),
+    QColor(0, 0, 255, 60),
+    QColor(255, 255, 0, 60),
+    QColor(255, 0, 255, 60),
+    QColor(0, 255, 255, 60),
+    QColor(255, 255, 255, 60),
+    QColor(127, 0, 0, 60),
+    QColor(0, 127, 0, 60),
+    QColor(0, 0, 127, 60),
+    QColor(127, 127, 0, 60),
+    QColor(127, 0, 127, 60),
+    QColor(0, 127, 127, 60),
+    QColor(127, 127, 127, 60),
+    QColor(255, 127, 0, 60),
+    QColor(255, 0, 127, 60),
+    QColor(0, 255, 127, 60),
+    QColor(127, 255, 0, 60),
+    QColor(127, 0, 255, 60),
+    QColor(0, 127, 255, 60),
+    QColor(255, 127, 127, 60),
+    QColor(127, 255, 127, 60),
+    QColor(127, 127, 255, 60),
+    QColor(255, 255, 127, 60),
+    QColor(255, 127, 255, 60),
+    QColor(127, 255, 255, 600)
+};
+
+void QtRenderer::renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth) {
+    switch (mode) {
+    case SelectionObjectElement::RenderMode::SELECTION:
+    {
+        SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+        if (cellSelection) {
+            painter->setBrush(QColor(0, 0, 255, 64));
+            painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+            return;
+        }
+        SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+        if (dimensionalSelection) {
+            for (int i = 0; i < dimensionalSelection->size(); i++) {
+                renderSelection(painter, dimensionalSelection->getSelection(i), mode, depth + 1);
+            }
+            return;
         }
         return;
+    }
+    case SelectionObjectElement::RenderMode::SELECTION_INVERTED:
+    {
+        SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+        if (cellSelection) {
+            painter->setBrush(QColor(255, 0, 0, 64));
+            painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+            return;
+        }
+        SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+        if (dimensionalSelection) {
+            for (int i = 0; i < dimensionalSelection->size(); i++) {
+                renderSelection(painter, dimensionalSelection->getSelection(i), mode, depth + 1);
+            }
+            return;
+        }
+        return;
+    }
+    case SelectionObjectElement::RenderMode::ARROWS:
+    {
+        SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+        if (cellSelection) {
+            painter->setBrush(QColor(0, 0, 255, 64));
+            painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+            return;
+        }
+        SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+        if (dimensionalSelection) {
+            SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selection);
+            if (projectionSelection) {
+                SharedDimensionalSelection dSel = dimensionalSelection;
+                Position orgin;
+                unsigned int height = 0;
+                while (dSel) {
+                    SharedSelection sel = dSel->getSelection(0);
+                    SharedCellSelection cSel = selectionCast<CellSelection>(sel);
+                    if (cSel) {
+                        orgin = cSel->getPosition();
+                        break;
+                    }
+                    height ++;
+                    dSel = selectionCast<DimensionalSelection>(sel);
+                }
+                for (int i = 1; i < projectionSelection->size(); i++) {
+                    QPointF start = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
+                    orgin += projectionSelection->getStep();
+                    QPointF end = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
+                    drawArrow(painter, start, end, 10.f / viewManager->getViewHeight(), arrowColorOrder[height % 26]);
+                }
+                renderSelection(painter, dimensionalSelection->getSelection(0), mode, depth + 1);
+            } else {
+                for (int i = 0; i < dimensionalSelection->size(); i++) {
+                    renderSelection(painter, dimensionalSelection->getSelection(i), mode, depth + 1);
+                }
+            }
+            return;
+        }
+        return;
+    }
+    default:
+        break;
     }
 }
 
@@ -416,9 +512,9 @@ ElementID QtRenderer::addSelectionElement(const SelectionElement& selection) {
     return newID;
 }
 
-ElementID QtRenderer::addSelectionElement(const SharedSelection selection) {
+ElementID QtRenderer::addSelectionElement(const SelectionObjectElement& selection) {
     ElementID newID = currentID++;
-    selectionObjectElements[newID] = selection;
+    selectionObjectElements.emplace(newID, selection);
     return newID;
 }
 
@@ -468,4 +564,37 @@ void QtRenderer::removeHalfConnectionPreview(ElementID halfConnectionPreview) {
 // confetti
 void QtRenderer::spawnConfetti(FPosition start) {
 
+}
+
+void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float scale, const QColor& color) {
+    // Draw main line
+    painter->save();
+    painter->setPen(QPen(color, 3.f * scale));
+    auto vec = QVector2D(start - end);
+    vec.normalize();
+    painter->drawLine(start, end + vec.toPointF() * scale*10);
+    painter->restore();
+    painter->setBrush(color);
+
+    // Draw arrowhead
+    QLineF line(start, end);
+    double angle = -line.angle() + 180;
+
+    // Calculate arrowhead points
+    double arrow_size = 10 * scale;
+    QPointF p1 = line.p2();
+    QPointF arrow_p1(
+        p1.x() - arrow_size * std::cos((angle + 150) * M_PI / 180),
+        p1.y() - arrow_size * std::sin((angle + 150) * M_PI / 180)
+    );
+
+    QPointF arrow_p2(
+        p1.x() - arrow_size * std::cos((angle - 150) * M_PI / 180),
+        p1.y() - arrow_size * std::sin((angle - 150) * M_PI / 180)
+    );
+
+    // Draw arrowhead as a polygon
+    QPolygonF arrow_head;
+    arrow_head << p1 << arrow_p1 << arrow_p2;
+    painter->drawPolygon(arrow_head);
 }
