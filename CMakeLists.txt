@@ -11,6 +11,9 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
+# C++ Standard
+set(CXX_STANDARD 20)
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")

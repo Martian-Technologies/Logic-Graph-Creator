@@ -1,128 +1,142 @@
 {
-    "version": 6,
-    "cmakeMinimumRequired": {
-	"major": 3,
-	"minor": 16,
-	"patch": 0
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 16,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "generator": "Ninja",
+      "binaryDir": "build",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Debug"
+      }
     },
-    "configurePresets": [
+    {
+      "name": "release",
+      "displayName": "Release",
+      "generator": "Ninja",
+      "binaryDir": "build-release",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "xcode-debug",
+      "displayName": "Debug (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "build-xcode-debug",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Debug",
+	"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+      },
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    },
+    {
+      "name": "xcode-release",
+      "displayName": "Release (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "build-xcode-release",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Release",
+	"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+      },
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "Build Debug",
+      "configurePreset": "debug",
+      "configuration": "Debug",
+      "jobs": 8
+    },
+    {
+      "name": "release",
+      "displayName": "Build Release",
+      "configurePreset": "release",
+      "configuration": "Release",
+      "jobs": 8
+    },
+    {
+      "name": "xcode-debug",
+      "displayName": "Build Debug (Xcode)",
+      "configurePreset": "xcode-debug",
+      "configuration": "Debug",
+      "jobs": 8,
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    },
+    {
+      "name": "xcode-release",
+      "displayName": "Build Release (Xcode)",
+      "configurePreset": "xcode-release",
+      "configuration": "Release",
+      "jobs": 8,
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug Build Workflow",
+      "steps": [
 	{
-	    "name": "debug",
-	    "displayName": "Debug",
-	    "generator": "Ninja",
-	    "binaryDir": "build",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Debug"
-	    }
+	  "type": "configure",
+	  "name": "debug"
 	},
 	{
-	    "name": "release",
-	    "displayName": "Release",
-	    "generator": "Ninja",
-	    "binaryDir": "build-release",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release"
-	    }
-	},
-	{
-	    "name": "xcode-debug",
-	    "displayName": "Debug (Xcode)",
-	    "generator": "Xcode",
-	    "binaryDir": "build-xcode-debug",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Debug",
-		"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
-	    },
-	    "condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Darwin"
-	    }
-	},
-	{
-	    "name": "xcode-release",
-	    "displayName": "Release (Xcode)",
-	    "generator": "Xcode",
-	    "binaryDir": "build-xcode-release",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release",
-		"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
-	    },
-	    "condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Darwin"
-	    }
+	  "type": "build",
+	  "name": "debug"
 	}
-    ],
-    "buildPresets": [
+      ]
+    },
+    {
+      "name": "dist",
+      "displayName": "Distribution Workflow",
+      "steps": [
 	{
-	    "name": "debug",
-	    "displayName": "Build Debug",
-	    "configurePreset": "debug",
-	    "configuration": "Debug",
-	    "jobs": 8
+	  "type": "configure",
+	  "name": "release"
 	},
 	{
-	    "name": "release",
-	    "displayName": "Build Release",
-	    "configurePreset": "release",
-	    "configuration": "Release",
-	    "jobs": 8
-	},
-	{
-	    "name": "xcode-debug",
-	    "displayName": "Build Debug (Xcode)",
-	    "configurePreset": "xcode-debug",
-	    "configuration": "Debug",
-	    "jobs": 8,
-	    "condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Darwin"
-	    }
-	},
-	{
-	    "name": "xcode-release",
-	    "displayName": "Build Release (Xcode)",
-	    "configurePreset": "xcode-release",
-	    "configuration": "Release",
-	    "jobs": 8,
-	    "condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Darwin"
-	    }
+	  "type": "build",
+	  "name": "release"
 	}
-    ],
-    "workflowPresets": [
+      ]
+    },
+    {
+      "name": "xcode-dist",
+      "displayName": "Distribution Workflow (Xcode)",
+      "steps": [
 	{
-	    "name": "dist",
-	    "displayName": "Distribution Workflow",
-	    "steps": [
-		{
-		    "type": "configure",
-		    "name": "release"
-		},
-		{
-		    "type": "build",
-		    "name": "release"
-		}
-	    ]
+	  "type": "configure",
+	  "name": "xcode-release"
 	},
 	{
-	    "name": "xcode-dist",
-	    "displayName": "Distribution Workflow (Xcode)",
-	    "steps": [
-		{
-		    "type": "configure",
-		    "name": "xcode-release"
-		},
-		{
-		    "type": "build",
-		    "name": "xcode-release"
-		}
-	    ]
+	  "type": "build",
+	  "name": "xcode-release"
 	}
-    ]
+      ]
+    }
+  ]
 }
