@@ -8,9 +8,9 @@
 
 #include "backend/evaluator/evaluatorStateInterface.h"
 #include "middleEnd/blockContainerWrapper.h"
+#include "../renderer/elementCreator.h"
 #include "toolManagerEventRegister.h"
 #include "../events/customEvents.h"
-#include "../renderer/elementCreator.h"
 class LogicGridWindow;
 
 

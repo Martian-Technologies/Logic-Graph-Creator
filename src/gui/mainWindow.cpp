@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
 
-    makeGPU1(blockContainerWrapper.get());
+    // makeGPU1(blockContainerWrapper.get());
     
     evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 

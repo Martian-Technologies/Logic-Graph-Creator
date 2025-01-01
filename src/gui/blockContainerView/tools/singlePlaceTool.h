@@ -35,4 +35,4 @@ private:
     char clicks[2];
 };
 
-#endif /* singlePlaceTool_h */
+#endif /* SinglePlaceTool_h */
