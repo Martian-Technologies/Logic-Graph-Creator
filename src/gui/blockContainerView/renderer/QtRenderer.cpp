@@ -31,7 +31,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
         }
 
         // create tileSet
-        tileSetInfo = std::make_unique<TileSetInfo>(128, 14);
+        tileSetInfo = std::make_unique<TileSetInfo>(512, 14);
     }
 }
 
@@ -100,7 +100,6 @@ void QtRenderer::render(QPainter* painter) {
         Position bottomRightBound = viewManager->getBottomRight().snap();
 
         // render grid
-        std::set<const Block*> blocksToRender;
         for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
             for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
                 renderCell(FPosition(x, y), BlockType::NONE);
@@ -121,12 +120,11 @@ void QtRenderer::render(QPainter* painter) {
         }
         painter->setOpacity(1.0f);
 
-
         // render connections
-        std::vector<QLineF> connectionLinesOff;
-        std::vector<QLineF> connectionLinesOn;
+        painter->save();
+        painter->setOpacity(0.9f);
+        painter->setRenderHint(QPainter::Antialiasing);
         for (unsigned int i = 0; i < blocks.size(); i++) {
-            if (connectionLinesOff.size() + connectionLinesOn.size() >= lineRendingLimit) break;
             bool state = blockStates[i];
             for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
                 // continue if input, we only want outputs
@@ -136,25 +134,18 @@ void QtRenderer::render(QPainter* painter) {
                 for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, pos, blocks[i], otherPos, other, state ? connectionLinesOn : connectionLinesOff);
+                    renderConnection(painter, pos, blocks[i], otherPos, other, state);
                 }
             }
         }
         // render connection previews
         for (const auto& preview : connectionPreviews) {
-            renderConnection(painter, preview.second.input, preview.second.output, connectionLinesOff);
+            renderConnection(painter, preview.second.input, preview.second.output, false);
         }
         // render half connection previews
         for (const auto& preview : halfConnectionPreviews) {
-            renderConnection(painter, preview.second.input, preview.second.output, connectionLinesOff);
+            renderConnection(painter, preview.second.input, preview.second.output, false);
         }
-        painter->save();
-        painter->setOpacity(0.8f);
-        // painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(QPen(QColor(2507161), 25.0f / viewManager->getViewHeight()));
-        painter->drawLines(&connectionLinesOff[0], connectionLinesOff.size());
-        painter->setPen(QPen(QColor(7910911), 25.0f / viewManager->getViewHeight()));
-        painter->drawLines(&connectionLinesOn[0], connectionLinesOn.size());
         painter->restore();
     } else {
         // get bounds
@@ -162,7 +153,6 @@ void QtRenderer::render(QPainter* painter) {
         Position bottomRightBound = viewManager->getBottomRight().snap();
 
         // render grid
-        std::set<const Block*> blocksToRender;
         for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
             for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
                 renderCell(FPosition(x, y), BlockType::NONE);
@@ -185,11 +175,11 @@ void QtRenderer::render(QPainter* painter) {
         }
         painter->setOpacity(1.0f);
 
-
         // render connections
-        std::vector<QLineF> connectionLines;
+        painter->save();
+        painter->setOpacity(0.9f);
+        painter->setRenderHint(QPainter::Antialiasing);
         for (unsigned int i = 0; i < blocks.size(); i++) {
-            if (connectionLines.size() >= lineRendingLimit) break;
             for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
                 // continue if input, we only want outputs
                 if (blocks[i]->isConnectionInput(id)) continue;
@@ -198,23 +188,18 @@ void QtRenderer::render(QPainter* painter) {
                 for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, pos, blocks[i], otherPos, other, connectionLines);
+                    renderConnection(painter, pos, blocks[i], otherPos, other, false);
                 }
             }
         }
         // render connection previews
         for (const auto& preview : connectionPreviews) {
-            renderConnection(painter, preview.second.input, preview.second.output, connectionLines);
+            renderConnection(painter, preview.second.input, preview.second.output, false);
         }
         // render half connection previews
         for (const auto& preview : halfConnectionPreviews) {
-            renderConnection(painter, preview.second.input, preview.second.output, connectionLines);
+            renderConnection(painter, preview.second.input, preview.second.output, false);
         }
-        painter->save();
-        painter->setOpacity(0.8f);
-        // painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(QPen(QColor(2507161), 25.0f / viewManager->getViewHeight()));
-        painter->drawLines(&connectionLines[0], connectionLines.size());
         painter->restore();
     }
 
@@ -333,7 +318,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
                         orgin = cSel->getPosition();
                         break;
                     }
-                    height ++;
+                    height++;
                     dSel = selectionCast<DimensionalSelection>(sel);
                 }
                 for (int i = 1; i < projectionSelection->size(); i++) {
@@ -390,77 +375,79 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     painter->translate(-center);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, std::vector<QLineF>& lines) {
+void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
+    if (state) {
+        painter->setPen(QPen(QColor(7910911), 30.0f / viewManager->getViewHeight()));
+    } else {
+        painter->setPen(QPen(QColor(2507161), 30.0f / viewManager->getViewHeight()));
+    }
     QPointF start = gridToQt(aPos);
     QPointF end = gridToQt(bPos);
 
 
-    // QPointF c1 = gridToQt(aPos + aControlOffset);
-    // QPointF c2 = gridToQt(bPos + bControlOffset);
+    QPointF c1 = gridToQt(aPos + aControlOffset * 1.4f);
+    QPointF c2 = gridToQt(bPos + bControlOffset * 1.4f);
 
-    lines.push_back(QLineF(start, end));
+    // lines.push_back(QLineF(start, end));
 
     // painter->drawLine(start, end);
 
-    // QPainterPath myPath;
-    // myPath.moveTo(start);
-    // myPath.cubicTo(c1, c2, end);
-    // painter->drawPath(myPath);
+    QPainterPath myPath;
+    myPath.moveTo(start);
+    myPath.cubicTo(c1, c2, end);
+    painter->drawPath(myPath);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, std::vector<QLineF>& lines) {
+const float edgeDis = 0.45f;
+
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state) {
     FPosition centerOffset(0.5f, 0.5f);
+
+    if (a == b) {
+        if (state) {
+            painter->setPen(QPen(QColor(7910911), 30.0f / viewManager->getViewHeight()));
+        } else {
+            painter->setPen(QPen(QColor(2507161), 30.0f / viewManager->getViewHeight()));
+        }
+        painter->setFont(QFont("Arial", 60.0f / viewManager->getViewHeight()));
+        painter->drawText(QRectF(gridToQt(aPos.free()), gridToQt((aPos + Position(1, 1)).free())), "S", QTextOption(Qt::AlignCenter));
+        return;
+    }
+
     FPosition aSocketOffset(0.0f, 0.0f);
     FPosition bSocketOffset(0.0f, 0.0f);
 
     if (a) {
         switch (a->getRotation()) {
-        case Rotation::ZERO: aSocketOffset = { 0.5f, 0.0f }; break;
-        case Rotation::NINETY: aSocketOffset = { 0.0f, 0.5f }; break;
-        case Rotation::ONE_EIGHTY: aSocketOffset = { -0.5f, 0.0f }; break;
-        case Rotation::TWO_SEVENTY: aSocketOffset = { 0.0f, -0.5f }; break;
+        case Rotation::ZERO: aSocketOffset = { edgeDis, 0.0f }; break;
+        case Rotation::NINETY: aSocketOffset = { 0.0f, edgeDis }; break;
+        case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, 0.0f }; break;
+        case Rotation::TWO_SEVENTY: aSocketOffset = { 0.0f, -edgeDis }; break;
         }
     }
 
     if (b) {
         switch (b->getRotation()) {
-        case Rotation::ZERO: bSocketOffset = { -0.5f, 0.0f }; break;
-        case Rotation::NINETY: bSocketOffset = { 0.0f, -0.5f }; break;
-        case Rotation::ONE_EIGHTY: bSocketOffset = { 0.5f, 0.0f }; break;
-        case Rotation::TWO_SEVENTY: bSocketOffset = { 0.0f, 0.5f }; break;
+        case Rotation::ZERO: bSocketOffset = { -edgeDis, 0.0f }; break;
+        case Rotation::NINETY: bSocketOffset = { 0.0f, -edgeDis }; break;
+        case Rotation::ONE_EIGHTY: bSocketOffset = { edgeDis, 0.0f }; break;
+        case Rotation::TWO_SEVENTY: bSocketOffset = { 0.0f, edgeDis }; break;
         }
     }
 
-    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos.free() + centerOffset + bSocketOffset, aSocketOffset, bSocketOffset, lines);
+    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos.free() + centerOffset + bSocketOffset, aSocketOffset, bSocketOffset, state);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPos, std::vector<QLineF>& lines) {
-    FPosition centerOffset(0.5f, 0.5f);
-    FPosition aSocketOffset(0.0f, 0.0f);
-    FPosition bSocketOffset(0.0f, 0.0f);
-
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPos, bool state) {
     // Socket offsets will be retrieved data later, this code will go
     const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
     const Block* b = blockContainer->getBlockContainer()->getBlock(bPos);
 
-    if (a) {
-        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
-        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
-        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
-    }
 
-    if (b) {
-        if (b->getRotation() == Rotation::ZERO) bSocketOffset = { -0.5f, 0.0f };
-        if (b->getRotation() == Rotation::NINETY) bSocketOffset = { 0.0f, -0.5f };
-        if (b->getRotation() == Rotation::ONE_EIGHTY) bSocketOffset = { 0.5f, 0.0f };
-        if (b->getRotation() == Rotation::TWO_SEVENTY) bSocketOffset = { 0.0f, 0.5f };
-    }
-
-    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos.free() + centerOffset + bSocketOffset, aSocketOffset, bSocketOffset, lines);
+    renderConnection(painter, aPos, a, bPos, b, state);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, std::vector<QLineF>& lines) {
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state) {
     FPosition centerOffset(0.5f, 0.5f);
     FPosition aSocketOffset(0.0f, 0.0f);
 
@@ -468,13 +455,13 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bP
     const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
 
     if (a) {
-        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { 0.5f, 0.0f };
-        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, 0.5f };
-        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -0.5f, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -0.5f };
+        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { edgeDis, 0.0f };
+        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, edgeDis };
+        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -edgeDis, 0.0f };
+        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -edgeDis };
     }
 
-    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), lines);
+    renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), state);
 }
 
 QPointF QtRenderer::gridToQt(FPosition position) {
@@ -572,7 +559,7 @@ void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPoint
     painter->setPen(QPen(color, 3.f * scale));
     auto vec = QVector2D(start - end);
     vec.normalize();
-    painter->drawLine(start, end + vec.toPointF() * scale*10);
+    painter->drawLine(start, end + vec.toPointF() * scale * 10);
     painter->restore();
     painter->setBrush(color);
 

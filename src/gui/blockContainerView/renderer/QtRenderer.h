@@ -52,10 +52,10 @@ private:
 
     void renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth = 0);
     void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);
-    void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, std::vector<QLineF>& lines);
-    void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, std::vector<QLineF>& lines);
-    void renderConnection(QPainter* painter, Position aPos, Position bPos, std::vector<QLineF>& lines);
-    void renderConnection(QPainter* painter, Position aPos, FPosition bPos, std::vector<QLineF>& lines);
+    void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state);
+    void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state);
+    void renderConnection(QPainter* painter, Position aPos, Position bPos, bool state);
+    void renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state);
 
     void drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float scale, const QColor& color);
 
@@ -74,8 +74,6 @@ private:
     std::unordered_map<ElementID, BlockPreview> blockPreviews;
     std::unordered_map<ElementID, ConnectionPreview> connectionPreviews;
     std::unordered_map<ElementID, HalfConnectionPreview> halfConnectionPreviews;
-
-    unsigned int lineRendingLimit = 200000;
 
     // info
     float lastFrameTime = 0.0f;
