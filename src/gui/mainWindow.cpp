@@ -1,6 +1,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QTreeView>
+#include <QCheckBox>
 
 #include <iostream>
 #include <memory>
@@ -29,6 +30,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     logicGridWindow->setSelector(ui->selectorTreeWidget);
 
     connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
+    connect(ui->UseSpeed, &QCheckBox::stateChanged, this, &MainWindow::simUseSpeed);
+    connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);
@@ -36,4 +39,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::setSimState(bool state) {
     evaluator->setPause(!state);
+}
+
+void MainWindow::simUseSpeed(bool state) {
+    std::cout << state << std::endl;
+    // evaluator->setPause(!state);
+}
+
+void MainWindow::setSimSpeed(double speed) {
+    std::cout << speed << std::endl;
+    // evaluator->setPause(!state);
 }
