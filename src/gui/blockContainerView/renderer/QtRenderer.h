@@ -58,7 +58,8 @@ private:
     void renderConnection(QPainter* painter, Position aPos, Position bPos, bool state);
     void renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state);
 
-    void drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float scale, const QColor& color);
+    void drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float size, const QColor& color);
+    void drawText(QPainter* painter, const QPointF& center, const QString& text, float size, const QColor& color);
 
     int w, h;
     BlockContainerWrapper* blockContainer;

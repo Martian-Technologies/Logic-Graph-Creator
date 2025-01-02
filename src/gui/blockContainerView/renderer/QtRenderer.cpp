@@ -328,7 +328,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
                     QPointF start = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
                     orgin += projectionSelection->getStep();
                     QPointF end = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
-                    drawArrow(painter, start, end, scalePixelCount(16.0f), arrowColorOrder[height % 26]);
+                    drawArrow(painter, start, end, 16.0f, arrowColorOrder[height % 26]);
                 }
                 renderSelection(painter, dimensionalSelection->getSelection(0), mode, depth + 1);
             } else {
@@ -381,9 +381,9 @@ const char* connectionON = "#8FE97F";
 
 void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
     if (state) {
-        painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f)));
+        painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
     } else {
-        painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f)));
+        painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
     }
     QPointF start = gridToQt(aPos);
     QPointF end = gridToQt(bPos);
@@ -409,12 +409,10 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block*
 
     if (a == b) {
         if (state) {
-            painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f)));
+            drawText(painter, gridToQt(aPos.free() + centerOffset), "S", 30, QColor(connectionON));
         } else {
-            painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f)));
+            drawText(painter, gridToQt(aPos.free() + centerOffset), "S", 30, QColor(connectionOFF));
         }
-        painter->setFont(QFont("Arial", scalePixelCount(60.0f)));
-        painter->drawText(QRectF(gridToQt(aPos.free()), gridToQt((aPos + Position(1, 1)).free())), "S", QTextOption(Qt::AlignCenter));
         return;
     }
 
@@ -559,13 +557,16 @@ void QtRenderer::spawnConfetti(FPosition start) {
 
 }
 
-void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float scale, const QColor& color) {
+
+// helpers
+void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float size, const QColor& color) {
     // Draw main line
+    size = scalePixelCount(size);
     painter->save();
-    painter->setPen(QPen(color, 3.f * scale));
+    painter->setPen(QPen(color, 3.f * size, Qt::SolidLine, Qt::RoundCap));
     auto vec = QVector2D(start - end);
     vec.normalize();
-    painter->drawLine(start, end + vec.toPointF() * scale * 10);
+    painter->drawLine(start, end + vec.toPointF() * size * 10);
     painter->restore();
     painter->setBrush(color);
 
@@ -574,7 +575,7 @@ void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPoint
     double angle = -line.angle() + 180;
 
     // Calculate arrowhead points
-    double arrow_size = 10 * scale;
+    double arrow_size = 10 * size;
     QPointF p1 = line.p2();
     QPointF arrow_p1(
         p1.x() - arrow_size * std::cos((angle + 150) * M_PI / 180),
@@ -590,4 +591,13 @@ void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPoint
     QPolygonF arrow_head;
     arrow_head << p1 << arrow_p1 << arrow_p2;
     painter->drawPolygon(arrow_head);
+}
+
+void QtRenderer::drawText(QPainter* painter, const QPointF& center, const QString& text, float size, const QColor& color) {
+    if (size*4 <= 0) return;
+    painter->setPen(QPen(color));
+    QFont font = painter->font();
+    font.setPixelSize(scalePixelCount(size*4));
+    painter->setFont(font);
+    painter->drawText(QRectF(center + QPointF(-100, -100), center + QPointF(100, 100)), text, QTextOption(Qt::AlignCenter));
 }

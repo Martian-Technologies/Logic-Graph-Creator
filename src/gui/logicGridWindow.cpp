@@ -7,7 +7,7 @@
 #include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
+LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(false), treeWidget(nullptr) {
     // qt settings
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
@@ -84,14 +84,14 @@ bool LogicGridWindow::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
         QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
         if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", 1 - nge->value()))) event->accept();
+            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", nge->value() - 1))) event->accept();
             return true;
         }
     } else if (event->type() == QEvent::Gesture) {
         QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
         if (gestureEvent) {
             QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", 1 - pinchGesture->scaleFactor()))) event->accept();
+            if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", pinchGesture->scaleFactor() - 1))) event->accept();
 
             return true;
         }
