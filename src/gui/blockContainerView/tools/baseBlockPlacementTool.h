@@ -17,6 +17,8 @@ public:
 
     // This will also tell the tool to reset.
     inline void selectBlock(BlockType selectedBlock) { this->selectedBlock = selectedBlock; }
+    inline void setRotation(Rotation rotation) { this->rotation = rotation; }
+    inline Rotation getRotation() { return rotation; }
     inline BlockType getSelectedBlock() const { return selectedBlock; }
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override {
         BlockContainerTool::initialize(toolManagerEventRegister);
@@ -27,19 +29,19 @@ public:
     bool rotateBlockCW(const Event* event) {
         rotation = rotate(rotation, true);
         updateElements();
-        
+
         return true;
     }
     bool rotateBlockCCW(const Event* event) {
         rotation = rotate(rotation, false);
         updateElements();
-        
+
         return true;
     }
 
 protected:
     inline virtual void updateElements() {};
-    
+
     BlockType selectedBlock;
     Rotation rotation;
 };

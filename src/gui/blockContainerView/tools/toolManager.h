@@ -62,6 +62,10 @@ public:
 private:
     template<class ToolType>
     inline void changeTool() {
+        BaseBlockPlacementTool* oldPlacementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+        if (oldPlacementTool) {
+            selectedRotation = oldPlacementTool->getRotation();
+        }
         unregisterEvents();
         tool = std::make_unique<ToolType>();
         tool->setEvaluatorStateInterface(evaluatorStateInterface);
@@ -69,7 +73,10 @@ private:
         tool->setElementCreator(ElementCreator(renderer));
         tool->initialize(toolManagerEventRegister);
         BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
-        if (placementTool) placementTool->selectBlock(selectedBlock);
+        if (placementTool) {
+            placementTool->selectBlock(selectedBlock);
+            placementTool->setRotation(selectedRotation);
+        }
     }
 
     void unregisterEvents() {
@@ -97,6 +104,7 @@ private:
 
     // tool data
     BlockType selectedBlock;
+    Rotation selectedRotation;
 };
 
 #endif /* toolManager_h */

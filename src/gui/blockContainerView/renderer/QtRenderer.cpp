@@ -85,6 +85,7 @@ void QtRenderer::render(QPainter* painter) {
         };
     // --- end of render lambdas
 
+
     if (evaluator) {
         // get states
         std::vector<Address> blockAddresses;
@@ -105,8 +106,8 @@ void QtRenderer::render(QPainter* painter) {
                 renderCell(FPosition(x, y), BlockType::NONE);
             }
         }
-
         // render blocks
+        painter->setRenderHint(QPainter::SmoothPixmapTransform);
         for (unsigned int i = 0; i < blocks.size(); i++) {
             if (blocks[i]->getPosition().withinArea(topLeftBound, bottomRightBound) || blocks[i]->getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
                 renderBlock(painter, blocks[i]->type(), blocks[i]->getPosition(), blocks[i]->getRotation(), blockStates[i]);
@@ -119,6 +120,7 @@ void QtRenderer::render(QPainter* painter) {
             renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
         }
         painter->setOpacity(1.0f);
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
 
         // render connections
         painter->save();
@@ -159,7 +161,7 @@ void QtRenderer::render(QPainter* painter) {
             }
         }
 
-        std::vector<Address> blockAddresses;
+        painter->setRenderHint(QPainter::SmoothPixmapTransform);
         std::vector<const Block*> blocks;
         for (const auto& block : *(blockContainer->getBlockContainer())) {
             if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
@@ -174,6 +176,7 @@ void QtRenderer::render(QPainter* painter) {
             renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
         }
         painter->setOpacity(1.0f);
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
 
         // render connections
         painter->save();
@@ -343,7 +346,6 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
-
     Position gridSize(getBlockWidth(type), getBlockHeight(type));
 
     // block
@@ -363,7 +365,6 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     // rotate and position painter to center of block
     painter->translate(center);
     painter->rotate(getDegrees(rotation));
-
     // draw the block from the center
     QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
     painter->drawPixmap(drawRect,
