@@ -7,8 +7,9 @@ Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrappe
     :paused(true),
     targetTickrate(0),
     logicSimulator(),
-    addressTree() {
-    setTickrate(1000000000); // 1000000000 clocks / min
+    addressTree(),
+    usingTickrate(false) {
+    setTickrate(40 * 60); // 1000000000 clocks / min
     const auto blockContainer = blockContainerWrapper->getBlockContainer();
     const Difference difference = blockContainer->getCreationDifference();
 
@@ -36,7 +37,18 @@ void Evaluator::reset() {
 void Evaluator::setTickrate(unsigned long long tickrate) {
     assert(tickrate > 0);
     targetTickrate = tickrate;
-    logicSimulator.setTargetTickrate(tickrate);
+    if (usingTickrate) {
+        logicSimulator.setTargetTickrate(tickrate);
+    }
+}
+
+void Evaluator::setUseTickrate(bool useTickrate) {
+    if (useTickrate) {
+        setTickrate(targetTickrate);
+    }
+    else {
+        setTickrate(1000000000); // 1000000000 clocks / min
+    }
 }
 
 long long int Evaluator::getRealTickrate() const {

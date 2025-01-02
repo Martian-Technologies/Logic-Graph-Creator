@@ -42,11 +42,11 @@ void MainWindow::setSimState(bool state) {
 }
 
 void MainWindow::simUseSpeed(bool state) {
-    std::cout << state << std::endl;
+    evaluator->setUseTickrate(state);
     // evaluator->setPause(!state);
 }
 
 void MainWindow::setSimSpeed(double speed) {
-    std::cout << speed << std::endl;
+    evaluator->setTickrate(std::round(speed * 60));
     // evaluator->setPause(!state);
 }

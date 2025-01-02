@@ -18,6 +18,7 @@ public:
     void setPause(bool pause);
     void reset();
     void setTickrate(unsigned long long tickrate);
+    void setUseTickrate(bool useTickrate);
     long long int getRealTickrate() const;
     void runNTicks(unsigned long long n);
     void makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId);
@@ -30,6 +31,7 @@ public:
 
 private:
     bool paused;
+    bool usingTickrate;
     unsigned long long targetTickrate;
     LogicSimulator logicSimulator;
     AddressTreeNode<block_id_t> addressTree;
