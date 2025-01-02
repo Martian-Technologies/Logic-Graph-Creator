@@ -375,18 +375,21 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
     painter->translate(-center);
 }
 
+const char* connectionOFF = "#97A9E1";
+const char* connectionON = "#8FE97F";
+
 void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
     if (state) {
-        painter->setPen(QPen(QColor(7910911), 30.0f / viewManager->getViewHeight()));
+        painter->setPen(QPen(QColor(connectionON), 30.0f / viewManager->getViewHeight()));
     } else {
-        painter->setPen(QPen(QColor(2507161), 30.0f / viewManager->getViewHeight()));
+        painter->setPen(QPen(QColor(connectionOFF), 30.0f / viewManager->getViewHeight()));
     }
     QPointF start = gridToQt(aPos);
     QPointF end = gridToQt(bPos);
 
 
-    QPointF c1 = gridToQt(aPos + aControlOffset * 1.4f);
-    QPointF c2 = gridToQt(bPos + bControlOffset * 1.4f);
+    QPointF c1 = gridToQt(aPos + aControlOffset * 1.3f);
+    QPointF c2 = gridToQt(bPos + bControlOffset * 1.3f);
 
     // lines.push_back(QLineF(start, end));
 
@@ -398,16 +401,16 @@ void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition b
     painter->drawPath(myPath);
 }
 
-const float edgeDis = 0.45f;
+const float edgeDis = 0.48f;
 
 void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state) {
     FPosition centerOffset(0.5f, 0.5f);
 
     if (a == b) {
         if (state) {
-            painter->setPen(QPen(QColor(7910911), 30.0f / viewManager->getViewHeight()));
+            painter->setPen(QPen(QColor(connectionON), 30.0f / viewManager->getViewHeight()));
         } else {
-            painter->setPen(QPen(QColor(2507161), 30.0f / viewManager->getViewHeight()));
+            painter->setPen(QPen(QColor(connectionOFF), 30.0f / viewManager->getViewHeight()));
         }
         painter->setFont(QFont("Arial", 60.0f / viewManager->getViewHeight()));
         painter->drawText(QRectF(gridToQt(aPos.free()), gridToQt((aPos + Position(1, 1)).free())), "S", QTextOption(Qt::AlignCenter));
