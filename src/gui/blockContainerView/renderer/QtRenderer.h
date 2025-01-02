@@ -49,6 +49,7 @@ private:
 
 private:
     QPointF gridToQt(FPosition position);
+    inline float scalePixelCount(float pixelCount) { return pixelCount / viewManager->getViewHeight() * ((float)h) / 500.f; }
 
     void renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth = 0);
     void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);

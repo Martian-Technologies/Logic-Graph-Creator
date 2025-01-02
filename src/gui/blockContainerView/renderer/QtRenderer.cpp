@@ -328,7 +328,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
                     QPointF start = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
                     orgin += projectionSelection->getStep();
                     QPointF end = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
-                    drawArrow(painter, start, end, 16.f / viewManager->getViewHeight(), arrowColorOrder[height % 26]);
+                    drawArrow(painter, start, end, scalePixelCount(16.0f), arrowColorOrder[height % 26]);
                 }
                 renderSelection(painter, dimensionalSelection->getSelection(0), mode, depth + 1);
             } else {
@@ -381,16 +381,15 @@ const char* connectionON = "#8FE97F";
 
 void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
     if (state) {
-        painter->setPen(QPen(QColor(connectionON), 30.0f / viewManager->getViewHeight()));
+        painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f)));
     } else {
-        painter->setPen(QPen(QColor(connectionOFF), 30.0f / viewManager->getViewHeight()));
+        painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f)));
     }
     QPointF start = gridToQt(aPos);
     QPointF end = gridToQt(bPos);
 
-
-    QPointF c1 = gridToQt(aPos + aControlOffset * 1.3f);
-    QPointF c2 = gridToQt(bPos + bControlOffset * 1.3f);
+    QPointF c1 = (abs(aControlOffset.x) > abs(aControlOffset.y)) ? gridToQt(aPos + FPosition(aControlOffset.x * 1.3f, 0)) : gridToQt(aPos + FPosition(0, aControlOffset.y * 1.3f));
+    QPointF c2 = (abs(bControlOffset.x) > abs(bControlOffset.y)) ? gridToQt(bPos + FPosition(bControlOffset.x * 1.3f, 0)) : gridToQt(bPos + FPosition(0, bControlOffset.y * 1.3f));
 
     // lines.push_back(QLineF(start, end));
 
@@ -403,17 +402,18 @@ void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition b
 }
 
 const float edgeDis = 0.48f;
+const float sideShift = 0.25f;
 
 void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state) {
     FPosition centerOffset(0.5f, 0.5f);
 
     if (a == b) {
         if (state) {
-            painter->setPen(QPen(QColor(connectionON), 30.0f / viewManager->getViewHeight()));
+            painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f)));
         } else {
-            painter->setPen(QPen(QColor(connectionOFF), 30.0f / viewManager->getViewHeight()));
+            painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f)));
         }
-        painter->setFont(QFont("Arial", 60.0f / viewManager->getViewHeight()));
+        painter->setFont(QFont("Arial", scalePixelCount(60.0f)));
         painter->drawText(QRectF(gridToQt(aPos.free()), gridToQt((aPos + Position(1, 1)).free())), "S", QTextOption(Qt::AlignCenter));
         return;
     }
@@ -423,19 +423,19 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block*
 
     if (a) {
         switch (a->getRotation()) {
-        case Rotation::ZERO: aSocketOffset = { edgeDis, 0.0f }; break;
-        case Rotation::NINETY: aSocketOffset = { 0.0f, edgeDis }; break;
-        case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, 0.0f }; break;
-        case Rotation::TWO_SEVENTY: aSocketOffset = { 0.0f, -edgeDis }; break;
+        case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
+        case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
+        case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
+        case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
         }
     }
 
     if (b) {
         switch (b->getRotation()) {
-        case Rotation::ZERO: bSocketOffset = { -edgeDis, 0.0f }; break;
-        case Rotation::NINETY: bSocketOffset = { 0.0f, -edgeDis }; break;
-        case Rotation::ONE_EIGHTY: bSocketOffset = { edgeDis, 0.0f }; break;
-        case Rotation::TWO_SEVENTY: bSocketOffset = { 0.0f, edgeDis }; break;
+        case Rotation::ZERO: bSocketOffset = { -edgeDis, -sideShift }; break;
+        case Rotation::NINETY: bSocketOffset = { sideShift, -edgeDis }; break;
+        case Rotation::ONE_EIGHTY: bSocketOffset = { edgeDis, sideShift }; break;
+        case Rotation::TWO_SEVENTY: bSocketOffset = { -sideShift, edgeDis }; break;
         }
     }
 
@@ -459,10 +459,12 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bP
     const Block* a = blockContainer->getBlockContainer()->getBlock(aPos);
 
     if (a) {
-        if (a->getRotation() == Rotation::ZERO) aSocketOffset = { edgeDis, 0.0f };
-        if (a->getRotation() == Rotation::NINETY) aSocketOffset = { 0.0f, edgeDis };
-        if (a->getRotation() == Rotation::ONE_EIGHTY) aSocketOffset = { -edgeDis, 0.0f };
-        if (a->getRotation() == Rotation::TWO_SEVENTY) aSocketOffset = { 0.0f, -edgeDis };
+        switch (a->getRotation()) {
+        case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
+        case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
+        case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
+        case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
+        }
     }
 
     renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), state);
