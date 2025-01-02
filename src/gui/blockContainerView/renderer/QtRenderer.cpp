@@ -232,32 +232,32 @@ void QtRenderer::render(QPainter* painter) {
 }
 
 const QColor arrowColorOrder[] = {
-    QColor(255, 0, 0, 80),
-    QColor(0, 255, 0, 80),
-    QColor(0, 0, 255, 80),
-    QColor(255, 255, 0, 80),
-    QColor(255, 0, 255, 80),
-    QColor(0, 255, 255, 80),
-    QColor(255, 255, 255, 80),
-    QColor(127, 0, 0, 80),
-    QColor(0, 127, 0, 80),
-    QColor(0, 0, 127, 80),
-    QColor(127, 127, 0, 80),
-    QColor(127, 0, 127, 80),
-    QColor(0, 127, 127, 80),
-    QColor(127, 127, 127, 80),
-    QColor(255, 127, 0, 80),
-    QColor(255, 0, 127, 80),
-    QColor(0, 255, 127, 80),
-    QColor(127, 255, 0, 80),
-    QColor(127, 0, 255, 80),
-    QColor(0, 127, 255, 80),
-    QColor(255, 127, 127, 80),
-    QColor(127, 255, 127, 80),
-    QColor(127, 127, 255, 80),
-    QColor(255, 255, 127, 80),
-    QColor(255, 127, 255, 80),
-    QColor(127, 255, 255, 80)
+    QColor(255, 0, 0, 180),
+    QColor(0, 255, 0, 180),
+    QColor(0, 0, 255, 180),
+    QColor(255, 255, 0, 180),
+    QColor(255, 0, 255, 180),
+    QColor(0, 255, 255, 180),
+    QColor(255, 255, 255, 180),
+    QColor(127, 0, 0, 180),
+    QColor(0, 127, 0, 180),
+    QColor(0, 0, 127, 180),
+    QColor(127, 127, 0, 180),
+    QColor(127, 0, 127, 180),
+    QColor(0, 127, 127, 180),
+    QColor(127, 127, 127, 180),
+    QColor(255, 127, 0, 180),
+    QColor(255, 0, 127, 180),
+    QColor(0, 255, 127, 180),
+    QColor(127, 255, 0, 180),
+    QColor(127, 0, 255, 180),
+    QColor(0, 127, 255, 180),
+    QColor(255, 127, 127, 180),
+    QColor(127, 255, 127, 180),
+    QColor(127, 127, 255, 180),
+    QColor(255, 255, 127, 180),
+    QColor(255, 127, 255, 180),
+    QColor(127, 255, 255, 180)
 };
 
 void QtRenderer::renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth) {
@@ -325,7 +325,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
                     QPointF start = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
                     orgin += projectionSelection->getStep();
                     QPointF end = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
-                    drawArrow(painter, start, end, 20.f / viewManager->getViewHeight(), arrowColorOrder[height % 26]);
+                    drawArrow(painter, start, end, 16.f / viewManager->getViewHeight(), arrowColorOrder[height % 26]);
                 }
                 renderSelection(painter, dimensionalSelection->getSelection(0), mode, depth + 1);
             } else {
