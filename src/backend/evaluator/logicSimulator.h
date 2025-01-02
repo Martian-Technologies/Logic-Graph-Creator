@@ -43,6 +43,8 @@ public:
     bool threadIsWaiting() const;
 
     long long int getRealTickrate() const { return realTickrate.load(std::memory_order_acquire); }
+    void setTargetTickrate(unsigned long long tickrate);
+    void triggerNextTickReset();
 
 private:
     std::vector<logic_state_t> currentState, nextState;
@@ -59,6 +61,10 @@ private:
     std::atomic<bool> isWaiting;
     std::atomic<int> ticksRun;
     std::atomic<long long int> realTickrate;
+
+    std::atomic<unsigned long long int> targetTickrate; // updates per minute
+
+    std::atomic<int64_t> nextTick_us;
 
     void simulationLoop();
     void tickrateMonitor();

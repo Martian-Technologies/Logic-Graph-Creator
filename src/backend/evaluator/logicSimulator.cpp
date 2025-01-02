@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include <chrono>
 
 #include "logicSimulator.h"
 #include "gateOperations.h"
@@ -19,7 +20,8 @@ LogicSimulator::LogicSimulator()
     realTickrate(0),
     running(true),
     proceedFlag(false),
-    isWaiting(false) {
+    isWaiting(false),
+    nextTick_us(0) {
     simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
     tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
 }
@@ -302,7 +304,8 @@ void LogicSimulator::simulationLoop() {
 
         bool waiting = false;
 
-        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire) || !waiting) {
+        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire) || !waiting || std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() < nextTick_us.load(std::memory_order_acquire)
+            ) {
             if (!waiting) {
                 isWaiting.store(true, std::memory_order_release);
                 waiting = true;
@@ -318,6 +321,9 @@ void LogicSimulator::simulationLoop() {
             break;
         }
         swapStates();
+        // get target tickrate and add to counter
+        const unsigned long long int target = targetTickrate.load(std::memory_order_acquire);
+        nextTick_us.fetch_add(60000000 / target, std::memory_order_release);
     }
 }
 
@@ -340,4 +346,14 @@ void LogicSimulator::tickrateMonitor() {
         // std::cout << "Tickrate: " << ticks << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+}
+
+void LogicSimulator::setTargetTickrate(unsigned long long tickrate) {
+    targetTickrate.store(tickrate, std::memory_order_release);
+    triggerNextTickReset();
+}
+
+void LogicSimulator::triggerNextTickReset() {
+    nextTick_us.store(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::memory_order_release);
+
 }
