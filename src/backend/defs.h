@@ -16,6 +16,8 @@ enum BlockType {
   BUTTON,
   TICK_BUTTON,
   SWITCH,
+  CONSTANT,
+  LIGHT,
   CUSTOM,
   TYPE_COUNT
 };

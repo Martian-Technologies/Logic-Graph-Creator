@@ -304,7 +304,13 @@ void LogicSimulator::simulationLoop() {
 
         bool waiting = false;
 
-        while (!proceedFlag.load(std::memory_order_acquire) && running.load(std::memory_order_acquire) || !waiting || std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() < nextTick_us.load(std::memory_order_acquire)
+        while (
+            !proceedFlag.load(std::memory_order_acquire) &&
+            running.load(std::memory_order_acquire) ||
+            !waiting ||
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+            ).count() < nextTick_us.load(std::memory_order_acquire)
             ) {
             if (!waiting) {
                 isWaiting.store(true, std::memory_order_release);

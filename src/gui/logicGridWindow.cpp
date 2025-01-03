@@ -60,6 +60,7 @@ void LogicGridWindow::updateSelectedItem() {
                 else if (str == "Switch") blockContainerView.getToolManager().selectBlock(BlockType::SWITCH);
                 else if (str == "Button") blockContainerView.getToolManager().selectBlock(BlockType::BUTTON);
                 else if (str == "Tick Button") blockContainerView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
+                else if (str == "Light") blockContainerView.getToolManager().selectBlock(BlockType::LIGHT);
                 else {
                     blockContainerView.getToolManager().changeTool(str.toStdString());
                 }

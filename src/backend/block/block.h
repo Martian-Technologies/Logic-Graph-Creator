@@ -38,6 +38,7 @@ inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type,
     case BlockType::SWITCH: return { 0, false };
     case BlockType::BUTTON: return { 0, false };
     case BlockType::TICK_BUTTON: return { 0, false };
+    case BlockType::LIGHT: return { 0, true };
     default:
         if (relativePos.x == 0 && relativePos.y == 0) return { 0, true };
         return { 0, false };
@@ -49,6 +50,7 @@ inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type
     case BlockType::SWITCH: return { 0, true };
     case BlockType::BUTTON: return { 0, true };
     case BlockType::TICK_BUTTON: return { 0, true };
+    case BlockType::LIGHT: return { 0, false };
     default:
         if (relativePos.x == 0 && relativePos.y == 0) return { 1, true };
         return { 0, false };
@@ -74,6 +76,7 @@ inline std::pair<Position, bool> getConnectionPosition(BlockType type, connectio
     case BlockType::SWITCH: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
     case BlockType::BUTTON: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
     case BlockType::TICK_BUTTON: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
+    case BlockType::LIGHT: if (connectionId) return { Position(), false }; return { Position(0, 0), true };
     default:
         if (connectionId < 2) return { Position(0, 0), true };
         return { Position(), false };
@@ -92,6 +95,7 @@ constexpr connection_end_id_t getMaxConnectionId(BlockType type) {
     case BlockType::SWITCH: return 0;
     case BlockType::BUTTON: return 0;
     case BlockType::TICK_BUTTON: return 0;
+    case BlockType::LIGHT: return 0;
     default: return 1;
     }
 }

@@ -43,11 +43,12 @@ void Evaluator::setTickrate(unsigned long long tickrate) {
 }
 
 void Evaluator::setUseTickrate(bool useTickrate) {
+    usingTickrate = useTickrate;
     if (useTickrate) {
-        setTickrate(targetTickrate);
+        logicSimulator.setTargetTickrate(targetTickrate);
     }
     else {
-        setTickrate(1000000000); // 1000000000 clocks / min
+        logicSimulator.setTargetTickrate(1000000000); // 1000000000 clocks / min
     }
 }
 
@@ -135,6 +136,7 @@ GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
     case BlockType::SWITCH: return GateType::CONTINUOUS_INPUT;
     case BlockType::BUTTON: return GateType::CONTINUOUS_INPUT;
     case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
+    case BlockType::LIGHT: return GateType::AND;
     default:
         throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
     }
