@@ -4,7 +4,6 @@
 #include <chrono>
 
 #include "logicSimulator.h"
-#include "gateOperations.h"
 
 
 LogicSimulator::LogicSimulator()
