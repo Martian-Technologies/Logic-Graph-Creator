@@ -21,16 +21,8 @@ public:
     void setSimState(bool state);
     void simUseSpeed(bool state);
     void setSimSpeed(double speed);
-    void save();
-    void load(const QString& filePath);
-
-
-protected:
-    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dropEvent(QDropEvent* event) override;
 
 private:
-    block_container_wrapper_id_t id;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;

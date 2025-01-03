@@ -28,6 +28,8 @@ public:
     // dont call this func (temporary)
     void updateSelectedItem();
 
+    
+
 private:
     BlockContainerView<QtRenderer> blockContainerView;
     
@@ -46,7 +48,9 @@ private:
     // settings (temp)
     bool mouseControls;
 
-private:
+    void save();
+    void load(const QString& filePath);
+
     // utility functions
     inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
     inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
@@ -66,6 +70,8 @@ protected:
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
     bool event(QEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 };
 
 #endif /* logicGridWindow_h */
