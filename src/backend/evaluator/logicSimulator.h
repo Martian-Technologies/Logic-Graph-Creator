@@ -35,7 +35,7 @@ public:
 
     void simulateNTicks(unsigned int n);
 
-    logic_state_t getState(block_id_t gate) const { return currentState.at(gate); }
+    logic_state_t getState(block_id_t gate) const { return currentState[gate]; }
 
     void debugPrint();
     void signalToPause();
@@ -50,7 +50,7 @@ private:
     std::vector<logic_state_t> currentState, nextState;
     std::vector<GateType> gateTypes;
     std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
-    std::vector<int> gateInputCountTotal, gateInputCountPowered;
+    std::vector<unsigned int> gateInputCountTotal, gateInputCountPowered;
     int numDecomissioned;
 
     // shit for threading

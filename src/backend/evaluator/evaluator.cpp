@@ -133,8 +133,8 @@ GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
     case BlockType::NAND: return GateType::NAND;
     case BlockType::NOR: return GateType::NOR;
     case BlockType::XNOR: return GateType::XNOR;
-    case BlockType::SWITCH: return GateType::CONTINUOUS_INPUT;
-    case BlockType::BUTTON: return GateType::CONTINUOUS_INPUT;
+    case BlockType::SWITCH: return GateType::DEFAULT_RETURN_CURRENTSTATE;
+    case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
     case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
     case BlockType::LIGHT: return GateType::AND;
     default:
@@ -146,6 +146,9 @@ logic_state_t Evaluator::getState(const Address& address) {
     const block_id_t blockId = addressTree.getValue(address);
 
     logicSimulator.signalToPause();
+    while (!logicSimulator.threadIsWaiting()) {
+        std::this_thread::yield();
+    }
     const logic_state_t state = logicSimulator.getState(blockId);
     if (!paused) {
         logicSimulator.signalToProceed();
@@ -157,6 +160,9 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
     std::vector<logic_state_t> states;
     states.reserve(addresses.size());
     logicSimulator.signalToPause();
+    while (!logicSimulator.threadIsWaiting()) {
+        std::this_thread::yield();
+    }
     for (const auto& address : addresses) {
         const block_id_t blockId = addressTree.getValue(address);
         states.push_back(logicSimulator.getState(blockId));
