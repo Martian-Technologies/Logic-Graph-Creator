@@ -12,7 +12,6 @@ bool MoveTool::click(const Event* event) {
         origin = positionEvent->getPosition();
         originSelection = std::make_shared<CellSelection>(origin);
         stage = 'd';
-        updateElements();
         break;
     case 'd':
         destination = positionEvent->getPosition();
@@ -20,6 +19,7 @@ bool MoveTool::click(const Event* event) {
         reset();
         break;
     }
+    updateElements();
     return true;
 }
 
@@ -30,9 +30,9 @@ bool MoveTool::unclick(const Event* event) {
         return false;
     case 'd':
         stage = 'o';
-        updateElements();
         break;
     }
+    updateElements();
     return true;
 }
 
@@ -55,6 +55,7 @@ bool MoveTool::pointerMove(const Event* event) {
 }
 
 void MoveTool::updateElements() {
+    if (!elementCreator.isSetup()) return;
     elementCreator.clear();
     if (stage == 'd') {
         elementCreator.addSelectionElement(SelectionObjectElement(originSelection));
@@ -62,10 +63,4 @@ void MoveTool::updateElements() {
     } else {
         elementCreator.addSelectionElement(SelectionElement(pointer));
     }
-    // if (makingOutput) {
-    //     elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
-    // } else {
-    //     elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
-    //     elementCreator.addSelectionElement(SelectionObjectElement(outputSelection, SelectionObjectElement::RenderMode::ARROWS));
-    // }
 }

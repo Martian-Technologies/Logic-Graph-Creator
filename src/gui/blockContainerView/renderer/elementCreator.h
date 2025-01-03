@@ -7,10 +7,12 @@
 
 class ElementCreator {
 public:
-    ElementCreator() : renderer(nullptr) {}
+    ElementCreator() : renderer(nullptr) { }
     ElementCreator(Renderer* renderer) : renderer(renderer), ids() { assert(renderer); }
 
     ~ElementCreator() { clear(); }
+
+    bool isSetup() { return (bool)renderer; }
 
     void removeElement(ElementID id) {
         assert(renderer);

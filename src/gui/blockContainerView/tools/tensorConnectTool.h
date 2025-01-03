@@ -13,6 +13,7 @@ public:
         makingOutput = true;
         outputSelection = nullptr;
         inputSelection = nullptr;
+        updateElements();
     }
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
@@ -40,10 +41,11 @@ public:
     // bool exitBlockView(const Event* event);
 
 private:
-    void updateElements(SharedSelection selection);
+    void updateElements();
 
     bool makingOutput;
-    
+    FPosition pointer;
+        
     // output
     int outputStage;
     Position outputPosition;

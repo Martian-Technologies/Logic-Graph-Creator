@@ -70,9 +70,7 @@ private:
         }
         unregisterEvents();
         tool = std::make_unique<ToolType>();
-        tool->setEvaluatorStateInterface(evaluatorStateInterface);
-        tool->setElementCreator(ElementCreator(renderer));
-        tool->setBlockContainer(blockContainerWrapper);
+        tool->setup(ElementCreator(renderer), evaluatorStateInterface, blockContainerWrapper);
         tool->initialize(toolManagerEventRegister);
         BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
         if (placementTool) {

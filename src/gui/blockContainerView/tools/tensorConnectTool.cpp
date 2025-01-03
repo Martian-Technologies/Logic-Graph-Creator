@@ -60,6 +60,7 @@ bool TensorConnectTool::click(const Event* event) {
             inputStage++;
         }
     }
+    updateElements();
     return true;
 }
 
@@ -113,6 +114,7 @@ bool TensorConnectTool::unclick(const Event* event) {
             }
         }
     }
+    updateElements();
     return true;
 }
 
@@ -123,81 +125,79 @@ bool TensorConnectTool::confirm(const Event* event) {
         if (outputStage % 2 == 1) outputStage--;
         makingOutput = false;
         inputStage = -1;
-        return true;
     } else {
         if (inputStage != outputStage) return false;
         if (!sameSelectionShape(inputSelection, outputSelection)) return false;
         // std::cout << "DONE" << std::endl;
         blockContainer->tryCreateConnection(outputSelection, inputSelection);
         reset();
-        return true;
     }
-
-    return false;
+    updateElements();
+    return true;
 }
 
 bool TensorConnectTool::pointerMove(const Event* event) {
     if (!blockContainer) return false;
     const PositionEvent* positionEvent = event->cast<PositionEvent>();
     if (!positionEvent) return false;
+    pointer = positionEvent->getFPosition();
+    updateElements();
+    return true;
+}
 
+void TensorConnectTool::updateElements() {
+    if (!elementCreator.isSetup()) return;
+    elementCreator.clear();
+    SharedSelection selection;
     if (makingOutput) {
         // orgin
         if (outputStage == -1) {
-            updateElements(std::make_shared<CellSelection>(positionEvent->getPosition()));
+            selection = std::make_shared<CellSelection>(pointer.snap());
         } else if (outputStage % 2 == 0) { // step
-            step = positionEvent->getPosition();
+            step = pointer.snap();
             if (step == outputPosition) {
-                updateElements(std::make_shared<ProjectionSelection>(outputSelection, Position(), 1));
+                selection = std::make_shared<ProjectionSelection>(outputSelection, Position(), 1);
             } else {
-                updateElements(std::make_shared<ProjectionSelection>(outputSelection, step - outputPosition, 2));
+                selection = std::make_shared<ProjectionSelection>(outputSelection, step - outputPosition, 2);
             }
         } else { // count
             int dis = outputPosition.distanceTo(step);
-            float length = positionEvent->getFPosition().lengthAlongProjectToVec(outputPosition.free() + FPosition(0.5f, 0.5f), step.free() + FPosition(0.5f, 0.5f));
+            float length = pointer.lengthAlongProjectToVec(outputPosition.free() + FPosition(0.5f, 0.5f), step.free() + FPosition(0.5f, 0.5f));
             int count = Abs(round(length / dis)) + 1;
-            updateElements(std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step - outputPosition : outputPosition - step, count));
+            selection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step - outputPosition : outputPosition - step, count);
         }
+        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
     } else {
         // orgin
         if (outputStage <= inputStage) {
-            updateElements(inputSelection);
-            return false;
+            selection = inputSelection;
+            return;
         }
         if (inputStage == -1) {
-            updateElements(std::make_shared<CellSelection>(positionEvent->getPosition()));
+            selection = std::make_shared<CellSelection>(pointer.snap());
         } else if (inputStage % 2 == 0) { // step
-            step = positionEvent->getPosition();
+            step = pointer.snap();
             if (step == inputPosition) {
-                updateElements(std::make_shared<ProjectionSelection>(inputSelection, Position(), 1));
+                selection = std::make_shared<ProjectionSelection>(inputSelection, Position(), 1);
             } else {
                 SharedDimensionalSelection outputSimilarSelection = selectionCast<DimensionalSelection>(outputSelection);
                 for (int i = outputStage/2 - inputStage/2 - 1; i > 0; i--) {
                     outputSimilarSelection = selectionCast<DimensionalSelection>(outputSimilarSelection->getSelection(0));
                 }
                 if (outputSimilarSelection->size() == 1) {
-                    updateElements(std::make_shared<ProjectionSelection>(inputSelection, step - inputPosition, 2));
+                    selection = std::make_shared<ProjectionSelection>(inputSelection, step - inputPosition, 2);
                 } else {
-                    updateElements(std::make_shared<ProjectionSelection>(inputSelection, step - inputPosition, outputSimilarSelection->size()));
+                    selection = std::make_shared<ProjectionSelection>(inputSelection, step - inputPosition, outputSimilarSelection->size());
                 }
                 
             }
         } else { // count
             int dis = inputPosition.distanceTo(step);
-            float length = positionEvent->getFPosition().lengthAlongProjectToVec(inputPosition.free() + FPosition(0.5f, 0.5f), step.free() + FPosition(0.5f, 0.5f));
+            float length = pointer.lengthAlongProjectToVec(inputPosition.free() + FPosition(0.5f, 0.5f), step.free() + FPosition(0.5f, 0.5f));
             int count = Abs(round(length / dis)) + 1;
-            updateElements(std::make_shared<ProjectionSelection>(inputSelection, (length > 0) ? step - inputPosition : inputPosition - step, count));
+            selection = std::make_shared<ProjectionSelection>(inputSelection, (length > 0) ? step - inputPosition : inputPosition - step, count);
         }
-    }
-    return true;
-}
-
-void TensorConnectTool::updateElements(SharedSelection selection) {
-    elementCreator.clear();
-    if (makingOutput) {
-        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
-    } else {
-        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
         elementCreator.addSelectionElement(SelectionObjectElement(outputSelection, SelectionObjectElement::RenderMode::ARROWS));
+        elementCreator.addSelectionElement(SelectionObjectElement(selection, SelectionObjectElement::RenderMode::ARROWS));
     }
 }
