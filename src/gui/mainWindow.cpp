@@ -82,8 +82,8 @@ void MainWindow::save() {
             const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
             placement["x"] = position.x;
             placement["y"] = position.y;
-            placement["r"] = (int)rotation;
-            placement["t"] = (int)blockType;
+            placement["r"] = (char)rotation;
+            placement["t"] = (char)blockType;
             placeJson.push_back(placement);
             break;
         }

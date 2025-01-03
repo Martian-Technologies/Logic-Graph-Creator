@@ -4,7 +4,7 @@
 typedef unsigned char block_size_t;
 typedef unsigned int block_id_t;
 
-enum BlockType {
+enum BlockType : char {
   NONE,
   BLOCK,
   AND,

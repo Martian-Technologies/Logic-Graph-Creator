@@ -84,7 +84,7 @@ inline FPosition Position::free() const { return FPosition(x, y); }
 inline Position FPosition::snap() const { return Position(downwardFloor(x), downwardFloor(y)); }
 
 // ---- we also define block rotation here so ----
-enum Rotation {
+enum Rotation : char {
     ZERO = 0,
     NINETY = 1,
     ONE_EIGHTY = 2,
