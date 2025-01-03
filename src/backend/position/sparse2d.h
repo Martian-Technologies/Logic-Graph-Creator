@@ -76,7 +76,8 @@ void Sparse2dArray<T>::insert(const Position& position, const T& value) {
 template<class T>
 void Sparse2dArray<T>::remove(const Position& position) {
     iterator iter = data.find(position);
-    if (iter != data.end()) data.erase(iter);
+    if (iter != data.end())
+        data.erase(iter);
 }
 
 #endif /* sparse2d_h */

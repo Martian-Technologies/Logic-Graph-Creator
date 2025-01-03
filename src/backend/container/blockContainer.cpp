@@ -115,8 +115,8 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
         checkCollision(
             position,
             position + Position(
-                getBlockWidth(block->type(), block->getRotation()),
-                getBlockHeight(block->type(), block->getRotation())
+                getBlockWidth(block->type(), block->getRotation())-1,
+                getBlockHeight(block->type(), block->getRotation())-1
             )
         )
     ) {

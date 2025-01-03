@@ -39,7 +39,7 @@ struct SelectionObjectElement {
         SELECTION_INVERTED,
         ARROWS
     };
-    SelectionObjectElement(SharedSelection selection, RenderMode renderMode)
+    SelectionObjectElement(SharedSelection selection, RenderMode renderMode = RenderMode::SELECTION)
         : selection(selection), renderMode(renderMode) {}
 
     SharedSelection selection;

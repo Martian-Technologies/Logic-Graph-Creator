@@ -11,6 +11,7 @@ public:
     inline void reset() override final {
         stage = 'o';
         originSelection = nullptr;
+        updateElements();
     }
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
@@ -36,9 +37,11 @@ public:
     // bool exitBlockView(const Event* event);
 
 private:
-    void updateElements(SharedSelection selection);
+    void updateElements();
 
     char stage;
+
+    Position pointer;
 
     // output
     Position origin;
