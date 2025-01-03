@@ -40,7 +40,7 @@ public:
     // Trys to remove a block. Returns if successful.
     bool tryRemoveBlock(const Position& position);
     // Trys to move a block. Returns if successful.
-    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation);
+    bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
 
     void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
     void tryRemoveOverArea(Position cellA, Position cellB);

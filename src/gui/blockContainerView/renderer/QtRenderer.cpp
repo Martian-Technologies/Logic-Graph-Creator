@@ -593,7 +593,7 @@ void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPoint
 }
 
 void QtRenderer::drawText(QPainter* painter, const QPointF& center, const QString& text, float size, const QColor& color) {
-    if (size * 4 <= 0) return;
+    if (scalePixelCount(size * 4) <= 1) return;
     painter->setPen(QPen(color));
     QFont font = painter->font();
     font.setPixelSize(scalePixelCount(size * 4));

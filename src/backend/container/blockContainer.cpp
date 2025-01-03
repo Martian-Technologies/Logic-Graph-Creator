@@ -46,21 +46,20 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
     return true;
 }
 
-bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation) {
+bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
     Block* block = getBlock(positionOfBlock);
     if (!block) return false;
     if (
         checkCollision(
             position,
             position + Position(
-                getBlockWidth(block->type(), rotation),
-                getBlockHeight(block->type(), rotation)
+                getBlockWidth(block->type(), block->getRotation()),
+                getBlockHeight(block->type(), block->getRotation())
             )
         )
         ) return false;
     removeBlockCells(block);
     block->setPosition(position);
-    block->setRotation(rotation);
     placeBlockCells(block);
     return true;
 }
@@ -109,23 +108,26 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
     return true;
 }
 
-bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation, Difference* difference) {
+bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference) {
     Block* block = getBlock(positionOfBlock);
     if (!block) return false;
     if (
         checkCollision(
             position,
             position + Position(
-                getBlockWidth(block->type(), rotation),
-                getBlockHeight(block->type(), rotation)
+                getBlockWidth(block->type(), block->getRotation()),
+                getBlockHeight(block->type(), block->getRotation())
             )
         )
-        ) return false;
+    ) {
+        return false;
+    }
+
+    // do move
+    difference->addMovedBlock(block->getPosition(), position);
     removeBlockCells(block);
     block->setPosition(position);
-    block->setRotation(rotation);
     placeBlockCells(block);
-    // difference.addMovedBlock(position, rotation, position, rotation)
     return true;
 }
 

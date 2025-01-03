@@ -112,6 +112,12 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             logicSimulator.connectGates(outputBlockId, inputBlockId);
             break;
         }
+        case Difference::MOVE_BLOCK:
+        {
+            const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
+            addressTree.moveData(curPosition, newPosition);
+            break;
+        }
         default:
             throw std::invalid_argument("makeEdit: invalid modificationType");
         }

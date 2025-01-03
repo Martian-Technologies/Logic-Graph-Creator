@@ -1,30 +1,26 @@
-#ifndef tensorConnectTool_h
-#define tensorConnectTool_h
+#ifndef moveTool_h
+#define moveTool_h
 
 #include "blockContainerTool.h"
 #include "middleEnd/selection.h"
 
-class TensorConnectTool : public BlockContainerTool {
+class MoveTool : public BlockContainerTool {
 public:
-    inline TensorConnectTool() : BlockContainerTool(), makingOutput(true), outputStage(-1), inputStage(-1), outputSelection(), inputSelection() {}
+    inline MoveTool() : BlockContainerTool(), stage('o'), originSelection(nullptr) {}
 
     inline void reset() override final {
-        outputStage = -1;
-        makingOutput = true;
-        outputSelection = nullptr;
-        inputSelection = nullptr;
+        stage = 'o';
+        originSelection = nullptr;
     }
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BlockContainerTool::initialize(toolManagerEventRegister);
-        toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&TensorConnectTool::click, this, std::placeholders::_1));
-        // toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&TensorConnectTool::stopPlaceBlock, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&TensorConnectTool::unclick, this, std::placeholders::_1));
-        // toolManagerEventRegister.registerFunction("tool secondary deactivate", std::bind(&TensorConnectTool::stopDeleteBlocks, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("pointer move", std::bind(&TensorConnectTool::pointerMove, this, std::placeholders::_1));
-        // toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&TensorConnectTool::enterBlockView, this, std::placeholders::_1));
-        // toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&TensorConnectTool::exitBlockView, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("tool rotate block cw", std::bind(&TensorConnectTool::confirm, this, std::placeholders::_1));
+        toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
+        toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
+        toolManagerEventRegister.registerFunction("pointer move", std::bind(&MoveTool::pointerMove, this, std::placeholders::_1));
+        // toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&MoveTool::enterBlockView, this, std::placeholders::_1));
+        // toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&MoveTool::exitBlockView, this, std::placeholders::_1));
+        toolManagerEventRegister.registerFunction("tool rotate block cw", std::bind(&MoveTool::confirm, this, std::placeholders::_1));
     }
 
     bool click(const Event* event);
@@ -42,20 +38,14 @@ public:
 private:
     void updateElements(SharedSelection selection);
 
-    bool makingOutput;
-    
+    char stage;
+
     // output
-    int outputStage;
-    Position outputPosition;
-    SharedSelection outputSelection;
+    Position origin;
+    SharedSelection originSelection;
 
     // input
-    int inputStage;
-    Position inputPosition;
-    SharedSelection inputSelection;
-
-    // tmp
-    Position step;
+    Position destination;
 };
 
-#endif /* tensorConnectTool_h */
+#endif /* moveTool_h */

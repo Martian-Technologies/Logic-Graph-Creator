@@ -13,6 +13,7 @@
 #include "blockContainerTool.h"
 #include "tensorConnectTool.h"
 #include "singleConnectTool.h"
+#include "moveTool.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
 #include "logicToucher.h"
@@ -31,6 +32,7 @@ public:
         if (this->toolType == toolType) return;
         if (toolType == "Single Place") changeTool<SinglePlaceTool>();
         else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
+        else if (toolType == "Move") changeTool<MoveTool>();
         else if (toolType == "Simple") changeTool<SingleConnectTool>();
         else if (toolType == "Tensor") changeTool<TensorConnectTool>();
         else if (toolType == "State Changer") changeTool<LogicToucher>();

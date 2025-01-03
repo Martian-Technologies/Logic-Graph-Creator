@@ -14,9 +14,9 @@ bool BlockContainerWrapper::tryRemoveBlock(const Position& position) {
     return out;
 }
 
-bool BlockContainerWrapper::tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation) {
+bool BlockContainerWrapper::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
     DifferenceSharedPtr difference = std::make_shared<Difference>();
-    bool out = blockContainer.tryMoveBlock(positionOfBlock, position, rotation, difference.get());
+    bool out = blockContainer.tryMoveBlock(positionOfBlock, position, difference.get());
     sendDifference(difference);
     return false;
 }
@@ -158,6 +158,10 @@ void BlockContainerWrapper::undo() {
             connectionModification = std::get<Difference::connection_modification_t>(modification.second);
             blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
             break;
+        case Difference::MOVE_BLOCK:
+            connectionModification = std::get<Difference::move_modification_t>(modification.second);
+            blockContainer.tryMoveBlock(std::get<1>(connectionModification), std::get<0>(connectionModification), newDifference.get());
+            break;
         }
     }
     sendDifference(newDifference);
@@ -186,6 +190,10 @@ void BlockContainerWrapper::redo() {
         case Difference::CREATED_CONNECTION:
             connectionModification = std::get<Difference::connection_modification_t>(modification.second);
             blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+        case Difference::MOVE_BLOCK:
+            connectionModification = std::get<Difference::move_modification_t>(modification.second);
+            blockContainer.tryMoveBlock(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
             break;
         }
     }

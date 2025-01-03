@@ -36,13 +36,13 @@ public:
     // Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryRemoveBlock(const Position& position);
     // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation);
+    bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
     // Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
     // Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryRemoveBlock(const Position& position, Difference* difference);
     // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Rotation rotation, Difference* difference);
+    bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference);
 
     /* ----------- connections ----------- */
     // -- getters --

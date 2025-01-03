@@ -19,19 +19,20 @@ public:
         const_cast<AddressTreeNode<T>&>(getParentBranch(address)).values.erase(address.getPosition(address.size() - 1));
     }
 
-    T getValue(Position position) const { return values.at(position); }
-    T getValue(const Address& address) const { return getParentBranch(address).getValue(address.getPosition(address.size() - 1)); }
+    inline T getValue(Position position) const { return values.at(position); }
+    inline T getValue(const Address& address) const { return getParentBranch(address).getValue(address.getPosition(address.size() - 1)); }
 
     // Added const overload for getParentBranch
     AddressTreeNode<T>& getParentBranch(const Address& address);
     const AddressTreeNode<T>& getParentBranch(const Address& address) const;
 
-    AddressTreeNode<T> getBranch(Position position) const { return branches.at(position); }
-    AddressTreeNode<T> getBranch(const Address& address) const;
+    inline const AddressTreeNode<T>& getBranch(Position position) const;
+    const AddressTreeNode<T>& getBranch(const Address& address) const;
 
-    bool hasValue(Position position) const { return values.find(position) != values.end(); }
-    bool hasBranch(Position position) const { return branches.find(position) != branches.end(); }
+    inline bool hasValue(Position position) const { return values.find(position) != values.end(); }
+    inline bool hasBranch(Position position) const { return branches.find(position) != branches.end(); }
 
+    void moveData(Position curPosition, Position newPosition);
     void remap(const std::unordered_map<T, T>& mapping);
 
 private:
@@ -74,16 +75,34 @@ void AddressTreeNode<T>::makeBranch(const Address& address) {
 }
 
 template<class T>
-AddressTreeNode<T> AddressTreeNode<T>::getBranch(const Address& address) const {
+const AddressTreeNode<T>& AddressTreeNode<T>::getBranch(Position position) const {
+    auto it = branches.find(position);
+    if (it == branches.end()) {
+        throw std::out_of_range("AddressTree::getBranch: address not found");
+    }
+    return it->second;
+}
+
+template<class T>
+const AddressTreeNode<T>& AddressTreeNode<T>::getBranch(const Address& address) const {
     const AddressTreeNode<T>* currentBranch = this;
     for (size_t i = 0; i < address.size(); i++) {
-        auto it = currentBranch->branches.find(address.getPosition(i));
-        if (it == currentBranch->branches.end()) {
-            throw std::out_of_range("AddressTree::getBranch: address not found");
-        }
-        currentBranch = &(it->second);
+        currentBranch = &getBranch(address.getPosition(i));
     }
     return *currentBranch;
+}
+
+template<class T>
+void AddressTreeNode<T>::moveData(Position curPosition, Position newPosition) {
+    if (hasValue(curPosition)) {
+        auto pair = values.extract(curPosition);
+        pair.key() = newPosition;
+        values.insert(std::move(pair));
+    } else {
+        auto pair = branches.extract(curPosition);
+        pair.key() = newPosition;
+        branches.insert(std::move(pair));
+    }
 }
 
 template<class T>
