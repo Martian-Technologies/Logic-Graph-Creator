@@ -21,7 +21,7 @@ class ToolManager {
 public:
     inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
         blockContainerWrapper(nullptr), eventRegister(eventRegister), registeredEvents(), renderer(renderer),
-        tool(nullptr), selectedBlock(NONE), toolType("NONE"), toolManagerEventRegister(eventRegister, &registeredEvents) {}
+        tool(nullptr), selectedBlock(NONE), selectedRotation(ZERO), toolType("NONE"), toolManagerEventRegister(eventRegister, &registeredEvents) {}
 
     inline ~ToolManager() {
         unregisterEvents();

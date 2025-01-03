@@ -19,7 +19,6 @@
 
 QtRenderer::QtRenderer()
     : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
-
 }
 
 void QtRenderer::initializeTileSet(const std::string& filePath) {
