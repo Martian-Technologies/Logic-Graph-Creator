@@ -18,8 +18,7 @@
 #include "util/vec2.h"
 
 QtRenderer::QtRenderer()
-    : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) {
-}
+    : w(0), h(0), blockContainer(nullptr), tileSetInfo(nullptr) { }
 
 void QtRenderer::initializeTileSet(const std::string& filePath) {
     if (filePath != "") {
@@ -30,7 +29,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
         }
 
         // create tileSet
-        tileSetInfo = std::make_unique<TileSetInfo>(512, 15);
+        tileSetInfo = std::make_unique<TileSetInfo>(256, 15);
     }
 }
 
@@ -84,6 +83,9 @@ void QtRenderer::render(QPainter* painter) {
         };
     // --- end of render lambdas
 
+    // get bounds
+    Position topLeftBound = viewManager->getTopLeft().snap();
+    Position bottomRightBound = viewManager->getBottomRight().snap();
 
     if (evaluator) {
         // get states
@@ -94,10 +96,6 @@ void QtRenderer::render(QPainter* painter) {
             blocks.push_back(&(block.second));
         }
         std::vector<logic_state_t> blockStates = evaluator->getBulkStates(blockAddresses);
-
-        // get bounds
-        Position topLeftBound = viewManager->getTopLeft().snap();
-        Position bottomRightBound = viewManager->getBottomRight().snap();
 
         // render grid
         for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
@@ -135,7 +133,14 @@ void QtRenderer::render(QPainter* painter) {
                 for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, pos, blocks[i], otherPos, other, state);
+                    if (
+                        (pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
+                        (pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
+                        (pos.x - 2 < bottomRightBound.x || otherPos.x - 2 < bottomRightBound.x) &&
+                        (pos.y - 2 < bottomRightBound.y || otherPos.y - 2 < bottomRightBound.y)
+                    ) {
+                        renderConnection(painter, pos, blocks[i], otherPos, other, state);
+                    }
                 }
             }
         }
@@ -149,10 +154,6 @@ void QtRenderer::render(QPainter* painter) {
         }
         painter->restore();
     } else {
-        // get bounds
-        Position topLeftBound = viewManager->getTopLeft().snap();
-        Position bottomRightBound = viewManager->getBottomRight().snap();
-
         // render grid
         for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
             for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
@@ -390,7 +391,6 @@ void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition b
     QPointF c1 = (abs(aControlOffset.x) > abs(aControlOffset.y)) ? gridToQt(aPos + FPosition(aControlOffset.x * 1.3f, 0)) : gridToQt(aPos + FPosition(0, aControlOffset.y * 1.3f));
     QPointF c2 = (abs(bControlOffset.x) > abs(bControlOffset.y)) ? gridToQt(bPos + FPosition(bControlOffset.x * 1.3f, 0)) : gridToQt(bPos + FPosition(0, bControlOffset.y * 1.3f));
 
-    // lines.push_back(QLineF(start, end));
 
     // painter->drawLine(start, end);
 
@@ -593,10 +593,10 @@ void QtRenderer::drawArrow(QPainter* painter, const QPointF& start, const QPoint
 }
 
 void QtRenderer::drawText(QPainter* painter, const QPointF& center, const QString& text, float size, const QColor& color) {
-    if (size*4 <= 0) return;
+    if (size * 4 <= 0) return;
     painter->setPen(QPen(color));
     QFont font = painter->font();
-    font.setPixelSize(scalePixelCount(size*4));
+    font.setPixelSize(scalePixelCount(size * 4));
     painter->setFont(font);
     painter->drawText(QRectF(center + QPointF(-100, -100), center + QPointF(100, 100)), text, QTextOption(Qt::AlignCenter));
 }
