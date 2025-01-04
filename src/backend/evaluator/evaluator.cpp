@@ -37,6 +37,9 @@ void Evaluator::setTickrate(unsigned long long tickrate) {
     if (usingTickrate) {
         logicSimulator.setTargetTickrate(tickrate);
     }
+    else {
+        logicSimulator.setTargetTickrate(1000000000); // 1000000000 clocks / min
+    }
 }
 
 void Evaluator::setUseTickrate(bool useTickrate) {
