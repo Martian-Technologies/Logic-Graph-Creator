@@ -9,6 +9,9 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
+# C++ Standard
+set(CXX_STANDARD 20)
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
@@ -52,6 +55,7 @@ endif()
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${Vulkan_LIBRARIES})
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
 if(APPLE) # MacOS specific (After add_executable)
     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)

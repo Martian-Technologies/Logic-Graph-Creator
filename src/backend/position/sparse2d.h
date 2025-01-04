@@ -1,8 +1,6 @@
 #ifndef sparse2d_h
 #define sparse2d_h
 
-#include <unordered_map>
-
 #include "position.h"
 
 /*

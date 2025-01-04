@@ -3,8 +3,6 @@
 #include <QTreeView>
 #include <QCheckBox>
 
-#include <memory>
-
 #include "logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"

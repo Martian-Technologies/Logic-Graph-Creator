@@ -1,6 +1,3 @@
-#include <functional>
-#include <iostream>
-
 #include "evaluator.h"
 
 Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)

@@ -1,5 +1,3 @@
-// #include <iostream>
-
 #include "logicToucher.h"
 
 bool LogicToucher::press(const Event* event) {

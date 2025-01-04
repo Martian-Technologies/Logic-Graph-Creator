@@ -2,8 +2,6 @@
 #define QtRenderer_h
 
 #include <QLineF>
-#include <memory>
-#include <unordered_map>
 #include <QPainter>
 #include <QColor>
 

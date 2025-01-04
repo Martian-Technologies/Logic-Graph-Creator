@@ -3,9 +3,6 @@
 
 #include <QPainter>
 
-#include <vector>
-#include <string>
-
 #include "backend/evaluator/evaluatorStateInterface.h"
 #include "middleEnd/blockContainerWrapper.h"
 #include "../renderer/elementCreator.h"

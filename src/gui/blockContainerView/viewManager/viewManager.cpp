@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <qlogging.h>
 
 #include "viewManager.h"
 #include "gui/blockContainerView/events/customEvents.h"
