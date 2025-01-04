@@ -42,7 +42,7 @@ bool TensorConnectTool::click(const Event* event) {
                 inputStage += 2;
             } else {
                 SharedDimensionalSelection outputSimilarSelection = selectionCast<DimensionalSelection>(outputSelection);
-                for (int i = outputStage/2 - inputStage/2 - 1; i > 0; i--) {
+                for (int i = outputStage / 2 - inputStage / 2 - 1; i > 0; i--) {
                     outputSimilarSelection = selectionCast<DimensionalSelection>(outputSimilarSelection->getSelection(0));
                 }
                 if (outputSimilarSelection->size() == 1) {
@@ -100,7 +100,7 @@ bool TensorConnectTool::unclick(const Event* event) {
                 inputSelection = projectionSelection->getSelection(0);
             } else {
                 SharedDimensionalSelection outputSimilarSelection = selectionCast<DimensionalSelection>(outputSelection);
-                for (int i = outputStage/2 - inputStage/2 - 2; i > 0; i--) {
+                for (int i = outputStage / 2 - inputStage / 2 - 2; i > 0; i--) {
                     outputSimilarSelection = selectionCast<DimensionalSelection>(outputSimilarSelection->getSelection(0));
                 }
                 if (outputSimilarSelection->size() == 1) {
@@ -170,7 +170,8 @@ void TensorConnectTool::updateElements() {
     } else {
         // orgin
         if (outputStage <= inputStage) {
-            selection = inputSelection;
+            elementCreator.addSelectionElement(SelectionObjectElement(outputSelection, SelectionObjectElement::RenderMode::ARROWS));
+            elementCreator.addSelectionElement(SelectionObjectElement(inputSelection, SelectionObjectElement::RenderMode::ARROWS));
             return;
         }
         if (inputStage == -1) {
@@ -181,7 +182,7 @@ void TensorConnectTool::updateElements() {
                 selection = std::make_shared<ProjectionSelection>(inputSelection, Position(), 1);
             } else {
                 SharedDimensionalSelection outputSimilarSelection = selectionCast<DimensionalSelection>(outputSelection);
-                for (int i = outputStage/2 - inputStage/2 - 1; i > 0; i--) {
+                for (int i = outputStage / 2 - inputStage / 2 - 1; i > 0; i--) {
                     outputSimilarSelection = selectionCast<DimensionalSelection>(outputSimilarSelection->getSelection(0));
                 }
                 if (outputSimilarSelection->size() == 1) {
@@ -189,7 +190,7 @@ void TensorConnectTool::updateElements() {
                 } else {
                     selection = std::make_shared<ProjectionSelection>(inputSelection, step - inputPosition, outputSimilarSelection->size());
                 }
-                
+
             }
         } else { // count
             int dis = inputPosition.distanceTo(step);
