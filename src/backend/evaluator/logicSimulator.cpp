@@ -194,7 +194,7 @@ void LogicSimulator::swapStates() {
 }
 
 void LogicSimulator::computeNextState() {
-    for (block_id_t gate = 0; gate < currentState.size(); ++gate) {
+    for (block_id_t gate = 0; gate < nextState.size(); ++gate) {
         unsigned int powered = gateInputCountPowered[gate];
         unsigned int type = (unsigned int)gateTypes[gate];
         if (type > 7)  { // and + nand
@@ -207,6 +207,8 @@ void LogicSimulator::computeNextState() {
             nextState[gate] = (powered & 1) || (powered && (type&1)); 
         } else if (type > 1) { // tick_input + constant_on
             nextState[gate] = type & 1;
+        } else { // stays the same
+            nextState[gate] = currentState[gate];
         }
     }
 }
