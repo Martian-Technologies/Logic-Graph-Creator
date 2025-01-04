@@ -1,5 +1,5 @@
-#ifndef QTRenderer_h
-#define QTRenderer_h
+#ifndef QtRenderer_h
+#define QtRenderer_h
 
 #include <QLineF>
 #include <memory>
