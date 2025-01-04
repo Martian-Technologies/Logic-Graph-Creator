@@ -1,9 +1,6 @@
 #ifndef blockContainer_h
 #define blockContainer_h
 
-#include <unordered_map>
-#include <optional>
-
 #include "../position/sparse2d.h"
 #include "difference.h"
 #include "cell.h"

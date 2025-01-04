@@ -1,8 +1,6 @@
 #ifndef connectionContainer_h
 #define connectionContainer_h
 
-#include <vector>
-
 #include "../../util/emptyVector.h"
 #include "connectionEnd.h"
 #include "../defs.h"

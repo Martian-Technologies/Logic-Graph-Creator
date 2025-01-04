@@ -2,7 +2,6 @@
 #define toolManagerEventRegister_h
 
 #include "../events/eventRegister.h"
-#include <string>
 
 class ToolManagerEventRegister {
 public:

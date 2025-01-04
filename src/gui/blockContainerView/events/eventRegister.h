@@ -1,12 +1,6 @@
 #ifndef eventRegister_h
 #define eventRegister_h
 
-#include <functional>
-#include <string>
-#include <vector>
-#include <map>
-#include <algorithm>
-
 #include "event.h"
 
 typedef std::function<bool(const Event* event)> EventFunction;

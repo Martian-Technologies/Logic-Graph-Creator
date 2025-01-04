@@ -1,8 +1,6 @@
 #ifndef position_h
 #define position_h
 
-#include <string>
-
 #include "util/fastMath.h"
 
 typedef int cord_t;

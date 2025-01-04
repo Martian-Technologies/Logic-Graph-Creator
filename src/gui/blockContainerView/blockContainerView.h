@@ -2,7 +2,6 @@
 #define blockContainerView_h
 
 #include <type_traits>
-#include <memory>
 
 #include "backend/evaluator/evaluatorStateInterface.h"
 #include "middleEnd/blockContainerWrapper.h"

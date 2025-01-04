@@ -1,82 +1,142 @@
 {
-    "version": 6,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 16,
-        "patch": 0
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 16,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "generator": "Ninja",
+      "binaryDir": "build",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Debug"
+      }
     },
-    "configurePresets": [
-        {
-            "name": "debug",
-            "binaryDir": "${sourceDir}/build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
-            }
-        },
-        {
-            "name": "release",
-            "binaryDir": "${sourceDir}/build-release",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_FLAGS": "-O3"
-            }
-        },
-        {
-            "name": "Custom configure preset",
-            "displayName": "Custom configure preset",
-            "description": "Sets Ninja generator, build and install directory",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
-            }
-        }
-    ],
-    "buildPresets": [
-        {
-            "name": "default",
-            "hidden": true,
-            "jobs": 8
-        },
-        {
-            "name": "debug",
-            "inherits": "default",
-            "configurePreset": "debug"
-        },
-        {
-            "name": "release",
-            "inherits": "default",
-            "configurePreset": "release"
-        }
-    ],
-    "workflowPresets": [
-        {
-            "name": "debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "debug"
-                },
-                {
-                    "type": "build",
-                    "name": "debug"
-                }
-            ]
-        },
-        {
-            "name": "release",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "release"
-                },
-                {
-                    "type": "build",
-                    "name": "release"
-                }
-            ]
-        }
-    ]
+    {
+      "name": "release",
+      "displayName": "Release",
+      "generator": "Ninja",
+      "binaryDir": "build-release",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "xcode-debug",
+      "displayName": "Debug (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "build-xcode-debug",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Debug",
+	"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+      },
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    },
+    {
+      "name": "xcode-release",
+      "displayName": "Release (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "build-xcode-release",
+      "cacheVariables": {
+	"CMAKE_BUILD_TYPE": "Release",
+	"CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+      },
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "Build Debug",
+      "configurePreset": "debug",
+      "configuration": "Debug",
+      "jobs": 8
+    },
+    {
+      "name": "release",
+      "displayName": "Build Release",
+      "configurePreset": "release",
+      "configuration": "Release",
+      "jobs": 8
+    },
+    {
+      "name": "xcode-debug",
+      "displayName": "Build Debug (Xcode)",
+      "configurePreset": "xcode-debug",
+      "configuration": "Debug",
+      "jobs": 8,
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    },
+    {
+      "name": "xcode-release",
+      "displayName": "Build Release (Xcode)",
+      "configurePreset": "xcode-release",
+      "configuration": "Release",
+      "jobs": 8,
+      "condition": {
+	"type": "equals",
+	"lhs": "${hostSystemName}",
+	"rhs": "Darwin"
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug Build Workflow",
+      "steps": [
+	{
+	  "type": "configure",
+	  "name": "debug"
+	},
+	{
+	  "type": "build",
+	  "name": "debug"
+	}
+      ]
+    },
+    {
+      "name": "dist",
+      "displayName": "Distribution Workflow",
+      "steps": [
+	{
+	  "type": "configure",
+	  "name": "release"
+	},
+	{
+	  "type": "build",
+	  "name": "release"
+	}
+      ]
+    },
+    {
+      "name": "xcode-dist",
+      "displayName": "Distribution Workflow (Xcode)",
+      "steps": [
+	{
+	  "type": "configure",
+	  "name": "xcode-release"
+	},
+	{
+	  "type": "build",
+	  "name": "xcode-release"
+	}
+      ]
+    }
+  ]
 }

@@ -1,8 +1,6 @@
 #ifndef viewManager_h
 #define viewManager_h
 
-#include <functional>
-
 #include "gui/blockContainerView/events/eventRegister.h"
 #include "backend/position/position.h"
 #include "util/vec2.h"
