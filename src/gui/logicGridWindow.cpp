@@ -1,8 +1,5 @@
-#include <QNativeGestureEvent>
-#include <QGestureEvent>
-#include <sstream>
-#include <iomanip>
-#include <iostream>
+#include "logicGridWindow.h"
+
 #include <QJsonDocument>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -11,8 +8,9 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QShortcut>
+#include <QNativeGestureEvent>
+#include <QGestureEvent>
 
-#include "logicGridWindow.h"
 #include "blockContainerView/blockContainerView.h"
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {

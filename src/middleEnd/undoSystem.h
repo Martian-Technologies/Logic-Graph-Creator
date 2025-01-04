@@ -1,8 +1,6 @@
 #ifndef undoSystem_h
 #define undoSystem_h
 
-#include <vector>
-
 #include "backend/container/difference.h"
 
 class UndoSystem {

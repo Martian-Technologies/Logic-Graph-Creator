@@ -2,7 +2,6 @@
 #define vec2_h
 
 #include "fastMath.h"
-#include <string>
 
 typedef float vec_cord_t;
 

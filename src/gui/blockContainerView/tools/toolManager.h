@@ -1,10 +1,6 @@
 #ifndef toolManager_h
 #define toolManager_h
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include "backend/evaluator/evaluatorStateInterface.h"
 #include "toolManagerEventRegister.h"
 #include "../events/eventRegister.h"

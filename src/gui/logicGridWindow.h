@@ -9,8 +9,6 @@
 #include <QWidget>
 #include <QTimer>
 
-#include <memory>
-
 #include "blockContainerView/blockContainerView.h"
 #include "blockContainerView/renderer/QtRenderer.h"
 #include "util/vec2.h"

@@ -1,8 +1,6 @@
 #ifndef block_h
 #define block_h
 
-#include <utility>
-
 #include "../position/position.h"
 #include "../connection/connectionContainer.h"
 #include "../defs.h"

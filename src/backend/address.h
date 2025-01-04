@@ -1,7 +1,6 @@
 #ifndef address_h
 #define address_h
 
-#include <vector>
 #include "position/position.h"
 
 class Address {
