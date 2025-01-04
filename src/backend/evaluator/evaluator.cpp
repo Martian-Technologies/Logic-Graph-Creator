@@ -142,7 +142,7 @@ GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
     case BlockType::SWITCH: return GateType::DEFAULT_RETURN_CURRENTSTATE;
     case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
     case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
-    case BlockType::LIGHT: return GateType::AND;
+    case BlockType::LIGHT: return GateType::OR;
     default:
         throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
     }
