@@ -119,7 +119,7 @@ void QtRenderer::render(QPainter* painter) {
         // render connections
         painter->save();
         painter->setOpacity(0.9f);
-        painter->setRenderHint(QPainter::Antialiasing);
+        // painter->setRenderHint(QPainter::Antialiasing);
         for (unsigned int i = 0; i < blocks.size(); i++) {
             bool state = blockStates[i];
             for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
@@ -188,7 +188,14 @@ void QtRenderer::render(QPainter* painter) {
                 for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
                     const Block* other = blockContainer->getBlockContainer()->getBlock(connectionIter.getBlockId());
                     Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
-                    renderConnection(painter, pos, blocks[i], otherPos, other, false);
+                    if (
+                        (pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
+                        (pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
+                        (pos.x - 2 < bottomRightBound.x || otherPos.x - 2 < bottomRightBound.x) &&
+                        (pos.y - 2 < bottomRightBound.y || otherPos.y - 2 < bottomRightBound.y)
+                    ) {
+                        renderConnection(painter, pos, blocks[i], otherPos, other, false);
+                    }
                 }
             }
         }
