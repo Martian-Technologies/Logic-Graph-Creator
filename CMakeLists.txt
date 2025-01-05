@@ -4,11 +4,14 @@ project(LogicGraphCreator)
 # Build Config
 set(CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# hack to avoid DNDEBUG which removes wires for some reason
+
 if (MSVC)
-  # also do it for MSVC, not sure if needed
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
+  # hack to avoid DNDEBUG which removes wires for some reason
   set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+  # hack to avoid DNDEBUG which removes wires for some reason
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
@@ -37,11 +40,10 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 set(LIB_SOURCE
-	"${LIBRARY_DIR}/vk-bootstrap/VkBootstrap.cpp"
+
 )
 set(LIB_INCLUDE
 	${Vulkan_INCLUDE_DIRS}
-	"${LIBRARY_DIR}/vk-bootstrap/"
 )
 
 file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
@@ -59,6 +61,7 @@ elseif (WIN32) # Windows specific (Before add_executable)
     set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
     list(APPEND SOURCE_FILES ${ICON_PATH})
 endif()
+
 
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${LIB_SOURCE})
