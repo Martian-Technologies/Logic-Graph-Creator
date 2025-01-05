@@ -9,8 +9,9 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-# C++ Standard
+# Build Config
 set(CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
