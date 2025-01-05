@@ -1,5 +1,9 @@
 #include "vulkanContext.h"
 
-void VulkanContext::initialize() {
+VulkanContext::VulkanContext() {
+    
+}
+
+VulkanContext::~VulkanContext() {
     
 }

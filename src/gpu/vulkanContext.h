@@ -4,11 +4,12 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+// probably the only vulkan class that will use RAII
+
 class VulkanContext {
 public:
-    VulkanContext() = default;
-
-    void initialize();
+    VulkanContext();
+    ~VulkanContext();
 
     inline VkInstance getInstance() const { return instance; }
     inline VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
