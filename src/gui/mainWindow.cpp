@@ -23,8 +23,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // init vulkan
     vulkanContext = std::make_shared<VulkanContext>();
-    vulkanContext->initialize();
-    qVulkanInstance = std::make_shared<QVulkanInstance>();
+    qVulkanInstance = new QVulkanInstance();
     qVulkanInstance->setVkInstance(vulkanContext->getInstance());
     qVulkanInstance->create();
 

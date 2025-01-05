@@ -26,11 +26,11 @@ public:
 
 private:
     Ui::MainWindow* ui;
-    QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;
     std::shared_ptr<Evaluator> evaluator;
+    
     std::shared_ptr<VulkanContext> vulkanContext;
-    std::shared_ptr<QVulkanInstance> qVulkanInstance;
+    QVulkanInstance* qVulkanInstance;
 };
 
 #endif /* mainWindow_h */

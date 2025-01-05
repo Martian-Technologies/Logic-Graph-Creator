@@ -7,7 +7,8 @@
 
 class VulkanRenderer : public Renderer {
 public:
-    void initialize(VulkanContext context, VkSurfaceKHR surface);
+    void initialize(std::shared_ptr<VulkanContext> context, VkSurfaceKHR surface);
+    void resize(int w, int h);
     void run();
     
     // updating
@@ -37,6 +38,7 @@ private:
     void spawnConfetti(FPosition start) override;
 
 private:
+    std::shared_ptr<VulkanContext> context;
     float lastFrameTime = 0.0f;
 };
 

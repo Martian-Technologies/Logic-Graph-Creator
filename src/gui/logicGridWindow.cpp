@@ -10,6 +10,8 @@
 #include <QShortcut>
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
+#include <QWindow>
+#include <QLayout>
 
 #include "blockContainerView/blockContainerView.h"
 
@@ -26,8 +28,6 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseContro
     updateLoopTimer->start();
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
-    blockContainerView.getRenderer().initializeTileSet(":logicTiles.png");
-
     QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
     connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
 }
@@ -36,14 +36,21 @@ void LogicGridWindow::showEvent(QShowEvent* event) {
     float w = size().width();
     float h = size().height();
 
-    // initialize QTRenderer with width and height
+    // initialize renderer with width and height
     blockContainerView.getRenderer().resize(w, h);
+    
     // set viewmanager aspect ratio to begin with
     blockContainerView.getViewManager().setAspectRatio(w / h);
 }
 
-void LogicGridWindow::createVulkanWindow(std::shared_ptr<VulkanContext> context, std::shared_ptr<QVulkanInstance> qVulkanInstance) {
-    
+void LogicGridWindow::createVulkanWindow(std::shared_ptr<VulkanContext> context, QVulkanInstance* qVulkanInstance) {
+    QWindow* window = new QWindow();
+    window->setSurfaceType(QSurface::VulkanSurface);
+    window->setVulkanInstance(qVulkanInstance);
+    QWidget* wrapper = QWidget::createWindowContainer(window, this);
+    VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
+
+    blockContainerView.getRenderer().initialize(context, surface);
 }
 
 void LogicGridWindow::updateLoop() {
@@ -118,9 +125,7 @@ bool LogicGridWindow::event(QEvent* event) {
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
     QPainter* painter = new QPainter(this);
-
-    blockContainerView.getRenderer().render(painter);
-
+    
     // rolling average for frame time
     pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
     int numPops = pastFrameTimes.size() - numTimesInAverage;
