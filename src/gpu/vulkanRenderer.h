@@ -3,11 +3,9 @@
 
 #include "gui/blockContainerView/renderer/renderer.h"
 
-#include <QWindow>
-
 #include "gpu/vulkanContext.h"
 
-class VulkanRenderer : public Renderer, public QWindow {
+class VulkanRenderer : public Renderer {
 public:
     void initialize(VulkanContext context, VkSurfaceKHR surface);
     void run();

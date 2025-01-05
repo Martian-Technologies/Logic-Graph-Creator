@@ -4,7 +4,9 @@
 #include <QGraphicsScene>
 #include <QMainWindow>
 #include <QWidget>
+#include <QVulkanInstance>
 
+#include "gpu/vulkanContext.h"
 #include "middleEnd/blockContainerManager.h"
 #include "backend/evaluator/evaluator.h"
 
@@ -27,6 +29,8 @@ private:
     QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;
     std::shared_ptr<Evaluator> evaluator;
+    std::shared_ptr<VulkanContext> vulkanContext;
+    std::shared_ptr<QVulkanInstance> qVulkanInstance;
 };
 
 #endif /* mainWindow_h */

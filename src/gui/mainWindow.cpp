@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowTitle(tr("Logic Graph Creator"));
     setWindowIcon(QIcon(":/gateIcon.ico"));
-    
 
     block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
     std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
@@ -22,7 +21,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 
+    // init vulkan
+    vulkanContext = std::make_shared<VulkanContext>();
+    vulkanContext->initialize();
+    qVulkanInstance = std::make_shared<QVulkanInstance>();
+    qVulkanInstance->setVkInstance(vulkanContext->getInstance());
+    qVulkanInstance->create();
+
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
+    logicGridWindow->createVulkanWindow(vulkanContext, qVulkanInstance);
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setEvaluator(evaluator);
     logicGridWindow->setSelector(ui->selectorTreeWidget);

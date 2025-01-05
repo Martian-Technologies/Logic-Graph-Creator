@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QTreeWidget>
+#include <QVulkanInstance>
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <QPainter>
@@ -11,6 +12,7 @@
 
 #include "blockContainerView/blockContainerView.h"
 #include "blockContainerView/renderer/QtRenderer.h"
+#include "gpu/vulkanContext.h"
 #include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
@@ -19,14 +21,13 @@ public:
     LogicGridWindow(QWidget* parent = nullptr);
 
     // setup
+    void createVulkanWindow(std::shared_ptr<VulkanContext> context, std::shared_ptr<QVulkanInstance> qVulkanInstance);
     void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
     void setEvaluator(std::shared_ptr<Evaluator> evaluator);
     void setSelector(QTreeWidget* treeWidget);
 
     // dont call this func (temporary)
-    void updateSelectedItem();
-
-    
+    void updateSelectedItem();    
 
 private:
     BlockContainerView<QtRenderer> blockContainerView;
@@ -57,6 +58,7 @@ private:
     
 protected:
     // events overrides
+    void showEvent(QShowEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;

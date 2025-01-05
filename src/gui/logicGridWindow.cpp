@@ -13,7 +13,7 @@
 
 #include "blockContainerView/blockContainerView.h"
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
+LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
     // qt settings
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);
@@ -26,18 +26,24 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContai
     updateLoopTimer->start();
     connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
-    float w = size().width();
-    float h = size().height();
-
-    // set viewmanager aspect ratio to begin with
-    blockContainerView.getViewManager().setAspectRatio(w / h);
-
-    // initialize QTRenderer with width and height + tileset
-    blockContainerView.getRenderer().resize(w, h);
     blockContainerView.getRenderer().initializeTileSet(":logicTiles.png");
 
     QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
     connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
+}
+
+void LogicGridWindow::showEvent(QShowEvent* event) {
+    float w = size().width();
+    float h = size().height();
+
+    // initialize QTRenderer with width and height
+    blockContainerView.getRenderer().resize(w, h);
+    // set viewmanager aspect ratio to begin with
+    blockContainerView.getViewManager().setAspectRatio(w / h);
+}
+
+void LogicGridWindow::createVulkanWindow(std::shared_ptr<VulkanContext> context, std::shared_ptr<QVulkanInstance> qVulkanInstance) {
+    
 }
 
 void LogicGridWindow::updateLoop() {
