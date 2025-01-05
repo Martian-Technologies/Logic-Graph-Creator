@@ -17,7 +17,52 @@ bool BlockContainerWrapper::tryRemoveBlock(const Position& position) {
 bool BlockContainerWrapper::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
     DifferenceSharedPtr difference = std::make_shared<Difference>();
     bool out = blockContainer.tryMoveBlock(positionOfBlock, position, difference.get());
+    assert(out != difference->empty());
     sendDifference(difference);
+    return out;
+}
+
+bool BlockContainerWrapper::tryMoveBlocks(const SharedSelection& selection, const Position& relPosition) {
+    if (checkModeCollision(selection, relPosition)) return false;
+    DifferenceSharedPtr difference = std::make_shared<Difference>();
+    moveBlocks(selection, relPosition, difference.get());
+    sendDifference(difference);
+    return true;
+}
+
+void BlockContainerWrapper::moveBlocks(const SharedSelection& selection, const Position& relPosition, Difference* difference) {
+    // Cell Selection
+    SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+    if (cellSelection) {
+        blockContainer.tryMoveBlock(cellSelection->getPosition(), cellSelection->getPosition() + relPosition, difference);
+    }
+
+    // Dimensional Selection
+    SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+    if (dimensionalSelection) {
+        for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
+            moveBlocks(dimensionalSelection->getSelection(i - 1), relPosition, difference);
+        }
+    }
+ }
+
+bool BlockContainerWrapper::checkModeCollision(const SharedSelection& selection, const Position& relPosition) {
+    // Cell Selection
+    SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+    if (cellSelection) {
+        if (blockContainer.checkCollision(cellSelection->getPosition())) {
+            return blockContainer.checkCollision(cellSelection->getPosition() + relPosition);
+        }
+        return false;
+    }
+
+    // Dimensional Selection
+    SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+    if (dimensionalSelection) {
+        for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
+            if (checkModeCollision(dimensionalSelection->getSelection(i - 1), relPosition)) return true;
+        }
+    }
     return false;
 }
 
@@ -45,6 +90,23 @@ void BlockContainerWrapper::tryRemoveOverArea(Position cellA, Position cellB) {
         }
     }
     sendDifference(difference);
+}
+
+bool BlockContainerWrapper::checkCollision(const SharedSelection& selection) {
+    // Cell Selection
+    SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+    if (cellSelection) {
+        return blockContainer.checkCollision(cellSelection->getPosition());
+    }
+
+    // Dimensional Selection
+    SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+    if (dimensionalSelection) {
+        for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
+            if (checkCollision(dimensionalSelection->getSelection(i - 1))) return true;
+        }
+    }
+    return false;
 }
 
 bool BlockContainerWrapper::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {

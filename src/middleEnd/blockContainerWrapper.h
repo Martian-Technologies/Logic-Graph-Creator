@@ -37,9 +37,13 @@ public:
     bool tryRemoveBlock(const Position& position);
     // Trys to move a block. Returns if successful.
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
+    // Trys to move a blocks. Wont move any if one cant move. Returns if successful.
+    bool tryMoveBlocks(const SharedSelection& selection, const Position& relPosition);
 
     void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
     void tryRemoveOverArea(Position cellA, Position cellB);
+
+    bool checkCollision(const SharedSelection& selection);
 
     /* ----------- connections ----------- */
     // Trys to creates a connection. Returns if successful.
@@ -57,8 +61,11 @@ public:
     void redo();
 
 private:
+    // helpers
+    bool checkModeCollision(const SharedSelection& selection, const Position& relPosition);
+    void moveBlocks(const SharedSelection& selection, const Position& relPosition, Difference* difference);
+
     void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
-    // Trys to remove connections.
     void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
 
     void startUndo() { midUndo = true; }

@@ -100,6 +100,7 @@ private:
 };
 typedef std::shared_ptr<const ProjectionSelection> SharedProjectionSelection;
 
+// ---------------- helpers ----------------
 inline bool sameSelectionShape(SharedSelection selectionA, SharedSelection selectionB) {
     // check if both cell selections
     SharedCellSelection cellSelectionA = selectionCast<CellSelection>(selectionA);

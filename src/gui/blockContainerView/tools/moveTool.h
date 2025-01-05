@@ -6,11 +6,12 @@
 
 class MoveTool : public BlockContainerTool {
 public:
-    inline MoveTool() : BlockContainerTool(), stage('o'), originSelection(nullptr) {}
+    inline MoveTool() : BlockContainerTool(), stage('o'), originSelection(nullptr), tensorStage(-1) {}
 
     inline void reset() override final {
         stage = 'o';
         originSelection = nullptr;
+        tensorStage = -1;
         updateElements();
     }
 
@@ -41,13 +42,17 @@ private:
 
     char stage;
 
-    Position pointer;
-
-    // output
-    Position origin;
+    FPosition pointer;
+    
+    // blocks
+    Position originPosition;
     SharedSelection originSelection;
 
-    // input
+    // tensor stuff
+    Position step;
+    int tensorStage;
+
+    // destination
     Position destination;
 };
 
