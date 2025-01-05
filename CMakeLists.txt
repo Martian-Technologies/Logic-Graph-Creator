@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(LogicGraphCreator)
 
+# Build Config
+set(CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # hack to avoid DNDEBUG which removes wires for some reason
 if (MSVC)
   # also do it for MSVC, not sure if needed
@@ -9,12 +12,9 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-# Build Config
-set(CXX_STANDARD 20)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
+set(LIBRARY_DIR "${CMAKE_SOURCE_DIR}/lib")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Set Qt moc and uic
@@ -36,6 +36,14 @@ file(GLOB_RECURSE SOURCE_FILES
         "${SOURCE_DIR}/*.qrc"
 )
 
+set(LIB_SOURCE
+	"${LIBRARY_DIR}/vk-bootstrap/VkBootstrap.cpp"
+)
+set(LIB_INCLUDE
+	${Vulkan_INCLUDE_DIRS}
+	"${LIBRARY_DIR}/vk-bootstrap/"
+)
+
 file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
 file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
 file(GLOB_RECURSE SHADER_SOURCES "")
@@ -53,8 +61,8 @@ elseif (WIN32) # Windows specific (Before add_executable)
 endif()
 
 # Add executable
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${LIB_SOURCE})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${LIB_INCLUDE})
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${Vulkan_LIBRARIES})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
