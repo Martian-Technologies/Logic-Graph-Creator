@@ -45,6 +45,19 @@ public:
 
     bool checkCollision(const SharedSelection& selection);
 
+    /* ----------- block data ----------- */
+
+    // Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+    bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
+    // Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+    template<class T, unsigned int index>
+    bool trySetBlockDataValue(const Position& positionOfBlock, T value) {
+        DifferenceSharedPtr difference = std::make_shared<Difference>();
+        bool out = blockContainer.trySetBlockDataValue<T, index>(positionOfBlock, value, difference.get());
+        sendDifference(difference);
+        return out;
+    }
+    
     /* ----------- connections ----------- */
     // Trys to creates a connection. Returns if successful.
     bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);

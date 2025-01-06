@@ -109,6 +109,13 @@ bool BlockContainerWrapper::checkCollision(const SharedSelection& selection) {
     return false;
 }
 
+bool BlockContainerWrapper::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
+    DifferenceSharedPtr difference = std::make_shared<Difference>();
+    bool out = blockContainer.trySetBlockData(positionOfBlock, data, difference.get());
+    sendDifference(difference);
+    return out;
+}
+
 bool BlockContainerWrapper::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
     DifferenceSharedPtr difference = std::make_shared<Difference>();
     bool out = blockContainer.tryCreateConnection(outputPosition, inputPosition, difference.get());
@@ -201,6 +208,7 @@ void BlockContainerWrapper::undo() {
     DifferenceSharedPtr difference = undoSystem.undoDifference();
     Difference::block_modification_t blockModification;
     Difference::connection_modification_t connectionModification;
+    Difference::data_modification_t dataModification;
     const std::vector<Difference::Modification>& modifications = difference->getModifications();
     for (unsigned int i = modifications.size(); i > 0; --i) {
         const Difference::Modification& modification = modifications[i - 1];
@@ -224,6 +232,10 @@ void BlockContainerWrapper::undo() {
             connectionModification = std::get<Difference::move_modification_t>(modification.second);
             blockContainer.tryMoveBlock(std::get<1>(connectionModification), std::get<0>(connectionModification), newDifference.get());
             break;
+        case Difference::SET_DATA:
+            dataModification = std::get<Difference::data_modification_t>(modification.second);
+            blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<2>(dataModification), newDifference.get());
+            break;
         }
     }
     sendDifference(newDifference);
@@ -236,6 +248,7 @@ void BlockContainerWrapper::redo() {
     DifferenceSharedPtr difference = undoSystem.redoDifference();
     Difference::block_modification_t blockModification;
     Difference::connection_modification_t connectionModification;
+    Difference::data_modification_t dataModification;
     for (auto modification : difference->getModifications()) {
         switch (modification.first) {
         case Difference::REMOVED_BLOCK:
@@ -256,6 +269,10 @@ void BlockContainerWrapper::redo() {
         case Difference::MOVE_BLOCK:
             connectionModification = std::get<Difference::move_modification_t>(modification.second);
             blockContainer.tryMoveBlock(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+            break;
+         case Difference::SET_DATA:
+            dataModification = std::get<Difference::data_modification_t>(modification.second);
+            blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<1>(dataModification), newDifference.get());
             break;
         }
     }

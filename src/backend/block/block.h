@@ -8,11 +8,11 @@ class Block {
     friend class BlockContainer;
     friend Block getBlockClass(BlockType type);
 public:
-    inline Block() : Block(BLOCK) {}
+    inline Block() : Block(BLOCK) { }
 
     // getters
-    inline block_id_t id() const { return blockId; }
-    inline BlockType type() const { return blockType; }
+    block_id_t id() const { return blockId; }
+    BlockType type() const { return blockType; }
 
     inline const Position& getPosition() const { return position; }
     inline Position getLargestPosition() const { return position + Position(width(), height()); }
@@ -48,21 +48,27 @@ public:
     inline bool isConnectionInput(connection_end_id_t connectionId) const { return ::isConnectionInput(type(), connectionId); }
 
     // saved data
-    template<class T, unsigned int index>
-    inline T hasDataValue() { return getDataValue<T, index>(type()); }
+    inline block_data_t getRawData() const { return data; }
+    inline void setRawData(block_data_t data) { this->data = data; }
 
     template<class T, unsigned int index>
-    inline T getDataValue() { return getDataValue<T, index>(type(), data); }
+    inline bool hasDataValue() const { return hasBlockDataValue<T, index>(type()); }
+
+    template<class T, unsigned int index>
+    inline T getDataValue() const { return getBlockDataValue<T, index>(type(), data); }
+
+    template<class T, unsigned int index>
+    inline void setDataValue(T value) { setBlockDataValue<T, index>(type(), data, value); }
 
 protected:
-    inline void destroy() {}
+    inline void destroy() { }
     inline ConnectionContainer& getConnectionContainer() { return connections; }
     inline void setPosition(const Position& position) { this->position = position; }
     inline void setRotation(Rotation rotation) { this->rotation = rotation; }
     inline void setId(block_id_t id) { blockId = id; }
 
-    inline Block(BlockType blockType) : Block(blockType, 0) {}
-    inline Block(BlockType blockType, block_id_t id) : blockType(blockType), blockId(id), connections(blockType), position(), rotation() {}
+    inline Block(BlockType blockType) : Block(blockType, 0) { }
+    inline Block(BlockType blockType, block_id_t id) : blockType(blockType), blockId(id), connections(blockType), position(), rotation() { }
 
     // const data
     BlockType blockType;

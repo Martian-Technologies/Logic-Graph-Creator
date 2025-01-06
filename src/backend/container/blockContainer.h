@@ -5,8 +5,8 @@
 #include "difference.h"
 #include "cell.h"
 
-
 class BlockContainer {
+friend class LogicToucher;
 public:
     inline BlockContainer() : lastId(0), grid(), blocks() {}
 
@@ -40,6 +40,35 @@ public:
     bool tryRemoveBlock(const Position& position, Difference* difference);
     // Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
     bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference);
+
+    /* ----------- block data ----------- */
+    // // Gets the data from a block at position. Returns 0 if no block is found. 
+    // block_data_t getBlockData(const Position& positionOfBlock) const;
+
+
+    // Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
+    bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
+    // Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+    template<class T, unsigned int index>
+    bool trySetBlockDataValue(const Position& positionOfBlock, T value) {
+        Block* block = getBlock(positionOfBlock);
+        if (!block) return false;
+        block->setDataValue<T, index>(value);
+        return true;
+    }
+    // Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
+    bool trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference);
+    // Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+    template<class T, unsigned int index>
+    bool trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference) {
+        Block* block = getBlock(positionOfBlock);
+        if (!block) return false;
+        block_data_t oldData = block->getRawData();
+        block->setDataValue<T, index>(value);
+        block_data_t newData = block->getRawData();
+        if (oldData != newData) difference->addSetData(positionOfBlock, newData, oldData);
+        return true;
+    }
 
     /* ----------- connections ----------- */
     // -- getters --

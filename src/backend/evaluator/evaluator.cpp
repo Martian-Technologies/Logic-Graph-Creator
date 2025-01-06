@@ -20,8 +20,7 @@ void Evaluator::setPause(bool pause) {
     paused = pause;
     if (pause) {
         logicSimulator.signalToPause();
-    }
-    else {
+    } else {
         logicSimulator.triggerNextTickReset();
         logicSimulator.signalToProceed();
     }
@@ -36,8 +35,7 @@ void Evaluator::setTickrate(unsigned long long tickrate) {
     targetTickrate = tickrate;
     if (usingTickrate) {
         logicSimulator.setTargetTickrate(tickrate);
-    }
-    else {
+    } else {
         logicSimulator.setTargetTickrate(1000000000); // 1000000000 clocks / min
     }
 }
@@ -46,8 +44,7 @@ void Evaluator::setUseTickrate(bool useTickrate) {
     usingTickrate = useTickrate;
     if (useTickrate) {
         logicSimulator.setTargetTickrate(targetTickrate);
-    }
-    else {
+    } else {
         logicSimulator.setTargetTickrate(1000000000); // 1000000000 clocks / min
     }
 }
@@ -118,8 +115,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
             addressTree.moveData(curPosition, newPosition);
             break;
         }
-        default:
-            throw std::invalid_argument("makeEdit: invalid modificationType");
+        case Difference::SET_DATA: break;
         }
     }
     if (deletedBlocks) {

@@ -5,26 +5,36 @@ typedef u_int32_t block_data_t; // change if need more data
 typedef char block_data_index_t;
 
 template<class T, block_data_index_t index>
-inline bool hasDataValue(BlockType type) {
+inline bool hasBlockDataValue(BlockType type) {
     return false;
 }
 
 template<>
-inline bool hasDataValue<unsigned int, 0>(BlockType type) {
+inline bool hasBlockDataValue<unsigned int, 0>(BlockType type) {
     return type == BlockType::LIGHT;
 }
 
 template<class T, block_data_index_t index>
-inline T getDataValue(BlockType type, block_data_t data) {
+inline T getBlockDataValue(BlockType type, block_data_t data) {
     return T();
 }
 
 template<>
-inline unsigned int getDataValue<unsigned int, 0>(BlockType type, block_data_t data) {
+inline unsigned int getBlockDataValue<unsigned int, 0>(BlockType type, block_data_t data) {
     if (type == BlockType::LIGHT) {
         return data;
     }
     return 0;
+}
+
+template<class T, block_data_index_t index>
+inline void setBlockDataValue(BlockType type, block_data_t& data, T value) {}
+
+template<>
+inline void setBlockDataValue<unsigned int, 0>(BlockType type, block_data_t& data, unsigned int value) {
+    if (type == BlockType::LIGHT) {
+        data = (uint32_t)value;
+    }
 }
 
 inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
