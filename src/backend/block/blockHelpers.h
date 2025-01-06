@@ -1,7 +1,7 @@
 #include "../position/position.h"
 #include "../defs.h"
 
-typedef u_int32_t block_data_t; // change if need more data
+typedef std::uint32_t block_data_t; // change if need more data
 typedef char block_data_index_t;
 
 template<class T, block_data_index_t index>
