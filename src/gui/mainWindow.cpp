@@ -63,7 +63,7 @@ void MainWindow::initVulkan() {
     std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
     
     // create instance
-    vulkanManager.createInstance(extensions);
+    vulkanManager.createInstance(extensions, DEBUG);
 
     // goofy ahh hack to get surface for device selection
     QWindow tempWindow;
