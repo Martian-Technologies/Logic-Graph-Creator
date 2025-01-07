@@ -7,26 +7,26 @@
 class BlockContainer;
 
 class ConnectionContainer {
-    friend BlockContainer;
+	friend BlockContainer;
 public:
-    ConnectionContainer(BlockType blockType);
+	ConnectionContainer(BlockType blockType);
 
-    BlockType getBlockType() const { return blockType; }
+	BlockType getBlockType() const { return blockType; }
 
-    inline connection_end_id_t getMaxConnectionId() const { return connections.size() - 1; }
+	inline connection_end_id_t getMaxConnectionId() const { return connections.size() - 1; }
 
-    inline const std::vector<ConnectionEnd>& getConnections(connection_end_id_t thisEndId) const {
-        if (thisEndId > getMaxConnectionId()) return getEmptyVector<ConnectionEnd>(); return connections[thisEndId];
-    }
+	inline const std::vector<ConnectionEnd>& getConnections(connection_end_id_t thisEndId) const {
+		if (thisEndId > getMaxConnectionId()) return getEmptyVector<ConnectionEnd>(); return connections[thisEndId];
+	}
 
-    bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const;
+	bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const;
 
 private:
-    bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-    bool tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+	bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+	bool tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
-    BlockType blockType;
-    std::vector<std::vector<ConnectionEnd>> connections;
+	BlockType blockType;
+	std::vector<std::vector<ConnectionEnd>> connections;
 };
 
 #endif /* connectionContainer_h */

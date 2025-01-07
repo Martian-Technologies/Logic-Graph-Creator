@@ -1,74 +1,74 @@
 {
-  "version": 6,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 16,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "debug",
-      "displayName": "Debug",
-      "generator": "Ninja",
-      "binaryDir": "build",
-      "cacheVariables": {
-	"CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "release",
-      "displayName": "Release",
-      "generator": "Ninja",
-      "binaryDir": "build-release",
-      "cacheVariables": {
-	"CMAKE_BUILD_TYPE": "Release"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "debug",
-      "displayName": "Build Debug",
-      "configurePreset": "debug",
-      "configuration": "Debug",
-      "jobs": 8
-    },
-    {
-      "name": "release",
-      "displayName": "Build Release",
-      "configurePreset": "release",
-      "configuration": "Release",
-      "jobs": 8
-    }
-  ],
-  "workflowPresets": [
-    {
-      "name": "debug",
-      "displayName": "Debug Build Workflow",
-      "steps": [
-	{
-	  "type": "configure",
-	  "name": "debug"
+	"version": 6,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 16,
+		"patch": 0
 	},
-	{
-	  "type": "build",
-	  "name": "debug"
-	}
-      ]
-    },
-    {
-      "name": "dist",
-      "displayName": "Distribution Workflow",
-      "steps": [
-	{
-	  "type": "configure",
-	  "name": "release"
-	},
-	{
-	  "type": "build",
-	  "name": "release"
-	}
-      ]
-    }
-  ]
+	"configurePresets": [
+		{
+			"name": "debug",
+			"displayName": "Debug",
+			"generator": "Ninja",
+			"binaryDir": "build",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "release",
+			"displayName": "Release",
+			"generator": "Ninja",
+			"binaryDir": "build-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "debug",
+			"displayName": "Build Debug",
+			"configurePreset": "debug",
+			"configuration": "Debug",
+			"jobs": 8
+		},
+		{
+			"name": "release",
+			"displayName": "Build Release",
+			"configurePreset": "release",
+			"configuration": "Release",
+			"jobs": 8
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "debug",
+			"displayName": "Debug Build Workflow",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "debug"
+				},
+				{
+					"type": "build",
+					"name": "debug"
+				}
+			]
+		},
+		{
+			"name": "dist",
+			"displayName": "Distribution Workflow",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "release"
+				},
+				{
+					"type": "build",
+					"name": "release"
+				}
+			]
+		}
+	]
 }

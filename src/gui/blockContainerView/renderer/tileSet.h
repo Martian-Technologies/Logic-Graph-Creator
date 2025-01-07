@@ -5,19 +5,19 @@
 
 class TileSetInfo {
 public:
-    TileSetInfo(int cellSize, int numCells)
-        : cellPixelSize(cellSize, cellSize), numCells(numCells), cellUVSize(1.0f / numCells, 0.5f) {}
+	TileSetInfo(int cellSize, int numCells)
+		: cellPixelSize(cellSize, cellSize), numCells(numCells), cellUVSize(1.0f / numCells, 0.5f) { }
 
-    inline Vec2Int getCellPixelSize() const { return cellPixelSize; }
-    inline Vec2Int getTopLeftPixel(int index, bool state) const { return Vec2Int(index * cellPixelSize.x, state * cellPixelSize.y); }
+	inline Vec2Int getCellPixelSize() const { return cellPixelSize; }
+	inline Vec2Int getTopLeftPixel(int index, bool state) const { return Vec2Int(index * cellPixelSize.x, state * cellPixelSize.y); }
 
-    inline Vec2 getCellUVSize() const { return cellUVSize; }
-    inline Vec2 getBottomLeftUV(int index, bool state) const { return Vec2(index * cellUVSize.x, (!state) * cellUVSize.y); }
+	inline Vec2 getCellUVSize() const { return cellUVSize; }
+	inline Vec2 getBottomLeftUV(int index, bool state) const { return Vec2(index * cellUVSize.x, (!state) * cellUVSize.y); }
 
 private:
-    Vec2Int cellPixelSize;
-    Vec2 cellUVSize;
-    int numCells;
+	Vec2Int cellPixelSize;
+	Vec2 cellUVSize;
+	int numCells;
 };
 
 

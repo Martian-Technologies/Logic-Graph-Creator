@@ -5,8 +5,8 @@
 
 template <class T>
 inline const std::vector<T>& getEmptyVector() {
-    static std::vector<T> emptyVector = std::vector<T>();
-    return emptyVector;
+	static std::vector<T> emptyVector = std::vector<T>();
+	return emptyVector;
 }
 
 #endif /* emptyVector_h */

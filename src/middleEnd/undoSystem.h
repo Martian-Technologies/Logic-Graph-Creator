@@ -5,15 +5,15 @@
 
 class UndoSystem {
 public:
-    inline UndoSystem() : undoPosition(0), differences() {}
+	inline UndoSystem() : undoPosition(0) { }
 
-    inline void addDifference(DifferenceSharedPtr difference) { while (undoPosition < differences.size()) differences.pop_back(); ++undoPosition; differences.push_back(difference); }
-    inline DifferenceSharedPtr undoDifference() { if (undoPosition == 0) return std::make_shared<Difference>(); return differences[--undoPosition]; }
-    inline DifferenceSharedPtr redoDifference() { while (undoPosition == differences.size()) return std::make_shared<Difference>(); return differences[undoPosition++];}
+	inline void addDifference(DifferenceSharedPtr difference) { while (undoPosition < differences.size()) differences.pop_back(); ++undoPosition; differences.push_back(difference); }
+	inline DifferenceSharedPtr undoDifference() { if (undoPosition == 0) return std::make_shared<Difference>(); return differences[--undoPosition]; }
+	inline DifferenceSharedPtr redoDifference() { while (undoPosition == differences.size()) return std::make_shared<Difference>(); return differences[undoPosition++]; }
 
 private:
-    unsigned int undoPosition;
-    std::vector<DifferenceSharedPtr> differences;
+	unsigned int undoPosition;
+	std::vector<DifferenceSharedPtr> differences;
 
 };
 

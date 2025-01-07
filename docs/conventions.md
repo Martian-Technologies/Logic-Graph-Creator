@@ -12,32 +12,82 @@ Include Order
 - Add line breaks between the different kinds of includes if you want
 
 QT Includes
-- Do not use QT includes ending with .h, use the ones specified by classes in the Qt documentation
-
-Case Sensitive Includes
-- 
+- Do not use QT includes ending with .h, use the ones specified by classes in the [Qt documentation](https://doc.qt.io/qt-6/classes.html)
 
 ### Header Guards
 
+Use **#ifndef**
+The preporsseser var should be named the name of the file with a '_' instead of '.'
+
 ### Naming
 
-### Pointers
+**camalCase** for file names
+".h" for headers and ".cpp" for sources
+
+var and function names should be **camalCase**
+const var and enum states names should be **MACRO_CASE**
+class, enum, and struct names should **PascalCase**
+
+### Using Raw and Smart Pointers
+
+Dont use new except when creating windows for qt to own.
+You should use smart pointers for ownership. These may be custom smart pointers.
+
+You can pass raw pointers around but objects reciving raw pointers should not be responsible for deallocating the memory.
 
 ### Enums
+
+When using enum use the name of the enum :: the state
+example `BlockType::AND`
 
 ### Class Declaration Order
 Info on where to put public/private variables and function, and in what order
 
-### Assertions and Returning "Failed"
+Order should be:
+- friends
+- public
+- protected functions
+- protected vars
+- private functions
+- private vars
+
+### Assertions
+
+Use assertions when you think is necessary. You should not over do it.
+
+### Returning Nothing
+
+When functions should sometimes return values you should use `std::optional`
 
 ### Types and Sizes
 
+Using regular c++ types when the size is not highly important. You should use cstdint types when you need an exact size
+
 ### Tabs vs. Spaces
+
+use tabs please
 
 ### Small TODO comments
 
-### Header vs. CPP and function inlining
+`// TODO: info`
 
 ### Curly Brackets
 
+You should open them on the same line. Not a new one.
+```cpp
+// do
+if () {
+}
+```
+```cpp
+// dont
+if ()
+{
+}
+```
+Place a space before curley bracket set for while, for, and functions
+Space after if, while, for loops
+
 ### Constructor initializer lists
+
+
