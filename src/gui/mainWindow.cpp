@@ -46,3 +46,13 @@ void MainWindow::simUseSpeed(bool state) {
 void MainWindow::setSimSpeed(double speed) {
     evaluator->setTickrate(std::round(speed * 60));
 }
+
+void MainWindow::connectMenuBar() {
+    connect(ui->actionPreferences, &QAction::triggered, this, &MainWindow::onPreferenceClick);
+}
+
+void MainWindow::onPreferenceClick(){
+    SettingsWindow* sw = new SettingsWindow(this); 
+}
+
+>>>>>>> Stashed 
