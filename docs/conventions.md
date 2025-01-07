@@ -12,10 +12,7 @@ Include Order
 - Add line breaks between the different kinds of includes if you want
 
 QT Includes
-- Do not use QT includes ending with .h, use the ones specified by classes in the Qt documentation
-
-Case Sensitive Includes
-- 
+- Do not use QT includes ending with .h, use the ones specified by classes in the [Qt documentation](https://doc.qt.io/qt-6/classes.html)
 
 ### Header Guards
 
@@ -24,12 +21,12 @@ The preporsseser var should be named the name of the file with a '_' instead of 
 
 ### Naming
 
-camalCase for file names
-.h for headers and .cpp for sources
+**camalCase** for file names
+".h" for headers and ".cpp" for sources
 
-var and function names should be camalCase
-const var and enum states names should be MACRO_CASE
-class, enum, and struct names should PascalCase
+var and function names should be **camalCase**
+const var and enum states names should be **MACRO_CASE**
+class, enum, and struct names should **PascalCase**
 
 ### Using Raw and Smart Pointers
 
@@ -58,13 +55,13 @@ Order should be:
 
 Use assertions when you think is necessary. You should not over do it.
 
-### Retruning nothing
+### Returning Nothing
 
-When functions should sometimes return values you should use std optional.
+When functions should sometimes return values you should use `std::optional`
 
 ### Types and Sizes
 
-Using regual c++ types when the size is not highly important. You should use cstdint types when you need a exact size
+Using regular c++ types when the size is not highly important. You should use cstdint types when you need an exact size
 
 ### Tabs vs. Spaces
 
@@ -88,6 +85,8 @@ if ()
 {
 }
 ```
+Place a space before curley bracket set for while, for, and functions
+Space after if, while, for loops
 
 ### Constructor initializer lists
 
