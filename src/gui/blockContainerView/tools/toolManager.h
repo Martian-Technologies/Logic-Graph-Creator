@@ -98,8 +98,8 @@ private:
 	std::string toolType = "NONE";
 
 	// tool data
-	BlockType selectedBlock = NONE;
-	Rotation selectedRotation = ZERO;
+	BlockType selectedBlock = BlockType::NONE;
+	Rotation selectedRotation = Rotation::ZERO;
 };
 
 #endif /* toolManager_h */

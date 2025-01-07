@@ -12,7 +12,7 @@ bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 	switch (clicks[0]) {
 	case 'n':
 		clicks[0] = 'p';
-		if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
+		if (selectedBlock != BlockType::NONE) blockContainer->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
 		updateElements();
 		return true;
 	case 'p':
@@ -20,7 +20,7 @@ bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 	case 'r':
 		if (clicks[1] == 'n') {
 			clicks[1] = 'p';
-			if (selectedBlock != NONE) blockContainer->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
+			if (selectedBlock != BlockType::NONE) blockContainer->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
 			updateElements();
 			return true;
 		}
@@ -119,8 +119,8 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 		return returnVal;
 	case 'r':
 		if (clicks[1] == 'p') {
-			if (selectedBlock != NONE) blockContainer->tryInsertBlock(position, rotation, selectedBlock);
-			return selectedBlock != NONE;
+			if (selectedBlock != BlockType::NONE) blockContainer->tryInsertBlock(position, rotation, selectedBlock);
+			return selectedBlock != BlockType::NONE;
 		}
 		blockContainer->tryRemoveBlock(position);
 		return true;
@@ -129,8 +129,8 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 			blockContainer->tryRemoveBlock(position);
 			return true;
 		}
-		if (selectedBlock != NONE) blockContainer->tryInsertBlock(position, rotation, selectedBlock);
-		return selectedBlock != NONE;
+		if (selectedBlock != BlockType::NONE) blockContainer->tryInsertBlock(position, rotation, selectedBlock);
+		return selectedBlock != BlockType::NONE;
 	}
 	return returnVal;
 }

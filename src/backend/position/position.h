@@ -93,10 +93,10 @@ inline constexpr bool isRotated(Rotation rotation) noexcept { return rotation & 
 inline constexpr bool isFlipped(Rotation rotation) noexcept { return rotation > 1; }
 inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
 	if (clockWise) {
-		if (rotation == TWO_SEVENTY) return ZERO;
+		if (rotation == Rotation::TWO_SEVENTY) return Rotation::ZERO;
 		return (Rotation)((int)rotation + 1);
 	}
-	if (rotation == ZERO) return TWO_SEVENTY;
+	if (rotation == Rotation::ZERO) return Rotation::TWO_SEVENTY;
 	return (Rotation)((int)rotation - 1);
 }
 inline constexpr float getDegrees(Rotation rotation) {

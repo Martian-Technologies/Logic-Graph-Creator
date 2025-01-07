@@ -35,8 +35,8 @@ public:
 protected:
 	inline virtual void updateElements() { };
 
-	BlockType selectedBlock = NONE;
-	Rotation rotation = ZERO;
+	BlockType selectedBlock = BlockType::NONE;
+	Rotation rotation = Rotation::ZERO;
 };
 
 #endif /* baseBlockPlacementTool_h */

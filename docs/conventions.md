@@ -92,6 +92,18 @@ if ()
 Place a space before curley bracket set for while, for, and functions
 Space after if, while, for loops
 
-### Constructor initializer lists
+### Constructor/initializer lists
 
-
+Put anything that needs to be constructed in the initializer lists.
+Default constructors should not be called.
+Primitive and enums should have defalt values delared in the header.
+```
+class Foo {
+public:
+	Foo(int num) : bar(num) {}
+private:
+	std::string name;
+	int bar;
+	int count = 0;
+}
+```
