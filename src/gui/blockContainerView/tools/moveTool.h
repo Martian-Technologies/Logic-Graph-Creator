@@ -6,8 +6,6 @@
 
 class MoveTool : public BlockContainerTool {
 public:
-    inline MoveTool() : BlockContainerTool(), stage('o'), originSelection(nullptr), tensorStage(-1) {}
-
     inline void reset() override final {
         stage = 'o';
         originSelection = nullptr;
@@ -40,7 +38,7 @@ public:
 private:
     void updateElements();
 
-    char stage;
+    char stage = 'o';
 
     FPosition pointer;
     
@@ -50,7 +48,7 @@ private:
 
     // tensor stuff
     Position step;
-    int tensorStage;
+    int tensorStage = -1;
 
     // destination
     Position destination;

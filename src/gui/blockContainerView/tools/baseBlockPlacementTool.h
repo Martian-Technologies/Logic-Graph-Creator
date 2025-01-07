@@ -6,7 +6,6 @@ class LogicGridWindow;
 
 class BaseBlockPlacementTool : public BlockContainerTool {
 public:
-    inline BaseBlockPlacementTool() : BlockContainerTool(), selectedBlock(NONE), rotation(ZERO) {}
     virtual ~BaseBlockPlacementTool() {}
 
     // This will also tell the tool to reset.
@@ -36,8 +35,8 @@ public:
 protected:
     inline virtual void updateElements() {};
 
-    BlockType selectedBlock;
-    Rotation rotation;
+    BlockType selectedBlock = NONE;
+    Rotation rotation = ZERO;
 };
 
 #endif /* baseBlockPlacementTool_h */

@@ -5,8 +5,6 @@
 
 class LogicToucher : public BlockContainerTool {
 public:
-    inline LogicToucher() : BlockContainerTool(), clickPosition(), clicked(false) {}
-
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BlockContainerTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
@@ -21,7 +19,7 @@ public:
 
 private:
     
-    bool clicked;
+    bool clicked = false;
     Position clickPosition;
 };
 

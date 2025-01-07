@@ -26,8 +26,6 @@ public:
     // dont call this func (temporary)
     void updateSelectedItem();
 
-    
-
 private:
     BlockContainerView<QtRenderer> blockContainerView;
     

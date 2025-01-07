@@ -6,8 +6,6 @@
 
 class TensorConnectTool : public BlockContainerTool {
 public:
-    inline TensorConnectTool() : BlockContainerTool(), makingOutput(true), outputStage(-1), inputStage(-1), outputSelection(), inputSelection() {}
-
     inline void reset() override final {
         outputStage = -1;
         makingOutput = true;
@@ -43,16 +41,16 @@ public:
 private:
     void updateElements();
 
-    bool makingOutput;
+    bool makingOutput = true;
     FPosition pointer;
         
     // output
-    int outputStage;
+    int outputStage = -1;
     Position outputPosition;
     SharedSelection outputSelection;
 
     // input
-    int inputStage;
+    int inputStage = -1;
     Position inputPosition;
     SharedSelection inputSelection;
 

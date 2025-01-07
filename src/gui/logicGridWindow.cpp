@@ -13,7 +13,7 @@
 
 #include "blockContainerView/blockContainerView.h"
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), blockContainerView(), mouseControls(true), treeWidget(nullptr) {
+LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
     // qt settings
     setFocusPolicy(Qt::StrongFocus);
     grabGesture(Qt::PinchGesture);

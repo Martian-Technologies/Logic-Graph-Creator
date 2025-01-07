@@ -5,8 +5,6 @@
 
 class SingleConnectTool : public BlockContainerTool {
 public:
-    inline SingleConnectTool() : BlockContainerTool(), clickPosition(), clicked(false) {}
-
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BlockContainerTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SingleConnectTool::makeConnection, this, std::placeholders::_1));
@@ -26,7 +24,7 @@ public:
 private:
     void updateElements(FPosition pointerPosition);
     
-    bool clicked;
+    bool clicked = false;
     Position clickPosition;
 };
 

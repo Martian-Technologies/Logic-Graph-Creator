@@ -5,8 +5,6 @@
 
 class AreaPlaceTool : public BaseBlockPlacementTool {
 public:
-    inline AreaPlaceTool() : BaseBlockPlacementTool(), clickPosition(), click('n') {}
-
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
         BaseBlockPlacementTool::initialize(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
@@ -25,7 +23,7 @@ public:
 
 private:
     Position clickPosition;
-    char click;
+    char click = 'n';
 };
 
 #endif /* areaPlaceTool_h */

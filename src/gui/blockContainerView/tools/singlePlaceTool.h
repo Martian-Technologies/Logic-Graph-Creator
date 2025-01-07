@@ -5,8 +5,6 @@
 
 class SinglePlaceTool : public BaseBlockPlacementTool {
 public:
-    inline SinglePlaceTool() : BaseBlockPlacementTool(), clicks{'n', 'n'} {}
-
     inline void reset() override final {memset(clicks, 'n', 2);}
 
     void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
@@ -32,7 +30,7 @@ private:
     void updateElements() override;
 
     Position position;
-    char clicks[2];
+    char clicks[2] = {'n', 'n'};
 };
 
 #endif /* SinglePlaceTool_h */

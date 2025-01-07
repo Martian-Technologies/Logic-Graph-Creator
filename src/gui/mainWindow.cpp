@@ -8,7 +8,7 @@
 #include "mainWindow.h"
 #include "gpu1.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager(), evaluator(nullptr) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     setWindowTitle(tr("Logic Graph Creator"));

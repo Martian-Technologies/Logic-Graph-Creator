@@ -11,7 +11,7 @@ typedef unsigned int block_container_wrapper_id_t;
 
 class BlockContainerWrapper {
 public:
-    inline BlockContainerWrapper(block_container_wrapper_id_t containerId) : containerId(containerId), blockContainer(), listenerFunctions(), undoSystem(), midUndo(false) {}
+    inline BlockContainerWrapper(block_container_wrapper_id_t containerId) : containerId(containerId), midUndo(false) {}
 
     block_container_wrapper_id_t getContainerId() const { return containerId; }
 

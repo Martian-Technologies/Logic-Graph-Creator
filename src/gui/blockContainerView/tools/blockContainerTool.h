@@ -13,7 +13,6 @@ class LogicGridWindow;
 
 class BlockContainerTool {
 public:
-    inline BlockContainerTool() : blockContainer(nullptr), evaluatorStateInterface(nullptr) {}
     virtual ~BlockContainerTool() {}
 
     // This will also tell the tool to reset.
@@ -30,8 +29,8 @@ public:
     virtual void reset() {};
 
 protected:
-    BlockContainerWrapper* blockContainer;
-    EvaluatorStateInterface* evaluatorStateInterface;
+    BlockContainerWrapper* blockContainer = nullptr;
+    EvaluatorStateInterface* evaluatorStateInterface = nullptr;
     ElementCreator elementCreator;
 };
 
