@@ -6,7 +6,6 @@
 #include "cell.h"
 
 class BlockContainer {
-	friend class LogicToucher;
 public:
 	inline BlockContainer() : lastId(0), grid(), blocks() { }
 
