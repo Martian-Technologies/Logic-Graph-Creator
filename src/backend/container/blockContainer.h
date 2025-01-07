@@ -5,7 +5,6 @@
 #include "difference.h"
 #include "cell.h"
 
-
 class BlockContainer {
 public:
 	inline BlockContainer() : lastId(0), grid(), blocks() { }
