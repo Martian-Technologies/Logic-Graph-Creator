@@ -11,8 +11,8 @@
 #include <QTimer>
 
 #include "blockContainerView/blockContainerView.h"
+#include "gpu/vulkanManager.h"
 #include "gpu/vulkanRenderer.h"
-#include "gpu/vulkanContext.h"
 #include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
@@ -21,7 +21,7 @@ public:
     LogicGridWindow(QWidget* parent = nullptr);
 
     // setup
-    void createVulkanWindow(std::shared_ptr<VulkanContext> context, QVulkanInstance* qVulkanInstance);
+    void createVulkanWindow(VulkanView vulkanView, QVulkanInstance* qVulkanInstance);
     void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
     void setEvaluator(std::shared_ptr<Evaluator> evaluator);
     void setSelector(QTreeWidget* treeWidget);

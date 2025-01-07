@@ -3,11 +3,11 @@
 
 #include "gui/blockContainerView/renderer/renderer.h"
 
-#include "gpu/vulkanContext.h"
+#include "gpu/vulkanManager.h"
 
 class VulkanRenderer : public Renderer {
 public:
-    void initialize(std::shared_ptr<VulkanContext> context, VkSurfaceKHR surface);
+    void initialize(VulkanView view, VkSurfaceKHR surface);
     void resize(int w, int h);
     void run();
     
@@ -38,7 +38,7 @@ private:
     void spawnConfetti(FPosition start) override;
 
 private:
-    std::shared_ptr<VulkanContext> context;
+    VulkanView view;
     float lastFrameTime = 0.0f;
 };
 

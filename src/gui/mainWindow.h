@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <QVulkanInstance>
 
-#include "gpu/vulkanContext.h"
+#include "gpu/vulkanManager.h"
 #include "middleEnd/blockContainerManager.h"
 #include "backend/evaluator/evaluator.h"
 
@@ -20,17 +20,21 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(QWidget* parent = nullptr);
+    ~MainWindow();
+    
     void setSimState(bool state);
     void simUseSpeed(bool state);
     void setSimSpeed(double speed);
-
+private:
+    void initVulkan();
+    
 private:
     Ui::MainWindow* ui;
     BlockContainerManager blockContainerManager;
     std::shared_ptr<Evaluator> evaluator;
     
-    std::shared_ptr<VulkanContext> vulkanContext;
-    QVulkanInstance* qVulkanInstance;
+    VulkanManager vulkanManager;
+    std::unique_ptr<QVulkanInstance> qVulkanInstance;
 };
 
 #endif /* mainWindow_h */

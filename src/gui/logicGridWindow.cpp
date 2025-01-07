@@ -43,14 +43,14 @@ void LogicGridWindow::showEvent(QShowEvent* event) {
     blockContainerView.getViewManager().setAspectRatio(w / h);
 }
 
-void LogicGridWindow::createVulkanWindow(std::shared_ptr<VulkanContext> context, QVulkanInstance* qVulkanInstance) {
+void LogicGridWindow::createVulkanWindow(VulkanView view, QVulkanInstance* qVulkanInstance) {
     QWindow* window = new QWindow();
     window->setSurfaceType(QSurface::VulkanSurface);
     window->setVulkanInstance(qVulkanInstance);
     QWidget* wrapper = QWidget::createWindowContainer(window, this);
     VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
 
-    blockContainerView.getRenderer().initialize(context, surface);
+    blockContainerView.getRenderer().initialize(view, surface);
 }
 
 void LogicGridWindow::updateLoop() {

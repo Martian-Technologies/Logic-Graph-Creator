@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 #include <QCheckBox>
+#include <QWindow>
 
 #include "logicGridWindow.h"
 #include "ui_mainWindow.h"
@@ -22,13 +23,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 
     // init vulkan
-    vulkanContext = std::make_shared<VulkanContext>();
-    qVulkanInstance = new QVulkanInstance();
-    qVulkanInstance->setVkInstance(vulkanContext->getInstance());
-    qVulkanInstance->create();
+    initVulkan();
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->createVulkanWindow(vulkanContext, qVulkanInstance);
+    logicGridWindow->createVulkanWindow(vulkanManager.createVulkanView(), qVulkanInstance.get());
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setEvaluator(evaluator);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
@@ -41,6 +39,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     layout->addWidget(logicGridWindow);
 }
 
+MainWindow::~MainWindow() {
+    vulkanManager.destroy();
+}
+
 void MainWindow::setSimState(bool state) {
     evaluator->setPause(!state);
 }
@@ -51,4 +53,34 @@ void MainWindow::simUseSpeed(bool state) {
 
 void MainWindow::setSimSpeed(double speed) {
     evaluator->setTickrate(std::round(speed * 60));
+}
+
+void MainWindow::initVulkan() {
+    // goofy ahh hack to get required extension list
+    QVulkanInstance tempInstance;
+    tempInstance.create();
+    QByteArrayList qExtensions = tempInstance.extensions();
+    std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
+    
+    // create instance
+    vulkanManager.createInstance(extensions);
+
+    // goofy ahh hack to get surface for device selection
+    QWindow tempWindow;
+    tempWindow.create();
+    tempWindow.setSurfaceType(QSurface::VulkanSurface);
+    tempWindow.setVulkanInstance(&tempInstance);
+    VkSurfaceKHR tempSurface = tempInstance.surfaceForWindow(&tempWindow);
+    
+    // create device
+    vulkanManager.createDevice(tempSurface);
+
+    // create permanent QVulkaninstance
+    qVulkanInstance = std::make_unique<QVulkanInstance>();
+    qVulkanInstance->setVkInstance(vulkanManager.getInstance());
+    qVulkanInstance->create();
+
+    // destroy temp instance
+    tempWindow.destroy();
+    tempInstance.destroy();
 }

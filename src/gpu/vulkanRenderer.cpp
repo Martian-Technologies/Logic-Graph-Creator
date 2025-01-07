@@ -1,7 +1,8 @@
 #include "vulkanRenderer.h"
 
-void VulkanRenderer::initialize(std::shared_ptr<VulkanContext> context, VkSurfaceKHR surface) {
-    
+void VulkanRenderer::initialize(VulkanView view, VkSurfaceKHR surface)
+{
+    this->view = view;
 }
 
 void VulkanRenderer::resize(int w, int h) {
