@@ -6,7 +6,7 @@ set(CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
 	# hack to avoid DNDEBUG which removes wires for some reason
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()

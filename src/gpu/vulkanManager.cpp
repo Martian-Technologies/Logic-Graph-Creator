@@ -7,7 +7,7 @@
 const std::vector<const char*> deviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
-const std::vector<const char *> validationLayers = {
+const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
@@ -15,11 +15,11 @@ const std::vector<const char *> validationLayers = {
 void VulkanManager::createInstance(const std::vector<const char*>& requiredExtensions, bool enableValidationlayers) {
 	// confirm we have validation layers if we need them
 	if (enableValidationlayers && !checkValidationLayerSupport()) {
-	fail("validation layers requested, but not available!");
+		fail("validation layers requested, but not available!");
 	}
-	
+
 	// set applicaiton information
-	VkApplicationInfo appInfo{};
+	VkApplicationInfo appInfo {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = "Gatality";
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -28,7 +28,7 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 
 	// start instance creation
-	VkInstanceCreateInfo createInfo{};
+	VkInstanceCreateInfo createInfo {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
 
@@ -40,23 +40,23 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 
 	// enable validation layers3
 	if (enableValidationlayers) {
-	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-	createInfo.ppEnabledLayerNames = validationLayers.data();
-	// TODO - custom message callback
-		
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+		// TODO - custom message callback
+
 	} else {
-	createInfo.enabledLayerCount = 0;
-	createInfo.pNext = nullptr;
+		createInfo.enabledLayerCount = 0;
+		createInfo.pNext = nullptr;
 	}
-	
+
 	// create the instance
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-	fail("failed to create instance!");
+		fail("failed to create instance!");
 	}
 }
 
 void VulkanManager::createDevice(VkSurfaceKHR surface) {
-	
+
 }
 
 void VulkanManager::destroy() {
@@ -82,18 +82,18 @@ bool VulkanManager::checkValidationLayerSupport() {
 
 	// confirm support of every required layer
 	for (const char* layerName : validationLayers) {
-	bool layerFound = false;
+		bool layerFound = false;
 
-	for (const auto& layerProperties : availableLayers) {
-		if (strcmp(layerName, layerProperties.layerName) == 0) {
-		layerFound = true;
-		break;
+		for (const auto& layerProperties : availableLayers) {
+			if (strcmp(layerName, layerProperties.layerName) == 0) {
+				layerFound = true;
+				break;
+			}
 		}
-	}
 
-	if (!layerFound) {
-		return false;
-	}	
+		if (!layerFound) {
+			return false;
+		}
 	}
 
 	return true;
