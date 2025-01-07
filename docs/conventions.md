@@ -11,6 +11,10 @@ Include Order
 - If the file is a .cpp file, include the corresponding .h before any other local .h files
 - Add line breaks between the different kinds of includes if you want
 
+Include Path
+
+- all paths should be case sensitive `util/fastMath.h` not `util/fastmath.h`
+
 QT Includes
 - Do not use QT includes ending with .h, use the ones specified by classes in the [Qt documentation](https://doc.qt.io/qt-6/classes.html)
 
@@ -68,9 +72,9 @@ Using regular c++ types when the size is not highly important. You should use cs
 use tabs please
 
 ### Small TODO comments
-
-`// TODO: info`
-
+```cpp
+// TODO: changes to be made
+```
 ### Curly Brackets
 
 You should open them on the same line. Not a new one.
