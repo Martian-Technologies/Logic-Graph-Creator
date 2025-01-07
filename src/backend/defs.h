@@ -13,7 +13,7 @@ enum BlockType : char {
 	NAND,
 	NOR,
 	XNOR,
-	TIMER,
+	//TIMER,
 	BUTTON,
 	TICK_BUTTON,
 	SWITCH,
