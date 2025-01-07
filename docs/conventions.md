@@ -14,9 +14,6 @@ Include Order
 QT Includes
 - Do not use QT includes ending with .h, use the ones specified by classes in the [Qt documentation](https://doc.qt.io/qt-6/classes.html)
 
-Case Sensitive Includes
-- 
-
 ### Header Guards
 
 Use **#ifndef**
