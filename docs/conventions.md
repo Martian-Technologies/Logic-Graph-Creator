@@ -19,9 +19,23 @@ Case Sensitive Includes
 
 ### Header Guards
 
+Use **#ifndef**
+The preporsseser var should be named the name of the file with a '_' instead of '.'
+
 ### Naming
 
+camalCase for file names
+.h for headers and .cpp for sources
+
+var and function names should be camalCase
+const var and enum states names should be MACRO_CASE
+class, enum, and struct names should PascalCase
+
 ### Using Raw and Smart Pointers
+
+Dont use new except when creating windows for qt to own.
+
+
 
 ### Enums
 
