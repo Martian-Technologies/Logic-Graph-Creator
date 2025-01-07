@@ -6,21 +6,20 @@
 
 template <unsigned int p, class T>
 constexpr int FastPower(T x) {
-    if constexpr (p == 0) return 1;
-    if constexpr (p == 1) return x;
+	if constexpr (p == 0) return 1;
+	if constexpr (p == 1) return x;
 
-    int tmp = FastPower<p / 2>(x);
-    if constexpr ((p % 2) == 0) { return tmp * tmp; }
-    else { return x * tmp * tmp; }
+	int tmp = FastPower<p / 2>(x);
+	if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
 constexpr int Abs(int x) { return x < 0 ? -x : x; }
 
 template <typename T>
 constexpr char signum(T x) {
-    if constexpr (std::is_signed<T>())
-        return (T(0) < x) - (x < T(0));
-    return T(0) < x;
+	if constexpr (std::is_signed<T>())
+		return (T(0) < x) - (x < T(0));
+	return T(0) < x;
 }
 
 #if __APPLE__

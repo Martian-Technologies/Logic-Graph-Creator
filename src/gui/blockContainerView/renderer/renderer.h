@@ -21,89 +21,89 @@ typedef unsigned int ElementID;
 
 // Element Types ------------------------------
 struct SelectionElement {
-    SelectionElement() = default;
-    SelectionElement(Position topLeft, Position bottomRight, bool inverted = false)
-        : topLeft(topLeft), bottomRight(bottomRight), inverted(inverted) {}
+	SelectionElement() = default;
+	SelectionElement(Position topLeft, Position bottomRight, bool inverted = false)
+		: topLeft(topLeft), bottomRight(bottomRight), inverted(inverted) { }
 
-    SelectionElement(Position topLeft, bool inverted = false)
-        : topLeft(topLeft), bottomRight(topLeft), inverted(inverted) {}
+	SelectionElement(Position topLeft, bool inverted = false)
+		: topLeft(topLeft), bottomRight(topLeft), inverted(inverted) { }
 
-    Position topLeft;
-    Position bottomRight;
-    bool inverted;
+	Position topLeft;
+	Position bottomRight;
+	bool inverted;
 };
 
 struct SelectionObjectElement {
-    enum RenderMode {
-        SELECTION,
-        SELECTION_INVERTED,
-        ARROWS
-    };
-    SelectionObjectElement(SharedSelection selection, RenderMode renderMode = RenderMode::SELECTION)
-        : selection(selection), renderMode(renderMode) {}
+	enum RenderMode {
+		SELECTION,
+		SELECTION_INVERTED,
+		ARROWS
+	};
+	SelectionObjectElement(SharedSelection selection, RenderMode renderMode = RenderMode::SELECTION)
+		: selection(selection), renderMode(renderMode) { }
 
-    SharedSelection selection;
-    RenderMode renderMode;
+	SharedSelection selection;
+	RenderMode renderMode;
 };
 
 struct BlockPreview {
-    BlockPreview() = default;
-    BlockPreview(BlockType type, Position position, Rotation rotation)
-        : type(type), position(position), rotation(rotation) {}
+	BlockPreview() = default;
+	BlockPreview(BlockType type, Position position, Rotation rotation)
+		: type(type), position(position), rotation(rotation) { }
 
-    BlockType type;
-    Position position;
-    Rotation rotation;
+	BlockType type;
+	Position position;
+	Rotation rotation;
 };
 
 struct ConnectionPreview {
-    ConnectionPreview() = default;
-    ConnectionPreview(Position input, Position output)
-        : input(input), output(output) {}
+	ConnectionPreview() = default;
+	ConnectionPreview(Position input, Position output)
+		: input(input), output(output) { }
 
-    Position input;
-    Position output;
+	Position input;
+	Position output;
 };
 
 struct HalfConnectionPreview {
-    HalfConnectionPreview() = default;
-    HalfConnectionPreview(Position input, FPosition output)
-        : input(input), output(output) {}
+	HalfConnectionPreview() = default;
+	HalfConnectionPreview(Position input, FPosition output)
+		: input(input), output(output) { }
 
-    Position input;
-    FPosition output;
+	Position input;
+	FPosition output;
 };
 
 // Renderer -----------------------------------
 
 class Renderer {
-    friend class ElementCreator;
+	friend class ElementCreator;
 public:
-    // main flow
-    virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
-    virtual void setEvaluator(Evaluator* evaluator) = 0;
+	// main flow
+	virtual void setBlockContainer(BlockContainerWrapper* blockContainer) = 0;
+	virtual void setEvaluator(Evaluator* evaluator) = 0;
 
-    virtual void updateView(ViewManager* viewManager) = 0;
-    virtual void updateBlockContainer(DifferenceSharedPtr diff) = 0;
+	virtual void updateView(ViewManager* viewManager) = 0;
+	virtual void updateBlockContainer(DifferenceSharedPtr diff) = 0;
 
-    virtual float getLastFrameTimeMs() const = 0;
+	virtual float getLastFrameTimeMs() const = 0;
 
 private:
-    // elements
-    virtual ElementID addSelectionElement(const SelectionObjectElement& selection) = 0;
-    virtual ElementID addSelectionElement(const SelectionElement& selection) = 0;
-    virtual void removeSelectionElement(ElementID selection) = 0;
+	// elements
+	virtual ElementID addSelectionElement(const SelectionObjectElement& selection) = 0;
+	virtual ElementID addSelectionElement(const SelectionElement& selection) = 0;
+	virtual void removeSelectionElement(ElementID selection) = 0;
 
-    virtual ElementID addBlockPreview(const BlockPreview& blockPreview) = 0;
-    virtual void removeBlockPreview(ElementID blockPreview) = 0;
+	virtual ElementID addBlockPreview(const BlockPreview& blockPreview) = 0;
+	virtual void removeBlockPreview(ElementID blockPreview) = 0;
 
-    virtual ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) = 0;
-    virtual void removeConnectionPreview(ElementID connectionPreview) = 0;
+	virtual ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) = 0;
+	virtual void removeConnectionPreview(ElementID connectionPreview) = 0;
 
-    virtual ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) = 0;
-    virtual void removeHalfConnectionPreview(ElementID halfConnectionPreview) = 0;
+	virtual ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) = 0;
+	virtual void removeHalfConnectionPreview(ElementID halfConnectionPreview) = 0;
 
-    virtual void spawnConfetti(FPosition start) = 0;
+	virtual void spawnConfetti(FPosition start) = 0;
 };
 
 #endif /* renderer_h */

@@ -10,23 +10,23 @@
 
 
 namespace Ui {
-    class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = nullptr);
-    void setSimState(bool state);
-    void simUseSpeed(bool state);
-    void setSimSpeed(double speed);
+	MainWindow(QWidget* parent = nullptr);
+	void setSimState(bool state);
+	void simUseSpeed(bool state);
+	void setSimSpeed(double speed);
 
 private:
-    Ui::MainWindow* ui;
-    QGraphicsScene* scene;
-    BlockContainerManager blockContainerManager;
-    std::shared_ptr<Evaluator> evaluator;
+	Ui::MainWindow* ui;
+	QGraphicsScene* scene;
+	BlockContainerManager blockContainerManager;
+	std::shared_ptr<Evaluator> evaluator;
 };
 
 #endif /* mainWindow_h */

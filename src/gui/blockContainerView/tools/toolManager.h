@@ -16,90 +16,90 @@
 
 class ToolManager {
 public:
-    inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
-        eventRegister(eventRegister), renderer(renderer), toolManagerEventRegister(eventRegister, &registeredEvents) {}
+	inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
+		eventRegister(eventRegister), renderer(renderer), toolManagerEventRegister(eventRegister, &registeredEvents) { }
 
-    inline ~ToolManager() {
-        unregisterEvents();
-    }
+	inline ~ToolManager() {
+		unregisterEvents();
+	}
 
-    inline void changeTool(const std::string& toolType) {
-        if (this->toolType == toolType) return;
-        if (toolType == "Single Place") changeTool<SinglePlaceTool>();
-        else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
-        else if (toolType == "Move") changeTool<MoveTool>();
-        else if (toolType == "Simple") changeTool<SingleConnectTool>();
-        else if (toolType == "Tensor") changeTool<TensorConnectTool>();
-        else if (toolType == "State Changer") changeTool<LogicToucher>();
-        else return;
-        this->toolType = toolType;
-    }
+	inline void changeTool(const std::string& toolType) {
+		if (this->toolType == toolType) return;
+		if (toolType == "Single Place") changeTool<SinglePlaceTool>();
+		else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
+		else if (toolType == "Move") changeTool<MoveTool>();
+		else if (toolType == "Simple") changeTool<SingleConnectTool>();
+		else if (toolType == "Tensor") changeTool<TensorConnectTool>();
+		else if (toolType == "State Changer") changeTool<LogicToucher>();
+		else return;
+		this->toolType = toolType;
+	}
 
-    inline void setBlockContainer(BlockContainerWrapper* blockContainerWrapper) {
-        this->blockContainerWrapper = blockContainerWrapper;
-        if (tool) tool->setBlockContainer(blockContainerWrapper);
-    }
+	inline void setBlockContainer(BlockContainerWrapper* blockContainerWrapper) {
+		this->blockContainerWrapper = blockContainerWrapper;
+		if (tool) tool->setBlockContainer(blockContainerWrapper);
+	}
 
-    inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
-        this->evaluatorStateInterface = evaluatorStateInterface;
-        if (tool) tool->setEvaluatorStateInterface(evaluatorStateInterface);
-    }
+	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
+		this->evaluatorStateInterface = evaluatorStateInterface;
+		if (tool) tool->setEvaluatorStateInterface(evaluatorStateInterface);
+	}
 
-    inline void selectBlock(BlockType selectedBlock) {
-        this->selectedBlock = selectedBlock;
-        if (tool) {
-            BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
-            if (placementTool) placementTool->selectBlock(selectedBlock);
+	inline void selectBlock(BlockType selectedBlock) {
+		this->selectedBlock = selectedBlock;
+		if (tool) {
+			BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+			if (placementTool) placementTool->selectBlock(selectedBlock);
 
-        }
-    }
+		}
+	}
 
-    inline void reset() { if (tool) tool->reset(); }
+	inline void reset() { if (tool) tool->reset(); }
 
 private:
-    template<class ToolType>
-    inline void changeTool() {
-        BaseBlockPlacementTool* oldPlacementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
-        if (oldPlacementTool) {
-            selectedRotation = oldPlacementTool->getRotation();
-        }
-        unregisterEvents();
-        tool = std::make_unique<ToolType>();
-        tool->setup(ElementCreator(renderer), evaluatorStateInterface, blockContainerWrapper);
-        tool->initialize(toolManagerEventRegister);
-        BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
-        if (placementTool) {
-            placementTool->selectBlock(selectedBlock);
-            placementTool->setRotation(selectedRotation);
-        }
-    }
+	template<class ToolType>
+	inline void changeTool() {
+		BaseBlockPlacementTool* oldPlacementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+		if (oldPlacementTool) {
+			selectedRotation = oldPlacementTool->getRotation();
+		}
+		unregisterEvents();
+		tool = std::make_unique<ToolType>();
+		tool->setup(ElementCreator(renderer), evaluatorStateInterface, blockContainerWrapper);
+		tool->initialize(toolManagerEventRegister);
+		BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+		if (placementTool) {
+			placementTool->selectBlock(selectedBlock);
+			placementTool->setRotation(selectedRotation);
+		}
+	}
 
-    void unregisterEvents() {
-        for (auto eventFuncPair : registeredEvents) {
-            eventRegister->unregisterFunction(eventFuncPair.first, eventFuncPair.second);
-        }
-        registeredEvents.clear();
-    }
+	void unregisterEvents() {
+		for (auto eventFuncPair : registeredEvents) {
+			eventRegister->unregisterFunction(eventFuncPair.first, eventFuncPair.second);
+		}
+		registeredEvents.clear();
+	}
 
 
-    // current block container
-    BlockContainerWrapper* blockContainerWrapper;
+	// current block container
+	BlockContainerWrapper* blockContainerWrapper;
 
-    // tool function event linking
-    ToolManagerEventRegister toolManagerEventRegister;
-    EventRegister* eventRegister;
-    std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;
+	// tool function event linking
+	ToolManagerEventRegister toolManagerEventRegister;
+	EventRegister* eventRegister;
+	std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;
 
-    Renderer* renderer;
-    EvaluatorStateInterface* evaluatorStateInterface;
+	Renderer* renderer;
+	EvaluatorStateInterface* evaluatorStateInterface;
 
-    // which tool data
-    std::unique_ptr<BlockContainerTool> tool;
-    std::string toolType = "NONE"
+	// which tool data
+	std::unique_ptr<BlockContainerTool> tool;
+	std::string toolType = "NONE";
 
-    // tool data
-    BlockType selectedBlock = NONE;
-    Rotation selectedRotation = ZERO;
+	// tool data
+	BlockType selectedBlock = NONE;
+	Rotation selectedRotation = ZERO;
 };
 
 #endif /* toolManager_h */
