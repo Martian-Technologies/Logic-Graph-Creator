@@ -138,20 +138,20 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 // }
 
 bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
-    Block* block = getBlock(positionOfBlock);
-    if (!block) return false;
-    block->setRawData(data);
-    return true;
+	Block* block = getBlock(positionOfBlock);
+	if (!block) return false;
+	block->setRawData(data);
+	return true;
 }
 
 bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference) {
-    Block* block = getBlock(positionOfBlock);
-    if (!block) return false;
-    block_data_t oldData = block->getRawData();
-    if (oldData == data) return true;
-    block->setRawData(data);
-    difference->addSetData(positionOfBlock, data, oldData);
-    return true;
+	Block* block = getBlock(positionOfBlock);
+	if (!block) return false;
+	block_data_t oldData = block->getRawData();
+	if (oldData == data) return true;
+	block->setRawData(data);
+	difference->addSetData(positionOfBlock, data, oldData);
+	return true;
 }
 
 bool BlockContainer::connectionExists(const Position& outputPosition, const Position& inputPosition) const {
