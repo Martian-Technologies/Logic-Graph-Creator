@@ -73,7 +73,7 @@ use tabs please
 
 ### Small TODO comments
 
-`// TODO: info`
+`// TODO: changes to be made`
 
 ### Curly Brackets
 
