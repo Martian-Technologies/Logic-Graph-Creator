@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     initVulkan();
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->createVulkanWindow(vulkanManager.createVulkanView(), qVulkanInstance.get());
+    logicGridWindow->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
     logicGridWindow->setBlockContainer(blockContainerWrapper);
     logicGridWindow->setEvaluator(evaluator);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
@@ -61,10 +61,6 @@ void MainWindow::initVulkan() {
     tempInstance.create();
     QByteArrayList qExtensions = tempInstance.extensions();
     std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
-    
-    // create instance
-    vulkanManager.createInstance(extensions, DEBUG);
-
     // goofy ahh hack to get surface for device selection
     QWindow tempWindow;
     tempWindow.create();
@@ -72,15 +68,16 @@ void MainWindow::initVulkan() {
     tempWindow.setVulkanInstance(&tempInstance);
     VkSurfaceKHR tempSurface = tempInstance.surfaceForWindow(&tempWindow);
     
-    // create device
+    // create instance and device
+    vulkanManager.createInstance(extensions, DEBUG);
     vulkanManager.createDevice(tempSurface);
 
-    // create permanent QVulkaninstance
+    // create permanent QVulkanInstance (for getting future window handles)
     qVulkanInstance = std::make_unique<QVulkanInstance>();
     qVulkanInstance->setVkInstance(vulkanManager.getInstance());
     qVulkanInstance->create();
 
-    // destroy temp instance
+    // destroy temp instance (from goofy ahh hacks)
     tempWindow.destroy();
     tempInstance.destroy();
 }

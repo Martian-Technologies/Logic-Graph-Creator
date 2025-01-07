@@ -1,6 +1,6 @@
 #include "vulkanRenderer.h"
 
-void VulkanRenderer::initialize(VulkanView view, VkSurfaceKHR surface)
+void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface)
 {
     this->view = view;
 }

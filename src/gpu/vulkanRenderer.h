@@ -7,7 +7,7 @@
 
 class VulkanRenderer : public Renderer {
 public:
-    void initialize(VulkanView view, VkSurfaceKHR surface);
+    void initialize(VulkanGraphicsView view, VkSurfaceKHR surface);
     void resize(int w, int h);
     void run();
     
@@ -38,7 +38,7 @@ private:
     void spawnConfetti(FPosition start) override;
 
 private:
-    VulkanView view;
+    VulkanGraphicsView view;
     float lastFrameTime = 0.0f;
 };
 

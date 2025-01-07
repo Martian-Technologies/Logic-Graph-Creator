@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-struct VulkanView {
+struct VulkanGraphicsView {
     VkDevice device;
 };
 
@@ -16,7 +16,7 @@ public:
 
     // util
     inline VkInstance getInstance() const { return instance; }
-    inline VulkanView createVulkanView() const { return { device }; }
+    inline VulkanGraphicsView createVulkanGraphicsView() const { return { device }; }
 
 private:
     void fail(const std::string& reason);
@@ -25,6 +25,7 @@ private:
     
 private:
     VkInstance instance;
+    VkPhysicalDevice physicalDevice;
     VkDevice device;
 };
 

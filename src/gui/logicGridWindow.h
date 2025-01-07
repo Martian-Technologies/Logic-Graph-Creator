@@ -21,7 +21,7 @@ public:
     LogicGridWindow(QWidget* parent = nullptr);
 
     // setup
-    void createVulkanWindow(VulkanView vulkanView, QVulkanInstance* qVulkanInstance);
+    void createVulkanWindow(VulkanGraphicsView vulkanView, QVulkanInstance* qVulkanInstance);
     void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
     void setEvaluator(std::shared_ptr<Evaluator> evaluator);
     void setSelector(QTreeWidget* treeWidget);

@@ -43,7 +43,7 @@ void LogicGridWindow::showEvent(QShowEvent* event) {
     blockContainerView.getViewManager().setAspectRatio(w / h);
 }
 
-void LogicGridWindow::createVulkanWindow(VulkanView view, QVulkanInstance* qVulkanInstance) {
+void LogicGridWindow::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
     QWindow* window = new QWindow();
     window->setSurfaceType(QSurface::VulkanSurface);
     window->setVulkanInstance(qVulkanInstance);
