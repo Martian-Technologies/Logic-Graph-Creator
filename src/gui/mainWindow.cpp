@@ -1,29 +1,48 @@
+#include <QPushButton>
 #include <QHBoxLayout>
 #include <QTreeView>
+#include <QCheckBox>
 
-#include "gridGUI/logicGridWindow.h"
+#include "logicGridWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
+#include "gpu1.h"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-	
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), blockContainerManager(), evaluator(nullptr) {
     ui->setupUi(this);
-	
+
     setWindowTitle(tr("Logic Graph Creator"));
-	setWindowIcon(QIcon(":/gateIcon.ico"));
+    setWindowIcon(QIcon(":/gateIcon.ico"));
+    
 
-    BlockContainer* blockContainer = new BlockContainer();
+    block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
+    std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
 
-    blockContainer->tryInsertBlock(Position(0, 0), ZERO, AND);
-    blockContainer->tryInsertBlock(Position(2, 0), ZERO, AND);
-    blockContainer->tryCreateConnection(Position(0, 0), Position(2, 0));
+    // makeGPU1(blockContainerWrapper.get());
+
+    evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 
     LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->loadTileMap(":logicTiles.png");
-    logicGridWindow->setBlockContainer(blockContainer);
+    logicGridWindow->setBlockContainer(blockContainerWrapper);
+    logicGridWindow->setEvaluator(evaluator);
     logicGridWindow->setSelector(ui->selectorTreeWidget);
+
+    connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
+    connect(ui->UseSpeed, &QCheckBox::stateChanged, this, &MainWindow::simUseSpeed);
+    connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
     QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
     layout->addWidget(logicGridWindow);
+}
+
+void MainWindow::setSimState(bool state) {
+    evaluator->setPause(!state);
+}
+
+void MainWindow::simUseSpeed(bool state) {
+    evaluator->setUseTickrate(state);
+}
+
+void MainWindow::setSimSpeed(double speed) {
+    evaluator->setTickrate(std::round(speed * 60));
 }

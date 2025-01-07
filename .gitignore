@@ -51,5 +51,23 @@
 *.config
 *.cflags
 
+# LSP
+compile_commands.json
+
 # IDE Specific
 /.idea
+
+# XCode
+/.qt
+/CMakeFiles
+CMakeCache.txt
+CMakeUserPresets.json
+CMakeScripts/ReRunCMake.make
+*.pbxproj
+*.xcsettings
+cmake_install.cmake
+/LogicGraphCreator_autogen
+/LogicGraphCreator.xcodeproj
+
+# MSVC
+*.pdb

@@ -3,7 +3,7 @@
 #include "connectionContainer.h"
 #include "../block/block.h"
 
-ConnectionContainer::ConnectionContainer(BlockType blockType) : blockType(blockType), connections(::getMaxConnectionId(blockType)+1) {}
+ConnectionContainer::ConnectionContainer(BlockType blockType) : blockType(blockType), connections(::getMaxConnectionId(blockType) + 1) {}
 
 bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
     // not a valid Id
@@ -35,8 +35,8 @@ bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, con
 
 bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const {
     return (
-        thisEndId > getMaxConnectionId() && 
+        thisEndId > getMaxConnectionId() &&
         contains(connections[thisEndId].begin(), connections[thisEndId].end(), otherConnectionEnd)
-    );
+        );
 }
 

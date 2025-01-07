@@ -1,15 +1,26 @@
 cmake_minimum_required(VERSION 3.16)
 project(LogicGraphCreator)
 
+# hack to avoid DNDEBUG which removes wires for some reason
+if (MSVC)
+  # also do it for MSVC, not sure if needed
+  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+else()
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
+# C++ Standard
+set(CXX_STANDARD 20)
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
-set(FORMS_DIR "${CMAKE_SOURCE_DIR}/src")
+set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Set Qt moc and uic
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${FORMS_DIR})
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
 
 # Initialize QT
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -17,12 +28,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 # Find source files
 set(SOURCE_FILES)
 file(GLOB_RECURSE SOURCE_FILES
-        "${FORMS_DIR}/*.ui"
-        "${FORMS_DIR}/*.qrc"
+        "${UI_DIR}/*.ui"
+        "${UI_DIR}/*.qrc"
         "${SOURCE_DIR}/*.cpp"
 )
 
 file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
+file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
 
 if(APPLE) # MacOS specific (Before add_executable)
     # Icon
@@ -38,8 +50,9 @@ endif()
 
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${FORMS_DIR} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} )
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
 if(APPLE) # MacOS specific (After add_executable)
     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
@@ -51,10 +64,11 @@ elseif (WIN32) # Windows specific (After add_executable)
 endif()
 
 # Add resources
-qt_add_resources(${PROJECT_NAME} "images"
+qt_add_resources(${PROJECT_NAME} "mainResources"
         PREFIX
         "/"
         FILES
         ${IMG_SOURCES}
+        ${JSON_SOURCES}
         BASE ${RESOURCES_DIR}
 )

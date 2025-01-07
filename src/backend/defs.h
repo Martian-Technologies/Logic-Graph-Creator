@@ -4,17 +4,22 @@
 typedef unsigned char block_size_t;
 typedef unsigned int block_id_t;
 
-enum BlockType {
-    NONE,
-    BLOCK,
-    AND,
-    OR,
-    XOR,
-    NAND,
-    NOR,
-    XNOR,
-    CUSTOM,
-    TYPE_COUNT
+enum BlockType : char {
+  NONE,
+  BLOCK,
+  AND,
+  OR,
+  XOR,
+  NAND,
+  NOR,
+  XNOR,
+  BUTTON,
+  TICK_BUTTON,
+  SWITCH,
+  CONSTANT,
+  LIGHT,
+  CUSTOM,
+  TYPE_COUNT
 };
 
 #endif /* defs_h */
