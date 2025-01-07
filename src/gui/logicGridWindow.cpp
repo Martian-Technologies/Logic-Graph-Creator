@@ -28,29 +28,29 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseContro
 	updateLoopTimer->start();
 	connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
 
-    QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-    connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
+	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
+	connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
 }
 
 void LogicGridWindow::showEvent(QShowEvent* event) {
-    float w = size().width();
-    float h = size().height();
+	float w = size().width();
+	float h = size().height();
 
-    // initialize renderer with width and height
-    blockContainerView.getRenderer().resize(w, h);
-    
-    // set viewmanager aspect ratio to begin with
-    blockContainerView.getViewManager().setAspectRatio(w / h);
+	// initialize renderer with width and height
+	blockContainerView.getRenderer().resize(w, h);
+	
+	// set viewmanager aspect ratio to begin with
+	blockContainerView.getViewManager().setAspectRatio(w / h);
 }
 
 void LogicGridWindow::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
-    QWindow* window = new QWindow();
-    window->setSurfaceType(QSurface::VulkanSurface);
-    window->setVulkanInstance(qVulkanInstance);
-    QWidget* wrapper = QWidget::createWindowContainer(window, this);
-    VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
+	QWindow* window = new QWindow();
+	window->setSurfaceType(QSurface::VulkanSurface);
+	window->setVulkanInstance(qVulkanInstance);
+	QWidget* wrapper = QWidget::createWindowContainer(window, this);
+	VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
 
-    blockContainerView.getRenderer().initialize(view, surface);
+	blockContainerView.getRenderer().initialize(view, surface);
 }
 
 void LogicGridWindow::updateLoop() {
@@ -124,15 +124,15 @@ bool LogicGridWindow::event(QEvent* event) {
 }
 
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
-    QPainter* painter = new QPainter(this);
-    
-    // rolling average for frame time
-    pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
-    int numPops = pastFrameTimes.size() - numTimesInAverage;
-    for (int i = 0; i < numPops; ++i) {
-        pastFrameTimes.pop_front();
-    }
-    float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
+	QPainter* painter = new QPainter(this);
+	
+	// rolling average for frame time
+	pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
+	int numPops = pastFrameTimes.size() - numTimesInAverage;
+	for (int i = 0; i < numPops; ++i) {
+		pastFrameTimes.pop_front();
+	}
+	float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
 
 	// avg frame
 	std::stringstream stream1;

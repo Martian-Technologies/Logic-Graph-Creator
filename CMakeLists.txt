@@ -34,9 +34,9 @@ find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 # Find source files
 set(SOURCE_FILES)
 file(GLOB_RECURSE SOURCE_FILES
-        "${SOURCE_DIR}/*.cpp"
-        "${SOURCE_DIR}/*.ui"
-        "${SOURCE_DIR}/*.qrc"
+		"${SOURCE_DIR}/*.cpp"
+		"${SOURCE_DIR}/*.ui"
+		"${SOURCE_DIR}/*.qrc"
 )
 
 set(LIB_SOURCE
@@ -82,25 +82,25 @@ endif()
 # Compile shaders -----
 set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 file(GLOB_RECURSE SHADERS_SOURCE
-  "${SOURCE_DIR}/*.vert"
-  "${SOURCE_DIR}/*.frag")
+	"${SOURCE_DIR}/*.vert"
+	"${SOURCE_DIR}/*.frag")
 # Create shader binary directory
 add_custom_target(make-shader-dir ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
 # Compile each shader
 foreach(source IN LISTS SHADERS_SOURCE)
-  get_filename_component(FILENAME ${source} NAME)
-  add_custom_command(
-    COMMAND
-      ${glslc_executable}
-      #      -MD -MF ${SHADER_BINARY_DIR}/${FILENAME}.d
-      -o ${SHADER_BINARY_DIR}/${FILENAME}.spv
-      ${source}
-    OUTPUT ${SHADER_BINARY_DIR}/${FILENAME}.spv
-    DEPENDS ${source} ${SHADER_BINARY_DIR}
-    COMMENT "Compiling ${FILENAME}"
-  )
-  list(APPEND SPV_SHADERS ${SHADER_BINARY_DIR}/${FILENAME}.spv)
+	get_filename_component(FILENAME ${source} NAME)
+	add_custom_command(
+	COMMAND
+		${glslc_executable}
+		#	  -MD -MF ${SHADER_BINARY_DIR}/${FILENAME}.d
+		-o ${SHADER_BINARY_DIR}/${FILENAME}.spv
+		${source}
+	OUTPUT ${SHADER_BINARY_DIR}/${FILENAME}.spv
+	DEPENDS ${source} ${SHADER_BINARY_DIR}
+	COMMENT "Compiling ${FILENAME}"
+	)
+	list(APPEND SPV_SHADERS ${SHADER_BINARY_DIR}/${FILENAME}.spv)
 endforeach()
 # Shader compilation dependency and directory
 add_custom_target(shaders ALL DEPENDS ${SPV_SHADERS} make-shader-dir)
@@ -117,9 +117,9 @@ qt_add_resources(${PROJECT_NAME} "mainResources"
 )
 # Add compiled shader to qt
 qt_add_resources(${PROJECT_NAME} "shaders"
-        PREFIX
-        "/shaders"
-        FILES
-        ${SPV_SHADERS}
-        BASE ${SHADER_BINARY_DIR}
+		PREFIX
+		"/shaders"
+		FILES
+		${SPV_SHADERS}
+		BASE ${SHADER_BINARY_DIR}
 )

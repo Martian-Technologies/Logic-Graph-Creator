@@ -19,22 +19,22 @@ class MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = nullptr);
-    ~MainWindow();
-    
-    void setSimState(bool state);
-    void simUseSpeed(bool state);
-    void setSimSpeed(double speed);
+	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
+	
+	void setSimState(bool state);
+	void simUseSpeed(bool state);
+	void setSimSpeed(double speed);
 private:
-    void initVulkan();
-    
+	void initVulkan();
+	
 private:
-    Ui::MainWindow* ui;
-    BlockContainerManager blockContainerManager;
-    std::shared_ptr<Evaluator> evaluator;
-    
-    VulkanManager vulkanManager;
-    std::unique_ptr<QVulkanInstance> qVulkanInstance;
+	Ui::MainWindow* ui;
+	BlockContainerManager blockContainerManager;
+	std::shared_ptr<Evaluator> evaluator;
+	
+	VulkanManager vulkanManager;
+	std::unique_ptr<QVulkanInstance> qVulkanInstance;
 };
 
 #endif /* mainWindow_h */

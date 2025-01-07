@@ -4,10 +4,10 @@
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>646</width>
-    <height>513</height>
+	<x>0</x>
+	<y>0</y>
+	<width>646</width>
+	<height>513</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,343 +15,343 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
-    <item>
-     <widget class="QWidget" name="widget" native="true">
-      <property name="maximumSize">
-       <size>
-        <width>120</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QWidget" name="EvalControls" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="StartSim">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>118</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Toggle Simulation</string>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>16</width>
-              <height>16</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="UseSpeed">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Limit Speed</string>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>16</width>
-              <height>5</height>
-             </size>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="Speed">
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
-            </property>
-            <property name="suffix">
-             <string>tps</string>
-            </property>
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>100000.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>40.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeWidget" name="selectorTreeWidget">
-         <property name="maximumSize">
-          <size>
-           <width>120</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>.AppleSystemUIFont</family>
-          </font>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="showDropIndicator" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="dragEnabled">
-          <bool>false</bool>
-         </property>
-         <property name="dragDropOverwriteMode">
-          <bool>false</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-         </property>
-         <property name="indentation">
-          <number>10</number>
-         </property>
-         <property name="animated">
-          <bool>false</bool>
-         </property>
-         <property name="expandsOnDoubleClick">
-          <bool>true</bool>
-         </property>
-         <attribute name="headerVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="headerCascadingSectionResizes">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="headerShowSortIndicator" stdset="0">
-          <bool>false</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>All</string>
-          </property>
-         </column>
-         <item>
-          <property name="text">
-           <string>Blocks</string>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <item>
-           <property name="text">
-            <string>Basic</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>And</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Or</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Xor</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Nand</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Nor</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Xnor</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Switch</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Button</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Tick Button</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Light</string>
-            </property>
-           </item>
-          </item>
-         </item>
-         <item>
-          <property name="text">
-           <string>Tools</string>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <item>
-           <property name="text">
-            <string>Placement</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Single Place</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Area Place</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Move</string>
-            </property>
-           </item>
-          </item>
-          <item>
-           <property name="text">
-            <string>Connection</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Simple</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Tensor</string>
-            </property>
-           </item>
-          </item>
-          <item>
-           <property name="text">
-            <string>Selection</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Other</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>State Changer</string>
-            </property>
-           </item>
-          </item>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QFrame" name="gridWindow">
-      <property name="cursor">
-       <cursorShape>CrossCursor</cursorShape>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Shape::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Shadow::Raised</enum>
-      </property>
-     </widget>
-    </item>
+	<item>
+	 <widget class="QWidget" name="widget" native="true">
+	  <property name="maximumSize">
+	   <size>
+		<width>120</width>
+		<height>16777215</height>
+	   </size>
+	  </property>
+	  <layout class="QVBoxLayout" name="verticalLayout_3">
+	   <property name="leftMargin">
+		<number>0</number>
+	   </property>
+	   <property name="topMargin">
+		<number>0</number>
+	   </property>
+	   <property name="rightMargin">
+		<number>0</number>
+	   </property>
+	   <property name="bottomMargin">
+		<number>0</number>
+	   </property>
+	   <item>
+		<widget class="QWidget" name="EvalControls" native="true">
+		 <layout class="QVBoxLayout" name="verticalLayout">
+		  <property name="leftMargin">
+		   <number>0</number>
+		  </property>
+		  <property name="topMargin">
+		   <number>0</number>
+		  </property>
+		  <property name="rightMargin">
+		   <number>0</number>
+		  </property>
+		  <property name="bottomMargin">
+		   <number>0</number>
+		  </property>
+		  <item>
+		   <widget class="QPushButton" name="StartSim">
+			<property name="sizePolicy">
+			 <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+			  <horstretch>0</horstretch>
+			  <verstretch>0</verstretch>
+			 </sizepolicy>
+			</property>
+			<property name="minimumSize">
+			 <size>
+			  <width>118</width>
+			  <height>0</height>
+			 </size>
+			</property>
+			<property name="maximumSize">
+			 <size>
+			  <width>16777215</width>
+			  <height>32</height>
+			 </size>
+			</property>
+			<property name="text">
+			 <string>Toggle Simulation</string>
+			</property>
+			<property name="iconSize">
+			 <size>
+			  <width>16</width>
+			  <height>16</height>
+			 </size>
+			</property>
+			<property name="checkable">
+			 <bool>true</bool>
+			</property>
+		   </widget>
+		  </item>
+		  <item>
+		   <widget class="QCheckBox" name="UseSpeed">
+			<property name="maximumSize">
+			 <size>
+			  <width>16777215</width>
+			  <height>16777215</height>
+			 </size>
+			</property>
+			<property name="text">
+			 <string>Limit Speed</string>
+			</property>
+			<property name="iconSize">
+			 <size>
+			  <width>16</width>
+			  <height>5</height>
+			 </size>
+			</property>
+			<property name="checked">
+			 <bool>false</bool>
+			</property>
+		   </widget>
+		  </item>
+		  <item>
+		   <widget class="QDoubleSpinBox" name="Speed">
+			<property name="alignment">
+			 <set>Qt::AlignmentFlag::AlignCenter</set>
+			</property>
+			<property name="buttonSymbols">
+			 <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+			</property>
+			<property name="suffix">
+			 <string>tps</string>
+			</property>
+			<property name="minimum">
+			 <double>0.010000000000000</double>
+			</property>
+			<property name="maximum">
+			 <double>100000.000000000000000</double>
+			</property>
+			<property name="value">
+			 <double>40.000000000000000</double>
+			</property>
+		   </widget>
+		  </item>
+		 </layout>
+		</widget>
+	   </item>
+	   <item>
+		<widget class="QTreeWidget" name="selectorTreeWidget">
+		 <property name="maximumSize">
+		  <size>
+		   <width>120</width>
+		   <height>16777215</height>
+		  </size>
+		 </property>
+		 <property name="font">
+		  <font>
+		   <family>.AppleSystemUIFont</family>
+		  </font>
+		 </property>
+		 <property name="horizontalScrollBarPolicy">
+		  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+		 </property>
+		 <property name="showDropIndicator" stdset="0">
+		  <bool>false</bool>
+		 </property>
+		 <property name="dragEnabled">
+		  <bool>false</bool>
+		 </property>
+		 <property name="dragDropOverwriteMode">
+		  <bool>false</bool>
+		 </property>
+		 <property name="dragDropMode">
+		  <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
+		 </property>
+		 <property name="selectionBehavior">
+		  <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+		 </property>
+		 <property name="indentation">
+		  <number>10</number>
+		 </property>
+		 <property name="animated">
+		  <bool>false</bool>
+		 </property>
+		 <property name="expandsOnDoubleClick">
+		  <bool>true</bool>
+		 </property>
+		 <attribute name="headerVisible">
+		  <bool>false</bool>
+		 </attribute>
+		 <attribute name="headerCascadingSectionResizes">
+		  <bool>false</bool>
+		 </attribute>
+		 <attribute name="headerShowSortIndicator" stdset="0">
+		  <bool>false</bool>
+		 </attribute>
+		 <column>
+		  <property name="text">
+		   <string>All</string>
+		  </property>
+		 </column>
+		 <item>
+		  <property name="text">
+		   <string>Blocks</string>
+		  </property>
+		  <property name="font">
+		   <font>
+			<pointsize>15</pointsize>
+			<bold>true</bold>
+		   </font>
+		  </property>
+		  <item>
+		   <property name="text">
+			<string>Basic</string>
+		   </property>
+		   <item>
+			<property name="text">
+			 <string>And</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Or</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Xor</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Nand</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Nor</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Xnor</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Switch</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Button</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Tick Button</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Light</string>
+			</property>
+		   </item>
+		  </item>
+		 </item>
+		 <item>
+		  <property name="text">
+		   <string>Tools</string>
+		  </property>
+		  <property name="font">
+		   <font>
+			<pointsize>15</pointsize>
+			<bold>true</bold>
+		   </font>
+		  </property>
+		  <item>
+		   <property name="text">
+			<string>Placement</string>
+		   </property>
+		   <item>
+			<property name="text">
+			 <string>Single Place</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Area Place</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Move</string>
+			</property>
+		   </item>
+		  </item>
+		  <item>
+		   <property name="text">
+			<string>Connection</string>
+		   </property>
+		   <item>
+			<property name="text">
+			 <string>Simple</string>
+			</property>
+		   </item>
+		   <item>
+			<property name="text">
+			 <string>Tensor</string>
+			</property>
+		   </item>
+		  </item>
+		  <item>
+		   <property name="text">
+			<string>Selection</string>
+		   </property>
+		  </item>
+		  <item>
+		   <property name="text">
+			<string>Other</string>
+		   </property>
+		   <item>
+			<property name="text">
+			 <string>State Changer</string>
+			</property>
+		   </item>
+		  </item>
+		 </item>
+		</widget>
+	   </item>
+	  </layout>
+	 </widget>
+	</item>
+	<item>
+	 <widget class="QFrame" name="gridWindow">
+	  <property name="cursor">
+	   <cursorShape>CrossCursor</cursorShape>
+	  </property>
+	  <property name="frameShape">
+	   <enum>QFrame::Shape::StyledPanel</enum>
+	  </property>
+	  <property name="frameShadow">
+	   <enum>QFrame::Shadow::Raised</enum>
+	  </property>
+	 </widget>
+	</item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>646</width>
-     <height>36</height>
-    </rect>
+	<rect>
+	 <x>0</x>
+	 <y>0</y>
+	 <width>646</width>
+	 <height>36</height>
+	</rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionj">
    <property name="text">
-    <string>j</string>
+	<string>j</string>
    </property>
   </action>
   <action name="actionj_2">
    <property name="text">
-    <string>j</string>
+	<string>j</string>
    </property>
   </action>
  </widget>

@@ -260,7 +260,7 @@ void LogicSimulator::simulateNTicks(unsigned int n) {
 }
 
 void LogicSimulator::debugPrint() {
-	std::cout << "ID:        ";
+	std::cout << "ID:		";
 	for (int i = 0; i < currentState.size(); ++i) {
 		std::cout << i << " ";
 	}
@@ -276,7 +276,7 @@ void LogicSimulator::debugPrint() {
 	}
 	for (int i = 0; i < maxOutputs; ++i) {
 		if (i != 0) {
-			std::cout << "           ";
+			std::cout << "		   ";
 		}
 		for (auto outputs : gateOutputs) {
 			if (i < outputs.size()) {

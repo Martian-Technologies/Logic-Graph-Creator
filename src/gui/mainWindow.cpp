@@ -20,16 +20,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// makeGPU1(blockContainerWrapper.get());
 
-    // init vulkan
-    initVulkan();
-    
-    evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
+	// init vulkan
+	initVulkan();
+	
+	evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
 
-    LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-    logicGridWindow->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
-    logicGridWindow->setBlockContainer(blockContainerWrapper);
-    logicGridWindow->setEvaluator(evaluator);
-    logicGridWindow->setSelector(ui->selectorTreeWidget);
+	LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
+	logicGridWindow->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
+	logicGridWindow->setBlockContainer(blockContainerWrapper);
+	logicGridWindow->setEvaluator(evaluator);
+	logicGridWindow->setSelector(ui->selectorTreeWidget);
 
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::stateChanged, this, &MainWindow::simUseSpeed);
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
-    vulkanManager.destroy();
+	vulkanManager.destroy();
 }
 
 void MainWindow::setSimState(bool state) {
@@ -56,28 +56,28 @@ void MainWindow::setSimSpeed(double speed) {
 }
 
 void MainWindow::initVulkan() {
-    // goofy ahh hack to get required extension list
-    QVulkanInstance tempInstance;
-    tempInstance.create();
-    QByteArrayList qExtensions = tempInstance.extensions();
-    std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
-    // goofy ahh hack to get surface for device selection
-    QWindow tempWindow;
-    tempWindow.create();
-    tempWindow.setSurfaceType(QSurface::VulkanSurface);
-    tempWindow.setVulkanInstance(&tempInstance);
-    VkSurfaceKHR tempSurface = tempInstance.surfaceForWindow(&tempWindow);
-    
-    // create instance and device
-    vulkanManager.createInstance(extensions, DEBUG);
-    vulkanManager.createDevice(tempSurface);
+	// goofy ahh hack to get required extension list
+	QVulkanInstance tempInstance;
+	tempInstance.create();
+	QByteArrayList qExtensions = tempInstance.extensions();
+	std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
+	// goofy ahh hack to get surface for device selection
+	QWindow tempWindow;
+	tempWindow.create();
+	tempWindow.setSurfaceType(QSurface::VulkanSurface);
+	tempWindow.setVulkanInstance(&tempInstance);
+	VkSurfaceKHR tempSurface = tempInstance.surfaceForWindow(&tempWindow);
+	
+	// create instance and device
+	vulkanManager.createInstance(extensions, DEBUG);
+	vulkanManager.createDevice(tempSurface);
 
-    // create permanent QVulkanInstance (for getting future window handles)
-    qVulkanInstance = std::make_unique<QVulkanInstance>();
-    qVulkanInstance->setVkInstance(vulkanManager.getInstance());
-    qVulkanInstance->create();
+	// create permanent QVulkanInstance (for getting future window handles)
+	qVulkanInstance = std::make_unique<QVulkanInstance>();
+	qVulkanInstance->setVkInstance(vulkanManager.getInstance());
+	qVulkanInstance->create();
 
-    // destroy temp instance (from goofy ahh hacks)
-    tempWindow.destroy();
-    tempInstance.destroy();
+	// destroy temp instance (from goofy ahh hacks)
+	tempWindow.destroy();
+	tempInstance.destroy();
 }

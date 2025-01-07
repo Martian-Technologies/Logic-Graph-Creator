@@ -71,7 +71,7 @@ struct FPosition {
 	}
 	inline FPosition projectToVec(const FPosition& orginOfVec, const FPosition& endOfVec) const {
 		FPosition vec = endOfVec - orginOfVec;
-		return  vec * (((this->x - orginOfVec.x) * vec.x + (this->y - orginOfVec.y) * vec.y) / vec.distanceToOriginSquared());
+		return vec * (((this->x - orginOfVec.x) * vec.x + (this->y - orginOfVec.y) * vec.y) / vec.distanceToOriginSquared());
 	}
 
 	f_cord_t x, y;

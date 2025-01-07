@@ -20,17 +20,17 @@ class LogicGridWindow : public QWidget {
 public:
 	LogicGridWindow(QWidget* parent = nullptr);
 
-    // setup
-    void createVulkanWindow(VulkanGraphicsView vulkanView, QVulkanInstance* qVulkanInstance);
-    void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
-    void setEvaluator(std::shared_ptr<Evaluator> evaluator);
-    void setSelector(QTreeWidget* treeWidget);
+	// setup
+	void createVulkanWindow(VulkanGraphicsView vulkanView, QVulkanInstance* qVulkanInstance);
+	void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
+	void setSelector(QTreeWidget* treeWidget);
 
-    // dont call this func (temporary)
-    void updateSelectedItem();    
+	// dont call this func (temporary)
+	void updateSelectedItem();	
 
 private:
-    BlockContainerView<VulkanRenderer> blockContainerView;
+	BlockContainerView<VulkanRenderer> blockContainerView;
 
 	// update loop
 	QTimer* updateLoopTimer;
@@ -57,8 +57,8 @@ private:
 	inline float getPixelsHight() { return (float)rect().height(); }
 
 protected:
-    // events overrides
-    void showEvent(QShowEvent* event) override;
+	// events overrides
+	void showEvent(QShowEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;

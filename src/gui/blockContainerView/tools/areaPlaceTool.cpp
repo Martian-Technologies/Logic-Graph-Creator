@@ -17,7 +17,7 @@ bool AreaPlaceTool::startPlaceBlock(const Event* event) {
 		click = 'n';
 		// left here for stats when needed
 		// TODO: make a stat tool
-		// std::cout << "blocks: " << blockContainer->getBlockCount() << "    cells: " << blockContainer->getCellCount() << std::endl;
+		// std::cout << "blocks: " << blockContainer->getBlockCount() << "	cells: " << blockContainer->getCellCount() << std::endl;
 		return true;
 	default:
 		return false;
