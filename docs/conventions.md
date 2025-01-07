@@ -72,9 +72,9 @@ Using regular c++ types when the size is not highly important. You should use cs
 use tabs please
 
 ### Small TODO comments
-
-`// TODO: changes to be made`
-
+```cpp
+// TODO: changes to be made
+```
 ### Curly Brackets
 
 You should open them on the same line. Not a new one.
