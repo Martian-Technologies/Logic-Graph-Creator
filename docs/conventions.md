@@ -88,6 +88,8 @@ if ()
 {
 }
 ```
+Place a space before curley bracket set for while, for, and functions
+Space after if, while, for loops
 
 ### Constructor initializer lists
 
