@@ -21,7 +21,7 @@ Case Sensitive Includes
 
 ### Naming
 
-### Pointers
+### Using Raw and Smart Pointers
 
 ### Enums
 
