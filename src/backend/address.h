@@ -5,14 +5,14 @@
 
 class Address {
 public:
-    Address(Position position) : addresses({position}) {}
-    inline int size() const { return addresses.size(); }
-    inline Position getPosition(int index) const { return addresses[index]; }
+	Address(Position position) : addresses({ position }) { }
+	inline int size() const { return addresses.size(); }
+	inline Position getPosition(int index) const { return addresses[index]; }
 
-    inline void addBlockId(Position position) { addresses.push_back(position); }
+	inline void addBlockId(Position position) { addresses.push_back(position); }
 
 private:
-    std::vector<Position> addresses;
+	std::vector<Position> addresses;
 
 };
 

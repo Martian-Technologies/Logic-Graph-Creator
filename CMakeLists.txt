@@ -6,13 +6,13 @@ set(CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
-  # hack to avoid DNDEBUG which removes wires for some reason
-  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+	# hack to avoid DNDEBUG which removes wires for some reason
+	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-  # hack to avoid DNDEBUG which removes wires for some reason
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+	# hack to avoid DNDEBUG which removes wires for some reason
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
 # Set directories
@@ -51,15 +51,15 @@ file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
 file(GLOB_RECURSE SHADER_SOURCES "")
 
 if(APPLE) # MacOS specific (Before add_executable)
-    # Icon
-    set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
-    set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
-    set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    list(APPEND SOURCE_FILES ${ICON_PATH})
+	# Icon
+	set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
+	set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+	set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	list(APPEND SOURCE_FILES ${ICON_PATH})
 elseif (WIN32) # Windows specific (Before add_executable)
-    # Icon
-    set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
-    list(APPEND SOURCE_FILES ${ICON_PATH})
+	# Icon
+	set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
+	list(APPEND SOURCE_FILES ${ICON_PATH})
 endif()
 
 
@@ -70,12 +70,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
 if(APPLE) # MacOS specific (After add_executable)
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 elseif (WIN32) # Windows specific (After add_executable)
-    if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
-        # Set WIN32_EXECUTABLE (Disables Console)
-        set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-    endif ()
+	if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
+		# Set WIN32_EXECUTABLE (Disables Console)
+		set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+	endif ()
 endif()
 
 
@@ -108,12 +108,12 @@ add_custom_target(shaders ALL DEPENDS ${SPV_SHADERS} make-shader-dir)
 
 # Add resources ------
 qt_add_resources(${PROJECT_NAME} "mainResources"
-        PREFIX
-        "/"
-        FILES
-        ${IMG_SOURCES}
-        ${JSON_SOURCES}
-        BASE ${RESOURCES_DIR}
+		PREFIX
+		"/"
+		FILES
+		${IMG_SOURCES}
+		${JSON_SOURCES}
+		BASE ${RESOURCES_DIR}
 )
 # Add compiled shader to qt
 qt_add_resources(${PROJECT_NAME} "shaders"

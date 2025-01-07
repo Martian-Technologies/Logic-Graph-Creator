@@ -6,38 +6,37 @@ class LogicGridWindow;
 
 class BaseBlockPlacementTool : public BlockContainerTool {
 public:
-    inline BaseBlockPlacementTool() : BlockContainerTool(), selectedBlock(NONE), rotation(ZERO) {}
-    virtual ~BaseBlockPlacementTool() {}
+	virtual ~BaseBlockPlacementTool() { }
 
-    // This will also tell the tool to reset.
-    inline void selectBlock(BlockType selectedBlock) { this->selectedBlock = selectedBlock; }
-    inline void setRotation(Rotation rotation) { this->rotation = rotation; }
-    inline Rotation getRotation() { return rotation; }
-    inline BlockType getSelectedBlock() const { return selectedBlock; }
-    void initialize(ToolManagerEventRegister& toolManagerEventRegister) override {
-        BlockContainerTool::initialize(toolManagerEventRegister);
-        toolManagerEventRegister.registerFunction("tool rotate block cw", std::bind(&BaseBlockPlacementTool::rotateBlockCW, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("tool rotate block ccw", std::bind(&BaseBlockPlacementTool::rotateBlockCCW, this, std::placeholders::_1));
-    }
+	// This will also tell the tool to reset.
+	inline void selectBlock(BlockType selectedBlock) { this->selectedBlock = selectedBlock; }
+	inline void setRotation(Rotation rotation) { this->rotation = rotation; }
+	inline Rotation getRotation() { return rotation; }
+	inline BlockType getSelectedBlock() const { return selectedBlock; }
+	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override {
+		BlockContainerTool::initialize(toolManagerEventRegister);
+		toolManagerEventRegister.registerFunction("tool rotate block cw", std::bind(&BaseBlockPlacementTool::rotateBlockCW, this, std::placeholders::_1));
+		toolManagerEventRegister.registerFunction("tool rotate block ccw", std::bind(&BaseBlockPlacementTool::rotateBlockCCW, this, std::placeholders::_1));
+	}
 
-    bool rotateBlockCW(const Event* event) {
-        rotation = rotate(rotation, true);
-        updateElements();
+	bool rotateBlockCW(const Event* event) {
+		rotation = rotate(rotation, true);
+		updateElements();
 
-        return true;
-    }
-    bool rotateBlockCCW(const Event* event) {
-        rotation = rotate(rotation, false);
-        updateElements();
+		return true;
+	}
+	bool rotateBlockCCW(const Event* event) {
+		rotation = rotate(rotation, false);
+		updateElements();
 
-        return true;
-    }
+		return true;
+	}
 
 protected:
-    inline virtual void updateElements() {};
+	inline virtual void updateElements() { };
 
-    BlockType selectedBlock;
-    Rotation rotation;
+	BlockType selectedBlock = NONE;
+	Rotation rotation = ZERO;
 };
 
 #endif /* baseBlockPlacementTool_h */
