@@ -49,25 +49,12 @@ public:
 	bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
 	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
 	template<class T, unsigned int index>
-	bool trySetBlockDataValue(const Position& positionOfBlock, T value) {
-		Block* block = getBlock(positionOfBlock);
-		if (!block) return false;
-		block->setDataValue<T, index>(value);
-		return true;
-	}
+	bool trySetBlockDataValue(const Position& positionOfBlock, T value);
 	// Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
 	bool trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference);
 	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
 	template<class T, unsigned int index>
-	bool trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference) {
-		Block* block = getBlock(positionOfBlock);
-		if (!block) return false;
-		block_data_t oldData = block->getRawData();
-		block->setDataValue<T, index>(value);
-		block_data_t newData = block->getRawData();
-		if (oldData != newData) difference->addSetData(positionOfBlock, newData, oldData);
-		return true;
-	}
+	bool trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference);
 
 	/* ----------- connections ----------- */
 	// -- getters --
@@ -97,21 +84,7 @@ public:
 	const_iterator end() const { return blocks.end(); }
 
 	/* Difference Getter */
-	Difference getCreationDifference() const {
-		Difference difference;
-		for (auto iter : blocks) {
-			difference.addPlacedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
-		}
-		for (auto iter : blocks) {
-			for (connection_end_id_t id = 0; id <= iter.second.getConnectionContainer().getMaxConnectionId(); id++) {
-				if (iter.second.isConnectionInput(id)) continue;
-				for (auto connectionIter : iter.second.getConnectionContainer().getConnections(id)) {
-					difference.addCreatedConnection(iter.second.getConnectionPosition(id).first, getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first);
-				}
-			}
-		}
-		return difference;
-	}
+	Difference getCreationDifference() const;
 
 private:
 	inline Block* getBlock(const Position& position);
@@ -147,6 +120,25 @@ inline Block* BlockContainer::getBlock(block_id_t blockId) {
 inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
 	auto iter = blocks.find(blockId);
 	return (iter == blocks.end()) ? nullptr : &iter->second;
+}
+
+template<class T, unsigned int index>
+bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value) {
+	Block* block = getBlock(positionOfBlock);
+	if (!block) return false;
+	block->setDataValue<T, index>(value);
+	return true;
+}
+
+template<class T, unsigned int index>
+bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference) {
+	Block* block = getBlock(positionOfBlock);
+	if (!block) return false;
+	block_data_t oldData = block->getRawData();
+	block->setDataValue<T, index>(value);
+	block_data_t newData = block->getRawData();
+	if (oldData != newData) difference->addSetData(positionOfBlock, newData, oldData);
+	return true;
 }
 
 #endif /* blockContainer_h */
