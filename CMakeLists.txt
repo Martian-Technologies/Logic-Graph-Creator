@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LogicGraphCreator)
+project(Gatality)
 
 # Build Config
 set(CXX_STANDARD 20)

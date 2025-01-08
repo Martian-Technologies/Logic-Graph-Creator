@@ -1,7 +1,7 @@
 #ifndef vulkanRenderer_h
 #define vulkanRenderer_h
 
-#include "gui/blockContainerView/renderer/renderer.h"
+#include "gui/circuitView/renderer/renderer.h"
 
 #include "gpu/vulkanManager.h"
 
@@ -12,11 +12,11 @@ public:
 	void run();
 	
 	// updating
-	void setBlockContainer(BlockContainerWrapper* blockContainer) override;
+	void setCircuit(Circuit* circuit) override;
 	void setEvaluator(Evaluator* evaluator) override;
 
 	void updateView(ViewManager* viewManager) override;
-	virtual void updateBlockContainer(DifferenceSharedPtr diff) override;
+	virtual void updateCircuit(DifferenceSharedPtr diff) override;
 
 	inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 

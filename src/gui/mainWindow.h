@@ -7,7 +7,7 @@
 #include <QVulkanInstance>
 
 #include "gpu/vulkanManager.h"
-#include "middleEnd/blockContainerManager.h"
+#include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
 
 
@@ -23,14 +23,14 @@ public:
 	~MainWindow();
 	
 	void setSimState(bool state);
-	void simUseSpeed(bool state);
+	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
 private:
 	void initVulkan();
 	
 private:
 	Ui::MainWindow* ui;
-	BlockContainerManager blockContainerManager;
+	CircuitManager circuitManager;
 	std::shared_ptr<Evaluator> evaluator;
 	
 	VulkanManager vulkanManager;

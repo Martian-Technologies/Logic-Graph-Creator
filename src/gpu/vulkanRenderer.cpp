@@ -13,7 +13,7 @@ void VulkanRenderer::run() {
 	
 }
 
-void VulkanRenderer::setBlockContainer(BlockContainerWrapper* blockContainer) {
+void VulkanRenderer::setCircuit(Circuit* circuit) {
 	
 }
 
@@ -25,7 +25,7 @@ void VulkanRenderer::updateView(ViewManager* viewManager) {
 	
 }
 
-void VulkanRenderer::updateBlockContainer(DifferenceSharedPtr diff) {
+void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
 	
 }
 

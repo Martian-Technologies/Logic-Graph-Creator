@@ -1,7 +1,7 @@
 #ifndef cell_h
 #define cell_h
 
-#include "../block/block.h"
+#include "block/blockDefs.h"
 
 class Cell {
 public:

@@ -4,7 +4,7 @@
 #include <QCheckBox>
 #include <QWindow>
 
-#include "logicGridWindow.h"
+#include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 #include "gpu1.h"
@@ -12,31 +12,29 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
-	setWindowTitle(tr("Logic Graph Creator"));
+	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
-	block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
-	std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
+	circuit_id_t id = circuitManager.createNewContainer();
+	std::shared_ptr<Circuit> circuit = circuitManager.getContainer(id);
 
-	// makeGPU1(blockContainerWrapper.get());
-
-	// init vulkan
+	// makeGPU1(circuit.get());
 	initVulkan();
-	
-	evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
+		
+	evaluator = std::make_shared<Evaluator>(circuit);
 
-	LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-	logicGridWindow->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
-	logicGridWindow->setBlockContainer(blockContainerWrapper);
-	logicGridWindow->setEvaluator(evaluator);
-	logicGridWindow->setSelector(ui->selectorTreeWidget);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	circuitViewWidget->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
+	circuitViewWidget->setCircuit(circuit);
+	circuitViewWidget->setEvaluator(evaluator);
+	circuitViewWidget->setSelector(ui->selectorTreeWidget);
 
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
-	connect(ui->UseSpeed, &QCheckBox::stateChanged, this, &MainWindow::simUseSpeed);
+	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
 	QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
-	layout->addWidget(logicGridWindow);
+	layout->addWidget(circuitViewWidget);
 }
 
 MainWindow::~MainWindow() {
@@ -47,7 +45,8 @@ void MainWindow::setSimState(bool state) {
 	evaluator->setPause(!state);
 }
 
-void MainWindow::simUseSpeed(bool state) {
+void MainWindow::simUseSpeed(Qt::CheckState state) {
+	bool evalState = state == Qt::CheckState::Checked;
 	evaluator->setUseTickrate(state);
 }
 
