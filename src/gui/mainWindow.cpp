@@ -61,23 +61,25 @@ void MainWindow::initVulkan() {
 	tempInstance.create();
 	QByteArrayList qExtensions = tempInstance.extensions();
 	std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
-	// goofy ahh hack to get surface for device selection
-	QWindow tempWindow;
-	tempWindow.create();
-	tempWindow.setSurfaceType(QSurface::VulkanSurface);
-	tempWindow.setVulkanInstance(&tempInstance);
-	VkSurfaceKHR tempSurface = tempInstance.surfaceForWindow(&tempWindow);
-	
-	// create instance and device
-	vulkanManager.createInstance(extensions, DEBUG);
-	vulkanManager.createDevice(tempSurface);
 
+	// create instance
+	vulkanManager.createInstance(extensions, DEBUG);
 	// create permanent QVulkanInstance (for getting future window handles)
 	qVulkanInstance = std::make_unique<QVulkanInstance>();
 	qVulkanInstance->setVkInstance(vulkanManager.getInstance());
 	qVulkanInstance->create();
+	
+	// goofy ahh hack to get surface for device selection
+	QWindow tempWindow;
+	tempWindow.setSurfaceType(QSurface::VulkanSurface);
+	tempWindow.setVulkanInstance(qVulkanInstance.get());
+	tempWindow.show();
+	VkSurfaceKHR tempSurface = QVulkanInstance::surfaceForWindow(&tempWindow);
+	
+	// create instance and device
+	vulkanManager.createDevice(tempSurface);
 
-	// destroy temp instance (from goofy ahh hacks)
-	tempWindow.destroy();
+	// destroy temp instance and window
 	tempInstance.destroy();
+	tempWindow.destroy();
 }

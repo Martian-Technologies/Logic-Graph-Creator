@@ -1,10 +1,12 @@
 #include "vulkanManager.h"
 
+#include "vulkanDevicePicker.h"
+
 #include <cassert>
 #include <cstring>
 
 // Constants ---------------------------------------------------------------------------
-const std::vector<const char*> deviceExtensions = {
+const std::vector<std::string> deviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 const std::vector<const char*> validationLayers = {
@@ -56,13 +58,18 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 }
 
 void VulkanManager::createDevice(VkSurfaceKHR surface) {
-
+	// Pick physical device
+	VulkanDevicePicker picker(instance, surface);
+	picker.requireExtensions(deviceExtensions);
+	auto pickerResult = picker.pick();
+	if (!pickerResult.has_value()) { fail(picker.getError()); }
+    physicalDevice = pickerResult.value();
+	
 }
 
 void VulkanManager::destroy() {
 	vkDestroyInstance(instance, nullptr);
 }
-
 
 // TODO - the application as a whole should have a failing system.
 // this also won't work once NDEBUG is re-enabled and asserts are disabled
@@ -72,7 +79,6 @@ void VulkanManager::fail(const std::string& reason) {
 }
 
 // Helper functions
-
 bool VulkanManager::checkValidationLayerSupport() {
 	// get supported layers
 	uint32_t layerCount;

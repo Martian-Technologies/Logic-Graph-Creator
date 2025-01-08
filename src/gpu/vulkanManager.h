@@ -20,6 +20,7 @@ public:
 
 private:
 	void fail(const std::string& reason);
+	
 	// helper functions
 	bool checkValidationLayerSupport();
 	
