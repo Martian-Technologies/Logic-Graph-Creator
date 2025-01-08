@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QWidget>
 
-#include "middleEnd/blockContainerManager.h"
+#include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
 
 
@@ -19,13 +19,13 @@ class MainWindow : public QMainWindow {
 public:
 	MainWindow(QWidget* parent = nullptr);
 	void setSimState(bool state);
-	void simUseSpeed(bool state);
+	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
 
 private:
 	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
-	BlockContainerManager blockContainerManager;
+	CircuitManager circuitManager;
 	std::shared_ptr<Evaluator> evaluator;
 };
 

@@ -2,7 +2,7 @@
 
 #include "util/emptyVector.h"
 #include "blockContainer.h"
-#include "../block/block.h"
+#include "block/block.h"
 
 bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) {
 	for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {

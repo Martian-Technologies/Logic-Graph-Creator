@@ -1,19 +1,19 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(std::shared_ptr<BlockContainerWrapper> blockContainerWrapper)
+Evaluator::Evaluator(std::shared_ptr<Circuit> circuit)
 	:paused(true),
 	targetTickrate(0),
 	logicSimulator(),
 	addressTree(),
 	usingTickrate(false) {
 	setTickrate(40 * 60); // 1000000000 clocks / min
-	const auto blockContainer = blockContainerWrapper->getBlockContainer();
+	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 
-	makeEdit(std::make_shared<Difference>(difference), blockContainerWrapper->getContainerId());
+	makeEdit(std::make_shared<Difference>(difference), circuit->getContainerId());
 
-	// connect makeEdit to blockContainerWrapper
-	blockContainerWrapper->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
+	// connect makeEdit to circuit
+	circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Evaluator::setPause(bool pause) {
@@ -59,7 +59,7 @@ void Evaluator::runNTicks(unsigned long long n) {
 	logicSimulator.simulateNTicks(n);
 }
 
-void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper_id_t containerId) {
+void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
 	logicSimulator.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulator.threadIsWaiting()) {
@@ -84,7 +84,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const auto address = Address(position);
-			const GateType gateType = blockContainerToEvaluatorGatetype(blockType);
+			const GateType gateType = circuitToEvaluatorGatetype(blockType);
 			const block_id_t blockId = logicSimulator.addGate(gateType, true);
 			addressTree.addValue(address, blockId);
 			break;
@@ -127,7 +127,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, block_container_wrapper
 	}
 }
 
-GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
+GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	switch (blockType) {
 	case BlockType::AND: return GateType::AND;
 	case BlockType::OR: return GateType::OR;
@@ -140,7 +140,7 @@ GateType blockContainerToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
 	case BlockType::LIGHT: return GateType::OR;
 	default:
-		throw std::invalid_argument("blockContainerToEvaluatorGatetype: invalid blockType");
+		throw std::invalid_argument("circuitToEvaluatorGatetype: invalid blockType");
 	}
 }
 

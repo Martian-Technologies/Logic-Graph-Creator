@@ -7,7 +7,7 @@
 
 #include "logicState.h"
 #include "gateType.h"
-#include "../defs.h"
+#include "backend/container/block/blockDefs.h"
 
 class LogicSimulator {
 public:
