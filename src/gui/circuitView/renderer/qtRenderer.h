@@ -1,5 +1,5 @@
-#ifndef QTRenderer_h
-#define QTRenderer_h
+#ifndef qtRenderer_h
+#define qtRenderer_h
 
 #include <QLineF>
 #include <QPainter>
@@ -78,4 +78,4 @@ private:
 	float lastFrameTime = 0.0f;
 };
 
-#endif /* QTRenderer_h */
+#endif /* qtRenderer_h */
