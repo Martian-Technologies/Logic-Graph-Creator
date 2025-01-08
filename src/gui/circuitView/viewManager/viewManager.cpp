@@ -77,8 +77,8 @@ void ViewManager::applyLimits() {
 
 Vec2 ViewManager::gridToView(FPosition position) const {
 	position -= viewCenter;
-	position += FPosition(getViewWidth() / 2.0f, getViewHeight() / 2.0f);
 	position.x /= getViewWidth();
 	position.y /= getViewHeight();
+	position += FPosition(0.5f, 0.5f);
 	return Vec2(position.x, position.y);
 }
