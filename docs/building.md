@@ -8,14 +8,14 @@ On Windows you can either build QT yourself, or [download it](https://www.qt.io/
 This project uses the CMake build system. Make sure that you have CMake and a compiler installed. 
 You can let your IDE manage CMake, or run the commands yourself:
 
-For development - `cmake --workflow --preset debug`
+1. Configure - `cmake --preset debug`
+2. Then Build - `cmake --build --preset debug`
 
-For a "release" - `cmake --workflow --preset release`
+You can also build for release with `release` preset
 > Tested for MacOS, Windows (MSVC), and Linux
 
-Temp: for using XCode you should use the command `cmake -G Xcode <dir of CMakeLists.txt>`
-
 ## Setting up CMake in an IDE
+TODO
 
 ## Notes
 If your error highlighting or IDE integration is showing red, make sure you have already compiled the project (to generate QT moc header files) and the compile_commands.json in the build folder is being recognized (default for most lsp)
