@@ -15,15 +15,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
 
-	block_container_wrapper_id_t id = blockContainerManager.createNewContainer();
-	std::shared_ptr<BlockContainerWrapper> blockContainerWrapper = blockContainerManager.getContainer(id);
+	circuit_id_t id = circuitManager.createNewContainer();
+	std::shared_ptr<Circuit> circuit = circuitManager.getContainer(id);
 
-	// makeGPU1(blockContainerWrapper.get());
+	// makeGPU1(circuit.get());
 
-	evaluator = std::make_shared<Evaluator>(blockContainerWrapper);
+	evaluator = std::make_shared<Evaluator>(circuit);
 
 	LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-	logicGridWindow->setBlockContainer(blockContainerWrapper);
+	logicGridWindow->setCircuit(circuit);
 	logicGridWindow->setEvaluator(evaluator);
 	logicGridWindow->setSelector(ui->selectorTreeWidget);
 

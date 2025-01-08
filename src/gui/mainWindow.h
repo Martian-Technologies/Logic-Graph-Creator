@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QWidget>
 
-#include "middleEnd/blockContainerManager.h"
+#include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
 
 
@@ -25,7 +25,7 @@ public:
 private:
 	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
-	BlockContainerManager blockContainerManager;
+	CircuitManager circuitManager;
 	std::shared_ptr<Evaluator> evaluator;
 };
 

@@ -19,7 +19,7 @@ BlockType strToType(QString str) {
 	return BlockType::NONE;
 }
 
-void makeGPU1(BlockContainerWrapper* container, bool doConnections) {
+void makeGPU1(Circuit* container, bool doConnections) {
 	return;
 	// Load JSON data using Qt
 	QFile file(":gpu1.json");

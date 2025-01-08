@@ -1,7 +1,8 @@
 #ifndef blockContainer_h
 #define blockContainer_h
 
-#include "../position/sparse2d.h"
+#include "backend/position/sparse2d.h"
+#include "block/block.h"
 #include "difference.h"
 #include "cell.h"
 

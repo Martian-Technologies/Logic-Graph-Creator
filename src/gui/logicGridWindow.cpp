@@ -11,7 +11,7 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 
-#include "blockContainerView/blockContainerView.h"
+#include "circuitView/circuitView.h"
 
 LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
 	// qt settings
@@ -30,11 +30,11 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseContro
 	float h = size().height();
 
 	// set viewmanager aspect ratio to begin with
-	blockContainerView.getViewManager().setAspectRatio(w / h);
+	circuitView.getViewManager().setAspectRatio(w / h);
 
 	// initialize QTRenderer with width and height + tileset
-	blockContainerView.getRenderer().resize(w, h);
-	blockContainerView.getRenderer().initializeTileSet(":logicTiles.png");
+	circuitView.getRenderer().resize(w, h);
+	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
@@ -61,18 +61,18 @@ void LogicGridWindow::updateSelectedItem() {
 		for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
 			if (item) {
 				QString str = item->text(0);
-				if (str == "And") blockContainerView.getToolManager().selectBlock(BlockType::AND);
-				else if (str == "Or") blockContainerView.getToolManager().selectBlock(BlockType::OR);
-				else if (str == "Xor") blockContainerView.getToolManager().selectBlock(BlockType::XOR);
-				else if (str == "Nand") blockContainerView.getToolManager().selectBlock(BlockType::NAND);
-				else if (str == "Nor") blockContainerView.getToolManager().selectBlock(BlockType::NOR);
-				else if (str == "Xnor") blockContainerView.getToolManager().selectBlock(BlockType::XNOR);
-				else if (str == "Switch") blockContainerView.getToolManager().selectBlock(BlockType::SWITCH);
-				else if (str == "Button") blockContainerView.getToolManager().selectBlock(BlockType::BUTTON);
-				else if (str == "Tick Button") blockContainerView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
-				else if (str == "Light") blockContainerView.getToolManager().selectBlock(BlockType::LIGHT);
+				if (str == "And") circuitView.getToolManager().selectBlock(BlockType::AND);
+				else if (str == "Or") circuitView.getToolManager().selectBlock(BlockType::OR);
+				else if (str == "Xor") circuitView.getToolManager().selectBlock(BlockType::XOR);
+				else if (str == "Nand") circuitView.getToolManager().selectBlock(BlockType::NAND);
+				else if (str == "Nor") circuitView.getToolManager().selectBlock(BlockType::NOR);
+				else if (str == "Xnor") circuitView.getToolManager().selectBlock(BlockType::XNOR);
+				else if (str == "Switch") circuitView.getToolManager().selectBlock(BlockType::SWITCH);
+				else if (str == "Button") circuitView.getToolManager().selectBlock(BlockType::BUTTON);
+				else if (str == "Tick Button") circuitView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
+				else if (str == "Light") circuitView.getToolManager().selectBlock(BlockType::LIGHT);
 				else {
-					blockContainerView.getToolManager().changeTool(str.toStdString());
+					circuitView.getToolManager().changeTool(str.toStdString());
 				}
 			}
 			return;
@@ -80,13 +80,13 @@ void LogicGridWindow::updateSelectedItem() {
 	}
 }
 
-void LogicGridWindow::setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer) {
-	blockContainerView.setBlockContainer(blockContainer);
+void LogicGridWindow::setCircuit(std::shared_ptr<Circuit> circuit) {
+	circuitView.setCircuit(circuit);
 	updateSelectedItem();
 }
 
 void LogicGridWindow::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-	blockContainerView.setEvaluator(evaluator);
+	circuitView.setEvaluator(evaluator);
 }
 
 // input events ------------------------------------------------------------------------------
@@ -95,14 +95,14 @@ bool LogicGridWindow::event(QEvent* event) {
 	if (event->type() == QEvent::NativeGesture) {
 		QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
 		if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-			if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", nge->value() - 1))) event->accept();
+			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", nge->value() - 1))) event->accept();
 			return true;
 		}
 	} else if (event->type() == QEvent::Gesture) {
 		QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
 		if (gestureEvent) {
 			QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-			if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", pinchGesture->scaleFactor() - 1))) event->accept();
+			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", pinchGesture->scaleFactor() - 1))) event->accept();
 
 			return true;
 		}
@@ -113,10 +113,10 @@ bool LogicGridWindow::event(QEvent* event) {
 void LogicGridWindow::paintEvent(QPaintEvent* event) {
 	QPainter* painter = new QPainter(this);
 
-	blockContainerView.getRenderer().render(painter);
+	circuitView.getRenderer().render(painter);
 
 	// rolling average for frame time
-	pastFrameTimes.push_back(blockContainerView.getRenderer().getLastFrameTimeMs());
+	pastFrameTimes.push_back(circuitView.getRenderer().getLastFrameTimeMs());
 	int numPops = pastFrameTimes.size() - numTimesInAverage;
 	for (int i = 0; i < numPops; ++i) {
 		pastFrameTimes.pop_front();
@@ -131,7 +131,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
 
 	// tps
 	std::stringstream stream2;
-	stream2 << std::fixed << std::setprecision(3) << blockContainerView.getEvaluatorStateInterface().getRealTickrate();
+	stream2 << std::fixed << std::setprecision(3) << circuitView.getEvaluatorStateInterface().getRealTickrate();
 	std::string tpsStr = "tps: " + stream2.str();
 	painter->drawText(QRect(QPoint(0, 16), size()), Qt::AlignTop, QString(tpsStr.c_str()));
 
@@ -142,8 +142,8 @@ void LogicGridWindow::resizeEvent(QResizeEvent* event) {
 	int w = event->size().width();
 	int h = event->size().height();
 
-	blockContainerView.getRenderer().resize(w, h);
-	blockContainerView.getViewManager().setAspectRatio((float)w / (float)h);
+	circuitView.getRenderer().resize(w, h);
+	circuitView.getViewManager().setAspectRatio((float)w / (float)h);
 }
 
 void LogicGridWindow::wheelEvent(QWheelEvent* event) {
@@ -152,12 +152,12 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 
 	if (!numPixels.isNull()) {
 		if (mouseControls) {
-			if (blockContainerView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
+			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
 		} else {
-			if (blockContainerView.getEventRegister().doEvent(DeltaXYEvent(
+			if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
 				"view pan",
-				numPixels.x() / getPixelsWidth() * blockContainerView.getViewManager().getViewWidth(),
-				numPixels.y() / getPixelsHight() * blockContainerView.getViewManager().getViewHeight()
+				numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
+				numPixels.y() / getPixelsHight() * circuitView.getViewManager().getViewHeight()
 			))) event->accept();
 		}
 	}
@@ -165,17 +165,17 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 
 void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
 	if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-		blockContainerView.getBlockContainer()->undo();
+		circuitView.getCircuit()->undo();
 		event->accept();
 	} else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-		blockContainerView.getBlockContainer()->redo();
+		circuitView.getCircuit()->redo();
 		event->accept();
 	} else if (event->key() == Qt::Key_Q) {
-		if (blockContainerView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
+		if (circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
 			event->accept();
 		}
 	} else if (event->key() == Qt::Key_E) {
-		if (blockContainerView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
+		if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
 			event->accept();
 		}
 	}
@@ -186,20 +186,20 @@ void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) { }
 void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
-			if (blockContainerView.getEventRegister().doEvent(PositionEvent("view attach anchor", blockContainerView.getViewManager().getPointerPosition()))) { event->accept(); return; }
+			if (circuitView.getEventRegister().doEvent(PositionEvent("view attach anchor", circuitView.getViewManager().getPointerPosition()))) { event->accept(); return; }
 		}
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool primary activate", blockContainerView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("tool primary activate", circuitView.getViewManager().getPointerPosition()))) event->accept();
 	} else if (event->button() == Qt::RightButton) {
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool secondary activate", blockContainerView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("tool secondary activate", circuitView.getViewManager().getPointerPosition()))) event->accept();
 	}
 }
 
 void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("view dettach anchor", blockContainerView.getViewManager().getPointerPosition()))) event->accept();
-		else if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool primary deactivate", blockContainerView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("view dettach anchor", circuitView.getViewManager().getPointerPosition()))) event->accept();
+		else if (circuitView.getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView.getViewManager().getPointerPosition()))) event->accept();
 	} else if (event->button() == Qt::RightButton) {
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("tool secondary deactivate", blockContainerView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("tool secondary deactivate", circuitView.getViewManager().getPointerPosition()))) event->accept();
 	}
 }
 
@@ -207,7 +207,7 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
 	QPoint point = event->pos();
 	if (insideWindow(point)) { // inside the widget
 		Vec2 viewPos = pixelsToView(point);
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer move", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("pointer move", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 	}
 }
 
@@ -216,21 +216,21 @@ void LogicGridWindow::enterEvent(QEnterEvent* event) {
 	setFocus(Qt::MouseFocusReason);
 
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-	if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
+	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void LogicGridWindow::leaveEvent(QEvent* event) {
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-	if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer exit view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
+	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void saveJsonToFile(const QJsonObject& jsonObject);
 
 void LogicGridWindow::save() {
 	// std::cout << "save" << std::endl;
-	BlockContainerWrapper* blockContainerWrapper = blockContainerView.getBlockContainer();
-	if (!blockContainerWrapper) return;
-	Difference difference = blockContainerWrapper->getBlockContainer()->getCreationDifference();
+	Circuit* circuit = circuitView.getCircuit();
+	if (!circuit) return;
+	Difference difference = circuit->getBlockContainer()->getCreationDifference();
 	const auto modifications = difference.getModifications();
 	QJsonObject modificationsJson;
 	QJsonArray placeJson;
@@ -269,7 +269,7 @@ void LogicGridWindow::save() {
 	modificationsJson["place"] = placeJson;
 	modificationsJson["connect"] = connectJson;
 	QJsonObject centerJson;
-	center /= blockContainerWrapper->getBlockContainer()->getBlockCount();
+	center /= circuit->getBlockContainer()->getBlockCount();
 	centerJson["x"] = center.x;
 	centerJson["y"] = center.y;
 	modificationsJson["center"] = centerJson;
@@ -312,7 +312,7 @@ void LogicGridWindow::dropEvent(QDropEvent* event) {
 	QPoint point = event->position().toPoint();
 	if (insideWindow(point)) {
 		Vec2 viewPos = pixelsToView(point);
-		if (blockContainerView.getEventRegister().doEvent(PositionEvent("pointer enter view", blockContainerView.getViewManager().viewToGrid(viewPos)))) event->accept();
+		if (circuitView.getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 
 		// Get the list of URLs from the event
 		const QList<QUrl> urls = event->mimeData()->urls();
@@ -363,12 +363,12 @@ void LogicGridWindow::load(const QString& filePath) {
 		}
 		center = Position(centerJson["x"].toInt(), centerJson["y"].toInt());
 	}
-	Position pointer = blockContainerView.getViewManager().getPointerPosition().snap();
+	Position pointer = circuitView.getViewManager().getPointerPosition().snap();
 
 	Position offset = pointer - center;
 
 	// load container
-	BlockContainerWrapper* container = blockContainerView.getBlockContainer();
+	Circuit* container = circuitView.getCircuit();
 	if (!container) return;
 
 	// place blocks

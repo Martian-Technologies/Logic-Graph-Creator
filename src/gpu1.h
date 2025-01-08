@@ -1,3 +1,3 @@
-#include "middleEnd/blockContainerWrapper.h"
+#include "backend/circuit/circuit.h"
 
-void makeGPU1(BlockContainerWrapper* container, bool doConnections = true);
+void makeGPU1(Circuit* container, bool doConnections = true);

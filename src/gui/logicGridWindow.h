@@ -9,8 +9,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "blockContainerView/blockContainerView.h"
-#include "blockContainerView/renderer/QtRenderer.h"
+#include "circuitView/circuitView.h"
+#include "circuitView/renderer/QtRenderer.h"
 #include "util/vec2.h"
 
 class LogicGridWindow : public QWidget {
@@ -19,7 +19,7 @@ public:
 	LogicGridWindow(QWidget* parent = nullptr);
 
 	// setup
-	void setBlockContainer(std::shared_ptr<BlockContainerWrapper> blockContainer);
+	void setCircuit(std::shared_ptr<Circuit> circuit);
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
 	void setSelector(QTreeWidget* treeWidget);
 
@@ -27,7 +27,7 @@ public:
 	void updateSelectedItem();
 
 private:
-	BlockContainerView<QtRenderer> blockContainerView;
+	CircuitView<QtRenderer> circuitView;
 
 	// update loop
 	QTimer* updateLoopTimer;

@@ -3,7 +3,7 @@
 
 #include <variant>
 
-#include "../block/block.h"
+#include "block/blockDefs.h"
 
 class Difference {
 	friend class BlockContainer;
