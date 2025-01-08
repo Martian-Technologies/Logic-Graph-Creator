@@ -51,7 +51,7 @@ private:
 	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
 	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
 	inline float getPixelsWidth() { return (float)rect().width(); }
-	inline float getPixelsHight() { return (float)rect().height(); }
+	inline float getPixelsHeight() { return (float)rect().height(); }
 
 protected:
 	// events overrides

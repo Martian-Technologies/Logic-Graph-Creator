@@ -13,7 +13,7 @@
 
 #include "circuitView/circuitView.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -154,11 +154,17 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 		if (mouseControls) {
 			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
 		} else {
-			if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
-				"view pan",
-				numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
-				numPixels.y() / getPixelsHight() * circuitView.getViewManager().getViewHeight()
-			))) event->accept();
+			if (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) {
+				// do zoom
+				if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 100.f))) event->accept();
+			}
+			else {
+				if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
+					"view pan",
+					numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
+					numPixels.y() / getPixelsHeight() * circuitView.getViewManager().getViewHeight()
+				))) event->accept();
+			}
 		}
 	}
 }

@@ -6,7 +6,7 @@
 bool ViewManager::zoom(const Event* event) {
 	const DeltaEvent* deltaEvent = event->cast<DeltaEvent>();
 	if (!deltaEvent) return false;
-	viewHeight *= 1.f - deltaEvent->getDelta();
+	viewHeight *= std::pow(2.f, -deltaEvent->getDelta());
 	applyLimits();
 	viewChanged();
 	return true;
