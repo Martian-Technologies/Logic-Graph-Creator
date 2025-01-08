@@ -1,5 +1,5 @@
-#ifndef vulkanDevicePicker_h
-#define vulkanDevicePicker_h
+#ifndef vulkanDevice_h
+#define vulkanDevice_h
 
 #include <vulkan/vulkan.h>
 

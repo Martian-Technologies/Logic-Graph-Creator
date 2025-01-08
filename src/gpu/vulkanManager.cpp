@@ -1,6 +1,6 @@
 #include "vulkanManager.h"
 
-#include "vulkanDevicePicker.h"
+#include "vulkanDevice.h"
 
 #include <cassert>
 #include <cstring>

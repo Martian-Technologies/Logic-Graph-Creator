@@ -1,4 +1,4 @@
-#include "vulkanDevicePicker.h"
+#include "vulkanDevice.h"
 
 VulkanDevicePicker::VulkanDevicePicker(VkInstance instance, VkSurfaceKHR idealSurface)
 	: instance(instance), idealSurface(idealSurface) {
