@@ -11,7 +11,7 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
-	setWindowTitle(tr("Logic Graph Creator"));
+	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
 

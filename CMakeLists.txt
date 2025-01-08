@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LogicGraphCreator)
+project(Gatality)
 
 # hack to avoid DNDEBUG which removes wires for some reason
 if (MSVC)
