@@ -1,4 +1,5 @@
 # Conventions and feature usage guidelines
+There are obviously some exceptions, and **some** (eg. pointers) may be temporarily omitted while developing.
 
 ### Includes
 Usage
@@ -11,42 +12,41 @@ Include Order
 - If the file is a .cpp file, include the corresponding .h before any other local .h files
 - Add line breaks between the different kinds of includes if you want
 
-Include Path
-
-- all paths should be case sensitive `util/fastMath.h` not `util/fastmath.h`
-
 QT Includes
 - Do not use QT includes ending with .h, use the ones specified by classes in the [Qt documentation](https://doc.qt.io/qt-6/classes.html)
 
 ### Header Guards
 
 Use **#ifndef**
-The preporsseser var should be named the name of the file with a '_' instead of '.'
+The preprocessor define should be the name of the file with an underscore.
+`blockContainer.h`:
+```
+#ifndef blockContainer_h
+#define blockContainer_h
+
+...
+
+#endif
+```
 
 ### Naming
-
 **camalCase** for file names
-".h" for headers and ".cpp" for sources
+".h" extension for headers and ".cpp" extension for source files
 
-var and function names should be **camalCase**
-const var and enum states names should be **MACRO_CASE**
-class, enum, and struct names should **PascalCase**
+- variable and function names should be **camalCase**
+- const variable and enum state names should be **MACRO_CASE**
+- type names should **PascalCase**
 
 ### Using Raw and Smart Pointers
-
-Dont use new except when creating windows for qt to own.
-You should use smart pointers for ownership. These may be custom smart pointers.
-
+Dont use the `new` keyword except when creating windows for qt to own.
+You should use smart pointers for ownership. Sometimes you may find custom smart pointers in the codebase.
 You can pass raw pointers around but objects reciving raw pointers should not be responsible for deallocating the memory.
 
 ### Enums
-
-When using enum use the name of the enum :: the state
-example `BlockType::AND`
+Please preface enum states in use with the enum type and the scope resolution operator.
+Use `BlockType::AND` instead of `AND`
 
 ### Class Declaration Order
-Info on where to put public/private variables and function, and in what order
-
 Order should be:
 - friends
 - public
@@ -56,28 +56,24 @@ Order should be:
 - private vars
 
 ### Assertions
-
-Use assertions when you think is necessary. You should not over do it.
+For now, you can use assertions to confirm state that is **essential** for the program to run.
 
 ### Returning Nothing
+When functions can return nothing, use `std::optional`
 
-When functions should sometimes return values you should use `std::optional`
-
-### Types and Sizes
-
-Using regular c++ types when the size is not highly important. You should use cstdint types when you need an exact size
+### Integer
+You should use regular c++ types when the size isn't important. You should use cstdint types when you need an exact size.
 
 ### Tabs vs. Spaces
-
-use tabs please
+Use tabs please
 
 ### Small TODO comments
 ```cpp
 // TODO: changes to be made
 ```
-### Curly Brackets
 
-You should open them on the same line. Not a new one.
+### Curly Brackets
+You should open them on the same line. Put a space before them.
 ```cpp
 // do
 if () {
@@ -89,8 +85,6 @@ if ()
 {
 }
 ```
-Place a space before curley bracket set for while, for, and functions
-Space after if, while, for loops
 
 ### Constructor/initializer lists
 
