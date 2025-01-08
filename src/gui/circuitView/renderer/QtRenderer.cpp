@@ -7,7 +7,7 @@
 #include "gui/circuitView/renderer/renderer.h"
 #include "backend/evaluator/logicState.h"
 #include "backend/address.h"
-#include "QtRenderer.h"
+#include "qtRenderer.h"
 #include "util/vec2.h"
 
 QtRenderer::QtRenderer()
