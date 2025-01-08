@@ -13,10 +13,10 @@
 #include "circuitView/renderer/QtRenderer.h"
 #include "util/vec2.h"
 
-class LogicGridWindow : public QWidget {
+class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-	LogicGridWindow(QWidget* parent = nullptr);
+	CircuitViewWidget(QWidget* parent = nullptr);
 
 	// setup
 	void setCircuit(std::shared_ptr<Circuit> circuit);

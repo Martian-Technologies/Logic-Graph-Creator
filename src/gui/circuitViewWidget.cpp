@@ -1,4 +1,4 @@
-#include "logicGridWindow.h"
+#include "circuitViewWidget.h"
 
 #include <QJsonDocument>
 #include <QFileDialog>
@@ -13,7 +13,7 @@
 
 #include "circuitView/circuitView.h"
 
-LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -24,7 +24,7 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseContro
 	updateLoopTimer = new QTimer(this);
 	updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
 	updateLoopTimer->start();
-	connect(updateLoopTimer, &QTimer::timeout, this, &LogicGridWindow::updateLoop);
+	connect(updateLoopTimer, &QTimer::timeout, this, &CircuitViewWidget::updateLoop);
 
 	float w = size().width();
 	float h = size().height();
@@ -37,26 +37,26 @@ LogicGridWindow::LogicGridWindow(QWidget* parent) : QWidget(parent), mouseContro
 	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &LogicGridWindow::save);
+	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
 }
 
-void LogicGridWindow::updateLoop() {
+void CircuitViewWidget::updateLoop() {
 	// update for re-render
 	update();
 }
 
 // setter functions -----------------------------------------------------------------------------
 
-void LogicGridWindow::setSelector(QTreeWidget* treeWidget) {
+void CircuitViewWidget::setSelector(QTreeWidget* treeWidget) {
 	// disconnect the old tree
 	if (this->treeWidget != nullptr)
-		disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+		disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &CircuitViewWidget::updateSelectedItem);
 	// connect the new tree
 	this->treeWidget = treeWidget;
-	connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &LogicGridWindow::updateSelectedItem);
+	connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &CircuitViewWidget::updateSelectedItem);
 }
 
-void LogicGridWindow::updateSelectedItem() {
+void CircuitViewWidget::updateSelectedItem() {
 	if (treeWidget) {
 		for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
 			if (item) {
@@ -80,18 +80,18 @@ void LogicGridWindow::updateSelectedItem() {
 	}
 }
 
-void LogicGridWindow::setCircuit(std::shared_ptr<Circuit> circuit) {
+void CircuitViewWidget::setCircuit(std::shared_ptr<Circuit> circuit) {
 	circuitView.setCircuit(circuit);
 	updateSelectedItem();
 }
 
-void LogicGridWindow::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+void CircuitViewWidget::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 	circuitView.setEvaluator(evaluator);
 }
 
 // input events ------------------------------------------------------------------------------
 
-bool LogicGridWindow::event(QEvent* event) {
+bool CircuitViewWidget::event(QEvent* event) {
 	if (event->type() == QEvent::NativeGesture) {
 		QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
 		if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
@@ -110,7 +110,7 @@ bool LogicGridWindow::event(QEvent* event) {
 	return QWidget::event(event);
 }
 
-void LogicGridWindow::paintEvent(QPaintEvent* event) {
+void CircuitViewWidget::paintEvent(QPaintEvent* event) {
 	QPainter* painter = new QPainter(this);
 
 	circuitView.getRenderer().render(painter);
@@ -138,7 +138,7 @@ void LogicGridWindow::paintEvent(QPaintEvent* event) {
 	delete painter;
 }
 
-void LogicGridWindow::resizeEvent(QResizeEvent* event) {
+void CircuitViewWidget::resizeEvent(QResizeEvent* event) {
 	int w = event->size().width();
 	int h = event->size().height();
 
@@ -146,7 +146,7 @@ void LogicGridWindow::resizeEvent(QResizeEvent* event) {
 	circuitView.getViewManager().setAspectRatio((float)w / (float)h);
 }
 
-void LogicGridWindow::wheelEvent(QWheelEvent* event) {
+void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 	QPoint numPixels = event->pixelDelta();
 	if (numPixels.isNull()) numPixels = event->angleDelta() / 120 * /* pixels per step */ 10;
 
@@ -163,7 +163,7 @@ void LogicGridWindow::wheelEvent(QWheelEvent* event) {
 	}
 }
 
-void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
+void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
 	if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
 		circuitView.getCircuit()->undo();
 		event->accept();
@@ -181,9 +181,9 @@ void LogicGridWindow::keyPressEvent(QKeyEvent* event) {
 	}
 }
 
-void LogicGridWindow::keyReleaseEvent(QKeyEvent* event) { }
+void CircuitViewWidget::keyReleaseEvent(QKeyEvent* event) { }
 
-void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
+void CircuitViewWidget::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
 			if (circuitView.getEventRegister().doEvent(PositionEvent("view attach anchor", circuitView.getViewManager().getPointerPosition()))) { event->accept(); return; }
@@ -194,7 +194,7 @@ void LogicGridWindow::mousePressEvent(QMouseEvent* event) {
 	}
 }
 
-void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
+void CircuitViewWidget::mouseReleaseEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (circuitView.getEventRegister().doEvent(PositionEvent("view dettach anchor", circuitView.getViewManager().getPointerPosition()))) event->accept();
 		else if (circuitView.getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView.getViewManager().getPointerPosition()))) event->accept();
@@ -203,7 +203,7 @@ void LogicGridWindow::mouseReleaseEvent(QMouseEvent* event) {
 	}
 }
 
-void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
+void CircuitViewWidget::mouseMoveEvent(QMouseEvent* event) {
 	QPoint point = event->pos();
 	if (insideWindow(point)) { // inside the widget
 		Vec2 viewPos = pixelsToView(point);
@@ -211,7 +211,7 @@ void LogicGridWindow::mouseMoveEvent(QMouseEvent* event) {
 	}
 }
 
-void LogicGridWindow::enterEvent(QEnterEvent* event) {
+void CircuitViewWidget::enterEvent(QEnterEvent* event) {
 	// grab focus so key inputs work without clicking
 	setFocus(Qt::MouseFocusReason);
 
@@ -219,14 +219,14 @@ void LogicGridWindow::enterEvent(QEnterEvent* event) {
 	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
-void LogicGridWindow::leaveEvent(QEvent* event) {
+void CircuitViewWidget::leaveEvent(QEvent* event) {
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
 	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void saveJsonToFile(const QJsonObject& jsonObject);
 
-void LogicGridWindow::save() {
+void CircuitViewWidget::save() {
 	// std::cout << "save" << std::endl;
 	Circuit* circuit = circuitView.getCircuit();
 	if (!circuit) return;
@@ -301,14 +301,14 @@ void saveJsonToFile(const QJsonObject& jsonObject) {
 	QMessageBox::information(nullptr, "Success", "JSON file saved successfully!");
 }
 
-void LogicGridWindow::dragEnterEvent(QDragEnterEvent* event) {
+void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {
 	// Accept the drag if it contains a file
 	if (event->mimeData()->hasUrls()) {
 		event->acceptProposedAction();
 	}
 }
 
-void LogicGridWindow::dropEvent(QDropEvent* event) {
+void CircuitViewWidget::dropEvent(QDropEvent* event) {
 	QPoint point = event->position().toPoint();
 	if (insideWindow(point)) {
 		Vec2 viewPos = pixelsToView(point);
@@ -331,7 +331,7 @@ void LogicGridWindow::dropEvent(QDropEvent* event) {
 	}
 }
 
-void LogicGridWindow::load(const QString& filePath) {
+void CircuitViewWidget::load(const QString& filePath) {
 	// open file
 	QFile file(filePath);
 	if (!file.open(QIODevice::ReadOnly)) {

@@ -8,7 +8,7 @@
 #include "../renderer/elementCreator.h"
 #include "toolManagerEventRegister.h"
 #include "../events/customEvents.h"
-class LogicGridWindow;
+class CircuitViewWidget;
 
 
 class CircuitTool {

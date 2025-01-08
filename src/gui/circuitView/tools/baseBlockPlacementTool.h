@@ -2,7 +2,6 @@
 #define baseBlockPlacementTool_h
 
 #include "circuitTool.h"
-class LogicGridWindow;
 
 class BaseBlockPlacementTool : public CircuitTool {
 public:

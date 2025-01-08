@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow {
 public:
 	MainWindow(QWidget* parent = nullptr);
 	void setSimState(bool state);
-	void simUseSpeed(bool state);
+	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
 
 private:

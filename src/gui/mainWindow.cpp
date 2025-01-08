@@ -3,7 +3,7 @@
 #include <QTreeView>
 #include <QCheckBox>
 
-#include "logicGridWindow.h"
+#include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 #include "gpu1.h"
@@ -22,24 +22,25 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	evaluator = std::make_shared<Evaluator>(circuit);
 
-	LogicGridWindow* logicGridWindow = new LogicGridWindow(this);
-	logicGridWindow->setCircuit(circuit);
-	logicGridWindow->setEvaluator(evaluator);
-	logicGridWindow->setSelector(ui->selectorTreeWidget);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	circuitViewWidget->setCircuit(circuit);
+	circuitViewWidget->setEvaluator(evaluator);
+	circuitViewWidget->setSelector(ui->selectorTreeWidget);
 
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
-	connect(ui->UseSpeed, &QCheckBox::stateChanged, this, &MainWindow::simUseSpeed);
+	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
 	QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
-	layout->addWidget(logicGridWindow);
+	layout->addWidget(circuitViewWidget);
 }
 
 void MainWindow::setSimState(bool state) {
 	evaluator->setPause(!state);
 }
 
-void MainWindow::simUseSpeed(bool state) {
+void MainWindow::simUseSpeed(Qt::CheckState state) {
+	bool evalState = state == Qt::CheckState::Checked;
 	evaluator->setUseTickrate(state);
 }
 
