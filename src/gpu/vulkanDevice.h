@@ -18,7 +18,6 @@ struct QueueFamilyIndices {
 	}
 };
 
-bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface, const std::vector<std::string>& requiredExtensions);
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
 bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std::string>& requiredExtensions);
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface);

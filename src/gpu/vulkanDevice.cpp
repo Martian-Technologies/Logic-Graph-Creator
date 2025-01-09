@@ -1,20 +1,5 @@
 #include "vulkanDevice.h"
 
-bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR idealSurface, const std::vector<std::string>& requiredExtensions) {
-	// check queue graphics feature support
-	QueueFamilyIndices indices = findQueueFamilies(device, idealSurface);
-	// check extension support
-	bool extensionsSupported = checkDeviceExtensionSupport(device, requiredExtensions);
-	// check swap chain adequacy
-	bool swapChainAdequate = false;
-	if (extensionsSupported) {
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, idealSurface);
-		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-	}
-	
-	return indices.isComplete() && extensionsSupported && swapChainAdequate;
-}
-
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
 	SwapChainSupportDetails details;
 

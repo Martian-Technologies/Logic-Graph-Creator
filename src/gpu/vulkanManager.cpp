@@ -114,10 +114,26 @@ void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 
 	// find first suitable device
 	for (const auto& device : devices) {
-		if (isDeviceSuitable(device, idealSurface, deviceExtensions)) {
+		if (isDeviceSuitable(device, idealSurface)) {
 			physicalDevice = device;
+			return;
 		}
 	}
 
 	fail("failed to find suitable GPU");
+}
+
+bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface) {
+	// check queue graphics feature support
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, idealSurface);
+	// check extension support
+	bool extensionsSupported = checkDeviceExtensionSupport(physicalDevice, deviceExtensions);
+	// check swap chain adequacy
+	bool swapChainAdequate = false;
+	if (extensionsSupported) {
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, idealSurface);
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+	
+	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }

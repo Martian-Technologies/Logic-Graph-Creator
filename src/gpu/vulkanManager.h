@@ -25,6 +25,7 @@ private:
 	// helper functions
 	bool checkValidationLayerSupport();
 	void pickPhysicalDevice(VkSurfaceKHR idealSurface);
+	bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface);
 	
 private:
 	VkInstance instance;
