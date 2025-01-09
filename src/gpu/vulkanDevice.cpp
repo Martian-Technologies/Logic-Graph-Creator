@@ -1,50 +1,21 @@
 #include "vulkanDevice.h"
 
-VulkanDevicePicker::VulkanDevicePicker(VkInstance instance, VkSurfaceKHR idealSurface)
-	: instance(instance), idealSurface(idealSurface) {
-	
-}
-
-std::optional<VkPhysicalDevice> VulkanDevicePicker::pick() {
-	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-
-	if (deviceCount == 0) {
-		error = "failed to find GPUs with Vulkan support!";
-		return std::nullopt;
-	}
-
-	// get vulkan supported devices
-	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-
-	// find first suitable device
-	for (const auto& device : devices) {
-		if (isDeviceSuitable(device)) {
-			return device;
-		}
-	}
-
-	error = "failed to find suitable GPU";
-	return std::nullopt;
-}
-
-bool VulkanDevicePicker::isDeviceSuitable(VkPhysicalDevice device) {
+bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR idealSurface, const std::vector<std::string>& requiredExtensions) {
 	// check queue graphics feature support
-	QueueFamilyIndices indices = findQueueFamilies(device);
+	QueueFamilyIndices indices = findQueueFamilies(device, idealSurface);
 	// check extension support
-	bool extensionsSupported = checkDeviceExtensionSupport(device);
+	bool extensionsSupported = checkDeviceExtensionSupport(device, requiredExtensions);
 	// check swap chain adequacy
 	bool swapChainAdequate = false;
 	if (extensionsSupported) {
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, idealSurface);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 	
 	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-SwapChainSupportDetails VulkanDevicePicker::querySwapChainSupport(VkPhysicalDevice device) {
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
 	SwapChainSupportDetails details;
 
 	// get capabilities
@@ -69,9 +40,7 @@ SwapChainSupportDetails VulkanDevicePicker::querySwapChainSupport(VkPhysicalDevi
 	return details;
 }
 
-bool VulkanDevicePicker::checkDeviceExtensionSupport(VkPhysicalDevice device) {
-	if (requiredDeviceExtensions.has_value()) { return true; }
-	
+bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std::string>& requiredExtensions) {
 	// get available extensions
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -79,16 +48,16 @@ bool VulkanDevicePicker::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
 	// check if all required extensions are available
-	std::set<std::string> requiredExtensions(requiredDeviceExtensions.value().begin(), requiredDeviceExtensions.value().end());
+	std::set<std::string> uniqueExtensions(requiredExtensions.begin(), requiredExtensions.end());
 	for (const auto& extension : availableExtensions) {
-		requiredExtensions.erase(extension.extensionName);
+		uniqueExtensions.erase(extension.extensionName);
 	}
 
-	return requiredExtensions.empty();
+	return uniqueExtensions.empty();
 
 }
 
-QueueFamilyIndices VulkanDevicePicker::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
 	QueueFamilyIndices indices;
 
 	// get list of queue families

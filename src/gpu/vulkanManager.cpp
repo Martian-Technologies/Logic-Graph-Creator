@@ -58,12 +58,7 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 }
 
 void VulkanManager::createDevice(VkSurfaceKHR surface) {
-	// Pick physical device
-	VulkanDevicePicker picker(instance, surface);
-	picker.requireExtensions(deviceExtensions);
-	auto pickerResult = picker.pick();
-	if (!pickerResult.has_value()) { fail(picker.getError()); }
-    physicalDevice = pickerResult.value();
+	pickPhysicalDevice(surface);
 	
 }
 
@@ -103,4 +98,26 @@ bool VulkanManager::checkValidationLayerSupport() {
 	}
 
 	return true;
+}
+
+void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	if (deviceCount == 0) {
+		fail("failed to find GPUs with Vulkan support!");
+	}
+
+	// get vulkan supported devices
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	// find first suitable device
+	for (const auto& device : devices) {
+		if (isDeviceSuitable(device, idealSurface, deviceExtensions)) {
+			physicalDevice = device;
+		}
+	}
+
+	fail("failed to find suitable GPU");
 }

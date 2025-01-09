@@ -13,33 +13,14 @@ struct QueueFamilyIndices {
 	std::optional<uint32_t> graphicsFamily;
 	std::optional<uint32_t> presentFamily;
 
-	bool isComplete() {
+	inline bool isComplete() {
 		return graphicsFamily.has_value() && presentFamily.has_value();
 	}
 };
 
-class VulkanDevicePicker {
-public:
-	VulkanDevicePicker(VkInstance instance, VkSurfaceKHR surface);
-
-	inline void requireExtensions(const std::vector<std::string>& requiredDeviceExtensions) { this->requiredDeviceExtensions = requiredDeviceExtensions; }
-	
-	std::optional<VkPhysicalDevice> pick();
-	inline const std::string& getError() const { return error; };
-	
-private:
-	bool isDeviceSuitable(VkPhysicalDevice physicalDevice);
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-
-private:
-	VkInstance instance;
-	VkSurfaceKHR idealSurface;
-	
-	std::optional<std::vector<std::string>> requiredDeviceExtensions = std::nullopt;
-	
-	std::string error;
-};
+bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface, const std::vector<std::string>& requiredExtensions);
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
+bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std::string>& requiredExtensions);
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef vulkanManager_h
 #define vulkanManager_h
 
+#include "gpu/vulkanDevice.h"
 #include <vulkan/vulkan.h>
 
 struct VulkanGraphicsView {
@@ -23,11 +24,14 @@ private:
 	
 	// helper functions
 	bool checkValidationLayerSupport();
+	void pickPhysicalDevice(VkSurfaceKHR idealSurface);
 	
 private:
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
+
+	QueueFamilyIndices queueIndices;
 };
 
 #endif
