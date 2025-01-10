@@ -1,14 +1,12 @@
 #ifndef evaluator_h
 #define evaluator_h
 
+#include "logicSimulator.h"
 #include "backend/circuit/circuit.h"
 #include "backend/container/difference.h"
-#include "logicSimulator.h"
 #include "addressTree.h"
 #include "backend/address.h"
 #include "evaluatorDefs.h"
-
-
 
 class Evaluator {
 public:

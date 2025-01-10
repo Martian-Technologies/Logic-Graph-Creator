@@ -71,6 +71,7 @@ void CircuitViewWidget::updateSelectedItem() {
 				else if (str == "Button") circuitView.getToolManager().selectBlock(BlockType::BUTTON);
 				else if (str == "Tick Button") circuitView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
 				else if (str == "Light") circuitView.getToolManager().selectBlock(BlockType::LIGHT);
+				else if (str == "Full Adder") circuitView.getToolManager().selectBlock(BlockType::FULLADDER);
 				else {
 					circuitView.getToolManager().changeTool(str.toStdString());
 				}

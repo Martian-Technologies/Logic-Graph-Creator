@@ -28,6 +28,7 @@ constexpr block_size_t getBlockWidth(BlockType type) noexcept {
 constexpr block_size_t getBlockHeight(BlockType type) noexcept {
 	// add if not 1
 	switch (type) {
+	case BlockType::FULLADDER: return 3;
 	default: return 1;
 	}
 }
@@ -46,6 +47,12 @@ inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type,
 	case BlockType::BUTTON: return { 0, false };
 	case BlockType::TICK_BUTTON: return { 0, false };
 	case BlockType::LIGHT: return { 0, true };
+	case BlockType::FULLADDER : {
+		if (vector.dx == 0 && vector.dy == 0) return { 0, true };
+		if (vector.dx == 0 && vector.dy == 1) return { 1, true };
+		if (vector.dx == 0 && vector.dy == 2) return { 2, true };
+		return { 0, false };
+	}
 	default:
 		if (vector.dx == 0 && vector.dy == 0) return { 0, true };
 		return { 0, false };
@@ -58,6 +65,11 @@ inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type
 	case BlockType::BUTTON: return { 0, true };
 	case BlockType::TICK_BUTTON: return { 0, true };
 	case BlockType::LIGHT: return { 0, false };
+	case BlockType::FULLADDER: {
+		if (vector.dx == 0 && vector.dy == 0) return { 3, true };
+		if (vector.dx == 0 && vector.dy == 1) return { 4, true };
+		return { 0, false };
+	}
 	default:
 		if (vector.dx == 0 && vector.dy == 0) return { 1, true };
 		return { 0, false };
@@ -103,6 +115,7 @@ constexpr connection_end_id_t getMaxConnectionId(BlockType type) {
 	case BlockType::BUTTON: return 0;
 	case BlockType::TICK_BUTTON: return 0;
 	case BlockType::LIGHT: return 0;
+	case BlockType::FULLADDER: return 4;
 	default: return 1;
 	}
 }
@@ -112,6 +125,7 @@ constexpr bool isConnectionInput(BlockType type, connection_end_id_t connectionI
 	case BlockType::SWITCH: return false;
 	case BlockType::BUTTON: return false;
 	case BlockType::TICK_BUTTON: return false;
+	case BlockType::FULLADDER: return connectionId < 3;
 	default:
 		return connectionId == 0;
 	}

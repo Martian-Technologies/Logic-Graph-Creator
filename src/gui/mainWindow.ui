@@ -250,6 +250,11 @@
              <string>Light</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Full Adder</string>
+            </property>
+           </item>
           </item>
          </item>
          <item>

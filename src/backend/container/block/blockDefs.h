@@ -24,6 +24,7 @@ enum BlockType : char {
 	SWITCH,
 	CONSTANT,
 	LIGHT,
+	FULLADDER,
 	CUSTOM,
 	TYPE_COUNT
 };
