@@ -9,6 +9,7 @@
 		{
 			"name": "debug",
 			"displayName": "Debug",
+			"generator": "Ninja",
 			"binaryDir": "build",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug"
@@ -17,6 +18,7 @@
 		{
 			"name": "release",
 			"displayName": "Release",
+			"generator": "Ninja",
 			"binaryDir": "build-release",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release"
