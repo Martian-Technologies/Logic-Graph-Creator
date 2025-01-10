@@ -2,7 +2,7 @@
 
 ## The Backend
 
-The Backend is where `Circuit`s and `Evaluator`s are created, managed.
+The Backend creates and manages `Circuit`s and `Evaluator`s.
 
 ### BlockContainer
 `BlockContainer` is a container used for storing and modifying the gird of `Cell`s and the related `Block`s.
@@ -30,9 +30,9 @@ A `connection_end_id_t` is local to a block and says which input or output the c
 A `ConnectionEnd` stores a `block_id_t` of the other block and a `connection_end_id_t` for which connection in that other block.
 
 ### Circuit
-`Circuit` is a higher level `BlockContainer` ment to manage the modifications coming from other parts of the program.
+`Circuit` is a higher level wrapper around `BlockContainer` that manages the modifications coming from other parts of the program.
 When you tell `Circuit` to modify `BlockContainer` it will create a `Difference` that contain the effects that the modification had.
-This `Difference` is then sent out to all registered functions. It is also added to the undo stack which allows undo and redoing.
+Classes can subscribe to a listener to receieve those `Difference`. It is also added to the undo stack which allows undo and redo.
 
 ### Evaluator
 Evaluators `Evaluator` are used to simulate the circuit made of containers.
