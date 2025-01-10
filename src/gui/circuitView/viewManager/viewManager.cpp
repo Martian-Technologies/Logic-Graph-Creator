@@ -42,8 +42,8 @@ bool ViewManager::pointerMove(const Event* event) {
 	pointerViewPosition = gridToView(positionEvent->getFPosition());
 
 	if (doPointerMovement) {
-		FPosition delta = pointerPosition - positionEvent->getFPosition();
-		if (std::abs(delta.manhattenDistanceToOrigin()) < 0.001f) return false; // no change in pointer pos
+		FVector delta = pointerPosition - positionEvent->getFPosition();
+		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos
 		viewCenter += delta;
 		applyLimits();
 		viewChanged();
@@ -76,9 +76,8 @@ void ViewManager::applyLimits() {
 }
 
 Vec2 ViewManager::gridToView(FPosition position) const {
-	position -= viewCenter;
-	position.x /= getViewWidth();
-	position.y /= getViewHeight();
-	position += FPosition(0.5f, 0.5f);
-	return Vec2(position.x, position.y);
+	return Vec2(
+		(position.x - viewCenter.x) / getViewWidth() + 0.5f,
+		(position.y - viewCenter.y) / getViewHeight() + 0.5f
+	);
 }

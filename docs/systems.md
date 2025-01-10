@@ -30,7 +30,7 @@ A `connection_end_id_t` is local to a block and says which input or output the c
 A `ConnectionEnd` stores a `block_id_t` of the other block and a `connection_end_id_t` for which connection in that other block.
 
 ### Circuit
-`Circuit` is a higher level wrapper around `BlockContainer` that manages the modifications coming from other parts of the program.
+`Circuit` is used to manage the modifications to `BlockContainer` coming from other parts of the program.
 When you tell `Circuit` to modify `BlockContainer` it will create a `Difference` that contain the effects that the modification had.
 Classes can subscribe to a listener to receieve those `Difference`. It is also added to the undo stack which allows undo and redo.
 
