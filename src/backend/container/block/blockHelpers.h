@@ -96,6 +96,12 @@ inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_en
 	case BlockType::BUTTON: if (connectionId) return { Vector(), false }; return { Vector(0, 0), true };
 	case BlockType::TICK_BUTTON: if (connectionId) return { Vector(), false }; return { Vector(0, 0), true };
 	case BlockType::LIGHT: if (connectionId) return { Vector(), false }; return { Vector(0, 0), true };
+	case BlockType::FULLADDER: {
+		if (connectionId < 3) return { Vector(0, connectionId), true };
+		if (connectionId == 3) return { Vector(0, 0), true };
+		if (connectionId == 4) return { Vector(0, 1), true };
+		return { Vector(), false };
+	}
 	default:
 		if (connectionId < 2) return { Vector(0, 0), true };
 		return { Vector(), false };

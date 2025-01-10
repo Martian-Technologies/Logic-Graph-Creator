@@ -131,7 +131,7 @@ void QtRenderer::render(QPainter* painter) {
 						(pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
 						(pos.x - 2 < bottomRightBound.x || otherPos.x - 2 < bottomRightBound.x) &&
 						(pos.y - 2 < bottomRightBound.y || otherPos.y - 2 < bottomRightBound.y)
-					) {
+						) {
 						renderConnection(painter, pos, blocks[i], otherPos, other, state);
 					}
 				}
