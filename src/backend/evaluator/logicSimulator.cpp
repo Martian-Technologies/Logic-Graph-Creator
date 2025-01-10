@@ -15,6 +15,7 @@ LogicSimulator::LogicSimulator()
 	gateInputCountPowered(),
 	numDecomissioned(0),
 	ticksRun(0),
+	tickrateConveyer{0, 0, 0, 0, 0, 0, 0, 0},
 	realTickrate(0),
 	running(true),
 	proceedFlag(false),
@@ -358,11 +359,16 @@ bool LogicSimulator::threadIsWaiting() const {
 }
 
 void LogicSimulator::tickrateMonitor() {
+	int i = 0;
+	long long int tickrate = 0;
 	while (running.load(std::memory_order_acquire)) {
-		const long long int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
-		realTickrate.store(ticks, std::memory_order_release);
+		const int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
+		tickrate += ticks - tickrateConveyer[i];
+		tickrateConveyer[i] = ticks;
+		i = (i + 1) % 8;
+		realTickrate.store(tickrate, std::memory_order_release);
 		// std::cout << "Tickrate: " << ticks << std::endl;
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(125));
 	}
 }
 

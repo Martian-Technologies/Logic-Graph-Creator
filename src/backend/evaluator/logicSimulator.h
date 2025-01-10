@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <array>
 
 #include "evaluatorDefs.h"
 #include "backend/container/block/blockDefs.h"
@@ -57,6 +58,7 @@ private:
 	std::atomic<bool> proceedFlag;
 	std::atomic<bool> isWaiting;
 	std::atomic<int> ticksRun;
+	std::array<int, 8> tickrateConveyer;
 	std::atomic<long long int> realTickrate;
 
 	std::atomic<unsigned long long int> targetTickrate; // updates per minute
