@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "gui/circuitView/renderer/renderer.h"
-#include "backend/evaluator/logicState.h"
+#include "backend/evaluator/evaluatorDefs.h"
 #include "backend/address.h"
 #include "qtRenderer.h"
 #include "util/vec2.h"

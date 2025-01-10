@@ -6,7 +6,9 @@
 #include "logicSimulator.h"
 #include "addressTree.h"
 #include "backend/address.h"
-#include "logicState.h"
+#include "evaluatorDefs.h"
+
+
 
 class Evaluator {
 public:
@@ -31,7 +33,7 @@ private:
 	bool usingTickrate;
 	unsigned long long targetTickrate;
 	LogicSimulator logicSimulator;
-	AddressTreeNode<block_id_t> addressTree;
+	AddressTreeNode<eval_gate_id_t> addressTree;
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);

@@ -42,7 +42,7 @@ void LogicSimulator::initialize() {
 	std::fill(gateInputCountPowered.begin(), gateInputCountPowered.end(), 0);
 }
 
-block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
+eval_gate_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
 	if (allowSubstituteDecomissioned && numDecomissioned > 0) {
 		auto it = std::find(gateTypes.begin(), gateTypes.end(), GateType::NONE);
 		if (it != gateTypes.end()) {
@@ -66,7 +66,7 @@ block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstitut
 	return currentState.size() - 1;
 }
 
-void LogicSimulator::connectGates(block_id_t gate1, block_id_t gate2) {
+void LogicSimulator::connectGates(eval_gate_id_t gate1, eval_gate_id_t gate2) {
 	if (gate1 < 0 || gate1 >= currentState.size())
 		throw std::out_of_range("connectGates: gate1 index out of range");
 	if (gate2 < 0 || gate2 >= currentState.size())
@@ -87,7 +87,7 @@ void LogicSimulator::connectGates(block_id_t gate1, block_id_t gate2) {
 	}
 }
 
-void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
+void LogicSimulator::disconnectGates(eval_gate_id_t gate1, eval_gate_id_t gate2) {
 	if (gate1 < 0 || gate1 >= currentState.size())
 		throw std::out_of_range("connectGates: gate1 index out of range");
 	if (gate2 < 0 || gate2 >= currentState.size())
@@ -113,7 +113,7 @@ void LogicSimulator::disconnectGates(block_id_t gate1, block_id_t gate2) {
 	}
 }
 
-void LogicSimulator::decomissionGate(block_id_t gate) {
+void LogicSimulator::decomissionGate(eval_gate_id_t gate) {
 	const auto inputs = gateInputs[gate];
 	for (auto input : inputs) {
 		disconnectGates(input, gate);
@@ -130,8 +130,8 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
 	++numDecomissioned;
 }
 
-std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
-	std::unordered_map<block_id_t, block_id_t> gateMap;
+std::unordered_map<eval_gate_id_t, eval_gate_id_t> LogicSimulator::compressGates() {
+	std::unordered_map<eval_gate_id_t, eval_gate_id_t> gateMap;
 	int newGateIndex = 0;
 	for (auto i = 0; i < currentState.size(); ++i) {
 		if (gateTypes[i] != GateType::NONE) {
@@ -144,7 +144,7 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
 		if (gateTypes[i] == GateType::NONE) {
 			continue;
 		}
-		const block_id_t newGateIndex = gateMap[i];
+		const eval_gate_id_t newGateIndex = gateMap[i];
 		gateTypes[newGateIndex] = gateTypes[i];
 		currentState[newGateIndex] = currentState[i];
 		nextState[newGateIndex] = nextState[i];
@@ -164,10 +164,10 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
 	gateInputCountPowered.resize(newGateIndex);
 
 	for (auto i = 0; i < currentState.size(); ++i) {
-		for (block_id_t& input : gateInputs[i]) {
+		for (eval_gate_id_t& input : gateInputs[i]) {
 			input = gateMap[input];
 		}
-		for (block_id_t& output : gateOutputs[i]) {
+		for (eval_gate_id_t& output : gateOutputs[i]) {
 			output = gateMap[output];
 		}
 	}
@@ -193,7 +193,7 @@ void LogicSimulator::swapStates() {
 }
 
 void LogicSimulator::computeNextState() {
-	for (block_id_t gate = 0; gate < nextState.size(); ++gate) {
+	for (eval_gate_id_t gate = 0; gate < nextState.size(); ++gate) {
 		unsigned int powered = gateInputCountPowered[gate];
 		unsigned int type = (unsigned int)gateTypes[gate];
 		if (type > 7) { // and + nand
@@ -212,7 +212,7 @@ void LogicSimulator::computeNextState() {
 	}
 }
 
-void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
+void LogicSimulator::setState(eval_gate_id_t gate, logic_state_t state) {
 	if (gate < 0 || gate >= currentState.size())
 		throw std::out_of_range("setState: gate index out of range");
 	currentState[gate] = state;
@@ -241,7 +241,7 @@ void LogicSimulator::clearGates() {
 	numDecomissioned = 0;
 }
 
-void LogicSimulator::reserveGates(block_id_t numGates) {
+void LogicSimulator::reserveGates(eval_gate_id_t numGates) {
 	currentState.reserve(numGates);
 	nextState.reserve(numGates);
 	gateTypes.reserve(numGates);

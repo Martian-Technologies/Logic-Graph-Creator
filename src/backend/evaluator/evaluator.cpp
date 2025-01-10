@@ -4,9 +4,9 @@ Evaluator::Evaluator(std::shared_ptr<Circuit> circuit)
 	:paused(true),
 	targetTickrate(0),
 	logicSimulator(),
-	addressTree(),
+	addressTree(circuit->getContainerId()),
 	usingTickrate(false) {
-	setTickrate(40 * 60); // 1000000000 clocks / min
+	setTickrate(40 * 60); // 40 clocks / sec
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 
@@ -75,7 +75,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 			deletedBlocks = true;
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const auto address = Address(position);
-			const block_id_t blockId = addressTree.getValue(address);
+			const eval_gate_id_t blockId = addressTree.getValue(address);
 			logicSimulator.decomissionGate(blockId);
 			addressTree.removeValue(address);
 			break;
@@ -85,7 +85,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const auto address = Address(position);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
-			const block_id_t blockId = logicSimulator.addGate(gateType, true);
+			const eval_gate_id_t blockId = logicSimulator.addGate(gateType, true);
 			addressTree.addValue(address, blockId);
 			break;
 		}
@@ -94,8 +94,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			const auto outputAddress = Address(outputPosition);
 			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+			const eval_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
+			const eval_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
 			logicSimulator.disconnectGates(outputBlockId, inputBlockId);
 			break;
 		}
@@ -104,8 +104,8 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			const auto outputAddress = Address(outputPosition);
 			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+			const eval_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
+			const eval_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
 			logicSimulator.connectGates(outputBlockId, inputBlockId);
 			break;
 		}
@@ -145,7 +145,7 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
-	const block_id_t blockId = addressTree.getValue(address);
+	const eval_gate_id_t blockId = addressTree.getValue(address);
 
 	logicSimulator.signalToPause();
 	while (!logicSimulator.threadIsWaiting()) {
@@ -166,7 +166,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		std::this_thread::yield();
 	}
 	for (const auto& address : addresses) {
-		const block_id_t blockId = addressTree.getValue(address);
+		const eval_gate_id_t blockId = addressTree.getValue(address);
 		states.push_back(logicSimulator.getState(blockId));
 	}
 	if (!paused) {
@@ -176,7 +176,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
-	const block_id_t blockId = addressTree.getValue(address);
+	const eval_gate_id_t blockId = addressTree.getValue(address);
 	logicSimulator.signalToPause();
 	while (!logicSimulator.threadIsWaiting()) {
 		std::this_thread::yield();

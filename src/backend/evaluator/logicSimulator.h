@@ -5,8 +5,7 @@
 #include <chrono>
 #include <thread>
 
-#include "logicState.h"
-#include "gateType.h"
+#include "evaluatorDefs.h"
 #include "backend/container/block/blockDefs.h"
 
 class LogicSimulator {
@@ -14,12 +13,12 @@ public:
 	LogicSimulator();
 	~LogicSimulator();
 	void initialize();
-	block_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
-	void connectGates(block_id_t gate1, block_id_t gate2);
-	void disconnectGates(block_id_t gate1, block_id_t gate2);
-	void decomissionGate(block_id_t gate); // TODO: figure out a better way to do this maybe
+	eval_gate_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
+	void connectGates(eval_gate_id_t gate1, eval_gate_id_t gate2);
+	void disconnectGates(eval_gate_id_t gate1, eval_gate_id_t gate2);
+	void decomissionGate(eval_gate_id_t gate); // TODO: figure out a better way to do this maybe
 
-	std::unordered_map<block_id_t, block_id_t> compressGates();
+	std::unordered_map<eval_gate_id_t, eval_gate_id_t> compressGates();
 
 	void computeNextState();
 	void propagatePowered();
@@ -29,11 +28,11 @@ public:
 	void clearGates();
 	void reserveGates(unsigned int numGates);
 
-	void setState(block_id_t gate, logic_state_t state);
+	void setState(eval_gate_id_t gate, logic_state_t state);
 
 	void simulateNTicks(unsigned int n);
 
-	logic_state_t getState(block_id_t gate) const { return currentState[gate]; }
+	logic_state_t getState(eval_gate_id_t gate) const { return currentState[gate]; }
 
 	void debugPrint();
 	void signalToPause();
@@ -47,7 +46,7 @@ public:
 private:
 	std::vector<logic_state_t> currentState, nextState;
 	std::vector<GateType> gateTypes;
-	std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;
+	std::vector<std::vector<eval_gate_id_t>> gateInputs, gateOutputs;
 	std::vector<unsigned int> gateInputCountTotal, gateInputCountPowered;
 	int numDecomissioned;
 
