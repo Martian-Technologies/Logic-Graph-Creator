@@ -62,7 +62,7 @@ void QtRenderer::render(QPainter* painter) {
 	// render lambdas ---
 	auto renderCell = [&](FPosition position, BlockType type) -> void {
 		QPointF point = gridToQt(position);
-		QPointF pointBR = gridToQt(position + FPosition(1.0f, 1.0f));
+		QPointF pointBR = gridToQt(position + FVector(1.0f, 1.0f));
 
 		Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, false);
 		Vec2Int tileSize = tileSetInfo->getCellPixelSize();
@@ -214,7 +214,7 @@ void QtRenderer::render(QPainter* painter) {
 	painter->setBrush(transparentBlue);
 	for (const auto& selection : selectionElements) {
 		FPosition topLeft = selection.second.topLeft.free();
-		FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f, 1.0f);
+		FPosition bottomRight = selection.second.bottomRight.free() + FVector(1.0f, 1.0f);
 		painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
 	}
 	// inverted selections
@@ -222,7 +222,7 @@ void QtRenderer::render(QPainter* painter) {
 	painter->setBrush(transparentRed);
 	for (const auto& selection : invertedSelectionElements) {
 		FPosition topLeft = selection.second.topLeft.free();
-		FPosition bottomRight = selection.second.bottomRight.free() + FPosition(1.0f, 1.0f);
+		FPosition bottomRight = selection.second.bottomRight.free() + FVector(1.0f, 1.0f);
 		painter->drawRect(QRectF(gridToQt(topLeft), gridToQt(bottomRight)));
 	}
 	// selection object
@@ -270,7 +270,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -287,7 +287,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(255, 0, 0, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -304,7 +304,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Position(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -325,9 +325,9 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 					dSel = selectionCast<DimensionalSelection>(sel);
 				}
 				for (int i = 1; i < projectionSelection->size(); i++) {
-					QPointF start = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
+					QPointF start = gridToQt(orgin.free() + FVector(0.5f, 0.5f));
 					orgin += projectionSelection->getStep();
-					QPointF end = gridToQt(orgin.free() + FPosition(0.5f, 0.5f));
+					QPointF end = gridToQt(orgin.free() + FVector(0.5f, 0.5f));
 					drawArrow(painter, start, end, 16.0f, arrowColorOrder[height % 26]);
 				}
 				renderSelection(painter, dimensionalSelection->getSelection(0), mode, depth + 1);
@@ -346,7 +346,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
-	Position gridSize(getBlockWidth(type), getBlockHeight(type));
+	Vector gridSize(getBlockWidth(type), getBlockHeight(type));
 
 	// block
 	QPointF topLeft = gridToQt(position.free());
@@ -379,7 +379,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 const char* connectionOFF = "#97A9E1";
 const char* connectionON = "#8FE97F";
 
-void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FPosition aControlOffset, FPosition bControlOffset, bool state) {
+void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FVector aControlOffset, FVector bControlOffset, bool state) {
 	if (state) {
 		painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
 	} else {
@@ -388,8 +388,8 @@ void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition b
 	QPointF start = gridToQt(aPos);
 	QPointF end = gridToQt(bPos);
 
-	QPointF c1 = (abs(aControlOffset.x) > abs(aControlOffset.y)) ? gridToQt(aPos + FPosition(aControlOffset.x * 1.3f, 0)) : gridToQt(aPos + FPosition(0, aControlOffset.y * 1.3f));
-	QPointF c2 = (abs(bControlOffset.x) > abs(bControlOffset.y)) ? gridToQt(bPos + FPosition(bControlOffset.x * 1.3f, 0)) : gridToQt(bPos + FPosition(0, bControlOffset.y * 1.3f));
+	QPointF c1 = (abs(aControlOffset.dx) > abs(aControlOffset.dy)) ? gridToQt(aPos + FVector(aControlOffset.dx * 1.3f, 0)) : gridToQt(aPos + FVector(0, aControlOffset.dy * 1.3f));
+	QPointF c2 = (abs(bControlOffset.dx) > abs(bControlOffset.dy)) ? gridToQt(bPos + FVector(bControlOffset.dx * 1.3f, 0)) : gridToQt(bPos + FVector(0, bControlOffset.dy * 1.3f));
 
 
 	// painter->drawLine(start, end);
@@ -404,7 +404,7 @@ const float edgeDis = 0.48f;
 const float sideShift = 0.25f;
 
 void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state) {
-	FPosition centerOffset(0.5f, 0.5f);
+	FVector centerOffset(0.5f, 0.5f);
 
 	if (a == b) {
 		if (state) {
@@ -415,8 +415,8 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block*
 		return;
 	}
 
-	FPosition aSocketOffset(0.0f, 0.0f);
-	FPosition bSocketOffset(0.0f, 0.0f);
+	FVector aSocketOffset(0.0f, 0.0f);
+	FVector bSocketOffset(0.0f, 0.0f);
 
 	if (a) {
 		switch (a->getRotation()) {
@@ -449,8 +449,8 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPo
 }
 
 void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state) {
-	FPosition centerOffset(0.5f, 0.5f);
-	FPosition aSocketOffset(0.0f, 0.0f);
+	FVector centerOffset(0.5f, 0.5f);
+	FVector aSocketOffset(0.0f, 0.0f);
 
 	// Socket offsets will be retrieved data later, this code will go
 	const Block* a = circuit->getBlockContainer()->getBlock(aPos);
@@ -464,7 +464,7 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bP
 		}
 	}
 
-	renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FPosition(0.0f, 0.0f), state);
+	renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos, aSocketOffset, FVector(0.0f, 0.0f), state);
 }
 
 QPointF QtRenderer::gridToQt(FPosition position) {

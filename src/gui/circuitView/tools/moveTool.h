@@ -47,7 +47,7 @@ private:
 	SharedSelection originSelection;
 
 	// tensor stuff
-	Position step;
+	Vector step;
 	int tensorStage = -1;
 
 	// destination

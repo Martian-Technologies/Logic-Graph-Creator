@@ -39,13 +39,13 @@ public:
 	inline FPosition getViewCenter() const { return viewCenter; }
 	inline float getViewHeight() const { return viewHeight; }
 	inline float getViewWidth() const { return viewHeight * aspectRatio; }
-	inline FPosition getTopLeft() const { return viewCenter - FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
-	inline FPosition getBottomRight() const { return viewCenter + FPosition(getViewWidth() / 2.0f, viewHeight / 2.0f); }
+	inline FPosition getTopLeft() const { return viewCenter - FVector(getViewWidth() / 2.0f, viewHeight / 2.0f); }
+	inline FPosition getBottomRight() const { return viewCenter + FVector(getViewWidth() / 2.0f, viewHeight / 2.0f); }
 	inline const FPosition& getPointerPosition() const { return pointerPosition; }
 	inline float getAspectRatio() const { return aspectRatio; }
 
 	// coordinate system conversion
-	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FPosition(getViewWidth() * view.x, getViewHeight() * view.y); }
+	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FVector(getViewWidth() * view.x, getViewHeight() * view.y); }
 	Vec2 gridToView(FPosition position) const; // temporary until matrix
 	// glm::mat4 getViewMatrix() const;
 	// glm::mat4 getPerspectiveMatrix() const;

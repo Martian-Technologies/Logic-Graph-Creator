@@ -15,7 +15,7 @@ public:
 	BlockType type() const { return blockType; }
 
 	inline const Position& getPosition() const { return position; }
-	inline Position getLargestPosition() const { return position + Position(width(), height()); }
+	inline Position getLargestPosition() const { return position + Vector(width(), height()); }
 	inline Rotation getRotation() const { return rotation; }
 
 	inline block_size_t width() const { return getBlockWidth(type(), getRotation()); }
@@ -41,9 +41,9 @@ public:
 		return withinBlock(position) ? ::getOutputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
 	}
 	inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) const {
-		auto output = ::getConnectionPosition(type(), getRotation(), connectionId);
-		output.first += getPosition();
-		return output;
+		auto output = ::getConnectionVector(type(), getRotation(), connectionId);
+		if (output.second) return { getPosition() + output.first, true };
+		return { Position(), false };
 	}
 	inline bool isConnectionInput(connection_end_id_t connectionId) const { return ::isConnectionInput(type(), connectionId); }
 
