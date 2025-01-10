@@ -51,14 +51,14 @@ public:
 	inline block_data_t getRawData() const { return data; }
 	inline void setRawData(block_data_t data) { this->data = data; }
 
-	template<class T, unsigned int index>
-	inline bool hasDataValue() const { return hasBlockDataValue<T, index>(type()); }
+	template<class T, unsigned int index, BlockType type>
+	inline bool hasDataValue() const { return hasBlockDataValue<T, index, type>(); }
 
-	template<class T, unsigned int index>
-	inline T getDataValue() const { return getBlockDataValue<T, index>(type(), data); }
+	template<class T, unsigned int index, BlockType type>
+	inline T getDataValue() const { return getBlockDataValue<T, index, type>(data); }
 
-	template<class T, unsigned int index>
-	inline void setDataValue(T value) { setBlockDataValue<T, index>(type(), data, value); }
+	template<class T, unsigned int index, BlockType type>
+	inline void setDataValue(T value) { setBlockDataValue<T, index, type>(data, value); }
 
 protected:
 	inline void destroy() { }
