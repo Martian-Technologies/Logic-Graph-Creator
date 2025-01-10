@@ -25,7 +25,7 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurface
 	return details;
 }
 
-bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std::string>& requiredExtensions) {
+bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*>& requiredExtensions) {
 	// get available extensions
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -42,8 +42,8 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std:
 
 }
 
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
-	QueueFamilyIndices indices;
+QueueFamilies findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
+	QueueFamilies indices;
 
 	// get list of queue families
 	uint32_t queueFamilyCount = 0;
@@ -55,13 +55,13 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR ideal
 	int i = 0;
 	for (const auto& queueFamily : queueFamilies) {
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			indices.graphicsFamily = i;
+			indices.graphicsFamily = { i, queueFamily.queueCount };
 		}
 
 		VkBool32 presentSupport = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, idealSurface, &presentSupport);
 		if (presentSupport) {
-			indices.presentFamily = i;
+			indices.presentFamily = { i, queueFamily.queueCount };
 		}
 
 		// break out if we found everything we need

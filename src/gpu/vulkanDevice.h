@@ -9,17 +9,25 @@ struct SwapChainSupportDetails {
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct QueueFamilyIndices {
-	std::optional<uint32_t> graphicsFamily;
-	std::optional<uint32_t> presentFamily;
+struct QueueFamily {
+	int index;
+	uint32_t queueCount;
+
+	inline bool operator<(const QueueFamily& other) const { return index < other.index; }
+	inline bool operator==(const QueueFamily& other) const { return index == other.index;	}
+};
+
+struct QueueFamilies {
+	std::optional<QueueFamily> graphicsFamily;
+	std::optional<QueueFamily> presentFamily;
 
 	inline bool isComplete() {
 		return graphicsFamily.has_value() && presentFamily.has_value();
 	}
 };
 
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
-bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<std::string>& requiredExtensions);
+QueueFamilies findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
+bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*>& requiredExtensions);
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
 
 #endif

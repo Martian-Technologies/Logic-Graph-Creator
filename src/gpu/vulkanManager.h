@@ -1,7 +1,6 @@
 #ifndef vulkanManager_h
 #define vulkanManager_h
 
-#include "gpu/vulkanDevice.h"
 #include <vulkan/vulkan.h>
 
 struct VulkanGraphicsView {
@@ -11,8 +10,8 @@ struct VulkanGraphicsView {
 class VulkanManager {
 public:
 	// flow
-	void createInstance(const std::vector<const char*>& requiredExtensions, bool enableValidationLayers);
-	void createDevice(VkSurfaceKHR surface);
+	void createInstance(const std::vector<const char*>& requiredExtensions);
+	void setUpDevice(VkSurfaceKHR surface);
 	void destroy();
 
 	// util
@@ -32,7 +31,8 @@ private:
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
 
-	QueueFamilyIndices queueIndices;
+	std::vector<VkQueue> graphicsQueues;
+	std::vector<VkQueue> presentQueues;
 };
 
 #endif

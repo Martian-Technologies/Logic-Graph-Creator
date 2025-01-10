@@ -63,7 +63,7 @@ void MainWindow::initVulkan() {
 	tempInstance.destroy();
 	
 	// create instance and qVulkanInstance
-	vulkanManager.createInstance(extensions, DEBUG);
+	vulkanManager.createInstance(extensions);
 	qVulkanInstance = std::make_unique<QVulkanInstance>();
 	qVulkanInstance->setVkInstance(vulkanManager.getInstance());
 	qVulkanInstance->create();
@@ -76,7 +76,7 @@ void MainWindow::initVulkan() {
 	VkSurfaceKHR tempSurface = QVulkanInstance::surfaceForWindow(&tempWindow);
 	
 	// create instance and device
-	vulkanManager.createDevice(tempSurface);
+	vulkanManager.setUpDevice(tempSurface);
 
 	// destroy temp surface
 	tempWindow.destroy();

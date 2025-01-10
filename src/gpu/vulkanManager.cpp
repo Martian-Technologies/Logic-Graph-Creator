@@ -6,7 +6,7 @@
 #include <cstring>
 
 // Constants ---------------------------------------------------------------------------
-const std::vector<std::string> deviceExtensions = {
+const std::vector<const char*> deviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 const std::vector<const char*> validationLayers = {
@@ -14,9 +14,9 @@ const std::vector<const char*> validationLayers = {
 };
 
 // Functions ---------------------------------------------------------------------------
-void VulkanManager::createInstance(const std::vector<const char*>& requiredExtensions, bool enableValidationlayers) {
+void VulkanManager::createInstance(const std::vector<const char*>& requiredExtensions) {
 	// confirm we have validation layers if we need them
-	if (enableValidationlayers && !checkValidationLayerSupport()) {
+	if (DEBUG && !checkValidationLayerSupport()) {
 		fail("validation layers requested, but not available!");
 	}
 
@@ -36,12 +36,12 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 
 	// add extensions
 	auto extensions = requiredExtensions;
-	if (enableValidationlayers) { extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
+	if (DEBUG) { extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
 	// enable validation layers3
-	if (enableValidationlayers) {
+	if (DEBUG) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 		// TODO - custom message callback
@@ -57,12 +57,63 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 	}
 }
 
-void VulkanManager::createDevice(VkSurfaceKHR surface) {
+void VulkanManager::setUpDevice(VkSurfaceKHR surface) {
+	// select physical device
 	pickPhysicalDevice(surface);
-	
+
+	// create all the queues from unique queues that we need
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	QueueFamilies queueFamilies = findQueueFamilies(physicalDevice, surface);
+	std::set<QueueFamily> uniqueQueueFamilies = { queueFamilies.graphicsFamily.value(), queueFamilies.presentFamily.value() };
+	float queuePriority = 1.0f;
+	for (QueueFamily queueFamily : uniqueQueueFamilies) {
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily.index;
+		queueCreateInfo.queueCount = queueFamily.queueCount;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
+	// no features to enable for now
+	VkPhysicalDeviceFeatures deviceFeatures{};
+
+	// logical device creation settings
+	VkDeviceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
+	createInfo.pEnabledFeatures = &deviceFeatures;
+
+	// logical device extensions
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+	// logical device validation layers (ignored by newer implementations)
+	if (DEBUG) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	} else {
+		createInfo.enabledLayerCount = 0;
+	}
+
+	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create logical device!");
+	}
+
+	// get all of the create
+	graphicsQueues.resize(queueFamilies.graphicsFamily.value().queueCount);
+	for (int i = 0; i < graphicsQueues.size(); ++i) {
+		vkGetDeviceQueue(device, queueFamilies.graphicsFamily.value().index, i, &graphicsQueues[i]);
+	}
+	presentQueues.resize(queueFamilies.presentFamily.value().queueCount);
+	for (int i = 0; i < presentQueues.size(); ++i) {
+		vkGetDeviceQueue(device, queueFamilies.presentFamily.value().index, i, &presentQueues[i]);
+	}
 }
 
 void VulkanManager::destroy() {
+	vkDestroyDevice(device, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
 
@@ -107,7 +158,7 @@ void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 	if (deviceCount == 0) {
 		fail("failed to find GPUs with Vulkan support!");
 	}
-
+	
 	// get vulkan supported devices
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
@@ -125,7 +176,7 @@ void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 
 bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface) {
 	// check queue graphics feature support
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, idealSurface);
+	QueueFamilies indices = findQueueFamilies(physicalDevice, idealSurface);
 	// check extension support
 	bool extensionsSupported = checkDeviceExtensionSupport(physicalDevice, deviceExtensions);
 	// check swap chain adequacy
