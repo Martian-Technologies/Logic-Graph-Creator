@@ -55,7 +55,7 @@ private:
 	SharedSelection inputSelection;
 
 	// tmp
-	Position step;
+	Vector step;
 };
 
 #endif /* tensorConnectTool_h */

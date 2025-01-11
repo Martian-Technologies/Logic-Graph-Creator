@@ -15,7 +15,7 @@
 
 #include "circuitView/circuitView.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -166,11 +166,17 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 		if (mouseControls) {
 			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
 		} else {
-			if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
-				"view pan",
-				numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
-				numPixels.y() / getPixelsHight() * circuitView.getViewManager().getViewHeight()
-			))) event->accept();
+			if (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) {
+				// do zoom
+				if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 100.f))) event->accept();
+			}
+			else {
+				if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
+					"view pan",
+					numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
+					numPixels.y() / getPixelsHeight() * circuitView.getViewManager().getViewHeight()
+				))) event->accept();
+			}
 		}
 	}
 }
@@ -247,7 +253,8 @@ void CircuitViewWidget::save() {
 	QJsonObject modificationsJson;
 	QJsonArray placeJson;
 	QJsonArray connectJson;
-	Position center;
+	int centerX = 0;
+	int centerY = 0;
 	for (const auto& modification : modifications) {
 		const auto& [modificationType, modificationData] = modification;
 		switch (modificationType) {
@@ -255,7 +262,8 @@ void CircuitViewWidget::save() {
 		{
 			QJsonObject placement;
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			center += position;
+			centerX += position.x;
+			centerY += position.y;
 			placement["x"] = position.x;
 			placement["y"] = position.y;
 			placement["r"] = (char)rotation;
@@ -281,9 +289,10 @@ void CircuitViewWidget::save() {
 	modificationsJson["place"] = placeJson;
 	modificationsJson["connect"] = connectJson;
 	QJsonObject centerJson;
-	center /= circuit->getBlockContainer()->getBlockCount();
-	centerJson["x"] = center.x;
-	centerJson["y"] = center.y;
+	centerX /= (int)(circuit->getBlockContainer()->getBlockCount());
+	centerY /= (int)(circuit->getBlockContainer()->getBlockCount());
+	centerJson["x"] = centerX;
+	centerJson["y"] = centerY;
 	modificationsJson["center"] = centerJson;
 	saveJsonToFile(modificationsJson);
 }
@@ -377,7 +386,7 @@ void CircuitViewWidget::load(const QString& filePath) {
 	}
 	Position pointer = circuitView.getViewManager().getPointerPosition().snap();
 
-	Position offset = pointer - center;
+	Vector offset = pointer - center;
 
 	// load container
 	Circuit* container = circuitView.getCircuit();

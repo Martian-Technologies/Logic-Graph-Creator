@@ -7,7 +7,6 @@
 #include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
-#include "gpu1.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -18,9 +17,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	circuit_id_t id = circuitManager.createNewContainer();
 	std::shared_ptr<Circuit> circuit = circuitManager.getContainer(id);	
 	
-	// makeGPU1(circuit.get());
 	initVulkan();
-		
+	
 	evaluator = std::make_shared<Evaluator>(circuit);
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);

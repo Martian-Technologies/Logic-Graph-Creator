@@ -22,36 +22,36 @@ bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& posi
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Position& relPosition) {
-	if (checkModeCollision(selection, relPosition)) return false;
+bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& movement) {
+	if (checkMoveCollision(selection, movement)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	moveBlocks(selection, relPosition, difference.get());
+	moveBlocks(selection, movement, difference.get());
 	sendDifference(difference);
 	return true;
 }
 
-void Circuit::moveBlocks(const SharedSelection& selection, const Position& relPosition, Difference* difference) {
+void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
-		blockContainer.tryMoveBlock(cellSelection->getPosition(), cellSelection->getPosition() + relPosition, difference);
+		blockContainer.tryMoveBlock(cellSelection->getPosition(), cellSelection->getPosition() + movement, difference);
 	}
 
 	// Dimensional Selection
 	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
 	if (dimensionalSelection) {
 		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			moveBlocks(dimensionalSelection->getSelection(i - 1), relPosition, difference);
+			moveBlocks(dimensionalSelection->getSelection(i - 1), movement, difference);
 		}
 	}
 }
 
-bool Circuit::checkModeCollision(const SharedSelection& selection, const Position& relPosition) {
+bool Circuit::checkMoveCollision(const SharedSelection& selection, const Vector& movement) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
 		if (blockContainer.checkCollision(cellSelection->getPosition())) {
-			return blockContainer.checkCollision(cellSelection->getPosition() + relPosition);
+			return blockContainer.checkCollision(cellSelection->getPosition() + movement);
 		}
 		return false;
 	}
@@ -60,7 +60,7 @@ bool Circuit::checkModeCollision(const SharedSelection& selection, const Positio
 	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
 	if (dimensionalSelection) {
 		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			if (checkModeCollision(dimensionalSelection->getSelection(i - 1), relPosition)) return true;
+			if (checkMoveCollision(dimensionalSelection->getSelection(i - 1), movement)) return true;
 		}
 	}
 	return false;
