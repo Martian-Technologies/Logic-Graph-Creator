@@ -10,6 +10,7 @@ class VulkanRenderer : public Renderer {
 	// ------------------------------------------------------------------------------------
 public:
 	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
+	void destroy();
 	void resize(int w, int h);
 	void run();
 

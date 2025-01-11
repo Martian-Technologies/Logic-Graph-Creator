@@ -4,7 +4,6 @@
 #include <QCheckBox>
 #include <QWindow>
 
-#include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
@@ -21,7 +20,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	
 	evaluator = std::make_shared<Evaluator>(circuit);
 
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	// The createvulkanwindow functions are not RAII. I think the per view vulkan stuff should still happen in a centralized place
+	circuitViewWidget = new CircuitViewWidget(this);
 	circuitViewWidget->createVulkanWindow(vulkanManager.createGraphicsView(), qVulkanInstance.get());
 	circuitViewWidget->setCircuit(circuit);
 	circuitViewWidget->setEvaluator(evaluator);
@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+	circuitViewWidget->destroyVulkanWindow();
 	vulkanManager.destroy();
 }
 

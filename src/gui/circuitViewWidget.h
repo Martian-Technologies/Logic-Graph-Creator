@@ -25,6 +25,9 @@ public:
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
 	void setSelector(QTreeWidget* treeWidget);
 
+	// shutdown
+	void destroyVulkanWindow();
+
 	// dont call this func (temporary)
 	void updateSelectedItem();	
 

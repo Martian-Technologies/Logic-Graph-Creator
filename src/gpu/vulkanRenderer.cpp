@@ -11,7 +11,11 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	windowWidth = w;
 	windowHeight = h;
 
-	// createSwapChain();
+	createSwapChain();
+}
+
+void VulkanRenderer::destroy() {
+	vkDestroySwapchainKHR(view.device, swapchain, nullptr);
 }
 
 void VulkanRenderer::resize(int w, int h) {

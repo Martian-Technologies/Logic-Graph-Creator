@@ -54,6 +54,10 @@ void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInsta
 	circuitView.getRenderer().initialize(view, surface, size().width(), size().height());
 }
 
+void CircuitViewWidget::destroyVulkanWindow() {
+	circuitView.getRenderer().destroy();
+}
+
 void CircuitViewWidget::updateLoop() {
 	// update for re-render
 	update();

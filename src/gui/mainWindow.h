@@ -9,6 +9,7 @@
 #include "gpu/vulkanManager.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
+#include "gui/circuitViewWidget.h"
 
 
 namespace Ui {
@@ -30,6 +31,8 @@ private:
 	
 private:
 	Ui::MainWindow* ui;
+	CircuitViewWidget* circuitViewWidget;
+	
 	CircuitManager circuitManager;
 	std::shared_ptr<Evaluator> evaluator;
 	
