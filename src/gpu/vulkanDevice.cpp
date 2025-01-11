@@ -52,7 +52,7 @@ QueueFamilies findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurfa
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
 	// find one that supports graphics
-	int i = 0;
+	uint32_t i = 0;
 	for (const auto& queueFamily : queueFamilies) {
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 			indices.graphicsFamily = { i, queueFamily.queueCount };

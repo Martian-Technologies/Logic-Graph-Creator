@@ -5,6 +5,9 @@
 
 struct VulkanGraphicsView {
 	VkDevice device;
+	VkPhysicalDevice physicalDevice;
+	VkQueue graphicsQueue;
+	VkQueue presentQueue;
 };
 
 class VulkanManager {
@@ -16,15 +19,16 @@ public:
 
 	// util
 	inline VkInstance getInstance() const { return instance; }
-	inline VulkanGraphicsView createVulkanGraphicsView() const { return { device }; }
+	VulkanGraphicsView createGraphicsView();
 
 private:
+	// helper functions
 	void fail(const std::string& reason);
 	
-	// helper functions
 	bool checkValidationLayerSupport();
 	void pickPhysicalDevice(VkSurfaceKHR idealSurface);
 	bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface);
+	void createLogicalDevice(VkSurfaceKHR surface);
 	
 private:
 	VkInstance instance;
@@ -32,7 +36,11 @@ private:
 	VkDevice device;
 
 	std::vector<VkQueue> graphicsQueues;
+	uint32_t graphicsFamilyIndex;
 	std::vector<VkQueue> presentQueues;
+	// TODO - temporary round robin queue distributions
+	int graphicsRoundRobin;
+	int presentRoundRobin;
 };
 
 #endif

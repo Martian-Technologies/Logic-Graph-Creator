@@ -6,11 +6,32 @@
 #include "gpu/vulkanManager.h"
 
 class VulkanRenderer : public Renderer {
+	// VULKAN -----------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
 public:
-	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface);
+	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
 	void resize(int w, int h);
 	void run();
+
+private:
+	void createSwapChain();
 	
+private:
+	VulkanGraphicsView view;
+	VkSurfaceKHR surface;
+
+	int windowWidth, windowHeight;
+	
+	// Swapchain
+	VkSwapchainKHR swapchain;
+	VkFormat swapchainImageFormat;
+	std::vector<VkImage> swapchainImages;
+	std::vector<VkImageView> swapchainImageViews;
+	VkExtent2D swapchainExtent;
+
+	// INTERFACE --------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
+public:
 	// updating
 	void setCircuit(Circuit* circuit) override;
 	void setEvaluator(Evaluator* evaluator) override;
@@ -38,8 +59,8 @@ private:
 	void spawnConfetti(FPosition start) override;
 
 private:
-	VulkanGraphicsView view;
 	float lastFrameTime = 0.0f;
+
 };
 
 #endif

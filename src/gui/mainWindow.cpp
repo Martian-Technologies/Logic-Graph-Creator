@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	evaluator = std::make_shared<Evaluator>(circuit);
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
-	circuitViewWidget->createVulkanWindow(vulkanManager.createVulkanGraphicsView(), qVulkanInstance.get());
+	circuitViewWidget->createVulkanWindow(vulkanManager.createGraphicsView(), qVulkanInstance.get());
 	circuitViewWidget->setCircuit(circuit);
 	circuitViewWidget->setEvaluator(evaluator);
 	circuitViewWidget->setSelector(ui->selectorTreeWidget);

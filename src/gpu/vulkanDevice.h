@@ -10,7 +10,7 @@ struct SwapChainSupportDetails {
 };
 
 struct QueueFamily {
-	int index;
+	uint32_t index;
 	uint32_t queueCount;
 
 	inline bool operator<(const QueueFamily& other) const { return index < other.index; }
