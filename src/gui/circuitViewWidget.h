@@ -27,7 +27,7 @@ public:
 
 	// shutdown
 	void destroyVulkanWindow();
-
+	
 	// dont call this func (temporary)
 	void updateSelectedItem();	
 

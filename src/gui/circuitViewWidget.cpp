@@ -14,6 +14,7 @@
 #include <QLayout>
 
 #include "circuitView/circuitView.h"
+#include "vulkanWindow.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
@@ -44,7 +45,7 @@ void CircuitViewWidget::showEvent(QShowEvent* event) {
 }
 
 void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
-	QWindow* window = new QWindow();
+	VulkanWindow* window = new VulkanWindow(&circuitView.getRenderer());
 	window->setSurfaceType(QSurface::VulkanSurface);
 	window->setVulkanInstance(qVulkanInstance);
 	window->show();
