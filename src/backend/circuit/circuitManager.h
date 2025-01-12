@@ -7,12 +7,12 @@ class CircuitManager {
 public:
 	CircuitManager() : lastId(0), blockContainers() { }
 
-	inline std::shared_ptr<Circuit> getContainer(circuit_id_t id) {
+	inline SharedCircuit getContainer(circuit_id_t id) {
 		auto iter = blockContainers.find(id);
 		if (iter == blockContainers.end()) return nullptr;
 		return iter->second;
 	}
-	inline const std::shared_ptr<Circuit> getContainer(circuit_id_t id) const {
+	inline const SharedCircuit getContainer(circuit_id_t id) const {
 		auto iter = blockContainers.find(id);
 		if (iter == blockContainers.end()) return nullptr;
 		return iter->second;
@@ -35,7 +35,7 @@ private:
 	circuit_id_t getLastCreatedContainerId() { return lastId; }
 
 	circuit_id_t lastId;
-	std::map<circuit_id_t, std::shared_ptr<Circuit>> blockContainers;
+	std::map<circuit_id_t, SharedCircuit> blockContainers;
 };
 
 #endif /* circuitManager_h */

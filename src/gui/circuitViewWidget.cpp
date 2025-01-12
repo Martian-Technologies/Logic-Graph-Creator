@@ -13,7 +13,7 @@
 
 #include "circuitView/circuitView.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -80,7 +80,7 @@ void CircuitViewWidget::updateSelectedItem() {
 	}
 }
 
-void CircuitViewWidget::setCircuit(std::shared_ptr<Circuit> circuit) {
+void CircuitViewWidget::setCircuit(SharedCircuit circuit) {
 	circuitView.setCircuit(circuit);
 	updateSelectedItem();
 }

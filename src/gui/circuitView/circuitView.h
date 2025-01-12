@@ -26,7 +26,7 @@ public:
 		toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
 	}
 
-	inline void setCircuit(std::shared_ptr<Circuit> circuit) {
+	inline void setCircuit(SharedCircuit circuit) {
 		if (this->circuit) this->circuit->disconnectListener(this);
 
 		this->circuit = circuit;
@@ -65,7 +65,7 @@ public:
 	inline const RENDERER_TYPE& getRenderer() const { return renderer; }
 
 private:
-	std::shared_ptr<Circuit> circuit;
+	SharedCircuit circuit;
 	std::shared_ptr<Evaluator> evaluator;
 	EvaluatorStateInterface evaluatorStateInterface;
 	EventRegister eventRegister;

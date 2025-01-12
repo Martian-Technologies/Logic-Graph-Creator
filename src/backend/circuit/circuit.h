@@ -8,10 +8,11 @@
 #include "undoSystem.h"
 
 typedef unsigned int circuit_id_t;
+typedef unsigned int circuit_update_count;
 
 class Circuit {
 public:
-	inline Circuit(circuit_id_t containerId) : containerId(containerId), midUndo(false) { }
+	inline Circuit(circuit_id_t containerId) : containerId(containerId) { }
 
 	circuit_id_t getContainerId() const { return containerId; }
 
@@ -47,9 +48,9 @@ public:
 
 	/* ----------- block data ----------- */
 
-	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+	// Sets the data value to a block at position. Returns if block found.
 	bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
-	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
+	// Sets the data value to a block at position. Returns if block found.
 	template<class T, unsigned int index>
 	bool trySetBlockDataValue(const Position& positionOfBlock, T value) {
 		DifferenceSharedPtr difference = std::make_shared<Difference>();
@@ -90,7 +91,10 @@ private:
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;
 	UndoSystem undoSystem;
-	bool midUndo;
+	bool midUndo = false;
+	unsigned int updateCount = 0; // increases anytime the container is changed
 };
+
+typedef std::shared_ptr<Circuit> SharedCircuit;
 
 #endif /* circuit_h */

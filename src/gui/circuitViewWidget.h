@@ -19,7 +19,7 @@ public:
 	CircuitViewWidget(QWidget* parent = nullptr);
 
 	// setup
-	void setCircuit(std::shared_ptr<Circuit> circuit);
+	void setCircuit(SharedCircuit circuit);
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
 	void setSelector(QTreeWidget* treeWidget);
 

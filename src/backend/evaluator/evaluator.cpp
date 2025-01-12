@@ -1,6 +1,6 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(std::shared_ptr<Circuit> circuit)
+Evaluator::Evaluator(SharedCircuit circuit)
 	:paused(true),
 	targetTickrate(0),
 	logicSimulator(),
