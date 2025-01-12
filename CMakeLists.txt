@@ -11,6 +11,7 @@ endif()
 
 # C++ Standard
 set(CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
