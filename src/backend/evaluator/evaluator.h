@@ -10,7 +10,7 @@
 
 class Evaluator {
 public:
-	Evaluator(std::shared_ptr<Circuit> circuit);
+	Evaluator(SharedCircuit circuit);
 	// pause/unpause used once the evaluator is "started" 
 	void setPause(bool pause);
 	void reset();

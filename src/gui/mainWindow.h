@@ -5,9 +5,9 @@
 #include <QMainWindow>
 #include <QWidget>
 
+#include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
-
 
 namespace Ui {
 	class MainWindow;
