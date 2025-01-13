@@ -66,7 +66,7 @@ VulkanGraphicsView VulkanManager::createGraphicsView() {
 	int graphicsIndex = graphicsRoundRobin++ % graphicsQueues.size();
 	int presentIndex = presentRoundRobin++ % presentQueues.size();
 
-	return { device, physicalDevice, graphicsQueues[graphicsIndex], presentQueues[presentIndex] };
+	return { device, physicalDevice, queueFamilies, graphicsQueues[graphicsIndex], presentQueues[presentIndex] };
 }
 
 void VulkanManager::destroy() {
@@ -149,7 +149,7 @@ bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceK
 void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 	// create all the queues from unique queues that we need
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	QueueFamilies queueFamilies = findQueueFamilies(physicalDevice, surface);
+	queueFamilies = findQueueFamilies(physicalDevice, surface);
 	std::set<QueueFamily> uniqueQueueFamilies = { queueFamilies.graphicsFamily.value(), queueFamilies.presentFamily.value() };
 	float queuePriority = 1.0f;
 	for (QueueFamily queueFamily : uniqueQueueFamilies) {
@@ -189,7 +189,6 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 
 	// get all of the created queues
 	graphicsQueues.resize(queueFamilies.graphicsFamily.value().queueCount);
-	graphicsFamilyIndex = queueFamilies.graphicsFamily.value().index;
 	for (int i = 0; i < graphicsQueues.size(); ++i) {
 		vkGetDeviceQueue(device, queueFamilies.graphicsFamily.value().index, i, &graphicsQueues[i]);
 	}

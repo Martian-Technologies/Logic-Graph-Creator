@@ -1,10 +1,13 @@
 #ifndef vulkanRenderer_h
 #define vulkanRenderer_h
 
-#include "gpu/vulkanSwapchain.h"
 #include "gui/circuitView/renderer/renderer.h"
 
+#include "gpu/vulkanSwapchain.h"
 #include "gpu/vulkanManager.h"
+#include "gpu/vulkanFrame.h"
+
+constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanRenderer : public Renderer {
 	// VULKAN -----------------------------------------------------------------------------
@@ -14,14 +17,18 @@ public:
 	void destroy();
 	void resize(int w, int h);
 	void run();
+
+private:
+	inline FrameData& get_current_frame() { return frames[frameNumber % FRAME_OVERLAP]; };
 	
 private:
 	VulkanGraphicsView view;
 	VkSurfaceKHR surface;
-
-	int windowWidth, windowHeight;
-	
 	SwapchainData swapchain;
+	FrameData frames[FRAME_OVERLAP];
+
+	int frameNumber = 0;
+	int windowWidth, windowHeight;
 
 	// INTERFACE --------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------

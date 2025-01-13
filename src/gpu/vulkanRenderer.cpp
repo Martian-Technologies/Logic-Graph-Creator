@@ -11,10 +11,12 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	windowHeight = h;
 
 	swapchain = createSwapchain(view, surface, w, h);
+	createFrameDatas(view.device, frames, FRAME_OVERLAP, view.queueFamilies.graphicsFamily.value().index );
 }
 
 void VulkanRenderer::destroy() {
 	destroySwapchain(view, swapchain);
+	destroyFrameDatas(view.device, frames, FRAME_OVERLAP);
 }
 
 void VulkanRenderer::resize(int w, int h) {

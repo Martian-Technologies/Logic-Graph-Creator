@@ -3,9 +3,12 @@
 
 #include <vulkan/vulkan.h>
 
+#include "gpu/vulkanDevice.h"
+
 struct VulkanGraphicsView {
 	VkDevice device;
 	VkPhysicalDevice physicalDevice;
+	QueueFamilies queueFamilies;
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 };
@@ -25,7 +28,7 @@ public:
 private:
 	// helper functions
 	void fail(const std::string& reason);
-	
+
 	bool checkValidationLayerSupport();
 	void pickPhysicalDevice(VkSurfaceKHR idealSurface);
 	bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface);
@@ -36,8 +39,8 @@ private:
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
 
+	QueueFamilies queueFamilies;
 	std::vector<VkQueue> graphicsQueues;
-	uint32_t graphicsFamilyIndex;
 	std::vector<VkQueue> presentQueues;
 	// TODO - temporary round robin queue distributions
 	int graphicsRoundRobin;
