@@ -1,6 +1,5 @@
 #include "vulkanRenderer.h"
 
-#include "gpu/vulkanDevice.h"
 #include "gpu/vulkanSwapchain.h"
 
 void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h)
@@ -11,15 +10,11 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	windowWidth = w;
 	windowHeight = h;
 
-	createSwapChain();
+	swapchain = createSwapchain(view, surface, w, h);
 }
 
 void VulkanRenderer::destroy() {
-	for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-		vkDestroyImageView(view.device, swapchainImageViews[i], nullptr);
-	}
-	
-	vkDestroySwapchainKHR(view.device, swapchain, nullptr);
+	destroySwapchain(view, swapchain);
 }
 
 void VulkanRenderer::resize(int w, int h) {
@@ -32,94 +27,6 @@ void VulkanRenderer::run() {
 }
 
 // Vulkan Setup
-
-
-// TODO - this could be abstraced into a vulkanSwapchain class or file
-void VulkanRenderer::createSwapChain() {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(view.physicalDevice, surface);
-
-	// choose best values for swap chain
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, windowWidth, windowHeight);
-
-	// set image count to one above the minimum, but don't exceed the maximum if there is one
-	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-		imageCount = swapChainSupport.capabilities.maxImageCount;
-	};
-
-	// create creator struct
-	VkSwapchainCreateInfoKHR createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = surface;
-	createInfo.minImageCount = imageCount;
-	createInfo.imageFormat = surfaceFormat.format;
-	createInfo.imageColorSpace = surfaceFormat.colorSpace;
-	createInfo.imageExtent = extent;
-	createInfo.imageArrayLayers = 1;
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-	// if we need our queues to share this swapchain (they are different queues), update the settings
-	QueueFamilies indices = findQueueFamilies(view.physicalDevice, surface);
-	uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value().index, indices.presentFamily.value().index};
-	if (indices.graphicsFamily.value().index != indices.presentFamily.value().index) {
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
-	} else {
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.queueFamilyIndexCount = 0; // Optional
-		createInfo.pQueueFamilyIndices = nullptr; // Optional
-	}
-
-	// additional settings
-	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	createInfo.presentMode = presentMode;
-	createInfo.clipped = VK_TRUE;
-	createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-	// create the swapChain
-	if (vkCreateSwapchainKHR(view.device, &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create swap chain!");
-	}
-
-	swapchainImageFormat = surfaceFormat.format;
-	swapchainExtent = extent;
-
-	vkGetSwapchainImagesKHR(view.device, swapchain, &imageCount, nullptr);
-	swapchainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(view.device, swapchain, &imageCount, swapchainImages.data());
-
-	// create an image view for each image
-	swapchainImageViews.resize(swapchainImages.size());
-	for (size_t i = 0; i < swapchainImages.size(); i++) {
-		VkImageViewCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image = swapchainImages[i];
-
-		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format = swapchainImageFormat;
-
-		// no swizzle
-		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-		// no mipmaps or layers
-		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		createInfo.subresourceRange.baseMipLevel = 0;
-		createInfo.subresourceRange.levelCount = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount = 1;
-
-		if (vkCreateImageView(view.device, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create image view!");
-		} 
-	}
-}
 
 // INTERFACE
 // ======================================================================

@@ -1,7 +1,7 @@
 #include "vulkanDevice.h"
 
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
-	SwapChainSupportDetails details;
+SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface) {
+	SwapchainSupportDetails details;
 
 	// get capabilities
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, idealSurface, &details.capabilities);

@@ -139,7 +139,7 @@ bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceK
 	// check swap chain adequacy
 	bool swapChainAdequate = false;
 	if (extensionsSupported) {
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, idealSurface);
+		SwapchainSupportDetails swapChainSupport = querySwapchainSupport(physicalDevice, idealSurface);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 	

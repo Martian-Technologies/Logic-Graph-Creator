@@ -1,6 +1,7 @@
 #ifndef vulkanRenderer_h
 #define vulkanRenderer_h
 
+#include "gpu/vulkanSwapchain.h"
 #include "gui/circuitView/renderer/renderer.h"
 
 #include "gpu/vulkanManager.h"
@@ -13,9 +14,6 @@ public:
 	void destroy();
 	void resize(int w, int h);
 	void run();
-
-private:
-	void createSwapChain();
 	
 private:
 	VulkanGraphicsView view;
@@ -23,12 +21,7 @@ private:
 
 	int windowWidth, windowHeight;
 	
-	// Swapchain
-	VkSwapchainKHR swapchain;
-	VkFormat swapchainImageFormat;
-	std::vector<VkImage> swapchainImages;
-	std::vector<VkImageView> swapchainImageViews;
-	VkExtent2D swapchainExtent;
+	SwapchainData swapchain;
 
 	// INTERFACE --------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------

@@ -10,6 +10,7 @@ struct VulkanGraphicsView {
 	VkQueue presentQueue;
 };
 
+// TODO - global vulkan context?
 class VulkanManager {
 public:
 	// flow

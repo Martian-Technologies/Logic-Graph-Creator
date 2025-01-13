@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-struct SwapChainSupportDetails {
+struct SwapchainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
@@ -28,6 +28,6 @@ struct QueueFamilies {
 
 QueueFamilies findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
 bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*>& requiredExtensions);
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
+SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device, VkSurfaceKHR idealSurface);
 
 #endif
