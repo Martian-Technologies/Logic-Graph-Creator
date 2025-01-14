@@ -53,6 +53,7 @@ void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInsta
 
 	// create vulkan window
 	VulkanWindow* window = new VulkanWindow(&circuitView.getRenderer());
+	window->setFlag(Qt::WindowTransparentForInput, true);
 	window->setSurfaceType(QSurface::VulkanSurface);
 	window->setVulkanInstance(qVulkanInstance);
 	window->show();
