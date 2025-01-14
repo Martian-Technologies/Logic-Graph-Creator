@@ -16,16 +16,23 @@ public:
 	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
 	void destroy();
 	void resize(int w, int h);
+	
 	void run();
+	void stop();
 
 private:
-	inline FrameData& get_current_frame() { return frames[frameNumber % FRAME_OVERLAP]; };
+	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
+
+	void renderLoop();
 	
 private:
 	VulkanGraphicsView view;
 	VkSurfaceKHR surface;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
+
+	std::thread renderThread;
+	bool running = false;
 
 	int frameNumber = 0;
 	int windowWidth, windowHeight;

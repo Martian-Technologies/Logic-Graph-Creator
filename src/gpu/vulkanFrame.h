@@ -4,8 +4,10 @@
 #include <vulkan/vulkan.h>
 
 struct FrameData {
-	VkCommandPool _commandPool;
-	VkCommandBuffer _mainCommandBuffer;
+	VkCommandPool commandPool;
+	VkCommandBuffer mainCommandBuffer;
+	VkSemaphore swapchainSemaphore, renderSemaphore;
+	VkFence renderFence;        
 };
 
 void createFrameDatas(VkDevice device, FrameData *frameDatas, unsigned int numFrames, unsigned int graphicsQueueIndex);

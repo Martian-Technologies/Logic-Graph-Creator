@@ -39,9 +39,14 @@ void CircuitViewWidget::showEvent(QShowEvent* event) {
 
 	// initialize renderer with width and height
 	circuitView.getRenderer().resize(w, h);
+	circuitView.getRenderer().run();
 	
 	// set viewmanager aspect ratio to begin with
 	circuitView.getViewManager().setAspectRatio(w / h);
+}
+
+void CircuitViewWidget::hideEvent(QHideEvent* event) {
+	circuitView.getRenderer().stop();
 }
 
 void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
