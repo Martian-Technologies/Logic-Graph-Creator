@@ -54,8 +54,12 @@ void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInsta
 	window->setSurfaceType(QSurface::VulkanSurface);
 	window->setVulkanInstance(qVulkanInstance);
 	window->show();
-	QWidget* wrapper = QWidget::createWindowContainer(window, this);
+	QWidget* wrapper = QWidget::createWindowContainer(window);
 	VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
+
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->addWidget(wrapper);
+	this->setLayout(layout);
 
 	circuitView.getRenderer().initialize(view, surface, size().width(), size().height());
 }

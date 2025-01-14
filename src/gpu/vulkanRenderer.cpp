@@ -59,7 +59,7 @@ void VulkanRenderer::renderLoop() {
 
 			// clear scren
 			VkClearColorValue clearValue;
-			float flash = std::abs(std::sin(frameNumber / 120.f));
+			float flash = std::abs(std::sin(frameNumber / 1200.f));
 			clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
 			VkImageSubresourceRange clearRange = imageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
 			vkCmdClearColorImage(cmd, swapchain.images[swapchainImageIndex], VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
