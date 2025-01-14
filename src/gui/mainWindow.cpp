@@ -14,8 +14,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
 
-	circuit_id_t id = circuitManager.createNewContainer();
-	SharedCircuit circuit = circuitManager.getContainer(id);
+	circuit_id_t id = circuitManager.createNewCircuit();
+	SharedCircuit circuit = circuitManager.getCircuit(id);
 
 	evaluator = std::make_shared<Evaluator>(circuit);
 

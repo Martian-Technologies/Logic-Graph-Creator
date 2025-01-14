@@ -8,9 +8,14 @@
 #include "backend/address.h"
 #include "logicState.h"
 
+typedef unsigned int evaluator_id_t;
+
 class Evaluator {
 public:
-	Evaluator(SharedCircuit circuit);
+	Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit);
+
+	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
+
 	// pause/unpause used once the evaluator is "started" 
 	void setPause(bool pause);
 	void reset();
@@ -18,7 +23,7 @@ public:
 	void setUseTickrate(bool useTickrate);
 	long long int getRealTickrate() const;
 	void runNTicks(unsigned long long n);
-	void makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId);
+	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
 	void setState(const Address& address, logic_state_t state);
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses);
@@ -27,6 +32,7 @@ public:
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
 private:
+	evaluator_id_t evaluatorId;
 	bool paused;
 	bool usingTickrate;
 	unsigned long long targetTickrate;

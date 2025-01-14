@@ -40,7 +40,7 @@ public:
 		eventRegister.doEvent(PositionEvent("pointer move", viewManager.getPointerPosition()));
 	}
 
-	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t containerId) {
+	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId) {
 		renderer.updateCircuit(difference);
 	}
 

@@ -1,7 +1,7 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(SharedCircuit circuit)
-	:paused(true),
+Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
+	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
 	logicSimulator(),
 	addressTree(),

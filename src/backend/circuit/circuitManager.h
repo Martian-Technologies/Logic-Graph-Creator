@@ -5,37 +5,35 @@
 
 class CircuitManager {
 public:
-	CircuitManager() : lastId(0), blockContainers() { }
-
-	inline SharedCircuit getContainer(circuit_id_t id) {
+	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = blockContainers.find(id);
-		if (iter == blockContainers.end()) return nullptr;
+		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}
-	inline const SharedCircuit getContainer(circuit_id_t id) const {
-		auto iter = blockContainers.find(id);
-		if (iter == blockContainers.end()) return nullptr;
+	inline const SharedCircuit getCircuit(circuit_id_t id) const {
+		auto iter = circuits.find(id);
+		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}
 
-	inline circuit_id_t createNewContainer() {
-		blockContainers.emplace(getNewContainerId(), std::make_shared<Circuit>(getLastCreatedContainerId()));
-		return getLastCreatedContainerId();
+	inline circuit_id_t createNewCircuit() {
+		circuits.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId()));
+		return getLastCreatedCircuitId();
 	}
-	inline void destroyContainer(circuit_id_t id) {
-		auto iter = blockContainers.find(id);
-		if (iter != blockContainers.end()) {
-			blockContainers.erase(iter);
+	inline void destroyCircuit(circuit_id_t id) {
+		auto iter = circuits.find(id);
+		if (iter != circuits.end()) {
+			circuits.erase(iter);
 		}
 	}
 
 
 private:
-	circuit_id_t getNewContainerId() { return ++lastId; }
-	circuit_id_t getLastCreatedContainerId() { return lastId; }
+	circuit_id_t getNewCircuitId() { return ++lastId; }
+	circuit_id_t getLastCreatedCircuitId() { return lastId; }
 
-	circuit_id_t lastId;
-	std::map<circuit_id_t, SharedCircuit> blockContainers;
+	circuit_id_t lastId = 0;
+	std::map<circuit_id_t, SharedCircuit> circuits;
 };
 
 #endif /* circuitManager_h */

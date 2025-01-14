@@ -12,9 +12,9 @@ typedef unsigned int circuit_update_count;
 
 class Circuit {
 public:
-	inline Circuit(circuit_id_t containerId) : containerId(containerId) { }
+	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
 
-	circuit_id_t getContainerId() const { return containerId; }
+	circuit_id_t getCircuitId() const { return circuitId; }
 
 
 	/* ----------- listener ----------- */
@@ -85,9 +85,9 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, containerId); }
+	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
-	circuit_id_t containerId;
+	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;
 	UndoSystem undoSystem;
