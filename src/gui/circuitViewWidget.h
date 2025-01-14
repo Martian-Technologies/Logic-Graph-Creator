@@ -25,6 +25,8 @@ public:
 
 	// dont call this func (temporary)
 	void updateSelectedItem();
+	
+	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
 
 private:
 	CircuitView<QtRenderer> circuitView;

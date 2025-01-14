@@ -80,15 +80,6 @@ void CircuitViewWidget::updateSelectedItem() {
 	}
 }
 
-void CircuitViewWidget::setCircuit(SharedCircuit circuit) {
-	circuitView.setCircuit(circuit);
-	updateSelectedItem();
-}
-
-void CircuitViewWidget::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-	circuitView.setEvaluator(evaluator);
-}
-
 // input events ------------------------------------------------------------------------------
 
 bool CircuitViewWidget::event(QEvent* event) {

@@ -14,25 +14,11 @@
 template <class RENDERER_TYPE>
 // typename std::enable_if<std::is_base_of<Renderer, RENDERER_TYPE>::value, void>::type // idk if we can get this working
 class CircuitView {
+friend class Backend;
 public:
 	CircuitView() : toolManager(&eventRegister, &renderer) {
 		viewManager.initialize(eventRegister);
 		viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
-	}
-
-	inline void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-		renderer.setEvaluator(evaluator.get());
-		evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
-		toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
-	}
-
-	inline void setCircuit(SharedCircuit circuit) {
-		if (this->circuit) this->circuit->disconnectListener(this);
-
-		this->circuit = circuit;
-		toolManager.setCircuit(circuit.get());
-		renderer.setCircuit(circuit.get());
-		circuit->connectListener(this, std::bind(&CircuitView<RENDERER_TYPE>::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void viewChanged() {
@@ -65,6 +51,21 @@ public:
 	inline const RENDERER_TYPE& getRenderer() const { return renderer; }
 
 private:
+	inline void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+		renderer.setEvaluator(evaluator.get());
+		evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
+		toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
+	}
+
+	inline void setCircuit(SharedCircuit circuit) {
+		if (this->circuit) this->circuit->disconnectListener(this);
+
+		this->circuit = circuit;
+		toolManager.setCircuit(circuit.get());
+		renderer.setCircuit(circuit.get());
+		circuit->connectListener(this, std::bind(&CircuitView<RENDERER_TYPE>::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
+	}
+
 	SharedCircuit circuit;
 	std::shared_ptr<Evaluator> evaluator;
 	EvaluatorStateInterface evaluatorStateInterface;

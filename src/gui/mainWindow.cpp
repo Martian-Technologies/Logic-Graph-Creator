@@ -13,16 +13,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
-
-	circuit_id_t id = circuitManager.createNewCircuit();
-	SharedCircuit circuit = circuitManager.getCircuit(id);
-
-	evalId = evaluatorManager.createNewEvaluator(circuit);
-	std::shared_ptr<Evaluator> evaluator = evaluatorManager.getEvaluator(evalId);
+	circuit_id_t id = backend.createCircuit();
+	auto maybeEvalId = backend.createEvaluator(id);
+	assert(maybeEvalId); // this should be true
+	evalId = *maybeEvalId;
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
-	circuitViewWidget->setCircuit(circuit);
-	circuitViewWidget->setEvaluator(evaluator);
+	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+	circuitViewWidget->updateSelectedItem();
+	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
+
 	circuitViewWidget->setSelector(ui->selectorTreeWidget);
 
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
@@ -34,14 +34,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::setSimState(bool state) {
-	evaluatorManager.getEvaluator(evalId)->setPause(!state);
+	backend.getEvaluator(evalId)->setPause(!state);
 }
 
 void MainWindow::simUseSpeed(Qt::CheckState state) {
 	bool evalState = state == Qt::CheckState::Checked;
-	evaluatorManager.getEvaluator(evalId)->setUseTickrate(state);
+	backend.getEvaluator(evalId)->setUseTickrate(state);
 }
 
 void MainWindow::setSimSpeed(double speed) {
-	evaluatorManager.getEvaluator(evalId)->setTickrate(std::round(speed * 60));
+	backend.getEvaluator(evalId)->setTickrate(std::round(speed * 60));
 }

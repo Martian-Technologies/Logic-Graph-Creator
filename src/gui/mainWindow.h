@@ -6,8 +6,7 @@
 #include <QWidget>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "backend/circuit/circuitManager.h"
-#include "backend/evaluator/evaluatorManager.h"
+#include "backend/backend.h"
 
 namespace Ui {
 	class MainWindow;
@@ -26,8 +25,7 @@ private:
 	evaluator_id_t evalId;
 	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
-	CircuitManager circuitManager;
-	EvaluatorManager evaluatorManager;
+	Backend backend;
 };
 
 #endif /* mainWindow_h */
