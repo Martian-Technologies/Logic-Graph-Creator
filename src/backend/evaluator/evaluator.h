@@ -42,4 +42,6 @@ private:
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);
 
+typedef std::shared_ptr<Evaluator> SharedEvaluator;
+
 #endif // evaluator_h

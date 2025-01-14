@@ -17,7 +17,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	circuit_id_t id = circuitManager.createNewCircuit();
 	SharedCircuit circuit = circuitManager.getCircuit(id);
 
-	evaluator = std::make_shared<Evaluator>(circuit);
+	evalId = evaluatorManager.createNewEvaluator(circuit);
+	std::shared_ptr<Evaluator> evaluator = evaluatorManager.getEvaluator(evalId);
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
 	circuitViewWidget->setCircuit(circuit);
@@ -33,14 +34,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::setSimState(bool state) {
-	evaluator->setPause(!state);
+	evaluatorManager.getEvaluator(evalId)->setPause(!state);
 }
 
 void MainWindow::simUseSpeed(Qt::CheckState state) {
 	bool evalState = state == Qt::CheckState::Checked;
-	evaluator->setUseTickrate(state);
+	evaluatorManager.getEvaluator(evalId)->setUseTickrate(state);
 }
 
 void MainWindow::setSimSpeed(double speed) {
-	evaluator->setTickrate(std::round(speed * 60));
+	evaluatorManager.getEvaluator(evalId)->setTickrate(std::round(speed * 60));
 }

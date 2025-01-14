@@ -6,7 +6,7 @@
 class CircuitManager {
 public:
 	inline SharedCircuit getCircuit(circuit_id_t id) {
-		auto iter = blockContainers.find(id);
+		auto iter = circuits.find(id);
 		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}

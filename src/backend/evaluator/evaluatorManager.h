@@ -5,37 +5,34 @@
 
 class EvaluatorManager {
 public:
-	EvaluatorManager() : lastId(0), evaluator() { }
-
-	inline SharedCircuit getCircuit(circuit_id_t id) {
-		auto iter = evaluator.find(id);
-		if (iter == evaluator.end()) return nullptr;
+	inline SharedEvaluator getEvaluator(evaluator_id_t id) {
+		auto iter = evaluators.find(id);
+		if (iter == evaluators.end()) return nullptr;
 		return iter->second;
 	}
-	inline const SharedCircuit getCircuit(circuit_id_t id) const {
-		auto iter = evaluator.find(id);
-		if (iter == evaluator.end()) return nullptr;
+	inline const SharedEvaluator getEvaluator(evaluator_id_t id) const {
+		auto iter = evaluators.find(id);
+		if (iter == evaluators.end()) return nullptr;
 		return iter->second;
 	}
 
-	inline circuit_id_t createNewCircuit() {
-		evaluator.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId()));
-		return getLastCreatedCircuitId();
+	inline evaluator_id_t createNewEvaluator(SharedCircuit circuit) {
+		evaluators.emplace(getNewEvaluatorId(), std::make_shared<Evaluator>(getLastCreatedEvaluatorId(), circuit));
+		return getLastCreatedEvaluatorId();
 	}
-	inline void destroyCircuit(circuit_id_t id) {
-		auto iter = evaluator.find(id);
-		if (iter != evaluator.end()) {
-			evaluator.erase(iter);
+	inline void destroyEvaluator(evaluator_id_t id) {
+		auto iter = evaluators.find(id);
+		if (iter != evaluators.end()) {
+			evaluators.erase(iter);
 		}
 	}
 
-
 private:
-	evaluator_id_t getNewCircuitId() { return ++lastId; }
-	evaluator_id_t getLastCreatedCircuitId() { return lastId; }
+	evaluator_id_t getNewEvaluatorId() { return ++lastId; }
+	evaluator_id_t getLastCreatedEvaluatorId() { return lastId; }
 
-	evaluator_id_t lastId;
-	std::map<evaluator_id_t, SharedCircuit> blockContainers;
+	evaluator_id_t lastId = 0;
+	std::map<evaluator_id_t, SharedEvaluator> evaluators;
 };
 
 #endif /* evaluatorManager_h */
