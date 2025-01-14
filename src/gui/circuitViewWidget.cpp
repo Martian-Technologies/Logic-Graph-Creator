@@ -50,17 +50,21 @@ void CircuitViewWidget::hideEvent(QHideEvent* event) {
 }
 
 void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
+
+	// create vulkan window
 	VulkanWindow* window = new VulkanWindow(&circuitView.getRenderer());
 	window->setSurfaceType(QSurface::VulkanSurface);
 	window->setVulkanInstance(qVulkanInstance);
 	window->show();
+
+	// embed vulkan window
 	QWidget* wrapper = QWidget::createWindowContainer(window);
 	VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
-
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->addWidget(wrapper);
 	this->setLayout(layout);
 
+	// initialize renderer
 	circuitView.getRenderer().initialize(view, surface, size().width(), size().height());
 }
 
