@@ -161,19 +161,27 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 
-	// no features to enable for now
-	VkPhysicalDeviceFeatures deviceFeatures{};
-
 	// logical device creation settings
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
-	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.pEnabledFeatures = nullptr; // we enable them later
 
 	// logical device extensions
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+	// enable features
+	VkPhysicalDeviceVulkan13Features features13{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
+	features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+	features13.dynamicRendering = true;
+	features13.synchronization2 = true;
+	VkPhysicalDeviceFeatures2 physicalFeatures2 = {};
+	physicalFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	physicalFeatures2.pNext = &features13;
+	vkGetPhysicalDeviceFeatures2(physicalDevice, &physicalFeatures2);
+	createInfo.pNext = &physicalFeatures2;
 
 	// logical device validation layers (ignored by newer implementations)
 	if (DEBUG) {
