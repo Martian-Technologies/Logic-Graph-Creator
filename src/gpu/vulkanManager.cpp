@@ -27,7 +27,7 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.pEngineName = "No Engine";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_3;
+	appInfo.apiVersion = VK_API_VERSION_1_0;
 
 	// start instance creation
 	VkInstanceCreateInfo createInfo {};
@@ -40,7 +40,7 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
-	// enable validation layers3
+	// enable validation layers
 	if (DEBUG) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -169,22 +169,11 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
-	createInfo.pEnabledFeatures = nullptr; // we enable them later
+	createInfo.pEnabledFeatures = nullptr;
 
 	// logical device extensions
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-
-	// enable features
-	VkPhysicalDeviceVulkan13Features features13 {};
-	features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	features13.dynamicRendering = true;
-	features13.synchronization2 = true;
-	VkPhysicalDeviceFeatures2 physicalFeatures2 {};
-	physicalFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-	physicalFeatures2.pNext = &features13;
-	vkGetPhysicalDeviceFeatures2(physicalDevice, &physicalFeatures2);
-	createInfo.pNext = &physicalFeatures2;
 
 	// logical device validation layers (ignored by newer implementations)
 	if (DEBUG) {
