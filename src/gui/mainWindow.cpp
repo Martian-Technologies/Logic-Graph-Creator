@@ -4,6 +4,7 @@
 #include <QCheckBox>
 
 #include "circuitViewWidget.h"
+#include "selectorWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
@@ -19,12 +20,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	evalId = *maybeEvalId;
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	circuitViewWidget->updateSelectedItem();
+	// circuitViewWidget->updateSelectedItem();
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
 
-	circuitViewWidget->setSelector(ui->selectorTreeWidget);
-
+	connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
+	
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
@@ -44,4 +46,24 @@ void MainWindow::simUseSpeed(Qt::CheckState state) {
 
 void MainWindow::setSimSpeed(double speed) {
 	backend.getEvaluator(evalId)->setTickrate(std::round(speed * 60));
+}
+
+void MainWindow::openNewSelectorWindow() {
+	SelectorWindow* window = new SelectorWindow();
+    window->setWindowTitle("Selector");
+	connect(window, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
+	connect(window, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
+    window->show();
+}
+
+void MainWindow::setBlock(BlockType blockType) {
+	for (auto view : circuitViews) {
+		view->getCircuitView()->setSelectedBlock(blockType);
+	}
+}
+
+void MainWindow::setTool(std::string tool) {
+	for (auto view : circuitViews) {
+		view->getCircuitView()->setSelectedTool(tool);
+	}
 }

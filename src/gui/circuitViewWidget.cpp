@@ -45,41 +45,6 @@ void CircuitViewWidget::updateLoop() {
 	update();
 }
 
-// setter functions -----------------------------------------------------------------------------
-
-void CircuitViewWidget::setSelector(QTreeWidget* treeWidget) {
-	// disconnect the old tree
-	if (this->treeWidget != nullptr)
-		disconnect(this->treeWidget, &QTreeWidget::itemSelectionChanged, this, &CircuitViewWidget::updateSelectedItem);
-	// connect the new tree
-	this->treeWidget = treeWidget;
-	connect(treeWidget, &QTreeWidget::itemSelectionChanged, this, &CircuitViewWidget::updateSelectedItem);
-}
-
-void CircuitViewWidget::updateSelectedItem() {
-	if (treeWidget) {
-		for (QTreeWidgetItem* item : treeWidget->selectedItems()) {
-			if (item) {
-				QString str = item->text(0);
-				if (str == "And") circuitView.getToolManager().selectBlock(BlockType::AND);
-				else if (str == "Or") circuitView.getToolManager().selectBlock(BlockType::OR);
-				else if (str == "Xor") circuitView.getToolManager().selectBlock(BlockType::XOR);
-				else if (str == "Nand") circuitView.getToolManager().selectBlock(BlockType::NAND);
-				else if (str == "Nor") circuitView.getToolManager().selectBlock(BlockType::NOR);
-				else if (str == "Xnor") circuitView.getToolManager().selectBlock(BlockType::XNOR);
-				else if (str == "Switch") circuitView.getToolManager().selectBlock(BlockType::SWITCH);
-				else if (str == "Button") circuitView.getToolManager().selectBlock(BlockType::BUTTON);
-				else if (str == "Tick Button") circuitView.getToolManager().selectBlock(BlockType::TICK_BUTTON);
-				else if (str == "Light") circuitView.getToolManager().selectBlock(BlockType::LIGHT);
-				else {
-					circuitView.getToolManager().changeTool(str.toStdString());
-				}
-			}
-			return;
-		}
-	}
-}
-
 // input events ------------------------------------------------------------------------------
 
 bool CircuitViewWidget::event(QEvent* event) {
