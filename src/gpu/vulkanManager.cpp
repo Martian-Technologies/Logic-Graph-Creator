@@ -151,13 +151,16 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	queueFamilies = findQueueFamilies(physicalDevice, surface);
 	std::set<QueueFamily> uniqueQueueFamilies = { queueFamilies.graphicsFamily.value(), queueFamilies.presentFamily.value() };
+	std::map<QueueFamily, std::vector<float>> queueCreatePriorities;
 	float queuePriority = 1.0f;
 	for (QueueFamily queueFamily : uniqueQueueFamilies) {
+		queueCreatePriorities[queueFamily] = std::vector<float>(queueFamily.queueCount, 1.0f);
+
 		VkDeviceQueueCreateInfo queueCreateInfo{};
 		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		queueCreateInfo.queueFamilyIndex = queueFamily.index;
 		queueCreateInfo.queueCount = queueFamily.queueCount;
-		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfo.pQueuePriorities = queueCreatePriorities[queueFamily].data();
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 

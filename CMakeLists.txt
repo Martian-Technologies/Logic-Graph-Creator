@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
+set(CXX_STANDARD 20)
 project(Gatality)
 
 # Build Config
-set(CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
