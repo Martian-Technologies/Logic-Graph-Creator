@@ -173,11 +173,11 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	// enable features
-	VkPhysicalDeviceVulkan13Features features13{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
+	VkPhysicalDeviceVulkan13Features features13 {};
 	features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 	features13.dynamicRendering = true;
 	features13.synchronization2 = true;
-	VkPhysicalDeviceFeatures2 physicalFeatures2 = {};
+	VkPhysicalDeviceFeatures2 physicalFeatures2 {};
 	physicalFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	physicalFeatures2.pNext = &features13;
 	vkGetPhysicalDeviceFeatures2(physicalDevice, &physicalFeatures2);
