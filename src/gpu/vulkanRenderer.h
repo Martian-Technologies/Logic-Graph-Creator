@@ -4,8 +4,9 @@
 #include "gui/circuitView/renderer/renderer.h"
 
 #include "gpu/vulkanSwapchain.h"
-#include "gpu/vulkanManager.h"
+#include "gpu/vulkanPipeline.h"
 #include "gpu/vulkanFrame.h"
+#include "gpu/vulkanManager.h"
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -13,7 +14,7 @@ class VulkanRenderer : public Renderer {
 	// VULKAN -----------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 public:
-	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
+	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h, std::vector<char> vertCode, std::vector<char> fragCode);
 	void destroy();
 	void resize(int w, int h);
 	
@@ -21,21 +22,30 @@ public:
 	void stop();
 
 private:
-	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
-
-	void renderLoop();
 	
 private:
+	int windowWidth, windowHeight;
+
+	// vulkan
 	VulkanGraphicsView view;
 	VkSurfaceKHR surface;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
+	PipelineData pipeline;
 
+	// shaders
+	VkShaderModule vertShader;
+	VkShaderModule fragShader;
+
+	// render loop
 	std::thread renderThread;
 	bool running = false;
+	void renderLoop();
 
+	// frame counting
 	int frameNumber = 0;
-	int windowWidth, windowHeight;
+	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
+	
 
 	// INTERFACE --------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------

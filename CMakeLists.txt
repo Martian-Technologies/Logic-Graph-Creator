@@ -102,8 +102,9 @@ foreach(source IN LISTS SHADERS_SOURCE)
 	)
 	list(APPEND SPV_SHADERS ${SHADER_BINARY_DIR}/${FILENAME}.spv)
 endforeach()
+
 # Shader compilation dependency and directory
-add_custom_target(shaders ALL DEPENDS ${SPV_SHADERS} make-shader-dir)
+add_custom_target(shaders ALL DEPENDS make-shader-dir)
 
 
 # Add resources ------

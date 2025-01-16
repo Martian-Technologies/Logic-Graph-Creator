@@ -1,9 +1,9 @@
 #include "vulkanRenderer.h"
 
-#include "gpu/vulkanSwapchain.h"
 #include "gpu/vulkanUtil.h"
 
-void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h)
+// obviously todo shader resource passing
+void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h, std::vector<char> vertCode, std::vector<char> fragCode)
 {
 	this->view = view;
 	this->surface = surface;
@@ -11,13 +11,21 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	windowWidth = w;
 	windowHeight = h;
 
+	// TODO - make all of these vulkan sub functions have uniform syntax (probably after view rework)
 	swapchain = createSwapchain(view, surface, w, h);
 	createFrameDatas(view.device, frames, FRAME_OVERLAP, view.queueFamilies.graphicsFamily.value().index );
+
+	vertShader = createShaderModule(view.device, vertCode);
+	fragShader = createShaderModule(view.device, fragCode);
+	pipeline = createPipeline(view.device, vertShader, fragShader);
 }
 
 void VulkanRenderer::destroy() {
 	destroySwapchain(view, swapchain);
 	destroyFrameDatas(view.device, frames, FRAME_OVERLAP);
+	destroyShaderModule(view.device, vertShader);
+	destroyShaderModule(view.device, fragShader);
+	destroyPipeline(view.device, pipeline);
 }
 
 void VulkanRenderer::resize(int w, int h) {
