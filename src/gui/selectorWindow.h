@@ -1,7 +1,6 @@
 #ifndef selectorWindow_h
 #define selectorWindow_h
-
-#include <QDialog>
+#include <QDockWidget>
 
 #include <string>
 
@@ -11,7 +10,7 @@ namespace Ui {
 	class Selector;
 };
 
-class SelectorWindow : public QDialog {
+class SelectorWindow : public QDockWidget {
 	Q_OBJECT
 public:
 	SelectorWindow(QWidget* parent = nullptr);

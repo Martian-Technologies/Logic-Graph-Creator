@@ -49,11 +49,11 @@ void MainWindow::setSimSpeed(double speed) {
 }
 
 void MainWindow::openNewSelectorWindow() {
-	SelectorWindow* window = new SelectorWindow();
-    window->setWindowTitle("Selector");
-	connect(window, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
-	connect(window, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
-    window->show();
+	SelectorWindow* selector = new SelectorWindow();
+	this->addDockWidget(Qt::LeftDockWidgetArea, selector);
+	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
+	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
+    selector->show();
 }
 
 void MainWindow::setBlock(BlockType blockType) {

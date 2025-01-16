@@ -1,7 +1,9 @@
+#include <QDockWidget>
+
 #include "selectorWindow.h"
 #include "ui_selector.h"
 
-SelectorWindow::SelectorWindow(QWidget* parent) : QDialog(parent), ui(new Ui::Selector) {
+SelectorWindow::SelectorWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Selector) {
 	// Load the UI file
 	ui->setupUi(this);
 
