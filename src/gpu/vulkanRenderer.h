@@ -22,6 +22,7 @@ public:
 	void stop();
 
 private:
+	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
 	
 private:
 	int windowWidth, windowHeight;

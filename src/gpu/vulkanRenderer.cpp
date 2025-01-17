@@ -46,16 +46,114 @@ void VulkanRenderer::stop() {
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
+		FrameData& frame = getCurrentFrame();
 		// wait for frame end
-		vkWaitForFences(view.device, 1, &getCurrentFrame().renderFence, true, 1000000000);
-		vkResetFences(view.device, 1, &getCurrentFrame().renderFence);
+		vkWaitForFences(view.device, 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(view.device, 1, &frame.renderFence);
 		
 		//increase the number of frames drawn
 		++frameNumber;
 
+		// get next swapchain image to render too
+		uint32_t imageIndex;
+		vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+		// record command buffer
+		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
+		recordCommandBuffer(frame, imageIndex);
+
+		// start setting up submission
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		// wait semaphore
+		VkSemaphore waitSemaphores[] = { frame.swapchainSemaphore };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		// command buffers
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &frame.mainCommandBuffer;
+
+		// signal semaphores
+		VkSemaphore signalSemaphores[] = { frame.renderSemaphore };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		// submit to queue
+		if (vkQueueSubmit(view.graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
+			throw std::runtime_error("failed to submit draw command buffer!");
+		}
+
+		// present
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		VkSwapchainKHR swapChains[] = { swapchain.handle };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.pResults = nullptr; // unused
+
+		vkQueuePresentKHR(view.presentQueue, &presentInfo);
 	}
 
 	vkDeviceWaitIdle(view.device);
+}
+
+void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {
+	// start recording
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0; // Optional
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+	if (vkBeginCommandBuffer(frame.mainCommandBuffer, &beginInfo) != VK_SUCCESS) {
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	// begin render pass
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = pipeline.renderPass;
+	renderPassInfo.framebuffer = swapchain.framebuffers[imageIndex];
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent = swapchain.extent;
+	
+	VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+	
+	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// bind render pipeline
+	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+
+	// set dynamic state
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(swapchain.extent.width);
+	viewport.height = static_cast<float>(swapchain.extent.height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewport);
+	VkRect2D scissor{};
+	scissor.offset = {0, 0};
+	scissor.extent = swapchain.extent;
+	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
+
+	// draw
+	vkCmdDraw(frame.mainCommandBuffer, 3, 1, 0, 0);
+
+	// end
+	vkCmdEndRenderPass(frame.mainCommandBuffer);
+	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
+
 }
 
 // Vulkan Setup
