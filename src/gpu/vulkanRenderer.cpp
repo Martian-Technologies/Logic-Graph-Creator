@@ -56,7 +56,10 @@ void VulkanRenderer::renderLoop() {
 
 		// get next swapchain image to render too
 		uint32_t imageIndex;
-		vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
+			std::cout << "THE IMAGE IS WRONG AAAAAHHH" << std::endl;
+		}
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -98,7 +101,10 @@ void VulkanRenderer::renderLoop() {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
 
-		vkQueuePresentKHR(view.presentQueue, &presentInfo);
+		VkResult presentResult = vkQueuePresentKHR(view.presentQueue, &presentInfo);
+		if (presentResult == VK_ERROR_OUT_OF_DATE_KHR) {
+			std::cout << "ASUDAOIDJWOIDJW" << std::endl;
+		}
 	}
 
 	vkDeviceWaitIdle(view.device);
@@ -121,8 +127,8 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	renderPassInfo.framebuffer = swapchain.framebuffers[imageIndex];
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain.extent;
-	
-	VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+
+	VkClearValue clearColor = {{{0.0, 0.0f, 0.0f, 1.0f}}};
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 	

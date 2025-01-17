@@ -14,7 +14,6 @@
 #include <QLayout>
 
 #include "circuitView/circuitView.h"
-#include "vulkanWindow.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
@@ -52,17 +51,17 @@ void CircuitViewWidget::hideEvent(QHideEvent* event) {
 void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
 
 	// create vulkan window
-	VulkanWindow* window = new VulkanWindow(&circuitView.getRenderer());
-	window->setFlag(Qt::WindowTransparentForInput, true);
-	window->setSurfaceType(QSurface::VulkanSurface);
-	window->setVulkanInstance(qVulkanInstance);
-	window->show();
+	vulkanWindow = new VulkanWindow(&circuitView.getRenderer());
+	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
+	vulkanWindow->setSurfaceType(QSurface::VulkanSurface);
+	vulkanWindow->setVulkanInstance(qVulkanInstance);
+	vulkanWindow->show();
 
 	// embed vulkan window
-	QWidget* wrapper = QWidget::createWindowContainer(window);
-	VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(window);
+	QWidget* windowWrapper = QWidget::createWindowContainer(vulkanWindow);
+	VkSurfaceKHR surface = QVulkanInstance::surfaceForWindow(vulkanWindow);
 	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->addWidget(wrapper);
+	layout->addWidget(windowWrapper);
 	this->setLayout(layout);
 	
 	// load shaders

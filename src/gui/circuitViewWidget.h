@@ -12,6 +12,7 @@
 
 #include "circuitView/circuitView.h"
 #include "gpu/vulkanRenderer.h"
+#include "gui/vulkanWindow.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
@@ -45,6 +46,7 @@ private:
 
 	// ui elements
 	QTreeWidget* treeWidget;
+	VulkanWindow* vulkanWindow;
 
 	// settings (temp)
 	bool mouseControls;
