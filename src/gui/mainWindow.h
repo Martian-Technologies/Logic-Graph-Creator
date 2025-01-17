@@ -24,6 +24,7 @@ public:
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
 	void openNewSelectorWindow();
+	void openNewHotbarWindow();
 
 private:
 	evaluator_id_t evalId;

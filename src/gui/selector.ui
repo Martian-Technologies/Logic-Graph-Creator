@@ -180,10 +180,16 @@
             <property name="text">
              <string>Single Place</string>
             </property>
+            <property name="toolTip">
+             <string>Place a single block</string>
+            </property>
            </item>
            <item>
             <property name="text">
              <string>Area Place</string>
+            </property>
+            <property name="toolTip">
+             <string>Place a area of blocks</string>
             </property>
            </item>
            <item>
@@ -199,6 +205,9 @@
            <item>
             <property name="text">
              <string>Simple</string>
+            </property>
+            <property name="toolTip">
+             <string>Create a single connection</string>
             </property>
            </item>
            <item>

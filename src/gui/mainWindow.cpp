@@ -5,6 +5,7 @@
 
 #include "circuitViewWidget.h"
 #include "selectorWindow.h"
+#include "hotbarWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
@@ -31,6 +32,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
+	openNewHotbarWindow();
+	openNewSelectorWindow();
+
 	QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
 	layout->addWidget(circuitViewWidget);
 }
@@ -53,6 +57,14 @@ void MainWindow::openNewSelectorWindow() {
 	this->addDockWidget(Qt::LeftDockWidgetArea, selector);
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
+    selector->show();
+}
+
+void MainWindow::openNewHotbarWindow() {
+	HotbarWindow* selector = new HotbarWindow();
+	this->addDockWidget(Qt::BottomDockWidgetArea, selector);
+	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
+	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
     selector->show();
 }
 

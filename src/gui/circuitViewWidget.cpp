@@ -13,7 +13,7 @@
 
 #include "circuitView/circuitView.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(true), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
