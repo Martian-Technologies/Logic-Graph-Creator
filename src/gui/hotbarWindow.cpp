@@ -1,5 +1,8 @@
 #include <QDockWidget>
-#include <QToolButton>
+#include <QLabel>
+#include <Qt>
+
+#include <iostream>
 
 #include "gui/customWidgets/dynamicGridWidget.h"
 #include "hotbarWindow.h"
@@ -9,18 +12,34 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Ho
 	// Load the UI file
 	ui->setupUi(this);
 	grid = new DynamicGridWidget(this, 48);
-	
+
 	for (int i = 0; i < 10; i++) {
-		QToolButton* button = new QToolButton(this);
+		int keyNum = (i == 9) ? 0 : (i + 1);
+		// button widget
+		QWidget* widget = new QWidget(this);
+		widget->setMinimumSize(48, 48);
+		widget->setMaximumSize(48, 48);
+		// button
+		QToolButton* button = new QToolButton(widget);
+		values.push_back("And");
+		buttons.push_back(button);
 		button->setCheckable(true);
+		// button->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
 		button->setIcon(QIcon(":/toolAndBlockIcons/defaultIcon.png"));
 		button->setMinimumSize(48, 48);
 		button->setMaximumSize(48, 48);
-		grid->addWidget(button);
+		button->setShortcut(QKeySequence(static_cast<Qt::Key>(Qt::Key_0 + keyNum)));
+		connect(button, &QToolButton::clicked, this, [this, i](bool state) {this->updateSelected(i, state);});
+		// connect(button, &QToolButton::triggered, this, &HotbarWindow::updateSelected2);
+		// number
+		QLabel* label = new QLabel(QString::number(keyNum), widget);
+		label->move(36, 30);
+		// add widget
+		grid->addWidget(widget);
 	}
 
 	QVBoxLayout* layout = new QVBoxLayout(ui->gridWidget);
-	layout->setSpacing(0); 
+	layout->setSpacing(0);
 	layout->setContentsMargins(4, 0, 4, 0);
 	layout->addWidget(grid);
 
@@ -32,6 +51,41 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Ho
 HotbarWindow::~HotbarWindow() {
 	delete ui;
 	delete grid;
+}
+
+void HotbarWindow::updateSelected(int index, bool state) {
+	if (state == false) {
+		if (selectedBlockIndex == index) {
+			selectBlock(BlockType::NONE, -1);
+		} else if (selectedToolIndex == index) {
+			selectTool("NONE", -1);
+		}
+	} else {
+		const std::string& selectedItem = values[index];
+		if (selectedItem == "NONE") buttons[index]->setChecked(false);
+		else if (selectedItem == "And") selectBlock(BlockType::AND, index);
+		else if (selectedItem == "Or") selectBlock(BlockType::OR, index);
+		else if (selectedItem == "Xor") selectBlock(BlockType::XOR, index);
+		else if (selectedItem == "Nand") selectBlock(BlockType::NAND, index);
+		else if (selectedItem == "Nor") selectBlock(BlockType::NOR, index);
+		else if (selectedItem == "Xnor") selectBlock(BlockType::XNOR, index);
+		else if (selectedItem == "Switch") selectBlock(BlockType::SWITCH, index);
+		else if (selectedItem == "Button") selectBlock(BlockType::BUTTON, index);
+		else if (selectedItem == "Tick Button") selectBlock(BlockType::TICK_BUTTON, index);
+		else if (selectedItem == "Light") selectBlock(BlockType::LIGHT, index);
+		else selectTool(selectedItem, index);
+	}
+}
+
+void HotbarWindow::selectBlock(BlockType blockType, int index) {
+	if (selectedBlockIndex != -1) buttons[selectedBlockIndex]->setChecked(false);
+	selectedBlockIndex = index;
+	emit selectedBlockChange(blockType);
+}
+void HotbarWindow::selectTool(std::string tool, int index) {
+	if (selectedToolIndex != -1) buttons[selectedToolIndex]->setChecked(false);
+	selectedToolIndex = index;
+	emit selectedToolChange(tool);
 }
 
 // void HotbarWindow::updateSelectedBlock() {

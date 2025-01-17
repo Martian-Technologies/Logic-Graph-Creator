@@ -2,7 +2,9 @@
 #define hotbarWindow_h
 
 #include <QDockWidget>
+#include <QToolButton>
 
+#include <vector>
 #include <string>
 
 #include "backend/container/block/blockDefs.h"
@@ -20,8 +22,15 @@ public:
 	~HotbarWindow();
 	
 private:
-	void updateSelected();
+	void updateSelected(int index, bool state);
+	void selectBlock(BlockType blockType, int index);
+	void selectTool(std::string tool, int index);
 
+	int selectedBlockIndex = -1;
+	int selectedToolIndex = -1;
+
+	std::vector<std::string> values;
+	std::vector<QToolButton*> buttons;
 	DynamicGridWidget* grid;
 	Ui::Hotbar* ui;
 
