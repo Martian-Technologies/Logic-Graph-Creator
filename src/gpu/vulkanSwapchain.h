@@ -8,12 +8,14 @@
 struct SwapchainData {
 	VkSwapchainKHR handle;
 	VkFormat imageFormat;
+	VkExtent2D extent;
 	std::vector<VkImage> images;
 	std::vector<VkImageView> imageViews;
-	VkExtent2D extent;
+	std::vector<VkFramebuffer> framebuffers;
 };
 
 SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int windowWidth, int windowHeight);
+void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapchain, VkRenderPass renderPass);
 void destroySwapchain(VulkanGraphicsView view, SwapchainData& swapchain);
 
 VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);

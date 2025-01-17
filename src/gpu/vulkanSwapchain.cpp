@@ -94,9 +94,36 @@ SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int
 	return swapchain;
 }
 
-void destroySwapchain(VulkanGraphicsView view, SwapchainData &swapchain) {
+void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapchain, VkRenderPass renderPass) {
+	swapchain.framebuffers.resize(swapchain.imageViews.size());
+
 	for (size_t i = 0; i < swapchain.imageViews.size(); i++) {
-		vkDestroyImageView(view.device, swapchain.imageViews[i], nullptr);
+		VkImageView attachments[] = {
+			swapchain.imageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = swapchain.extent.width;
+		framebufferInfo.height = swapchain.extent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(view.device, &framebufferInfo, nullptr, &swapchain.framebuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create framebuffer!");
+		}
+	}
+}
+
+void destroySwapchain(VulkanGraphicsView view, SwapchainData &swapchain) {
+	for (VkFramebuffer framebuffer : swapchain.framebuffers) {
+        vkDestroyFramebuffer(view.device, framebuffer, nullptr);
+    }
+	
+	for (VkImageView imageView : swapchain.imageViews) {
+		vkDestroyImageView(view.device, imageView, nullptr);
 	}
 	
 	vkDestroySwapchainKHR(view.device, swapchain.handle, nullptr);

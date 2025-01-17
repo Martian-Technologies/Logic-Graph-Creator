@@ -6,7 +6,6 @@
 
 struct PipelineData {
 	VkPipeline handle;
-    VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout layout;
     VkRenderPass renderPass;
 };

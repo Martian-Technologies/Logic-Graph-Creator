@@ -18,6 +18,7 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	vertShader = createShaderModule(view.device, vertCode);
 	fragShader = createShaderModule(view.device, fragCode);
 	pipeline = createPipeline(view.device, swapchain, vertShader, fragShader);
+	createSwapchainFramebuffers(view, swapchain, pipeline.renderPass);
 }
 
 void VulkanRenderer::destroy() {
