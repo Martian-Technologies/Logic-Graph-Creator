@@ -1,3 +1,5 @@
+set(CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 cmake_minimum_required(VERSION 3.16)
 project(Gatality)
 
@@ -9,9 +11,6 @@ else()
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-# C++ Standard
-set(CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")

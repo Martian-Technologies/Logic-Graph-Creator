@@ -1,18 +1,19 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(SharedCircuit circuit)
-	:paused(true),
+Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
+	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
 	logicSimulator(),
-	gateTree(circuit->getContainerId()),
-	inputSocketTree(circuit->getContainerId()),
-	outputSocketTree(circuit->getContainerId()),
+	addressTree(circuit->getCircuitId()),
 	usingTickrate(false) {
 	setTickrate(40);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
-	makeEdit(std::make_shared<Difference>(difference), circuit->getContainerId());
-	circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2)); // this should actually be circuitManager aggregating all the circuits' diffs
+
+	makeEdit(std::make_shared<Difference>(difference), circuit->getCircuitId());
+
+	// connect makeEdit to circuit
+	circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 logic_state_t Evaluator::getState(const Address& address) {

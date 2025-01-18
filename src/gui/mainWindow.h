@@ -6,8 +6,7 @@
 #include <QWidget>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "backend/circuit/circuitManager.h"
-#include "backend/evaluator/evaluator.h"
+#include "backend/backend.h"
 
 namespace Ui {
 	class MainWindow;
@@ -23,10 +22,10 @@ public:
 	void setSimSpeed(double speed);
 
 private:
+	evaluator_id_t evalId;
 	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
-	CircuitManager circuitManager;
-	std::shared_ptr<Evaluator> evaluator;
+	Backend backend;
 };
 
 #endif /* mainWindow_h */
