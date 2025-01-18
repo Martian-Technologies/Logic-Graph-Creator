@@ -12,7 +12,7 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	windowHeight = h;
 
 	// TODO - make all of these vulkan sub functions have uniform syntax (probably after view rework)
-	swapchain = createSwapchain(view, surface, w, h);
+	swapchain = createSwapchain(view, surface, windowWidth, windowHeight);
 	createFrameDatas(view.device, frames, FRAME_OVERLAP, view.queueFamilies.graphicsFamily.value().index );
 
 	vertShader = createShaderModule(view.device, vertCode);
@@ -32,6 +32,8 @@ void VulkanRenderer::destroy() {
 void VulkanRenderer::resize(int w, int h) {
 	windowWidth = w;
 	windowHeight = h;
+
+	resizeNeeded = true;
 }
 
 // TODO - ghetto render thread
@@ -46,20 +48,31 @@ void VulkanRenderer::stop() {
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
-		FrameData& frame = getCurrentFrame();
+		// get next frame
+		FrameData& frame = getCurrentFrame();		
 		// wait for frame end
 		vkWaitForFences(view.device, 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(view.device, 1, &frame.renderFence);
 		
-		//increase the number of frames drawn
-		++frameNumber;
+		// resize if needed
+		if (resizeNeeded) {
+			handleResize();
+			resizeNeeded = false;
+		}
 
 		// get next swapchain image to render too
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
-			std::cout << "THE IMAGE IS WRONG AAAAAHHH" << std::endl;
+			resizeNeeded = true;
+			continue;
+		} else if(imageGetResult == VK_SUBOPTIMAL_KHR) {
+			resizeNeeded = true;
+		} else if (imageGetResult != VK_SUCCESS) {
+			throw std::runtime_error("failed to acquire swap chain image!");
 		}
+
+		// reset render fence
+		vkResetFences(view.device, 1, &frame.renderFence);
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -102,9 +115,14 @@ void VulkanRenderer::renderLoop() {
 		presentInfo.pResults = nullptr; // unused
 
 		VkResult presentResult = vkQueuePresentKHR(view.presentQueue, &presentInfo);
-		if (presentResult == VK_ERROR_OUT_OF_DATE_KHR) {
-			std::cout << "ASUDAOIDJWOIDJW" << std::endl;
+		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
+			resizeNeeded = true;
+		} else if (imageGetResult != VK_SUCCESS) {
+			throw std::runtime_error("failed to acquire swap chain image!");
 		}
+
+		//increase the number of frames drawn
+		++frameNumber;
 	}
 
 	vkDeviceWaitIdle(view.device);
@@ -159,7 +177,14 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
+}
 
+void VulkanRenderer::handleResize() {
+	vkDeviceWaitIdle(view.device);
+
+	destroySwapchain(view, swapchain);
+	swapchain = createSwapchain(view, surface, windowWidth, windowHeight);
+	createSwapchainFramebuffers(view, swapchain, pipeline.renderPass);
 }
 
 // Vulkan Setup

@@ -23,6 +23,7 @@ public:
 
 private:
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
+	void handleResize();
 	
 private:
 	int windowWidth, windowHeight;
@@ -40,14 +41,16 @@ private:
 
 	// render loop
 	std::thread renderThread;
-	bool running = false;
 	void renderLoop();
 
 	// frame counting
 	int frameNumber = 0;
 	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
-	
 
+	// state
+	std::atomic<bool> running = false;
+	std::atomic<bool> resizeNeeded = false;
+	
 	// INTERFACE --------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 public:

@@ -14,7 +14,8 @@ struct SwapchainData {
 	std::vector<VkFramebuffer> framebuffers;
 };
 
-SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int windowWidth, int windowHeight);
+SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface,
+                              int windowWidth, int windowHeight);
 void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapchain, VkRenderPass renderPass);
 void destroySwapchain(VulkanGraphicsView view, SwapchainData& swapchain);
 
