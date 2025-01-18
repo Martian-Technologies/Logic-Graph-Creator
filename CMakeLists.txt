@@ -103,7 +103,7 @@ foreach(source IN LISTS SHADERS_SOURCE)
 	list(APPEND SPV_SHADERS ${SHADER_BINARY_DIR}/${FILENAME}.spv)
 endforeach()
 
-# Shader compilation dependency and directory
+# Shader compilation dependency and directory (TODO - I do not fully understand cmake dependencies but it works)
 add_custom_target(shaders ALL DEPENDS make-shader-dir)
 
 

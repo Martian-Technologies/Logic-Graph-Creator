@@ -48,26 +48,24 @@ void VulkanRenderer::stop() {
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
-		// get next frame
-		FrameData& frame = getCurrentFrame();		
-		// wait for frame end
-		vkWaitForFences(view.device, 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-		
 		// resize if needed
 		if (resizeNeeded) {
 			handleResize();
 			resizeNeeded = false;
 		}
+		
+		// get next frame
+		FrameData& frame = getCurrentFrame();		
+		// wait for frame end
+		vkWaitForFences(view.device, 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
 
 		// get next swapchain image to render too
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
-			resizeNeeded = true;
+			// wait for a resize event
 			continue;
-		} else if(imageGetResult == VK_SUBOPTIMAL_KHR) {
-			resizeNeeded = true;
-		} else if (imageGetResult != VK_SUCCESS) {
+		} else if (imageGetResult != VK_SUCCESS && imageGetResult != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
@@ -114,12 +112,7 @@ void VulkanRenderer::renderLoop() {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
 
-		VkResult presentResult = vkQueuePresentKHR(view.presentQueue, &presentInfo);
-		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
-			resizeNeeded = true;
-		} else if (imageGetResult != VK_SUCCESS) {
-			throw std::runtime_error("failed to acquire swap chain image!");
-		}
+		vkQueuePresentKHR(view.presentQueue, &presentInfo);
 
 		//increase the number of frames drawn
 		++frameNumber;

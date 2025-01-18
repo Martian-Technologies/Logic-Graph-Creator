@@ -47,4 +47,10 @@ private:
 	int presentRoundRobin;
 };
 
+// VULKAN TODO -
+// - [ ] Global vulkan state that handles instance/device
+//       - [ ] Queue management
+//       - [ ] Memory allocation
+//       - [ ] Deletion
+
 #endif
