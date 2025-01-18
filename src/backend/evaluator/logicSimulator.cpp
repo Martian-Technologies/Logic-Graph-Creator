@@ -1,57 +1,251 @@
 #include "logicSimulator.h"
+#include "util.h"
+
+std::vector<input_socket_id_t> Gate::getInputSockets() {
+	// switch using variant index
+	switch (sockets.index()) {
+	case 0:
+		return std::get<SocketsBothVector>(sockets).inputSockets;
+	case 1:
+		return { std::get<SocketsSingle>(sockets).inputSocket };
+	case 2:
+		return std::get<SocketsInputVector>(sockets).inputSockets;
+	case 3:
+		return { std::get<SocketsOutputVector>(sockets).inputSocket };
+	default:
+		UNREACHABLE();
+	}
+}
+std::vector<output_socket_id_t> Gate::getOutputSockets() {
+	switch (sockets.index()) {
+	case 0:
+		return std::get<SocketsBothVector>(sockets).outputSockets;
+	case 1:
+		return { std::get<SocketsSingle>(sockets).outputSocket };
+	case 2:
+		return { std::get<SocketsInputVector>(sockets).outputSocket };
+	case 3:
+		return std::get<SocketsOutputVector>(sockets).outputSockets;
+	default:
+		UNREACHABLE();
+	}
+}
 
 LogicSimulator::LogicSimulator()
-    : numThreads(4),
-    sync_after_state(numThreads),
-    sync_after_propagation(numThreads),
-    sync_after_swap(numThreads) {
+	: numThreads(4),
+	running(true),
+	sync_after_state(numThreads),
+	sync_after_propagation(numThreads),
+	sync_after_swap(numThreads){
+	threads.resize(numThreads);
+	for (unsigned int i = 0; i < numThreads; i++) {
+		threads[i] = std::thread(&LogicSimulator::simulationLoop, this, i);
+	}
+}
+
+LogicSimulator::~LogicSimulator() {
+	running.store(false, std::memory_order_release);
+	for (std::thread& thread : threads) {
+		thread.join();
+	}
 }
 
 output_socket_id_t LogicSimulator::registerOutputSocket() {
-    output_socket_id_t id = currentOutputSockets.size();
-    currentOutputSockets.push_back(false);
-    nextOutputSockets.push_back(false);
-    return id;
+	output_socket_id_t id = currentOutputSockets.size();
+	currentOutputSockets.push_back(false);
+	nextOutputSockets.push_back(false);
+	connectionDestinations.push_back(std::vector<input_socket_id_t>());
+	return id;
 }
 
 std::vector<output_socket_id_t> LogicSimulator::registerOutputSockets(unsigned int count) {
-    std::vector<output_socket_id_t> ids;
-    for (unsigned int i = 0; i < count; i++) {
-        ids.push_back(registerOutputSocket());
-    }
-    return ids;
+	std::vector<output_socket_id_t> ids;
+	for (unsigned int i = 0; i < count; i++) {
+		ids.push_back(registerOutputSocket());
+	}
+	return ids;
 }
 
-input_socket_id_t LogicSimulator::registerInputSocket(unsigned int count) {
-    input_socket_id_t id = inputCountSockets.size();
-    inputCountSockets.push_back(count);
-    return id;
+input_socket_id_t LogicSimulator::registerInputSocket() {
+	input_socket_id_t id = inputCountSockets.size();
+	inputCountSockets.push_back(0);
+	inputTotalCountSockets.push_back(0);
+	return id;
 }
 
 std::vector<input_socket_id_t> LogicSimulator::registerInputSockets(unsigned int count) {
-    std::vector<input_socket_id_t> ids;
-    for (unsigned int i = 0; i < count; i++) {
-        ids.push_back(registerInputSocket(0));
-    }
-    return ids;
+	std::vector<input_socket_id_t> ids;
+	for (unsigned int i = 0; i < count; i++) {
+		ids.push_back(registerInputSocket());
+	}
+	return ids;
 }
 
 eval_gate_id_t LogicSimulator::registerGate(input_socket_id_t inputSocket, output_socket_id_t outputSocket, GateType type) {
-    gates.push_back(GateSingle{ type, inputSocket, outputSocket });
-    return gates.size() - 1;
+	gates.push_back(Gate{
+		type,
+		SocketsSingle{
+			inputSocket,
+			outputSocket
+		}
+	});
+	return gates.size() - 1;
 }
 
 eval_gate_id_t LogicSimulator::registerGate(input_socket_id_t inputSocket, std::vector<output_socket_id_t> outputSockets, GateType type) {
-    gates.push_back(GateOutputVector{ type, inputSocket, outputSockets });
-    return gates.size() - 1;
+	gates.push_back(Gate{
+		type,
+		SocketsOutputVector{
+			inputSocket,
+			outputSockets
+		}
+	});
+	return gates.size() - 1;
 }
 
 eval_gate_id_t LogicSimulator::registerGate(std::vector<input_socket_id_t> inputSockets, output_socket_id_t outputSocket, GateType type) {
-    gates.push_back(GateInputVector{ type, inputSockets, outputSocket });
-    return gates.size() - 1;
+	gates.push_back(Gate{
+		type,
+		SocketsInputVector{
+			inputSockets,
+			outputSocket
+		}
+	});
+	return gates.size() - 1;
 }
 
 eval_gate_id_t LogicSimulator::registerGate(std::vector<input_socket_id_t> inputSockets, std::vector<output_socket_id_t> outputSockets, GateType type) {
-    gates.push_back(GateBothVector{ type, inputSockets, outputSockets });
-    return gates.size() - 1;
+	gates.push_back(Gate{
+		type,
+		SocketsBothVector{
+			inputSockets,
+			outputSockets
+		}
+	});
+	return gates.size() - 1;
+}
+
+void LogicSimulator::decomissionGate(eval_gate_id_t gateId) {
+	gates[gateId].type = GateType::NONE;
+}
+
+void LogicSimulator::connect(output_socket_id_t sourceSocket, input_socket_id_t destinationSocket) {
+	connectionDestinations[sourceSocket].push_back(destinationSocket);
+	inputTotalCountSockets[destinationSocket] += 1;
+}
+
+void LogicSimulator::disconnect(output_socket_id_t sourceSocket, input_socket_id_t destinationSocket) {
+	connectionDestinations[sourceSocket].erase(std::remove(connectionDestinations[sourceSocket].begin(), connectionDestinations[sourceSocket].end(), destinationSocket), connectionDestinations[sourceSocket].end());
+	inputTotalCountSockets[destinationSocket] -= 1;
+}
+
+void LogicSimulator::simulationLoop(unsigned int threadId) {
+	while (true) {
+		const eval_gate_id_t startGate = gates.size() * threadId / numThreads;
+		const eval_gate_id_t endGate = gates.size() * (threadId + 1) / numThreads;
+		const output_socket_id_t startSocket = currentOutputSockets.size() * threadId / numThreads;
+		const output_socket_id_t endSocket = currentOutputSockets.size() * (threadId + 1) / numThreads;
+
+		calculateStates(startGate, endGate);
+		sync_after_state.arrive_and_wait();
+
+		if (!running.load(std::memory_order_acquire)) {
+			break;
+		}
+
+		propagateStates(startSocket, endSocket);
+		sync_after_propagation.arrive_and_wait();
+
+		if (threadId == 0) {
+			bool waiting = false;
+			// wait for pause to be false, if it is already false, don't wait
+			while (pause.load(std::memory_order_acquire) && running.load(std::memory_order_acquire)) {
+				if (!waiting) {
+					waiting = true;
+					paused.store(true, std::memory_order_release);
+				}
+				// don't busy wait
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
+			}
+			if (waiting) {
+				paused.store(false, std::memory_order_release);
+			}
+
+			std::swap(currentOutputSockets, nextOutputSockets);
+		}
+
+		sync_after_swap.arrive_and_wait();
+	}
+}
+
+inline void LogicSimulator::calculateStateBasic(unsigned int type, input_socket_id_t input, output_socket_id_t output) {
+	unsigned int powered = inputCountSockets[input];
+	if (type > 7) { // and + nand
+		unsigned int gc = inputTotalCountSockets[input];
+		nextOutputSockets[output] = ((type & 1) ^ (powered == gc)) && gc;
+	} else if (type > 5) { // nor + xnor
+		unsigned int gc = inputTotalCountSockets[input];
+		nextOutputSockets[output] = (!((powered & 1) || (powered && (type & 1)))) && gc;
+	} else if (type > 3) { // or + xor
+		nextOutputSockets[output] = (powered & 1) || (powered && (type & 1));
+	} else if (type > 1) { // tick_input + constant_on
+		nextOutputSockets[output] = type & 1;
+	} else { // stays the same
+		nextOutputSockets[output] = currentOutputSockets[output];
+	}
+}
+
+void LogicSimulator::calculateStates(eval_gate_id_t start, eval_gate_id_t end) {
+	for (eval_gate_id_t i = start; i < end; ++i) {
+		const Gate gate = gates[i];
+		const unsigned int type = static_cast<unsigned int>(gate.type);
+		if (type < 10) {
+			calculateStateBasic(type, std::get<SocketsSingle>(gate.sockets).inputSocket, std::get<SocketsSingle>(gate.sockets).outputSocket);
+		}
+		else {
+		}
+	}
+}
+
+void LogicSimulator::propagateStates(output_socket_id_t start, output_socket_id_t end) {
+	for (output_socket_id_t i = start; i < end; ++i) {
+		const char difference = nextOutputSockets[i] - currentOutputSockets[i];
+		if (difference != 0){
+			for (input_socket_id_t destination : connectionDestinations[i]) {
+				inputCountSockets[destination] += difference;
+			}
+		}
+	}
+}
+
+void LogicSimulator::signalToPause() {
+	pause.store(true, std::memory_order_release);
+}
+
+void LogicSimulator::signalToResume() {
+	pause.store(false, std::memory_order_release);
+}
+
+void LogicSimulator::waitForPause() {
+	while (!paused.load(std::memory_order_acquire)) {
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+}
+
+void LogicSimulator::setTickrate(double tickrate) {
+	this->tickrate.store(tickrate, std::memory_order_release);
+}
+
+void LogicSimulator::setSprint(bool sprint) {
+	this->sprint.store(sprint, std::memory_order_release);
+}
+
+void LogicSimulator::setOutputSocketState(output_socket_id_t outputSocket, logic_state_t state) {
+	const char difference = state - nextOutputSockets[outputSocket];
+	if (difference != 0) {
+		for (input_socket_id_t destination : connectionDestinations[outputSocket]) {
+			inputCountSockets[destination] += difference;
+		}
+	}
+	nextOutputSockets[outputSocket] = state;
 }

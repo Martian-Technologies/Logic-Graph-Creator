@@ -15,9 +15,18 @@ public:
 	void makeBranch(Position position, circuit_id_t containerId);
 	void makeBranch(const Address& address, circuit_id_t containerId);
 
-	void removeValue(Position position) { values.erase(position); }
-	void removeValue(const Address& address) {
+	void removeValueAt(Position position) { values.erase(position); }
+	void removeValueAt(const Address& address) {
 		const_cast<AddressTreeNode<T>&>(getParentBranch(address)).values.erase(address.getPosition(address.size() - 1));
+	}
+	void removeValue(T value) {
+		for (auto it = values.begin(); it != values.end(); ) {
+			if (it->second == value) {
+				it = values.erase(it);
+			} else {
+				++it;
+			}
+		}
 	}
 
 	inline T getValue(Position position) const { return values.at(position); }

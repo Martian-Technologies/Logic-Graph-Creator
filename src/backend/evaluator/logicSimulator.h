@@ -7,64 +7,93 @@
 
 #include "evaluatorDefs.h"
 
-struct Connection {
-	output_socket_id_t sourceSocket;
-	std::vector<input_socket_id_t> destinationSockets;
-};
-
-struct GateBothVector {
-	GateType type;
+struct SocketsBothVector {
 	std::vector<input_socket_id_t> inputSockets;
 	std::vector<output_socket_id_t> outputSockets;
 };
 
-struct GateSingle {
-	GateType type;
+struct SocketsSingle {
 	input_socket_id_t inputSocket;
 	output_socket_id_t outputSocket;
 };
 
-struct GateInputVector {
-	GateType type;
+struct SocketsInputVector {
 	std::vector<input_socket_id_t> inputSockets;
 	output_socket_id_t outputSocket;
 };
 
-struct GateOutputVector {
-	GateType type;
+struct SocketsOutputVector {
 	input_socket_id_t inputSocket;
 	std::vector<output_socket_id_t> outputSockets;
 };
 
-using Gate = std::variant<GateBothVector, GateSingle, GateInputVector, GateOutputVector>;
+struct Gate {
+	GateType type;
+	std::variant<SocketsBothVector, SocketsSingle, SocketsInputVector, SocketsOutputVector> sockets;
+	std::vector<input_socket_id_t> getInputSockets();
+	std::vector<output_socket_id_t> getOutputSockets();
+};
 
 class LogicSimulator {
 public:
 	LogicSimulator();
+	~LogicSimulator();
 
 	output_socket_id_t registerOutputSocket();
 	std::vector<output_socket_id_t> registerOutputSockets(unsigned int count);
-	input_socket_id_t registerInputSocket(unsigned int count);
+	input_socket_id_t registerInputSocket();
 	std::vector<input_socket_id_t> registerInputSockets(unsigned int count);
+
 	eval_gate_id_t registerGate(input_socket_id_t inputSocket, output_socket_id_t outputSocket, GateType type);
 	eval_gate_id_t registerGate(input_socket_id_t inputSocket, std::vector<output_socket_id_t> outputSockets, GateType type);
 	eval_gate_id_t registerGate(std::vector<input_socket_id_t> inputSockets, output_socket_id_t outputSocket, GateType type);
 	eval_gate_id_t registerGate(std::vector<input_socket_id_t> inputSockets, std::vector<output_socket_id_t> outputSockets, GateType type);
+
+	void decomissionGate(eval_gate_id_t gateId);
 	void connect(output_socket_id_t sourceSocket, input_socket_id_t destinationSocket);
 	void disconnect(output_socket_id_t sourceSocket, input_socket_id_t destinationSocket);
+	void signalToPause();
+	void signalToResume();
+	void waitForPause();
+
+	std::unordered_map<eval_gate_id_t, eval_gate_id_t> compressGates();
+
+	void setTickrate(double tickrate);
+	void setSprint(bool sprint);
+
+	Gate getGate(eval_gate_id_t gateId) { return gates[gateId]; }
+	logic_state_t getOutputSocketState(output_socket_id_t outputSocket) { return nextOutputSockets[outputSocket]; }
+	logic_state_t getInputSocketState(input_socket_id_t inputSocket) { return inputCountSockets[inputSocket]; }
+	void setOutputSocketState(output_socket_id_t outputSocket, logic_state_t state);
 
 private:
 	std::vector<logic_state_t> currentOutputSockets;
 	std::vector<logic_state_t> nextOutputSockets;
 	std::vector<unsigned int> inputCountSockets;
-	std::vector<Connection> connections;
+	std::vector<unsigned int> inputTotalCountSockets;
+	std::vector<std::vector<input_socket_id_t>> connectionDestinations;
 	std::vector<Gate> gates;
 
 	unsigned int numThreads;
+	std::atomic<bool> running;
 
 	std::barrier<> sync_after_state;
 	std::barrier<> sync_after_propagation;
 	std::barrier<> sync_after_swap;
+
+	std::atomic<bool> pause;
+	std::atomic<bool> paused;
+	std::atomic<double> tickrate;
+	std::atomic<bool> sprint;
+	std::atomic<int64_t> nextTick_us;
+
+	std::vector<std::thread> threads;
+
+	void simulationLoop(unsigned int threadId);
+	void calculateStates(eval_gate_id_t start, eval_gate_id_t end);
+	void propagateStates(output_socket_id_t start, output_socket_id_t end);
+
+	inline void calculateStateBasic(unsigned int type, input_socket_id_t input, output_socket_id_t output);
 };
 
 #endif // logicSimulator_h

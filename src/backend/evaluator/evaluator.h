@@ -14,9 +14,9 @@ public:
 	// pause/unpause used once the evaluator is "started" 
 	void setPause(bool pause);
 	void reset();
-	void setTickrate(unsigned long long tickrate);
+	void setTickrate(double tickrate);
 	void setUseTickrate(bool useTickrate);
-	long long int getRealTickrate() const;
+	double getRealTickrate() const;
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId);
 	logic_state_t getState(const Address& address);
@@ -29,9 +29,11 @@ public:
 private:
 	bool paused;
 	bool usingTickrate;
-	unsigned long long targetTickrate;
+	double targetTickrate;
 	LogicSimulator logicSimulator;
-	AddressTreeNode<eval_gate_id_t> addressTree;
+	AddressTreeNode<eval_gate_id_t> gateTree;
+	AddressTreeNode<input_socket_id_t> inputSocketTree;
+	AddressTreeNode<output_socket_id_t> outputSocketTree;
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);
