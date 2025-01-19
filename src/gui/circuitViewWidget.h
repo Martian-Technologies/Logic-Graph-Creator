@@ -9,8 +9,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "circuitView/circuitView.h"
 #include "circuitView/renderer/qtRenderer.h"
+#include "circuitView/circuitView.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
@@ -18,14 +18,7 @@ class CircuitViewWidget : public QWidget {
 public:
 	CircuitViewWidget(QWidget* parent = nullptr);
 
-	// setup
-	void setCircuit(SharedCircuit circuit);
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
-	void setSelector(QTreeWidget* treeWidget);
-
-	// dont call this func (temporary)
-	void updateSelectedItem();
-	
+	// setup	
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
 
 private:

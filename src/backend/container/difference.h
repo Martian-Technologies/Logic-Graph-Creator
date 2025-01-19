@@ -1,8 +1,6 @@
 #ifndef difference_h
 #define difference_h
 
-#include <variant>
-
 #include "block/blockDefs.h"
 
 class Difference {

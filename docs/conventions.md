@@ -90,7 +90,7 @@ if ()
 
 Put anything that needs to be constructed in the initializer lists.
 Default constructors should not be called.
-Primitive and enums should have defalt values delared in the header.
+Primitive and enums should have default values delared in the header.
 ```
 class Foo {
 public:
