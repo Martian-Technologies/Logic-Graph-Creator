@@ -6,7 +6,7 @@
 IconLoader::IconLoader() {
 	int logo = loadTileset(":/toolAndBlockIcons/defaultIcon.png");
 	if (logo != -1) {
-		setIcon("Single Place", logo, QRect(0, 0, 256, 256));
+		setIcon("State Changer", logo, QRect(0, 0, 256, 256));
 	}
 
 	int blocks = loadTileset(":/toolAndBlockIcons/logicTiles.png");
@@ -17,6 +17,21 @@ IconLoader::IconLoader() {
 		setIcon("Nand", blocks, QRect(256 * 5, 0, 256, 256));
 		setIcon("Nor", blocks, QRect(256 * 6, 0, 256, 256));
 		setIcon("Xnor", blocks, QRect(256 * 7, 0, 256, 256));
+		setIcon("Button", blocks, QRect(256 * 8, 0, 256, 256));
+		setIcon("Tick Button", blocks, QRect(256 * 9, 0, 256, 256));
+		setIcon("Switch", blocks, QRect(256 * 10, 0, 256, 256));
+		setIcon("Constant", blocks, QRect(256 * 11, 0, 256, 256));
+		setIcon("Light", blocks, QRect(256 * 12, 0, 256, 256));
+	}
+
+	int tools = loadTileset(":/toolAndBlockIcons/toolIcons.png");
+	if (tools != -1) {
+		setIcon("Single Place", tools, QRect(0, 0, 256, 256));
+		setIcon("Area Place", tools, QRect(256, 0, 256, 256));
+		setIcon("Move", tools, QRect(256 * 2, 0, 256, 256));
+		setIcon("Simple", tools, QRect(256, 256, 256, 256));
+		setIcon("Tensor", tools, QRect(0, 256, 256, 256));
+
 	}
 }
 

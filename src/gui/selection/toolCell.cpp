@@ -2,12 +2,12 @@
 
 #include "toolCell.h"
 
-ToolCell::ToolCell(QWidget* parent) : QToolButton(parent) {
+ToolCell::ToolCell(QWidget* parent, int size) : QToolButton(parent) {
 	setCheckable(true);
 	// setIcon(QIcon(":/toolAndBlockIcons/defaultIcon.png"));
-	setMinimumSize(48, 48);
-	setMaximumSize(48, 48);
-	setIconSize(QSize(32, 32));
+	setMinimumSize(size, size);
+	setMaximumSize(size, size);
+	setIconSize(QSize(size-16, size-16));
 	setAcceptDrops(true);
 	setFocusPolicy(Qt::NoFocus);
 }
@@ -36,6 +36,9 @@ void ToolCell::dropEvent(QDropEvent* event) {
 			if (roleDataMap.contains(Qt::DisplayRole)) {
 				event->acceptProposedAction();
 				QString value = roleDataMap[Qt::DisplayRole].toString();
+				if (value != "NONE") {
+					setToolTip(value);
+				}
 				setIcon(iconLoader.getIcon(value.toStdString()));
 				emit itemAccepted(value);
 				break;

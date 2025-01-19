@@ -12,7 +12,7 @@
 class ToolCell : public QToolButton {
 	Q_OBJECT
 public:
-	ToolCell(QWidget* parent = nullptr);
+	ToolCell(QWidget* parent = nullptr, int size = 48);
 
 signals:
 	// Signal emitted when a new item is accepted

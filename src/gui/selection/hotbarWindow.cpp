@@ -11,17 +11,19 @@
 HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Hotbar) {
 	// Load the UI file
 	ui->setupUi(this);
-	grid = new DynamicGridWidget(this, 48);
 	setFocusPolicy(Qt::NoFocus);
+
+	int size = 64;
+	grid = new DynamicGridWidget(this, size);
 
 	for (int i = 0; i < 10; i++) {
 		int keyNum = (i == 9) ? 0 : (i + 1);
 		// button widget
 		QWidget* widget = new QWidget(this);
-		widget->setMinimumSize(48, 48);
-		widget->setMaximumSize(48, 48);
+		widget->setMinimumSize(size, size);
+		widget->setMaximumSize(size, size);
 		// button
-		ToolCell* toolCell = new ToolCell(widget);
+		ToolCell* toolCell = new ToolCell(widget, size);
 		buttons.push_back(toolCell);
 		values.push_back("NONE");
 		toolCell->setShortcut(QKeySequence(static_cast<Qt::Key>(Qt::Key_0 + keyNum)));
@@ -30,8 +32,17 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Ho
 		connect(toolCell, &ToolCell::clicked, this, [this, i](bool state) {this->updateSelected(i, state);});
 		// connect(button, &QToolButton::triggered, this, &HotbarWindow::updateSelected2);
 		// number
-		QLabel* label = new QLabel(QString::number(keyNum), widget);
-		label->move(36, 30);
+		QWidget* labelBackground = new QWidget(widget);
+		labelBackground->setGeometry(size - 13, size - 15, 11, 14);
+		labelBackground->setStyleSheet("background-color:rgba(0, 0, 0, 0.86);");
+		QLabel* label = new QLabel(
+				"<b><font color='#ffffff' font_size=4>" +
+				QString::number(keyNum) +
+				"</font></b>",
+			labelBackground
+		);
+		label->setAlignment(Qt::AlignCenter);
+		label->move(1, -1);
 		// add widget
 		grid->addWidget(widget);
 	}
