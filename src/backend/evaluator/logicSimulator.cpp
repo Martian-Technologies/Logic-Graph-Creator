@@ -36,8 +36,13 @@ LogicSimulator::LogicSimulator()
 	running(true),
 	sync_after_state(numThreads),
 	sync_after_propagation(numThreads),
-	sync_after_swap(numThreads){
-	threads.resize(numThreads);
+	sync_after_swap(numThreads),
+	pause(false),
+	paused(false),
+	tickrate(40),
+	sprint(true),
+	nextTick_us(0) {
+threads.resize(numThreads);
 	for (unsigned int i = 0; i < numThreads; i++) {
 		threads[i] = std::thread(&LogicSimulator::simulationLoop, this, i);
 	}
@@ -159,7 +164,16 @@ void LogicSimulator::simulationLoop(unsigned int threadId) {
 		if (threadId == 0) {
 			bool waiting = false;
 			// wait for pause to be false, if it is already false, don't wait
-			while (pause.load(std::memory_order_acquire) && running.load(std::memory_order_acquire)) {
+			while (
+				running.load(std::memory_order_acquire)
+				&& (
+					pause.load(std::memory_order_acquire)
+					|| (
+					!sprint.load(std::memory_order_acquire))
+					&& std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() < nextTick_us.load(std::memory_order_acquire
+					)
+				)
+			) {
 				if (!waiting) {
 					waiting = true;
 					paused.store(true, std::memory_order_release);
@@ -170,6 +184,9 @@ void LogicSimulator::simulationLoop(unsigned int threadId) {
 			if (waiting) {
 				paused.store(false, std::memory_order_release);
 			}
+
+			const unsigned long long int target = tickrate.load(std::memory_order_acquire);
+			nextTick_us.fetch_add(60000000 / target, std::memory_order_release);
 
 			std::swap(currentOutputSockets, nextOutputSockets);
 		}
@@ -234,6 +251,8 @@ void LogicSimulator::waitForPause() {
 
 void LogicSimulator::setTickrate(double tickrate) {
 	this->tickrate.store(tickrate, std::memory_order_release);
+	nextTick_us.store(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::memory_order_release);
+
 }
 
 void LogicSimulator::setSprint(bool sprint) {
