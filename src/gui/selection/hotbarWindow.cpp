@@ -3,8 +3,6 @@
 #include <QLabel>
 #include <Qt>
 
-#include <iostream>
-
 #include "gui/customWidgets/dynamicGridWidget.h"
 #include "gui/customWidgets/singleItemDropWidget.h"
 #include "hotbarWindow.h"

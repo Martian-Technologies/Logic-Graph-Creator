@@ -1,8 +1,7 @@
 #ifndef selectorWindow_h
 #define selectorWindow_h
-#include <QDockWidget>
 
-#include <string>
+#include <QDockWidget>
 
 #include "backend/container/block/blockDefs.h"
 

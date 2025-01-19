@@ -3,46 +3,41 @@
 
 #include "iconLoader.h"
 
-TilesetLoader::TilesetLoader(QObject* parent)
-	: QObject(parent), tileWidth(0), tileHeight(0) { }
-
-bool TilesetLoader::loadTileset(const QString& filePath, int tileWidth, int tileHeight) {
-	QImageReader reader(filePath);
-	if (!reader.canRead()) {
-		qWarning() << "Failed to load tileset image:" << filePath;
-		return false;
+IconLoader::IconLoader() {
+	int logo = loadTileset(":/toolAndBlockIcons/defaultIcon.png");
+	if (logo != -1) {
+		setIcon("Single Place", logo, QRect(0, 0, 256, 256));
 	}
 
-	this->tilesetImage = QPixmap::fromImage(reader.read());
-	if (this->tilesetImage.isNull()) {
-		qWarning() << "Failed to load tileset image as QPixmap:" << filePath;
-		return false;
+	int blocks = loadTileset(":/toolAndBlockIcons/logicTiles.png");
+	if (blocks != -1) {
+		setIcon("And", blocks, QRect(256 * 2, 0, 256, 256));
+		setIcon("Or", blocks, QRect(256 * 3, 0, 256, 256));
+		setIcon("Xor", blocks, QRect(256 * 4, 0, 256, 256));
+		setIcon("Nand", blocks, QRect(256 * 5, 0, 256, 256));
+		setIcon("Nor", blocks, QRect(256 * 6, 0, 256, 256));
+		setIcon("Xnor", blocks, QRect(256 * 7, 0, 256, 256));
 	}
-
-	this->tileWidth = tileWidth;
-	this->tileHeight = tileHeight;
-
-	return true;
 }
 
-void TilesetLoader::mapTileToKey(const QString& key, int row, int col) {
-	if (this->tilesetImage.isNull() || tileWidth <= 0 || tileHeight <= 0) {
-		qWarning() << "Tileset image not loaded or invalid dimensions.";
-		return;
+int IconLoader::loadTileset(const std::string& path) {
+	QPixmap pixmap = QPixmap(path.c_str());
+	if (pixmap.isNull()) {
+		qWarning() << "Failed to load icon tileset:" << path;
+		return -1;
 	}
 
-	int x = col * tileWidth;
-	int y = row * tileHeight;
+	tilesets.push_back(pixmap);
 
-	if (x + tileWidth > tilesetImage.width() || y + tileHeight > tilesetImage.height()) {
-		qWarning() << "Tile coordinates out of bounds for key:" << key;
-		return;
-	}
-
-	QPixmap tile = tilesetImage.copy(x, y, tileWidth, tileHeight);
-	tileMap.insert(key, tile);
+	return tilesets.size() - 1;
 }
 
-QPixmap TilesetLoader::getTile(const QString& key) const {
-	return tileMap.value(key, QPixmap());
+void IconLoader::setIcon(const std::string& name, int index, const QRect& rect) {
+	nameToIcon[name] = { index, rect };
+}
+
+QIcon IconLoader::getIcon(const std::string& key) const {
+	auto iter = nameToIcon.find(key);
+	if (iter == nameToIcon.end()) return QIcon();
+	return QIcon(tilesets[iter->second.first].copy(iter->second.second));
 }

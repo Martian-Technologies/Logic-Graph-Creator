@@ -4,11 +4,12 @@
 
 ToolCell::ToolCell(QWidget* parent) : QToolButton(parent) {
 	setCheckable(true);
-	setIcon(QIcon(":/toolAndBlockIcons/defaultIcon.png"));
+	// setIcon(QIcon(":/toolAndBlockIcons/defaultIcon.png"));
 	setMinimumSize(48, 48);
 	setMaximumSize(48, 48);
+	setIconSize(QSize(32, 32));
 	setAcceptDrops(true);
-	setFocusPolicy( Qt::NoFocus );
+	setFocusPolicy(Qt::NoFocus);
 }
 
 void ToolCell::dragEnterEvent(QDragEnterEvent* event) {
@@ -34,7 +35,9 @@ void ToolCell::dropEvent(QDropEvent* event) {
 			// Assuming Qt::DisplayRole contains the text
 			if (roleDataMap.contains(Qt::DisplayRole)) {
 				event->acceptProposedAction();
-				emit itemAccepted(roleDataMap[Qt::DisplayRole].toString());
+				QString value = roleDataMap[Qt::DisplayRole].toString();
+				setIcon(iconLoader.getIcon(value.toStdString()));
+				emit itemAccepted(value);
 				break;
 			}
 		}

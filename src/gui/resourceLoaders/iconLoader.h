@@ -1,26 +1,23 @@
-#ifndef tilesetLoader_h
-#define tilesetLoader_h
+#ifndef iconLoader_h
+#define iconLoader_h
 
-#include <QObject>
 #include <QPixmap>
-#include <QString>
-#include <QMap>
+#include <QRect>
+#include <QIcon>
 
-class TilesetLoader : public QObject {
-	Q_OBJECT
 
+class IconLoader : public QObject {
 public:
-	explicit TilesetLoader(QObject* parent = nullptr);
+	IconLoader();
 
-	bool loadTileset(const QString& filePath, int tileWidth, int tileHeight);
-	QPixmap getTile(const QString& key) const;
-	void mapTileToKey(const QString& key, int row, int col);
+	QIcon getIcon(const std::string& key) const;
 
 private:
-	QPixmap tilesetImage;
-	QMap<QString, QPixmap> tileMap;
-	int tileWidth;
-	int tileHeight;
+	int loadTileset(const std::string& path);
+	void setIcon(const std::string& name, int index, const QRect& rect);
+
+	std::map<std::string, std::pair<int, QRect>> nameToIcon;
+	std::vector<QPixmap> tilesets;
 };
 
-#endif /* tilesetLoader_h */
+#endif /* iconLoader_h */

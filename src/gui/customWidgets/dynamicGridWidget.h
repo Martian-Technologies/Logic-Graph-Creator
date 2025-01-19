@@ -4,8 +4,6 @@
 #include <QGridLayout>
 #include <QWidget>
 
-#include <vector>
-
 class DynamicGridWidget : public QWidget {
 	Q_OBJECT
 public:

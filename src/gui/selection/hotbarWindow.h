@@ -4,9 +4,6 @@
 #include <QDockWidget>
 #include <QToolButton>
 
-#include <vector>
-#include <string>
-
 #include "backend/container/block/blockDefs.h"
 #include "toolCell.h"
 

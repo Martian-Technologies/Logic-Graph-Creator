@@ -1,9 +1,6 @@
 #ifndef fastMath_h
 #define fastMath_h
 
-#include <cstdint>
-#include <cmath>
-
 template <unsigned int p, class T>
 constexpr int FastPower(T x) {
 	if constexpr (p == 0) return 1;

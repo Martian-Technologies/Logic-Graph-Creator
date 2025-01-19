@@ -3,9 +3,11 @@
 
 #include <QDragEnterEvent>
 #include <QMouseEvent>
-#include <QDropEvent>
 #include <QToolButton>
+#include <QDropEvent>
 #include <QString>
+
+#include "gui/resourceLoaders/iconLoader.h"
 
 class ToolCell : public QToolButton {
 	Q_OBJECT
@@ -19,8 +21,8 @@ signals:
 protected:
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
-
-	std::string value;
+	
+	IconLoader iconLoader;
 };
 
 #endif /* toolCell_h */
