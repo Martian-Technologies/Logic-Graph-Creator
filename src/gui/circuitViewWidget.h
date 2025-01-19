@@ -9,8 +9,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "circuitView/circuitView.h"
 #include "circuitView/renderer/qtRenderer.h"
+#include "circuitView/circuitView.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {

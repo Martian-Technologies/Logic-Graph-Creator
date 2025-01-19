@@ -8,6 +8,7 @@
 #include <string>
 
 #include "backend/container/block/blockDefs.h"
+#include "toolCell.h"
 
 class DynamicGridWidget;
 
@@ -20,17 +21,18 @@ class HotbarWindow : public QDockWidget {
 public:
 	HotbarWindow(QWidget* parent = nullptr);
 	~HotbarWindow();
-	
+	void setItem(int index, std::string name);
+
 private:
 	void updateSelected(int index, bool state);
-	void selectBlock(BlockType blockType, int index);
-	void selectTool(std::string tool, int index);
+	void selectBlock(int index, BlockType blockType);
+	void selectTool(int index, std::string tool);
 
 	int selectedBlockIndex = -1;
 	int selectedToolIndex = -1;
 
 	std::vector<std::string> values;
-	std::vector<QToolButton*> buttons;
+	std::vector<ToolCell*> buttons;
 	DynamicGridWidget* grid;
 	Ui::Hotbar* ui;
 

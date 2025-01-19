@@ -3,9 +3,9 @@
 #include <QTreeView>
 #include <QCheckBox>
 
+#include "selection/selectorWindow.h"
+#include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
-#include "selectorWindow.h"
-#include "hotbarWindow.h"
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 

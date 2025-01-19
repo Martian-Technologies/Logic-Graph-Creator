@@ -20,7 +20,7 @@ void SelectorWindow::updateSelectedBlock() {
 	for (QTreeWidgetItem* item : ui->BlockTree->selectedItems()) {
 		if (item) {
 			QString str = item->text(0);
-			BlockType type; 
+			BlockType type;
 			if (str == "And") type = BlockType::AND;
 			else if (str == "Or") type = BlockType::OR;
 			else if (str == "Xor") type = BlockType::XOR;

@@ -78,6 +78,9 @@
         </property>
         <item>
          <widget class="QTreeWidget" name="BlockTree">
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+          </property>
           <attribute name="headerVisible">
            <bool>false</bool>
           </attribute>
@@ -164,6 +167,9 @@
         </property>
         <item>
          <widget class="QTreeWidget" name="ToolTree">
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragDropMode::DragOnly</enum>
+          </property>
           <attribute name="headerVisible">
            <bool>false</bool>
           </attribute>
