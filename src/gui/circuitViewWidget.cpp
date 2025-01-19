@@ -64,19 +64,8 @@ void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInsta
 	layout->addWidget(windowWrapper);
 	this->setLayout(layout);
 	
-	// load shaders
-	QByteArray qVertShader, qFragShader;
-	QFile vertFile(":/shaders/shader.vert.spv");
-    if (!vertFile.open(QFile::ReadOnly)) throw std::runtime_error("could not open vertex shader");
-	qVertShader = vertFile.readAll();
-	QFile fragFile(":/shaders/shader.frag.spv");
-    if (!fragFile.open(QFile::ReadOnly)) throw std::runtime_error("could not open fragment shader");
-	qFragShader = fragFile.readAll();
-	std::vector<char> vertShader(qVertShader.begin(), qVertShader.end());
-	std::vector<char> fragShader(qFragShader.begin(), qFragShader.end());
-
 	// initialize renderer
-	circuitView.getRenderer().initialize(view, surface, size().width(), size().height(), vertShader, fragShader);
+	circuitView.getRenderer().initialize(view, surface, size().width(), size().height());
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {

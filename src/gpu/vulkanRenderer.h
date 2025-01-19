@@ -14,7 +14,7 @@ class VulkanRenderer : public Renderer {
 	// VULKAN -----------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 public:
-	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h, std::vector<char> vertCode, std::vector<char> fragCode);
+	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
 	void destroy();
 	void resize(int w, int h);
 	

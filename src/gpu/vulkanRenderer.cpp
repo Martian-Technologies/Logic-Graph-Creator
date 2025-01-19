@@ -1,9 +1,10 @@
 #include "vulkanRenderer.h"
 
+#include "computerAPI/fileLoader.h"
 #include "gpu/vulkanUtil.h"
 
 // obviously todo shader resource passing
-void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h, std::vector<char> vertCode, std::vector<char> fragCode)
+void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h)
 {
 	this->view = view;
 	this->surface = surface;
@@ -15,8 +16,8 @@ void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, i
 	swapchain = createSwapchain(view, surface, windowWidth, windowHeight);
 	createFrameDatas(view.device, frames, FRAME_OVERLAP, view.queueFamilies.graphicsFamily.value().index );
 
-	vertShader = createShaderModule(view.device, vertCode);
-	fragShader = createShaderModule(view.device, fragCode);
+	vertShader = createShaderModule(view.device, readFileAsBytes(":/shaders/shader.vert.spv"));
+	fragShader = createShaderModule(view.device, readFileAsBytes(":/shaders/shader.frag.spv"));
 	pipeline = createPipeline(view.device, swapchain, vertShader, fragShader);
 	createSwapchainFramebuffers(view, swapchain, pipeline.renderPass);
 }
