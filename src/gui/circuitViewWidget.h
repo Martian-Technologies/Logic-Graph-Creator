@@ -46,11 +46,15 @@ private:
 
 	// ui elements
 	QTreeWidget* treeWidget;
+
+	// vulkan
+	std::unique_ptr<QVulkanInstance> qVulkanInstance = nullptr;
 	VulkanWindow* vulkanWindow;
 
 	// settings (temp)
 	bool mouseControls;
 
+private:
 	void save();
 	void load(const QString& filePath);
 

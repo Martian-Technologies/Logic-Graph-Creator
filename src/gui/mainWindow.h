@@ -19,7 +19,8 @@ class MainWindow : public QMainWindow {
 
 public:
 	MainWindow(QWidget* parent = nullptr);
-	~MainWindow();
+
+	void closeEvent(QCloseEvent* event) override;
 	
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);

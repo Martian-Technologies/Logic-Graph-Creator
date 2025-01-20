@@ -48,15 +48,15 @@ void CircuitViewWidget::hideEvent(QHideEvent* event) {
 
 void CircuitViewWidget::createVulkanWindow() {
 
-	QVulkanInstance qVulkanInstance;
-	qVulkanInstance.setVkInstance(Vulkan::Instance());
-	qVulkanInstance.create();
+	qVulkanInstance = std::make_unique<QVulkanInstance>();
+	qVulkanInstance->setVkInstance(Vulkan::Instance());
+	qVulkanInstance->create();
 
 	// create vulkan window
 	vulkanWindow = new VulkanWindow(&circuitView.getRenderer());
 	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
 	vulkanWindow->setSurfaceType(QSurface::VulkanSurface);
-	vulkanWindow->setVulkanInstance(&qVulkanInstance);
+	vulkanWindow->setVulkanInstance(qVulkanInstance.get());
 	vulkanWindow->show();
 
 	// embed vulkan window
@@ -71,6 +71,7 @@ void CircuitViewWidget::createVulkanWindow() {
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {
+	circuitView.getRenderer().stop();
 	circuitView.getRenderer().destroy();
 }
 

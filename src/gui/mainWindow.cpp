@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	layout->addWidget(circuitViewWidget);
 }
 
-MainWindow::~MainWindow() {
+void MainWindow::closeEvent(QCloseEvent* event) {
 	circuitViewWidget->destroyVulkanWindow();
 }
 

@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
 
 	// initialize vulkan
 	setupVulkan();
-
+	
 	// create main window
 	MainWindow window;
 	window.show();
