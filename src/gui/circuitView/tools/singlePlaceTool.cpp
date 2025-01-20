@@ -1,5 +1,4 @@
 #include <Qt>
-#include <system_error>
 
 #include "singlePlaceTool.h"
 #include "gui/circuitView/renderer/renderer.h"

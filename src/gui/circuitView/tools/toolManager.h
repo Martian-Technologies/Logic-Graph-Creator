@@ -31,6 +31,7 @@ public:
 		else if (toolType == "Simple") changeTool<SingleConnectTool>();
 		else if (toolType == "Tensor") changeTool<TensorConnectTool>();
 		else if (toolType == "State Changer") changeTool<LogicToucher>();
+		else if (toolType == "NONE") clearTool();
 		else return;
 		this->toolType = toolType;
 	}
@@ -72,6 +73,15 @@ private:
 			placementTool->selectBlock(selectedBlock);
 			placementTool->setRotation(selectedRotation);
 		}
+	}
+
+	inline void clearTool() {
+		BaseBlockPlacementTool* oldPlacementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
+		if (oldPlacementTool) {
+			selectedRotation = oldPlacementTool->getRotation();
+		}
+		unregisterEvents();
+		tool = nullptr;
 	}
 
 	void unregisterEvents() {

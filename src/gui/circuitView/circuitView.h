@@ -30,6 +30,14 @@ public:
 		renderer.updateCircuit(difference);
 	}
 
+	void setSelectedTool(std::string tool) {
+		toolManager.changeTool(tool);
+	}
+
+	void setSelectedBlock(BlockType blockType) {
+		toolManager.selectBlock(blockType);
+	}
+
 	// --------------- Gettters ---------------
 
 	inline Circuit* getCircuit() { return circuit.get(); }

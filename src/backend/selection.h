@@ -1,8 +1,6 @@
 #ifndef selection_h
 #define selection_h
 
-#include <memory>
-
 #include "backend/position/position.h"
 
 typedef unsigned int dimensional_selection_size_t;
