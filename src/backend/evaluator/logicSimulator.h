@@ -74,12 +74,7 @@ private:
 	std::vector<std::vector<input_socket_id_t>> connectionDestinations;
 	std::vector<Gate> gates;
 
-	unsigned int numThreads;
 	std::atomic<bool> running;
-
-	std::barrier<> sync_after_state;
-	std::barrier<> sync_after_propagation;
-	std::barrier<> sync_after_swap;
 
 	std::atomic<bool> pause;
 	std::atomic<bool> paused;
@@ -87,11 +82,11 @@ private:
 	std::atomic<bool> sprint;
 	std::atomic<int64_t> nextTick_us;
 
-	std::vector<std::thread> threads;
+	std::thread thread;
 
-	void simulationLoop(unsigned int threadId);
-	void calculateStates(eval_gate_id_t start, eval_gate_id_t end);
-	void propagateStates(output_socket_id_t start, output_socket_id_t end);
+	void simulationLoop();
+	void calculateStates();
+	void propagateStates();
 
 	inline void calculateStateBasic(unsigned int type, input_socket_id_t input, output_socket_id_t output);
 };

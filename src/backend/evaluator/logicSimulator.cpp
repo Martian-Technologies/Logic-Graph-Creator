@@ -32,27 +32,18 @@ std::vector<output_socket_id_t> Gate::getOutputSockets() {
 }
 
 LogicSimulator::LogicSimulator()
-	: numThreads(4),
-	running(true),
-	sync_after_state(numThreads),
-	sync_after_propagation(numThreads),
-	sync_after_swap(numThreads),
+	: running(true),
 	pause(false),
 	paused(false),
 	tickrate(40),
 	sprint(true),
-	nextTick_us(0) {
-threads.resize(numThreads);
-	for (unsigned int i = 0; i < numThreads; i++) {
-		threads[i] = std::thread(&LogicSimulator::simulationLoop, this, i);
-	}
+	nextTick_us(0),
+	thread(std::thread(&LogicSimulator::simulationLoop, this)){
 }
 
 LogicSimulator::~LogicSimulator() {
 	running.store(false, std::memory_order_release);
-	for (std::thread& thread : threads) {
-		thread.join();
-	}
+	thread.join();
 }
 
 output_socket_id_t LogicSimulator::registerOutputSocket() {
@@ -144,54 +135,43 @@ void LogicSimulator::disconnect(output_socket_id_t sourceSocket, input_socket_id
 	inputTotalCountSockets[destinationSocket] -= 1;
 }
 
-void LogicSimulator::simulationLoop(unsigned int threadId) {
+void LogicSimulator::simulationLoop() {
 	while (true) {
-		const eval_gate_id_t startGate = gates.size() * threadId / numThreads;
-		const eval_gate_id_t endGate = gates.size() * (threadId + 1) / numThreads;
-		const output_socket_id_t startSocket = currentOutputSockets.size() * threadId / numThreads;
-		const output_socket_id_t endSocket = currentOutputSockets.size() * (threadId + 1) / numThreads;
+		calculateStates();
 
-		calculateStates(startGate, endGate);
-		sync_after_state.arrive_and_wait();
+		propagateStates();
+
+		bool waiting = false;
+		bool sprinting = sprint.load(std::memory_order_acquire);
+		// wait for pause to be false, if it is already false, don't wait
+		while (
+			running.load(std::memory_order_acquire)
+			&& (
+				pause.load(std::memory_order_acquire)
+				|| (!sprinting)
+				&& std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() < nextTick_us.load(std::memory_order_acquire)
+			)
+		) {
+			if (!waiting) {
+				waiting = true;
+				paused.store(true, std::memory_order_release);
+			}
+			std::this_thread::sleep_for(std::chrono::microseconds(100));
+		}
+		if (waiting) {
+			paused.store(false, std::memory_order_release);
+		}
+
+		if (!sprinting) {
+			const double target = tickrate.load(std::memory_order_acquire);
+			nextTick_us.fetch_add(1000000 / target, std::memory_order_release);
+		}
 
 		if (!running.load(std::memory_order_acquire)) {
 			break;
 		}
 
-		propagateStates(startSocket, endSocket);
-		sync_after_propagation.arrive_and_wait();
-
-		if (threadId == 0) {
-			bool waiting = false;
-			// wait for pause to be false, if it is already false, don't wait
-			while (
-				running.load(std::memory_order_acquire)
-				&& (
-					pause.load(std::memory_order_acquire)
-					|| (
-					!sprint.load(std::memory_order_acquire))
-					&& std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() < nextTick_us.load(std::memory_order_acquire
-					)
-				)
-			) {
-				if (!waiting) {
-					waiting = true;
-					paused.store(true, std::memory_order_release);
-				}
-				// don't busy wait
-				std::this_thread::sleep_for(std::chrono::microseconds(100));
-			}
-			if (waiting) {
-				paused.store(false, std::memory_order_release);
-			}
-
-			const unsigned long long int target = tickrate.load(std::memory_order_acquire);
-			nextTick_us.fetch_add(60000000 / target, std::memory_order_release);
-
-			std::swap(currentOutputSockets, nextOutputSockets);
-		}
-
-		sync_after_swap.arrive_and_wait();
+		std::swap(currentOutputSockets, nextOutputSockets);
 	}
 }
 
@@ -212,8 +192,8 @@ inline void LogicSimulator::calculateStateBasic(unsigned int type, input_socket_
 	}
 }
 
-void LogicSimulator::calculateStates(eval_gate_id_t start, eval_gate_id_t end) {
-	for (eval_gate_id_t i = start; i < end; ++i) {
+void LogicSimulator::calculateStates() {
+	for (eval_gate_id_t i = 0; i < gates.size(); ++i) {
 		const Gate gate = gates[i];
 		const unsigned int type = static_cast<unsigned int>(gate.type);
 		if (type < 10) {
@@ -224,8 +204,8 @@ void LogicSimulator::calculateStates(eval_gate_id_t start, eval_gate_id_t end) {
 	}
 }
 
-void LogicSimulator::propagateStates(output_socket_id_t start, output_socket_id_t end) {
-	for (output_socket_id_t i = start; i < end; ++i) {
+void LogicSimulator::propagateStates() {
+	for (output_socket_id_t i = 0; i < nextOutputSockets.size(); ++i) {
 		const char difference = nextOutputSockets[i] - currentOutputSockets[i];
 		if (difference != 0){
 			for (input_socket_id_t destination : connectionDestinations[i]) {
@@ -257,6 +237,7 @@ void LogicSimulator::setTickrate(double tickrate) {
 
 void LogicSimulator::setSprint(bool sprint) {
 	this->sprint.store(sprint, std::memory_order_release);
+	nextTick_us.store(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::memory_order_release);
 }
 
 void LogicSimulator::setOutputSocketState(output_socket_id_t outputSocket, logic_state_t state) {

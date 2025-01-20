@@ -43,5 +43,5 @@ void MainWindow::simUseSpeed(Qt::CheckState state) {
 }
 
 void MainWindow::setSimSpeed(double speed) {
-	backend.getEvaluator(evalId)->setTickrate(std::round(speed * 60));
+	backend.getEvaluator(evalId)->setTickrate(speed);
 }
