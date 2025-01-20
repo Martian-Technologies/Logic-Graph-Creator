@@ -21,7 +21,7 @@ public:
 	CircuitViewWidget(QWidget* parent = nullptr);
 
 	// setup
-	void createVulkanWindow(VulkanGraphicsView vulkanView, QVulkanInstance* qVulkanInstance);
+	void createVulkanWindow();
 	void setCircuit(std::shared_ptr<Circuit> circuit);
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
 	void setSelector(QTreeWidget* treeWidget);

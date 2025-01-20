@@ -14,7 +14,7 @@ class VulkanRenderer : public Renderer {
 	// VULKAN -----------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 public:
-	void initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h);
+	void initialize(VkSurfaceKHR surface, int w, int h);
 	void destroy();
 	void resize(int w, int h);
 	
@@ -29,7 +29,6 @@ private:
 	int windowWidth, windowHeight;
 
 	// vulkan
-	VulkanGraphicsView view;
 	VkSurfaceKHR surface;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];

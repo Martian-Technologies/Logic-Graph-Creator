@@ -2,12 +2,13 @@
 
 #include <limits>
 
+#include "gpu/vulkanManager.h"
 #include "gpu/vulkanDevice.h"
 
-SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int windowWidth, int windowHeight) {
+SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowHeight) {
 	SwapchainData swapchain;
 	
-	SwapchainSupportDetails swapchainSupport = querySwapchainSupport(view.physicalDevice, surface);
+	SwapchainSupportDetails swapchainSupport = querySwapchainSupport(Vulkan::PhysicalDevice(), surface);
 
 	// choose best values for swap chain
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapchainSupport.formats);
@@ -32,9 +33,8 @@ SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	// if we need our queues to share this swapchain (they are different queues), update the settings
-	QueueFamilies indices = findQueueFamilies(view.physicalDevice, surface);
-	uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value().index, indices.presentFamily.value().index};
-	if (indices.graphicsFamily.value().index != indices.presentFamily.value().index) {
+	uint32_t queueFamilyIndices[] = {Vulkan::QueueFamilies().graphicsFamily.value().index, Vulkan::QueueFamilies().presentFamily.value().index};
+	if (queueFamilyIndices[0] != queueFamilyIndices[1]) {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -52,16 +52,18 @@ SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	// create the swapChain
-	if (vkCreateSwapchainKHR(view.device, &createInfo, nullptr, &swapchain.handle) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(Vulkan::Device(), &createInfo, nullptr, &swapchain.handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
+	// save info about the swapchain
 	swapchain.imageFormat = surfaceFormat.format;
 	swapchain.extent = extent;
 
-	vkGetSwapchainImagesKHR(view.device, swapchain.handle, &imageCount, nullptr);
+	// get swapchain images
+	vkGetSwapchainImagesKHR(Vulkan::Device(), swapchain.handle, &imageCount, nullptr);
 	swapchain.images.resize(imageCount);
-	vkGetSwapchainImagesKHR(view.device, swapchain.handle, &imageCount, swapchain.images.data());
+	vkGetSwapchainImagesKHR(Vulkan::Device(), swapchain.handle, &imageCount, swapchain.images.data());
 
 	// create an image view for each image
 	swapchain.imageViews.resize(swapchain.images.size());
@@ -86,7 +88,7 @@ SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(view.device, &createInfo, nullptr, &swapchain.imageViews[i]) != VK_SUCCESS) {
+		if (vkCreateImageView(Vulkan::Device(), &createInfo, nullptr, &swapchain.imageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image view!");
 		} 
 	}
@@ -94,7 +96,7 @@ SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface, int
 	return swapchain;
 }
 
-void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapchain, VkRenderPass renderPass) {
+void createSwapchainFramebuffers(SwapchainData& swapchain, VkRenderPass renderPass) {
 	swapchain.framebuffers.resize(swapchain.imageViews.size());
 
 	for (size_t i = 0; i < swapchain.imageViews.size(); i++) {
@@ -111,22 +113,22 @@ void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapcha
 		framebufferInfo.height = swapchain.extent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(view.device, &framebufferInfo, nullptr, &swapchain.framebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(Vulkan::Device(), &framebufferInfo, nullptr, &swapchain.framebuffers[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 }
 
-void destroySwapchain(VulkanGraphicsView view, SwapchainData &swapchain) {
+void destroySwapchain(SwapchainData &swapchain) {
 	for (VkFramebuffer framebuffer : swapchain.framebuffers) {
-        vkDestroyFramebuffer(view.device, framebuffer, nullptr);
+        vkDestroyFramebuffer(Vulkan::Device(), framebuffer, nullptr);
     }
 	
 	for (VkImageView imageView : swapchain.imageViews) {
-		vkDestroyImageView(view.device, imageView, nullptr);
+		vkDestroyImageView(Vulkan::Device(), imageView, nullptr);
 	}
 	
-	vkDestroySwapchainKHR(view.device, swapchain.handle, nullptr);
+	vkDestroySwapchainKHR(Vulkan::Device(), swapchain.handle, nullptr);
 }
 
 // UTIL

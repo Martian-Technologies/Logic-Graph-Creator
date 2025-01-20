@@ -4,30 +4,27 @@
 #include "gpu/vulkanUtil.h"
 
 // obviously todo shader resource passing
-void VulkanRenderer::initialize(VulkanGraphicsView view, VkSurfaceKHR surface, int w, int h)
+void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 {
-	this->view = view;
 	this->surface = surface;
-
 	windowWidth = w;
 	windowHeight = h;
 
-	// TODO - make all of these vulkan sub functions have uniform syntax (probably after view rework)
-	swapchain = createSwapchain(view, surface, windowWidth, windowHeight);
-	createFrameDatas(view.device, frames, FRAME_OVERLAP, view.queueFamilies.graphicsFamily.value().index );
+	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	createFrameDatas(frames, FRAME_OVERLAP);
 
-	vertShader = createShaderModule(view.device, readFileAsBytes(":/shaders/shader.vert.spv"));
-	fragShader = createShaderModule(view.device, readFileAsBytes(":/shaders/shader.frag.spv"));
-	pipeline = createPipeline(view.device, swapchain, vertShader, fragShader);
-	createSwapchainFramebuffers(view, swapchain, pipeline.renderPass);
+	vertShader = createShaderModule(readFileAsBytes(":/shaders/shader.vert.spv"));
+	fragShader = createShaderModule(readFileAsBytes(":/shaders/shader.frag.spv"));
+	pipeline = createPipeline(swapchain, vertShader, fragShader);
+	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 }
 
 void VulkanRenderer::destroy() {
-	destroySwapchain(view, swapchain);
-	destroyFrameDatas(view.device, frames, FRAME_OVERLAP);
-	destroyShaderModule(view.device, vertShader);
-	destroyShaderModule(view.device, fragShader);
-	destroyPipeline(view.device, pipeline);
+	destroySwapchain(swapchain);
+	destroyFrameDatas(frames, FRAME_OVERLAP);
+	destroyShaderModule(vertShader);
+	destroyShaderModule(fragShader);
+	destroyPipeline(pipeline);
 }
 
 void VulkanRenderer::resize(int w, int h) {
@@ -58,11 +55,14 @@ void VulkanRenderer::renderLoop() {
 		// get next frame
 		FrameData& frame = getCurrentFrame();		
 		// wait for frame end
-		vkWaitForFences(view.device, 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+		vkWaitForFences(Vulkan::Device(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+
+		VkQueue& graphicsQueue = Vulkan::Singleton().requestGraphicsQueue();
+		VkQueue& presentQueue = Vulkan::Singleton().requestPresentQueue();
 
 		// get next swapchain image to render too
 		uint32_t imageIndex;
-		VkResult imageGetResult = vkAcquireNextImageKHR(view.device, swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::Device(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
 			// wait for a resize event
 			continue;
@@ -71,7 +71,7 @@ void VulkanRenderer::renderLoop() {
 		}
 
 		// reset render fence
-		vkResetFences(view.device, 1, &frame.renderFence);
+		vkResetFences(Vulkan::Device(), 1, &frame.renderFence);
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -98,7 +98,7 @@ void VulkanRenderer::renderLoop() {
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
-		if (vkQueueSubmit(view.graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
+		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 
@@ -113,13 +113,13 @@ void VulkanRenderer::renderLoop() {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
 
-		vkQueuePresentKHR(view.presentQueue, &presentInfo);
+		vkQueuePresentKHR(presentQueue, &presentInfo);
 
 		//increase the number of frames drawn
 		++frameNumber;
 	}
 
-	vkDeviceWaitIdle(view.device);
+	vkDeviceWaitIdle(Vulkan::Device());
 }
 
 void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {
@@ -174,11 +174,11 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 }
 
 void VulkanRenderer::handleResize() {
-	vkDeviceWaitIdle(view.device);
+	vkDeviceWaitIdle(Vulkan::Device());
 
-	destroySwapchain(view, swapchain);
-	swapchain = createSwapchain(view, surface, windowWidth, windowHeight);
-	createSwapchainFramebuffers(view, swapchain, pipeline.renderPass);
+	destroySwapchain(swapchain);
+	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 }
 
 // Vulkan Setup

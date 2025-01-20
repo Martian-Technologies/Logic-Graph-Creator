@@ -1,7 +1,5 @@
 #include "vulkanManager.h"
 
-#include "vulkanDevice.h"
-
 #include <cassert>
 #include <cstring>
 
@@ -14,10 +12,10 @@ const std::vector<const char*> validationLayers = {
 };
 
 // Functions ---------------------------------------------------------------------------
-void VulkanManager::createInstance(const std::vector<const char*>& requiredExtensions) {
+void Vulkan::createInstance(const std::vector<const char*>& requiredExtensions) {
 	// confirm we have validation layers if we need them
 	if (DEBUG && !checkValidationLayerSupport()) {
-		fail("validation layers requested, but not available!");
+		throw std::runtime_error("validation layers requested, but not available!");
 	}
 
 	// set applicaiton information
@@ -53,36 +51,22 @@ void VulkanManager::createInstance(const std::vector<const char*>& requiredExten
 
 	// create the instance
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-		fail("failed to create instance!");
+		throw std::runtime_error("failed to create instance!");
 	}
 }
 
-void VulkanManager::setUpDevice(VkSurfaceKHR surface) {
+void Vulkan::setupDevice(VkSurfaceKHR surface) {
 	pickPhysicalDevice(surface);
-	createLogicalDevice(surface);
+	createLogicalDevice();
 }
 
-VulkanGraphicsView VulkanManager::createGraphicsView() {
-	int graphicsIndex = graphicsRoundRobin++ % graphicsQueues.size();
-	int presentIndex = presentRoundRobin++ % presentQueues.size();
-
-	return { device, physicalDevice, queueFamilies, graphicsQueues[graphicsIndex], presentQueues[presentIndex] };
-}
-
-void VulkanManager::destroy() {
+void Vulkan::destroy() {
 	vkDestroyDevice(device, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
 
-// TODO - the application as a whole should have a failing system.
-// this also won't work once NDEBUG is re-enabled and asserts are disabled
-void VulkanManager::fail(const std::string& reason) {
-	std::cerr << reason << std::endl;
-	assert(false);
-}
-
 // Helper functions
-bool VulkanManager::checkValidationLayerSupport() {
+bool Vulkan::checkValidationLayerSupport() {
 	// get supported layers
 	uint32_t layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -108,12 +92,12 @@ bool VulkanManager::checkValidationLayerSupport() {
 	return true;
 }
 
-void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
+void Vulkan::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
 	if (deviceCount == 0) {
-		fail("failed to find GPUs with Vulkan support!");
+		throw std::runtime_error("failed to find GPUs with Vulkan support!");
 	}
 	
 	// get vulkan supported devices
@@ -124,16 +108,17 @@ void VulkanManager::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 	for (const auto& device : devices) {
 		if (isDeviceSuitable(device, idealSurface)) {
 			physicalDevice = device;
+			queueFamilies = findQueueFamilies(physicalDevice, idealSurface);
 			return;
 		}
 	}
 
-	fail("failed to find suitable GPU");
+	throw std::runtime_error("failed to find suitable GPU");
 }
 
-bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface) {
+bool Vulkan::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface) {
 	// check queue graphics feature support
-	QueueFamilies indices = findQueueFamilies(physicalDevice, idealSurface);
+	struct QueueFamilies indices = findQueueFamilies(physicalDevice, idealSurface);
 	// check extension support
 	bool extensionsSupported = checkDeviceExtensionSupport(physicalDevice, deviceExtensions);
 	// check swap chain adequacy
@@ -146,10 +131,9 @@ bool VulkanManager::isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceK
 	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
+void Vulkan::createLogicalDevice() {
 	// create all the queues from unique queues that we need
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	queueFamilies = findQueueFamilies(physicalDevice, surface);
 	std::set<QueueFamily> uniqueQueueFamilies = { queueFamilies.graphicsFamily.value(), queueFamilies.presentFamily.value() };
 	std::map<QueueFamily, std::vector<float>> queueCreatePriorities;
 	float queuePriority = 1.0f;
@@ -196,4 +180,16 @@ void VulkanManager::createLogicalDevice(VkSurfaceKHR surface) {
 	for (int i = 0; i < presentQueues.size(); ++i) {
 		vkGetDeviceQueue(device, queueFamilies.presentFamily.value().index, i, &presentQueues[i]);
 	}
+}
+
+VkQueue& Vulkan::requestGraphicsQueue(bool important) {
+	VkQueue& queue = graphicsQueues[graphicsRoundRobin];
+	graphicsRoundRobin = (graphicsRoundRobin + 1) % queueFamilies.graphicsFamily.value().queueCount;
+	return queue;
+}
+
+VkQueue& Vulkan::requestPresentQueue(bool important) {
+	VkQueue& queue = presentQueues[presentRoundRobin];
+	presentRoundRobin = (presentRoundRobin + 1) % queueFamilies.presentFamily.value().queueCount;
+	return queue;
 }

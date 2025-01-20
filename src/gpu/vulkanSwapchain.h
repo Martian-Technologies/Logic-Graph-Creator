@@ -3,8 +3,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "vulkanManager.h"
-
 struct SwapchainData {
 	VkSwapchainKHR handle;
 	VkFormat imageFormat;
@@ -14,10 +12,9 @@ struct SwapchainData {
 	std::vector<VkFramebuffer> framebuffers;
 };
 
-SwapchainData createSwapchain(VulkanGraphicsView view, VkSurfaceKHR surface,
-                              int windowWidth, int windowHeight);
-void createSwapchainFramebuffers(VulkanGraphicsView view, SwapchainData& swapchain, VkRenderPass renderPass);
-void destroySwapchain(VulkanGraphicsView view, SwapchainData& swapchain);
+SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowHeight);
+void createSwapchainFramebuffers(SwapchainData& swapchain, VkRenderPass renderPass);
+void destroySwapchain(SwapchainData& swapchain);
 
 VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

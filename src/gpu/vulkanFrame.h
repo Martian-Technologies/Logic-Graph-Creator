@@ -10,7 +10,7 @@ struct FrameData {
 	VkFence renderFence;        
 };
 
-void createFrameDatas(VkDevice device, FrameData *frameDatas, unsigned int numFrames, unsigned int graphicsQueueIndex);
-void destroyFrameDatas(VkDevice device, FrameData* frameDatas, unsigned int numFrames);
+void createFrameDatas(FrameData *frameDatas, unsigned int numFrames);
+void destroyFrameDatas(FrameData* frameDatas, unsigned int numFrames);
 
 #endif

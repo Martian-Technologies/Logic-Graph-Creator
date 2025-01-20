@@ -1,11 +1,12 @@
 #include "vulkanPipeline.h"
+#include "gpu/vulkanManager.h"
 
 const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_VIEWPORT,
 	VK_DYNAMIC_STATE_SCISSOR
 };
 
-PipelineData createPipeline(VkDevice device, SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag) {
+PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag) {
 	PipelineData pipeline;
 
 	// shader stages
@@ -102,7 +103,7 @@ PipelineData createPipeline(VkDevice device, SwapchainData& swapchain, VkShaderM
 	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // unused
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // unused
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(Vulkan::Device(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -141,7 +142,7 @@ PipelineData createPipeline(VkDevice device, SwapchainData& swapchain, VkShaderM
 	renderPassInfo.pSubpasses = &subpass;
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
-	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &pipeline.renderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(Vulkan::Device(), &renderPassInfo, nullptr, &pipeline.renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
 
@@ -164,34 +165,16 @@ PipelineData createPipeline(VkDevice device, SwapchainData& swapchain, VkShaderM
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // unused
 	pipelineInfo.basePipelineIndex = -1; // unused
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.handle) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(Vulkan::Device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 	
 	return pipeline;
 }
 
-void destroyPipeline(VkDevice device, PipelineData& pipeline) {
-	vkDestroyPipeline(device, pipeline.handle, nullptr);
-	vkDestroyPipelineLayout(device, pipeline.layout, nullptr);
-	vkDestroyRenderPass(device, pipeline.renderPass, nullptr);
+void destroyPipeline(PipelineData& pipeline) {
+	vkDestroyPipeline(Vulkan::Device(), pipeline.handle, nullptr);
+	vkDestroyPipelineLayout(Vulkan::Device(), pipeline.layout, nullptr);
+	vkDestroyRenderPass(Vulkan::Device(), pipeline.renderPass, nullptr);
 
-}
-
-VkShaderModule createShaderModule(VkDevice device, std::vector<char> byteCode) {
-	VkShaderModuleCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = byteCode.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(byteCode.data());
-
-	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create shader module!");
-	}
-
-	return shaderModule;
-}
-
-void destroyShaderModule(VkDevice device, VkShaderModule shader) {
-	vkDestroyShaderModule(device, shader, nullptr);
 }

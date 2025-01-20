@@ -6,11 +6,9 @@
 #include <QWidget>
 #include <QVulkanInstance>
 
-#include "gpu/vulkanManager.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
 #include "gui/circuitViewWidget.h"
-
 
 namespace Ui {
 	class MainWindow;
@@ -26,8 +24,6 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
-private:
-	void initVulkan();
 	
 private:
 	Ui::MainWindow* ui;
@@ -35,9 +31,6 @@ private:
 	
 	CircuitManager circuitManager;
 	std::shared_ptr<Evaluator> evaluator;
-	
-	VulkanManager vulkanManager;
-	std::unique_ptr<QVulkanInstance> qVulkanInstance;
 };
 
 #endif /* mainWindow_h */

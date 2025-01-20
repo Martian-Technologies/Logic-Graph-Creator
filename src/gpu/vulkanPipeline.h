@@ -10,10 +10,7 @@ struct PipelineData {
     VkRenderPass renderPass;
 };
 
-PipelineData createPipeline(VkDevice device, SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag);
-void destroyPipeline(VkDevice device, PipelineData& pipeline);
-
-VkShaderModule createShaderModule(VkDevice device, std::vector<char> byteCode);
-void destroyShaderModule(VkDevice device, VkShaderModule shader);
+PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag);
+void destroyPipeline(PipelineData& pipeline);
 
 #endif

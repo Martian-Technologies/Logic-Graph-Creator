@@ -3,4 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
+VkShaderModule createShaderModule(std::vector<char> byteCode);
+void destroyShaderModule(VkShaderModule shader);
+
 #endif

@@ -13,8 +13,6 @@
 #include <QWindow>
 #include <QLayout>
 
-#include "circuitView/circuitView.h"
-
 CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
@@ -48,13 +46,17 @@ void CircuitViewWidget::hideEvent(QHideEvent* event) {
 	circuitView.getRenderer().stop();
 }
 
-void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInstance* qVulkanInstance) {
+void CircuitViewWidget::createVulkanWindow() {
+
+	QVulkanInstance qVulkanInstance;
+	qVulkanInstance.setVkInstance(Vulkan::Instance());
+	qVulkanInstance.create();
 
 	// create vulkan window
 	vulkanWindow = new VulkanWindow(&circuitView.getRenderer());
 	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
 	vulkanWindow->setSurfaceType(QSurface::VulkanSurface);
-	vulkanWindow->setVulkanInstance(qVulkanInstance);
+	vulkanWindow->setVulkanInstance(&qVulkanInstance);
 	vulkanWindow->show();
 
 	// embed vulkan window
@@ -65,7 +67,7 @@ void CircuitViewWidget::createVulkanWindow(VulkanGraphicsView view, QVulkanInsta
 	this->setLayout(layout);
 	
 	// initialize renderer
-	circuitView.getRenderer().initialize(view, surface, size().width(), size().height());
+	circuitView.getRenderer().initialize(surface, size().width(), size().height());
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {

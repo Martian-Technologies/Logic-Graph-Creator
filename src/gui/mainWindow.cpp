@@ -16,13 +16,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	circuit_id_t id = circuitManager.createNewContainer();
 	std::shared_ptr<Circuit> circuit = circuitManager.getContainer(id);	
 	
-	initVulkan();
-	
 	evaluator = std::make_shared<Evaluator>(circuit);
 
 	// The createvulkanwindow functions are not RAII. I think the per view vulkan stuff should still happen in a centralized place
 	circuitViewWidget = new CircuitViewWidget(this);
-	circuitViewWidget->createVulkanWindow(vulkanManager.createGraphicsView(), qVulkanInstance.get());
+	circuitViewWidget->createVulkanWindow();
 	circuitViewWidget->setCircuit(circuit);
 	circuitViewWidget->setEvaluator(evaluator);
 	circuitViewWidget->setSelector(ui->selectorTreeWidget);
@@ -37,7 +35,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
 	circuitViewWidget->destroyVulkanWindow();
-	vulkanManager.destroy();
 }
 
 void MainWindow::setSimState(bool state) {
@@ -51,32 +48,4 @@ void MainWindow::simUseSpeed(Qt::CheckState state) {
 
 void MainWindow::setSimSpeed(double speed) {
 	evaluator->setTickrate(std::round(speed * 60));
-}
-
-void MainWindow::initVulkan() {
-	// goofy ahh hack to get required extension list
-	QVulkanInstance tempInstance;
-	tempInstance.create();
-	QByteArrayList qExtensions = tempInstance.extensions();
-	std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
-	tempInstance.destroy();
-	
-	// create instance and qVulkanInstance
-	vulkanManager.createInstance(extensions);
-	qVulkanInstance = std::make_unique<QVulkanInstance>();
-	qVulkanInstance->setVkInstance(vulkanManager.getInstance());
-	qVulkanInstance->create();
-	
-	// goofy ahh hack to get temp surface for device selection
-	QWindow tempWindow;
-	tempWindow.setSurfaceType(QSurface::VulkanSurface);
-	tempWindow.setVulkanInstance(qVulkanInstance.get());
-	tempWindow.show();
-	VkSurfaceKHR tempSurface = QVulkanInstance::surfaceForWindow(&tempWindow);
-	
-	// create instance and device
-	vulkanManager.setUpDevice(tempSurface);
-
-	// destroy temp surface
-	tempWindow.destroy();
 }
