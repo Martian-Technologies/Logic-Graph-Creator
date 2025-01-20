@@ -209,7 +209,7 @@ void LogicSimulator::calculateStates() {
 
 void LogicSimulator::propagateStates() {
 	for (output_socket_id_t i = 0; i < nextOutputSockets.size(); ++i) {
-		const char difference = nextOutputSockets[i] - currentOutputSockets[i];
+		int difference = nextOutputSockets[i] - currentOutputSockets[i];
 		if (difference != 0){
 			for (input_socket_id_t destination : connectionDestinations[i]) {
 				inputCountSockets[destination] += difference;
@@ -244,7 +244,7 @@ void LogicSimulator::setSprint(bool sprint) {
 }
 
 void LogicSimulator::setOutputSocketState(output_socket_id_t outputSocket, logic_state_t state) {
-	const char difference = state - nextOutputSockets[outputSocket];
+	int difference = state - nextOutputSockets[outputSocket];
 	if (difference != 0) {
 		for (input_socket_id_t destination : connectionDestinations[outputSocket]) {
 			inputCountSockets[destination] += difference;
