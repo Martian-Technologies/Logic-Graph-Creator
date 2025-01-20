@@ -1,6 +1,7 @@
 #ifndef logicSimulator_h
 #define logicSimulator_h
 
+#include <array>
 #include <barrier>
 #include <thread>
 #include <variant>
@@ -56,6 +57,8 @@ public:
 	void signalToResume();
 	void waitForPause();
 
+	long long int getRealTickrate() const { return realTickrate.load(std::memory_order_acquire); }
+
 	std::unordered_map<eval_gate_id_t, eval_gate_id_t> compressGates();
 
 	void setTickrate(double tickrate);
@@ -82,9 +85,16 @@ private:
 	std::atomic<bool> sprint;
 	std::atomic<int64_t> nextTick_us;
 
-	std::thread thread;
+	std::atomic<int> ticksRun;
+	std::array<int, 8> tickrateConveyer;
+	std::atomic<long long int> realTickrate;
+
+	std::thread calculationThread;
+	std::thread monitorThread;
 
 	void simulationLoop();
+	void monitorLoop();
+
 	void calculateStates();
 	void propagateStates();
 

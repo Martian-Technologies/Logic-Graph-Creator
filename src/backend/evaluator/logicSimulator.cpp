@@ -38,12 +38,17 @@ LogicSimulator::LogicSimulator()
 	tickrate(40),
 	sprint(true),
 	nextTick_us(0),
-	thread(std::thread(&LogicSimulator::simulationLoop, this)){
+	ticksRun(0),
+	tickrateConveyer{0, 0, 0, 0, 0, 0, 0, 0},
+	realTickrate(0),
+	calculationThread(std::thread(&LogicSimulator::simulationLoop, this)),
+	monitorThread(std::thread(&LogicSimulator::monitorLoop, this)) {
 }
 
 LogicSimulator::~LogicSimulator() {
 	running.store(false, std::memory_order_release);
-	thread.join();
+	calculationThread.join();
+	monitorThread.join();
 }
 
 output_socket_id_t LogicSimulator::registerOutputSocket() {
@@ -138,8 +143,8 @@ void LogicSimulator::disconnect(output_socket_id_t sourceSocket, input_socket_id
 void LogicSimulator::simulationLoop() {
 	while (true) {
 		calculateStates();
-
 		propagateStates();
+		++ticksRun;
 
 		bool waiting = false;
 		bool sprinting = sprint.load(std::memory_order_acquire);
@@ -248,4 +253,17 @@ void LogicSimulator::setOutputSocketState(output_socket_id_t outputSocket, logic
 		}
 	}
 	nextOutputSockets[outputSocket] = state;
+}
+
+void LogicSimulator::monitorLoop() {
+	int i = 0;
+	long long int tickrate = 0;
+	while (running.load(std::memory_order_acquire)) {
+		const int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
+		tickrate += ticks - tickrateConveyer[i];
+		tickrateConveyer[i] = ticks;
+		i = (i + 1) % 8;
+		realTickrate.store(tickrate, std::memory_order_release);
+		std::this_thread::sleep_for(std::chrono::milliseconds(125));
+	}
 }

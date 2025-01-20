@@ -55,7 +55,9 @@ void Evaluator::setUseTickrate(bool useTickrate) {
 	usingTickrate = useTickrate;
 	logicSimulator.setSprint(!useTickrate);
 }
-double Evaluator::getRealTickrate() const { return 0; }
+double Evaluator::getRealTickrate() const {
+	return logicSimulator.getRealTickrate();
+}
 
 GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	switch (blockType) {
