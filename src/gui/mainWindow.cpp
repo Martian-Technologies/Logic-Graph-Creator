@@ -9,8 +9,10 @@
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-	ui->setupUi(this);
+MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW")) {
+	// ui->setupUi(this);
+
+	resize(400, 300);
 
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
@@ -20,23 +22,35 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	assert(maybeEvalId); // this should be true
 	evalId = *maybeEvalId;
 
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget();
 	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	// circuitViewWidget->updateSelectedItem();
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
 
-	connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
+	auto dock1 = new KDDockWidgets::QtWidgets::DockWidget("dock1");
+	dock1->setWidget(circuitViewWidget);
+	addDockWidget(dock1, KDDockWidgets::Location_OnLeft);
+
+	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
+	circuitViews.push_back(circuitViewWidget2);
+	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id);
+	backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
+
+	auto dock2 = new KDDockWidgets::QtWidgets::DockWidget("dock2");
+	dock2->setWidget(circuitViewWidget2);
+	addDockWidget(dock2, KDDockWidgets::Location_OnLeft);
+
+	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
 	
-	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
-	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
-	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
+	// connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
+	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
+	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
-	openNewHotbarWindow();
-	openNewSelectorWindow();
+	// openNewHotbarWindow();
+	// openNewSelectorWindow();
 
-	QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
-	layout->addWidget(circuitViewWidget);
+	// QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
+	// addDockWidget(circuitViewWidget,);
 }
 
 void MainWindow::setSimState(bool state) {
@@ -54,7 +68,7 @@ void MainWindow::setSimSpeed(double speed) {
 
 void MainWindow::openNewSelectorWindow() {
 	SelectorWindow* selector = new SelectorWindow();
-	this->addDockWidget(Qt::LeftDockWidgetArea, selector);
+	// this->addDockWidget(Qt::LeftDockWidgetArea, selector);
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
     selector->show();
@@ -62,7 +76,7 @@ void MainWindow::openNewSelectorWindow() {
 
 void MainWindow::openNewHotbarWindow() {
 	HotbarWindow* selector = new HotbarWindow();
-	this->addDockWidget(Qt::BottomDockWidgetArea, selector);
+	// this->addDockWidget(Qt::BottomDockWidgetArea, selector);
 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
     selector->show();

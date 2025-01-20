@@ -10,6 +10,7 @@ else()
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
+
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -22,6 +23,8 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
 
 # Initialize QT
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+
+find_package(KDDockWidgets-qt6 REQUIRED)
 
 # Find source files
 set(SOURCE_FILES)
@@ -49,7 +52,8 @@ endif()
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} )
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE KDAB::kddockwidgets Qt6::Core Qt6::Gui Qt6::Widgets)
+# target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets KDAB::kddockwidgets)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
 if(APPLE) # MacOS specific (After add_executable)

@@ -2,8 +2,10 @@
 #define mainWindow_h
 
 #include <QGraphicsScene>
-#include <QMainWindow>
 #include <QWidget>
+
+#include <kddockwidgets/MainWindow.h>
+#include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/backend.h"
@@ -14,10 +16,10 @@ namespace Ui {
 
 class CircuitViewWidget;
 
-class MainWindow : public QMainWindow {
+class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
 	Q_OBJECT
 public:
-	MainWindow(QWidget* parent = nullptr);
+	MainWindow();
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
@@ -28,7 +30,6 @@ public:
 
 private:
 	evaluator_id_t evalId;
-	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
