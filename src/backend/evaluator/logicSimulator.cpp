@@ -180,29 +180,27 @@ void LogicSimulator::simulationLoop() {
 	}
 }
 
-inline void LogicSimulator::calculateStateBasic(unsigned int type, input_socket_id_t input, output_socket_id_t output) {
-	unsigned int powered = inputCountSockets[input];
-	if (type > 7) { // and + nand
-		unsigned int gc = inputTotalCountSockets[input];
-		nextOutputSockets[output] = ((type & 1) ^ (powered == gc)) && gc;
-	} else if (type > 5) { // nor + xnor
-		unsigned int gc = inputTotalCountSockets[input];
-		nextOutputSockets[output] = (!((powered & 1) || (powered && (type & 1)))) && gc;
-	} else if (type > 3) { // or + xor
-		nextOutputSockets[output] = (powered & 1) || (powered && (type & 1));
-	} else if (type > 1) { // tick_input + constant_on
-		nextOutputSockets[output] = type & 1;
-	} else { // stays the same
-		nextOutputSockets[output] = currentOutputSockets[output];
-	}
-}
-
 void LogicSimulator::calculateStates() {
 	for (eval_gate_id_t i = 0; i < gates.size(); ++i) {
 		const Gate gate = gates[i];
 		const unsigned int type = static_cast<unsigned int>(gate.type);
 		if (type < 10) {
-			calculateStateBasic(type, std::get<SocketsSingle>(gate.sockets).inputSocket, std::get<SocketsSingle>(gate.sockets).outputSocket);
+			const input_socket_id_t input = std::get<SocketsSingle>(gate.sockets).inputSocket;
+			const output_socket_id_t output = std::get<SocketsSingle>(gate.sockets).outputSocket;
+			unsigned int powered = inputCountSockets[input];
+			if (type > 7) { // and + nand
+				unsigned int gc = inputTotalCountSockets[input];
+				nextOutputSockets[output] = ((type & 1) ^ (powered == gc)) && gc;
+			} else if (type > 5) { // nor + xnor
+				unsigned int gc = inputTotalCountSockets[input];
+				nextOutputSockets[output] = (!((powered & 1) || (powered && (type & 1)))) && gc;
+			} else if (type > 3) { // or + xor
+				nextOutputSockets[output] = (powered & 1) || (powered && (type & 1));
+			} else if (type > 1) { // tick_input + constant_on
+				nextOutputSockets[output] = type & 1;
+			} else { // stays the same
+				nextOutputSockets[output] = currentOutputSockets[output];
+			}
 		}
 		else {
 		}

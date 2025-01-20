@@ -97,8 +97,6 @@ private:
 
 	void calculateStates();
 	void propagateStates();
-
-	inline void calculateStateBasic(unsigned int type, input_socket_id_t input, output_socket_id_t output);
 };
 
 #endif // logicSimulator_h
