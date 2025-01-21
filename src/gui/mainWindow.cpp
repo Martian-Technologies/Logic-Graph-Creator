@@ -12,7 +12,7 @@
 MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW")) {
 	// ui->setupUi(this);
 
-	resize(400, 300);
+	resize(900, 600);
 
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
@@ -26,13 +26,13 @@ MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"
 	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
-	addDock(circuitViewWidget, KDDockWidgets::Location_OnLeft);
+	addDock(circuitViewWidget, KDDockWidgets::Location_OnRight);
 
 	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
 	circuitViews.push_back(circuitViewWidget2);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
-	addDock(circuitViewWidget2, KDDockWidgets::Location_OnLeft);
+	addDock(circuitViewWidget2, KDDockWidgets::Location_OnRight);
 
 	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
 	
@@ -42,9 +42,6 @@ MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"
 
 	openNewHotbarWindow();
 	openNewSelectorWindow();
-
-	// QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
-	// addDockWidget(circuitViewWidget,);
 }
 
 void MainWindow::setSimState(bool state) {
@@ -64,14 +61,14 @@ void MainWindow::openNewSelectorWindow() {
 	SelectorWindow* selector = new SelectorWindow();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
-    addDock(selector, KDDockWidgets::Location_OnRight);
+    addDock(selector, KDDockWidgets::Location_OnLeft);
 }
 
 void MainWindow::openNewHotbarWindow() {
 	HotbarWindow* selector = new HotbarWindow();
 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
-    addDock(selector, KDDockWidgets::Location_OnRight);
+    addDock(selector, KDDockWidgets::Location_OnBottom);
 }
 
 void MainWindow::setBlock(BlockType blockType) {

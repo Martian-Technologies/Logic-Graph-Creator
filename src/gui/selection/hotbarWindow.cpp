@@ -46,10 +46,10 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Hotbar
 		grid->addWidget(widget);
 	}
 
-	QVBoxLayout* layout = new QVBoxLayout(ui->gridWidget);
-	layout->setSpacing(0);
-	layout->setContentsMargins(4, 0, 4, 0);
-	layout->addWidget(grid);
+	// QVBoxLayout* layout = new QVBoxLayout(ui->Hotbar);
+	// layout->setSpacing(0);
+	// layout->setContentsMargins(4, 0, 4, 0);
+	// layout->addWidget(grid);
 
 	// Connect button signal to a slot
 	// connect(ui->BlockTree, &QTreeWidget::itemSelectionChanged, this, &HotbarWindow::updateSelectedBlock);
