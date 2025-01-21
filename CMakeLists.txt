@@ -1,4 +1,4 @@
-# CMAKE SETUP ======================================================================================
+# ======================================== CMAKE SETUP ========================================
 cmake_minimum_required(VERSION 3.16)
 
 # set c++ standards as global variables
@@ -13,7 +13,7 @@ else()
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-# PROJECT SETUP ====================================================================================
+# ======================================== PROJECT SETUP ========================================
 project(Gatality)
 
 # Set directories
@@ -28,7 +28,7 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.cpp"
 )
 
-# DEPENDENCY SETUP =================================================================================
+# ======================================== DEPENDENCY SETUP ========================================
 # Initialize QT
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -50,7 +50,7 @@ set(EXTERNAL_LINKS
 	KDAB::kddockwidgets
 )
 
-# CREATE EXECUTABLE ================================================================================
+# ======================================== CREATE EXECUTABLE ========================================
 # Platform specific business before add_executable
 if(APPLE) # MacOS
 	# Icon
@@ -80,7 +80,7 @@ elseif (WIN32) # Windows
 	endif ()
 endif()
 
-# RESOURCE EMBEDDING ===============================================================================
+# ======================================== RESOURCE EMBEDDING ========================================
 
 # find resources
 file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
