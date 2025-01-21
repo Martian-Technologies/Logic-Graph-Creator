@@ -3,6 +3,7 @@
 ## Prerequestites
 QT6 is required to build this project. On MacOS or Linux you can get the libraries from your package manager.
 On Windows you can either build QT yourself, or [download it](https://www.qt.io/download-qt-installer). Make sure that the QT compiler bin and lib directories are added to your system PATH variable [(guide)](https://youtu.be/rnogAji_I5E?si=yG-h8Z5A5h3anPI3&t=97).
+> On Windows: Gatality only builds with MSVC on Windows. Make sure you install QT with MSVC and not MinGW. Also make sure you have installed [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/)
 
 ## Getting the source
 You can start by cloning this repo. We use git submodules to keep all of the other dependencies within the project.
