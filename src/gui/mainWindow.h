@@ -28,6 +28,7 @@ public:
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 	void openNewControlsWindow();
+	void openNewCircuitViewWindow();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:

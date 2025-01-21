@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 	KDDockWidgets::Config::self().setViewFactory(new CustomWidgetFactory());
 	// KDDockWidgets::Config::self().setSeparatorThickness(10);
 
-	KDDockWidgets::Core::ViewFactory::s_dropIndicatorType = KDDockWidgets::DropIndicatorType::Segmented;
+	// KDDockWidgets::Core::ViewFactory::s_dropIndicatorType = KDDockWidgets::DropIndicatorType::Segmented;
 
 	auto internalFlags = KDDockWidgets::Config::self().internalFlags();
 	// internalFlags |= KDDockWidgets::Config::InternalFlag_DontUseQtToolWindowsForFloatingWindows;
