@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "gui/mainWindow.h"
+#include "gpu/vulkanPlatformBridge.h"
 
 void setupVulkan();
 
@@ -26,21 +27,14 @@ int main(int argc, char* argv[]) {
 }
 
 void setupVulkan() {
-	// goofy ahh hack to get required extension list
-	QVulkanInstance tempInstance;
-	tempInstance.create();
-	QByteArrayList qExtensions = tempInstance.extensions();
-	std::vector<const char*> extensions(qExtensions.begin(), qExtensions.end());
-	tempInstance.destroy();
-	
 	// create instance and qVulkanInstance
-	Vulkan::Singleton().createInstance(extensions);
-	QVulkanInstance qVulkanInstance;
-	qVulkanInstance.setVkInstance(Vulkan::Instance());
-	qVulkanInstance.create();
+	Vulkan::Singleton().createInstance();
 	
 	// goofy ahh hack to get temp surface for device selection
 	QWindow tempWindow;
+	QVulkanInstance qVulkanInstance;
+	qVulkanInstance.setVkInstance(Vulkan::Instance());
+	qVulkanInstance.create();
 	tempWindow.setSurfaceType(QSurface::VulkanSurface);
 	tempWindow.setVulkanInstance(&qVulkanInstance);
 	tempWindow.show();

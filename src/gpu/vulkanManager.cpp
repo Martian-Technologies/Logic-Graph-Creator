@@ -1,5 +1,7 @@
 #include "vulkanManager.h"
 
+#include "gpu/vulkanPlatformBridge.h"
+
 #include <cassert>
 #include <cstring>
 
@@ -12,7 +14,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 // Functions ---------------------------------------------------------------------------
-void Vulkan::createInstance(const std::vector<const char*>& requiredExtensions) {
+void Vulkan::createInstance() {
 	// confirm we have validation layers if we need them
 	if (DEBUG && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
@@ -30,13 +32,16 @@ void Vulkan::createInstance(const std::vector<const char*>& requiredExtensions) 
 	// start instance creation
 	VkInstanceCreateInfo createInfo {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR; // this seems like a good thing to have in general, but I did only add this for macOS
 	createInfo.pApplicationInfo = &appInfo;
 
 	// add extensions
-	auto extensions = requiredExtensions;
-	if (DEBUG) { extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-	createInfo.ppEnabledExtensionNames = extensions.data();
+	std::vector<std::string> requiredExtensionsStr = getRequiredInstanceExtensions();
+	std::vector<const char*> requiredExtensions;
+	for (const std::string& extension : requiredExtensionsStr) requiredExtensions.push_back(extension.c_str());
+	if (DEBUG) { requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
 	// enable validation layers
 	if (DEBUG) {

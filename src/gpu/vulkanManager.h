@@ -20,7 +20,7 @@ public:
 
 public:
 	// management functions
-	void createInstance(const std::vector<const char*>& requiredExtensions);
+	void createInstance();
 	void setupDevice(VkSurfaceKHR surface);
 	void destroy();
 
