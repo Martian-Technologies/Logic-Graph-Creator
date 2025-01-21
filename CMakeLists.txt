@@ -28,8 +28,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${SOURCE_DIR})
 # Initialize QT
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 # Initialize Vulkan
-find_package(Vulkan REQUIRED)
-find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
+find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 # Find source files
 set(SOURCE_FILES)
@@ -81,30 +80,33 @@ endif()
 
 # Compile shaders -----
 set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-file(GLOB_RECURSE SHADERS_SOURCE
+file(GLOB_RECURSE SHADER_SOURCE_FILES
 	"${SOURCE_DIR}/*.vert"
 	"${SOURCE_DIR}/*.frag")
-# Create shader binary directory
-add_custom_target(make-shader-dir ALL
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
-# Compile each shader
-foreach(source IN LISTS SHADERS_SOURCE)
-	get_filename_component(FILENAME ${source} NAME)
-	add_custom_command(
-	COMMAND
-		${glslc_executable}
-		#	  -MD -MF ${SHADER_BINARY_DIR}/${FILENAME}.d
-		-o ${SHADER_BINARY_DIR}/${FILENAME}.spv
-		${source}
-	OUTPUT ${SHADER_BINARY_DIR}/${FILENAME}.spv
-	DEPENDS ${source} ${SHADER_BINARY_DIR}
-	COMMENT "Compiling ${FILENAME}"
-	)
-	list(APPEND SPV_SHADERS ${SHADER_BINARY_DIR}/${FILENAME}.spv)
+
+set(SHADER_COMMANDS)
+set(SHADER_PRODUCTS)
+
+foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
+	cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
+
+	# Build command
+	list(APPEND SHADER_COMMANDS COMMAND)
+	list(APPEND SHADER_COMMANDS Vulkan::glslc)
+	list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
+	list(APPEND SHADER_COMMANDS "-o")
+	list(APPEND SHADER_COMMANDS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
+
+	# Add product
+	list(APPEND SHADER_PRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
 endforeach()
 
-# Shader compilation dependency and directory (TODO - I do not fully understand cmake dependencies but it works)
-add_custom_target(shaders ALL DEPENDS make-shader-dir)
+add_custom_target("Shaders" ALL
+${SHADER_COMMANDS}
+COMMENT "Compiling Shaders"
+SOURCES ${SHADER_SOURCE_FILES}
+BYPRODUCTS ${SHADER_PRODUCTS}
+)
 
 # Add resources ------
 qt_add_resources(${PROJECT_NAME} "mainResources"
@@ -120,6 +122,6 @@ qt_add_resources(${PROJECT_NAME} "shaders"
 		PREFIX
 		"/shaders"
 		FILES
-		${SPV_SHADERS}
-		BASE ${SHADER_BINARY_DIR}
+		${SHADER_PRODUCTS}
+		BASE ${CMAKE_CURRENT_BINARY_DIR}
 )
