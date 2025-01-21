@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>585</width>
-    <height>68</height>
+    <width>508</width>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Hotbar</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -26,16 +26,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="QWidget" name="gridWidget" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>10</height>
-      </size>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>
