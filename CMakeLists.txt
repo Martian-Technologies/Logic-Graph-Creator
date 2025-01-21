@@ -35,6 +35,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
+# KDDockWidgets
+set(KDDockWidgets_QT6 ON)
+add_subdirectory(external/KDDockWidgets)
+
 set(EXTERNAL_SOURCES
 	
 )
