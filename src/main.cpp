@@ -5,7 +5,7 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
-#include "gui/MyViewFactory.h"
+// #include "gui/MyViewFactory.h"
 #include "gui/mainWindow.h"
 
 int main(int argc, char* argv[]) {
@@ -15,8 +15,7 @@ int main(int argc, char* argv[]) {
 
 	KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 
-	KDDockWidgets::Config::self().setViewFactory(new CustomWidgetFactory());
-	// KDDockWidgets::Config::self().setSeparatorThickness(10);
+	KDDockWidgets::Config::self().setSeparatorThickness(5);
 
 	// KDDockWidgets::Core::ViewFactory::s_dropIndicatorType = KDDockWidgets::DropIndicatorType::Segmented;
 
