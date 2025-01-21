@@ -19,7 +19,7 @@ class CircuitViewWidget;
 class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
 	Q_OBJECT
 public:
-	MainWindow();
+	MainWindow(KDDockWidgets::MainWindowOptions options);
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
@@ -27,6 +27,7 @@ public:
 	void setTool(std::string tool);
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
+	void openNewControlsWindow();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:

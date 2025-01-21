@@ -6,10 +6,11 @@
 #include "selection/selectorWindow.h"
 #include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
-#include "ui_mainWindow.h"
+#include "controlsWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW")) {
+
+MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options) {
 	// ui->setupUi(this);
 
 	resize(900, 600);
@@ -35,13 +36,10 @@ MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"
 	addDock(circuitViewWidget2, KDDockWidgets::Location_OnRight);
 
 	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
-	
-	// connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
-	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
-	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
 	openNewHotbarWindow();
 	openNewSelectorWindow();
+	openNewControlsWindow();
 }
 
 void MainWindow::setSimState(bool state) {
@@ -69,6 +67,14 @@ void MainWindow::openNewHotbarWindow() {
 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
     addDock(selector, KDDockWidgets::Location_OnBottom);
+}
+
+void MainWindow::openNewControlsWindow() {
+	ControlsWindow* controls = new ControlsWindow();
+	connect(controls, &ControlsWindow::setSimState, this, &MainWindow::setSimState);
+	connect(controls, &ControlsWindow::simUseSpeed, this, &MainWindow::simUseSpeed);
+	connect(controls, &ControlsWindow::setSimSpeed, this, &MainWindow::setSimSpeed);
+    addDock(controls, KDDockWidgets::Location_OnLeft);
 }
 
 void MainWindow::setBlock(BlockType blockType) {

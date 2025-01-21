@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
 	KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 
 	KDDockWidgets::Config::self().setViewFactory(new CustomWidgetFactory());
+	// KDDockWidgets::Config::self().setSeparatorThickness(10);
+
 	KDDockWidgets::Core::ViewFactory::s_dropIndicatorType = KDDockWidgets::DropIndicatorType::Segmented;
 
 	auto internalFlags = KDDockWidgets::Config::self().internalFlags();
@@ -30,9 +32,12 @@ int main(int argc, char* argv[]) {
 	flags |= KDDockWidgets::Config::Flag_AlwaysShowTabs;
 	KDDockWidgets::Config::self().setFlags(flags);
 
-	// KDDockWidgets::Config::self().setSeparatorThickness(10);
+	KDDockWidgets::MainWindowOptions options = KDDockWidgets::MainWindowOption_None;
+	// options = KDDockWidgets::MainWindowOption_HasCentralGroup;
+	// options |= KDDockWidgets::MainWindowOption_HasCentralWidget;
+	
 
-	MainWindow window;
+	MainWindow window(options);
 	window.show();
 
 	return app.exec();

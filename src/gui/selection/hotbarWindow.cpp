@@ -9,11 +9,11 @@
 
 HotbarWindow::HotbarWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Hotbar) {
 	// Load the UI file
-	// ui->setupUi(this);
+	ui->setupUi(this);
 	setFocusPolicy(Qt::NoFocus);
 
 	int size = 64;
-	grid = new DynamicGridWidget(this, size);
+	grid = new DynamicGridWidget(this, size + 5);
 
 	for (int i = 0; i < 10; i++) {
 		int keyNum = (i == 9) ? 0 : (i + 1);
@@ -46,10 +46,10 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Hotbar
 		grid->addWidget(widget);
 	}
 
-	// QVBoxLayout* layout = new QVBoxLayout(ui->Hotbar);
-	// layout->setSpacing(0);
-	// layout->setContentsMargins(4, 0, 4, 0);
-	// layout->addWidget(grid);
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setSpacing(0);
+	layout->setContentsMargins(4, 0, 4, 0);
+	layout->addWidget(grid);
 
 	// Connect button signal to a slot
 	// connect(ui->BlockTree, &QTreeWidget::itemSelectionChanged, this, &HotbarWindow::updateSelectedBlock);
