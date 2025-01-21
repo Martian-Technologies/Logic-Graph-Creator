@@ -26,19 +26,13 @@ MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"
 	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
-
-	auto dock1 = new KDDockWidgets::QtWidgets::DockWidget("dock1");
-	dock1->setWidget(circuitViewWidget);
-	addDockWidget(dock1, KDDockWidgets::Location_OnLeft);
+	addDock(circuitViewWidget, KDDockWidgets::Location_OnLeft);
 
 	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
 	circuitViews.push_back(circuitViewWidget2);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
-
-	auto dock2 = new KDDockWidgets::QtWidgets::DockWidget("dock2");
-	dock2->setWidget(circuitViewWidget2);
-	addDockWidget(dock2, KDDockWidgets::Location_OnLeft);
+	addDock(circuitViewWidget2, KDDockWidgets::Location_OnLeft);
 
 	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
 	
@@ -46,8 +40,8 @@ MainWindow::MainWindow() : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"
 	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);
 
-	// openNewHotbarWindow();
-	// openNewSelectorWindow();
+	openNewHotbarWindow();
+	openNewSelectorWindow();
 
 	// QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
 	// addDockWidget(circuitViewWidget,);
@@ -68,24 +62,30 @@ void MainWindow::setSimSpeed(double speed) {
 
 void MainWindow::openNewSelectorWindow() {
 	SelectorWindow* selector = new SelectorWindow();
-	// this->addDockWidget(Qt::LeftDockWidgetArea, selector);
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
-    selector->show();
+    addDock(selector, KDDockWidgets::Location_OnRight);
 }
 
 void MainWindow::openNewHotbarWindow() {
 	HotbarWindow* selector = new HotbarWindow();
-	// this->addDockWidget(Qt::BottomDockWidgetArea, selector);
 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
-    selector->show();
+    addDock(selector, KDDockWidgets::Location_OnRight);
 }
 
 void MainWindow::setBlock(BlockType blockType) {
 	for (auto view : circuitViews) {
 		view->getCircuitView()->setSelectedBlock(blockType);
 	}
+}
+
+void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
+	static int nameIndex = 0;
+	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
+	dock->setWidget(widget);
+	addDockWidget(dock, location);
+	nameIndex++;
 }
 
 void MainWindow::setTool(std::string tool) {

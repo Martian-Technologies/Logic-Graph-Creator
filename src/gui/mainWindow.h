@@ -27,6 +27,7 @@ public:
 	void setTool(std::string tool);
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
+	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:
 	evaluator_id_t evalId;

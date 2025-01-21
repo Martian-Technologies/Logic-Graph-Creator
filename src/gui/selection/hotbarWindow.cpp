@@ -1,4 +1,3 @@
-#include <QDockWidget>
 #include <QString>
 #include <QLabel>
 #include <Qt>
@@ -8,9 +7,9 @@
 #include "hotbarWindow.h"
 #include "ui_hotbar.h"
 
-HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Hotbar) {
+HotbarWindow::HotbarWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Hotbar) {
 	// Load the UI file
-	ui->setupUi(this);
+	// ui->setupUi(this);
 	setFocusPolicy(Qt::NoFocus);
 
 	int size = 64;
