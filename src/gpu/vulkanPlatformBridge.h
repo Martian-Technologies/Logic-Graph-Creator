@@ -1,9 +1,10 @@
 #ifndef vulkanPlatformBridge_h
 #define vulkanPlatformBridge_h
 
+#include <vulkan/vulkan.h>
+
 #include <QWindow>
 #include <QVulkanInstance>
-#include <vulkan/vulkan.h>
 
 std::vector<std::string> getRequiredInstanceExtensions();
 
