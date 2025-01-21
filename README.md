@@ -1,6 +1,6 @@
-# Logic Graph Creator
+# Gatality
 
-Logic Graph Creator is a desktop application for designing and simulating logic graph systems.
+[Gatality](https://gatality.com) is a desktop application for designing and simulating logic graph systems.
 
 ## Developer Documentation
 - [Build instructions and information](docs/building.md)
