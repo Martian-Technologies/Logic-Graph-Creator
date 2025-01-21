@@ -7,10 +7,9 @@
 // this file exists because apple is stupid
 
 std::vector<std::string> getRequiredInstanceExtensions() {
-	#if __APPLE__
+#ifdef __APPLE__
 	
-	#else
-
+#else
 	// goofy ahh hack to get required extension list
 	QVulkanInstance tempInstance;
 	tempInstance.create();
@@ -24,21 +23,20 @@ std::vector<std::string> getRequiredInstanceExtensions() {
 	
 	return extensions;
 	
-	#endif
+#endif
 }
 
-VkSurfaceKHR createSurface(QWindow *window) {
-	#if __APPLE__
+VulkanSurface::VulkanSurface(QWindow* window) {
+#ifdef __APPLE__
 	
-	#else
-	
-	#endif
+#else
+	qVulkanInstance.setVkInstance(Vulkan::Instance());
+	qVulkanInstance.create();
+	window->setVulkanInstance(&qVulkanInstance);
+	surface = QVulkanInstance::surfaceForWindow(window);
+#endif
 }
 
-void destroySurface(VkSurfaceKHR surface) {
-	#if __APPLE__
-	vkDestroySurfaceKHR(Vulkan::Instance(), surface, nullptr);
-	#else
-	// qt automatically does it
-	#endif
+VulkanSurface::~VulkanSurface() {
+	
 }

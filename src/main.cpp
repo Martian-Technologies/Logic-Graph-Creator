@@ -32,16 +32,12 @@ void setupVulkan() {
 	
 	// goofy ahh hack to get temp surface for device selection
 	QWindow tempWindow;
-	QVulkanInstance qVulkanInstance;
-	qVulkanInstance.setVkInstance(Vulkan::Instance());
-	qVulkanInstance.create();
 	tempWindow.setSurfaceType(QSurface::VulkanSurface);
-	tempWindow.setVulkanInstance(&qVulkanInstance);
 	tempWindow.show();
-	VkSurfaceKHR tempSurface = QVulkanInstance::surfaceForWindow(&tempWindow);
+	VulkanSurface surface(&tempWindow);
 	
 	// create instance and device
-	Vulkan::Singleton().setupDevice(tempSurface);
+	Vulkan::Singleton().setupDevice(surface.getVkSurfaceKHR());
 
 	// destroy temp surface
 	tempWindow.destroy();
