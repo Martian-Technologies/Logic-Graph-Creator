@@ -106,7 +106,6 @@ endforeach()
 # Shader compilation dependency and directory (TODO - I do not fully understand cmake dependencies but it works)
 add_custom_target(shaders ALL DEPENDS make-shader-dir)
 
-
 # Add resources ------
 qt_add_resources(${PROJECT_NAME} "mainResources"
 		PREFIX

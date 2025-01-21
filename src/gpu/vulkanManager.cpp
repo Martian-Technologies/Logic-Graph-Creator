@@ -13,10 +13,16 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
+#ifdef DEBUG
+const bool USE_VALIDATION_LAYERS = true;
+#else
+const bool USE_VALIDATION_LAYERS = false;
+#endif
+
 // Functions ---------------------------------------------------------------------------
 void Vulkan::createInstance() {
 	// confirm we have validation layers if we need them
-	if (DEBUG && !checkValidationLayerSupport()) {
+	if (USE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
 	}
 
@@ -39,12 +45,12 @@ void Vulkan::createInstance() {
 	std::vector<std::string> requiredExtensionsStr = getRequiredInstanceExtensions();
 	std::vector<const char*> requiredExtensions;
 	for (const std::string& extension : requiredExtensionsStr) requiredExtensions.push_back(extension.c_str());
-	if (DEBUG) { requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
+	if (USE_VALIDATION_LAYERS) { requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
 	// enable validation layers
-	if (DEBUG) {
+	if (USE_VALIDATION_LAYERS) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 		// TODO - custom message callback
@@ -165,7 +171,7 @@ void Vulkan::createLogicalDevice() {
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	// logical device validation layers (ignored by newer implementations)
-	if (DEBUG) {
+	if (USE_VALIDATION_LAYERS) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	} else {
