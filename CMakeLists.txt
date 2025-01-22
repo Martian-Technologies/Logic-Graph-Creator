@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Build Config
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(ENV{VK_DRIVER_FILES}, "VulkanSDK/macOS/share/vulkan/icd.d/MoltenVK_icd.json")
-# set(ENV{VK_LAYER_PATH}, "VulkanSDK/platform/share/vulkan/explicit_layer.d")
 
 if (MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")

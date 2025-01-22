@@ -12,7 +12,6 @@ std::vector<std::string> getRequiredInstanceExtensions() {
 #ifdef __APPLE__
 	// we don't have a library for this on apple, so this will have to work. May not age very well
 	std::vector<std::string> extensions = { "VK_KHR_surface", "VK_KHR_portability_enumeration", "VK_MVK_macos_surface"};
-	// std::vector<std::string> extensions = { "VK_KHR_surface", "VK_KHR_portability_enumeration", "VK_EXT_DEBUG_UTILS", "VK_EXT_metal_surface"};
 	return extensions;
 	
 #else
