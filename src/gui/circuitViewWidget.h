@@ -20,17 +20,12 @@ class CircuitViewWidget : public QWidget {
 public:
 	CircuitViewWidget(QWidget* parent = nullptr);
 
-	// setup
+	// vulkan
 	void createVulkanWindow();
-	void setCircuit(std::shared_ptr<Circuit> circuit);
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
-	void setSelector(QTreeWidget* treeWidget);
-
-	// shutdown
 	void destroyVulkanWindow();
 	
-	// dont call this func (temporary)
-	void updateSelectedItem();	
+	// setup	
+	inline CircuitView<VulkanRenderer>* getCircuitView() { return &circuitView; }
 
 private:
 	CircuitView<VulkanRenderer> circuitView;

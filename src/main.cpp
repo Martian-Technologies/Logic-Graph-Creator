@@ -2,6 +2,7 @@
 
 #include "gui/mainWindow.h"
 #include "gpu/vulkanPlatformBridge.h"
+#include "gpu/vulkanManager.h"
 
 void setupVulkan();
 

@@ -1,8 +1,6 @@
 #ifndef elementCreator_h
 #define elementCreator_h
 
-#include <map>
-
 #include "renderer.h"
 
 class ElementCreator {

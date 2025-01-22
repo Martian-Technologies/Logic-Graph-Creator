@@ -1,5 +1,4 @@
 #include "logicToucher.h"
-#include <iostream>
 
 bool LogicToucher::press(const Event* event) {
 	if (!circuit || !evaluatorStateInterface) return false;
