@@ -5,7 +5,6 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
-// #include "gui/MyViewFactory.h"
 #include "gui/mainWindow.h"
 
 int main(int argc, char* argv[]) {
