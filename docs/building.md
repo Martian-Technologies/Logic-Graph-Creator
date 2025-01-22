@@ -22,9 +22,10 @@ You can get the QT libraries from your package manager (brew on MacOS, distro de
 ### Windows
 You can either build QT yourself, or download and install it with QT's [installer](https://www.qt.io/download-qt-installer).
 > Gatality only builds with MSVC on Windows. Make sure you install QT with MSVC and not MinGW.
-- Unfortunately QT's installer does not add its directories to your environment variables, and CMake will not be able to find it, so you need to add it youself.
+Unfortunately QT's installer does not add its directories to your environment variables, and CMake will not be able to find it, so you need to add it youself.
 - You need to add your QT version's lib and bin directories for MSVC to your path environment variable. This [(guide)](https://youtu.be/rnogAji_I5E?si=yG-h8Z5A5h3anPI3&t=97) will show you how.
 - You also need to add a new environment variable called `QTDIR` which is the directory of your QT version and compiler.
+
 For example:
 - Your PATH should include `C:\Qt\6.8.1\msvc2022_64\bin` and `C:\Qt\6.8.1\msvc2022_64\lib`
 - You should have an additional environment variable called `QTDIR` which is `C:\Qt\6.8.1\msvc2022_64\`
@@ -36,8 +37,9 @@ You need the CMake build system and a C++ compiler to build this project.
 You can get a compiler and CMake from your package manager. Any compiler should work.
 ### Windows
 You can install CMake using the [CMake Binary Installer](https://cmake.org/download/).
-You need the MSVC compiler and CMake build tools. You can download the installer from [Microsoft](https://visualstudio.microsoft.com/downloads/)
-> In the installer, you probably want to do a custom installation, just make sure that you have C++ and CMake tools.
+
+You also need the MSVC compiler and its CMake build tools. You can download the installer from [Microsoft](https://visualstudio.microsoft.com/downloads/)
+> In the Visual Studio installer, you probably want to do a custom installation, just make sure that you have C++ and CMake tools.
  
 ## Using CMake
 Even if you are going to have your IDE manage CMake, it's a good idea to try running it from the terminal first.
