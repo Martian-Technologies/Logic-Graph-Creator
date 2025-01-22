@@ -37,6 +37,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # KDDockWidgets
 set(KDDockWidgets_QT6 ON)
+set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
 set(EXTERNAL_SOURCES
