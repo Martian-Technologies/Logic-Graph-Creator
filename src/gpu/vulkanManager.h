@@ -50,10 +50,16 @@ private:
 };
 
 // VULKAN TODO -
-// - [ ] Create the surface ourself
-// - [ ] Global vulkan state that handles instance/device
-//       - [ ] Queue management
+// - [x] New surface creation
+// - [x] Global vulkan state that handles instance/device
+//       - [x] Queue requests
 //       - [ ] Memory allocation
-//       - [ ] Deletion
+// - [ ] Drawing with vertex buffers
+// - [ ] Prototype block renderer
+// - [ ] New object management scheme 
+//       -  Possibly RAII?
+//       -  Possibly deletion queue
+// - [ ] Don't draw directly to swapchain
+// - [ ] IMGUI for debug
 
 #endif
