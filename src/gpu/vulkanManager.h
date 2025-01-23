@@ -23,7 +23,7 @@ public:
 	void createInstance();
 	void setupDevice(VkSurfaceKHR surface);
 	void destroy();
-
+	
 	VkQueue& requestGraphicsQueue(bool important = false);
 	VkQueue& requestPresentQueue(bool important = false);
 
@@ -49,6 +49,16 @@ private:
 	int presentRoundRobin = 0;
 };
 
+// Vulkan Renderer Design Notes
+// - most of the renderer isn't designed to be modular or particular extensible
+// right now, the goal is just to logically separate each "component" into its
+// own file
+// - from what we do have right now, VulkanManager is a singleton that has
+// global vulkan objects, and will be in charge of distributing certain
+// resources (like queues). Each vulkan renderer will be in charge of managing
+// its own stuff.
+
+
 // VULKAN TODO -
 // - [x] New surface creation
 // - [x] Global vulkan state that handles instance/device
@@ -56,9 +66,10 @@ private:
 //       - [ ] Memory allocation
 // - [ ] Drawing with vertex buffers
 // - [ ] Prototype block renderer
-// - [ ] New object management scheme 
+// - [ ] New object management scheme
 //       -  Possibly RAII?
 //       -  Possibly deletion queue
+//       -  Builder pattern 
 // - [ ] Don't draw directly to swapchain
 // - [ ] IMGUI for debug
 

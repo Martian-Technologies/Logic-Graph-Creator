@@ -87,7 +87,7 @@ void VulkanRenderer::renderLoop() {
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
-
+		
 		// command buffers
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &frame.mainCommandBuffer;

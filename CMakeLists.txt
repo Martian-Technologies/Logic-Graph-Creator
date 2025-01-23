@@ -89,7 +89,8 @@ endif()
 set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 file(GLOB_RECURSE SHADER_SOURCE_FILES
 	"${SOURCE_DIR}/*.vert"
-	"${SOURCE_DIR}/*.frag")
+	"${SOURCE_DIR}/*.frag"
+)
 
 set(SHADER_COMMANDS)
 set(SHADER_PRODUCTS)
@@ -109,10 +110,10 @@ foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
 endforeach()
 
 add_custom_target("Shaders" ALL
-${SHADER_COMMANDS}
-COMMENT "Compiling Shaders"
-SOURCES ${SHADER_SOURCE_FILES}
-BYPRODUCTS ${SHADER_PRODUCTS}
+	${SHADER_COMMANDS}
+	COMMENT "Compiling Shaders"
+	SOURCES ${SHADER_SOURCE_FILES}
+	BYPRODUCTS ${SHADER_PRODUCTS}
 )
 
 # RESOURCE EMBEDDING ===============================================================================
