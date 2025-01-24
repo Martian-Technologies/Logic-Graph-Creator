@@ -40,7 +40,7 @@ VulkanSurface::VulkanSurface(QWindow* window) {
 
 	vkCreateMacOSSurfaceMVK(Vulkan::Instance(), &surfaceInfo, nullptr, &surface);
 #else
-	qVulkanInstance.setVkInstance(Vulkan::Instance());
+	qVulkanInstance.setVkInstance(Vulkan::getInstance());
 	qVulkanInstance.create();
 	window->setVulkanInstance(&qVulkanInstance);
 	surface = QVulkanInstance::surfaceForWindow(window);

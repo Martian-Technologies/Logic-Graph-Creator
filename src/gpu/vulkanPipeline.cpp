@@ -103,7 +103,7 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // unused
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // unused
-	if (vkCreatePipelineLayout(Vulkan::Device(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(Vulkan::getDevice(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -142,7 +142,7 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	renderPassInfo.pSubpasses = &subpass;
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
-	if (vkCreateRenderPass(Vulkan::Device(), &renderPassInfo, nullptr, &pipeline.renderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(Vulkan::getDevice(), &renderPassInfo, nullptr, &pipeline.renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
 
@@ -165,7 +165,7 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // unused
 	pipelineInfo.basePipelineIndex = -1; // unused
 
-	if (vkCreateGraphicsPipelines(Vulkan::Device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.handle) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(Vulkan::getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 	
@@ -173,8 +173,8 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 }
 
 void destroyPipeline(PipelineData& pipeline) {
-	vkDestroyPipeline(Vulkan::Device(), pipeline.handle, nullptr);
-	vkDestroyPipelineLayout(Vulkan::Device(), pipeline.layout, nullptr);
-	vkDestroyRenderPass(Vulkan::Device(), pipeline.renderPass, nullptr);
+	vkDestroyPipeline(Vulkan::getDevice(), pipeline.handle, nullptr);
+	vkDestroyPipelineLayout(Vulkan::getDevice(), pipeline.layout, nullptr);
+	vkDestroyRenderPass(Vulkan::getDevice(), pipeline.renderPass, nullptr);
 
 }

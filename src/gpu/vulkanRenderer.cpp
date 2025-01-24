@@ -55,14 +55,14 @@ void VulkanRenderer::renderLoop() {
 		// get next frame
 		FrameData& frame = getCurrentFrame();		
 		// wait for frame end
-		vkWaitForFences(Vulkan::Device(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
 
-		VkQueue& graphicsQueue = Vulkan::Singleton().requestGraphicsQueue();
-		VkQueue& presentQueue = Vulkan::Singleton().requestPresentQueue();
+		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
+		VkQueue& presentQueue = Vulkan::getSingleton().requestPresentQueue();
 
 		// get next swapchain image to render too
 		uint32_t imageIndex;
-		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::Device(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
 			// wait for a resize event
 			continue;
@@ -71,7 +71,7 @@ void VulkanRenderer::renderLoop() {
 		}
 
 		// reset render fence
-		vkResetFences(Vulkan::Device(), 1, &frame.renderFence);
+		vkResetFences(Vulkan::getDevice(), 1, &frame.renderFence);
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -119,7 +119,7 @@ void VulkanRenderer::renderLoop() {
 		++frameNumber;
 	}
 
-	vkDeviceWaitIdle(Vulkan::Device());
+	vkDeviceWaitIdle(Vulkan::getDevice());
 }
 
 void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {
@@ -174,7 +174,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 }
 
 void VulkanRenderer::handleResize() {
-	vkDeviceWaitIdle(Vulkan::Device());
+	vkDeviceWaitIdle(Vulkan::getDevice());
 
 	destroySwapchain(swapchain);
 	swapchain = createSwapchain(surface, windowWidth, windowHeight);

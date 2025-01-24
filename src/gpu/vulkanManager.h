@@ -12,11 +12,11 @@ public:
 	void operator=(const Vulkan& o) = delete;
 
 	// singleton access
-	inline static Vulkan& Singleton() { static Vulkan vulkan; return vulkan; }
-	inline static const VkInstance& Instance() { return Singleton().instance; }
-	inline static const VkPhysicalDevice& PhysicalDevice() { return Singleton().physicalDevice; }
-	inline static const VkDevice& Device() { return Singleton().device; }
-	inline static const QueueFamilies& QueueFamilies() { return Singleton().queueFamilies; }
+	inline static Vulkan& getSingleton() { static Vulkan vulkan; return vulkan; }
+	inline static const VkInstance& getInstance() { return getSingleton().instance; }
+	inline static const VkPhysicalDevice& getPhysicalDevice() { return getSingleton().physicalDevice; }
+	inline static const VkDevice& getDevice() { return getSingleton().device; }
+	inline static const QueueFamilies& getQueueFamilies() { return getSingleton().queueFamilies; }
 
 public:
 	// management functions

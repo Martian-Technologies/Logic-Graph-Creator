@@ -8,7 +8,7 @@ void createFrameDatas(FrameData *frameDatas, unsigned int numFrames) {
 	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolInfo.pNext = nullptr;
 	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	commandPoolInfo.queueFamilyIndex = Vulkan::QueueFamilies().graphicsFamily.value().index;
+	commandPoolInfo.queueFamilyIndex = Vulkan::getQueueFamilies().graphicsFamily.value().index;
 
 	// shared sync structure create infos
 	VkFenceCreateInfo fenceInfo = {};
@@ -22,7 +22,7 @@ void createFrameDatas(FrameData *frameDatas, unsigned int numFrames) {
 	
 	for (int i = 0; i < numFrames; i++) {
 		// allocate command pool
-		vkCreateCommandPool(Vulkan::Device(), &commandPoolInfo, nullptr, &frameDatas[i].commandPool);
+		vkCreateCommandPool(Vulkan::getDevice(), &commandPoolInfo, nullptr, &frameDatas[i].commandPool);
 
 		// allocate the default command buffer that we will use for rendering
 		VkCommandBufferAllocateInfo commandBufferInfo = {};
@@ -32,22 +32,22 @@ void createFrameDatas(FrameData *frameDatas, unsigned int numFrames) {
 		commandBufferInfo.commandBufferCount = 1;
 		commandBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-		vkAllocateCommandBuffers(Vulkan::Device(), &commandBufferInfo, &frameDatas[i].mainCommandBuffer);
+		vkAllocateCommandBuffers(Vulkan::getDevice(), &commandBufferInfo, &frameDatas[i].mainCommandBuffer);
 
 		// allocate sync structures
-		vkCreateFence(Vulkan::Device(), &fenceInfo, nullptr, &frameDatas[i].renderFence);
+		vkCreateFence(Vulkan::getDevice(), &fenceInfo, nullptr, &frameDatas[i].renderFence);
 
-		vkCreateSemaphore(Vulkan::Device(), &semaphoreInfo, nullptr, &frameDatas[i].swapchainSemaphore);
-		vkCreateSemaphore(Vulkan::Device(), &semaphoreInfo, nullptr, &frameDatas[i].renderSemaphore);
+		vkCreateSemaphore(Vulkan::getDevice(), &semaphoreInfo, nullptr, &frameDatas[i].swapchainSemaphore);
+		vkCreateSemaphore(Vulkan::getDevice(), &semaphoreInfo, nullptr, &frameDatas[i].renderSemaphore);
 	}
 }
 
 void destroyFrameDatas(FrameData* frameDatas, unsigned int numFrames) {
 	for (int i = 0; i < numFrames; i++) {
-		vkDestroyCommandPool(Vulkan::Device(), frameDatas[i].commandPool, nullptr);
+		vkDestroyCommandPool(Vulkan::getDevice(), frameDatas[i].commandPool, nullptr);
 
-		vkDestroyFence(Vulkan::Device(), frameDatas[i].renderFence, nullptr);
-		vkDestroySemaphore(Vulkan::Device(), frameDatas[i].renderSemaphore, nullptr);
-		vkDestroySemaphore(Vulkan::Device(), frameDatas[i].swapchainSemaphore, nullptr);
+		vkDestroyFence(Vulkan::getDevice(), frameDatas[i].renderFence, nullptr);
+		vkDestroySemaphore(Vulkan::getDevice(), frameDatas[i].renderSemaphore, nullptr);
+		vkDestroySemaphore(Vulkan::getDevice(), frameDatas[i].swapchainSemaphore, nullptr);
 	}
 }

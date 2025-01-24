@@ -22,14 +22,14 @@ int main(int argc, char* argv[]) {
 	int out = app.exec();
 
 	// shutdown vulkan
-	Vulkan::Singleton().destroy();
+	Vulkan::getSingleton().destroy();
 
 	return out;
 }
 
 void setupVulkan() {
 	// create instance and qVulkanInstance
-	Vulkan::Singleton().createInstance();
+	Vulkan::getSingleton().createInstance();
 	
 	// goofy ahh hack to get temp surface for device selection
 	QWindow tempWindow;
@@ -38,7 +38,7 @@ void setupVulkan() {
 	VulkanSurface surface(&tempWindow);
 	
 	// create instance and device
-	Vulkan::Singleton().setupDevice(surface.getVkSurfaceKHR());
+	Vulkan::getSingleton().setupDevice(surface.getVkSurfaceKHR());
 
 	// destroy temp surface
 	tempWindow.destroy();

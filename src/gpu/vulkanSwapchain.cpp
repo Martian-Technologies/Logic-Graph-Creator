@@ -8,7 +8,7 @@
 SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowHeight) {
 	SwapchainData swapchain;
 	
-	SwapchainSupportDetails swapchainSupport = querySwapchainSupport(Vulkan::PhysicalDevice(), surface);
+	SwapchainSupportDetails swapchainSupport = querySwapchainSupport(Vulkan::getPhysicalDevice(), surface);
 
 	// choose best values for swap chain
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapchainSupport.formats);
@@ -33,7 +33,7 @@ SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowH
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	// if we need our queues to share this swapchain (they are different queues), update the settings
-	uint32_t queueFamilyIndices[] = {Vulkan::QueueFamilies().graphicsFamily.value().index, Vulkan::QueueFamilies().presentFamily.value().index};
+	uint32_t queueFamilyIndices[] = {Vulkan::getQueueFamilies().graphicsFamily.value().index, Vulkan::getQueueFamilies().presentFamily.value().index};
 	if (queueFamilyIndices[0] != queueFamilyIndices[1]) {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
@@ -52,7 +52,7 @@ SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowH
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
 	// create the swapChain
-	if (vkCreateSwapchainKHR(Vulkan::Device(), &createInfo, nullptr, &swapchain.handle) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(Vulkan::getDevice(), &createInfo, nullptr, &swapchain.handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
@@ -61,9 +61,9 @@ SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowH
 	swapchain.extent = extent;
 
 	// get swapchain images
-	vkGetSwapchainImagesKHR(Vulkan::Device(), swapchain.handle, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(Vulkan::getDevice(), swapchain.handle, &imageCount, nullptr);
 	swapchain.images.resize(imageCount);
-	vkGetSwapchainImagesKHR(Vulkan::Device(), swapchain.handle, &imageCount, swapchain.images.data());
+	vkGetSwapchainImagesKHR(Vulkan::getDevice(), swapchain.handle, &imageCount, swapchain.images.data());
 
 	// create an image view for each image
 	swapchain.imageViews.resize(swapchain.images.size());
@@ -88,7 +88,7 @@ SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowH
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(Vulkan::Device(), &createInfo, nullptr, &swapchain.imageViews[i]) != VK_SUCCESS) {
+		if (vkCreateImageView(Vulkan::getDevice(), &createInfo, nullptr, &swapchain.imageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image view!");
 		} 
 	}
@@ -113,7 +113,7 @@ void createSwapchainFramebuffers(SwapchainData& swapchain, VkRenderPass renderPa
 		framebufferInfo.height = swapchain.extent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(Vulkan::Device(), &framebufferInfo, nullptr, &swapchain.framebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(Vulkan::getDevice(), &framebufferInfo, nullptr, &swapchain.framebuffers[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
@@ -121,14 +121,14 @@ void createSwapchainFramebuffers(SwapchainData& swapchain, VkRenderPass renderPa
 
 void destroySwapchain(SwapchainData &swapchain) {
 	for (VkFramebuffer framebuffer : swapchain.framebuffers) {
-        vkDestroyFramebuffer(Vulkan::Device(), framebuffer, nullptr);
+        vkDestroyFramebuffer(Vulkan::getDevice(), framebuffer, nullptr);
     }
 	
 	for (VkImageView imageView : swapchain.imageViews) {
-		vkDestroyImageView(Vulkan::Device(), imageView, nullptr);
+		vkDestroyImageView(Vulkan::getDevice(), imageView, nullptr);
 	}
 	
-	vkDestroySwapchainKHR(Vulkan::Device(), swapchain.handle, nullptr);
+	vkDestroySwapchainKHR(Vulkan::getDevice(), swapchain.handle, nullptr);
 }
 
 // UTIL
