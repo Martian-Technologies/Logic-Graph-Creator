@@ -23,7 +23,7 @@ project(Gatality)
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
-set(LIBRARY_DIR "${CMAKE_SOURCE_DIR}/lib")
+set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Find source files
@@ -42,6 +42,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # Initialize Vulkan
 find_package(Vulkan REQUIRED COMPONENTS glslc)
+add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM) # and vma
 
 set(EXTERNAL_SOURCES
 	
@@ -52,6 +53,7 @@ set(EXTERNAL_INCLUDES
 set(EXTERNAL_LINKS
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	${Vulkan_LIBRARIES}
+	VulkanMemoryAllocator
 )
 
 # CREATE EXECUTABLE ================================================================================

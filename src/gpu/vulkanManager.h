@@ -69,7 +69,7 @@ private:
 // - [ ] New object management scheme
 //       -  Possibly RAII?
 //       -  Possibly deletion queue
-//       -  Builder pattern 
+//       -  Builder pattern (for pipeline at least)
 // - [ ] Don't draw directly to swapchain
 // - [ ] IMGUI for debug
 
