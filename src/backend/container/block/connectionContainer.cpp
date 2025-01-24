@@ -35,7 +35,7 @@ bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, con
 
 bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const {
 	return (
-		thisEndId > getMaxConnectionId() &&
+		thisEndId <= getMaxConnectionId() &&
 		contains(connections[thisEndId].begin(), connections[thisEndId].end(), otherConnectionEnd)
 		);
 }
