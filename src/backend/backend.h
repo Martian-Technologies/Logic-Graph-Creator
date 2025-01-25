@@ -14,6 +14,7 @@ public:
 
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
+    const CircuitManager* getCircuitManager() const { return &circuitManager; }
 
 	// Attempts to link a CircuitView and a Circuit. Returns success bool.
 	template <class RENDERER_TYPE>

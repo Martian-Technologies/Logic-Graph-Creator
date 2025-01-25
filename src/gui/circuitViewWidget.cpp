@@ -13,7 +13,8 @@
 
 #include "circuitView/circuitView.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget *parent, CircuitFileManager *fileManager)
+    : QWidget(parent), fileManager(fileManager), mouseControls(false), treeWidget(nullptr) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -189,82 +190,101 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 void saveJsonToFile(const QJsonObject& jsonObject);
 
 void CircuitViewWidget::save() {
-	// std::cout << "save" << std::endl;
-	Circuit* circuit = circuitView.getCircuit();
-	if (!circuit) return;
-	Difference difference = circuit->getBlockContainer()->getCreationDifference();
-	const auto modifications = difference.getModifications();
-	QJsonObject modificationsJson;
-	QJsonArray placeJson;
-	QJsonArray connectJson;
-	int centerX = 0;
-	int centerY = 0;
-	for (const auto& modification : modifications) {
-		const auto& [modificationType, modificationData] = modification;
-		switch (modificationType) {
-		case Difference::PLACE_BLOCK:
-		{
-			QJsonObject placement;
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			centerX += position.x;
-			centerY += position.y;
-			placement["x"] = position.x;
-			placement["y"] = position.y;
-			placement["r"] = (char)rotation;
-			placement["t"] = (char)blockType;
-			placeJson.push_back(placement);
-			break;
-		}
-		case Difference::CREATED_CONNECTION:
-		{
-			QJsonObject connection;
-			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			connection["ox"] = outputPosition.x;
-			connection["oy"] = outputPosition.y;
-			connection["iy"] = inputPosition.y;
-			connection["ix"] = inputPosition.x;
-			connectJson.push_back(connection);
-			break;
-		}
-		default:
-			throw std::invalid_argument("save: invalid modificationType");
-		}
-	}
-	modificationsJson["place"] = placeJson;
-	modificationsJson["connect"] = connectJson;
-	QJsonObject centerJson;
-	centerX /= (int)(circuit->getBlockContainer()->getBlockCount());
-	centerY /= (int)(circuit->getBlockContainer()->getBlockCount());
-	centerJson["x"] = centerX;
-	centerJson["y"] = centerY;
-	modificationsJson["center"] = centerJson;
-	saveJsonToFile(modificationsJson);
+    std::cout << "trying to save" << std::endl;
+    if (fileManager) {
+        std::cout << "filemanager is good" << std::endl;
+        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
+        if (!filePath.isEmpty()) {
+            fileManager->save(filePath, circuitView.getCircuit()->getCircuitId());
+        }
+    }
 }
 
-void saveJsonToFile(const QJsonObject& jsonObject) {
-	// Convert JSON object to QJsonDocument
-	QJsonDocument jsonDoc(jsonObject);
-
-	// Open a save file dialog
-	QString fileName = QFileDialog::getSaveFileName(nullptr, "Save JSON File", "", "JSON Files (*.json);;All Files (*)");
-
-	if (fileName.isEmpty()) {
-		QMessageBox::information(nullptr, "No File Selected", "No file was selected to save the JSON.");
-		return;
-	}
-
-	QFile file(fileName);
-	if (!file.open(QIODevice::WriteOnly)) {
-		QMessageBox::critical(nullptr, "Error", "Could not open the file for writing.");
-		return;
-	}
-
-	// Write JSON to the file
-	file.write(jsonDoc.toJson());
-	file.close();
-
-	QMessageBox::information(nullptr, "Success", "JSON file saved successfully!");
+void CircuitViewWidget::load(const QString& filePath) {
+    if (fileManager) {
+      fileManager->loadInto(
+          filePath, circuitView.getCircuit()->getCircuitId(),
+          circuitView.getViewManager().getPointerPosition().snap());
+    }
 }
+
+//void CircuitViewWidget::save() {
+//	// std::cout << "save" << std::endl;
+//	Circuit* circuit = circuitView.getCircuit();
+//	if (!circuit) return;
+//	Difference difference = circuit->getBlockContainer()->getCreationDifference();
+//	const auto modifications = difference.getModifications();
+//	QJsonObject modificationsJson;
+//	QJsonArray placeJson;
+//	QJsonArray connectJson;
+//	int centerX = 0;
+//	int centerY = 0;
+//	for (const auto& modification : modifications) {
+//		const auto& [modificationType, modificationData] = modification;
+//		switch (modificationType) {
+//		case Difference::PLACE_BLOCK:
+//		{
+//			QJsonObject placement;
+//			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+//			centerX += position.x;
+//			centerY += position.y;
+//			placement["x"] = position.x;
+//			placement["y"] = position.y;
+//			placement["r"] = (char)rotation;
+//			placement["t"] = (char)blockType;
+//			placeJson.push_back(placement);
+//			break;
+//		}
+//		case Difference::CREATED_CONNECTION:
+//		{
+//			QJsonObject connection;
+//			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+//			connection["ox"] = outputPosition.x;
+//			connection["oy"] = outputPosition.y;
+//			connection["iy"] = inputPosition.y;
+//			connection["ix"] = inputPosition.x;
+//			connectJson.push_back(connection);
+//			break;
+//		}
+//		default:
+//			throw std::invalid_argument("save: invalid modificationType");
+//		}
+//	}
+//	modificationsJson["place"] = placeJson;
+//	modificationsJson["connect"] = connectJson;
+//	QJsonObject centerJson;
+//	centerX /= (int)(circuit->getBlockContainer()->getBlockCount());
+//	centerY /= (int)(circuit->getBlockContainer()->getBlockCount());
+//	centerJson["x"] = centerX;
+//	centerJson["y"] = centerY;
+//	modificationsJson["center"] = centerJson;
+//	saveJsonToFile(modificationsJson);
+//}
+
+//void saveJsonToFile(const QJsonObject& jsonObject) {
+//	// Convert JSON object to QJsonDocument
+//	QJsonDocument jsonDoc(jsonObject);
+//
+//	// Open a save file dialog
+//	QString fileName = QFileDialog::getSaveFileName(nullptr, "Save JSON File", "", "JSON Files (*.json);;All Files (*)");
+//
+//	if (fileName.isEmpty()) {
+//		QMessageBox::information(nullptr, "No File Selected", "No file was selected to save the JSON.");
+//		return;
+//	}
+//
+//	QFile file(fileName);
+//	if (!file.open(QIODevice::WriteOnly)) {
+//		QMessageBox::critical(nullptr, "Error", "Could not open the file for writing.");
+//		return;
+//	}
+//
+//	// Write JSON to the file
+//	file.write(jsonDoc.toJson());
+//	file.close();
+//
+//	QMessageBox::information(nullptr, "Success", "JSON file saved successfully!");
+//}
 
 void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {
 	// Accept the drag if it contains a file
@@ -296,74 +316,74 @@ void CircuitViewWidget::dropEvent(QDropEvent* event) {
 	}
 }
 
-void CircuitViewWidget::load(const QString& filePath) {
-	// open file
-	QFile file(filePath);
-	if (!file.open(QIODevice::ReadOnly)) {
-		qWarning("Couldn't open JSON file.");
-		return;
-	}
-	QByteArray fileData = file.readAll();
-	file.close();
-
-	// validate data
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(fileData);
-	if (!jsonDoc.isObject()) {
-		qWarning("Invalid JSON format: Expected an object");
-		return;
-	}
-
-	QJsonObject data = jsonDoc.object();
-	if (!data["place"].isArray() || !data["connect"].isArray()) {
-		qWarning("Invalid JSON format: Expected an object->[place/connect]array");
-		return;
-	}
-
-	Position center = Position(0, 0);
-	if (data["center"].isObject()) {
-		QJsonObject centerJson = data["center"].toObject();
-		if (!(centerJson["x"].isDouble() && centerJson["y"].isDouble())) {
-			qWarning("Invalid JSON format: Expected an object->[center]object->'x','y'");
-			return;
-		}
-		center = Position(centerJson["x"].toInt(), centerJson["y"].toInt());
-	}
-	Position pointer = circuitView.getViewManager().getPointerPosition().snap();
-
-	Vector offset = pointer - center;
-
-	// load container
-	Circuit* container = circuitView.getCircuit();
-	if (!container) return;
-
-	// place blocks
-	QJsonArray placeJson = data["place"].toArray();
-	for (const QJsonValue& value : placeJson) {
-		if (!value.isObject()) {
-			qWarning("Invalid JSON format: Expected an object->[place]array->object");
-			return;
-		}
-		QJsonObject placement = value.toObject();
-		if (!(placement["x"].isDouble() && placement["y"].isDouble() && placement["r"].isDouble() && placement["t"].isDouble())) {
-			qWarning("Invalid JSON format: Expected an object->[place]array->object->'x','y','r','t'");
-			return;
-		}
-		container->tryInsertBlock(Position(placement["x"].toInt(), placement["y"].toInt()) + offset, (Rotation)(placement["r"].toInt()), (BlockType)(placement["t"].toInt()));
-	}
-
-	// connect blocks
-	QJsonArray connectJson = data["connect"].toArray();
-	for (const QJsonValue& value : connectJson) {
-		if (!value.isObject()) {
-			qWarning("Invalid JSON format: Expected an object->[connect]array->object.");
-			return;
-		}
-		QJsonObject connection = value.toObject();
-		if (!(connection["ox"].isDouble() && connection["oy"].isDouble() && connection["ix"].isDouble() && connection["iy"].isDouble())) {
-			qWarning("Invalid JSON format: Expected an object->[connect]array->object->'ox','oy','ix','iy'");
-			return;
-		}
-		container->tryCreateConnection(Position(connection["ox"].toInt(), connection["oy"].toInt()) + offset, Position(connection["ix"].toInt(), connection["iy"].toInt()) + offset);
-	}
-
-}
+//void CircuitViewWidget::load(const QString& filePath) {
+//	// open file
+//	QFile file(filePath);
+//	if (!file.open(QIODevice::ReadOnly)) {
+//		qWarning("Couldn't open JSON file.");
+//		return;
+//	}
+//	QByteArray fileData = file.readAll();
+//	file.close();
+//
+//	// validate data
+//	QJsonDocument jsonDoc = QJsonDocument::fromJson(fileData);
+//	if (!jsonDoc.isObject()) {
+//		qWarning("Invalid JSON format: Expected an object");
+//		return;
+//	}
+//
+//	QJsonObject data = jsonDoc.object();
+//	if (!data["place"].isArray() || !data["connect"].isArray()) {
+//		qWarning("Invalid JSON format: Expected an object->[place/connect]array");
+//		return;
+//	}
+//
+//	Position center = Position(0, 0);
+//	if (data["center"].isObject()) {
+//		QJsonObject centerJson = data["center"].toObject();
+//		if (!(centerJson["x"].isDouble() && centerJson["y"].isDouble())) {
+//			qWarning("Invalid JSON format: Expected an object->[center]object->'x','y'");
+//			return;
+//		}
+//		center = Position(centerJson["x"].toInt(), centerJson["y"].toInt());
+//	}
+//	Position pointer = circuitView.getViewManager().getPointerPosition().snap();
+//
+//	Vector offset = pointer - center;
+//
+//	// load container
+//	Circuit* container = circuitView.getCircuit();
+//	if (!container) return;
+//
+//	// place blocks
+//	QJsonArray placeJson = data["place"].toArray();
+//	for (const QJsonValue& value : placeJson) {
+//		if (!value.isObject()) {
+//			qWarning("Invalid JSON format: Expected an object->[place]array->object");
+//			return;
+//		}
+//		QJsonObject placement = value.toObject();
+//		if (!(placement["x"].isDouble() && placement["y"].isDouble() && placement["r"].isDouble() && placement["t"].isDouble())) {
+//			qWarning("Invalid JSON format: Expected an object->[place]array->object->'x','y','r','t'");
+//			return;
+//		}
+//		container->tryInsertBlock(Position(placement["x"].toInt(), placement["y"].toInt()) + offset, (Rotation)(placement["r"].toInt()), (BlockType)(placement["t"].toInt()));
+//	}
+//
+//	// connect blocks
+//	QJsonArray connectJson = data["connect"].toArray();
+//	for (const QJsonValue& value : connectJson) {
+//		if (!value.isObject()) {
+//			qWarning("Invalid JSON format: Expected an object->[connect]array->object.");
+//			return;
+//		}
+//		QJsonObject connection = value.toObject();
+//		if (!(connection["ox"].isDouble() && connection["oy"].isDouble() && connection["ix"].isDouble() && connection["iy"].isDouble())) {
+//			qWarning("Invalid JSON format: Expected an object->[connect]array->object->'ox','oy','ix','iy'");
+//			return;
+//		}
+//		container->tryCreateConnection(Position(connection["ox"].toInt(), connection["oy"].toInt()) + offset, Position(connection["ix"].toInt(), connection["iy"].toInt()) + offset);
+//	}
+//
+//}

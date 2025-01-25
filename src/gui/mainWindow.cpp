@@ -9,7 +9,9 @@
 #include "ui_mainWindow.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow),
+                                        circuitFileManager(backend.getCircuitManager()){
 	ui->setupUi(this);
 
 	setWindowTitle(tr("Gatality"));
@@ -20,7 +22,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	assert(maybeEvalId); // this should be true
 	evalId = *maybeEvalId;
 
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this, &circuitFileManager);
 	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	// circuitViewWidget->updateSelectedItem();

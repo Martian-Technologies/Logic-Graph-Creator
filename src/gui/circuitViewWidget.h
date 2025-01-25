@@ -11,18 +11,20 @@
 
 #include "circuitView/renderer/qtRenderer.h"
 #include "circuitView/circuitView.h"
+#include "computerAPI/circuits/circuitFileManager.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-	CircuitViewWidget(QWidget* parent = nullptr);
+	CircuitViewWidget(QWidget* parent = nullptr, CircuitFileManager* fileManager = nullptr);
 
 	// setup	
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
 
 private:
 	CircuitView<QtRenderer> circuitView;
+    CircuitFileManager* fileManager;
 
 	// update loop
 	QTimer* updateLoopTimer;

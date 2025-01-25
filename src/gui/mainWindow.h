@@ -32,6 +32,7 @@ private:
 	QGraphicsScene* scene;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
+    CircuitFileManager circuitFileManager;
 };
 
 #endif /* mainWindow_h */

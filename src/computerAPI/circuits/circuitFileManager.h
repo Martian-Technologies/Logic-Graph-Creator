@@ -13,11 +13,10 @@ enum CircuitFileTypes {
 
 class CircuitFileManager {
 public:
-	inline CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
+	CircuitFileManager(const CircuitManager* circuitManager);
 	
-	std::optional<circuit_id_t> load(const QString& path);
+	//std::optional<circuit_id_t> load(const QString& path); // creates new circuit
 	bool loadInto(const QString& path, circuit_id_t circuit, const Position& position);
-
 	bool save(const QString& path, circuit_id_t circuit);
 
 private:
@@ -26,7 +25,7 @@ private:
 		QString filePath;
 	};
 
-	CircuitManager* circuitManager;
+	const CircuitManager* circuitManager;
 	std::unordered_map<circuit_id_t, saveInfo> circuitSaveInfo;
 };
 
