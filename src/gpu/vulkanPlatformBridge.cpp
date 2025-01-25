@@ -36,9 +36,9 @@ VulkanSurface::VulkanSurface(QWindow* window) {
 	surfaceInfo.pView = reinterpret_cast<const void*>(winID);
 
 	PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK =
-		(PFN_vkCreateMacOSSurfaceMVK)vkGetInstanceProcAddr(Vulkan::Instance(), "vkCreateMacOSSurfaceMVK");
+		(PFN_vkCreateMacOSSurfaceMVK)vkGetInstanceProcAddr(Vulkan::getInstance(), "vkCreateMacOSSurfaceMVK");
 
-	vkCreateMacOSSurfaceMVK(Vulkan::Instance(), &surfaceInfo, nullptr, &surface);
+	vkCreateMacOSSurfaceMVK(Vulkan::getInstance(), &surfaceInfo, nullptr, &surface);
 #else
 	qVulkanInstance.setVkInstance(Vulkan::getInstance());
 	qVulkanInstance.create();
@@ -49,7 +49,7 @@ VulkanSurface::VulkanSurface(QWindow* window) {
 
 VulkanSurface::~VulkanSurface() {
 #ifdef __APPLE__
-	vkDestroySurfaceKHR(Vulkan::Instance(), surface, nullptr);
+	vkDestroySurfaceKHR(Vulkan::getInstance(), surface, nullptr);
 #else
 	// QT does it
 #endif
