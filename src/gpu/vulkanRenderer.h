@@ -6,7 +6,7 @@
 #include "gpu/vulkanSwapchain.h"
 #include "gpu/vulkanPipeline.h"
 #include "gpu/vulkanFrame.h"
-#include "gpu/vulkanManager.h"
+#include "gpu/vulkanBuffer.h"
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -32,11 +32,12 @@ private:
 	VkSurfaceKHR surface;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
-	PipelineData pipeline;
 
-	// shaders
+	//
+	PipelineData pipeline;
 	VkShaderModule vertShader;
 	VkShaderModule fragShader;
+	AllocatedBuffer vertexBuffer;
 
 	// render loop
 	std::thread renderThread;

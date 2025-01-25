@@ -9,6 +9,7 @@ struct PipelineData {
     VkPipelineLayout layout;
     VkRenderPass renderPass;
 };
+// TODO - pipeline absolutely does not own the render pass, it should be somewhere else
 
 PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag);
 void destroyPipeline(PipelineData& pipeline);

@@ -1,5 +1,7 @@
 #include "vulkanPipeline.h"
+
 #include "gpu/vulkanManager.h"
+#include "vulkanVertices.h"
 
 const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_VIEWPORT,
@@ -28,13 +30,15 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 	dynamicState.pDynamicStates = dynamicStates.data();
 
-	// vertex input state
+	// vertex input state (vertex buffers)
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = nullptr;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	// input assembly state
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};

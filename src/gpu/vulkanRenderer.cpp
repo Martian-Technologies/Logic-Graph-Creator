@@ -1,9 +1,16 @@
 #include "vulkanRenderer.h"
 
 #include "computerAPI/fileLoader.h"
+#include "gpu/vulkanManager.h"
 #include "gpu/vulkanUtil.h"
+#include "vulkanVertices.h"
 
-// obviously todo shader resource passing
+const std::vector<Vertex> vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
+
 void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 {
 	this->surface = surface;
@@ -17,9 +24,14 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	fragShader = createShaderModule(readFileAsBytes(":/shaders/shader.frag.spv"));
 	pipeline = createPipeline(swapchain, vertShader, fragShader);
 	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
+
+	size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
+	vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
 }
 
 void VulkanRenderer::destroy() {
+	destroyBuffer(vertexBuffer);
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
 	destroyShaderModule(vertShader);
@@ -149,6 +161,10 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	// bind render pipeline
 	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
+	VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
+
 	// set dynamic state
 	VkViewport viewport{};
 	viewport.x = 0.0f;
@@ -164,7 +180,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
 
 	// draw
-	vkCmdDraw(frame.mainCommandBuffer, 3, 1, 0, 0);
+	vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);

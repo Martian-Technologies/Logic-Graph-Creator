@@ -67,9 +67,12 @@ private:
 // - [x] New surface creation
 // - [x] Global vulkan state that handles instance/device
 //       - [x] Queue requests
-//       - [ ] Memory allocation
-// - [ ] Drawing with vertex buffers
-// - [ ] Prototype block renderer
+//       - [x] Memory allocation
+// - [x] Drawing with vertex buffers
+// - [ ] Prototype block renderer with
+//       - [ ] Push constant view matrix
+//       - [ ] Blocks and textures
+// - [ ] Butter buffer management. Staging buffer?
 // - [ ] New object management scheme
 //       -  Possibly RAII?
 //       -  Possibly deletion queue
