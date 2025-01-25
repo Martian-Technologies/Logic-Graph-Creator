@@ -69,9 +69,11 @@ void Vulkan::createInstance() {
 void Vulkan::setupDevice(VkSurfaceKHR surface) {
 	pickPhysicalDevice(surface);
 	createLogicalDevice();
+	createAllocator();
 }
 
 void Vulkan::destroy() {
+	vmaDestroyAllocator(allocator);
 	vkDestroyDevice(device, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
@@ -191,6 +193,15 @@ void Vulkan::createLogicalDevice() {
 	for (int i = 0; i < presentQueues.size(); ++i) {
 		vkGetDeviceQueue(device, queueFamilies.presentFamily.value().index, i, &presentQueues[i]);
 	}
+}
+
+void Vulkan::createAllocator() {
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = physicalDevice;
+    allocatorInfo.device = device;
+    allocatorInfo.instance = instance;
+    allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+    vmaCreateAllocator(&allocatorInfo, &allocator);
 }
 
 VkQueue& Vulkan::requestGraphicsQueue(bool important) {

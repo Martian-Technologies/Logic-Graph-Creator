@@ -2,6 +2,7 @@
 #define vulkanManager_h
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include "gpu/vulkanDevice.h"
 
@@ -16,6 +17,7 @@ public:
 	inline static const VkInstance& getInstance() { return getSingleton().instance; }
 	inline static const VkPhysicalDevice& getPhysicalDevice() { return getSingleton().physicalDevice; }
 	inline static const VkDevice& getDevice() { return getSingleton().device; }
+	inline static const VmaAllocator& getAllocator() { return getSingleton().allocator; }
 	inline static const QueueFamilies& getQueueFamilies() { return getSingleton().queueFamilies; }
 
 public:
@@ -31,6 +33,7 @@ private:
 	// helper functions
 	bool checkValidationLayerSupport();
 	void pickPhysicalDevice(VkSurfaceKHR idealSurface);
+	void createAllocator();
 	bool isDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR idealSurface);
 	void createLogicalDevice();
 	
@@ -39,7 +42,8 @@ private:
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
-	struct QueueFamilies queueFamilies;
+	VmaAllocator allocator;
+	QueueFamilies queueFamilies;
 
 	// stupid shit
 	std::vector<VkQueue> graphicsQueues;
@@ -72,5 +76,6 @@ private:
 //       -  Builder pattern (for pipeline at least)
 // - [ ] Don't draw directly to swapchain
 // - [ ] IMGUI for debug
+// - [ ] Switch from singleton to top down design
 
 #endif
