@@ -19,6 +19,7 @@ project(Gatality)
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
+set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Find source files
@@ -92,7 +93,7 @@ qt_add_resources(${PROJECT_NAME} "mainResources"
 )
 
 # GTESTING ===============================================================================
-find_package(GTest REQUIRED)
+add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
 enable_testing()
 
 set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
@@ -100,12 +101,12 @@ set(TEST_FILES)
 file(GLOB_RECURSE TEST_FILES
 	"${TEST_DIR}/*.cpp"
 	"${TEST_DIR}/*.h"
-    "${SOURCE_DIR}/backend/*"
+	"${SOURCE_DIR}/backend/*"
 )
 
 add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
 target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::GTest GTest::Main Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
 target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 
 add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
