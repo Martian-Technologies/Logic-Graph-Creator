@@ -48,6 +48,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM) # and vma
 
+# GLM
+add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM)
+
 set(EXTERNAL_SOURCES
 	
 )
@@ -58,6 +61,7 @@ set(EXTERNAL_LINKS
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	${Vulkan_LIBRARIES}
 	VulkanMemoryAllocator
+	glm
 )
 
 if (Gatality_BuildApp)
