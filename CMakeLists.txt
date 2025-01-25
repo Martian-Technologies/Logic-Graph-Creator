@@ -33,11 +33,15 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.qrc"
 )
 
+# OPTIONS ==========================================================================================
+option(Gatality_BuildApp "Build main app" ON)
+option(Gatality_BuildTests "Build tests" OFF)
+
 # DEPENDENCY SETUP =================================================================================
 # Initialize QT
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${SOURCE_DIR})
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # Initialize Vulkan
@@ -56,6 +60,7 @@ set(EXTERNAL_LINKS
 	VulkanMemoryAllocator
 )
 
+if (Gatality_BuildApp)
 # CREATE EXECUTABLE ================================================================================
 # Platform specific business before add_executable
 if(APPLE) # MacOS
@@ -73,7 +78,7 @@ endif()
 
 # Add executable
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${EXTERNAL_INCLUDES} )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
@@ -132,7 +137,8 @@ qt_add_resources(${PROJECT_NAME} "mainResources"
 		${IMG_SOURCES}
 		${JSON_SOURCES}
 		BASE ${RESOURCES_DIR}
-)
+	      )
+	      
 # Add compiled shader to qt
 qt_add_resources(${PROJECT_NAME} "shaders"
 		PREFIX
@@ -141,3 +147,26 @@ qt_add_resources(${PROJECT_NAME} "shaders"
 		${SHADER_PRODUCTS}
 		BASE ${CMAKE_CURRENT_BINARY_DIR}
 )
+endif()
+
+# GTESTING ===============================================================================
+if (Gatality_BuildTests)
+	message("HI")
+	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
+	enable_testing()
+
+	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
+	set(TEST_FILES)
+	file(GLOB_RECURSE TEST_FILES
+		"${TEST_DIR}/*.cpp"
+		"${TEST_DIR}/*.h"
+		"${SOURCE_DIR}/backend/*"
+	)
+
+	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
+	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+	
+	add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
+endif()

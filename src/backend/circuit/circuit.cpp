@@ -4,7 +4,7 @@ bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockT
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
 	sendDifference(difference);
-	return false;
+	return out;
 }
 
 bool Circuit::tryRemoveBlock(const Position& position) {

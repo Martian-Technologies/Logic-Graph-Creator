@@ -21,6 +21,16 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release"
 			}
+		},
+		{
+			"name": "tests",
+			"displayName": "Tests",
+			"binaryDir": "build-tests",
+			"cacheVariables": {
+			    "CMAKE_BUILD_TYPE": "Debug",
+			    "Gatality_BuildApp": "OFF",
+			    "Gatality_BuildTests": "ON"
+			}
 		}
 	],
 	"buildPresets": [
@@ -36,6 +46,13 @@
 			"displayName": "Build Release",
 			"configurePreset": "release",
 			"configuration": "Release",
+			"jobs": 8
+		},
+		{
+			"name": "tests",
+			"displayName": "Build Tests",
+			"configurePreset": "tests",
+			"configuration": "Debug",
 			"jobs": 8
 		}
 	],
