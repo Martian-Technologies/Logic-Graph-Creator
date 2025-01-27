@@ -25,10 +25,11 @@ TEST_F(EvaluatorTest, PauseUnpauseTest) {
     evaluator->setUseTickrate(false);
     // set to 1000000000 tick/min
     // tickrate should be ~16666666.7 ?
-	//std::this_thread::sleep_for(std::chrono::seconds(5));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
     ASSERT_GT(evaluator->getRealTickrate(), 0);
 	
 	evaluator->setPause(true);
+	std::this_thread::sleep_for(std::chrono::seconds(2));
 	ASSERT_EQ(evaluator->getRealTickrate(), 0);
 }
 
@@ -38,7 +39,7 @@ TEST_F(EvaluatorTest, TickrateTest) {
 	evaluator->setUseTickrate(true);
 	evaluator->setPause(false);
 	
-	//std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	
 	ASSERT_GT(evaluator->getRealTickrate(), 0);
 	//ASSERT_EQ(evaluator->getRealTickrate(), new_tickrate/60); // have to sleep for a couple seconds
