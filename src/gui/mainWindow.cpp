@@ -20,6 +20,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
 	circuit_id_t id = backend.createCircuit();
+	circuit_id_t id2 = backend.createCircuit();
 	auto maybeEvalId = backend.createEvaluator(id);
 	assert(maybeEvalId); // this should be true
 	evalId = *maybeEvalId;
@@ -32,8 +33,8 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 
 	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
 	circuitViews.push_back(circuitViewWidget2);
-	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id);
-	backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
+	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id2);
+	// backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
 	addDock(circuitViewWidget2, KDDockWidgets::Location_OnRight);
 
 	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
