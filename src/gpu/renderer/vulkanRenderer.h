@@ -3,10 +3,10 @@
 
 #include "gui/circuitView/renderer/renderer.h"
 
-#include "gpu/vulkanSwapchain.h"
-#include "gpu/vulkanPipeline.h"
-#include "gpu/vulkanFrame.h"
 #include "gpu/vulkanBuffer.h"
+#include "vulkanSwapchain.h"
+#include "vulkanPipeline.h"
+#include "vulkanFrame.h"
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 

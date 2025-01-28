@@ -12,7 +12,7 @@
 
 #include "circuitView/circuitView.h"
 #include "gpu/vulkanPlatformBridge.h"
-#include "gpu/vulkanRenderer.h"
+#include "gpu/renderer/vulkanRenderer.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {

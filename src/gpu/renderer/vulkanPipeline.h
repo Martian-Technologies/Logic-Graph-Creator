@@ -2,7 +2,8 @@
 #define vulkanPipeline_h
 
 #include <vulkan/vulkan.h>
-#include "gpu/vulkanSwapchain.h"
+
+#include "vulkanSwapchain.h"
 
 struct PipelineData {
 	VkPipeline handle;
