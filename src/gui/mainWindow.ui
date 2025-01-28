@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>658</width>
-     <height>36</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>
@@ -198,6 +198,13 @@
          <widget class="QPushButton" name="SelectMenu">
           <property name="text">
            <string>Select Menu</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton">
+          <property name="text">
+           <string>Help</string>
           </property>
          </widget>
         </item>
