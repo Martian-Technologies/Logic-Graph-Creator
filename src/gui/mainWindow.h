@@ -22,7 +22,15 @@ public:
     void simUseSpeed(bool state);
     void setSimSpeed(double speed);
 
+    void closePreference() { preferencesOpen = false;  }
+
 private:
+
+    void connectMenuBar();
+    void onPreferenceClick();
+
+    bool preferencesOpen;
+
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
     BlockContainerManager blockContainerManager;

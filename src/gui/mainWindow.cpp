@@ -52,7 +52,6 @@ void MainWindow::connectMenuBar() {
 }
 
 void MainWindow::onPreferenceClick(){
+    // if(preferencesOpen)
     SettingsWindow* sw = new SettingsWindow(this); 
 }
-
->>>>>>> Stashed 

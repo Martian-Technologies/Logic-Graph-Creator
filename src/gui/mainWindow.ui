@@ -339,9 +339,16 @@
      <x>0</x>
      <y>0</y>
      <width>646</width>
-     <height>36</height>
+     <height>38</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuLogic">
+    <property name="title">
+     <string>Logic</string>
+    </property>
+    <addaction name="actionPreference"/>
+   </widget>
+   <addaction name="menuLogic"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionj">
@@ -352,6 +359,11 @@
   <action name="actionj_2">
    <property name="text">
     <string>j</string>
+   </property>
+  </action>
+  <action name="actionPreference">
+   <property name="text">
+    <string>Preference</string>
    </property>
   </action>
  </widget>
