@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <exception>
 #include <optional>
 #include <utility>
 #include <memory>
@@ -23,6 +24,9 @@
 #include <iostream>
 #include <sstream>
 #include <ostream>
+#include <fstream>
 #include <iomanip>
+
+#include "logging/logger.h"
 
 #endif
