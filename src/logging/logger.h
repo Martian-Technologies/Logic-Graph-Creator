@@ -3,30 +3,26 @@
 
 #include <filesystem>
 
-enum LogType { Verbose, Info, Warning, Error, Fatal };
-
-void logVerbose(const std::string& message);
-void logInfo(const std::string& message);
-void logWarning(const std::string& message);
-void logError(const std::string& message);
-void fatalError(const std::string& message);
+enum LogType {
+	Info=1,
+	Warning=2,
+	Error=4,
+	Fatal=8
+};
 
 class Logger {
 public:
-	Logger(const std::filesystem::path& outputFile, LogType logIntensity);
+	Logger(const std::filesystem::path& outputFile);
 
 	void log(LogType type, const std::string& message);
 
 private:
+	void flushToFile();
+
 	std::filesystem::path outputFile;
 	std::ofstream outputFileStream;
 
 	std::stringstream fileBuffer;
-
-	LogType logIntensity;
-
-private:
-	void flushToFile();
 };
 
-#endif
+#endif /* logger_h */

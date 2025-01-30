@@ -27,6 +27,6 @@
 #include <fstream>
 #include <iomanip>
 
-#include "logging/logger.h"
+#include "logging/logging.h"
 
 #endif

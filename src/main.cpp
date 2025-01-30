@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 	logInfo("wooho");
 	logInfo("woohotwo");
 	logError("oopsie");
-	fatalError("big oopsie");
+	logFatalError("big oopsie");
 	logWarning("no oopsie?");
 
 	MainWindow window;
