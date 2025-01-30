@@ -6,7 +6,6 @@ Logger::Logger(const std::filesystem::path& outputFile) : outputFile(outputFile)
 }
 
 void Logger::log(LogType type, const std::string& message) {
-	std::lock_guard<std::mutex> lock(mtx);
 	std::string output;
 	switch (type) {
 	case LogType::Info:

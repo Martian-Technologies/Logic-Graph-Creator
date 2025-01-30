@@ -2,13 +2,12 @@
 #define logger_h
 
 #include <filesystem>
-#include <mutex>
 
 enum LogType {
-	Info = 1,
-	Warning = 2,
-	Error = 4,
-	Fatal = 8
+	Info=1,
+	Warning=2,
+	Error=4,
+	Fatal=8
 };
 
 class Logger {
@@ -19,8 +18,6 @@ public:
 
 private:
 	void flushToFile();
-
-	std::mutex mtx;
 
 	std::filesystem::path outputFile;
 	std::ofstream outputFileStream;
