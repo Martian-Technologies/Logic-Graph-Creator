@@ -4,10 +4,10 @@
 #include <filesystem>
 
 enum LogType {
-	Info=1,
-	Warning=2,
-	Error=4,
-	Fatal=8
+	Info = 1,
+	Warning = 2,
+	Error = 4,
+	Fatal = 8
 };
 
 class Logger {
