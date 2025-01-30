@@ -6,27 +6,22 @@ Logger::Logger(const std::filesystem::path& outputFile) : outputFile(outputFile)
 }
 
 void Logger::log(LogType type, const std::string& message) {
-	std::string output;
 	switch (type) {
 	case LogType::Info:
-		output = "[Info] " + message + "\n";
-		fileBuffer << output;
-		std::cout << output;
+		fileBuffer << "[Info] " + message + "\n";
+		std::cout << "[\e[1;37mInfo\e[0m] " << message << "\n";
 		break;
 	case LogType::Warning:
-		output = "[Warning] " + message + "\n";
-		fileBuffer << output;
-		std::cout << output;
+		fileBuffer << "[Warning] " + message + "\n";
+		std::cout << "[\e[1;33mWarning\e[0m] " << message << "\n";
 		break;
 	case LogType::Error:
-		output = "[ERROR] " + message + "\n";
-		fileBuffer << output;
-		std::cerr << output;
+		fileBuffer << "[ERROR] " << message << "\n";
+		std::cerr << "[\e[1;31mERROR\e[0m] " << message << "\n";;
 		break;
 	case LogType::Fatal:
-		output = "[FATAL] " + message + "\n";
-		fileBuffer << output;
-		std::cerr << output;
+		fileBuffer << "[FATAL] " << message << "\n";
+		std::cerr << "[\e[1;4;41;30mFATAL\e[0m] " + message + "\n";
 		break;
 	}
 
