@@ -37,7 +37,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
 	// make sure to remove all connections from this block
 	for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
 		for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
-			Block* otherBlock = getBlock(connectionEnd.getBlockId());
+			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock) otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i));
 		}
 	}
@@ -47,7 +47,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
 }
 
 bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	if (
 		checkCollision(
@@ -92,7 +92,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 		if (!success)
 			continue;
 		for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
-			Block* otherBlock = getBlock(connectionEnd.getBlockId());
+			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i))) {
 				auto [otherPosition, otherSuccess] = otherBlock->getConnectionPosition(connectionEnd.getConnectionId());
 				if (!otherSuccess)
@@ -109,7 +109,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 }
 
 bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	if (
 		checkCollision(
@@ -138,14 +138,14 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 // }
 
 bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	block->setRawData(data);
 	return true;
 }
 
 bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	block_data_t oldData = block->getRawData();
 	if (oldData == data) return true;
@@ -195,11 +195,11 @@ const std::optional<ConnectionEnd> BlockContainer::getOutputConnectionEnd(const 
 }
 
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
-	Block* input = getBlock(inputPosition);
+	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
 	if (!inputSuccess) return false;
-	Block* output = getBlock(outputPosition);
+	Block* output = getBlock_(outputPosition);
 	if (!output) return false;
 	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
 	if (!outputSuccess) return false;
@@ -211,11 +211,11 @@ bool BlockContainer::tryCreateConnection(const Position& outputPosition, const P
 }
 
 bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const Position& inputPosition) {
-	Block* input = getBlock(inputPosition);
+	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
 	if (!inputSuccess) return false;
-	Block* output = getBlock(outputPosition);
+	Block* output = getBlock_(outputPosition);
 	if (!output) return false;
 	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
 	if (!outputSuccess) return false;
@@ -227,11 +227,11 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 }
 
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference) {
-	Block* input = getBlock(inputPosition);
+	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
 	if (!inputSuccess) return false;
-	Block* output = getBlock(outputPosition);
+	Block* output = getBlock_(outputPosition);
 	if (!output) return false;
 	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
 	if (!outputSuccess) return false;
@@ -244,11 +244,11 @@ bool BlockContainer::tryCreateConnection(const Position& outputPosition, const P
 }
 
 bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference) {
-	Block* input = getBlock(inputPosition);
+	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
 	if (!inputSuccess) return false;
-	Block* output = getBlock(outputPosition);
+	Block* output = getBlock_(outputPosition);
 	if (!output) return false;
 	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
 	if (!outputSuccess) return false;
