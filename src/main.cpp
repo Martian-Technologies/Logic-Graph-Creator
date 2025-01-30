@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "gui/mainWindow.h"
+#include "gpu/vulkanQtWindow.h"
 #include "gpu/vulkanPlatformBridge.h"
 #include "gpu/vulkanManager.h"
 
@@ -32,14 +33,14 @@ void setupVulkan() {
 	Vulkan::getSingleton().createInstance();
 	
 	// goofy ahh hack to get temp surface for device selection
-	QWindow tempWindow;
+	VulkanQtWindow tempWindow;
 	tempWindow.setSurfaceType(QSurface::VulkanSurface);
 	tempWindow.show();
-	VulkanSurface surface(&tempWindow);
 	
 	// create instance and device
-	Vulkan::getSingleton().setupDevice(surface.getVkSurfaceKHR());
+	Vulkan::getSingleton().setupDevice(tempWindow.createSurface());
 
 	// destroy temp surface
+	tempWindow.destroySurface();
 	tempWindow.destroy();
 }

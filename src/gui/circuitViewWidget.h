@@ -11,8 +11,8 @@
 #include <QTimer>
 
 #include "circuitView/circuitView.h"
-#include "gpu/vulkanPlatformBridge.h"
 #include "gpu/renderer/vulkanRenderer.h"
+#include "gpu/vulkanQtWindow.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
@@ -43,8 +43,8 @@ private:
 	QTreeWidget* treeWidget;
 
 	// vulkan
-	std::unique_ptr<VulkanSurface> vulkanSurface = nullptr;
-	QWindow* vulkanWindow;
+	VulkanQtWindow* vulkanWindow;
+	QWidget* vulkanWindowWrapper;
 
 	// settings (temp)
 	bool mouseControls;

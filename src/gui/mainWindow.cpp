@@ -23,13 +23,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	evalId = *maybeEvalId;
 
 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(this);
-	circuitViewWidget->createVulkanWindow();
 	circuitViews.push_back(circuitViewWidget);
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
 
 	connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
-	
 	connect(ui->StartSim, &QPushButton::clicked, this, &MainWindow::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &MainWindow::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &MainWindow::setSimSpeed);

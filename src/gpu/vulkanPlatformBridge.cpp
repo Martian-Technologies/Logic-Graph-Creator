@@ -2,12 +2,7 @@
 
 #include "vulkanManager.h"
 
-#ifdef __APPLE__
-#include <vulkan/vulkan_macos.h>
-#endif
-
 // this file exists because apple is stupid
-
 std::vector<std::string> getRequiredInstanceExtensions() {
 #ifdef __APPLE__
 	// we don't have a library for this on apple, so this will have to work. May not age very well
@@ -25,33 +20,5 @@ std::vector<std::string> getRequiredInstanceExtensions() {
 	
 	return extensions;
 	
-#endif
-}
-
-VulkanSurface::VulkanSurface(QWindow* window) {
-#ifdef __APPLE__
-	VkMacOSSurfaceCreateInfoMVK surfaceInfo = {};
-	surfaceInfo.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-	auto winID = window->winId();
-	// we're going to hope this works
-	surfaceInfo.pView = reinterpret_cast<const void*>(winID);
-
-	PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK =
-		(PFN_vkCreateMacOSSurfaceMVK)vkGetInstanceProcAddr(Vulkan::getInstance(), "vkCreateMacOSSurfaceMVK");
-
-	vkCreateMacOSSurfaceMVK(Vulkan::getInstance(), &surfaceInfo, nullptr, &surface);
-#else
-	qVulkanInstance.setVkInstance(Vulkan::getInstance());
-	qVulkanInstance.create();
-	window->setVulkanInstance(&qVulkanInstance);
-	surface = QVulkanInstance::surfaceForWindow(window);
-#endif
-}
-
-VulkanSurface::~VulkanSurface() {
-#ifdef __APPLE__
-	vkDestroySurfaceKHR(Vulkan::getInstance(), surface, nullptr);
-#else
-	// QT does it
 #endif
 }

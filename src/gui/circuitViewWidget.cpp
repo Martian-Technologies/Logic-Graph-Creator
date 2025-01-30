@@ -28,6 +28,12 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseCo
 
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
+
+	// layout for sub vulkan window
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	this->setLayout(layout);
+
+	createVulkanWindow();
 }
 
 void CircuitViewWidget::showEvent(QShowEvent* event) {
@@ -48,27 +54,24 @@ void CircuitViewWidget::hideEvent(QHideEvent* event) {
 
 void CircuitViewWidget::createVulkanWindow() {
 	// create vulkan window
-	vulkanWindow = new QWindow();
+	vulkanWindow = new VulkanQtWindow();
 	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
-	vulkanWindow->setSurfaceType(QSurface::VulkanSurface);
 	vulkanWindow->show();
 
 	// embed vulkan window
-	QWidget* windowWrapper = QWidget::createWindowContainer(vulkanWindow);
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->addWidget(windowWrapper);
-	this->setLayout(layout);
-
-	// create surface
-	vulkanSurface = std::make_unique<VulkanSurface>(vulkanWindow);
+	vulkanWindowWrapper = QWidget::createWindowContainer(vulkanWindow);
+	layout()->addWidget(vulkanWindowWrapper);
 	
 	// initialize renderer
-	circuitView.getRenderer().initialize(vulkanSurface->getVkSurfaceKHR(), size().width(), size().height());
+	circuitView.getRenderer().initialize(vulkanWindow->createSurface(), size().width(), size().height());
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {
 	circuitView.getRenderer().stop();
 	circuitView.getRenderer().destroy();
+	vulkanWindow->destroySurface();
+	vulkanWindow->destroy();
+	layout()->removeWidget(vulkanWindowWrapper);
 }
 
 void CircuitViewWidget::updateLoop() {
