@@ -4,6 +4,7 @@
 #include "gpu/vulkanManager.h"
 #include "gpu/vulkanUtil.h"
 #include "vulkanVertices.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 const std::vector<Vertex> vertices = {
     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -161,9 +162,15 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	// bind render pipeline
 	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
+	// bind vertex buffers
 	VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
+
+	// bind push constants
+	VertexPushConstants pushConstants{};
+	pushConstants.mvp = orthoMat;
+	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(VertexPushConstants), &pushConstants);
 
 	// set dynamic state
 	VkViewport viewport{};
@@ -211,7 +218,10 @@ void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
 }
 
 void VulkanRenderer::updateView(ViewManager* viewManager) {
-	
+	FPosition topLeft = viewManager->getTopLeft();
+    FPosition bottomRight = viewManager->getBottomRight();
+	orthoMat = glm::ortho(topLeft.x, bottomRight.x, bottomRight.y, topLeft.y);
+	orthoMat[1][1] *= -1; // because glm is made for opengl with different coordinate system
 }
 
 void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {

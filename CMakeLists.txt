@@ -63,6 +63,10 @@ set(EXTERNAL_LINKS
 	VulkanMemoryAllocator
 	glm
 )
+set(EXTERNAL_DEFINES
+	"GLM_FORCE_RADIANS"
+	"GLM_FORCE_DEPTH_ZERO_TO_ONE"
+)
 
 if (Gatality_BuildApp)
 # CREATE EXECUTABLE ================================================================================
@@ -85,6 +89,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${EXTERNAL_INCLUDES} )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${EXTERNAL_DEFINES})
 
 # Platform specific business after add_executable
 if(APPLE) # MacOS
