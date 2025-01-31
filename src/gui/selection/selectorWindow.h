@@ -18,6 +18,7 @@ public:
 private:
 	void updateSelectedBlock();
 	void updateSelectedTool();
+	bool isSinglePlace = true;
 
 	Ui::Selector* ui;
 

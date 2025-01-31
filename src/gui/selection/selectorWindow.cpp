@@ -32,6 +32,13 @@ void SelectorWindow::updateSelectedBlock() {
 			else if (str == "Tick Button") type = BlockType::TICK_BUTTON;
 			else if (str == "Light") type = BlockType::LIGHT;
 			emit selectedBlockChange(type);
+			//selecting a block automatically selects single place tool
+			//if area place was the last selected place tool, then it switches to area tool instead
+			if(isSinglePlace) {
+				emit selectedToolChange("Single Place");
+			} else {
+				emit selectedToolChange("Area Place");
+			}
 			return;
 		}
 	}
@@ -42,6 +49,13 @@ void SelectorWindow::updateSelectedTool() {
 		if (item) {
 			QString str = item->text(0);
 			emit selectedToolChange(str.toStdString());
+			//using single or area tool resets what the default place tool is when selecting blocks
+			if(str.toStdString() == "Single Place") {
+				isSinglePlace = true;
+			}
+			if(str.toStdString() == "Area Place") {
+				isSinglePlace = false;
+			}
 			return;
 		}
 	}
