@@ -1,5 +1,3 @@
-#include "circuitViewWidget.h"
-
 #include <QJsonDocument>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -12,8 +10,10 @@
 #include <QGestureEvent>
 
 #include "circuitView/circuitView.h"
+#include "circuitViewWidget.h"
+#include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseControls(false), treeWidget(nullptr) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector) : QWidget(parent), mouseControls(false), circuitSelector(circuitSelector) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -38,9 +38,39 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseCo
 
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
+
+	connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index){
+			Backend* backend = this->circuitView.getBackend();
+			if (backend && this->circuitSelector) {
+				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
+			}
+		}
+	);
 }
 
 void CircuitViewWidget::updateLoop() {
+	if (circuitSelector) {
+		const Backend* backend = circuitView.getBackend();
+		if (backend) {
+			for (auto pair : backend->getCircuitManager()) {
+				QString name = QString::fromStdString(pair.second->getCircuitName());
+				if (circuitSelector->findText(name) == -1) {
+					circuitSelector->addItem(name, pair.second->getCircuitId());
+				}
+			}
+		}
+		Circuit* circuit = circuitView.getCircuit();
+		if (circuit != nullptr) {
+			QString name = QString::fromStdString(circuit->getCircuitName());
+			int index = circuitSelector->findText(name);
+			if ( index != -1 ) { // -1 for not found
+				circuitSelector->setCurrentIndex(index);
+			}
+		} else {
+			int index = circuitSelector->findText("None");
+			circuitSelector->setCurrentIndex(index);
+		}
+	}
 	// update for re-render
 	update();
 }

@@ -11,6 +11,7 @@
 #include "circuitViewWidget.h"
 #include "controlsWindow.h"
 #include "mainWindow.h"
+#include "ui_circuitViewUi.h"
 
 
 MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options) {
@@ -25,17 +26,9 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 	assert(maybeEvalId); // this should be true
 	evalId = *maybeEvalId;
 
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget();
-	circuitViews.push_back(circuitViewWidget);
+	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId);
-	addDock(circuitViewWidget, KDDockWidgets::Location_OnRight);
-
-	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
-	circuitViews.push_back(circuitViewWidget2);
-	backend.linkCircuitViewWithCircuit(circuitViewWidget2->getCircuitView(), id2);
-	// backend.linkCircuitViewWithEvaluator(circuitViewWidget2->getCircuitView(), evalId);
-	addDock(circuitViewWidget2, KDDockWidgets::Location_OnRight);
+	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId, Address());
 
 	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
 
@@ -94,10 +87,17 @@ void MainWindow::openNewControlsWindow() {
 	connect(controls, &ControlsWindow::setSimSpeed, this, &MainWindow::setSimSpeed);
 	addDock(controls, KDDockWidgets::Location_OnLeft);
 }
-void MainWindow::openNewCircuitViewWindow() {
-	CircuitViewWidget* circuitViewWidget2 = new CircuitViewWidget();
-	circuitViews.push_back(circuitViewWidget2);
-	addDock(circuitViewWidget2, KDDockWidgets::Location_OnRight);
+
+CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
+	QWidget* w = new QWidget();
+	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
+	circuitViewUi->setupUi(w);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi->CircuitSelector);
+	backend.linkCircuitView(circuitViewWidget->getCircuitView());
+	circuitViews.push_back(circuitViewWidget);
+	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
+	addDock(w, KDDockWidgets::Location_OnRight);
+	return circuitViewWidget;
 }
 
 void MainWindow::setBlock(BlockType blockType) {

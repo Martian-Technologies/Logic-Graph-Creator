@@ -14,7 +14,8 @@ class Circuit {
 public:
 	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
 
-	circuit_id_t getCircuitId() const { return circuitId; }
+	inline circuit_id_t getCircuitId() const { return circuitId; }
+	inline std::string getCircuitName() const { return "Circuit " + std::to_string(circuitId); }
 
 
 	/* ----------- listener ----------- */

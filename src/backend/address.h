@@ -5,6 +5,7 @@
 
 class Address {
 public:
+	Address() { }
 	Address(Position position) : addresses({ position }) { }
 	inline int size() const { return addresses.size(); }
 	inline Position getPosition(int index) const { return addresses[index]; }
