@@ -9,19 +9,19 @@ void Logger::log(LogType type, const std::string& message) {
 	switch (type) {
 	case LogType::Info:
 		fileBuffer << "[Info] " + message + "\n";
-		std::cout << "[\e[1;37mInfo\e[0m] " << message << "\n";
+		std::cout << "[\033[1;37mInfo\033[0m] " << message << "\n";
 		break;
 	case LogType::Warning:
 		fileBuffer << "[Warning] " + message + "\n";
-		std::cout << "[\e[1;33mWarning\e[0m] " << message << "\n";
+		std::cout << "[\033[1;33mWarning\033[0m] " << message << "\n";
 		break;
 	case LogType::Error:
 		fileBuffer << "[ERROR] " << message << "\n";
-		std::cerr << "[\e[1;31mERROR\e[0m] " << message << "\n";;
+		std::cerr << "[\033[1;31mERROR\033[0m] " << message << "\n";;
 		break;
 	case LogType::Fatal:
 		fileBuffer << "[FATAL] " << message << "\n";
-		std::cerr << "[\e[1;4;41;30mFATAL\e[0m] " + message + "\n";
+		std::cerr << "[\033[1;4;41;97mFATAL\033[0m] " + message + "\n";
 		break;
 	}
 
