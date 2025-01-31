@@ -64,10 +64,9 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
     Rotation rotation;
     int numConns;
 
+    std::unordered_map<block_id_t, block_id_t> realBlockId;
     std::unordered_map<block_id_t, Position> blockPositions;
     std::unordered_map<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t, connection_end_id_t>>> connections;
-
-    int id_offset = circuit->getBlockContainer()->getBlockCount();
 
     // read all blocks and store positions
     while (inputFile >> token) {
@@ -86,9 +85,8 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
             //return false;
         }
 
-        // the "real" blockid is going to be different than the saved blockid, because
-        // we might be loading it into a circuit that already has this id taken up.
-        block_id_t currentBlockId = blockId + id_offset;
+        block_id_t currentBlockId = blockId;
+        realBlockId[currentBlockId] = circuit->getBlockContainer()->getBlock(currentBlockPos)->id();
         blockPositions[currentBlockId] = currentBlockPos;
 
         std::cout << "Inserted block. ID=" << currentBlockId << std::endl;
@@ -100,8 +98,8 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
             std::cout<< "token: " << token << std::endl;
             while (inputFile.peek() != '\n'){
                 inputFile >> cToken >> blockId >> connId >> cToken;
-                std::cout << "\t(" << blockId+id_offset << ' ' << connId << cToken << std::endl;
-                connections[currentBlockId].push_back(std::make_tuple(i, blockId+id_offset, connId));
+                std::cout << "\t(" << blockId << ' ' << connId << cToken << std::endl;
+                connections[currentBlockId].push_back(std::make_tuple(i, blockId, connId));
             }
         }
 
@@ -112,7 +110,9 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
         block_id_t output = p.first;
         for (auto& input : p.second){
             std::cout << "connecting [block=" << output << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
-            if (!circuit->tryCreateConnection(std::make_pair(output, get<0>(input)), std::make_pair(get<1>(input), get<2>(input)))) {
+            ConnectionEnd outputConnection(realBlockId[output], get<0>(input));
+            ConnectionEnd inputConnection(realBlockId[get<1>(input)], get<2>(input));
+            if (!circuit->tryCreateConnection(outputConnection, inputConnection)) {
                 qWarning("Failed to create connection.");
                 //return false;
             }
@@ -167,20 +167,18 @@ bool CircuitFileManager::save(const QString& path, circuit_id_t circuit) {
     outputFile << "version_1\n";
 
     const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
-    int blockCount = blockContainer->getBlockCount();
-    for (int blockId=1; blockId<=blockCount; ++blockId) {
+    std::unordered_map<block_id_t, Block>::const_iterator itr = blockContainer->begin();
+    for (; itr!=blockContainer->end(); ++itr) {
 
-        const Block* block = blockContainer->getBlock(blockId);
-        if (!block) continue;
+        const Block& block = itr->second;
+        const Position& pos = block.getPosition();
 
-        const Position& pos = block->getPosition();
-
-        const ConnectionContainer& blockCC = block->getConnectionContainer();
+        const ConnectionContainer& blockCC = block.getConnectionContainer();
         connection_end_id_t connectionNum = blockCC.getMaxConnectionId() + 1;
 
-        outputFile << "blockId " << blockId << ' '
-                   << blockTypeToString(block->type()) << ' ' << pos.x << ' '
-                   << pos.y << ' ' << rotationToString(block->getRotation()) << ' '
+        outputFile << "blockId " << itr->first << ' '
+                   << blockTypeToString(block.type()) << ' ' << pos.x << ' '
+                   << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
                    << connectionNum << '\n';
         //const std::vector<ConnectionEnd>& inputConnections = block.getInputConnections(pos);
         //const std::vector<ConnectionEnd>& outputConnections = block.getOutputConnections(pos);

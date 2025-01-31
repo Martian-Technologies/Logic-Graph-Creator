@@ -75,10 +75,6 @@ public:
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 
-    // Make specific connection between blocks and their connection ids
-    bool tryCreateConnection(const std::pair<block_id_t, connection_end_id_t>& blockOne,
-            const std::pair<block_id_t, connection_end_id_t>& blockTwo);
-
 	/* ----------- iterators ----------- */
 	// not safe if the container gets modifided (dont worry about it for now)
 	typedef std::unordered_map<block_id_t, Block>::iterator iterator;
