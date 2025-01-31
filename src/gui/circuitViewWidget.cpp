@@ -79,17 +79,20 @@ void CircuitViewWidget::paintEvent(QPaintEvent* event) {
 	}
 	float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
 
-	// avg frame
+	//setting color of font
+	painter->setPen(Qt::magenta);
+
+	// avg frame text in top left corner of circuit view
 	std::stringstream stream1;
 	stream1 << std::fixed << std::setprecision(3) << average;
 	std::string frameTimeStr = "avg frame: " + stream1.str() + "ms";
-	painter->drawText(QRect(QPoint(0, 0), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
+	painter->drawText(QRect(QPoint(5, 5), size()), Qt::AlignTop, QString(frameTimeStr.c_str()));
 
-	// tps
+	// tps text in top left corner of circuit view
 	std::stringstream stream2;
 	stream2 << std::fixed << std::setprecision(3) << circuitView.getEvaluatorStateInterface().getRealTickrate();
 	std::string tpsStr = "tps: " + stream2.str();
-	painter->drawText(QRect(QPoint(0, 16), size()), Qt::AlignTop, QString(tpsStr.c_str()));
+	painter->drawText(QRect(QPoint(5, 21), size()), Qt::AlignTop, QString(tpsStr.c_str()));
 
 	delete painter;
 }
