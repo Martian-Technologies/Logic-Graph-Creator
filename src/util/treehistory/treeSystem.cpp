@@ -1,8 +1,7 @@
-#ifndef undoSystem_h
-#define undoSystem_h
+#include "treeSystem.h"
 
-#include "backend/container/difference.h"
 
+/* info for class
 class UndoSystem {
 public:
 	inline UndoSystem() : undoPosition(0) { }
@@ -10,7 +9,7 @@ public:
 	inline void addDifference(DifferenceSharedPtr difference) { 
         while (undoPosition < differences.size()) 
             differences.pop_back(); 
-        ++undoPosition; 
+        undoPosition++; 
         differences.push_back(difference); 
     }
 	inline DifferenceSharedPtr undoDifference() { 
@@ -30,4 +29,4 @@ private:
 
 };
 
-#endif /* undoSystem_h */
+*/

@@ -10,7 +10,7 @@ public:
 	inline void addDifference(DifferenceSharedPtr difference) { 
         while (undoPosition < differences.size()) 
             differences.pop_back(); 
-        ++undoPosition; 
+        undoPosition++; 
         differences.push_back(difference); 
     }
 	inline DifferenceSharedPtr undoDifference() { 
