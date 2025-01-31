@@ -88,8 +88,8 @@ public:
 	Difference getCreationDifference() const;
 
 private:
-	inline Block* getBlock(const Position& position);
-	inline Block* getBlock(block_id_t blockId);
+	inline Block* getBlock_(const Position& position);
+	inline Block* getBlock_(block_id_t blockId);
 	inline Cell* getCell(const Position& position) { return grid.get(position); }
 	inline void insertCell(const Position& position, Cell cell) { grid.insert(position, cell); }
 	inline void removeCell(const Position& position) { grid.remove(position); }
@@ -103,7 +103,7 @@ private:
 	std::unordered_map<block_id_t, Block> blocks;
 };
 
-inline Block* BlockContainer::getBlock(const Position& position) {
+inline Block* BlockContainer::getBlock_(const Position& position) {
 	const Cell* cell = grid.get(position);
 	return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
 }
@@ -113,19 +113,19 @@ inline const Block* BlockContainer::getBlock(const Position& position) const {
 	return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
 }
 
-inline Block* BlockContainer::getBlock(block_id_t blockId) {
+inline Block* BlockContainer::getBlock_(block_id_t blockId) {
 	auto iter = blocks.find(blockId);
-	return (iter == blocks.end()) ? nullptr : &iter->second;
+	return (iter == blocks.end()) ? nullptr : &(iter->second);
 }
 
 inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
 	auto iter = blocks.find(blockId);
-	return (iter == blocks.end()) ? nullptr : &iter->second;
+	return (iter == blocks.end()) ? nullptr : &(iter->second);
 }
 
 template<class T, unsigned int index>
 bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	block->setDataValue<T, index>(value);
 	return true;
@@ -133,7 +133,7 @@ bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T val
 
 template<class T, unsigned int index>
 bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference) {
-	Block* block = getBlock(positionOfBlock);
+	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	block_data_t oldData = block->getRawData();
 	block->setDataValue<T, index>(value);
