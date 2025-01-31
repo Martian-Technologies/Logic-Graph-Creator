@@ -4,7 +4,7 @@ bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockT
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
 	sendDifference(difference);
-	return false;
+	return out;
 }
 
 bool Circuit::tryRemoveBlock(const Position& position) {
@@ -128,6 +128,24 @@ bool Circuit::tryRemoveConnection(const Position& outputPosition, const Position
 	bool out = blockContainer.tryRemoveConnection(outputPosition, inputPosition, difference.get());
 	sendDifference(difference);
 	return out;
+}
+
+bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
+	const Block* inputBlock = blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
+	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
+	if (!outputOut.second || !inputOut.second) return false;
+	return tryCreateConnection(outputOut.first, inputOut.first);
+}
+
+bool Circuit::tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
+	const Block* inputBlock =  blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
+	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
+	if (!outputOut.second || !inputOut.second) return false;
+	return tryRemoveConnection(outputOut.first, inputOut.first);
 }
 
 bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
