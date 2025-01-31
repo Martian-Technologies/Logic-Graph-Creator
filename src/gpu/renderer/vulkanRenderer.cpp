@@ -220,8 +220,8 @@ void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
 void VulkanRenderer::updateView(ViewManager* viewManager) {
 	FPosition topLeft = viewManager->getTopLeft();
     FPosition bottomRight = viewManager->getBottomRight();
-	orthoMat = glm::ortho(topLeft.x, bottomRight.x, bottomRight.y, topLeft.y);
-	orthoMat[1][1] *= -1; // because glm is made for opengl with different coordinate system
+	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
+	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
 }
 
 void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
