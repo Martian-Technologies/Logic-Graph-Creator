@@ -79,7 +79,7 @@ void CircuitViewWidget::paintEvent(QPaintEvent* event) {
 	}
 	float average = std::accumulate(pastFrameTimes.begin(), pastFrameTimes.end(), 0.0f) / (float)pastFrameTimes.size();
 
-	//setting color of font
+	//setting color of font (magenta is contrasting with black, white, and green)
 	painter->setPen(Qt::magenta);
 
 	// avg frame text in top left corner of circuit view

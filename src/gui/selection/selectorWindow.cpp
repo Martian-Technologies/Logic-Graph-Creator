@@ -20,6 +20,7 @@ void SelectorWindow::updateSelectedBlock() {
 	for (QTreeWidgetItem* item : ui->BlockTree->selectedItems()) {
 		if (item) {
 			QString str = item->text(0);
+			bool blockClicked = true;
 			BlockType type;
 			if (str == "And") type = BlockType::AND;
 			else if (str == "Or") type = BlockType::OR;
@@ -31,7 +32,11 @@ void SelectorWindow::updateSelectedBlock() {
 			else if (str == "Button") type = BlockType::BUTTON;
 			else if (str == "Tick Button") type = BlockType::TICK_BUTTON;
 			else if (str == "Light") type = BlockType::LIGHT;
-			emit selectedBlockChange(type);
+			else blockClicked = false;
+
+			if(blockClicked) {
+				emit selectedBlockChange(type);
+			}
 			//selecting a block automatically selects single place tool
 			//if area place was the last selected place tool, then it switches to area tool instead
 			if(isSinglePlace) {
