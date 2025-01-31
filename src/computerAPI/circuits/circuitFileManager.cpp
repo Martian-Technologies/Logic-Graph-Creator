@@ -48,6 +48,7 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
     }
 
     std::string token;
+    char cToken;
     inputFile >> token;
 
     // check version
@@ -58,18 +59,18 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
 
     Vector offset = position - Position(0, 0);
 
-    int blockId, posX, posY;
+    int blockId, connId, posX, posY;
     BlockType blockType;
     Rotation rotation;
-    int numIO;
+    int numConns;
 
     std::unordered_map<block_id_t, Position> blockPositions;
-    std::unordered_map<block_id_t, std::list<block_id_t>> connections;
-    // since every output is paired to an input, and vice versa, we only have to check in one direction
+    std::unordered_map<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t, connection_end_id_t>>> connections;
+
+    int id_offset = circuit->getBlockContainer()->getBlockCount();
 
     // read all blocks and store positions
     while (inputFile >> token) {
-        if (token != "blockId") return false;
         inputFile >> blockId;
         inputFile >> token; // blockType
         blockType = stringToBlockType(token);
@@ -78,43 +79,42 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
         inputFile >> token; // rotation
         rotation = stringToRotation(token);
 
-        Position currentBlockPos(posX, posY);
-        block_id_t currentBlockId = blockId;
-        blockPositions[currentBlockId] = currentBlockPos + offset;
+        Position currentBlockPos = Position(posX, posY) + offset;
 
-        if (!circuit->tryInsertBlock(currentBlockPos + offset, rotation, blockType)) {
+        if (!circuit->tryInsertBlock(currentBlockPos, rotation, blockType)) {
             qWarning("Failed to insert block.");
-            return false;
+            //return false;
         }
 
-        // check for the input connections
-        inputFile >> numIO;
-        inputFile >> token; // "inputs"
-        for (int i=0; i<numIO; ++i){
-            inputFile >> blockId;
-            connections[blockId].push_back(currentBlockId);
+        // the "real" blockid is going to be different than the saved blockid, because
+        // we might be loading it into a circuit that already has this id taken up.
+        block_id_t currentBlockId = blockId + id_offset;
+        blockPositions[currentBlockId] = currentBlockPos;
+
+        std::cout << "Inserted block. ID=" << currentBlockId << std::endl;
+
+        inputFile >> numConns;
+
+        for (int i=0; i<numConns; ++i){
+            inputFile >> token;
+            std::cout<< "token: " << token << std::endl;
+            while (inputFile.peek() != '\n'){
+                inputFile >> cToken >> blockId >> connId >> cToken;
+                std::cout << "\t(" << blockId+id_offset << ' ' << connId << cToken << std::endl;
+                connections[currentBlockId].push_back(std::make_tuple(i, blockId+id_offset, connId));
+            }
         }
 
-        // check for the output connections (we can just skip them because we
-        // are only looking at the inputs)
-        std::getline(inputFile >> std::ws, token); // consume the outputs line
-
-        //inputFile >> numIO;
-        //inputFile >> token; // "outputs"
-        //for (int i=0; i<numIO; ++i){
-        //    inputFile >> blockId;
-        //    connections[currentBlockId].push_back(blockId);
-        //}
     }
 
     // make the connections
-    for (const std::pair<block_id_t, std::list<block_id_t>>& p: connections){
+    for (const std::pair<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t,connection_end_id_t>>>& p: connections){
         block_id_t output = p.first;
-        for (block_id_t input : p.second){
-            std::cout << "connecting [output: " << output << ", input: " << input << "]\n";
-            if (!circuit->tryCreateConnection(blockPositions[output], blockPositions[input])) {
+        for (auto& input : p.second){
+            std::cout << "connecting [block=" << output << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
+            if (!circuit->tryCreateConnection(std::make_pair(output, get<0>(input)), std::make_pair(get<1>(input), get<2>(input)))) {
                 qWarning("Failed to create connection.");
-                return false;
+                //return false;
             }
         }
     }
@@ -166,30 +166,33 @@ bool CircuitFileManager::save(const QString& path, circuit_id_t circuit) {
 
     outputFile << "version_1\n";
 
-    const BlockContainer* blocks = circuitPtr->getBlockContainer();
-    std::unordered_map<block_id_t, Block>::const_iterator itr = blocks->begin();
-    for (; itr != blocks->end(); ++itr) {
-        const Block& block = itr->second;
-        const Position& pos = block.getPosition();
-        outputFile << "blockId " << itr->first << " "
-                   << blockTypeToString(block.type()) << " " << pos.x << " "
-                   << pos.y << " " << rotationToString(block.getRotation())
-                   << "\n";
+    const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
+    int blockCount = blockContainer->getBlockCount();
+    for (int blockId=1; blockId<=blockCount; ++blockId) {
 
-        const std::vector<ConnectionEnd>& inputConnections = block.getInputConnections(pos);
-        const std::vector<ConnectionEnd>& outputConnections = block.getOutputConnections(pos);
+        const Block* block = blockContainer->getBlock(blockId);
+        if (!block) continue;
 
-        outputFile << "\t" << inputConnections.size() << " inputs ";
-        for (const ConnectionEnd& conn : inputConnections) {
-            outputFile << conn.getBlockId() << " ";
+        const Position& pos = block->getPosition();
+
+        const ConnectionContainer& blockCC = block->getConnectionContainer();
+        connection_end_id_t connectionNum = blockCC.getMaxConnectionId() + 1;
+
+        outputFile << "blockId " << blockId << ' '
+                   << blockTypeToString(block->type()) << ' ' << pos.x << ' '
+                   << pos.y << ' ' << rotationToString(block->getRotation()) << ' '
+                   << connectionNum << '\n';
+        //const std::vector<ConnectionEnd>& inputConnections = block.getInputConnections(pos);
+        //const std::vector<ConnectionEnd>& outputConnections = block.getOutputConnections(pos);
+
+        for (int j=0; j<connectionNum; ++j){
+            outputFile << '\t' << "(connId:" << j << ')';
+            const std::vector<ConnectionEnd>& connections = blockCC.getConnections(j);
+            for (const ConnectionEnd& conn : connections) {
+                outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
+            }
+            outputFile << '\n';
         }
-        outputFile << "\n";
-
-        outputFile << "\t" << outputConnections.size() << " outputs ";
-        for (const ConnectionEnd& conn : outputConnections) {
-            outputFile << conn.getBlockId() << " ";
-        }
-        outputFile << "\n";
     }
 
     outputFile.close();

@@ -68,12 +68,16 @@ public:
 	// -- setters --
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
-	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+        // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
+
+    // Make specific connection between blocks and their connection ids
+    bool tryCreateConnection(const std::pair<block_id_t, connection_end_id_t>& blockOne,
+            const std::pair<block_id_t, connection_end_id_t>& blockTwo);
 
 	/* ----------- iterators ----------- */
 	// not safe if the container gets modifided (dont worry about it for now)

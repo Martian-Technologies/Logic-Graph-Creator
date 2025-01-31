@@ -226,6 +226,24 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 	return false;
 }
 
+bool BlockContainer::tryCreateConnection(const std::pair<block_id_t, connection_end_id_t>& blockOne,
+                                         const std::pair<block_id_t, connection_end_id_t>& blockTwo){
+    Block* one = getBlock_(blockOne.first);
+    Block* two = getBlock_(blockTwo.first);
+    if (!one || !two) return false;
+    ConnectionContainer& connectionOne = one->getConnectionContainer();
+    ConnectionContainer& connectionTwo = two->getConnectionContainer();
+    if (blockOne.second > connectionOne.getMaxConnectionId()) return false;
+    if (blockTwo.second > connectionTwo.getMaxConnectionId()) return false;
+
+    if (one->getConnectionContainer().tryMakeConnection(blockOne.second, ConnectionEnd(blockTwo.first, blockTwo.second))){
+        // Only adding connections in one direction right now
+        //two->getConnectionContainer().tryMakeConnection(blockTwo.second, ConnectionEnd(blockOne.first, blockOne.second));
+        return true;
+    }
+    return false;
+}
+
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference) {
 	Block* input = getBlock_(inputPosition);
 	if (!input) return false;

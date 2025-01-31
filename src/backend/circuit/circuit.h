@@ -65,13 +65,13 @@ public:
 	// Trys to remove a connection. Returns if successful.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 	// Trys to creates a connection. Returns if successful.
-	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
-	// Trys to remove a connection. Returns if successful.
-	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
-	// Trys to creates connections.
 	bool tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection);
 	// Trys to remove connections.
 	bool tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection);
+
+    // Create connection between specific block and connection end ids
+    bool tryCreateConnection(const std::pair<block_id_t, connection_end_id_t>& blockOne,
+                             const std::pair<block_id_t, connection_end_id_t>& blockTwo);
 
 
 	/* ----------- undo ----------- */
