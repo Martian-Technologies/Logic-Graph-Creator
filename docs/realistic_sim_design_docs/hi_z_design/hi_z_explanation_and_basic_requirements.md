@@ -36,6 +36,32 @@ High Z states are particularly useful in situations where multiple devices need 
 
 ## Requirements
 
+1. An additional state for high-z and an "X state" must support where the output of a tri-state buffer is in high impedance mode and where the state cannot be defined respectively.
+
+2. The output of a tri-state buffer is the "Z state" when the control input is low (see test for truth table and image).
+
+3. The high-z state allows combining multiple inputs into 1 output where the output is dependant upon the non-high-z input.
+
+4. If wires outputs are connected and collide ie. 1 gate outputs 0 while the other outputs a 1 results in the wire being in the X state.
+
+5. Gates that take in multiple inputs with a Z or X input should attempt to resolve the output but otherwise should output the X state.  See testcases of the specific truth table on this.  Note this also applies to tri-state buffers.
+
 ## Test Cases
+
+### The testcases below show a circuit with inputs and outputs and below show a truth table of the following values.
+
+1. Tri-State Buffer Functionality.
+
+  
+2. Multiple Inputs can be combined into 1
+
+   
+3. And gate functionality works with new states
+
+   
+4. Nor gate functionality works with new states
+
+   
+5. Xor gate works with new states
 
 ## Extra Notes
