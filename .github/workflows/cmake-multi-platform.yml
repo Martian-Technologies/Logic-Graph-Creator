@@ -62,11 +62,11 @@ jobs:
     #     -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
     #     -G Ninja
     #     -S ${{ github.workspace }}
-    - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@master
-      with:
-        # ninja version to download. Default: 1.10.0
-        version: 1.10.0
+    # - name: Setup Ninja
+    #   uses: ashutoshvarma/setup-ninja@master
+    #   with:
+    #     # ninja version to download. Default: 1.10.0
+    #     version: 1.10.0
 
     - name: Build with CMake
       uses: ashutoshvarma/action-cmake-build@master
@@ -74,7 +74,7 @@ jobs:
         build-dir: ${{ steps.strings.outputs.build-output-dir }}
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
-        configure-options: -G Ninja
+        # configure-options: -G Ninja
         build-type: ${{ matrix.build_type }}
 
 
