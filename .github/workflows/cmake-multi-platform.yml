@@ -21,15 +21,15 @@ jobs:
       #
       # To add more build types (Release, Debug, etc.) customize the build_type list.
       matrix:
-        build_type: [Tests]
+        build_type: [Debug]
         # os: [windows-latest, ubuntu-latest, macos-latest]
         # os: [ubuntu-latest, macos-latest]
-        os: [macos-latest]
+        os: [windows-latest, macos-latest]
         include:
-            # - os: windows-latest
-            #   c_compiler: cl
-            #   cpp_compiler: cl
-            #   runExecutable:
+            - os: windows-latest
+              c_compiler: cl
+              cpp_compiler: cl
+              runExecutable:
             # - os: ubuntu-latest
             #   c_compiler: gcc
             #   cpp_compiler: g++
@@ -41,7 +41,7 @@ jobs:
             - os: macos-latest
               c_compiler: clang
               cpp_compiler: clang++
-              runExecutable: open -n Gatality.app
+              runExecutable: ./Gatality_tests
 
     steps:
     - uses: actions/checkout@v4
@@ -66,6 +66,7 @@ jobs:
         build-dir: ${{ steps.strings.outputs.build-output-dir }}
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
+        configure-options: -DGatality_BuildApp=OFF -DGatality_BuildTests=ON
         build-type: ${{ matrix.build_type }}
 
     - name: Build
