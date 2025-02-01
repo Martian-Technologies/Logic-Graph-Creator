@@ -27,8 +27,6 @@ Current flows down path with least resistance. Since High Z occurs when a circui
 
 In the case of logic circuit simulations, the state would occur in conjunction with tri-state buffers. 
 
-### Effects of High Z on a complex circuit
-
 ### Application of High Z
 
 High Z states are particularly useful in situations where multiple devices need to communicate on a shared bus (a shared physical pathway between electronic components). By setting their outputs to high Z when not actively transmitting data, devices avoid interfering with each other, allow other output 
