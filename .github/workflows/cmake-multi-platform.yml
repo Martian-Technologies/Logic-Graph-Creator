@@ -21,7 +21,7 @@ jobs:
       #
       # To add more build types (Release, Debug, etc.) customize the build_type list.
       matrix:
-        build_type: [Debug]
+        build_type: [Tests]
         os: [windows-latest, ubuntu-latest, macos-latest]
         include:
             - os: windows-latest
