@@ -125,11 +125,17 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
 
     // make the connections with the real id's
     for (const std::pair<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t,connection_end_id_t>>>& p: oldIdConnections){
-        block_id_t output = p.first;
+        block_id_t outputId = realBlockId[p.first];
         for (auto& input : p.second){
-            std::cout << "connecting [block=" << output << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
-            ConnectionEnd outputConnection(realBlockId[output], get<0>(input));
-            ConnectionEnd inputConnection(realBlockId[get<1>(input)], get<2>(input));
+            if (isConnectionInput(get<2>(oldIdBlocks[p.first]), get<0>(input))){
+                // skip inputs
+                continue;
+            }
+
+            std::cout << "connecting [block=" << outputId << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
+            block_id_t inputId = realBlockId[get<1>(input)];
+            ConnectionEnd outputConnection(outputId, get<0>(input));
+            ConnectionEnd inputConnection(inputId, get<2>(input));
             if (!circuitPtr->tryCreateConnection(outputConnection, inputConnection)) {
                 qWarning("Failed to create connection.");
                 //return false;
