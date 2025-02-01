@@ -38,8 +38,8 @@ std::string rotationToString(Rotation rotation);
 std::string blockTypeToString(BlockType type);
 
 bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, const Position& cursorPosition) {
-    auto circuit = circuitManager->getCircuit(circuitId);
-    if (!circuit) {
+    SharedCircuit circuitPtr = circuitManager->getCircuit(circuitId);
+    if (!circuitPtr) {
         qWarning("Circuit not found.");
         return false;
     }
@@ -107,19 +107,20 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
 
     }
 
+    const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
     // adjust block positions to be relative to the mouse position and minimum block position of the save
     std::unordered_map<block_id_t, std::tuple<Position, Rotation, BlockType>>::iterator itr;
     Vector cursorVector(cursorPosition.x, cursorPosition.y);
     for (itr=oldIdBlocks.begin() ; itr!=oldIdBlocks.end(); ++itr){
         get<0>(itr->second) = get<0>(itr->second) - minPos + cursorVector;
 
-        if (!circuit->tryInsertBlock(get<0>(itr->second), get<1>(itr->second), get<2>(itr->second))) {
+        if (!circuitPtr->tryInsertBlock(get<0>(itr->second), get<1>(itr->second), get<2>(itr->second))) {
             qWarning("Failed to insert block.");
             //return false;
         }
         std::cout << "Inserted block. ID=" << itr->first << ", Rot=" << rotationToString(get<1>(itr->second)) <<
             ", Type=" << blockTypeToString(get<2>(itr->second)) <<  std::endl;
-        realBlockId[itr->first] = circuit->getBlockContainer()->getBlock(get<0>(itr->second))->id();
+        realBlockId[itr->first] = blockContainer->getBlock(get<0>(itr->second))->id();
     }
 
     // make the connections with the real id's
@@ -129,7 +130,7 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
             std::cout << "connecting [block=" << output << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
             ConnectionEnd outputConnection(realBlockId[output], get<0>(input));
             ConnectionEnd inputConnection(realBlockId[get<1>(input)], get<2>(input));
-            if (!circuit->tryCreateConnection(outputConnection, inputConnection)) {
+            if (!circuitPtr->tryCreateConnection(outputConnection, inputConnection)) {
                 qWarning("Failed to create connection.");
                 //return false;
             }
@@ -171,8 +172,8 @@ std::string rotationToString(Rotation rotation) {
     }
 }
 
-bool CircuitFileManager::save(const QString& path, circuit_id_t circuit) {
-    SharedCircuit circuitPtr = circuitManager->getCircuit(circuit);
+bool CircuitFileManager::save(const QString& path, circuit_id_t circuitId) {
+    SharedCircuit circuitPtr = circuitManager->getCircuit(circuitId);
     if (!circuitPtr) return false;
 
     std::ofstream outputFile(path.toStdString());
