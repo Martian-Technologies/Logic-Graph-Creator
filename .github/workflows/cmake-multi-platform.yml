@@ -34,8 +34,8 @@ jobs:
               c_compiler: clang
               cpp_compiler: clang++
             - os: macos-latest
-              c_compiler: gcc-13
-              cpp_compiler: g++-13
+              c_compiler: clang
+              cpp_compiler: clang++
 
     steps:
     - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
-        version: 6.7.*
+        version: 6.8.*
 
     # - name: Configure CMake
     #   # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
