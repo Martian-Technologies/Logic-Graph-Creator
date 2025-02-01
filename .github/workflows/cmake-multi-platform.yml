@@ -29,19 +29,19 @@ jobs:
             # - os: windows-latest
             #   c_compiler: cl
             #   cpp_compiler: cl
-            #   executable:
+            #   runExecutable:
             # - os: ubuntu-latest
             #   c_compiler: gcc
             #   cpp_compiler: g++
-            #   executable:
+            #   runExecutable:
             # - os: ubuntu-latest
             #   c_compiler: clang
             #   cpp_compiler: clang++
-            #   executable:
+            #   runExecutable:
             - os: macos-latest
               c_compiler: clang
               cpp_compiler: clang++
-              executable: Gatality.app
+              runExecutable: open -n Gatality.app
 
     steps:
     - uses: actions/checkout@v4
@@ -79,5 +79,5 @@ jobs:
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ./${{ matrix.executable }}
+      run: ${{ matrix.runExecutable }}
       # run: Gatality_tests
