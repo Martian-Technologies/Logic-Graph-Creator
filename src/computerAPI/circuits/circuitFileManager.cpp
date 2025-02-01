@@ -34,7 +34,10 @@ Rotation stringToRotation(const std::string& str) {
     return ZERO;
 }
 
-bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, const Position& position) {
+std::string rotationToString(Rotation rotation);
+std::string blockTypeToString(BlockType type);
+
+bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, const Position& cursorPosition) {
     auto circuit = circuitManager->getCircuit(circuitId);
     if (!circuit) {
         qWarning("Circuit not found.");
@@ -57,16 +60,19 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
         return false;
     }
 
-    Vector offset = position - Position(0, 0);
-
     int blockId, connId, posX, posY;
     BlockType blockType;
     Rotation rotation;
     int numConns;
 
+    // In order to go through all of the blocks to be inserted to make sure that there are no conflicts, we have to hold off
+    // inserting the blocks until we've collected all of them.
+    std::unordered_map<block_id_t, std::tuple<Position, Rotation, BlockType>> oldIdBlocks;
+    std::unordered_map<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t, connection_end_id_t>>> oldIdConnections;
+
     std::unordered_map<block_id_t, block_id_t> realBlockId;
-    std::unordered_map<block_id_t, Position> blockPositions;
-    std::unordered_map<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t, connection_end_id_t>>> connections;
+
+    Vector minPos(std::numeric_limits<cord_t>::max(), std::numeric_limits<cord_t>::max());
 
     // read all blocks and store positions
     while (inputFile >> token) {
@@ -78,35 +84,46 @@ bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, c
         inputFile >> token; // rotation
         rotation = stringToRotation(token);
 
-        Position currentBlockPos = Position(posX, posY) + offset;
+        if (posX < minPos.dx) minPos.dx = posX;
+        if (posY < minPos.dy) minPos.dy = posY;
 
-        if (!circuit->tryInsertBlock(currentBlockPos, rotation, blockType)) {
-            qWarning("Failed to insert block.");
-            //return false;
-        }
+        Position currentBlockPos = Position(posX, posY);
 
         block_id_t currentBlockId = blockId;
-        realBlockId[currentBlockId] = circuit->getBlockContainer()->getBlock(currentBlockPos)->id();
-        blockPositions[currentBlockId] = currentBlockPos;
-
-        std::cout << "Inserted block. ID=" << currentBlockId << std::endl;
+        oldIdBlocks[currentBlockId] = std::make_tuple(Position(posX, posY), rotation, blockType);
 
         inputFile >> numConns;
 
+        // prepare all connections (by old ids that are in the save file)
         for (int i=0; i<numConns; ++i){
             inputFile >> token;
             std::cout<< "token: " << token << std::endl;
             while (inputFile.peek() != '\n'){
                 inputFile >> cToken >> blockId >> connId >> cToken;
                 std::cout << "\t(" << blockId << ' ' << connId << cToken << std::endl;
-                connections[currentBlockId].push_back(std::make_tuple(i, blockId, connId));
+                oldIdConnections[currentBlockId].push_back(std::make_tuple(i, blockId, connId));
             }
         }
 
     }
 
-    // make the connections
-    for (const std::pair<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t,connection_end_id_t>>>& p: connections){
+    // adjust block positions to be relative to the mouse position and minimum block position of the save
+    std::unordered_map<block_id_t, std::tuple<Position, Rotation, BlockType>>::iterator itr;
+    Vector cursorVector(cursorPosition.x, cursorPosition.y);
+    for (itr=oldIdBlocks.begin() ; itr!=oldIdBlocks.end(); ++itr){
+        get<0>(itr->second) = get<0>(itr->second) - minPos + cursorVector;
+
+        if (!circuit->tryInsertBlock(get<0>(itr->second), get<1>(itr->second), get<2>(itr->second))) {
+            qWarning("Failed to insert block.");
+            //return false;
+        }
+        std::cout << "Inserted block. ID=" << itr->first << ", Rot=" << rotationToString(get<1>(itr->second)) <<
+            ", Type=" << blockTypeToString(get<2>(itr->second)) <<  std::endl;
+        realBlockId[itr->first] = circuit->getBlockContainer()->getBlock(get<0>(itr->second))->id();
+    }
+
+    // make the connections with the real id's
+    for (const std::pair<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t,connection_end_id_t>>>& p: oldIdConnections){
         block_id_t output = p.first;
         for (auto& input : p.second){
             std::cout << "connecting [block=" << output << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
