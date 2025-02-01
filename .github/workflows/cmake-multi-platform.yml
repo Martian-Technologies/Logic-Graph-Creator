@@ -52,16 +52,6 @@ jobs:
       with:
         version: 6.2.*
 
-    - name: Remove cmake 3.20.5
-      run: |
-        CMAKE=$(which cmake)
-        sudo rm $CMAKE
-    
-    - name: install cmake 3.16
-      run: |
-        sudo apt-get install cmake
-        hash -r
-
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -70,6 +60,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -G Ninja
         -S ${{ github.workspace }}
 
     - name: Build
