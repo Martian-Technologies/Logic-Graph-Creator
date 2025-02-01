@@ -1,9 +1,10 @@
 #ifndef vulkanQtWindow_h
 #define vulkanQtWindow_h
 
+#include <vulkan/vulkan.h>
+
 #include <QWindow>
 #include <QVulkanInstance>
-#include <vulkan/vulkan.h>
 
 class VulkanQtWindow : public QWindow {
 	Q_OBJECT
