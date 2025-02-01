@@ -52,7 +52,6 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
-        setup-python: false
         version: 6.7.*
 
     # - name: Configure CMake
