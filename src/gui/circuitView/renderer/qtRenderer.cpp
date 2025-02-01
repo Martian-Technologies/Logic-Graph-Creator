@@ -2,6 +2,7 @@
 #include <QPainterPath>
 #include <QDateTime>
 #include <QVector2D>
+#include <QString>
 #include <QDebug>
 
 #include "gui/circuitView/renderer/renderer.h"
