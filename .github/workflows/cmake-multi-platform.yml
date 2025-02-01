@@ -19,9 +19,9 @@ jobs:
       # 2. <Linux, Tests, latest GCC compiler toolchain on the default runner image, default generator>
       # 3. <Linux, Tests, latest Clang compiler toolchain on the default runner image, default generator>
       #
-      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
+      # To add more build types (Release, Debug, etc.) customize the build_type list.
       matrix:
-        build_type: [Tests]
+        build_type: [Debug]
         os: [windows-latest, ubuntu-latest, macos-latest]
         include:
             - os: windows-latest
@@ -52,6 +52,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
+        setup-python: false
         version: 6.7.*
 
     # - name: Configure CMake
