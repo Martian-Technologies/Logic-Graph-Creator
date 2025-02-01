@@ -18,7 +18,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
 		tileSet = QPixmap(filePath.c_str());
 
 		if (tileSet.isNull()) {
-			qDebug() << "ERROR: tileSet image could not be loaded from file." << filePath;
+			qDebug() << "ERROR: tileSet image could not be loaded from file." << QString::fromStdString(filePath);
 		}
 
 		// create tileSet
