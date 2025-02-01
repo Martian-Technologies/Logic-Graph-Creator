@@ -50,18 +50,119 @@ High Z states are particularly useful in situations where multiple devices need 
 
 ### The testcases below show a circuit with inputs and outputs and below show a truth table of the following values.
 
-1. Tri-State Buffer Functionality.
+1. Tri-State Buffer Functionality.  NOTE* The buffer used in the diagram shows hi-z when the control is high but the truth table assumes hi-z is output for a low input.
+
+| P | Q | Out |
+|---|---|-----|
+| 0 | 0 |  Z  |
+| 0 | 1 |  0  |
+| 0 | Z |  X  |
+| 0 | X |  X  |
+| 1 | 0 |  Z  |
+| 1 | 1 |  1  |
+| 1 | Z |  X  |
+| 1 | X |  X  |
+| Z | 0 |  Z  |
+| Z | 1 |  X  |
+| Z | Z |  X  |
+| Z | X |  X  |
+| X | 0 |  Z  |
+| X | 1 |  X  |
+| X | Z |  X  |
+| X | X |  X  |
+
 
   
 2. Multiple Inputs can be combined into 1
 
-   
+![image](https://github.com/user-attachments/assets/aa58d297-76b2-4d2a-9a9e-262df634a7fb)
+
+| B0  | C0  | B1  | C1  | Out |
+|-----|-----|-----|-----|-----|
+|  0  |  0  |  0  |  0  |  Z  |
+|  0  |  0  |  0  |  1  |  0  |
+|  0  |  0  |  1  |  0  |  Z  |
+|  0  |  0  |  1  |  1  |  1  |
+|  0  |  1  |  0  |  0  |  0  |
+|  0  |  1  |  0  |  1  |  0  |
+|  0  |  1  |  1  |  0  |  0  |
+|  0  |  1  |  1  |  1  |  X  |
+|  1  |  0  |  0  |  0  |  Z  |
+|  1  |  0  |  0  |  1  |  0  |
+|  1  |  0  |  1  |  0  |  Z  |
+|  1  |  0  |  1  |  1  |  1  |
+|  1  |  1  |  0  |  0  |  1  |
+|  1  |  1  |  0  |  1  |  X  |
+|  1  |  1  |  1  |  0  |  1  |
+|  1  |  1  |  1  |  1  |  1  |
+  
 3. And gate functionality works with new states
 
+![image](https://github.com/user-attachments/assets/a3136ac5-b792-43ca-97b4-0d407ac5d9fd)
+
+| P | Q | Out |
+|---|---|-----|
+| 0 | 0 |  0  |
+| 0 | 1 |  0  |
+| 0 | Z |  0  |
+| 0 | X |  0  |
+| 1 | 0 |  0  |
+| 1 | 1 |  1  |
+| 1 | Z |  X  |
+| 1 | X |  X  |
+| Z | 0 |  0  |
+| Z | 1 |  X  |
+| Z | Z |  X  |
+| Z | X |  X  |
+| X | 0 |  0  |
+| X | 1 |  X  |
+| X | Z |  X  |
+| X | X |  X  |
    
 4. Nor gate functionality works with new states
 
+![image](https://github.com/user-attachments/assets/238cbda2-fffe-4cd6-9fae-468b89bbfe48)
+
+| P | Q | Out |
+|---|---|-----|
+| 0 | 0 |  1  |
+| 0 | 1 |  0  |
+| 0 | Z |  X  |
+| 0 | X |  X  |
+| 1 | 0 |  0  |
+| 1 | 1 |  0  |
+| 1 | Z |  0  |
+| 1 | X |  0  |
+| Z | 0 |  X  |
+| Z | 1 |  0  |
+| Z | Z |  X  |
+| Z | X |  X  |
+| X | 0 |  X  |
+| X | 1 |  0  |
+| X | Z |  X  |
+| X | X |  X  |
    
 5. Xor gate works with new states
+
+![image](https://github.com/user-attachments/assets/f71ae9dc-d246-4fc3-939f-789500cd95e9)
+
+| P | Q | Out |
+|---|---|-----|
+| 0 | 0 |  0  |
+| 0 | 1 |  1  |
+| 0 | Z |  X  |
+| 0 | X |  X  |
+| 1 | 0 |  1  |
+| 1 | 1 |  0  |
+| 1 | Z |  X  |
+| 1 | X |  X  |
+| Z | 0 |  X  |
+| Z | 1 |  X  |
+| Z | Z |  X  |
+| Z | X |  X  |
+| X | 0 |  X  |
+| X | 1 |  X  |
+| X | Z |  X  |
+| X | X |  X  |
 
 ## Extra Notes
