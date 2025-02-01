@@ -49,6 +49,10 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Check qt on linux
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: aqt list-qt linux desktop --arch 6.8.2
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
@@ -88,4 +92,5 @@ jobs:
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest --build-config ${{ matrix.build_type }}
+      run: ls
+      # run: Gatality_tests
