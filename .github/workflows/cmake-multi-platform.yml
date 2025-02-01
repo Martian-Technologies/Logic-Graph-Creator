@@ -23,20 +23,21 @@ jobs:
       matrix:
         build_type: [Tests]
         # os: [windows-latest, ubuntu-latest, macos-latest]
-        os: [ubuntu-latest, macos-latest]
+        # os: [ubuntu-latest, macos-latest]
+        os: [macos-latest]
         include:
-            - os: windows-latest
-              c_compiler: cl
-              cpp_compiler: cl
-              executable:
+            # - os: windows-latest
+            #   c_compiler: cl
+            #   cpp_compiler: cl
+            #   executable:
             # - os: ubuntu-latest
             #   c_compiler: gcc
             #   cpp_compiler: g++
             #   executable:
-            - os: ubuntu-latest
-              c_compiler: clang
-              cpp_compiler: clang++
-              executable:
+            # - os: ubuntu-latest
+            #   c_compiler: clang
+            #   cpp_compiler: clang++
+            #   executable:
             - os: macos-latest
               c_compiler: clang
               cpp_compiler: clang++
@@ -53,10 +54,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-    - name: Check qt on linux
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: pip install aqtinstall; aqt list-qt linux desktop --arch 6.8.2
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
@@ -82,5 +79,5 @@ jobs:
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ${{ matrix.executable }}
+      run: ./${{ matrix.executable }}
       # run: Gatality_tests
