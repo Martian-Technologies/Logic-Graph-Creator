@@ -1,6 +1,7 @@
 #ifndef logger_h
 #define logger_h
 
+#include <syncstream>
 #include <filesystem>
 
 enum LogType {
@@ -18,7 +19,7 @@ public:
 
 private:
 	void flushToFile();
-
+	std::osyncstream asyncStream;
 	std::filesystem::path outputFile;
 	std::ofstream outputFileStream;
 
