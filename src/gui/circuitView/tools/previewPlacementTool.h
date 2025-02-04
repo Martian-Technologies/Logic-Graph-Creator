@@ -27,7 +27,6 @@ public:
 
     void startPreview(const ParsedCircuit& circuitData) {
         parsedCircuit = circuitData;
-        parsedCircuit.minPos *= -1;
         updatePreviewElements();
     }
 

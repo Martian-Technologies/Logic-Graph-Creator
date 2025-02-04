@@ -3,25 +3,7 @@
 #include <QString>
 #include <vector>
 #include "backend/circuit/circuitManager.h"
-
-struct ParsedCircuit {
-    struct BlockData {
-        Position pos;
-        Rotation rotation;
-        BlockType type;
-    };
-    
-    struct ConnectionData {
-        block_id_t outputBlockId;
-        connection_end_id_t outputId;
-        block_id_t inputBlockId;
-        connection_end_id_t inputId;
-    };
-
-    Vector minPos;
-    std::unordered_map<block_id_t, BlockData> blocks;
-    std::vector<ConnectionData> connections;
-};
+#include "backend/circuit/parsedCircuit.h"
 
 class CircuitFileManager {
 public:

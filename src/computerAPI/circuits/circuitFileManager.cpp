@@ -81,12 +81,12 @@ bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outPar
         return false;
     }
 
-    int blockId, connId, posX, posY;
+    int blockId, connId;
+    float posX, posY;
     BlockType blockType;
     Rotation rotation;
     int numConns;
 
-    outParsed.minPos = Vector(std::numeric_limits<cord_t>::max(), std::numeric_limits<cord_t>::max());
     while (inputFile >> token) {
         inputFile >> blockId;
         inputFile >> token;
@@ -96,10 +96,7 @@ bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outPar
         inputFile >> token;
         rotation = stringToRotation(token);
 
-        if (posX < outParsed.minPos.dx) outParsed.minPos.dx = posX;
-        if (posY < outParsed.minPos.dy) outParsed.minPos.dy = posY;
-
-        outParsed.blocks[blockId] = {Position(posX, posY), rotation, blockType};
+        outParsed.addBlock(blockId, {FPosition(posX, posY), rotation, blockType});
 
         block_id_t currentBlockId = blockId;
         inputFile >> numConns;
@@ -107,7 +104,7 @@ bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outPar
             inputFile >> token;
             while (inputFile.peek() != '\n') {
                 inputFile >> cToken >> blockId >> connId >> cToken;
-                outParsed.connections.push_back({
+                outParsed.addConnection({
                     static_cast<block_id_t>(currentBlockId),
                     static_cast<connection_end_id_t>(i),
                     static_cast<block_id_t>(blockId),
