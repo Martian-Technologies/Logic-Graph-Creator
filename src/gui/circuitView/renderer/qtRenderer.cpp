@@ -2,6 +2,7 @@
 #include <QPainterPath>
 #include <QDateTime>
 #include <QVector2D>
+#include <QString>
 #include <QDebug>
 
 #include "gui/circuitView/renderer/renderer.h"
@@ -18,7 +19,7 @@ void QtRenderer::initializeTileSet(const std::string& filePath) {
 		tileSet = QPixmap(filePath.c_str());
 
 		if (tileSet.isNull()) {
-			qDebug() << "ERROR: tileSet image could not be loaded from file." << filePath;
+			qDebug() << "ERROR: tileSet image could not be loaded from file." << QString::fromStdString(filePath);
 		}
 
 		// create tileSet
