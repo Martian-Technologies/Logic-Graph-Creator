@@ -25,7 +25,7 @@ public:
             std::bind(&PreviewPlacementTool::exitBlockView, this, std::placeholders::_1));
     }
 
-    void startPreview(const ParsedCircuit& circuitData) {
+    void startPreview(std::shared_ptr<ParsedCircuit> circuitData) {
         parsedCircuit = circuitData;
         updatePreviewElements();
     }
@@ -43,7 +43,7 @@ private:
     void clearPreview();
     bool validatePlacement() const;
 
-    ParsedCircuit parsedCircuit;
+    std::shared_ptr<ParsedCircuit> parsedCircuit;
     Position currentPosition;
     bool usingTool = true;
     bool continueRender = true;

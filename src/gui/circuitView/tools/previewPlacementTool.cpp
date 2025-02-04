@@ -7,20 +7,20 @@ void PreviewPlacementTool::updatePreviewElements() {
 
     elementCreator.clear();
     
-    FVector totalOffset = (parsedCircuit.getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
     bool isValid = validatePlacement();
 
     // only displays block previews, not connections
-    for (const auto& [id, block] : parsedCircuit.getBlocks()) {
+    for (const auto& [id, block] : parsedCircuit->getBlocks()) {
         FPosition displayPos = block.pos + totalOffset;
         elementCreator.addBlockPreview(BlockPreview(block.type, displayPos.snap(), block.rotation));
     }
 }
 
 bool PreviewPlacementTool::validatePlacement() const {
-    FVector totalOffset = (parsedCircuit.getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
 
-    for (const auto& [id, block] : parsedCircuit.getBlocks()) {
+    for (const auto& [id, block] : parsedCircuit->getBlocks()) {
         FPosition testPos = block.pos + totalOffset;
         if (circuit->getBlockContainer()->checkCollision(testPos.snap())) {
             return false;
@@ -49,10 +49,10 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         return false;
     }
 
-    FVector totalOffset = (parsedCircuit.getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
     std::unordered_map<block_id_t, block_id_t> realIds;
 
-    for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
+    for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
         FPosition targetPos = block.pos + totalOffset;
         block_id_t newId;
         if (!circuit->tryInsertBlock(targetPos.snap(), block.rotation, block.type)) {
@@ -62,8 +62,8 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos.snap())->id();;
     }
 
-    for (const auto& conn : parsedCircuit.getConns()) {
-        ParsedCircuit::BlockData* b = parsedCircuit.getBlock(conn.outputBlockId);
+    for (const auto& conn : parsedCircuit->getConns()) {
+        ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
         if (!b){
             qWarning("Could not get block from parsed circuit");
             break;
@@ -96,7 +96,6 @@ bool PreviewPlacementTool::cancelPlacement(const Event* event) {
 
 void PreviewPlacementTool::clearPreview() {
     elementCreator.clear();
-    parsedCircuit.clear();
 }
 
 bool PreviewPlacementTool::enterBlockView(const Event* event) {

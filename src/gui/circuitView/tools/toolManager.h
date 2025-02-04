@@ -61,7 +61,7 @@ public:
 		}
 	}
 
-    void setPendingPreviewData(const ParsedCircuit& data) {
+    void setPendingPreviewData(std::shared_ptr<ParsedCircuit> data) {
         previewData = data;
     }
 
@@ -127,7 +127,7 @@ private:
 	BlockType selectedBlock = BlockType::NONE;
 	Rotation selectedRotation = Rotation::ZERO;
 
-    ParsedCircuit previewData;
+    std::shared_ptr<ParsedCircuit> previewData;
 };
 
 #endif /* toolManager_h */

@@ -8,7 +8,7 @@
 class CircuitFileManager {
 public:
     CircuitFileManager(const CircuitManager* circuitManager);
-    bool loadFromFile(const QString& path, ParsedCircuit& outCircuit);
+    bool loadFromFile(const QString& path, std::shared_ptr<ParsedCircuit> outCircuit);
     bool saveToFile(const QString& path, circuit_id_t circuitId);
 
 private:

@@ -65,7 +65,7 @@ std::string rotationToString(Rotation rotation) {
     }
 }
 
-bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outParsed) {
+bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<ParsedCircuit> outParsed) {
     std::ifstream inputFile(path.toStdString());
     if (!inputFile.is_open()) {
         qWarning("Couldn't open file.");
@@ -96,7 +96,7 @@ bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outPar
         inputFile >> token;
         rotation = stringToRotation(token);
 
-        outParsed.addBlock(blockId, {FPosition(posX, posY), rotation, blockType});
+        outParsed->addBlock(blockId, {FPosition(posX, posY), rotation, blockType});
 
         block_id_t currentBlockId = blockId;
         inputFile >> numConns;
@@ -104,7 +104,7 @@ bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outPar
             inputFile >> token;
             while (inputFile.peek() != '\n') {
                 inputFile >> cToken >> blockId >> connId >> cToken;
-                outParsed.addConnection({
+                outParsed->addConnection({
                     static_cast<block_id_t>(currentBlockId),
                     static_cast<connection_end_id_t>(i),
                     static_cast<block_id_t>(blockId),

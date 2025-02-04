@@ -199,13 +199,13 @@ void CircuitViewWidget::save() {
 void CircuitViewWidget::load(const QString& filePath) {
     if (!fileManager) return;
 
-    ParsedCircuit parsed;
+    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath, parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    circuitView.getToolManager().setPendingPreviewData(std::move(parsed));
+    circuitView.getToolManager().setPendingPreviewData(parsed);
     circuitView.getToolManager().changeTool("Preview Placement");
 }
 
