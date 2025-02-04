@@ -101,12 +101,16 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	colorBlending.blendConstants[3] = 0.0f; // unused
 
 	// pipeline layout
+	VkPushConstantRange pushConstant{};
+	pushConstant.offset = 0;
+	pushConstant.size = sizeof(VertexPushConstants);
+	pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
 	pipelineLayoutInfo.setLayoutCount = 0; // unused
 	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
-	pipelineLayoutInfo.pushConstantRangeCount = 0; // unused
-	pipelineLayoutInfo.pPushConstantRanges = nullptr; // unused
 	if (vkCreatePipelineLayout(Vulkan::getDevice(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}

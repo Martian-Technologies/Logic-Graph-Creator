@@ -42,7 +42,7 @@ void Vulkan::createInstance() {
 	// start instance creation
 	VkInstanceCreateInfo createInfo {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR; // this seems like a good thing to have in general, but I did only add it for macOS
+	createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR; // this seems like a good thing to have in general, but I did only add it for macOS. In the future should check if this is actually available before enabling.
 	createInfo.pApplicationInfo = &appInfo;
 
 	// add extensions

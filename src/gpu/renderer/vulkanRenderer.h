@@ -27,6 +27,7 @@ private:
 	
 private:
 	int windowWidth, windowHeight;
+	glm::mat4 orthoMat = glm::mat4(1.0f);
 
 	// vulkan
 	VkSurfaceKHR surface;

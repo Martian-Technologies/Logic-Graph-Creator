@@ -31,6 +31,8 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent) : QWidget(parent), mouseCo
 
 	// layout for sub vulkan window
 	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(0, 0, 0, 0); 
+	layout->setSpacing(0);
 	this->setLayout(layout);
 
 	createVulkanWindow();
@@ -56,10 +58,14 @@ void CircuitViewWidget::createVulkanWindow() {
 	// create vulkan window
 	vulkanWindow = new VulkanQtWindow();
 	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
+	vulkanWindow->setFlag(Qt::WindowDoesNotAcceptFocus, true);
 	vulkanWindow->show();
 
 	// embed vulkan window
 	vulkanWindowWrapper = QWidget::createWindowContainer(vulkanWindow);
+	vulkanWindowWrapper->setWindowFlag(Qt::WindowTransparentForInput, true);
+	vulkanWindowWrapper->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true);
+	vulkanWindowWrapper->setAttribute(Qt::WA_TransparentForMouseEvents);
 	layout()->addWidget(vulkanWindowWrapper);
 	
 	// initialize renderer
