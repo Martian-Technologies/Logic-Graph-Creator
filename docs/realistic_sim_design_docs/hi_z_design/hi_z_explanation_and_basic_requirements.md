@@ -171,7 +171,8 @@ High Z states are particularly useful in situations where multiple devices need 
 
 ![image](https://github.com/user-attachments/assets/b4043377-1169-401e-ab1c-304f978d23b0)
 
-Out = X
+The top-left or gate outputs X -> Top right or gate outputs X.
+And gate should output the same as the input.
 
 
 ## Extra Notes
