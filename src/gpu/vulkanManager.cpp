@@ -21,6 +21,10 @@ const bool USE_VALIDATION_LAYERS = false;
 
 // Functions ---------------------------------------------------------------------------
 void Vulkan::createInstance() {
+	#ifdef DEBUG
+	std::cout << "Creating Vulkan Instance" << std::endl;
+	#endif
+
 	// confirm we have validation layers if we need them
 	if (USE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
@@ -107,7 +111,11 @@ bool Vulkan::checkValidationLayerSupport() {
 
 void Vulkan::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr); 
+
+	#ifdef DEBUG
+	std::cout << "Found " << deviceCount << " GPUs with Vulkan support" << std::endl;
+	#endif
 
 	if (deviceCount == 0) {
 		throw std::runtime_error("failed to find GPUs with Vulkan support!");
