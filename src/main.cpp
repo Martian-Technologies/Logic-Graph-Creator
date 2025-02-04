@@ -11,6 +11,7 @@ int main(int argc, char* argv[]) {
 	logError("oopsie");
 	logFatalError("big oopsie");
 	logWarning("no oopsie?");
+	logWarning("no oopsie?", "Vulkan");
 
 	MainWindow window;
 	window.show();

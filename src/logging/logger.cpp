@@ -5,23 +5,31 @@ Logger::Logger(const std::filesystem::path& outputFile) : asyncStream(std::cout)
 	outputFileStream.close();
 }
 
-void Logger::log(LogType type, const std::string& message) {
+void Logger::log(LogType type, const std::string& message, const std::string& subcategory) {
+	std::string thingThatGoesBetweenTheBrackets;
+	if (subcategory != "") {
+		thingThatGoesBetweenTheBrackets = " - " + subcategory;
+	}
 	switch (type) {
 	case LogType::Info:
-		fileBuffer << "[Info] " + message + "\n";
-		asyncStream << "[\033[1;37mInfo\033[0m] " << message << "\n";
+		thingThatGoesBetweenTheBrackets = "Info" + thingThatGoesBetweenTheBrackets;
+		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
+		asyncStream << "[\033[1;37m" + thingThatGoesBetweenTheBrackets + "\033[0m] " << message << "\n";
 		break;
 	case LogType::Warning:
-		fileBuffer << "[Warning] " + message + "\n";
-		asyncStream << "[\033[1;33mWarning\033[0m] " << message << "\n";
+		thingThatGoesBetweenTheBrackets = "Warning" + thingThatGoesBetweenTheBrackets;
+		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
+		asyncStream << "[\033[1;33m" + thingThatGoesBetweenTheBrackets + "\033[0m] " << message << "\n";
 		break;
 	case LogType::Error:
-		fileBuffer << "[ERROR] " << message << "\n";
-		asyncStream << "[\033[1;31mERROR\033[0m] " << message << "\n";;
+		thingThatGoesBetweenTheBrackets = "ERROR" + thingThatGoesBetweenTheBrackets;
+		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
+		asyncStream << "[\033[1;31m" + thingThatGoesBetweenTheBrackets + "\033[0m] " << message << "\n";;
 		break;
 	case LogType::Fatal:
-		fileBuffer << "[FATAL] " << message << "\n";
-		asyncStream << "[\033[1;4;41;97mFATAL\033[0m] " + message + "\n";
+		thingThatGoesBetweenTheBrackets = "FATAL" + thingThatGoesBetweenTheBrackets;
+		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
+		asyncStream << "[\033[1;4;41;97m" + thingThatGoesBetweenTheBrackets + "\033[0m] " + message + "\n";
 		break;
 	}
 	asyncStream.emit();

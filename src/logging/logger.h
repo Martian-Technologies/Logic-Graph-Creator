@@ -15,7 +15,7 @@ class Logger {
 public:
 	Logger(const std::filesystem::path& outputFile);
 
-	void log(LogType type, const std::string& message);
+	void log(LogType type, const std::string& message, const std::string& subcategory = "");
 
 private:
 	void flushToFile();

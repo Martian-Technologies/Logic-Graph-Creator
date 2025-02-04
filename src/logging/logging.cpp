@@ -3,18 +3,18 @@
 
 Logger mainLogger("gatality.log");
 
-void logInfo(const std::string& message) {
-	mainLogger.log(LogType::Info, message);
+void logInfo(const std::string& message, const std::string& subcategory) {
+	mainLogger.log(LogType::Info, message, subcategory);
 }
 
-void logWarning(const std::string& message) {
-	mainLogger.log(LogType::Warning, message);
+void logWarning(const std::string& message, const std::string& subcategory) {
+	mainLogger.log(LogType::Warning, message, subcategory);
 }
 
-void logError(const std::string& message) {
-	mainLogger.log(LogType::Error, message);
+void logError(const std::string& message, const std::string& subcategory) {
+	mainLogger.log(LogType::Error, message, subcategory);
 }
 
-void logFatalError(const std::string& message) {
-	mainLogger.log(LogType::Fatal, message);
+void logFatalError(const std::string& message, const std::string& subcategory) {
+	mainLogger.log(LogType::Fatal, message, subcategory);
 }
