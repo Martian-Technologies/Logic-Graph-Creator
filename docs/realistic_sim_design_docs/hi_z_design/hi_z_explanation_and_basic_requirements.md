@@ -166,4 +166,12 @@ High Z states are particularly useful in situations where multiple devices need 
 | X | Z |  X  |
 | X | X |  X  |
 
+
+6. Gatality no input testcase
+
+![image](https://github.com/user-attachments/assets/b4043377-1169-401e-ab1c-304f978d23b0)
+
+Out = X
+
+
 ## Extra Notes
