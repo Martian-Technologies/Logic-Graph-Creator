@@ -8,6 +8,7 @@
 #include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
+#include "helpDialog.h"
 #include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -41,8 +42,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 	//adding menu to main window
 	auto menubar = menuBar();
 	auto helpMenu = new QMenu(QStringLiteral("Help"), this);
-
 	menubar->addMenu(helpMenu);
+
+	//connect(helpMenu, &QPushButton::clicked, this)
+
+	//helpDialog helpdialog(this);
+	//helpdialog.exec();
 }
 
 void MainWindow::setSimState(bool state) {
