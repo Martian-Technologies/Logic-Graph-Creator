@@ -11,7 +11,7 @@ public:
 	inline BlockContainer() : lastId(0), grid(), blocks() { }
 
 	/* ----------- collision ----------- */
-	inline bool checkCollision(const Position& position) { return getCell(position); }
+	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge);
 
 	/* ----------- blocks ----------- */

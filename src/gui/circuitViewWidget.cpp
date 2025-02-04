@@ -191,16 +191,22 @@ void CircuitViewWidget::save() {
     if (fileManager) {
         QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
         if (!filePath.isEmpty()) {
-            fileManager->save(filePath, circuitView.getCircuit()->getCircuitId());
+            fileManager->saveToFile(filePath, circuitView.getCircuit()->getCircuitId());
         }
     }
 }
 
 void CircuitViewWidget::load(const QString& filePath) {
-    if (fileManager) {
-        fileManager->loadInto(filePath, circuitView.getCircuit()->getCircuitId(),
-                circuitView.getViewManager().getPointerPosition().snap());
+    if (!fileManager) return;
+
+    ParsedCircuit parsed;
+    if (!fileManager->loadFromFile(filePath, parsed)) {
+        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        return;
     }
+
+    circuitView.getToolManager().setPendingPreviewData(std::move(parsed));
+    circuitView.getToolManager().changeTool("Preview Placement");
 }
 
 void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {

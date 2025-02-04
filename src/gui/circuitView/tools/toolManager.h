@@ -2,6 +2,7 @@
 #define toolManager_h
 
 #include "backend/evaluator/evaluatorStateInterface.h"
+#include "gui/circuitView/tools/previewPlacementTool.h"
 #include "toolManagerEventRegister.h"
 #include "../events/eventRegister.h"
 #include "baseBlockPlacementTool.h"
@@ -23,7 +24,12 @@ public:
 		unregisterEvents();
 	}
 
+    inline std::string getCurrentTool() const { return toolType; }
+
 	inline void changeTool(const std::string& toolType) {
+        // reload preview tool on every change to it
+        if (toolType == "Preview Placement") changeTool<PreviewPlacementTool>();
+
 		if (this->toolType == toolType) return;
 		if (toolType == "Single Place") changeTool<SinglePlaceTool>();
 		else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
@@ -55,6 +61,10 @@ public:
 		}
 	}
 
+    void setPendingPreviewData(const ParsedCircuit& data) {
+        previewData = data;
+    }
+
 	inline void reset() { if (tool) tool->reset(); }
 
 private:
@@ -68,6 +78,12 @@ private:
 		tool = std::make_unique<ToolType>();
 		tool->setup(ElementCreator(renderer), evaluatorStateInterface, circuit);
 		tool->initialize(toolManagerEventRegister);
+
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(tool.get());
+        if (previewTool){
+            previewTool->startPreview(previewData);
+        }
+
 		BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
 		if (placementTool) {
 			placementTool->selectBlock(selectedBlock);
@@ -110,6 +126,8 @@ private:
 	// tool data
 	BlockType selectedBlock = BlockType::NONE;
 	Rotation selectedRotation = Rotation::ZERO;
+
+    ParsedCircuit previewData;
 };
 
 #endif /* toolManager_h */

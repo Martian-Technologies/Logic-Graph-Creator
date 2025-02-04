@@ -34,119 +34,6 @@ Rotation stringToRotation(const std::string& str) {
     return ZERO;
 }
 
-std::string rotationToString(Rotation rotation);
-std::string blockTypeToString(BlockType type);
-
-bool CircuitFileManager::loadInto(const QString& path, circuit_id_t circuitId, const Position& cursorPosition) {
-    SharedCircuit circuitPtr = circuitManager->getCircuit(circuitId);
-    if (!circuitPtr) {
-        qWarning("Circuit not found.");
-        return false;
-    }
-
-    std::ifstream inputFile(path.toStdString());
-    if (!inputFile.is_open()) {
-        qWarning("Couldn't open file.");
-        return false;
-    }
-
-    std::string token;
-    char cToken;
-    inputFile >> token;
-
-    // check version
-    if (token != "version_1") {
-        qWarning("Invalid file type.");
-        return false;
-    }
-
-    int blockId, connId, posX, posY;
-    BlockType blockType;
-    Rotation rotation;
-    int numConns;
-
-    // In order to go through all of the blocks to be inserted to make sure that there are no conflicts, we have to hold off
-    // inserting the blocks until we've collected all of them.
-    std::unordered_map<block_id_t, std::tuple<Position, Rotation, BlockType>> oldIdBlocks;
-    std::unordered_map<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t, connection_end_id_t>>> oldIdConnections;
-
-    std::unordered_map<block_id_t, block_id_t> realBlockId;
-
-    Vector minPos(std::numeric_limits<cord_t>::max(), std::numeric_limits<cord_t>::max());
-
-    // read all blocks and store positions
-    while (inputFile >> token) {
-        inputFile >> blockId;
-        inputFile >> token; // blockType
-        blockType = stringToBlockType(token);
-        inputFile >> posX;
-        inputFile >> posY;
-        inputFile >> token; // rotation
-        rotation = stringToRotation(token);
-
-        if (posX < minPos.dx) minPos.dx = posX;
-        if (posY < minPos.dy) minPos.dy = posY;
-
-        Position currentBlockPos = Position(posX, posY);
-
-        block_id_t currentBlockId = blockId;
-        oldIdBlocks[currentBlockId] = std::make_tuple(Position(posX, posY), rotation, blockType);
-
-        inputFile >> numConns;
-
-        // prepare all connections (by old ids that are in the save file)
-        for (int i=0; i<numConns; ++i){
-            inputFile >> token;
-            std::cout<< "token: " << token << std::endl;
-            while (inputFile.peek() != '\n'){
-                inputFile >> cToken >> blockId >> connId >> cToken;
-                std::cout << "\t(" << blockId << ' ' << connId << cToken << std::endl;
-                oldIdConnections[currentBlockId].push_back(std::make_tuple(i, blockId, connId));
-            }
-        }
-
-    }
-
-    const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
-    // adjust block positions to be relative to the mouse position and minimum block position of the save
-    std::unordered_map<block_id_t, std::tuple<Position, Rotation, BlockType>>::iterator itr;
-    Vector cursorVector(cursorPosition.x, cursorPosition.y);
-    for (itr=oldIdBlocks.begin() ; itr!=oldIdBlocks.end(); ++itr){
-        get<0>(itr->second) = get<0>(itr->second) - minPos + cursorVector;
-
-        if (!circuitPtr->tryInsertBlock(get<0>(itr->second), get<1>(itr->second), get<2>(itr->second))) {
-            qWarning("Failed to insert block.");
-            //return false;
-        }
-        std::cout << "Inserted block. ID=" << itr->first << ", Rot=" << rotationToString(get<1>(itr->second)) <<
-            ", Type=" << blockTypeToString(get<2>(itr->second)) <<  std::endl;
-        realBlockId[itr->first] = blockContainer->getBlock(get<0>(itr->second))->id();
-    }
-
-    // make the connections with the real id's
-    for (const std::pair<block_id_t, std::list<std::tuple<connection_end_id_t, block_id_t,connection_end_id_t>>>& p: oldIdConnections){
-        block_id_t outputId = realBlockId[p.first];
-        for (auto& input : p.second){
-            if (isConnectionInput(get<2>(oldIdBlocks[p.first]), get<0>(input))){
-                // skip inputs
-                continue;
-            }
-
-            std::cout << "connecting [block=" << outputId << ", id=" << get<0>(input) << " --> " << "block=" << get<1>(input) << ", id=" << get<2>(input) << "]\n";
-            block_id_t inputId = realBlockId[get<1>(input)];
-            ConnectionEnd outputConnection(outputId, get<0>(input));
-            ConnectionEnd inputConnection(inputId, get<2>(input));
-            if (!circuitPtr->tryCreateConnection(outputConnection, inputConnection)) {
-                qWarning("Failed to create connection.");
-                //return false;
-            }
-        }
-    }
-
-    inputFile.close();
-    return true;
-}
-
 std::string blockTypeToString(BlockType type) {
     switch (type) {
         case NONE: return "NONE";
@@ -178,7 +65,62 @@ std::string rotationToString(Rotation rotation) {
     }
 }
 
-bool CircuitFileManager::save(const QString& path, circuit_id_t circuitId) {
+bool CircuitFileManager::loadFromFile(const QString& path, ParsedCircuit& outParsed) {
+    std::ifstream inputFile(path.toStdString());
+    if (!inputFile.is_open()) {
+        qWarning("Couldn't open file.");
+        return false;
+    }
+
+    std::string token;
+    char cToken;
+    inputFile >> token;
+
+    if (token != "version_1") {
+        qWarning("Invalid file type.");
+        return false;
+    }
+
+    int blockId, connId, posX, posY;
+    BlockType blockType;
+    Rotation rotation;
+    int numConns;
+
+    outParsed.minPos = Vector(std::numeric_limits<cord_t>::max(), std::numeric_limits<cord_t>::max());
+    while (inputFile >> token) {
+        inputFile >> blockId;
+        inputFile >> token;
+        blockType = stringToBlockType(token);
+        inputFile >> posX;
+        inputFile >> posY;
+        inputFile >> token;
+        rotation = stringToRotation(token);
+
+        if (posX < outParsed.minPos.dx) outParsed.minPos.dx = posX;
+        if (posY < outParsed.minPos.dy) outParsed.minPos.dy = posY;
+
+        outParsed.blocks[blockId] = {Position(posX, posY), rotation, blockType};
+
+        block_id_t currentBlockId = blockId;
+        inputFile >> numConns;
+        for (int i = 0; i < numConns; ++i) {
+            inputFile >> token;
+            while (inputFile.peek() != '\n') {
+                inputFile >> cToken >> blockId >> connId >> cToken;
+                outParsed.connections.push_back({
+                    static_cast<block_id_t>(currentBlockId),
+                    static_cast<connection_end_id_t>(i),
+                    static_cast<block_id_t>(blockId),
+                    static_cast<connection_end_id_t>(connId)
+                });
+            }
+        }
+    }
+    inputFile.close();
+    return true;
+}
+
+bool CircuitFileManager::saveToFile(const QString& path, circuit_id_t circuitId) {
     SharedCircuit circuitPtr = circuitManager->getCircuit(circuitId);
     if (!circuitPtr) return false;
 
@@ -204,8 +146,6 @@ bool CircuitFileManager::save(const QString& path, circuit_id_t circuitId) {
                    << blockTypeToString(block.type()) << ' ' << pos.x << ' '
                    << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
                    << connectionNum << '\n';
-        //const std::vector<ConnectionEnd>& inputConnections = block.getInputConnections(pos);
-        //const std::vector<ConnectionEnd>& outputConnections = block.getOutputConnections(pos);
 
         for (int j=0; j<connectionNum; ++j){
             outputFile << '\t' << "(connId:" << j << ')';
