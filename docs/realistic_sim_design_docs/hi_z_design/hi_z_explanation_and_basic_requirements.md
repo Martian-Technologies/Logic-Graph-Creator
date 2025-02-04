@@ -36,19 +36,23 @@ High Z states are particularly useful in situations where multiple devices need 
 
 1. An additional state for high-z and an "X state" must support where the output of a tri-state buffer is in high impedance mode and where the state cannot be defined respectively.
 
-2. The output of a tri-state buffer is the "Z state" when the control input is low (see test for truth table and image).
+2. The X state should be outputted when there are no inputs to a gate.
 
-3. The high-z state allows combining multiple inputs into 1 output where the output is dependant upon the non-high-z input.
+3. The output of a tri-state buffer is the "Z state" when the control input is low (see test 1 for truth table and image).
 
-4. If wires outputs are connected and collide ie. 1 gate outputs 0 while the other outputs a 1 results in the wire being in the X state.
+4. The high-z state allows combining multiple inputs into 1 output where the output is dependant upon the non-high-z input.
 
-5. Gates that take in multiple inputs with a Z or X input should attempt to resolve the output but otherwise should output the X state.  See testcases of the specific truth table on this.  Note this also applies to tri-state buffers.
+5. If wires outputs are connected and collide ie. 1 gate outputs 0 while the other outputs a 1 results in the wire being in the X state.
+
+6. Gates that take in multiple inputs with a Z or X input should attempt to resolve the output but otherwise should output the X state.  See testcases of the specific truth table on this.  Note this also applies to tri-state buffers.  For example, for an and gate if an and gate has an input of X and 0 then the output is 0.  If the input is Z and 0 then the output is 0.  However, if the input is Z and 1 then since Z could be read by the gate as either a 0 or 1, then the output is X since the output could not be resolved.
 
 ## Test Cases
 
 ### The testcases below show a circuit with inputs and outputs and below show a truth table of the following values.
 
 1. Tri-State Buffer Functionality.  NOTE* The buffer used in the diagram shows hi-z when the control is high but the truth table assumes hi-z is output for a low input.
+
+![image](https://github.com/user-attachments/assets/340c7662-800e-4fd0-be2b-424f911d6f51)
 
 | P | Q | Out |
 |---|---|-----|
@@ -68,7 +72,6 @@ High Z states are particularly useful in situations where multiple devices need 
 | X | 1 |  X  |
 | X | Z |  X  |
 | X | X |  X  |
-
 
   
 2. Multiple Inputs can be combined into 1
