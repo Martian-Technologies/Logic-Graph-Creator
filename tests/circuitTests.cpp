@@ -123,3 +123,21 @@ TEST_F(CircuitTest, ConnectionRemoval) {
 	const BlockContainer* container = circuit->getBlockContainer();
 	ASSERT_FALSE(container->connectionExists(pos1, pos2));
 }
+
+TEST_F(CircuitTest, BlockTypePlacement) {
+	Position pos(i, i); ++i;
+	Rotation rot = Rotation::ZERO;
+	BlockType type = (BlockType)i;
+	
+	bool success = circuit->tryInsertBlock(pos, rot, type);
+	if (type == BlockType::NONE || type == BlockType::BLOCK || type == BlockType::TYPE_COUNT) {
+		ASSERT_FALSE(success);
+		const Block* block = circuit->getBlockContainer()->getBlock(pos);
+		ASSERT_EQ(block, nullptr);
+	} else {
+		ASSERT_TRUE(success);
+		const Block* block = circuit->getBlockContainer()->getBlock(pos);
+		ASSERT_NE(block, nullptr);
+		ASSERT_EQ(block->type(), type);
+	}
+}

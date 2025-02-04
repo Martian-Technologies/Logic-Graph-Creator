@@ -16,7 +16,8 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	if (
 		blockType == BlockType::NONE ||
-		blockType == BlockType::TYPE_COUNT ||
+		blockType == BlockType::BLOCK ||
+		blockType >= BlockType::TYPE_COUNT ||
 		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
 		) return false;
 	block_id_t id = getNewId();
@@ -67,6 +68,7 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
 	if (
 		blockType == BlockType::NONE ||
+		blockType == BlockType::BLOCK ||
 		blockType == BlockType::TYPE_COUNT ||
 		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
 		) return false;
