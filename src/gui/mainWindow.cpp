@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QTreeView>
 #include <QCheckBox>
+#include <QMenuBar>
 
 #include "selection/selectorWindow.h"
 #include "selection/hotbarWindow.h"
@@ -11,7 +12,6 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
-
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
@@ -37,6 +37,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	QVBoxLayout* layout = new QVBoxLayout(ui->gridWindow);
 	layout->addWidget(circuitViewWidget);
+
+	//adding menu to main window
+	auto menubar = menuBar();
+	auto helpMenu = new QMenu(QStringLiteral("Help"), this);
+
+	menubar->addMenu(helpMenu);
 }
 
 void MainWindow::setSimState(bool state) {
