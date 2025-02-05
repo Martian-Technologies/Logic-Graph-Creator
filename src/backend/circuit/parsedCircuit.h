@@ -28,8 +28,10 @@ public:
     };
 
     void addBlock(block_id_t id, const BlockData& block) {
-        if (block.pos.x < minPos.dx) minPos.dx = block.pos.x;
-        if (block.pos.y < minPos.dy) minPos.dy = block.pos.y;
+        int x = std::floor(block.pos.x);
+        int y = std::floor(block.pos.y);
+        if (x < minPos.dx) minPos.dx = x;
+        if (y < minPos.dy) minPos.dy = y;
         blocks[id] = block;
         valid = false;
     }
@@ -38,7 +40,7 @@ public:
         valid = false;
     }
     bool isValid() const { return valid; }
-    const FVector& getMinPos() const { return minPos; }
+    const Vector& getMinPos() const { return minPos; }
 
     void clear() { blocks.clear(); connections.clear(); }
 
@@ -50,7 +52,7 @@ public:
     const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
     const std::vector<ConnectionData>& getConns() const { return connections; }
 private:
-    FVector minPos = FVector(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
     bool valid = true;

@@ -15,8 +15,10 @@ bool CircuitValidator::setBlockPositionsInt() {
     for (auto& [id, block] : parsedCircuit.blocks) {
         if (!isIntegerPosition(block.pos)) {
             std::cout << "Converted block id=" << id << " position from " << block.pos.toString() << " to ";
-            block.pos.x = std::round(block.pos.x);
-            block.pos.y = std::round(block.pos.y);
+            block.pos.x = std::floor(block.pos.x);
+            block.pos.y = std::floor(block.pos.y);
+            if (block.pos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = block.pos.x;
+            if (block.pos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = block.pos.y;
             std::cout << block.pos.toString() << '\n';
         }
     }
@@ -108,6 +110,8 @@ bool CircuitValidator::handleUnpositionedBlocks() {
             }
 
             block.pos = FPosition(currentPos.x, currentPos.y);
+            if (currentPos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = currentPos.x;
+            if (currentPos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = currentPos.y;
             std::cout << "Found new empty block position: " << block.pos.toString() << " --> " << block.pos.snap().toString() << '\n';
             occupiedPositions.insert(currentPos);
         }

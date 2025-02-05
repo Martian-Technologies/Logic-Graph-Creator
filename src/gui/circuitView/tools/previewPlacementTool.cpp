@@ -7,22 +7,23 @@ void PreviewPlacementTool::updatePreviewElements() {
 
     elementCreator.clear();
     
-    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    // note that getMinPos will return an FVector but will have valid integer coordinates.
+    Vector totalOffset = (parsedCircuit->getMinPos()*-1) + Vector(currentPosition.x, currentPosition.y);
     bool isValid = validatePlacement();
 
     // only displays block previews, not connections
     for (const auto& [id, block] : parsedCircuit->getBlocks()) {
-        FPosition displayPos = block.pos + totalOffset;
-        elementCreator.addBlockPreview(BlockPreview(block.type, displayPos.snap(), block.rotation));
+        Position displayPos = block.pos.snap() + totalOffset;
+        elementCreator.addBlockPreview(BlockPreview(block.type, displayPos, block.rotation));
     }
 }
 
 bool PreviewPlacementTool::validatePlacement() const {
-    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    Vector totalOffset = (parsedCircuit->getMinPos()*-1) + Vector(currentPosition.x, currentPosition.y);
 
     for (const auto& [id, block] : parsedCircuit->getBlocks()) {
-        FPosition testPos = block.pos + totalOffset;
-        if (circuit->getBlockContainer()->checkCollision(testPos.snap())) {
+        Position testPos = block.pos.snap() + totalOffset;
+        if (circuit->getBlockContainer()->checkCollision(testPos)) {
             return false;
         }
     }
@@ -49,17 +50,17 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         return false;
     }
 
-    FVector totalOffset = (parsedCircuit->getMinPos()*-1) + FVector(currentPosition.x, currentPosition.y);
+    Vector totalOffset = (parsedCircuit->getMinPos()*-1) + Vector(currentPosition.x, currentPosition.y);
     std::unordered_map<block_id_t, block_id_t> realIds;
 
     for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
-        FPosition targetPos = block.pos + totalOffset;
+        Position targetPos = block.pos.snap() + totalOffset;
         block_id_t newId;
-        if (!circuit->tryInsertBlock(targetPos.snap(), block.rotation, block.type)) {
+        if (!circuit->tryInsertBlock(targetPos, block.rotation, block.type)) {
             qWarning("Failed to insert block.");
         }
         std::cout << "Inserted block. ID=" << oldId << ", Rot=" << rotationToString(block.rotation) << ", Type=" << blockTypeToString(block.type) <<  std::endl;
-        realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos.snap())->id();;
+        realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos)->id();;
     }
 
     for (const auto& conn : parsedCircuit->getConns()) {
