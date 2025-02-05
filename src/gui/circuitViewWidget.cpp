@@ -11,6 +11,7 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 
+#include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget *parent, CircuitFileManager *fileManager)
@@ -205,8 +206,13 @@ void CircuitViewWidget::load(const QString& filePath) {
         return;
     }
 
-    circuitView.getToolManager().setPendingPreviewData(parsed);
-    circuitView.getToolManager().changeTool("Preview Placement");
+    CircuitValidator validator(*parsed);
+    if (parsed->isValid()){
+        circuitView.getToolManager().setPendingPreviewData(parsed);
+        circuitView.getToolManager().changeTool("Preview Placement");
+    }else {
+        qWarning("Parsed circuit is not valid to be placed");
+    }
 }
 
 void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {

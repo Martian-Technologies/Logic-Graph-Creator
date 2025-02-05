@@ -6,12 +6,13 @@
 #include "backend/position/position.h"
 
 class ParsedCircuit {
+    friend class CircuitValidator;
 public:
     ParsedCircuit() = default;
 
     struct BlockData {
         FPosition pos; // will be validated into integer values
-        Rotation rotation;
+        Rotation rotation; // todo: make into integer value to generalize the rotation
         BlockType type;
     };
     struct ConnectionData {
@@ -19,21 +20,29 @@ public:
         connection_end_id_t outputId;
         block_id_t inputBlockId;
         connection_end_id_t inputId;
+
+        bool operator==(const ConnectionData& other) const {
+            return outputId == other.outputId && inputId == other.inputId &&
+                   outputBlockId == other.outputBlockId && inputBlockId == other.inputBlockId;
+        }
     };
 
     void addBlock(block_id_t id, const BlockData& block) {
         if (block.pos.x < minPos.dx) minPos.dx = block.pos.x;
         if (block.pos.y < minPos.dy) minPos.dy = block.pos.y;
         blocks[id] = block;
+        valid = false;
     }
-    void addConnection(const ConnectionData& conn) { connections.push_back(conn); }
+    void addConnection(const ConnectionData& conn) {
+        connections.push_back(conn);
+        valid = false;
+    }
     bool isValid() const { return valid; }
-    void setStatus(bool state) { valid = state; }
     const FVector& getMinPos() const { return minPos; }
 
     void clear() { blocks.clear(); connections.clear(); }
 
-    BlockData* getBlock(block_id_t id) {
+    const BlockData* getBlock(block_id_t id) const {
         auto itr = blocks.find(id);
         if (itr != blocks.end()) return &itr->second;
         return nullptr;
@@ -44,7 +53,7 @@ private:
     FVector minPos = FVector(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
-    bool valid = false;
+    bool valid = true;
 };
 
 #endif /* parsedCircuit_h */

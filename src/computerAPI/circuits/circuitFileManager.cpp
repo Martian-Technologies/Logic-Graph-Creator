@@ -84,15 +84,22 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
     int blockId, connId;
     float posX, posY;
     BlockType blockType;
-    Rotation rotation;
+    Rotation rotation; // loaded from Rotation type and stored as degrees in ParsedCircuit
     int numConns;
 
     while (inputFile >> token) {
         inputFile >> blockId;
         inputFile >> token;
         blockType = stringToBlockType(token);
-        inputFile >> posX;
-        inputFile >> posY;
+
+        inputFile >> token;
+        if (token == "null") posX = std::numeric_limits<float>::max();
+        else posX = std::stof(token);
+
+        inputFile >> token;
+        if (token == "null") posY = std::numeric_limits<float>::max();
+        else posY = std::stof(token);
+
         inputFile >> token;
         rotation = stringToRotation(token);
 

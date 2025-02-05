@@ -63,7 +63,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
     }
 
     for (const auto& conn : parsedCircuit->getConns()) {
-        ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
+        const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
         if (!b){
             qWarning("Could not get block from parsed circuit");
             break;
