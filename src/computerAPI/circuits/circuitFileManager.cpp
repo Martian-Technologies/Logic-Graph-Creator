@@ -115,15 +115,17 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
             continue;
         }else if (token == "external"){
             ParsedCircuit::ExternalConnection ec;
-            std::string dependencyFile;
+            std::string file1, file2;
 
-            inputFile >> ec.localBlockId
+            inputFile >> std::quoted(file1)
+                      >> ec.localBlockId
                       >> ec.localConnectionId
                       >> ec.externalBlockId
                       >> ec.externalConnectionId
-                      >> std::quoted(dependencyFile);
+                      >> std::quoted(file2);
 
-            ec.dependencyFile = dependencyFile;
+            ec.localFile = file1; // "." for the current file.
+            ec.dependencyFile = file2;
             outParsed->addExternalConnection(ec);
             continue;
         }

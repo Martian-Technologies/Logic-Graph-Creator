@@ -27,6 +27,7 @@ public:
         }
     };
     struct ExternalConnection {
+        std::string localFile;
         block_id_t localBlockId;
         connection_end_id_t localConnectionId;
         block_id_t externalBlockId;

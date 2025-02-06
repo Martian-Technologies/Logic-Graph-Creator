@@ -25,10 +25,11 @@ private:
                    std::hash<connection_end_id_t>()(p.inputBlockId);
         }
     };
+    std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
+    void processExternalConnections();
     bool validateAndMergeDependencies();
-    void mergeCircuit(const ParsedCircuit& depCircuit, int offsetX, int offsetY, int& currMaxX, int& currMaxY);
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
