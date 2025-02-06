@@ -9,7 +9,7 @@ void PreviewPlacementTool::updatePreviewElements() {
     
     // note that getMinPos will return an FVector but will have valid integer coordinates.
     Vector totalOffset = (parsedCircuit->getMinPos()*-1) + Vector(currentPosition.x, currentPosition.y);
-    bool isValid = validatePlacement();
+    //bool isValid = validatePlacement(); // possible change preview colors if invalid
 
     // only displays block previews, not connections
     for (const auto& [id, block] : parsedCircuit->getBlocks()) {

@@ -2,6 +2,10 @@
 #include <fstream>
 #include <QTextStream>
 #include <string>
+#include <QFileInfo>
+#include <QDir>
+#include <QString>
+
 
 #include "circuitFileManager.h"
 
@@ -66,7 +70,14 @@ std::string rotationToString(Rotation rotation) {
 }
 
 bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<ParsedCircuit> outParsed) {
-    std::ifstream inputFile(path.toStdString());
+    std::string currentFile = path.toStdString();
+    if (!loadedFiles.insert(currentFile).second){
+        std::cout << currentFile << " is already added as a dependency\n";
+        return false;
+    }
+    std::cout << "Inserted current file as a dependency: " << currentFile << '\n';
+
+    std::ifstream inputFile(currentFile);
     if (!inputFile.is_open()) {
         qWarning("Couldn't open file.");
         return false;
@@ -88,6 +99,35 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
     int numConns;
 
     while (inputFile >> token) {
+        if (token == "import"){
+            std::string importFileName;
+            inputFile >> std::quoted(importFileName);
+
+            QString fullPath = QFileInfo(path).absoluteDir().filePath(QString::fromStdString(importFileName));
+            std::shared_ptr<ParsedCircuit> dependency = std::make_shared<ParsedCircuit>();
+            std::cout << "File to access: " << fullPath.toStdString() << '\n';
+            if (loadFromFile(fullPath, dependency)){
+                std::cout << "Successfully imported dependency: " << importFileName << '\n';
+                outParsed->addDependency(importFileName, dependency);
+            }else{
+                std::cout << "Failed to import dependency: " << importFileName << '\n';
+            }
+            continue;
+        }else if (token == "external"){
+            ParsedCircuit::ExternalConnection ec;
+            std::string dependencyFile;
+
+            inputFile >> ec.localBlockId
+                      >> ec.localConnectionId
+                      >> ec.externalBlockId
+                      >> ec.externalConnectionId
+                      >> std::quoted(dependencyFile);
+
+            ec.dependencyFile = dependencyFile;
+            outParsed->addExternalConnection(ec);
+            continue;
+        }
+
         inputFile >> blockId;
         inputFile >> token;
         blockType = stringToBlockType(token);
@@ -120,7 +160,9 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
             }
         }
     }
+    outParsed->makePositionsRelative();
     inputFile.close();
+    loadedFiles.erase(currentFile);
     return true;
 }
 

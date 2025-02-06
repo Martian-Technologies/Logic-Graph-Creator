@@ -3,12 +3,70 @@
 void CircuitValidator::validate() {
     bool isValid = true;
 
+    isValid = isValid && validateAndMergeDependencies();
+
     isValid = isValid && setBlockPositionsInt();
     isValid = isValid && handleInvalidConnections();
     isValid = isValid && setOverlapsUnpositioned();
     isValid = isValid && handleUnpositionedBlocks();
 
     parsedCircuit.valid = isValid;
+}
+
+bool CircuitValidator::validateAndMergeDependencies() {
+    const std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> dependencies = parsedCircuit.getDependencies();
+
+    int offsetX = parsedCircuit.maxPos.dx;
+    if (!parsedCircuit.blocks.empty()) offsetX += 3;
+
+    int offsetY = parsedCircuit.minPos.dy;
+    int currMaxX = parsedCircuit.maxPos.dx;
+    int currMaxY = parsedCircuit.maxPos.dy;
+    
+    int numImports = 0;
+    for (auto& [depName, depCircuit] : dependencies) {
+        CircuitValidator depValidator(*depCircuit);
+        if (depCircuit->isValid()) {
+            std::cout << "Dependency circuit validation success for " << depName << '\n';
+        } else{
+            std::cout << "** Dependency circuit validation failed for " << depName << " **\n";
+        }
+        mergeCircuit(*depCircuit, offsetX, offsetY, currMaxX, currMaxY);
+        offsetX = currMaxX + 3;
+        if ((++numImports)%3 == 0){
+            offsetX = currMaxX = 0;
+            offsetY = currMaxY + 2;
+        }
+    }
+    return true;
+}
+
+void CircuitValidator::mergeCircuit(const ParsedCircuit& depCircuit, int offsetX, int offsetY, int& currMaxX, int& currMaxY) {
+    std::unordered_map<block_id_t, block_id_t> idMapping;
+
+    // merge blocks
+    for (const auto& [depBlockId, depBlock] : depCircuit.blocks) {
+        block_id_t newBlockId = generateNewBlockId();
+        idMapping[depBlockId] = newBlockId;
+        parsedCircuit.blocks[newBlockId] = depBlock;
+
+        parsedCircuit.blocks[newBlockId].pos.x += offsetX;
+        if (parsedCircuit.blocks[newBlockId].pos.x > currMaxX){
+            currMaxX = parsedCircuit.blocks[newBlockId].pos.x;
+        }
+        parsedCircuit.blocks[newBlockId].pos.y += offsetY;
+        if (parsedCircuit.blocks[newBlockId].pos.y > currMaxY){
+            currMaxY = parsedCircuit.blocks[newBlockId].pos.y;
+        }
+    }
+
+    // merge connections, adjusting old ids
+    for (auto& conn : depCircuit.connections) {
+        ParsedCircuit::ConnectionData newConn = conn;
+        newConn.outputBlockId = idMapping[conn.outputBlockId];
+        newConn.inputBlockId = idMapping[conn.inputBlockId];
+        parsedCircuit.connections.push_back(newConn);
+    }
 }
 
 bool CircuitValidator::setBlockPositionsInt() {
@@ -19,6 +77,9 @@ bool CircuitValidator::setBlockPositionsInt() {
             block.pos.y = std::floor(block.pos.y);
             if (block.pos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = block.pos.x;
             if (block.pos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = block.pos.y;
+            if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
+            if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
+
             std::cout << block.pos.toString() << '\n';
         }
     }
@@ -112,6 +173,8 @@ bool CircuitValidator::handleUnpositionedBlocks() {
             block.pos = FPosition(currentPos.x, currentPos.y);
             if (currentPos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = currentPos.x;
             if (currentPos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = currentPos.y;
+            if (currentPos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = currentPos.x;
+            if (currentPos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = currentPos.y;
             std::cout << "Found new empty block position: " << block.pos.toString() << " --> " << block.pos.snap().toString() << '\n';
             occupiedPositions.insert(currentPos);
         }

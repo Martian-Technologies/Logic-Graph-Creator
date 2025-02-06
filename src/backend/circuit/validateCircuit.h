@@ -27,6 +27,8 @@ private:
     };
 
     void validate();
+    bool validateAndMergeDependencies();
+    void mergeCircuit(const ParsedCircuit& depCircuit, int offsetX, int offsetY, int& currMaxX, int& currMaxY);
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
@@ -34,6 +36,13 @@ private:
 
     bool isIntegerPosition(const FPosition& pos) const {
         return pos.x == std::floor(pos.x) && pos.y == std::floor(pos.y);
+    }
+    block_id_t generateNewBlockId() const {
+        block_id_t id = 0;
+        while (parsedCircuit.blocks.find(id) != parsedCircuit.blocks.end()){
+            ++id;
+        }
+        return id;
     }
 
     ParsedCircuit& parsedCircuit;
