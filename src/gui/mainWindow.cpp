@@ -8,7 +8,6 @@
 #include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
 #include "ui_mainWindow.h"
-#include "helpDialog.h"
 #include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -41,22 +40,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	//adding menu to main window
 	auto menubar = menuBar();
-	auto helpMenu = new QMenu(QStringLiteral("Help"), this);
-	menubar->addMenu(helpMenu);
+	auto help = new QAction(QStringLiteral("Help"), this);
+	menubar->addAction(help);
 
-	//connect(helpMenu, &QPushButton::clicked, this)
-
-	//helpDialog helpdialog(this);
-	//helpdialog.exec();
-
-	/* to add to helpDialog:
-	private slots:
-    void openDialog() {
-        MyDialog dialog(this);
-        dialog.exec();  // Show the dialog as modal
-    }
-	
-	*/
+	connect(help, &QAction::triggered, this, &MainWindow::openDialog);
 }
 
 void MainWindow::setSimState(bool state) {
@@ -98,4 +85,9 @@ void MainWindow::setTool(std::string tool) {
 	for (auto view : circuitViews) {
 		view->getCircuitView()->setSelectedTool(tool);
 	}
+}
+
+void MainWindow::openDialog() {
+	HelpDialog dialog(this);
+  dialog.exec();
 }

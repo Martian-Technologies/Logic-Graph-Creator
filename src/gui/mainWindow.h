@@ -7,6 +7,7 @@
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/backend.h"
+#include "helpDialog.h"
 
 namespace Ui {
 	class MainWindow;
@@ -32,6 +33,9 @@ private:
 	QGraphicsScene* scene;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
+
+private slots:
+  void openDialog();
 };
 
 #endif /* mainWindow_h */

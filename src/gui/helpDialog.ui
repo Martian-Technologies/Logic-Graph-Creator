@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>helpDialog</class>
+ <widget class="QDialog" name="helpDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>helpDialog</string>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>256</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <row>
+    <property name="text">
+     <string notr="true">Place</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string notr="true">Delete</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string notr="true">Pan</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string notr="true">Zoom</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string notr="true">Pause/Unpause </string>
+    </property>
+   </row>
+   <column>
+    <property name="text">
+     <string notr="true">Keybinds</string>
+    </property>
+   </column>
+   <item row="0" column="0">
+    <property name="text">
+     <string>Left Mouse</string>
+    </property>
+   </item>
+   <item row="1" column="0">
+    <property name="text">
+     <string>Right Mouse</string>
+    </property>
+   </item>
+   <item row="2" column="0">
+    <property name="text">
+     <string>Alt + Drag Mouse</string>
+    </property>
+   </item>
+   <item row="3" column="0">
+    <property name="text">
+     <string>Mouse Wheel/Pinch on Trackpad</string>
+    </property>
+   </item>
+   <item row="4" column="0">
+    <property name="text">
+     <string>Space Bar</string>
+    </property>
+   </item>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

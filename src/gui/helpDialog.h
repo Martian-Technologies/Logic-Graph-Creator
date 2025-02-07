@@ -1,17 +1,19 @@
 #ifndef helpDialog_h
 #define helpDialog_h
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QPushButton>
 #include <QDialog>
-#include <QVBoxLayout>
-#include <QLabel>
 
-class helpDialog : public QDialog {
+namespace Ui {
+	class HelpDialog;
+}
+
+class HelpDialog : public QDialog {
   Q_OBJECT
 public:
-  helpDialog(QWidget* parent = nullptr);
+  HelpDialog(QWidget* parent = nullptr);
+
+private:
+  Ui::HelpDialog* ui;
 };
 
 #endif /* helpDialog_h */
