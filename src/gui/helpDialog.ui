@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>helpDialog</class>
- <widget class="QDialog" name="helpDialog">
+ <class>HelpDialog</class>
+ <widget class="QDialog" name="HelpDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,15 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>helpDialog</string>
+   <string>HelpDialog</string>
   </property>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>256</width>
-     <height>192</height>
+     <width>800</width>
+     <height>600</height>
     </rect>
    </property>
    <row>

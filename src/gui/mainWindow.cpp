@@ -88,6 +88,6 @@ void MainWindow::setTool(std::string tool) {
 }
 
 void MainWindow::openDialog() {
-	HelpDialog dialog(this);
-  dialog.exec();
+	HelpDialog* dialog = new HelpDialog(this);
+  dialog->show();
 }
