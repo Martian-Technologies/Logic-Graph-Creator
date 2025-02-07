@@ -48,6 +48,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	//helpDialog helpdialog(this);
 	//helpdialog.exec();
+
+	/* to add to helpDialog:
+	private slots:
+    void openDialog() {
+        MyDialog dialog(this);
+        dialog.exec();  // Show the dialog as modal
+    }
+	
+	*/
 }
 
 void MainWindow::setSimState(bool state) {
