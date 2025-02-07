@@ -3,6 +3,8 @@
 
 HelpDialog::HelpDialog(QWidget* parent) : QDialog(parent), ui(new Ui::HelpDialog) {
   ui->setupUi(this);
-  // layout->addWidget(label);
-  // setLayout(layout);
+  ui->tableWidget->setColumnWidth(0, 300);
+  ui->tableWidget->setColumnWidth(1, 500);
+  setWindowTitle("Help");
+  resize(400, 200);
 }
