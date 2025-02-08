@@ -2,6 +2,7 @@
 #define logicGridWindow_h
 
 #include <QApplication>
+#include <QToolButton>
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <QComboBox>
@@ -16,7 +17,7 @@
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-	CircuitViewWidget(QWidget* parent = nullptr, QComboBox* circuitSelector = nullptr);
+	CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector, QComboBox* evaluatorSelector, QToolButton* newCircuit, QToolButton* newEvaluator);
 
 	// setup
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
@@ -62,6 +63,7 @@ private:
 	bool mouseControls;
 
 	QComboBox* circuitSelector;
+	QComboBox* evaluatorSelector;
 };
 
 #endif /* logicGridWindow_h */

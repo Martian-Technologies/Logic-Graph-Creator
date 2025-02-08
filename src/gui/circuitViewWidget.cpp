@@ -13,7 +13,8 @@
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector) : QWidget(parent), mouseControls(false), circuitSelector(circuitSelector) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector, QComboBox* evaluatorSelector, QToolButton* newCircuit, QToolButton* newEvaluator) :
+	QWidget(parent), mouseControls(false), circuitSelector(circuitSelector), evaluatorSelector(evaluatorSelector) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -46,6 +47,30 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 			}
 		}
 	);
+
+	std::cout << connect(newCircuit, &QToolButton::clicked, this, [&](bool pressed){
+			Backend* backend = this->circuitView.getBackend();
+			if (backend) {
+				backend->createCircuit();
+			}
+		}
+	) << std::endl;
+
+	connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index){
+			Backend* backend = this->circuitView.getBackend();
+			if (backend && this->evaluatorSelector) {
+				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
+			}
+		}
+	);
+	
+	connect(newEvaluator, &QToolButton::clicked, this, [&](bool pressed){
+			Backend* backend = this->circuitView.getBackend();
+			if (backend && this->circuitView.getCircuit()) {
+				backend->createEvaluator(this->circuitView.getCircuit()->getCircuitId());
+			}
+		}
+	);
 }
 
 void CircuitViewWidget::updateLoop() {
@@ -55,11 +80,11 @@ void CircuitViewWidget::updateLoop() {
 			for (auto pair : backend->getCircuitManager()) {
 				QString name = QString::fromStdString(pair.second->getCircuitName());
 				if (circuitSelector->findText(name) == -1) {
-					circuitSelector->addItem(name, pair.second->getCircuitId());
+					circuitSelector->insertItem(circuitSelector->count()-1, name, pair.second->getCircuitId());
 				}
 			}
 		}
-		Circuit* circuit = circuitView.getCircuit();
+		const Circuit* circuit = circuitView.getCircuit();
 		if (circuit != nullptr) {
 			QString name = QString::fromStdString(circuit->getCircuitName());
 			int index = circuitSelector->findText(name);
@@ -69,6 +94,28 @@ void CircuitViewWidget::updateLoop() {
 		} else {
 			int index = circuitSelector->findText("None");
 			circuitSelector->setCurrentIndex(index);
+		}
+	}
+	if (evaluatorSelector) {
+		const Backend* backend = circuitView.getBackend();
+		if (backend) {
+			for (auto pair : backend->getEvaluatorManager()) {
+				QString name = QString::fromStdString(pair.second->getEvaluatorName());
+				if (evaluatorSelector->findText(name) == -1) {
+					evaluatorSelector->insertItem(evaluatorSelector->count()-1, name, pair.second->getEvaluatorId());
+				}
+			}
+		}
+		const Evaluator* evaluator = circuitView.getEvaluator();
+		if (evaluator != nullptr) {
+			QString name = QString::fromStdString(evaluator->getEvaluatorName());
+			int index = evaluatorSelector->findText(name);
+			if ( index != -1 ) { // -1 for not found
+				evaluatorSelector->setCurrentIndex(index);
+			}
+		} else {
+			int index = evaluatorSelector->findText("None");
+			evaluatorSelector->setCurrentIndex(index);
 		}
 	}
 	// update for re-render

@@ -74,6 +74,7 @@ private:
 		renderer.setEvaluator(evaluator.get());
 		evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 		toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
+		this->evaluator = evaluator;
 	}
 
 	inline void setCircuit(SharedCircuit circuit) {

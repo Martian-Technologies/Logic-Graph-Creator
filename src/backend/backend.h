@@ -63,13 +63,15 @@ bool Backend::linkCircuitViewWithCircuit(CircuitView<RENDERER_TYPE>* circuitView
 
 template <class RENDERER_TYPE>
 bool Backend::linkCircuitViewWithEvaluator(CircuitView<RENDERER_TYPE>* circuitView, evaluator_id_t evalId, const Address& address) {
+	if (!circuitView->getCircuit()) return false;
+
 	SharedEvaluator evaluator = evaluatorManager.getEvaluator(evalId);
 	if (evaluator) {
-		if (circuitView->getBackend() != this) {
-			circuitView->setBackend(this);
-			circuitView->setCircuit(nullptr);
-		} else if (false) { // TODO: check that address is in the eval
-			circuitView->setCircuit(nullptr);
+		if (
+			(circuitView->getBackend() != this) ||
+			(evaluator->getCircuitId(address) != circuitView->getCircuit()->getCircuitId())
+		) {
+			return false;
 		}
 		circuitView->setEvaluator(evaluator);
 		return true;

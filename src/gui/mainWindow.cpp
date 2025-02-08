@@ -38,6 +38,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 
 	// menubar setup
 	auto menubar = menuBar();
+
 	auto windowMenu = new QMenu(QStringLiteral("Window"), this);
 
 	menubar->addMenu(windowMenu);
@@ -92,7 +93,7 @@ CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
 	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi->CircuitSelector);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi->CircuitSelector, circuitViewUi->EvaluatorSelector, circuitViewUi->NewCircuitButton, circuitViewUi->NewEvaluatorButton);
 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
 	circuitViews.push_back(circuitViewWidget);
 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
