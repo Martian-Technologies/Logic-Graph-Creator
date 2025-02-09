@@ -12,28 +12,31 @@ public:
 
     // actions
     void add(DifferenceSharedPtr difference);
-    void undo();
-    void redo();
+    DifferenceSharedPtr undo();
+    DifferenceSharedPtr redo();
     void changeBranch(int i);
 
     // gui related info    
     const std::vector<std::vector<Node>>& getTree() const { return tree; }
+    std::vector<unsigned int> getBranchConnection(const unsigned int i) const { return branchMap.find(i)->second; }
     
 
 private:
 
     // jagged array tree version
-    std::unordered_map<int ,std::vector<int>> branches; // id matches to ints that are branches of node
+    std::unordered_map<int ,std::vector<unsigned int>> branchMap; // id matches to ints that are branches of node
     std::vector<std::vector<Node>> tree; // jagged array enjoyer
     
-    int branchPosition;
-    int nodePosition; // inside the branch itself
+    unsigned int branchPosition;
+    unsigned int nodePosition; // inside the branch itself
+    unsigned int nodeCount;
 };
 
 struct Node {
-        Node(DifferenceSharedPtr diff, unsigned int id) : diff(diff), id(id) {}
+        Node(DifferenceSharedPtr diff, unsigned int id) : diff(diff), id(id), branching(0) {}
         DifferenceSharedPtr diff;
-        unsigned int id;
+        unsigned int id; // node count correlates to branches map, it will pair id to what branches said node connects to
+        bool branching; // makes it easier then searching unordered map on whether or not this node branches off
 };
 
 #endif /* treeSystem_h */

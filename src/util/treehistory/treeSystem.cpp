@@ -1,32 +1,48 @@
 #include "treeSystem.h"
+#include "backend/container/difference.h"
 
+TreeManager::TreeManager() : branchPosition(0), nodePosition(0) {}
 
-/* info for class
-class UndoSystem {
-public:
-	inline UndoSystem() : undoPosition(0) { }
+// actions
+void TreeManager::add(DifferenceSharedPtr difference) {
+    nodeCount++;
 
-	inline void addDifference(DifferenceSharedPtr difference) { 
-        while (undoPosition < differences.size()) 
-            differences.pop_back(); 
-        undoPosition++; 
-        differences.push_back(difference); 
+    if (nodePosition < tree[branchPosition].size()) { // creates a new branch history if not at newest node
+        tree.push_back({}); 
+
+        // pairs id to new branch
+        branchMap[nodeCount].push_back(nodePosition); // maps new node to where it branched off from
+        branchMap[tree[branchPosition][nodePosition].id].push_back(0); // maps old node to branch off
+
+        branchPosition = tree.size() - 1;
+        nodePosition = 0;
     }
-	inline DifferenceSharedPtr undoDifference() { 
-        if (undoPosition == 0) 
-            return std::make_shared<Difference>(); 
-        return differences[undoPosition--];
+    tree[branchPosition].emplace_back(difference, nodeCount);
+    nodePosition++;
+}
+
+DifferenceSharedPtr TreeManager::undo() {
+    if (nodePosition == 0) {
+        return NULL;
     }
-	inline DifferenceSharedPtr redoDifference() { 
-        while (undoPosition == differences.size()) 
-            return std::make_shared<Difference>(); 
-        return differences[undoPosition++]; 
-    }
+    return tree[branchPosition][nodePosition--].diff;
+}
 
-private:
-	unsigned int undoPosition;
-	std::vector<DifferenceSharedPtr> differences;
+DifferenceSharedPtr TreeManager::redo() {
+    // this wont redo to new trees
+    if (nodePosition+1 == tree[branchPosition].size())
+        return std::make_shared<Difference>();
+    return tree[branchPosition][nodePosition++].diff;
+}
 
-};
+void TreeManager::changeBranch(int i) {
+    branchPosition = i;
+    nodePosition = 0;
+}
 
-*/
+
+
+
+
+
+
