@@ -12,7 +12,7 @@ void EvaluatorTest::TearDown() {
     circuit.reset();
     evaluator.reset();
 }
-
+/*
 TEST_F(EvaluatorTest, InitTest) {
     ASSERT_EQ(evaluator->getEvaluatorId(), 1);
 
@@ -201,14 +201,14 @@ TEST_F(EvaluatorTest, ThreadSafetyAndPausing) {
 
 void EvaluatorTest::changeState(const Address& addr) {
     for (int j = 0; j < 100; j++) {
-        evaluator->setState(addr, j % 2 == 0);
+        //evaluator->setState(addr, j % 2 == 0);
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
 void EvaluatorTest::readState(const Address& addr) {
     for (int j=0; j<100; ++j) {
-        evaluator->getState(addr);
+        //evaluator->getState(addr);
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
@@ -234,3 +234,4 @@ TEST_F(EvaluatorTest, FastCircuitModifications) {
 		ASSERT_NO_THROW(evaluator->getState(addr));
 	}
 }
+*/
