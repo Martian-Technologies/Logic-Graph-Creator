@@ -9,8 +9,5 @@ int main(int argc, char* argv[]) {
 	MainWindow window;
 	window.show();
 
-	logInfo("test");
-	logFatalError("test");
-
 	return app.exec();
 }

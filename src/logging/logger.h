@@ -11,6 +11,10 @@ enum LogType {
 	Fatal = 8
 };
 
+// Possible future improvements
+// - [ ] Make ANSI optional
+// - [ ] Detailed category system for suppressing certain messages
+
 class Logger {
 public:
 	Logger(const std::filesystem::path& outputFile);
