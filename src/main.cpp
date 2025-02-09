@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
 	window.show();
 
 	logInfo("test");
+	logFatalError("test");
 
 	return app.exec();
 }

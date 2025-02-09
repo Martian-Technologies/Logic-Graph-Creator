@@ -18,12 +18,12 @@ public:
 	void log(LogType type, const std::string& message, const std::string& subcategory = "");
 
 private:
-	void flushToFile();
-	std::osyncstream asyncStream;
 	std::filesystem::path outputFile;
 	std::ofstream outputFileStream;
-
-	std::stringstream fileBuffer;
+	
+	std::osyncstream outStream;
+	std::osyncstream errStream;
+	std::osyncstream fileStream;
 };
 
 #endif /* logger_h */

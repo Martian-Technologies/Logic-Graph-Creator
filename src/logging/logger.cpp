@@ -1,50 +1,45 @@
 #include "logger.h"
 
-#define INFO_HEAD "[\033[1;37m"
-#define WARNING_HEAD "[\033[1;33m"
-#define ERROR_HEAD "[\033[1;31m"
-#define FATAL_HEAD "[\033[1;4;41;97m"
-#define ANSI_TAIL "\033[0m] "
+#define ANSI_INFO "\033[1;37m"
+#define ANSI_WARNING "\033[1;33m"
+#define ANSI_ERROR "\033[1;31m"
+#define ANSI_FATAL "\033[1;4;41;97m"
+#define ANSI_TAIL "\033[0m"
 
-Logger::Logger(const std::filesystem::path& outputFile) : asyncStream(std::cout), outputFile(outputFile) {
-	outputFileStream.open(outputFile);
-	outputFileStream.close();
+Logger::Logger(const std::filesystem::path& outputFile)
+	: outputFile(outputFile), outputFileStream(outputFile), outStream(std::cout), errStream(std::cerr), fileStream(outputFileStream) {
 }
 
 void Logger::log(LogType type, const std::string& message, const std::string& subcategory) {
-	std::string thingThatGoesBetweenTheBrackets;
+	std::string categoryText; 
 	if (subcategory != "") {
-		thingThatGoesBetweenTheBrackets = " - " + subcategory;
+		categoryText = " - " + subcategory;
 	}
+	
 	switch (type) {
 	case LogType::Info:
-		thingThatGoesBetweenTheBrackets = "Info" + thingThatGoesBetweenTheBrackets;
-		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
-		asyncStream << INFO_HEAD + thingThatGoesBetweenTheBrackets + ANSI_TAIL << message << "\n";
+		categoryText = "Info" + categoryText;
+		fileStream << "[" << categoryText << "] " << message << "\n";
+		outStream << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Warning:
-		thingThatGoesBetweenTheBrackets = "Warning" + thingThatGoesBetweenTheBrackets;
-		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
-		asyncStream << WARNING_HEAD + thingThatGoesBetweenTheBrackets + ANSI_TAIL << message << "\n";
+		categoryText = "Warning" + categoryText;
+		fileStream << "[" << categoryText << "] " << message << "\n";
+		outStream << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Error:
-		thingThatGoesBetweenTheBrackets = "ERROR" + thingThatGoesBetweenTheBrackets;
-		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
-		asyncStream << ERROR_HEAD + thingThatGoesBetweenTheBrackets + ANSI_TAIL << message << "\n";
+		categoryText = "ERROR" + categoryText;
+		fileStream << "[" << categoryText << "] " << message << "\n";
+		errStream << "[" << ANSI_ERROR << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Fatal:
-		thingThatGoesBetweenTheBrackets = "FATAL" + thingThatGoesBetweenTheBrackets;
-		fileBuffer << "[" + thingThatGoesBetweenTheBrackets + "] " + message + "\n";
-		asyncStream << FATAL_HEAD + thingThatGoesBetweenTheBrackets + ANSI_TAIL + message + "\n";
+		categoryText = "FATAL" + categoryText;
+		fileStream << "[" << categoryText << "] " << message << "\n";
+		errStream << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	}
-	asyncStream.emit();
-	flushToFile();
-}
-
-void Logger::flushToFile() {
-	outputFileStream.open(outputFile, std::ios::app);
-	outputFileStream << fileBuffer.str();
-	outputFileStream.close();
-	fileBuffer.str(""); // clears the buffer
+	
+	outStream.emit();
+	errStream.emit();
+	fileStream.emit();
 }
