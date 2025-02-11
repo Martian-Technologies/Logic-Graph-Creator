@@ -42,11 +42,6 @@
      <string notr="true">Zoom</string>
     </property>
    </row>
-   <row>
-    <property name="text">
-     <string notr="true">Pause/Unpause </string>
-    </property>
-   </row>
    <column>
     <property name="text">
      <string notr="true">Keybinds</string>
@@ -70,11 +65,6 @@
    <item row="3" column="0">
     <property name="text">
      <string>Ctrl + Mouse Wheel/Pinch on Trackpad</string>
-    </property>
-   </item>
-   <item row="4" column="0">
-    <property name="text">
-     <string>Space Bar</string>
     </property>
    </item>
   </widget>
