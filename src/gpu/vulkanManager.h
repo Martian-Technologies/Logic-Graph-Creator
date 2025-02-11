@@ -40,6 +40,7 @@ private:
 private:
 	// important shit
 	VkInstance instance;
+	VkDebugUtilsMessengerEXT debugMessenger;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
 	VmaAllocator allocator;
