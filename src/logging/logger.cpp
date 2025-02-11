@@ -7,10 +7,12 @@
 #define ANSI_TAIL "\033[0m"
 
 Logger::Logger(const std::filesystem::path& outputFile)
-	: outputFile(outputFile), outputFileStream(outputFile), outStream(std::cout), errStream(std::cerr), fileStream(outputFileStream) {
+	: outputFile(outputFile), outputFileStream(outputFile) {
 }
 
 void Logger::log(LogType type, const std::string& message, const std::string& subcategory) {
+	std::lock_guard<std::mutex> guard(loggingMutex);
+	
 	std::string categoryText; 
 	if (subcategory != "") {
 		categoryText = " - " + subcategory;
@@ -19,27 +21,23 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 	switch (type) {
 	case LogType::Info:
 		categoryText = "Info" + categoryText;
-		fileStream << "[" << categoryText << "] " << message << "\n";
-		outStream << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
+		outputFileStream << "[" << categoryText << "] " << message << "\n";
+		std::cout << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Warning:
 		categoryText = "Warning" + categoryText;
-		fileStream << "[" << categoryText << "] " << message << "\n";
-		outStream << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
+		outputFileStream << "[" << categoryText << "] " << message << "\n";
+		std::cout << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Error:
 		categoryText = "ERROR" + categoryText;
-		fileStream << "[" << categoryText << "] " << message << "\n";
-		errStream << "[" << ANSI_ERROR << categoryText << ANSI_TAIL << "] " << message << "\n";
+		outputFileStream << "[" << categoryText << "] " << message << "\n";
+		std::cerr << "[" << ANSI_ERROR << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Fatal:
 		categoryText = "FATAL" + categoryText;
-		fileStream << "[" << categoryText << "] " << message << "\n";
-		errStream << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
+		outputFileStream << "[" << categoryText << "] " << message << "\n";
+		std::cerr << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	}
-	
-	outStream.emit();
-	errStream.emit();
-	fileStream.emit();
 }
