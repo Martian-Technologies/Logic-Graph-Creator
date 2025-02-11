@@ -69,7 +69,7 @@
    </item>
    <item row="3" column="0">
     <property name="text">
-     <string>Mouse Wheel/Pinch on Trackpad</string>
+     <string>Ctrl + Mouse Wheel/Pinch on Trackpad</string>
     </property>
    </item>
    <item row="4" column="0">
