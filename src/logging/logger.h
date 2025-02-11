@@ -23,11 +23,9 @@ public:
 
 private:
 	std::filesystem::path outputFile;
-	std::ofstream outputFileStream;
+	std::mutex loggingMutex;
 	
-	std::osyncstream outStream;
-	std::osyncstream errStream;
-	std::osyncstream fileStream;
+	std::ofstream outputFileStream;
 };
 
 #endif /* logger_h */
