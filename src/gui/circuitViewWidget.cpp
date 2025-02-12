@@ -48,13 +48,13 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 		}
 	);
 
-	std::cout << connect(newCircuit, &QToolButton::clicked, this, [&](bool pressed){
+	connect(newCircuit, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend) {
 				backend->createCircuit();
 			}
 		}
-	) << std::endl;
+	);
 
 	connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
