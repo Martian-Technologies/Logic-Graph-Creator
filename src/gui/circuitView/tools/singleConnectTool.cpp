@@ -57,6 +57,8 @@ bool SingleConnectTool::exitBlockView(const Event* event) {
 }
 
 void SingleConnectTool::updateElements(FPosition pointerPosition) {
+	if (!circuit) return;
+	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 
 	if (clicked) {
