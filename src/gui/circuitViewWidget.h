@@ -2,9 +2,10 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QTreeWidget>
+#include <QToolButton>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QComboBox>
 #include <QPainter>
 #include <QWidget>
 #include <QTimer>
@@ -17,38 +18,10 @@
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-	CircuitViewWidget(QWidget* parent = nullptr, CircuitFileManager* fileManager = nullptr);
+    CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector, QComboBox* evaluatorSelector, QToolButton* newCircuit, QToolButton* newEvaluator, CircuitFileManager* fileManager);
 
-	// setup	
+	// setup
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
-
-private:
-	CircuitView<QtRenderer> circuitView;
-    CircuitFileManager* fileManager;
-
-	// update loop
-	QTimer* updateLoopTimer;
-	const float updateInterval = 0.0001f;
-	void updateLoop();
-
-	// framerate statistics
-	std::list<float> pastFrameTimes;
-	const int numTimesInAverage = 20;
-
-	// ui elements
-	QTreeWidget* treeWidget;
-
-	// settings (temp)
-	bool mouseControls;
-
-	void save();
-	void load(const QString& filePath);
-
-	// utility functions
-	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
-	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
-	inline float getPixelsWidth() { return (float)rect().width(); }
-	inline float getPixelsHeight() { return (float)rect().height(); }
 
 protected:
 	// events overrides
@@ -65,6 +38,34 @@ protected:
 	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
+
+private:
+	void save();
+	void load(const QString& filePath);
+
+	// utility functions
+	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
+	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
+	inline float getPixelsWidth() { return (float)rect().width(); }
+	inline float getPixelsHeight() { return (float)rect().height(); }
+
+	CircuitView<QtRenderer> circuitView;
+    CircuitFileManager* fileManager;
+
+	// update loop
+	QTimer* updateLoopTimer;
+	const float updateInterval = 0.0001f;
+	void updateLoop();
+
+	// framerate statistics
+	std::list<float> pastFrameTimes;
+	const int numTimesInAverage = 20;
+
+	// settings (temp)
+	bool mouseControls;
+
+	QComboBox* circuitSelector;
+	QComboBox* evaluatorSelector;
 };
 
 #endif /* logicGridWindow_h */

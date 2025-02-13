@@ -73,3 +73,6 @@ cmake_install.cmake
 # MSVC
 *.pdb
 CppProperties.json
+
+# .log files we generate
+*.log

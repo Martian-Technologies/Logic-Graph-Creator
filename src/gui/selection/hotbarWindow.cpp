@@ -1,4 +1,3 @@
-#include <QDockWidget>
 #include <QString>
 #include <QLabel>
 #include <Qt>
@@ -8,13 +7,13 @@
 #include "hotbarWindow.h"
 #include "ui_hotbar.h"
 
-HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Hotbar) {
+HotbarWindow::HotbarWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Hotbar) {
 	// Load the UI file
 	ui->setupUi(this);
 	setFocusPolicy(Qt::NoFocus);
 
 	int size = 64;
-	grid = new DynamicGridWidget(this, size);
+	grid = new DynamicGridWidget(this, size + 5);
 
 	for (int i = 0; i < 10; i++) {
 		int keyNum = (i == 9) ? 0 : (i + 1);
@@ -47,7 +46,7 @@ HotbarWindow::HotbarWindow(QWidget* parent) : QDockWidget(parent), ui(new Ui::Ho
 		grid->addWidget(widget);
 	}
 
-	QVBoxLayout* layout = new QVBoxLayout(ui->gridWidget);
+	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setSpacing(0);
 	layout->setContentsMargins(4, 0, 4, 0);
 	layout->addWidget(grid);
