@@ -24,7 +24,7 @@ public:
 		unregisterEvents();
 	}
 
-    inline std::string getCurrentTool() const { return toolType; }
+    inline std::shared_ptr<CircuitTool> getCurrentTool() const { return tool; }
 
 	inline void changeTool(const std::string& toolType) {
         // reload preview tool on every change to it
@@ -75,13 +75,14 @@ private:
 			selectedRotation = oldPlacementTool->getRotation();
 		}
 		unregisterEvents();
-		tool = std::make_unique<ToolType>();
+		tool = std::make_shared<ToolType>();
 		tool->setup(ElementCreator(renderer), evaluatorStateInterface, circuit);
 		tool->initialize(toolManagerEventRegister);
 
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(tool.get());
         if (previewTool){
-            previewTool->startPreview(previewData);
+            previewTool->loadParsedCircuit(previewData);
+            previewTool->startPreview();
         }
 
 		BaseBlockPlacementTool* placementTool = dynamic_cast<BaseBlockPlacementTool*>(tool.get());
@@ -120,7 +121,7 @@ private:
 	EvaluatorStateInterface* evaluatorStateInterface;
 
 	// which tool data
-	std::unique_ptr<CircuitTool> tool;
+	std::shared_ptr<CircuitTool> tool;
 	std::string toolType = "NONE";
 
 	// tool data

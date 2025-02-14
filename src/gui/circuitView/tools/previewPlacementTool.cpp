@@ -1,7 +1,9 @@
 #include "previewPlacementTool.h"
+#include "backend/backend.h"
 #include "gui/circuitView/renderer/elementCreator.h"
 #include <QMessageBox>
 
+// Preview is only shown for the primary parsed circuit, not the dependencies that will be created in a different circuit
 void PreviewPlacementTool::updatePreviewElements() {
     if (!usingTool || !continueRender) return;
 
@@ -41,6 +43,8 @@ bool PreviewPlacementTool::pointerMove(const Event* event) {
     return false;
 }
 
+// Places the primary parsed circuit in the current circuit.
+// Places all dependencies on their own circuits.
 bool PreviewPlacementTool::commitPlacement(const Event* event) {
     if (!usingTool) return true;
 
@@ -80,6 +84,22 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         if (!circuit->tryCreateConnection(output, input)) {
             qWarning("Failed to create connection.");
         }
+    }
+
+    // Place all dependencies in their own circuits
+    if (backend) {
+        std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
+        for (auto itr = deps.begin(); itr != deps.end(); ++itr){
+            circuit_id_t id = backend->createCircuit();
+            backend->createEvaluator(id);
+
+            loadParsedCircuit(itr->second);
+            setCircuit(backend->getCircuit(id).get());
+            commitPlacement(nullptr);
+            reUse();
+        }
+    } else {
+        std::cout << "Backed is not initialized to place the dependencies\n";
     }
 
     clearPreview();

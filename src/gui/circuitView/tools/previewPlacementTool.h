@@ -2,7 +2,9 @@
 #define previewPlacementTool_h
 
 #include "circuitTool.h"
+#include "backend/circuit/parsedCircuit.h"
 #include "computerAPI/circuits/circuitFileManager.h"
+class Backend;
 
 class PreviewPlacementTool : public CircuitTool {
 public:
@@ -25,12 +27,20 @@ public:
             std::bind(&PreviewPlacementTool::exitBlockView, this, std::placeholders::_1));
     }
 
-    void startPreview(std::shared_ptr<ParsedCircuit> circuitData) {
+    void loadParsedCircuit(std::shared_ptr<ParsedCircuit> circuitData) {
         parsedCircuit = circuitData;
+    }
+
+    void setBackend(Backend* backend){
+        this->backend = backend;
+    }
+
+    void startPreview() {
         updatePreviewElements();
     }
 
     void reset() override { clearPreview(); }
+    void reUse() { usingTool = continueRender = true; }
 
     bool pointerMove(const Event* event);
     bool commitPlacement(const Event* event);
@@ -44,6 +54,7 @@ private:
     bool validatePlacement() const;
 
     std::shared_ptr<ParsedCircuit> parsedCircuit;
+    Backend* backend;
     Position currentPosition;
     bool usingTool = true;
     bool continueRender = true;

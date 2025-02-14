@@ -45,6 +45,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
+                std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
 			}
 		}
 	);
@@ -61,6 +62,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
+                std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
 			}
 		}
 	);
@@ -264,6 +266,7 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
+// save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 void CircuitViewWidget::save() {
     std::cout << "Trying to save\n";
     if (fileManager) {
@@ -274,6 +277,7 @@ void CircuitViewWidget::save() {
     }
 }
 
+// for drag and drop load directly onto this circuit view widget
 void CircuitViewWidget::load(const QString& filePath) {
     if (!fileManager) return;
 
@@ -287,6 +291,12 @@ void CircuitViewWidget::load(const QString& filePath) {
     if (parsed->isValid()){
         circuitView.getToolManager().setPendingPreviewData(parsed);
         circuitView.getToolManager().changeTool("Preview Placement");
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
+        if (previewTool) {
+            previewTool->setBackend(circuitView.getBackend());
+        }else{
+            std::cout << "Preview tool failed to cast\n";
+        }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
     }

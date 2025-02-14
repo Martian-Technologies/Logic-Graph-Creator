@@ -25,6 +25,12 @@ public:
 	void setSimSpeed(double speed);
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
+    void updateSaveMenu();
+    void updateLoadIntoMenu();
+    void saveCircuit(int index);
+    void saveCircuitAs();
+    void loadCircuit();
+    void loadCircuitInto(int index);
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 	void openNewControlsWindow();
@@ -32,8 +38,9 @@ public:
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:
-	evaluator_id_t evalId;
 	QGraphicsScene* scene;
+    QMenu* saveSubMenu;
+    QMenu* loadIntoSubMenu;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
     CircuitFileManager circuitFileManager;

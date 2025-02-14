@@ -29,7 +29,7 @@ private:
 
     void validate();
     void processExternalConnections();
-    bool validateAndMergeDependencies();
+    bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
