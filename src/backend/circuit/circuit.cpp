@@ -205,7 +205,7 @@ void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection 
 void Circuit::undo() {
 	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
-	DifferenceSharedPtr difference = undoSystem.undoDifference();
+	DifferenceSharedPtr difference = undoSystem.undo();
 	Difference::block_modification_t blockModification;
 	Difference::connection_modification_t connectionModification;
 	Difference::data_modification_t dataModification;
@@ -245,7 +245,7 @@ void Circuit::undo() {
 void Circuit::redo() {
 	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
-	DifferenceSharedPtr difference = undoSystem.redoDifference();
+	DifferenceSharedPtr difference = undoSystem.redo();
 	Difference::block_modification_t blockModification;
 	Difference::connection_modification_t connectionModification;
 	Difference::data_modification_t dataModification;

@@ -15,6 +15,7 @@ endif()
 
 # PROJECT SETUP ====================================================================================
 project(Gatality)
+set(APP_NAME "Gatality")
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")

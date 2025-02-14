@@ -5,7 +5,7 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
-#include "undoSystem.h"
+#include "util/treehistory/treeSystem.h"
 
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
@@ -85,12 +85,12 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.add(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;
-	UndoSystem undoSystem;
+	TreeManager undoSystem;
 	bool midUndo = false;
 	unsigned int updateCount = 0; // increases anytime the container is changed
 };
