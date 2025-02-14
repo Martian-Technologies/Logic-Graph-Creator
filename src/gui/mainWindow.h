@@ -27,7 +27,8 @@ public:
 	void setTool(std::string tool);
     void updateSaveMenu();
     void updateLoadIntoMenu();
-    void saveCircuit(int index);
+    void saveCircuit(int id);
+    void saveCircuitIndex(int index);
     void saveCircuitAs();
     void loadCircuit();
     void loadCircuitInto(int index);

@@ -119,17 +119,21 @@ void MainWindow::updateLoadIntoMenu() {
     }
 }
 
-void MainWindow::saveCircuit(int index) {
+void MainWindow::saveCircuit(int id) {
     // TODO: actually implement keeping track of save file and if change has been made
     QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
     if (!filePath.isEmpty()) {
-        circuitFileManager.saveToFile(filePath, circuitViews[index]->getCircuitView()->getCircuit()->getCircuitId());
+        circuitFileManager.saveToFile(filePath, id);
     }
+}
+
+void MainWindow::saveCircuitIndex(int index) {
+    saveCircuit(circuitViews[index]->getCircuitView()->getCircuit()->getCircuitId());
 }
 
 void MainWindow::saveCircuitAs() {
     // TODO.
-    saveCircuit(0);
+    saveCircuitIndex(0);
 }
 
 
