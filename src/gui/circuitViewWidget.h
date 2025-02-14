@@ -58,7 +58,7 @@ private:
 
 	// update loop
 	QTimer* updateLoopTimer;
-	const float updateInterval = 0.0001f;
+	const float updateInterval = 0.008f;
 	void updateLoop();
 
 	// framerate statistics
