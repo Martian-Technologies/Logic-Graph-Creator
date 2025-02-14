@@ -45,6 +45,7 @@ public:
 	inline Circuit* getCircuit() { return circuit.get(); }
 	inline const Circuit* getCircuit() const { return circuit.get(); }
 
+	inline Evaluator* getEvaluator() { return evaluator.get(); }
 	inline const Evaluator* getEvaluator() const { return evaluator.get(); }
 
 	inline EvaluatorStateInterface& getEvaluatorStateInterface() { return evaluatorStateInterface; }

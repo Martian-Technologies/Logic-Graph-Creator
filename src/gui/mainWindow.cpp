@@ -12,10 +12,7 @@
 #include "selection/selectorWindow.h"
 #include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
-#include "controlsWindow.h"
 #include "mainWindow.h"
-#include "ui_circuitViewUi.h"
-
 
 MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()){
 	resize(900, 600);
@@ -27,19 +24,12 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 	circuit_id_t id = backend.createCircuit();
 	evaluator_id_t evalId1 = *backend.createEvaluator(id);
 
-    //circuit_id_t id2 = backend.createCircuit();
-    //auto evalId2 = backend.createEvaluator(id2);
-	//evalIds.push_back(*evalId2);
-
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
 
-	// connect(ui->SelectMenu, &QPushButton::clicked, this, &MainWindow::openNewSelectorWindow);
-
 	openNewHotbarWindow();
 	openNewSelectorWindow();
-	openNewControlsWindow();
 
 	// menubar setup
 	QMenuBar* menubar = menuBar();
@@ -54,12 +44,10 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 
 	QAction* newHotbarAction = windowMenu->addAction(QStringLiteral("New Hotbar"));
 	QAction* newSelectorAction = windowMenu->addAction(QStringLiteral("New Selector"));
-	QAction* newControlsAction = windowMenu->addAction(QStringLiteral("New Controls"));
 	QAction* newCircuitViewAction = windowMenu->addAction(QStringLiteral("New Circuit View"));
 
 	connect(newHotbarAction, &QAction::triggered, this, &MainWindow::openNewHotbarWindow);
 	connect(newSelectorAction, &QAction::triggered, this, &MainWindow::openNewSelectorWindow);
-	connect(newControlsAction, &QAction::triggered, this, &MainWindow::openNewControlsWindow);
 	connect(newCircuitViewAction, &QAction::triggered, this, &MainWindow::openNewCircuitViewWindow);
 
     QAction* saveAsAction = fileMenu->addAction(QStringLiteral("Save as"));
@@ -74,19 +62,6 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
     loadIntoAction->setText("Load Circuit Into");
     connect(saveSubMenu, &QMenu::aboutToShow, this, &MainWindow::updateSaveMenu);
     connect(loadIntoSubMenu, &QMenu::aboutToShow, this, &MainWindow::updateLoadIntoMenu);
-}
-
-void MainWindow::setSimState(bool state) {
-    for (std::pair<evaluator_id_t, SharedEvaluator> p: backend.getEvaluatorManager()) backend.getEvaluator(p.first)->setPause(!state);
-}
-
-void MainWindow::simUseSpeed(Qt::CheckState state) {
-	bool evalState = state == Qt::CheckState::Checked;
-	for (std::pair<evaluator_id_t, SharedEvaluator> p: backend.getEvaluatorManager()) backend.getEvaluator(p.first)->setUseTickrate(state);
-}
-
-void MainWindow::setSimSpeed(double speed) {
-	for (std::pair<evaluator_id_t, SharedEvaluator> p: backend.getEvaluatorManager()) backend.getEvaluator(p.first)->setTickrate(std::round(speed * 60));
 }
 
 void MainWindow::updateSaveMenu() {
@@ -223,19 +198,11 @@ void MainWindow::openNewHotbarWindow() {
 	addDock(selector, KDDockWidgets::Location_OnBottom);
 }
 
-void MainWindow::openNewControlsWindow() {
-	ControlsWindow* controls = new ControlsWindow();
-	connect(controls, &ControlsWindow::setSimState, this, &MainWindow::setSimState);
-	connect(controls, &ControlsWindow::simUseSpeed, this, &MainWindow::simUseSpeed);
-	connect(controls, &ControlsWindow::setSimSpeed, this, &MainWindow::setSimSpeed);
-	addDock(controls, KDDockWidgets::Location_OnLeft);
-}
-
 CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
 	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi->CircuitSelector, circuitViewUi->EvaluatorSelector, circuitViewUi->NewCircuitButton, circuitViewUi->NewEvaluatorButton, &circuitFileManager);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
 	circuitViews.push_back(circuitViewWidget);
 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);

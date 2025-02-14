@@ -10,18 +10,22 @@
 #include <QWidget>
 #include <QTimer>
 
+#include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
 #include "circuitView/circuitView.h"
-#include "computerAPI/circuits/circuitFileManager.h"
+#include "ui_circuitViewUi.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-    CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector, QComboBox* evaluatorSelector, QToolButton* newCircuit, QToolButton* newEvaluator, CircuitFileManager* fileManager);
+    CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager);
 
 	// setup
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
+	void setSimState(bool state);
+	void simUseSpeed(Qt::CheckState state);
+	void setSimSpeed(double speed);
 
 protected:
 	// events overrides

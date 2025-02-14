@@ -14,8 +14,8 @@
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector, QComboBox* evaluatorSelector, QToolButton* newCircuit, QToolButton* newEvaluator, CircuitFileManager* fileManager) :
-	QWidget(parent), mouseControls(false), circuitSelector(circuitSelector), evaluatorSelector(evaluatorSelector), fileManager(fileManager) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager) :
+	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -38,8 +38,13 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 	circuitView.getRenderer().resize(w, h);
 	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
+	
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
+
+	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
+	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
+	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
 
 	connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
@@ -50,7 +55,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 		}
 	);
 
-	connect(newCircuit, &QToolButton::clicked, this, [&](bool pressed){
+	connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend) {
 				backend->createCircuit();
@@ -67,7 +72,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 		}
 	);
 	
-	connect(newEvaluator, &QToolButton::clicked, this, [&](bool pressed){
+	connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitView.getCircuit()) {
 				backend->createEvaluator(this->circuitView.getCircuit()->getCircuitId());
@@ -75,6 +80,22 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, QComboBox* circuitSelector
 		}
 	);
 }
+
+void CircuitViewWidget::setSimState(bool state) {
+	if (circuitView.getEvaluator())
+		circuitView.getEvaluator()->setPause(!state);
+}
+
+void CircuitViewWidget::simUseSpeed(Qt::CheckState state) {
+	if (circuitView.getEvaluator())
+		circuitView.getEvaluator()->setUseTickrate(state == Qt::CheckState::Checked);
+}
+
+void CircuitViewWidget::setSimSpeed(double speed) {
+	if (circuitView.getEvaluator())
+		circuitView.getEvaluator()->setTickrate(std::round(speed * 60));
+}
+
 
 void CircuitViewWidget::updateLoop() {
 	if (circuitSelector) {
