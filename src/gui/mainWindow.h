@@ -2,8 +2,10 @@
 #define mainWindow_h
 
 #include <QGraphicsScene>
-#include <QMainWindow>
 #include <QWidget>
+
+#include <kddockwidgets/MainWindow.h>
+#include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/backend.h"
@@ -14,24 +16,31 @@ namespace Ui {
 
 class CircuitViewWidget;
 
-class MainWindow : public QMainWindow {
+class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
 	Q_OBJECT
 public:
-	MainWindow(QWidget* parent = nullptr);
-	void setSimState(bool state);
-	void simUseSpeed(Qt::CheckState state);
-	void setSimSpeed(double speed);
+	MainWindow(KDDockWidgets::MainWindowOptions options);
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
+    void updateSaveMenu();
+    void updateLoadIntoMenu();
+    void saveCircuit(int id);
+    void saveCircuitIndex(int index);
+    void saveCircuitAs();
+    void loadCircuit();
+    void loadCircuitInto(int index);
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
+	CircuitViewWidget* openNewCircuitViewWindow();
+	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:
-	evaluator_id_t evalId;
-	Ui::MainWindow* ui;
 	QGraphicsScene* scene;
+    QMenu* saveSubMenu;
+    QMenu* loadIntoSubMenu;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
+    CircuitFileManager circuitFileManager;
 };
 
 #endif /* mainWindow_h */

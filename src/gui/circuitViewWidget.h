@@ -2,51 +2,30 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QTreeWidget>
+#include <QToolButton>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QComboBox>
 #include <QPainter>
 #include <QWidget>
 #include <QTimer>
 
+#include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
 #include "circuitView/circuitView.h"
+#include "ui_circuitViewUi.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-	CircuitViewWidget(QWidget* parent = nullptr);
+    CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager);
 
-	// setup	
+	// setup
 	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
-
-private:
-	CircuitView<QtRenderer> circuitView;
-
-	// update loop
-	QTimer* updateLoopTimer;
-	const float updateInterval = 0.0001f;
-	void updateLoop();
-
-	// framerate statistics
-	std::list<float> pastFrameTimes;
-	const int numTimesInAverage = 20;
-
-	// ui elements
-	QTreeWidget* treeWidget;
-
-	// settings (temp)
-	bool mouseControls;
-
-	void save();
-	void load(const QString& filePath);
-
-	// utility functions
-	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
-	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
-	inline float getPixelsWidth() { return (float)rect().width(); }
-	inline float getPixelsHeight() { return (float)rect().height(); }
+	void setSimState(bool state);
+	void simUseSpeed(Qt::CheckState state);
+	void setSimSpeed(double speed);
 
 protected:
 	// events overrides
@@ -63,6 +42,34 @@ protected:
 	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
+
+private:
+	void save();
+	void load(const QString& filePath);
+
+	// utility functions
+	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
+	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }
+	inline float getPixelsWidth() { return (float)rect().width(); }
+	inline float getPixelsHeight() { return (float)rect().height(); }
+
+	CircuitView<QtRenderer> circuitView;
+    CircuitFileManager* fileManager;
+
+	// update loop
+	QTimer* updateLoopTimer;
+	const float updateInterval = 0.008f;
+	void updateLoop();
+
+	// framerate statistics
+	std::list<float> pastFrameTimes;
+	const int numTimesInAverage = 20;
+
+	// settings (temp)
+	bool mouseControls;
+
+	QComboBox* circuitSelector;
+	QComboBox* evaluatorSelector;
 };
 
 #endif /* logicGridWindow_h */

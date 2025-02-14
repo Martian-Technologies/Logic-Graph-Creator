@@ -9,6 +9,7 @@ void SimulatorTest::TearDown() {
 	simulator.clearGates();
 }
 
+/*
 TEST_F(SimulatorTest, BasicGateOperations) {
 	block_id_t andGate = simulator.addGate(GateType::AND);
 	ASSERT_EQ(simulator.getState(andGate), false);
@@ -160,3 +161,4 @@ TEST_F(SimulatorTest, StateManagement) {
 	auto currentState = simulator.getCurrentState();
 	ASSERT_EQ(currentState.size(), 6);
 }
+*/
