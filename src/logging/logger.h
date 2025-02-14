@@ -2,6 +2,7 @@
 #define logger_h
 
 #include <filesystem>
+#include <mutex>
 
 enum LogType {
 	Info = 1,
