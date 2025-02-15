@@ -26,12 +26,27 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	pipeline = createPipeline(swapchain, vertShader, fragShader);
 	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 
-	size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
-	vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
+	logInfo("Renderer initialized", "Vulkan");
+}
+
+void VulkanRenderer::setCircuit(Circuit* circuit) {
+	if (running) return;
+
+	if (circuit) {
+		size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
+		vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
+
+		logInfo("Renderer circuit assigned and setup", "Vulkan");
+	}
+	else {
+		logInfo("Renderer circuit set to nothing", "Vulkan");
+	}
 }
 
 void VulkanRenderer::destroy() {
+	if (running) stop();
+
 	destroyBuffer(vertexBuffer);
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
@@ -49,12 +64,20 @@ void VulkanRenderer::resize(int w, int h) {
 
 // TODO - ghetto render thread
 void VulkanRenderer::run() {
+	if (running) return;
+	
 	running = true;
 	renderThread = std::thread(&VulkanRenderer::renderLoop, this);
+	logInfo("Renderer started", "Vulkan");
 }
 void VulkanRenderer::stop() {
+	if (!running) return;
+	
 	running = false;
 	if (renderThread.joinable()) renderThread.join();
+
+	
+	logInfo("Renderer stopped", "Vulkan");
 }
 
 void VulkanRenderer::renderLoop() {
@@ -162,11 +185,6 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	// bind render pipeline
 	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
-	// bind vertex buffers
-	VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
-
 	// bind push constants
 	VertexPushConstants pushConstants{};
 	pushConstants.mvp = orthoMat;
@@ -185,6 +203,11 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	scissor.offset = {0, 0};
 	scissor.extent = swapchain.extent;
 	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
+
+	// bind vertex buffers
+	VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 	// draw
 	vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
@@ -208,10 +231,6 @@ void VulkanRenderer::handleResize() {
 
 // INTERFACE
 // ======================================================================
-
-void VulkanRenderer::setCircuit(Circuit* circuit) {
-	
-}
 
 void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
 	

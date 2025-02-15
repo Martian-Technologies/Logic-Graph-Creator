@@ -113,7 +113,6 @@ void CircuitViewWidget::createVulkanWindow() {
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {
-	circuitView.getRenderer().stop();
 	circuitView.getRenderer().destroy();
 	vulkanWindow->destroySurface();
 	vulkanWindow->destroy();

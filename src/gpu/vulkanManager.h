@@ -71,7 +71,7 @@ private:
 //       - [x] Memory allocation
 // - [x] Drawing with vertex buffers
 // - [ ] Prototype block renderer with
-//       - [ ] Push constant view matrix
+//       - [x] Push constant view matrix
 //       - [ ] Blocks and textures
 // - [ ] Butter buffer management. Staging buffer?
 // - [ ] New object management scheme

@@ -8,6 +8,12 @@
 #include "vulkanPipeline.h"
 #include "vulkanFrame.h"
 
+// STATES of a vulkan renderer:
+// - initialized surface and swapchain
+// - initialized with circuit
+// - running
+// - not running
+
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanRenderer : public Renderer {
@@ -34,7 +40,7 @@ private:
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
 
-	//
+	// pipeline
 	PipelineData pipeline;
 	VkShaderModule vertShader;
 	VkShaderModule fragShader;
