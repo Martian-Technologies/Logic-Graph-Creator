@@ -14,7 +14,8 @@ class Circuit {
 public:
 	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
 
-	circuit_id_t getCircuitId() const { return circuitId; }
+	inline circuit_id_t getCircuitId() const { return circuitId; }
+	inline std::string getCircuitName() const { return "Circuit " + std::to_string(circuitId); }
 
 
 	/* ----------- listener ----------- */
@@ -68,11 +69,10 @@ public:
 	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
 	// Trys to remove a connection. Returns if successful.
 	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
-	// Trys to creates connections.
+	// Trys to creates a connection. Returns if successful.
 	bool tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection);
 	// Trys to remove connections.
 	bool tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection);
-
 
 	/* ----------- undo ----------- */
 	void undo();

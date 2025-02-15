@@ -11,7 +11,7 @@ public:
 	inline BlockContainer() : lastId(0), grid(), blocks() { }
 
 	/* ----------- collision ----------- */
-	inline bool checkCollision(const Position& position) { return getCell(position); }
+	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge);
 
 	/* ----------- blocks ----------- */
@@ -68,7 +68,7 @@ public:
 	// -- setters --
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
-	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+        // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);

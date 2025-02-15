@@ -146,6 +146,7 @@ bool TensorConnectTool::pointerMove(const Event* event) {
 }
 
 void TensorConnectTool::updateElements() {
+	if (!circuit) return;
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	SharedSelection selection;

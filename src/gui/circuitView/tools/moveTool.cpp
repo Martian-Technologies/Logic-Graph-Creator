@@ -86,6 +86,7 @@ bool MoveTool::pointerMove(const Event* event) {
 
 void MoveTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
+	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	if (stage == 'd') {
 		elementCreator.addSelectionElement(SelectionObjectElement(originSelection, SelectionObjectElement::RenderMode::ARROWS));

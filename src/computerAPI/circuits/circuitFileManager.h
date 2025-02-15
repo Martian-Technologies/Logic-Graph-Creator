@@ -1,33 +1,32 @@
 #ifndef circuitFileManager_h
 #define circuitFileManager_h
-
 #include <QString>
-
+#include <vector>
 #include "backend/circuit/circuitManager.h"
-
-// dont change the numbers next to enum values
-// (app name)_(file version)
-enum CircuitFileTypes {
-	GATALITY_1 = 0
-};
+#include "backend/circuit/parsedCircuit.h"
 
 class CircuitFileManager {
 public:
-	inline CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
-	
-	std::optional<circuit_id_t> load(const QString& path);
-	bool loadInto(const QString& path, circuit_id_t circuit, const Position& position);
-
-	bool save(const QString& path, circuit_id_t circuit);
+    CircuitFileManager(const CircuitManager* circuitManager);
+    bool loadFromFile(const QString& path, std::shared_ptr<ParsedCircuit> outCircuit);
+    bool saveToFile(const QString& path, circuit_id_t circuitId);
 
 private:
+    /*
+    // not implemented yet, possibly want to hold multiple save states
 	struct saveInfo {
 		circuit_update_count lastUpdateSaved;
 		QString filePath;
 	};
-
-	CircuitManager* circuitManager;
-	std::unordered_map<circuit_id_t, saveInfo> circuitSaveInfo;
+    std::unordered_map<circuit_id_t, saveInfo> circuitSaveInfo;
+    */
+    const CircuitManager* circuitManager;
+    std::unordered_set<std::string> loadedFiles;
 };
 
-#endif /* circuitFileManager_h */
+BlockType stringToBlockType(const std::string& str);
+Rotation stringToRotation(const std::string& str);
+std::string blockTypeToString(BlockType type);
+std::string rotationToString(Rotation rotation);
+
+#endif
