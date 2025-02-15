@@ -44,7 +44,7 @@ bool PreviewPlacementTool::pointerMove(const Event* event) {
 }
 
 // Places the primary parsed circuit in the current circuit.
-// Places all dependencies on their own circuits.
+// Places all dependencies on their own circuits, unless we are merging circuits into one.
 bool PreviewPlacementTool::commitPlacement(const Event* event) {
     if (!usingTool) return true;
 
@@ -87,6 +87,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
     }
 
     // Place all dependencies in their own circuits
+    // Note that this is done here so that we recursively place all dependencies of dependencies
     if (backend) {
         std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
         for (auto itr = deps.begin(); itr != deps.end(); ++itr){

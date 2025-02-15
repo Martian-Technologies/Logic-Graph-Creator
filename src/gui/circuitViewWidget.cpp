@@ -308,7 +308,7 @@ void CircuitViewWidget::load(const QString& filePath) {
         return;
     }
 
-    CircuitValidator validator(*parsed);
+    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
     if (parsed->isValid()){
         circuitView.getToolManager().setPendingPreviewData(parsed);
         circuitView.getToolManager().changeTool("Preview Placement");

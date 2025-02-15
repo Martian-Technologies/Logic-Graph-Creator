@@ -8,6 +8,7 @@
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "circuitView/renderer/qtRenderer.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -23,23 +24,26 @@ public:
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
     void updateSaveMenu();
-    void updateLoadIntoMenu();
+    void updateLoadIntoMenu(bool loadMerged = false);
     void saveCircuit(int id);
     void saveCircuitIndex(int index);
     void saveCircuitAs();
-    void loadCircuit();
-    void loadCircuitInto(int index);
+    void loadCircuit(bool loadMerged = false);
+    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged = false);
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 	CircuitViewWidget* openNewCircuitViewWindow();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
+    bool eventFilter(QObject* obj, QEvent* event);
 
 private:
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
     QMenu* loadIntoSubMenu;
+    QMenu* loadMergedSubMenu;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
+    std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;
 };
 
