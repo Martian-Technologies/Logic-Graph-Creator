@@ -50,7 +50,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
-                std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
+                logInfo("linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
 			}
 		}
 	);
@@ -67,7 +67,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
-                std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
+                logInfo("linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
 			}
 		}
 	);

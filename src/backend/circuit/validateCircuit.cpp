@@ -20,11 +20,11 @@ bool CircuitValidator::validateDependencies() {
         // validate the dependency as a circuit itself
         CircuitValidator depValidator(*depCircuit);
         if (!depCircuit->valid) {
-            std::cout << "** Dependency circuit validation failed for " << depName << " **\n";
+            logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
             return false;
         }
-        std::cout << "\nDependency circuit validation success for " << depName << '\n';
+        logInfo("Dependency circuit validation success for " + depName);
 
         /*
         TODO: we don't want to make the connections directly anymore, need to implement custom blocks first
@@ -42,7 +42,7 @@ bool CircuitValidator::validateDependencies() {
     }
 
 
-    std::cout << "File dependency size: " << parsedCircuit.dependencies.size() << " MERGING DEPENDENCY CONNECTIONS\n";
+    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()) + " MERGING DEPENDENCY CONNECTIONS");
     //processExternalConnections();
 
     return true;
