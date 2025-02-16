@@ -10,8 +10,8 @@ class PreviewPlacementTool : public CircuitTool {
 public:
     PreviewPlacementTool() = default;
 
-    void initialize(ToolManagerEventRegister& toolManagerEventRegister) override {
-        CircuitTool::initialize(toolManagerEventRegister);
+    void activate(ToolManagerEventRegister& toolManagerEventRegister) override {
+        CircuitTool::activate(toolManagerEventRegister);
         toolManagerEventRegister.registerFunction("pointer move", 
             std::bind(&PreviewPlacementTool::pointerMove, this, std::placeholders::_1));
         toolManagerEventRegister.registerFunction("view zoom", 

@@ -14,22 +14,28 @@ class CircuitTool {
 	friend class ToolManager;
 public:
 	virtual ~CircuitTool() { }
-	virtual void reset() { };
-
+	bool isHelper() { return helper; }
+	virtual std::vector<std::string> getModes() { return {}; }
+	
 protected:
-	virtual void initialize(ToolManagerEventRegister& toolManagerEventRegister) { }
+	virtual void reset() { };
+	virtual void activate(ToolManagerEventRegister& toolManagerEventRegister) { }
+	virtual void deactivate(ToolManagerEventRegister& toolManagerEventRegister) { }
+	
+	virtual void setMode(std::string toolMode) { }
 
 	ToolManagerInterface* toolManagerInterface;
 	ElementCreator elementCreator;
-	
+
 	EvaluatorStateInterface* evaluatorStateInterface = nullptr;
 	Circuit* circuit = nullptr;
+	bool helper = false;
 
 private:
 	// This will also tell the tool to reset.
 	void setup(ElementCreator elementCreator, ToolManagerInterface* toolManagerInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
-	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }	
+	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
 };
 
 typedef std::shared_ptr<CircuitTool> SharedCircuitTool;

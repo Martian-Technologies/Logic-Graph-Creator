@@ -5,8 +5,8 @@
 
 class SingleConnectTool : public CircuitTool {
 public:
-	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::initialize(toolManagerEventRegister);
+	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
+		CircuitTool::activate(toolManagerEventRegister);
 		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SingleConnectTool::makeConnection, this, std::placeholders::_1));
 		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SingleConnectTool::cancelConnection, this, std::placeholders::_1));
 		toolManagerEventRegister.registerFunction("pointer move", std::bind(&SingleConnectTool::pointerMove, this, std::placeholders::_1));

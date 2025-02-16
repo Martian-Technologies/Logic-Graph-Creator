@@ -1,6 +1,15 @@
 #include "areaPlaceTool.h"
 #include "gui/circuitView/renderer/renderer.h"
 
+void AreaPlaceTool::activate(ToolManagerEventRegister& toolManagerEventRegister) {
+	BaseBlockPlacementTool::activate(toolManagerEventRegister);
+	toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&AreaPlaceTool::startDeleteBlocks, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer move", std::bind(&AreaPlaceTool::pointerMove, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&AreaPlaceTool::enterBlockView, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&AreaPlaceTool::exitBlockView, this, std::placeholders::_1));
+}
+
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {
 	if (!circuit) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();

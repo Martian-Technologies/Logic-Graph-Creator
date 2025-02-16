@@ -14,51 +14,22 @@ public:
 	inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
 		eventRegister(eventRegister), renderer(renderer), toolManagerEventRegister(eventRegister, &registeredEvents), toolManagerInterface(this) { }
 
-	inline ~ToolManager() {
-		unregisterEvents();
-	}
+	inline ~ToolManager() { unregisterEvents(); }
 
-    inline SharedCircuitTool getCurrentTool() const { if (!toolStack.empty()) return toolStack.back(); return nullptr; }
+	void reset();
+	void pushTool(SharedCircuitTool newTool);
+	void popTool();
+	void clearTools();
 
-	inline void pushTool(SharedCircuitTool newTool) {
-		toolStack.push_back(newTool);
-		toolStack.back()->setup(ElementCreator(renderer), &toolManagerInterface, evaluatorStateInterface, circuit);
-		toolStack.back()->initialize(toolManagerEventRegister);
-	}
+	SharedCircuitTool getCurrentNoHelperTool() const;
+	SharedCircuitTool getCurrentTool() const;
 
-	inline void popTool() {
-		unregisterEvents();
-		toolStack.pop_back();
-		if (!toolStack.empty()) {
-			toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
-			toolStack.back()->initialize(toolManagerEventRegister);
-		}
-	}
-
-	inline void clearTools() {
-		unregisterEvents();
-		toolStack.clear();
-	}
-
-	inline void setCircuit(Circuit* circuit) {
-		this->circuit = circuit;
-		toolStack.clear();
-	}
-
-	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
-		this->evaluatorStateInterface = evaluatorStateInterface;
-		if (!toolStack.empty()) toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
-	}
-
-	inline void reset() { if (toolStack.size()) toolStack.back()->reset(); }
+	void setCircuit(Circuit* circuit);
+	void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface);
+	
 
 private:
-	void unregisterEvents() {
-		for (auto eventFuncPair : registeredEvents) {
-			eventRegister->unregisterFunction(eventFuncPair.first, eventFuncPair.second);
-		}
-		registeredEvents.clear();
-	}
+	void unregisterEvents();
 
 	// current block container
 	Circuit* circuit;

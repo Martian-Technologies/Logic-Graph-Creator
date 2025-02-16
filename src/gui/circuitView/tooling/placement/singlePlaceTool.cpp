@@ -1,6 +1,17 @@
 #include "singlePlaceTool.h"
 #include "gui/circuitView/renderer/renderer.h"
 
+void SinglePlaceTool::activate(ToolManagerEventRegister& toolManagerEventRegister)  {
+	BaseBlockPlacementTool::activate(toolManagerEventRegister);
+	toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SinglePlaceTool::startPlaceBlock, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&SinglePlaceTool::stopPlaceBlock, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("tool secondary deactivate", std::bind(&SinglePlaceTool::stopDeleteBlocks, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer move", std::bind(&SinglePlaceTool::pointerMove, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&SinglePlaceTool::enterBlockView, this, std::placeholders::_1));
+	toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&SinglePlaceTool::exitBlockView, this, std::placeholders::_1));
+}
+
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 	if (!circuit) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();

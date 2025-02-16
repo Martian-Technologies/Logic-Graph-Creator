@@ -3,6 +3,7 @@
 
 #include "baseBlockPlacementTool.h"
 #include "singlePlaceTool.h"
+#include "areaPlaceTool.h"
 #include "../circuitTool.h"
 
 class BlockPlacementTool : public CircuitTool {
@@ -11,18 +12,20 @@ public:
 		activePlacementTool = std::make_shared<SinglePlaceTool>();
 	}
 
-	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override {
-		toolManagerInterface->pushTool(activePlacementTool);
-	}
+	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final { if (activePlacementTool) toolManagerInterface->pushTool(activePlacementTool); }
 
-	// inline void setPlacementType(std::string toolType) {
-	// 	// if (this->toolType == toolType) return;
-	// 	// if (toolType == "Single Place") changeTool<SinglePlaceTool>();
-	// 	// else if (toolType == "Area Place") changeTool<AreaPlaceTool>();
-	// 	// else if (toolType == "NONE") clearTool();
-	// 	// else return;
-	// 	// this->toolType = toolType;
-	// }
+	std::vector<std::string> getModes() override final { return {"Single", "Area"}; }
+	void setMode(std::string toolMode) override final {
+		if (mode != toolMode) {
+			if (toolMode == "None") {
+				activePlacementTool = nullptr;
+			} else if (toolMode == "Single") {
+				activePlacementTool = std::make_shared<SinglePlaceTool>();
+			} else if (toolMode == "Area") {
+				activePlacementTool = std::make_shared<AreaPlaceTool>();
+			}
+		}
+	}
 
 	inline void selectBlock(BlockType selectedBlock) {
 		this->selectedBlock = selectedBlock;
@@ -34,10 +37,8 @@ public:
 		if (activePlacementTool) activePlacementTool->setRotation(rotation);
 	}
 
-	inline Rotation getRotation() { return rotation; }
-	inline BlockType getSelectedBlock() const { return selectedBlock; }
-	
-protected:
+private:
+	std::string mode = "None";
 	SharedBaseBlockPlacementTool activePlacementTool = nullptr;
 	BlockType selectedBlock = BlockType::NONE;
 	Rotation rotation = Rotation::ZERO;

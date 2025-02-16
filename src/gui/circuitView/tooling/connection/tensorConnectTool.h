@@ -14,8 +14,8 @@ public:
 		updateElements();
 	}
 
-	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::initialize(toolManagerEventRegister);
+	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
+		CircuitTool::activate(toolManagerEventRegister);
 		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&TensorConnectTool::click, this, std::placeholders::_1));
 		// toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&TensorConnectTool::stopPlaceBlock, this, std::placeholders::_1));
 		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&TensorConnectTool::unclick, this, std::placeholders::_1));

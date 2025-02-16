@@ -13,8 +13,8 @@ public:
 		updateElements();
 	}
 
-	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::initialize(toolManagerEventRegister);
+	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
+		CircuitTool::activate(toolManagerEventRegister);
 		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
 		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
 		toolManagerEventRegister.registerFunction("pointer move", std::bind(&MoveTool::pointerMove, this, std::placeholders::_1));

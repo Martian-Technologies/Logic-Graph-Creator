@@ -7,16 +7,7 @@ class SinglePlaceTool : public BaseBlockPlacementTool {
 public:
 	inline void reset() override final { memset(clicks, 'n', 2); }
 
-	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		BaseBlockPlacementTool::initialize(toolManagerEventRegister);
-		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SinglePlaceTool::startPlaceBlock, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&SinglePlaceTool::stopPlaceBlock, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool secondary deactivate", std::bind(&SinglePlaceTool::stopDeleteBlocks, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer move", std::bind(&SinglePlaceTool::pointerMove, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&SinglePlaceTool::enterBlockView, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&SinglePlaceTool::exitBlockView, this, std::placeholders::_1));
-	}
+	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final;
 
 	bool startPlaceBlock(const Event* event);
 	bool stopPlaceBlock(const Event* event);
