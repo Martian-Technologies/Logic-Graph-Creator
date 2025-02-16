@@ -1,7 +1,7 @@
 #ifndef logicToucher_h
 #define logicToucher_h
 
-#include "circuitTool.h"
+#include "../circuitTool.h"
 
 class LogicToucher : public CircuitTool {
 public:

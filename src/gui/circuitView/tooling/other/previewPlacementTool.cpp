@@ -63,7 +63,6 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         if (!circuit->tryInsertBlock(targetPos, block.rotation, block.type)) {
             qWarning("Failed to insert block.");
         }
-        std::cout << "Inserted block. ID=" << oldId << ", Rot=" << rotationToString(block.rotation) << ", Type=" << blockTypeToString(block.type) <<  std::endl;
         realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos)->id();;
     }
 
@@ -77,7 +76,6 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
             // skip inputs
             continue;
         }
-        std::cout << "connecting [block=" << conn.outputBlockId << ", id=" << conn.outputId << " --> " << "block=" << conn.inputBlockId << ", id=" << conn.inputId << "]\n";
 
         ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
         ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
@@ -89,15 +87,15 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
     // Place all dependencies in their own circuits
     if (backend) {
         std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
-        for (auto itr = deps.begin(); itr != deps.end(); ++itr){
-            circuit_id_t id = backend->createCircuit();
-            backend->createEvaluator(id);
+        // for (auto itr = deps.begin(); itr != deps.end(); ++itr){
+        //     circuit_id_t id = backend->createCircuit();
+        //     backend->createEvaluator(id);
 
-            loadParsedCircuit(itr->second);
-            setCircuit(backend->getCircuit(id).get());
-            commitPlacement(nullptr);
-            reUse();
-        }
+        //     loadParsedCircuit(itr->second);
+        //     setCircuit(backend->getCircuit(id).get());
+        //     commitPlacement(nullptr);
+        //     reUse();
+        // } TODO make backend or Ciruit manager do this with no placement preview
     } else {
         std::cout << "Backed is not initialized to place the dependencies\n";
     }

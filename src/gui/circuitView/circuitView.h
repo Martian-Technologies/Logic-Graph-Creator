@@ -7,9 +7,10 @@
 #include "backend/circuit/circuit.h"
 #include "backend/evaluator/evaluator.h"
 #include "events/eventRegister.h"
-#include "tools/toolManager.h"
+#include "tooling/toolManager.h"
 #include "renderer/renderer.h"
 #include "viewManager/viewManager.h"
+#include "tooling/placement/blockPlacementTool.h"
 
 class Backend;
 
@@ -21,6 +22,7 @@ public:
 	CircuitView() : toolManager(&eventRegister, &renderer) {
 		viewManager.initialize(eventRegister);
 		viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
+		placementTool = std::make_shared<BlockPlacementTool>();
 	}
 
 	void viewChanged() {
@@ -33,11 +35,15 @@ public:
 	}
 
 	void setSelectedTool(std::string tool) {
-		toolManager.changeTool(tool);
+		toolManager.clearTools();
 	}
 
 	void setSelectedBlock(BlockType blockType) {
-		toolManager.selectBlock(blockType);
+		if (blockType != BlockType::NONE) {
+			toolManager.clearTools();
+			toolManager.pushTool(placementTool);
+			placementTool->selectBlock(blockType);
+		}
 	}
 
 	// --------------- Gettters ---------------
@@ -97,6 +103,7 @@ private:
 	RENDERER_TYPE renderer;
 	ToolManager toolManager;
 	Backend* backend;
+	SharedBlockPlacementTool placementTool;
 };
 
 #endif /* circuitView_h */

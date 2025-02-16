@@ -4,7 +4,7 @@
 #include "baseBlockPlacementTool.h"
 
 class AreaPlaceTool : public BaseBlockPlacementTool {
-public:
+protected:
 	void initialize(ToolManagerEventRegister& toolManagerEventRegister) override final {
 		BaseBlockPlacementTool::initialize(toolManagerEventRegister);
 		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));

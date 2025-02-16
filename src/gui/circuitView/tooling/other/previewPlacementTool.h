@@ -1,7 +1,7 @@
 #ifndef previewPlacementTool_h
 #define previewPlacementTool_h
 
-#include "circuitTool.h"
+#include "../circuitTool.h"
 #include "backend/circuit/parsedCircuit.h"
 #include "computerAPI/circuits/circuitFileManager.h"
 class Backend;

@@ -9,6 +9,7 @@
 #include <QNativeGestureEvent>
 #include <QGestureEvent>
 
+#include "gui/circuitView/tooling/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
 #include "circuitViewWidget.h"
@@ -50,7 +51,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
-                std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
+                // std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
 			}
 		}
 	);
@@ -67,7 +68,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
-                std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
+                // std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
 			}
 		}
 	);
@@ -310,14 +311,14 @@ void CircuitViewWidget::load(const QString& filePath) {
 
     CircuitValidator validator(*parsed);
     if (parsed->isValid()){
-        circuitView.getToolManager().setPendingPreviewData(parsed);
-        circuitView.getToolManager().changeTool("Preview Placement");
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
-        if (previewTool) {
-            previewTool->setBackend(circuitView.getBackend());
-        }else{
-            std::cout << "Preview tool failed to cast\n";
-        }
+        // circuitView.getToolManager().setPendingPreviewData(parsed);
+        // circuitView.getToolManager().changeTool("Preview Placement");
+        // PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
+        // if (previewTool) {
+        //     previewTool->setBackend(circuitView.getBackend());
+        // }else{
+        //     std::cout << "Preview tool failed to cast\n";
+        // }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
     }

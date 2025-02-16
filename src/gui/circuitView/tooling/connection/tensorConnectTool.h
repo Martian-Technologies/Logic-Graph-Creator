@@ -2,7 +2,7 @@
 #define tensorConnectTool_h
 
 #include "backend/selection.h"
-#include "circuitTool.h"
+#include "../circuitTool.h"
 
 class TensorConnectTool : public CircuitTool {
 public:

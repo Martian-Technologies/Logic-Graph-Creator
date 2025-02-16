@@ -14,7 +14,6 @@ public:
 	}
 
 private:
-
 	EventRegister* eventRegister;
 	std::vector<std::pair<std::string, EventRegistrationSignature>>* registeredEvents;
 };

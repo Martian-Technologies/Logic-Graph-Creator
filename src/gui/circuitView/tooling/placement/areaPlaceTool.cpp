@@ -15,9 +15,6 @@ bool AreaPlaceTool::startPlaceBlock(const Event* event) {
 		elementCreator.clear();
 		elementCreator.addSelectionElement(positionEvent->getPosition());
 		click = 'n';
-		// left here for stats when needed
-		// TODO: make a stat tool
-		// std::cout << "blocks: " << circuit->getBlockCount() << "    cells: " << circuit->getCellCount() << std::endl;
 		return true;
 	default:
 		return false;

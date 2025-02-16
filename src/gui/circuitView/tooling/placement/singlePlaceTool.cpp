@@ -1,5 +1,3 @@
-#include <Qt>
-
 #include "singlePlaceTool.h"
 #include "gui/circuitView/renderer/renderer.h"
 

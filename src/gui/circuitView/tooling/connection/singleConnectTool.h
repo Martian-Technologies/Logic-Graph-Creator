@@ -1,7 +1,7 @@
 #ifndef singleConnectTool_h
 #define singleConnectTool_h
 
-#include "circuitTool.h"
+#include "../circuitTool.h"
 
 class SingleConnectTool : public CircuitTool {
 public:

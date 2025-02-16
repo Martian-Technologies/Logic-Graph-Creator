@@ -2,7 +2,7 @@
 #define moveTool_h
 
 #include "backend/selection.h"
-#include "circuitTool.h"
+#include "../circuitTool.h"
 
 class MoveTool : public CircuitTool {
 public:

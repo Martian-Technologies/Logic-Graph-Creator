@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "gui/circuitView/tooling/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "selection/selectorWindow.h"
 #include "selection/hotbarWindow.h"
@@ -130,22 +131,22 @@ void MainWindow::loadCircuit() {
         backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
         backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId, Address());
 
-        PreviewPlacementTool placementTool;
-        placementTool.loadParsedCircuit(parsed);
-        placementTool.setCircuit(circuitViewWidget->getCircuitView()->getCircuit());
-        placementTool.commitPlacement(nullptr);
+        // PreviewPlacementTool placementTool;
+        // placementTool.loadParsedCircuit(parsed);
+        // placementTool.setCircuit(circuitViewWidget->getCircuitView()->getCircuit());
+        // placementTool.commitPlacement(nullptr);
 
-        std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsed->getDependencies();
-        for (auto itr = deps.begin(); itr != deps.end(); ++itr){
-            placementTool.reUse();
+        // std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsed->getDependencies();
+        // for (auto itr = deps.begin(); itr != deps.end(); ++itr){
+        //     placementTool.reUse();
 
-            id = backend.createCircuit();
-            backend.createEvaluator(id);
+        //     id = backend.createCircuit();
+        //     backend.createEvaluator(id);
 
-            placementTool.loadParsedCircuit(itr->second);
-            placementTool.setCircuit(backend.getCircuit(id).get());
-            placementTool.commitPlacement(nullptr);
-        }
+        //     placementTool.loadParsedCircuit(itr->second);
+        //     placementTool.setCircuit(backend.getCircuit(id).get());
+        //     placementTool.commitPlacement(nullptr);
+        // }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
     }
@@ -171,8 +172,8 @@ void MainWindow::loadCircuitInto(int index) {
     CircuitValidator validator(*parsed);
     if (parsed->isValid()){
         CircuitView<QtRenderer>* circuitView = circuitViews[index]->getCircuitView();
-        circuitView->getToolManager().setPendingPreviewData(parsed);
-        circuitView->getToolManager().changeTool("Preview Placement");
+        // circuitView->getToolManager().setPendingPreviewData(parsed);
+        // circuitView->getToolManager().changeTool("Preview Placement");
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getCurrentTool().get());
         if (previewTool) {
             previewTool->setBackend(circuitView->getBackend());
