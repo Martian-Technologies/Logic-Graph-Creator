@@ -3,6 +3,8 @@
 
 #include "backend/container/difference.h"
 #include <unordered_map>
+#include <utility>
+#include <deque>
 
 struct Node; 
 
@@ -24,8 +26,9 @@ public:
 private:
 
     // jagged array tree version
-    std::unordered_map<int ,std::vector<unsigned int>> branchMap; // id matches to ints that are branches of node
+    std::unordered_map<int, std::vector<std::pair<unsigned int, unsigned int>>> branchMap; // id matches to branch, node positioning
     std::vector<std::vector<Node>> tree; // jagged array enjoyer
+	std::deque<int> branchHistory;
     
     unsigned int branchPosition;
     unsigned int nodePosition; // inside the branch itself
