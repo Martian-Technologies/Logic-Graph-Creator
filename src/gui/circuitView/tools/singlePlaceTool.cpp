@@ -152,6 +152,8 @@ bool SinglePlaceTool::exitBlockView(const Event* event) {
 }
 
 void SinglePlaceTool::updateElements() {
+	if (!circuit) return;
+	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 
 	bool blockAtPosition = circuit->getBlockContainer()->getBlock(position);

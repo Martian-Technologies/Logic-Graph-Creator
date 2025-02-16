@@ -6,8 +6,17 @@
 bool ViewManager::zoom(const Event* event) {
 	const DeltaEvent* deltaEvent = event->cast<DeltaEvent>();
 	if (!deltaEvent) return false;
+
+	// adjust zoom level
 	viewHeight *= std::pow(2.f, -deltaEvent->getDelta());
 	applyLimits();
+
+	// keep pointer position the same
+	FPosition newPointerPosition = viewToGrid(pointerViewPosition);
+	FVector pointerChange = newPointerPosition - pointerPosition;
+	viewCenter -= pointerChange;
+	applyLimits();
+	
 	viewChanged();
 	return true;
 }

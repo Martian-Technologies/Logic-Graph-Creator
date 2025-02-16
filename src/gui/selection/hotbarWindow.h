@@ -1,8 +1,8 @@
 #ifndef hotbarWindow_h
 #define hotbarWindow_h
 
-#include <QDockWidget>
 #include <QToolButton>
+#include <QWidget>
 
 #include "backend/container/block/blockDefs.h"
 #include "toolCell.h"
@@ -13,7 +13,7 @@ namespace Ui {
 	class Hotbar;
 };
 
-class HotbarWindow : public QDockWidget {
+class HotbarWindow : public QWidget {
 	Q_OBJECT
 public:
 	HotbarWindow(QWidget* parent = nullptr);

@@ -1,6 +1,6 @@
 # Building
 ## Introduction
-Hey! Gatality compiles on MacOS, Windows, and Linux. There are a few things you have to do in order to get it up and running:
+Gatality compiles on MacOS, Windows, and Linux. There are a few things you have to do in order to get it up and running:
 1. Download the code
 2. Install the dependencies (QT)
 3. Set up the CMake build system
@@ -23,7 +23,7 @@ You can get the QT libraries from your package manager (brew on MacOS, distro de
 You can either build QT yourself, or download and install it with QT's [installer](https://www.qt.io/download-qt-installer).
 > Gatality only builds with MSVC on Windows. Make sure you install QT with MSVC and not MinGW.
 Unfortunately QT's installer does not add its directories to your environment variables, and CMake will not be able to find it, so you need to add it youself.
-- You need to add your QT version's lib and bin directories for MSVC to your path environment variable. This [(guide)](https://youtu.be/rnogAji_I5E?si=yG-h8Z5A5h3anPI3&t=97) will show you how.
+- You need to add your QT version's lib and bin directories for MSVC to your path environment variable. This [guide](https://youtu.be/rnogAji_I5E?si=yG-h8Z5A5h3anPI3&t=97) will show you how.
 - You also need to add a new environment variable called `QTDIR` which is the directory of your QT version and compiler.
 
 For example:

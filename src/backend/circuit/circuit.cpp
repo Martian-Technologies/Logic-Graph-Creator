@@ -130,6 +130,24 @@ bool Circuit::tryRemoveConnection(const Position& outputPosition, const Position
 	return out;
 }
 
+bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
+	const Block* inputBlock = blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
+	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
+	if (!outputOut.second || !inputOut.second) return false;
+	return tryCreateConnection(outputOut.first, inputOut.first);
+}
+
+bool Circuit::tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
+	const Block* inputBlock =  blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
+	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
+	if (!outputOut.second || !inputOut.second) return false;
+	return tryRemoveConnection(outputOut.first, inputOut.first);
+}
+
 bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
 	if (!sameSelectionShape(outputSelection, inputSelection)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();

@@ -1,56 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Hotbar</class>
- <widget class="QDockWidget" name="Hotbar">
+ <widget class="QWidget" name="Hotbar">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
-    <height>89</height>
+    <width>553</width>
+    <height>104</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>100</width>
-    <height>38</height>
-   </size>
-  </property>
-  <property name="features">
-   <set>QDockWidget::DockWidgetFeature::DockWidgetFloatable|QDockWidget::DockWidgetFeature::DockWidgetMovable</set>
   </property>
   <property name="windowTitle">
    <string>Hotbar</string>
   </property>
-  <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-    <item>
-     <widget class="QWidget" name="gridWidget" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>10</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
  </widget>
  <resources/>
  <connections/>

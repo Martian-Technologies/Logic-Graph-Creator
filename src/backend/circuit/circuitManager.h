@@ -20,12 +20,21 @@ public:
 		circuits.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId()));
 		return getLastCreatedCircuitId();
 	}
+
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
 			circuits.erase(iter);
 		}
 	}
+
+	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;
+	typedef std::map<circuit_id_t, SharedCircuit>::const_iterator const_iterator;
+
+	inline iterator begin() { return circuits.begin(); }
+	inline iterator end() { return circuits.end(); }
+	inline const_iterator begin() const { return circuits.begin(); }
+	inline const_iterator end() const { return circuits.end(); }
 
 
 private:
