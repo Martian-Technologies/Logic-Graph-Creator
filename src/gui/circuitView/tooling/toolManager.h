@@ -21,7 +21,7 @@ public:
 	void popTool();
 	void clearTools();
 
-	SharedCircuitTool getCurrentNoHelperTool() const;
+	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;
 
 	void setCircuit(Circuit* circuit);
