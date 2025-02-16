@@ -94,10 +94,16 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
             circuit_id_t id = backend->createCircuit();
             backend->createEvaluator(id);
 
+            Circuit* depCircuit = backend->getCircuit(id).get();
+
             loadParsedCircuit(itr->second);
-            setCircuit(backend->getCircuit(id).get());
+            setCircuit(depCircuit);
             commitPlacement(nullptr);
             reUse();
+
+            depCircuit->setSaved();
+            depCircuit->setSaveFilePath(itr->second->getFilePath());
+            std::cout << "Loaded and marked circuit as saved: " << itr->second->getFilePath() << '\n';
         }
     } else {
         std::cout << "Backed is not initialized to place the dependencies\n";

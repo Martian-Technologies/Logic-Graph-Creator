@@ -23,13 +23,12 @@ public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
-    void updateSaveMenu();
+    void updateSaveMenu(bool saveAs = false);
     void updateLoadIntoMenu(bool loadMerged = false);
-    void saveCircuit(int id);
-    void saveCircuitIndex(int index);
-    void saveCircuitAs();
+    void saveCircuit(circuit_id_t id, bool saveAs = false);
     void loadCircuit(bool loadMerged = false);
     void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged = false);
+    void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 	CircuitViewWidget* openNewCircuitViewWindow();
@@ -39,6 +38,7 @@ public:
 private:
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
+    QMenu* saveAsSubMenu;
     QMenu* loadIntoSubMenu;
     QMenu* loadMergedSubMenu;
 	Backend backend;
