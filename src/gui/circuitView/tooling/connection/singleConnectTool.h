@@ -5,13 +5,13 @@
 
 class SingleConnectTool : public CircuitTool {
 public:
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::activate(toolManagerEventRegister);
-		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&SingleConnectTool::makeConnection, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&SingleConnectTool::cancelConnection, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer move", std::bind(&SingleConnectTool::pointerMove, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&SingleConnectTool::enterBlockView, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&SingleConnectTool::exitBlockView, this, std::placeholders::_1));
+	void activate() override final {
+		CircuitTool::activate();
+		registerFunction("tool primary activate", std::bind(&SingleConnectTool::makeConnection, this, std::placeholders::_1));
+		registerFunction("tool secondary activate", std::bind(&SingleConnectTool::cancelConnection, this, std::placeholders::_1));
+		registerFunction("pointer move", std::bind(&SingleConnectTool::pointerMove, this, std::placeholders::_1));
+		registerFunction("pointer enter view", std::bind(&SingleConnectTool::enterBlockView, this, std::placeholders::_1));
+		registerFunction("pointer exit view", std::bind(&SingleConnectTool::exitBlockView, this, std::placeholders::_1));
 	}
 
 	inline void reset() override final { clicked = false; elementCreator.clear(); }

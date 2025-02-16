@@ -12,7 +12,10 @@ public:
 		activePlacementTool = std::make_shared<SinglePlaceTool>();
 	}
 
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final { if (activePlacementTool) toolManagerInterface->pushTool(activePlacementTool); }
+	void activate() override final {
+		if (activePlacementTool)
+			toolManagerInterface->pushTool(activePlacementTool);
+	}
 
 	std::vector<std::string> getModes() override final { return {"Single", "Area"}; }
 	void setMode(std::string toolMode) override final {

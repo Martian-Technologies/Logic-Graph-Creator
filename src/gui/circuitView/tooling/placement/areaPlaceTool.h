@@ -5,7 +5,7 @@
 
 class AreaPlaceTool : public BaseBlockPlacementTool {
 protected:
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final;
+	void activate() override final;
 	inline void reset() override final { click = 'n'; }
 
 	bool startPlaceBlock(const Event* event);

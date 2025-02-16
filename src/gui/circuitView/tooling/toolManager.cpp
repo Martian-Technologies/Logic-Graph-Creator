@@ -23,40 +23,36 @@ void ToolManager::reset() {
 }
 
 void ToolManager::pushTool(SharedCircuitTool newTool) {
+	if (!toolStack.empty())
+		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
-	toolStack.back()->setup(ElementCreator(renderer), &toolManagerInterface, evaluatorStateInterface, circuit);
-	toolStack.back()->activate(toolManagerEventRegister);
+	toolStack.back()->setup(ElementCreator(renderer), eventRegister, &toolManagerInterface, evaluatorStateInterface, circuit);
+	toolStack.back()->activate();
 }
 
 void ToolManager::popTool() {
-	unregisterEvents();
+	if (toolStack.empty()) return;
+	toolStack.back()->unsetup();
 	toolStack.pop_back();
-	if (!toolStack.empty()) {
-		toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
-		toolStack.back()->activate(toolManagerEventRegister);
-	}
+
+	if (toolStack.empty()) return;
+	toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
+	toolStack.back()->activate();
 }
 
 void ToolManager::clearTools() {
-	unregisterEvents();
+	for (auto tool : toolStack) {
+		tool->unsetup();
+	}
 	toolStack.clear();
 }
 
 void ToolManager::setCircuit(Circuit* circuit) {
 	this->circuit = circuit;
-	toolStack.clear();
+	clearTools();
 }
 
 void ToolManager::setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
 	this->evaluatorStateInterface = evaluatorStateInterface;
 	if (!toolStack.empty()) toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
 }
-
-
-void ToolManager::unregisterEvents() {
-	for (auto eventFuncPair : registeredEvents) {
-		eventRegister->unregisterFunction(eventFuncPair.first, eventFuncPair.second);
-	}
-	registeredEvents.clear();
-}
-

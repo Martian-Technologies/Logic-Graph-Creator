@@ -5,11 +5,11 @@
 
 class LogicToucher : public CircuitTool {
 public:
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::activate(toolManagerEventRegister);
-		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool primary deactivate", std::bind(&LogicToucher::unpress, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer move", std::bind(&LogicToucher::pointerMove, this, std::placeholders::_1));
+	void activate() override final {
+		CircuitTool::activate();
+		registerFunction("tool primary activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
+		registerFunction("tool primary deactivate", std::bind(&LogicToucher::unpress, this, std::placeholders::_1));
+		registerFunction("pointer move", std::bind(&LogicToucher::pointerMove, this, std::placeholders::_1));
 	}
 
 	inline void reset() override final { clicked = false; elementCreator.clear(); }

@@ -13,14 +13,14 @@ public:
 		updateElements();
 	}
 
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override final {
-		CircuitTool::activate(toolManagerEventRegister);
-		toolManagerEventRegister.registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("pointer move", std::bind(&MoveTool::pointerMove, this, std::placeholders::_1));
-		// toolManagerEventRegister.registerFunction("pointer enter view", std::bind(&MoveTool::enterBlockView, this, std::placeholders::_1));
-		// toolManagerEventRegister.registerFunction("pointer exit view", std::bind(&MoveTool::exitBlockView, this, std::placeholders::_1));
-		toolManagerEventRegister.registerFunction("tool rotate block cw", std::bind(&MoveTool::confirm, this, std::placeholders::_1));
+	void activate() override final {
+		CircuitTool::activate();
+		registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
+		registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
+		registerFunction("pointer move", std::bind(&MoveTool::pointerMove, this, std::placeholders::_1));
+		// registerFunction("pointer enter view", std::bind(&MoveTool::enterBlockView, this, std::placeholders::_1));
+		// registerFunction("pointer exit view", std::bind(&MoveTool::exitBlockView, this, std::placeholders::_1));
+		registerFunction("tool rotate block cw", std::bind(&MoveTool::confirm, this, std::placeholders::_1));
 	}
 
 	bool click(const Event* event);

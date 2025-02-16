@@ -10,21 +10,15 @@ class PreviewPlacementTool : public CircuitTool {
 public:
     PreviewPlacementTool() = default;
 
-    void activate(ToolManagerEventRegister& toolManagerEventRegister) override {
-        CircuitTool::activate(toolManagerEventRegister);
-        toolManagerEventRegister.registerFunction("pointer move", 
-            std::bind(&PreviewPlacementTool::pointerMove, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("view zoom", 
-            std::bind(&PreviewPlacementTool::pointerMove, this, std::placeholders::_1));
+    void activate() override {
+        CircuitTool::activate();
+        registerFunction("pointer move", std::bind(&PreviewPlacementTool::pointerMove, this, std::placeholders::_1));
+        registerFunction("view zoom", std::bind(&PreviewPlacementTool::pointerMove, this, std::placeholders::_1));
 
-        toolManagerEventRegister.registerFunction("tool primary activate", 
-            std::bind(&PreviewPlacementTool::commitPlacement, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("tool secondary activate", 
-            std::bind(&PreviewPlacementTool::cancelPlacement, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("pointer enter view",
-            std::bind(&PreviewPlacementTool::enterBlockView, this, std::placeholders::_1));
-        toolManagerEventRegister.registerFunction("pointer exit view",
-            std::bind(&PreviewPlacementTool::exitBlockView, this, std::placeholders::_1));
+        registerFunction("tool primary activate", std::bind(&PreviewPlacementTool::commitPlacement, this, std::placeholders::_1));
+        registerFunction("tool secondary activate", std::bind(&PreviewPlacementTool::cancelPlacement, this, std::placeholders::_1));
+        registerFunction("pointer enter view",std::bind(&PreviewPlacementTool::enterBlockView, this, std::placeholders::_1));
+        registerFunction("pointer exit view",std::bind(&PreviewPlacementTool::exitBlockView, this, std::placeholders::_1));
     }
 
     void loadParsedCircuit(std::shared_ptr<ParsedCircuit> circuitData) {

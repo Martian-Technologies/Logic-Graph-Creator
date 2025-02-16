@@ -9,7 +9,7 @@ public:
 	inline void selectBlock(BlockType selectedBlock) { this->selectedBlock = selectedBlock; updateElements(); }
 	inline void setRotation(Rotation rotation) { this->rotation = rotation; updateElements(); }
 
-	void activate(ToolManagerEventRegister& toolManagerEventRegister) override;
+	void activate() override;
 
 	bool rotateBlockCW(const Event* event);
 	bool rotateBlockCCW(const Event* event);
