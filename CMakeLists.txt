@@ -96,8 +96,8 @@ if (Gatality_BuildApp)
 			MACOSX_BUNDLE_INFO_VERSION "6.0"
 			# Dev Region
 			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
-			# Doc Types
-			# for file handling "MACOSX_BUNDLE_DOCUMENT_TYPES "cir"" will be needed to denote the files we that this app can use, helps macos
+			# Doc Types that macos can handle
+			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;"
 			# Application category
 			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
