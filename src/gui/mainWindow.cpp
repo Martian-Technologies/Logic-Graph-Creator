@@ -201,7 +201,7 @@ void MainWindow::exportProject() {
     QString projectName = QInputDialog::getText(this, tr("Project Name"), tr("Enter project name:"), QLineEdit::Normal, "NewProject", &valid);
     if (!valid || projectName.isEmpty()) return;
 
-    QString projectPath = baseDir + '/' + projectName;
+    QString projectPath = QDir(baseDir).filePath(projectName);
 
     std::cout << "Export full path: " << projectPath.toStdString() << '\n';
 
@@ -228,15 +228,15 @@ void MainWindow::exportProject() {
         Circuit* circuit = p.second.get();
         if (!circuit) continue;
 
-        std::string filepath = circuit->getSaveFilePath();
-        std::string filename;
-        if (!filepath.empty()) {
-            filename = filepath.substr(filepath.rfind('/'));
+        QString filepath = QString::fromStdString(circuit->getSaveFilePath());
+        QString filename;
+        if (!filepath.isEmpty()) {
+            filename = QFileInfo(filepath).fileName();
         } else {
-            filename = "/Untitled_" + std::to_string(p.first) + ".circuit";
+            filename = QString("Untitled_%1.circuit").arg(p.first);
         }
 
-        std::string projectFilePath = projectPath.toStdString() + filename;
+        std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();
 
         // save the circuit
         if (!circuitFileManager.saveToFile(projectFilePath, circuit)) {
