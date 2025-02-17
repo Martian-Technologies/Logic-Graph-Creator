@@ -25,11 +25,14 @@ public:
 			[&signature](const RegistrationPair& i) { return i.first == signature; }
 		);
 		if (funcIter != iter->second.end()) {
-			*funcIter = iter->second.back();
-			iter->second.pop_back();
+			allEventFunctions.erase(iter);
+			// keeps order
+			// *funcIter = iter->second.back();
+			// iter->second.pop_back();
 		}
 	}
 
+	// functions are called in the order that they are added to a event
 	bool doEvent(const Event& event) {
 		auto iter = allEventFunctions.find(event.getName());
 		if (iter == allEventFunctions.end()) return false;

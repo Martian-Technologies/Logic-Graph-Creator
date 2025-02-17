@@ -22,10 +22,14 @@ protected:
 	void unregisterFunctions();
 
 	virtual void reset() { }
-	virtual void activate() { }
+	virtual void activate();
 	virtual void deactivate() { unregisterFunctions(); }
 
 	virtual void setMode(std::string toolMode) { }
+
+	bool pointerInView = false;
+	FPosition lastPointerFPosition;
+	Position lastPointerPosition;
 
 	Circuit* circuit = nullptr;
 	bool helper = false;
@@ -40,6 +44,10 @@ private:
 	void unsetup();
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
+
+	bool enterBlockView(const Event* event);
+	bool exitBlockView(const Event* event);
+	bool pointerMove(const Event* event);
 
 	EventRegister* eventRegister;
 	std::vector<std::pair<std::string, EventRegistrationSignature>> registeredEvents;

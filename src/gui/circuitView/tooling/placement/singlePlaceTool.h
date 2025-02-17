@@ -20,7 +20,6 @@ public:
 private:
 	void updateElements() override;
 
-	Position position;
 	char clicks[2] = { 'n', 'n' };
 };
 

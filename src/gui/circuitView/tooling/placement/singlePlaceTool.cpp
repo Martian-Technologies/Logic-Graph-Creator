@@ -14,13 +14,11 @@ void SinglePlaceTool::activate()  {
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 
 	switch (clicks[0]) {
 	case 'n':
 		clicks[0] = 'p';
-		if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
+		if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 		updateElements();
 		return true;
 	case 'p':
@@ -28,7 +26,7 @@ bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 	case 'r':
 		if (clicks[1] == 'n') {
 			clicks[1] = 'p';
-			if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(positionEvent->getPosition(), rotation, selectedBlock);
+			if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 			updateElements();
 			return true;
 		}
@@ -38,9 +36,6 @@ bool SinglePlaceTool::startPlaceBlock(const Event* event) {
 }
 
 bool SinglePlaceTool::stopPlaceBlock(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 	// this logic is to allow holding right then left then releasing left and it to start deleting
 	switch (clicks[0]) {
 	case 'n':
@@ -65,12 +60,10 @@ bool SinglePlaceTool::stopPlaceBlock(const Event* event) {
 
 bool SinglePlaceTool::startDeleteBlocks(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 	switch (clicks[0]) {
 	case 'n':
 		clicks[0] = 'r';
-		circuit->tryRemoveBlock(positionEvent->getPosition());
+		circuit->tryRemoveBlock(lastPointerPosition);
 		updateElements();
 		return true;
 	case 'r':
@@ -78,7 +71,7 @@ bool SinglePlaceTool::startDeleteBlocks(const Event* event) {
 	case 'p':
 		if (clicks[1] == 'n') {
 			clicks[1] = 'r';
-			circuit->tryRemoveBlock(positionEvent->getPosition());
+			circuit->tryRemoveBlock(lastPointerPosition);
 			updateElements();
 			return true;
 		}
@@ -88,9 +81,6 @@ bool SinglePlaceTool::startDeleteBlocks(const Event* event) {
 }
 
 bool SinglePlaceTool::stopDeleteBlocks(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 	// this logic is to allow holding left then right then releasing right and it to start placing
 	switch (clicks[0]) {
 	case 'n':
@@ -115,11 +105,8 @@ bool SinglePlaceTool::stopDeleteBlocks(const Event* event) {
 
 bool SinglePlaceTool::pointerMove(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
+	
 	bool returnVal = false; // used to make sure it updates the effect
-
-	position = positionEvent->getPosition();
 	updateElements();
 
 	switch (clicks[0]) {
@@ -127,36 +114,29 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 		return returnVal;
 	case 'r':
 		if (clicks[1] == 'p') {
-			if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(position, rotation, selectedBlock);
+			if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 			return selectedBlock != BlockType::NONE;
 		}
-		circuit->tryRemoveBlock(position);
+		circuit->tryRemoveBlock(lastPointerPosition);
 		return true;
 	case 'p':
 		if (clicks[1] == 'r') {
-			circuit->tryRemoveBlock(position);
+			circuit->tryRemoveBlock(lastPointerPosition);
 			return true;
 		}
-		if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(position, rotation, selectedBlock);
+		if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 		return selectedBlock != BlockType::NONE;
 	}
 	return returnVal;
 }
 
 bool SinglePlaceTool::enterBlockView(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-
-	position = positionEvent->getPosition();
 	updateElements();
-
 	return true;
 }
 
 bool SinglePlaceTool::exitBlockView(const Event* event) {
-	if (!circuit) return false;
-	elementCreator.clear();
+	updateElements();
 	return true;
 }
 
@@ -164,9 +144,11 @@ void SinglePlaceTool::updateElements() {
 	if (!circuit) return;
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+	
+	if (!pointerInView) return;
 
-	bool blockAtPosition = circuit->getBlockContainer()->getBlock(position);
-	elementCreator.addSelectionElement(SelectionElement(position, blockAtPosition));
+	bool blockAtPosition = circuit->getBlockContainer()->getBlock(lastPointerPosition);
+	elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, blockAtPosition));
 
-	if (!blockAtPosition) elementCreator.addBlockPreview(BlockPreview(selectedBlock, position, rotation));
+	if (!blockAtPosition) elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
 }

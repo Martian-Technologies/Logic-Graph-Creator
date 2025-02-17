@@ -12,81 +12,70 @@ void AreaPlaceTool::activate() {
 
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 	switch (click) {
 	case 'n':
-		click = 'c';
-		clickPosition = positionEvent->getPosition();
-		return true;
-	case 'c':
-		circuit->tryInsertOverArea(clickPosition, positionEvent->getPosition(), rotation, selectedBlock);
-		elementCreator.clear();
-		elementCreator.addSelectionElement(positionEvent->getPosition());
+		click = 'p';
+		clickPosition = lastPointerPosition;
+		updateElements();
+		break;
+	case 'p':
+		circuit->tryInsertOverArea(clickPosition, lastPointerPosition, rotation, selectedBlock);
 		click = 'n';
-		return true;
-	default:
-		return false;
+		updateElements();
+		break;
+	case 'r':
+		circuit->tryRemoveOverArea(clickPosition, lastPointerPosition);
+		click = 'n';
+		updateElements();
+		break;
 	}
-	return false;
+	return true;
 }
 
 bool AreaPlaceTool::startDeleteBlocks(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 	switch (click) {
 	case 'n':
-		click = 'c';
-		clickPosition = positionEvent->getPosition();
-		return true;
-	case 'c':
-		circuit->tryRemoveOverArea(clickPosition, positionEvent->getPosition());
-		elementCreator.clear();
-		elementCreator.addSelectionElement(positionEvent->getPosition());
-		click = 'n';
+		click = 'r';
+		clickPosition = lastPointerPosition;
+		updateElements();
 		return true;
 	default:
-		return false;
+		click = 'n';
+		updateElements();
+		return true;
 	}
-	return false;
 }
 
 bool AreaPlaceTool::pointerMove(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-	switch (click) {
-	case 'n':
-		elementCreator.clear();
-		elementCreator.addSelectionElement(SelectionElement(positionEvent->getPosition()));
-		return true;
-	default:
-		elementCreator.clear();
-		elementCreator.addSelectionElement(SelectionElement(clickPosition, positionEvent->getPosition()));
-		return true;
-	}
-	return false;
+	updateElements();
+	return true;
 }
 
 bool AreaPlaceTool::enterBlockView(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-	elementCreator.clear();
-	switch (click) {
-	case 'n':
-		elementCreator.addSelectionElement(SelectionElement(positionEvent->getPosition()));
-	default:
-		elementCreator.addSelectionElement(SelectionElement(clickPosition, positionEvent->getPosition()));
-	}
+	updateElements();
 	return true;
 }
 
 bool AreaPlaceTool::exitBlockView(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-	elementCreator.clear();
+	updateElements();
 	return true;
+}
+
+void AreaPlaceTool::updateElements() {
+	if (!elementCreator.isSetup()) return;
+	elementCreator.clear();
+	switch (click) {
+	case 'n':
+		if (pointerInView) {
+			elementCreator.addSelectionElement(SelectionElement(lastPointerPosition));
+		}
+		break;
+	case 'p':
+		elementCreator.addSelectionElement(SelectionElement(clickPosition, lastPointerPosition));
+		break;
+	case 'r':
+		elementCreator.addSelectionElement(SelectionElement(clickPosition, lastPointerPosition, true));
+		break;
+	}
 }

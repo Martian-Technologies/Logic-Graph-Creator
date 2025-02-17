@@ -21,6 +21,12 @@ void CircuitTool::unregisterFunctions() {
 	registeredEvents.clear();
 }
 
+void CircuitTool::activate() {
+	registerFunction("pointer enter view", std::bind(&CircuitTool::enterBlockView, this, std::placeholders::_1));
+	registerFunction("pointer exit view", std::bind(&CircuitTool::exitBlockView, this, std::placeholders::_1));
+	registerFunction("pointer move", std::bind(&CircuitTool::pointerMove, this, std::placeholders::_1));
+}
+
 // This will also tell the tool to reset.
 void CircuitTool::setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolManagerInterface* toolManagerInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit) {
 	setEvaluatorStateInterface(evaluatorStateInterface);
@@ -33,4 +39,30 @@ void CircuitTool::setup(ElementCreator elementCreator, EventRegister* eventRegis
 void CircuitTool::unsetup() {
 	elementCreator.clear();
 	deactivate();
+}
+
+bool CircuitTool::enterBlockView(const Event* event) {
+	pointerInView = true;
+
+	const PositionEvent* positionEvent = event->cast<PositionEvent>();
+	if (positionEvent) {
+		lastPointerFPosition = positionEvent->getFPosition();
+		lastPointerPosition = positionEvent->getPosition();
+
+	}
+
+	return true;
+}
+
+bool CircuitTool::exitBlockView(const Event* event) {
+	pointerInView = false;
+	return true;
+}
+
+bool CircuitTool::pointerMove(const Event* event) {
+	const PositionEvent* positionEvent = event->cast<PositionEvent>();
+	if (!positionEvent) return false;
+	lastPointerFPosition = positionEvent->getFPosition();
+	lastPointerPosition = positionEvent->getPosition();
+	return true;
 }

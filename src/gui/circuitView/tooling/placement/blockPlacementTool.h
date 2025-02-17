@@ -9,7 +9,7 @@
 class BlockPlacementTool : public CircuitTool {
 public:
 	BlockPlacementTool() {
-		activePlacementTool = std::make_shared<SinglePlaceTool>();
+		activePlacementTool = std::make_shared<AreaPlaceTool>();
 	}
 
 	void activate() override final {
@@ -17,15 +17,19 @@ public:
 			toolManagerInterface->pushTool(activePlacementTool);
 	}
 
-	std::vector<std::string> getModes() override final { return {"Single", "Area"}; }
+	std::vector<std::string> getModes() override final { return { "Single", "Area" }; }
 	void setMode(std::string toolMode) override final {
 		if (mode != toolMode) {
 			if (toolMode == "None") {
 				activePlacementTool = nullptr;
-			} else if (toolMode == "Single") {
-				activePlacementTool = std::make_shared<SinglePlaceTool>();
-			} else if (toolMode == "Area") {
-				activePlacementTool = std::make_shared<AreaPlaceTool>();
+			} else {
+				if (toolMode == "Single") {
+					activePlacementTool = std::make_shared<SinglePlaceTool>();
+				} else if (toolMode == "Area") {
+					activePlacementTool = std::make_shared<AreaPlaceTool>();
+				}
+				activePlacementTool->selectBlock(selectedBlock);
+				activePlacementTool->setRotation(rotation);
 			}
 		}
 	}
