@@ -7,3 +7,4 @@
 [submodule "wasmtime"]
 	path = external/wasmtime
 	url = https://github.com/bytecodealliance/wasmtime
+	
