@@ -1,18 +1,18 @@
 #ifndef cell_h
 #define cell_h
 
-#include "../block/block.h"
+#include "block/blockDefs.h"
 
 class Cell {
 public:
-    Cell(block_id_t blockId) : blockId(blockId) {}
+	Cell(block_id_t blockId) : blockId(blockId) { }
 
-    inline block_id_t getBlockId() const { return blockId; }
+	inline block_id_t getBlockId() const { return blockId; }
 
-    inline void setBlockId(block_id_t blockId) { this->blockId = blockId; }
+	inline void setBlockId(block_id_t blockId) { this->blockId = blockId; }
 
 private:
-    block_id_t blockId;
+	block_id_t blockId;
 };
 
 #endif /* cell_h */

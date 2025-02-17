@@ -2,39 +2,45 @@
 #define mainWindow_h
 
 #include <QGraphicsScene>
-#include <QMainWindow>
 #include <QWidget>
 
-#include "middleEnd/blockContainerManager.h"
-#include "backend/evaluator/evaluator.h"
+#include <kddockwidgets/MainWindow.h>
+#include <kddockwidgets/DockWidget.h>
 
+#include "computerAPI/circuits/circuitFileManager.h"
+#include "backend/backend.h"
 
 namespace Ui {
-    class MainWindow;
+	class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
-    Q_OBJECT
+class CircuitViewWidget;
 
+class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
+	Q_OBJECT
 public:
-    MainWindow(QWidget* parent = nullptr);
-    void setSimState(bool state);
-    void simUseSpeed(bool state);
-    void setSimSpeed(double speed);
-
-    void closePreference() { preferencesOpen = false;  }
+	MainWindow(KDDockWidgets::MainWindowOptions options);
+	void setBlock(BlockType blockType);
+	void setTool(std::string tool);
+    void updateSaveMenu();
+    void updateLoadIntoMenu();
+    void saveCircuit(int id);
+    void saveCircuitIndex(int index);
+    void saveCircuitAs();
+    void loadCircuit();
+    void loadCircuitInto(int index);
+	void openNewSelectorWindow();
+	void openNewHotbarWindow();
+	CircuitViewWidget* openNewCircuitViewWindow();
+	void addDock(QWidget* widget, KDDockWidgets::Location location);
 
 private:
-
-    void connectMenuBar();
-    void onPreferenceClick();
-
-    bool preferencesOpen;
-
-    Ui::MainWindow* ui;
-    QGraphicsScene* scene;
-    BlockContainerManager blockContainerManager;
-    std::shared_ptr<Evaluator> evaluator;
+	QGraphicsScene* scene;
+    QMenu* saveSubMenu;
+    QMenu* loadIntoSubMenu;
+	Backend backend;
+	std::vector<CircuitViewWidget*> circuitViews;
+    CircuitFileManager circuitFileManager;
 };
 
 #endif /* mainWindow_h */

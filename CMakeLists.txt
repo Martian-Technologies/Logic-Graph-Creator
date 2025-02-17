@@ -1,74 +1,126 @@
+# ======================================== CMAKE SETUP ========================================
 cmake_minimum_required(VERSION 3.16)
-project(LogicGraphCreator)
+
+# set c++ standards as global variables
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # hack to avoid DNDEBUG which removes wires for some reason
 if (MSVC)
-  # also do it for MSVC, not sure if needed
-  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+	# also do it for MSVC, not sure if needed
+	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-# C++ Standard
-set(CXX_STANDARD 20)
+# ======================================== PROJECT SETUP ========================================
+project(Gatality)
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(UI_DIR "${CMAKE_SOURCE_DIR}/src")
+set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
-# Set Qt moc and uic
+# Find source files
+file(GLOB_RECURSE PROJECT_SOURCES
+		"${UI_DIR}/*.ui"
+		"${UI_DIR}/*.qrc"
+		"${SOURCE_DIR}/*.cpp"
+)
+
+# ============================================ OPTIONS =============================================
+option(Gatality_BuildApp "Build main app" ON)
+option(Gatality_BuildTests "Build tests" OFF)
+
+# ======================================== DEPENDENCY SETUP ========================================
+# Initialize QT
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
-
-# Initialize QT
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-# Find source files
-set(SOURCE_FILES)
-file(GLOB_RECURSE SOURCE_FILES
-        "${UI_DIR}/*.ui"
-        "${UI_DIR}/*.qrc"
-        "${SOURCE_DIR}/*.cpp"
+# KDDockWidgets
+set(KDDockWidgets_QT6 ON)
+set(KDDockWidgets_STATIC ON)
+add_subdirectory(external/KDDockWidgets)
+
+set(EXTERNAL_SOURCES
+	
+)
+set(EXTERNAL_INCLUDES
+	
+)
+set(EXTERNAL_LINKS
+	Qt6::Core Qt6::Gui Qt6::Widgets
+	KDAB::kddockwidgets
 )
 
-file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
-file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
+if (Gatality_BuildApp)
+# ======================================= CREATE EXECUTABLE ========================================
+	# Platform specific business before add_executable
+	if(APPLE) # MacOS
+		# Icon
+		set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
+		set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+		set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+	elseif (WIN32) # Windows
+		# Icon
+		set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
+		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+	endif()
 
-if(APPLE) # MacOS specific (Before add_executable)
-    # Icon
-    set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
-    set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
-    set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    list(APPEND SOURCE_FILES ${ICON_PATH})
-elseif (WIN32) # Windows specific (Before add_executable)
-    # Icon
-    set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
-    list(APPEND SOURCE_FILES ${ICON_PATH})
+	# Add executable
+	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
+	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES} )
+	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
+	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+
+	# Platform specific business after add_executable
+	if(APPLE) # MacOS
+		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+	elseif (WIN32) # Windows
+		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
+			# Set WIN32_EXECUTABLE (Disables Console)
+			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+		endif ()
+	endif()
+
+# ======================================= RESOURCE EMBEDDING =======================================
+	# find resources
+	file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
+	file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
+
+	# add resources to QT
+	qt_add_resources(${PROJECT_NAME} "mainResources"
+			PREFIX
+			"/"
+			FILES
+			${IMG_SOURCES}
+			${JSON_SOURCES}
+			BASE ${RESOURCES_DIR}
+	)
 endif()
 
-# Add executable
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} )
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+if (Gatality_BuildTests)
+# ============================================ GTESTING ============================================
+	message("HI")
+	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
+	enable_testing()
 
-if(APPLE) # MacOS specific (After add_executable)
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
-elseif (WIN32) # Windows specific (After add_executable)
-    if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
-        # Set WIN32_EXECUTABLE (Disables Console)
-        set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-    endif ()
+	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
+	set(TEST_FILES)
+	file(GLOB_RECURSE TEST_FILES
+		"${TEST_DIR}/*.cpp"
+		"${TEST_DIR}/*.h"
+		"${SOURCE_DIR}/backend/*"
+	)
+
+	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
+	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+	
+	add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
 endif()
-
-# Add resources
-qt_add_resources(${PROJECT_NAME} "mainResources"
-        PREFIX
-        "/"
-        FILES
-        ${IMG_SOURCES}
-        ${JSON_SOURCES}
-        BASE ${RESOURCES_DIR}
-)
