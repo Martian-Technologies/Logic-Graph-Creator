@@ -1,6 +1,9 @@
 # ======================================== CMAKE SETUP ========================================
 cmake_minimum_required(VERSION 3.16)
 
+# generate compile commands json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # set c++ standards as global variables
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
