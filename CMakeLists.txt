@@ -45,15 +45,17 @@ set(KDDockWidgets_QT6 ON)
 set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
-set(EXTERNAL_SOURCES
-	
-)
+# wasmtime
+add_subdirectory(external/wasmtime/crates/c-api)
+
+set(EXTERNAL_SOURCES)
 set(EXTERNAL_INCLUDES
-	
+	wasmtime
 )
 set(EXTERNAL_LINKS
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
+	wasmtime
 )
 
 if (Gatality_BuildApp)

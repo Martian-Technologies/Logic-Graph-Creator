@@ -1,108 +1,146 @@
-#ifndef wasmTest_h
-#define wasmTest_h
+/*
+Example of instantiating of the WebAssembly module and invoking its exported
+function.
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <cstdio>  // For popen, pclose, etc.
-#include <memory> // Unique pointer
-#include <stdexcept> // Exceptions.
+You can compile and run this example on Linux with:
 
-//Requires pre-installing wasmtime!
+   cargo build --release -p wasmtime-c-api
+   cc examples/hello.c \
+       -I crates/c-api/include \
+       target/release/libwasmtime.a \
+       -lpthread -ldl -lm \
+       -o hello
+   ./hello
 
-#include <wasmtime.hh>
+Note that on Windows and macOS the command will be similar, but you'll need
+to tweak the `-lpthread` and such annotations as well as the name of the
+`libwasmtime.a` file on Windows.
 
+You can also build using cmake:
 
-std::string executeCommandWithInput(const std::string& command, const std::string& input) {
-    std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "w+"), pclose); // Use "w+" to allow both writing and reading.
-    if (!pipe) {
-        throw std::runtime_error("popen() failed!");
-    }
+mkdir build && cd build && cmake .. && cmake --build . --target wasmtime-hello
+*/
 
-    // Write input to the pipe.
-    if (fwrite(input.c_str(), 1, input.size(), pipe.get()) != input.size()) {
-        throw std::runtime_error("fwrite() failed!");
-    }
-    fflush(pipe.get());  // Ensure all input is sent.
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <wasm.h>
+#include <wasmtime.h>
 
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe.get()) != nullptr) {
-        result += buffer;
-    }
+static void exit_with_error(const char *message, wasmtime_error_t *error,
+                            wasm_trap_t *trap);
 
-    return result;
+static wasm_trap_t *hello_callback(void *env, wasmtime_caller_t *caller,
+                                   const wasmtime_val_t *args, size_t nargs,
+                                   wasmtime_val_t *results, size_t nresults) {
+  printf("Calling back...\n");
+  printf("> Hello World!\n");
+  return NULL;
 }
 
 int run() {
-    // 1. Define the WASM source code
-    const std::string wasmSourceCode =
-        "#include <stdio.h>\n"
-        "extern \"C\" {\n"  // Use extern "C" for C++ to avoid name mangling
-        "  int add(int a, int b) {\n"
-        "    printf(\"Adding %d and %d from WebAssembly!\\n\", a, b);\n"
-        "    return a + b;\n"
-        "  }\n"
-        "}";
+  int ret = 0;
+  // Set up our compilation context. Note that we could also work with a
+  // `wasm_config_t` here to configure what feature are enabled and various
+  // compilation settings.
+  printf("Initializing...\n");
+  wasm_engine_t *engine = wasm_engine_new();
+  assert(engine != NULL);
 
-    // 2. Emscripten Compilation (Piping the source code to emcc)
-    std::string emccCommand = "emcc -x c++ - -s EXPORTED_FUNCTIONS=['_add'] -s SIDE_MODULE=1 -o a.wasm"; // Compile directly to .wasm
-    // -x c++ tells emcc to treat the input stream as c++ code
-    // -s SIDE_MODULE=1 is criical, telling emscripten to output just the wasm and not javascript
+  // With an engine we can create a *store* which is a long-lived group of wasm
+  // modules. Note that we allocate some custom data here to live in the store,
+  // but here we skip that and specify NULL.
+  wasmtime_store_t *store = wasmtime_store_new(engine, NULL, NULL);
+  assert(store != NULL);
+  wasmtime_context_t *context = wasmtime_store_context(store);
 
-    std::string emccOutput;
+  // Read our input file, which in this case is a wasm text file.
+  FILE *file = fopen("src/wasm/hello.wat", "r");
+  assert(file != NULL);
+  fseek(file, 0L, SEEK_END);
+  size_t file_size = ftell(file);
+  fseek(file, 0L, SEEK_SET);
+  wasm_byte_vec_t wat;
+  wasm_byte_vec_new_uninitialized(&wat, file_size);
+  if (fread(wat.data, file_size, 1, file) != 1) {
+    printf("> Error loading module!\n");
+    return 1;
+  }
+  fclose(file);
 
+  // Parse the wat into the binary wasm format
+  wasm_byte_vec_t wasm;
+  wasmtime_error_t *error = wasmtime_wat2wasm(wat.data, wat.size, &wasm);
+  if (error != NULL)
+    exit_with_error("failed to parse wat", error, NULL);
+  wasm_byte_vec_delete(&wat);
 
-    try {
-        emccOutput = executeCommandWithInput(emccCommand, wasmSourceCode);
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Emscripten compilation failed: " << e.what() << std::endl;
-        return 1;
+  // Now that we've got our binary webassembly we can compile our module.
+  printf("Compiling module...\n");
+  wasmtime_module_t *module = NULL;
+  error = wasmtime_module_new(engine, (uint8_t *)wasm.data, wasm.size, &module);
+  wasm_byte_vec_delete(&wasm);
+  if (error != NULL)
+    exit_with_error("failed to compile module", error, NULL);
 
-    }
-    std::cout << "Emcc Output: " << emccOutput << std::endl; // Print emcc output for debugging.
+  // Next up we need to create the function that the wasm module imports. Here
+  // we'll be hooking up a thunk function to the `hello_callback` native
+  // function above. Note that we can assign custom data, but we just use NULL
+  // for now).
+  printf("Creating callback...\n");
+  wasm_functype_t *hello_ty = wasm_functype_new_0_0();
+  wasmtime_func_t hello;
+  wasmtime_func_new(context, hello_ty, hello_callback, NULL, NULL, &hello);
 
+  // With our callback function we can now instantiate the compiled module,
+  // giving us an instance we can then execute exports from. Note that
+  // instantiation can trap due to execution of the `start` function, so we need
+  // to handle that here too.
+  printf("Instantiating module...\n");
+  wasm_trap_t *trap = NULL;
+  wasmtime_instance_t instance;
+  wasmtime_extern_t import;
+  import.kind = WASMTIME_EXTERN_FUNC;
+  import.of.func = hello;
+  error = wasmtime_instance_new(context, module, &import, 1, &instance, &trap);
+  if (error != NULL || trap != NULL)
+    exit_with_error("failed to instantiate", error, trap);
 
-    // 3. Load and Run with Wasmtime
-    try {
+  // Lookup our `run` export function
+  printf("Extracting export...\n");
+  wasmtime_extern_t run;
+  bool ok = wasmtime_instance_export_get(context, &instance, "run", 3, &run);
+  assert(ok);
+  assert(run.kind == WASMTIME_EXTERN_FUNC);
 
+  // And call it!
+  printf("Calling export...\n");
+  error = wasmtime_func_call(context, &run.of.func, NULL, 0, NULL, 0, &trap);
+  if (error != NULL || trap != NULL)
+    exit_with_error("failed to call function", error, trap);
 
-        wasmtime::Engine engine;
-        wasmtime::Module module = wasmtime::Module::from_file(engine, "a.wasm");
-        wasmtime::Linker linker(engine);
+  // Clean up after ourselves at this point
+  printf("All finished!\n");
+  ret = 0;
 
-        wasmtime::Store store(engine);
-        wasmtime::Instance instance(store, module, linker);
-
-        // Find the function.  Note:  The mangled name from emcc!
-        auto add_func = instance.get_function(store, "_add");
-        if (!add_func) {
-            std::cerr << "Error:  Could not find function 'add' (mangled as '_add' by emcc)." << std::endl;
-            return 1;
-        }
-
-
-        // Call the function with arguments
-        wasmtime::Val resultVal;
-        std::vector<wasmtime::Val> args = {wasmtime::Val(int32_t(10)), wasmtime::Val(int32_t(20))};
-        add_func->call(store, args, {&resultVal});
-
-        // Get the result
-        int result = resultVal.i32();
-
-        std::cout << "Result from WASM: " << result << std::endl;
-
-         // Clean up the temporary WASM file
-        std::remove("a.wasm");
-
-    } catch (const wasmtime::Error& e) {
-        std::cerr << "Wasmtime error: " << e.message() << std::endl;
-        return 1;
-    }
-
-
-    return 0;
+  wasmtime_module_delete(module);
+  wasmtime_store_delete(store);
+  wasm_engine_delete(engine);
+  return ret;
 }
 
-#endif /* wasmTest_h */
+static void exit_with_error(const char *message, wasmtime_error_t *error,
+                            wasm_trap_t *trap) {
+  fprintf(stderr, "error: %s\n", message);
+  wasm_byte_vec_t error_message;
+  if (error != NULL) {
+    wasmtime_error_message(error, &error_message);
+    wasmtime_error_delete(error);
+  } else {
+    wasm_trap_message(trap, &error_message);
+    wasm_trap_delete(trap);
+  }
+  fprintf(stderr, "%.*s\n", (int)error_message.size, error_message.data);
+  wasm_byte_vec_delete(&error_message);
+  exit(1);
+}
