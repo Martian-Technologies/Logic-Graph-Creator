@@ -28,7 +28,10 @@ public:
 	void setSimSpeed(double speed);
 
 protected:
-	// events overrides
+	// important events
+	
+	// other events
+	bool event(QEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
@@ -39,7 +42,6 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void enterEvent(QEnterEvent* event) override;
 	void leaveEvent(QEvent* event) override;
-	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
 

@@ -14,24 +14,43 @@
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()){
-	resize(900, 600);
+MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
+	: KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()) {
 
+	// set up window
+	resize(900, 600);
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
-
+	// create default circuit and evaluator
 	circuit_id_t id = backend.createCircuit();
 	evaluator_id_t evalId1 = *backend.createEvaluator(id);
 
+	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
-
+	// create default hotbar and selector
 	openNewHotbarWindow();
 	openNewSelectorWindow();
 
-	// menubar setup
+	setUpMenuBar();
+}
+
+// Utility methods
+CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
+	QWidget* w = new QWidget();
+	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
+	circuitViewUi->setupUi(w);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+	backend.linkCircuitView(circuitViewWidget->getCircuitView());
+	circuitViews.push_back(circuitViewWidget);
+	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
+	addDock(w, KDDockWidgets::Location_OnRight);
+	return circuitViewWidget;
+}
+
+void MainWindow::setUpMenuBar() {
 	QMenuBar* menubar = menuBar();
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
@@ -55,7 +74,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveCircuitAs);
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadCircuit);
 
-    // Submenus
+	// submenu setup
 	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
     saveAction->setText("Save Circuit");
 	QAction* loadIntoAction = fileMenu->addMenu(loadIntoSubMenu); // should expand to show 1 through circuitViews.size()
@@ -64,6 +83,15 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
     connect(loadIntoSubMenu, &QMenu::aboutToShow, this, &MainWindow::updateLoadIntoMenu);
 }
 
+void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
+	static int nameIndex = 0;
+	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
+	dock->setWidget(widget);
+	addDockWidget(dock, location);
+	nameIndex++;
+}
+
+// Action methods
 void MainWindow::updateSaveMenu() {
     saveSubMenu->clear();
     for (std::pair<circuit_id_t, SharedCircuit> itr : backend.getCircuitManager()) {
@@ -198,30 +226,10 @@ void MainWindow::openNewHotbarWindow() {
 	addDock(selector, KDDockWidgets::Location_OnBottom);
 }
 
-CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
-	QWidget* w = new QWidget();
-	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
-	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
-	backend.linkCircuitView(circuitViewWidget->getCircuitView());
-	circuitViews.push_back(circuitViewWidget);
-	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
-	addDock(w, KDDockWidgets::Location_OnRight);
-	return circuitViewWidget;
-}
-
 void MainWindow::setBlock(BlockType blockType) {
 	for (auto view : circuitViews) {
 		view->getCircuitView()->setSelectedBlock(blockType);
 	}
-}
-
-void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
-	static int nameIndex = 0;
-	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
-	dock->setWidget(widget);
-	addDockWidget(dock, location);
-	nameIndex++;
 }
 
 void MainWindow::setTool(std::string tool) {
