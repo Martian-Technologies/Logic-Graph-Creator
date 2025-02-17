@@ -97,7 +97,7 @@ if (Gatality_BuildApp)
 			# Dev Region
 			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
 			# Doc Types that macos can handle
-			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;"
+			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir"
 			# Application category
 			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
