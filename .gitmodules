@@ -5,5 +5,5 @@
 	path = external/googletest
 	url = https://github.com/google/googletest
 [submodule "wasmtime"]
-	path = wasmtime
+	path = external/wasmtime
 	url = https://github.com/bytecodealliance/wasmtime
