@@ -2,6 +2,7 @@
 #define selectorWindow_h
 
 #include <QWidget>
+#include <QListWidgetItem>
 
 #include "backend/container/block/blockDefs.h"
 
@@ -14,16 +15,19 @@ class SelectorWindow : public QWidget {
 public:
 	SelectorWindow(QWidget* parent = nullptr);
 	~SelectorWindow();
+	
+	void updateToolModeOptions(std::vector<std::string> modes);
 
 private:
-	void updateSelectedBlock();
-	void updateSelectedTool();
+	void updateSelected();
+	void updateSelectedMode(QListWidgetItem *current, QListWidgetItem *previous);
 
 	Ui::Selector* ui;
 
 signals:
 	void selectedBlockChange(BlockType blockType);
 	void selectedToolChange(std::string tool);
+	void selectedModeChange(std::string mode);
 };
 
 #endif /* selectorWindow_h */

@@ -20,10 +20,16 @@ public:
 	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;
 
+	void setMode(std::string mode);
+
 	void setCircuit(Circuit* circuit);
 	void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface);
 
 private:
+	SharedCircuitTool getCurrentNonHelperTool();
+	SharedCircuitTool getCurrentTool();
+
+
 	// current block container
 	Circuit* circuit;
 

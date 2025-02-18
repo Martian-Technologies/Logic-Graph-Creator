@@ -38,6 +38,10 @@ public:
 		toolManager.clearTools();
 	}
 
+	void setSelectedToolMode(std::string mode) {
+		toolManager.setMode(mode);
+	}
+
 	void setSelectedBlock(BlockType blockType) {
 		if (blockType != BlockType::NONE) {
 			toolManager.clearTools();

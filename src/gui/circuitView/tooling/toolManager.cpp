@@ -1,5 +1,16 @@
 #include "toolManager.h"
 
+SharedCircuitTool ToolManager::getCurrentNonHelperTool() {
+	unsigned int i = toolStack.size();
+	while (i != 0) {
+		i--;
+		if (!toolStack[i]->isHelper()) {
+			return toolStack[i];
+		}
+	}
+	return nullptr;
+}
+
 SharedCircuitTool ToolManager::getCurrentNonHelperTool() const {
 	unsigned int i = toolStack.size();
 	while (i != 0) {
@@ -11,11 +22,22 @@ SharedCircuitTool ToolManager::getCurrentNonHelperTool() const {
 	return nullptr;
 }
 
+SharedCircuitTool ToolManager::getCurrentTool() {
+	if (!toolStack.empty())
+		return toolStack.back();
+	return nullptr;
+}
+
 SharedCircuitTool ToolManager::getCurrentTool() const {
 	if (!toolStack.empty())
 		return toolStack.back();
 	return nullptr;
 }
+
+void ToolManager::setMode(std::string mode) {
+	getCurrentNonHelperTool()->setMode(mode);
+}
+
 
 void ToolManager::reset() {
 	if (toolStack.size())

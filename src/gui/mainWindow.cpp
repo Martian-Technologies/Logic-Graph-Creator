@@ -112,7 +112,6 @@ void MainWindow::saveCircuitAs() {
     saveCircuitIndex(0);
 }
 
-
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit() {
     QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
@@ -174,12 +173,12 @@ void MainWindow::loadCircuitInto(int index) {
         CircuitView<QtRenderer>* circuitView = circuitViews[index]->getCircuitView();
         // circuitView->getToolManager().setPendingPreviewData(parsed);
         // circuitView->getToolManager().changeTool("Preview Placement");
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getCurrentTool().get());
-        if (previewTool) {
-            previewTool->setBackend(circuitView->getBackend());
-        }else{
-            std::cout << "Preview tool in mainWindow failed to cast\n";
-        }
+        // PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getCurrentTool().get());
+        // if (previewTool) {
+        //     previewTool->setBackend(circuitView->getBackend());
+        // }else{
+        //     std::cout << "Preview tool in mainWindow failed to cast\n";
+        // }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
     }
@@ -189,6 +188,8 @@ void MainWindow::openNewSelectorWindow() {
 	SelectorWindow* selector = new SelectorWindow();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
+	connect(selector, &SelectorWindow::selectedModeChange, this, &MainWindow::setMode);
+	connect(this, &MainWindow::toolModeOptionsChanged, selector, &SelectorWindow::updateToolModeOptions);
 	addDock(selector, KDDockWidgets::Location_OnLeft);
 }
 
@@ -211,12 +212,6 @@ CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	return circuitViewWidget;
 }
 
-void MainWindow::setBlock(BlockType blockType) {
-	for (auto view : circuitViews) {
-		view->getCircuitView()->setSelectedBlock(blockType);
-	}
-}
-
 void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
 	static int nameIndex = 0;
 	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
@@ -225,8 +220,22 @@ void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
 	nameIndex++;
 }
 
+void MainWindow::setBlock(BlockType blockType) {
+	for (auto view : circuitViews) {
+		view->getCircuitView()->setSelectedBlock(blockType);
+	}
+	emit toolModeOptionsChanged(BlockPlacementTool::getModes());
+}
+
 void MainWindow::setTool(std::string tool) {
 	for (auto view : circuitViews) {
-		view->getCircuitView()->setSelectedTool(tool);
+		// view->getCircuitView()->setSelectedTool(tool);
 	}
 }
+
+void MainWindow::setMode(std::string tool) {
+	for (auto view : circuitViews) {
+		view->getCircuitView()->setSelectedToolMode(tool);
+	}
+}
+

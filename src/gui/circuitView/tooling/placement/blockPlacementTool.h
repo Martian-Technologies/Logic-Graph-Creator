@@ -17,12 +17,16 @@ public:
 			toolManagerInterface->pushTool(activePlacementTool);
 	}
 
-	std::vector<std::string> getModes() override final { return { "Single", "Area" }; }
+	static inline std::vector<std::string> getModes() { return { "Single", "Area" }; }
 	void setMode(std::string toolMode) override final {
 		if (mode != toolMode) {
 			if (toolMode == "None") {
 				activePlacementTool = nullptr;
+				toolManagerInterface->popTool();
 			} else {
+				if (mode == "None") {
+					toolManagerInterface->popTool();
+				}
 				if (toolMode == "Single") {
 					activePlacementTool = std::make_shared<SinglePlaceTool>();
 				} else if (toolMode == "Area") {
@@ -30,6 +34,7 @@ public:
 				}
 				activePlacementTool->selectBlock(selectedBlock);
 				activePlacementTool->setRotation(rotation);
+				toolManagerInterface->pushTool(activePlacementTool);
 			}
 		}
 	}

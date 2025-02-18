@@ -22,6 +22,7 @@ public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
+	void setMode(std::string tool);
     void updateSaveMenu();
     void updateLoadIntoMenu();
     void saveCircuit(int id);
@@ -41,6 +42,9 @@ private:
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
     CircuitFileManager circuitFileManager;
+
+signals:
+	void toolModeOptionsChanged(std::vector<std::string> modes);
 };
 
 #endif /* mainWindow_h */
