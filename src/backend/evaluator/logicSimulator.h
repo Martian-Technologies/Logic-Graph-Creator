@@ -11,7 +11,7 @@
 
 class LogicSimulator {
 public:
-	LogicSimulator();
+	LogicSimulator(bool runSimLoop);
 	~LogicSimulator();
 	void initialize();
 	block_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
@@ -33,6 +33,10 @@ public:
 
 	void simulateNTicks(unsigned int n);
 
+    void setPreTickCallback(std::function<void()> callback) {
+        preTickCallback = std::move(callback);
+    }
+
 	logic_state_t getState(block_id_t gate) const { return currentState[gate]; }
 
 	void debugPrint();
@@ -45,6 +49,7 @@ public:
 	void triggerNextTickReset();
 
 private:
+    std::function<void()> preTickCallback;
 	std::vector<logic_state_t> currentState, nextState;
 	std::vector<GateType> gateTypes;
 	std::vector<std::vector<block_id_t>> gateInputs, gateOutputs;

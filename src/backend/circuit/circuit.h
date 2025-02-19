@@ -38,6 +38,7 @@ public:
 
 
 	/* ----------- blocks ----------- */
+    bool tryInsertCustomBlock(const Position& position, std::shared_ptr<Circuit> customCircuit);
 	// Trys to insert a block. Returns if successful.
 	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
 	// Trys to remove a block. Returns if successful.
@@ -83,6 +84,23 @@ public:
 	void undo();
 	void redo();
 
+    /* ---------- custom circuit/block logic ------------- */
+
+    struct ProxyData {
+        // port indicies to proxy blocks in the current circuit
+        std::unordered_map<unsigned int, Block*> inputProxies;
+        std::unordered_map<unsigned int, Block*> outputProxies;
+    };
+
+    bool isCustomBlock() const { return !inputPorts.empty() && !outputPorts.empty(); }
+    
+    const std::unordered_map<std::shared_ptr<Circuit>, ProxyData>& getCustomCircuits() const { return internalCustomCircuits; }
+
+    std::vector<Block*>& getAllInputPorts() { return inputPorts; }
+    std::vector<Block*>& getAllOutputPorts() { return outputPorts; }
+    Block* getInputPort(unsigned int index) const { return inputPorts[index]; }
+    Block* getOutputPort(unsigned int index) const { return outputPorts[index]; }
+
 private:
 	// helpers
 	bool checkMoveCollision(const SharedSelection& selection, const Vector& movement);
@@ -104,6 +122,11 @@ private:
 
     bool saved = false;
     std::string saveFilePath;
+
+    // Custom block components
+    std::unordered_map<std::shared_ptr<Circuit>, ProxyData> internalCustomCircuits;
+    std::vector<Block*> inputPorts;
+    std::vector<Block*> outputPorts;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;

@@ -4,10 +4,30 @@
 #include "backend/container/block/blockDefs.h"
 #include "backend/container/block/connectionEnd.h"
 #include "backend/position/position.h"
+#include "backend/circuit/circuit.h"
 
 class ParsedCircuit {
     friend class CircuitValidator;
 public:
+    ParsedCircuit(SharedCircuit c): isCustom(true), customCircuit(c) {
+        // only add blocks that will be the proxies, because that is all that we are going to be placing
+        // we want to make proxy blocks for the ports of the custom circuit.
+        int i = 0;
+        for (Block* b : customCircuit->getAllInputPorts()){
+            blocks[b->id()] = BlockData{FPosition(0,i), Rotation::ZERO, BlockType::INPUT_PROXY};
+            ++i;
+        }
+        maxPos.dy = i-1;
+        i = 0;
+        for (Block* b : customCircuit->getAllOutputPorts()){
+            blocks[b->id()] = BlockData{FPosition(1,i), Rotation::ZERO, BlockType::OUTPUT_PROXY};
+            ++i;
+        }
+        maxPos.dy = maxPos.dy >= (i-1) ? maxPos.dy : (i-1);
+        maxPos.dx = 1;
+        minPos.dx = 0;
+        minPos.dy = 0;
+    }
     ParsedCircuit() = default;
 
     struct BlockData {
@@ -92,6 +112,9 @@ public:
     void setFilePath(const std::string& fpath) { fullFilePath = fpath; }
     const std::string& getFilePath() const { return fullFilePath; }
 
+    bool isCustomParse() const { return isCustom; }
+    SharedCircuit getCustomCircuit() const { return customCircuit; }
+
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
 
@@ -114,6 +137,8 @@ private:
     std::vector<ConnectionData> connections;
     std::string fullFilePath;
     bool valid = true;
+    bool isCustom = false;
+    SharedCircuit customCircuit = nullptr;
 
     std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> dependencies;
     std::vector<ExternalConnection> externalConnections;

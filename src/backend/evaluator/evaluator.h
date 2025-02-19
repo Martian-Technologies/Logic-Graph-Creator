@@ -1,5 +1,6 @@
 #ifndef evaluator_h
 #define evaluator_h
+#include <list>
 
 #include "backend/circuit/circuit.h"
 #include "backend/container/difference.h"
@@ -12,7 +13,7 @@ typedef unsigned int evaluator_id_t;
 
 class Evaluator {
 public:
-	Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit);
+	Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit, bool runSimLoop=true);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Evaluator " + std::to_string(evaluatorId) + " (Circuit: " + std::to_string(addressTree.getContainerId()) + ")"; }
@@ -25,6 +26,7 @@ public:
 	void setTickrate(unsigned long long tickrate);
 	void setUseTickrate(bool useTickrate);
 	long long int getRealTickrate() const;
+    void evaluateWithProxies();
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
@@ -35,12 +37,15 @@ public:
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
 private:
+    void processCustomCircuitProxies(SharedCircuit childCircuit, const Circuit::ProxyData& proxies);
 	evaluator_id_t evaluatorId;
 	bool paused;
 	bool usingTickrate;
 	unsigned long long targetTickrate;
 	LogicSimulator logicSimulator;
 	AddressTreeNode<block_id_t> addressTree;
+    SharedCircuit circuit;
+    std::unordered_map<circuit_id_t, std::shared_ptr<Evaluator>> proxyEvaluators;
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);

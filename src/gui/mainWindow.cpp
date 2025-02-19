@@ -53,8 +53,10 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 	connect(newSelectorAction, &QAction::triggered, this, &MainWindow::openNewSelectorWindow);
 	connect(newCircuitViewAction, &QAction::triggered, this, &MainWindow::openNewCircuitViewWindow);
 
-    QAction* exportProjectAction = fileMenu->addAction(tr("Export All Circuits"));
+    QAction* exportProjectAction = fileMenu->addAction("Export All Circuits");
     connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
+    QAction* placeCustomBlock = fileMenu->addAction("Place circuit 2 as custom block into circuit 1");
+    connect(placeCustomBlock, &QAction::triggered, this, &MainWindow::placeCustomBlock);
 
     // Submenus
 	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
@@ -71,6 +73,43 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
     connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
     connect(loadIntoSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(false); });
     connect(loadMergedSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(true); });
+}
+
+// this places circuit 2 as a custom block into circuit 1
+void MainWindow::placeCustomBlock() {
+    SharedCircuit two = backend.getCircuit(2);
+    if (two == nullptr){
+        std::cout << "Circuit 2 is not created\n";
+        return;
+    }
+    if (!two->isCustomBlock()){
+        std::cout << "Circuit 2 is not a custom block with input and output ports\n";
+        return;
+    }
+    CircuitView<QtRenderer>* circuit_one_view = nullptr;
+    for (std::pair<QWidget*,CircuitViewWidget*> p : activeWidgets){
+        CircuitView<QtRenderer>* temp = p.second->getCircuitView();
+        if (temp->getCircuit()->getCircuitId() == 1){
+            circuit_one_view = temp;
+            break;
+        }
+    }
+    if (!circuit_one_view) {
+        std::cout << "Circuit one is not in view\n";
+        return;
+    }
+
+    // Create a new circuit 
+    // pass a custom circuit into parsed circuit
+    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>(two);
+    circuit_one_view->getToolManager().setPendingPreviewData(parsed);
+    circuit_one_view->getToolManager().changeTool("Preview Placement");
+    PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuit_one_view->getToolManager().getCurrentTool().get());
+    if (previewTool) {
+        previewTool->setBackend(&backend);
+    }else{
+        std::cout << "Preview tool in mainWindow failed to cast\n";
+    }
 }
 
 void MainWindow::updateSaveMenu(bool saveAs) {
@@ -192,13 +231,13 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView, bool load
 }
 
 void MainWindow::exportProject() {
-    QString baseDir = QFileDialog::getExistingDirectory(this, tr("Select Parent Directory"), QDir::homePath());
+    QString baseDir = QFileDialog::getExistingDirectory(this, "Select Parent Directory", QDir::homePath());
     if (baseDir.isEmpty()) return;
 
     std::cout << "Export base directory: " << baseDir.toStdString() << '\n';
 
     bool valid;
-    QString projectName = QInputDialog::getText(this, tr("Project Name"), tr("Enter project name:"), QLineEdit::Normal, "NewProject", &valid);
+    QString projectName = QInputDialog::getText(this, "Project Name", "Enter project name:", QLineEdit::Normal, "NewProject", &valid);
     if (!valid || projectName.isEmpty()) return;
 
     QString projectPath = QDir(baseDir).filePath(projectName);
@@ -206,18 +245,18 @@ void MainWindow::exportProject() {
     std::cout << "Export full path: " << projectPath.toStdString() << '\n';
 
     if (QDir(baseDir).exists(projectName)) {
-        QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Overwrite?"), tr("Directory exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No);
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "Overwrite?", "Directory exists. Overwrite?", QMessageBox::Yes | QMessageBox::No);
         if (reply != QMessageBox::Yes) return;
 
         // remove it and then recreate it with new contents
         //if (!QDir(projectPath).removeRecursively()) {
-        //    QMessageBox::warning(this, tr("Error"), tr("Failed to remove the existing project directory."));
+        //    QMessageBox::warning(this, "Error", "Failed to remove the existing project directory.");
         //    return;
         //}
     }
 
     if (!QDir(baseDir).mkpath(projectPath)) {
-        QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
+        QMessageBox::warning(this, "Error", "Failed to create project directory.");
         return;
     }
 
@@ -246,9 +285,9 @@ void MainWindow::exportProject() {
     }
 
     if (errorsOccurred) {
-        QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
+        QMessageBox::warning(this, "Partial Export", "Some circuits could not be exported.");
     } else {
-        QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
+        QMessageBox::information(this, "Success", "Project was fully exported");
     }
 }
 

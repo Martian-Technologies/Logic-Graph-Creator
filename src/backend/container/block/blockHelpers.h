@@ -11,8 +11,17 @@ inline T getBlockDataValue(block_data_t data) {
 	return T();
 }
 
-template<class T, block_data_index_t index, BlockType type>
-inline void setBlockDataValue(block_data_t& data, T value) { }
+//template<class T, block_data_index_t index, BlockType type>
+//inline void setBlockDataValue(block_data_t& data, T value) { }
+
+inline block_data_t packProxyData(unsigned int child_circuit_id, unsigned int port_index) {
+    return (static_cast<block_data_t>(child_circuit_id) << 16) | port_index;
+}
+
+inline void unpackProxyData(block_data_t data, unsigned int& child_circuit_id, unsigned int& port_index) {
+    child_circuit_id = data >> 16;
+    port_index = data & 0xFFFF;
+}
 
 inline void rotateWidthAndHeight(Rotation rotation, block_size_t& width, block_size_t& height) noexcept {
 	if (isRotated(rotation)) std::swap(width, height);
@@ -46,6 +55,10 @@ inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type,
 	case BlockType::BUTTON: return { 0, false };
 	case BlockType::TICK_BUTTON: return { 0, false };
 	case BlockType::LIGHT: return { 0, true };
+	case BlockType::INPUT_PORT: return { 0, false };
+	case BlockType::INPUT_PROXY: return { 0, true };
+    case BlockType::OUTPUT_PORT: return { 0, true };
+    case BlockType::OUTPUT_PROXY: return { 0, false };
 	default:
 		if (vector.dx == 0 && vector.dy == 0) return { 0, true };
 		return { 0, false };
@@ -58,6 +71,10 @@ inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type
 	case BlockType::BUTTON: return { 0, true };
 	case BlockType::TICK_BUTTON: return { 0, true };
 	case BlockType::LIGHT: return { 0, false };
+	case BlockType::INPUT_PORT: return { 0, true };
+	case BlockType::INPUT_PROXY: return { 0, false };
+    case BlockType::OUTPUT_PORT: return { 0, false };
+    case BlockType::OUTPUT_PROXY: return { 0, true };
 	default:
 		if (vector.dx == 0 && vector.dy == 0) return { 1, true };
 		return { 0, false };
@@ -103,6 +120,10 @@ constexpr connection_end_id_t getMaxConnectionId(BlockType type) {
 	case BlockType::BUTTON: return 0;
 	case BlockType::TICK_BUTTON: return 0;
 	case BlockType::LIGHT: return 0;
+	case BlockType::INPUT_PROXY: return 0;
+	case BlockType::INPUT_PORT: return 0;
+	case BlockType::OUTPUT_PROXY: return 0;
+	case BlockType::OUTPUT_PORT: return 0;
 	default: return 1;
 	}
 }
@@ -112,6 +133,8 @@ constexpr bool isConnectionInput(BlockType type, connection_end_id_t connectionI
 	case BlockType::SWITCH: return false;
 	case BlockType::BUTTON: return false;
 	case BlockType::TICK_BUTTON: return false;
+	case BlockType::INPUT_PORT: return false;
+	case BlockType::OUTPUT_PROXY: return false;
 	default:
 		return connectionId == 0;
 	}

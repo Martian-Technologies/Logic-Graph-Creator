@@ -142,6 +142,16 @@
             <string>Light</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Input Port</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Output Port</string>
+           </property>
+          </item>
          </item>
         </widget>
        </item>

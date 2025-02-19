@@ -28,14 +28,15 @@ public:
 	inline unsigned int getBlockCount() const { return blocks.size(); }
 
 	// -- setters --
-	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveBlock(const Position& position);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
+	Block* tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
+
+    // for custom block insertion, we pass data that holds custom circuit id, and port the proxy goes to
+	Block* tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, block_data_t data, Difference* difference);
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveBlock(const Position& position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.

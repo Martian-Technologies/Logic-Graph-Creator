@@ -24,7 +24,10 @@ enum BlockType : char {
 	SWITCH,
 	CONSTANT,
 	LIGHT,
-	CUSTOM,
+    INPUT_PORT, // used inside of custom block circuits to mark inputs
+    OUTPUT_PORT, // used inside of custom block circuits to mark outputs
+    INPUT_PROXY, // used in parent circuit (links to custom input)
+    OUTPUT_PROXY, // used in parent circuit (links to custom output)
 	TYPE_COUNT
 };
 

@@ -22,6 +22,10 @@ IconLoader::IconLoader() {
 		setIcon("Switch", blocks, QRect(256 * 10, 0, 256, 256));
 		setIcon("Constant", blocks, QRect(256 * 11, 0, 256, 256));
 		setIcon("Light", blocks, QRect(256 * 12, 0, 256, 256));
+        setIcon("Input Proxy", blocks, QRect(256*1, 0, 256, 256));
+        setIcon("Output Proxy", blocks, QRect(256*1, 0, 256, 256));
+        setIcon("Input Port", blocks, QRect(256*1, 0, 256, 256));
+        setIcon("Output Port", blocks, QRect(256*1, 0, 256, 256));
 	}
 
 	int tools = loadTileset(":/toolAndBlockIcons/toolIcons.png");

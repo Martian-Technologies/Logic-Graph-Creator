@@ -1,6 +1,11 @@
 #include "validateCircuit.h"
 
 void CircuitValidator::validate() {
+    if (parsedCircuit.isCustomParse()){
+        // the circuit that the parse is holding onto is guaranteed to be valid
+        parsedCircuit.valid = true;
+        return;
+    }
     bool isValid = true;
 
     isValid = isValid && validateDependencies();

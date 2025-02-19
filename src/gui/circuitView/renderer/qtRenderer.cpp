@@ -362,6 +362,11 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 	QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
 
 	// get tile set coordinate
+    if (type == BlockType::INPUT_PORT || type == BlockType::OUTPUT_PORT){
+        type = BlockType::LIGHT;
+    } else if (type == BlockType::INPUT_PROXY || type == BlockType::OUTPUT_PROXY){
+        type = BlockType::BLOCK;
+    }
 	Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, state);
 	Vec2Int tileSize = tileSetInfo->getCellPixelSize();
 

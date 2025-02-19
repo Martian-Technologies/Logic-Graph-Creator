@@ -25,8 +25,11 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "SWITCH") return SWITCH;
     if (str == "CONSTANT") return CONSTANT;
     if (str == "LIGHT") return LIGHT;
-    if (str == "CUSTOM") return CUSTOM;
     if (str == "TYPE_COUNT") return TYPE_COUNT;
+    if (str == "INPUT_PORT") return INPUT_PORT;
+    if (str == "OUTPUT_PORT") return OUTPUT_PORT;
+    if (str == "INPUT_PROXY") return INPUT_PROXY;
+    if (str == "OUTPUT_PROXY") return OUTPUT_PROXY;
     return NONE;
 }
 
@@ -53,8 +56,11 @@ std::string blockTypeToString(BlockType type) {
         case SWITCH: return "SWITCH";
         case CONSTANT: return "CONSTANT";
         case LIGHT: return "LIGHT";
-        case CUSTOM: return "CUSTOM";
         case TYPE_COUNT: return "TYPE_COUNT";
+        case INPUT_PORT: return "INPUT_PORT";
+        case OUTPUT_PORT: return "OUTPUT_PORT";
+        case INPUT_PROXY: return "INPUT_PROXY";
+        case OUTPUT_PROXY: return "OUTPUT_PROXY";
         default: return "UNKNOWN";
     }
 }

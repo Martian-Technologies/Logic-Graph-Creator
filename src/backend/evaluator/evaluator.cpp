@@ -1,15 +1,18 @@
 #include "evaluator.h"
+#include "computerAPI/circuits/circuitFileManager.h"
 
-Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
-	: evaluatorId(evaluatorId), paused(true),
+Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit, bool runSimLoop)
+	: evaluatorId(evaluatorId), circuit(circuit), paused(true),
 	targetTickrate(0),
-	logicSimulator(),
+	logicSimulator(runSimLoop),
 	addressTree(circuit->getCircuitId()),
 	usingTickrate(false) {
 	setTickrate(40 * 60); // 1000000000 clocks / min
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 
+    std::cout << "Created new evaluator" << ": " << runSimLoop << '\n';
+    logicSimulator.setPreTickCallback([this]() { this->evaluateWithProxies(); });
 	makeEdit(std::make_shared<Difference>(difference), circuit->getCircuitId());
 
 	// connect makeEdit to circuit
@@ -53,16 +56,77 @@ long long int Evaluator::getRealTickrate() const {
 	return paused ? 0 : logicSimulator.getRealTickrate();
 }
 
+// for each circuit, process it if it has any proxies in it.
+void Evaluator::evaluateWithProxies() {
+    if (!circuit) return;
+
+    static int count = 0;
+    std::cout << "Evaluate proxies: " << ++count << ", customs: " << circuit->getCustomCircuits().size() << '\n';
+    for (const std::pair<const unsigned int, Block> b : *circuit->getBlockContainer()){
+        std::cout << b.second.id() << ": " << blockTypeToString(b.second.type()) << ": " << logicSimulator.getState(addressTree.getValue(Address(b.second.getPosition())));
+        auto itr = circuit->getCustomCircuits().begin();
+        if (itr != circuit->getCustomCircuits().end()){
+            for (const std::pair<const unsigned int, Block *> ins : itr->second.inputProxies){
+                if (ins.second->id() == b.second.id()){
+                    std::cout << ", is input proxy";
+                }
+            }
+            for (const std::pair<const unsigned int, Block *> ins : itr->second.outputProxies){
+                if (ins.second->id() == b.second.id()){
+                    std::cout << ", is output proxy";
+                }
+            }
+        }
+        std::cout << '\n';
+    }
+    for (const auto& [childCircuit, proxyData] : circuit->getCustomCircuits()) {
+        processCustomCircuitProxies(childCircuit, proxyData);
+    }
+}
+
+void Evaluator::processCustomCircuitProxies(SharedCircuit childCircuit, const Circuit::ProxyData& proxies) {
+    std::shared_ptr<Evaluator> e;
+    std::unordered_map<circuit_id_t, std::shared_ptr<Evaluator>>::iterator itr = proxyEvaluators.find(childCircuit->getCircuitId());
+    if (itr != proxyEvaluators.end()){
+        e = itr->second;
+    } else {
+        e = std::make_shared<Evaluator>(-1 - proxyEvaluators.size(), childCircuit, false);
+        proxyEvaluators[childCircuit->getCircuitId()] = e;
+    }
+    
+    std::cout << "Input Proxies size: " << proxies.inputProxies.size() << '\n';
+    std::cout << "Output Proxies size: " << proxies.outputProxies.size() << '\n';
+    // Process INPUT_PROXY blocks (push data to inputPorts of other circuits)
+    for (const auto& [portIndex, proxyBlock] : proxies.inputProxies) {
+        logic_state_t inputState = logicSimulator.getState(addressTree.getValue(Address(proxyBlock->getPosition())));
+        if (inputState){
+            std::cout << "INPUT PROXY IS TOGGLED TRUE\n";
+        }
+        e->setState(Address(childCircuit->getInputPort(portIndex)->getPosition()), inputState);
+    }
+
+    // evaluate child circuit
+    e->runNTicks(1);
+
+    // Process OUTPUT_PROXY blocks (pull data from output ports to this circuit)
+    for (const auto& [portIndex, proxyBlock] : proxies.outputProxies) {
+        logic_state_t outputState = e->getState(Address(childCircuit->getOutputPort(portIndex)->getPosition()));
+        std::cout << "Changing id: " << proxyBlock->id() << ", from state: " << logicSimulator.getState(addressTree.getValue(Address(proxyBlock->getPosition()))) << ", to: " << outputState << '\n';
+        logicSimulator.setState(addressTree.getValue(Address(proxyBlock->getPosition())), outputState);
+    }
+}
 
 void Evaluator::runNTicks(unsigned long long n) {
 	// TODO: make this happen in the thread via leaky bucket
-	logicSimulator.simulateNTicks(n);
+    std::cout << "RUNNING " << n << " TICK\n";
+    logicSimulator.simulateNTicks(n);
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
 	logicSimulator.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulator.threadIsWaiting()) {
+        std::cout << "in loop\n";
 		std::this_thread::yield();
 	}
 	const auto modifications = difference->getModifications();
@@ -139,6 +203,10 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
 	case BlockType::LIGHT: return GateType::OR;
+    case BlockType::INPUT_PROXY: return GateType::OR;
+    case BlockType::OUTPUT_PROXY: return GateType::DEFAULT_RETURN_CURRENTSTATE;
+    case BlockType::INPUT_PORT: return GateType::DEFAULT_RETURN_CURRENTSTATE;
+    case BlockType::OUTPUT_PORT: return GateType::OR;
 	default:
 		throw std::invalid_argument("circuitToEvaluatorGatetype: invalid blockType");
 	}

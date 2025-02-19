@@ -28,6 +28,11 @@ public:
 		}
 	}
 
+    //SharedCircuit getCustomCircuit(circuit_id_t id) const {
+    //    auto it = customCircuits.find(id);
+    //    return (it != customCircuits.end()) ? it->second : nullptr;
+    //}
+
 	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;
 	typedef std::map<circuit_id_t, SharedCircuit>::const_iterator const_iterator;
 

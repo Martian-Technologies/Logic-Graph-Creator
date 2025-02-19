@@ -54,6 +54,12 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         return false;
     }
 
+    if (parsedCircuit->isCustomParse()){
+        clearPreview();
+        usingTool = continueRender = false;
+        return circuit->tryInsertCustomBlock(currentPosition, parsedCircuit->getCustomCircuit());
+    }
+
     Vector totalOffset = (parsedCircuit->getMinPos()*-1) + Vector(currentPosition.x, currentPosition.y);
     std::unordered_map<block_id_t, block_id_t> realIds;
 

@@ -13,22 +13,6 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 	return false;
 }
 
-bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
-	if (
-		blockType == BlockType::NONE ||
-		blockType == BlockType::BLOCK ||
-		blockType >= BlockType::TYPE_COUNT ||
-		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
-		) return false;
-	block_id_t id = getNewId();
-	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
-	iter->second.setId(id);
-	iter->second.setPosition(position);
-	iter->second.setRotation(rotation);
-	placeBlockCells(&iter->second);
-	return true;
-}
-
 bool BlockContainer::tryRemoveBlock(const Position& position) {
 	Cell* cell = getCell(position);
 	if (cell == nullptr) return false;
@@ -65,13 +49,13 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 	return true;
 }
 
-bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
+Block* BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
 	if (
 		blockType == BlockType::NONE ||
 		blockType == BlockType::BLOCK ||
 		blockType == BlockType::TYPE_COUNT ||
 		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
-		) return false;
+		) { return nullptr;}
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
 	iter->second.setId(id);
@@ -79,7 +63,25 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
 	iter->second.setRotation(rotation);
 	placeBlockCells(&iter->second);
 	difference->addPlacedBlock(position, rotation, blockType);
-	return true;
+	return &iter->second;
+}
+
+Block* BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, block_data_t data, Difference* difference) {
+	if (
+		blockType == BlockType::NONE ||
+		blockType == BlockType::BLOCK ||
+		blockType == BlockType::TYPE_COUNT ||
+		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
+		) { return nullptr;}
+	block_id_t id = getNewId();
+	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
+	iter->second.setId(id);
+	iter->second.setPosition(position);
+	iter->second.setRotation(rotation);
+	iter->second.setRawData(data); // set the data for this custom block
+	placeBlockCells(&iter->second);
+	difference->addPlacedBlock(position, rotation, blockType);
+	return &iter->second;
 }
 
 bool BlockContainer::tryRemoveBlock(const Position& position, Difference* difference) {

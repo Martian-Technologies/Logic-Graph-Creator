@@ -29,6 +29,7 @@ public:
     void loadCircuit(bool loadMerged = false);
     void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged = false);
     void exportProject();
+    void placeCustomBlock();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 	CircuitViewWidget* openNewCircuitViewWindow();

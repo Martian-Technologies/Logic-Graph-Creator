@@ -29,6 +29,8 @@ void SelectorWindow::updateSelectedBlock() {
 			else if (str == "Button") type = BlockType::BUTTON;
 			else if (str == "Tick Button") type = BlockType::TICK_BUTTON;
 			else if (str == "Light") type = BlockType::LIGHT;
+			else if (str == "Input Port") type = BlockType::INPUT_PORT;
+			else if (str == "Output Port") type = BlockType::OUTPUT_PORT;
 			emit selectedBlockChange(type);
 			return;
 		}

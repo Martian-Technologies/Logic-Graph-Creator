@@ -5,7 +5,7 @@
 #include "logicSimulator.h"
 
 
-LogicSimulator::LogicSimulator()
+LogicSimulator::LogicSimulator(bool runSimLoop)
 	:currentState(),
 	nextState(),
 	gateTypes(),
@@ -20,8 +20,16 @@ LogicSimulator::LogicSimulator()
 	proceedFlag(false),
 	isWaiting(false),
 	nextTick_us(0) {
-	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
-	tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
+
+    std::cout << "Created logic sim\n";
+    if (runSimLoop){
+        std::cout << "Logic sim is running\n";
+        simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
+        tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
+    } else{
+        std::cout << "Logic sim is NOT RUNNING\n";
+        isWaiting = true;
+    }
 }
 
 LogicSimulator::~LogicSimulator() {
@@ -252,11 +260,14 @@ void LogicSimulator::reserveGates(block_id_t numGates) {
 }
 
 void LogicSimulator::simulateNTicks(unsigned int n) {
-	for (int i = 0; i < n; ++i) {
-		computeNextState();
-		propagatePowered();
-		swapStates();
-	}
+    for (int i = 0; i < n; ++i) {
+        if (preTickCallback) {
+            preTickCallback();
+        }
+        computeNextState();
+        propagatePowered();
+        swapStates();
+    }
 }
 
 void LogicSimulator::debugPrint() {
@@ -310,6 +321,10 @@ void LogicSimulator::debugPrint() {
 
 void LogicSimulator::simulationLoop() {
 	while (running.load(std::memory_order_acquire)) {
+        if (preTickCallback) {
+            std::cout << "trying callback\n";
+            preTickCallback();
+        }
 		computeNextState();
 		propagatePowered();
 		++ticksRun;

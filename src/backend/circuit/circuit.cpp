@@ -1,10 +1,50 @@
 #include "circuit.h"
 
+bool Circuit::tryInsertCustomBlock(const Position& position, std::shared_ptr<Circuit> customCircuit){
+    if (!customCircuit) {
+        std::cout << "Trying to place down invalid custom block circuit\n";
+        return false;
+    }
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+    Block* b = nullptr;
+    bool out = true;
+    ProxyData& currentProxies = internalCustomCircuits[customCircuit];
+    for (int i=0; i<(int)customCircuit->inputPorts.size() && out; ++i) {
+        block_data_t data = packProxyData(customCircuit->getCircuitId(), i);
+        b = blockContainer.tryInsertBlock(position + Vector(0, i), Rotation::ZERO, BlockType::INPUT_PROXY, data, difference.get());
+        if (!b){
+            out = false;
+            break;
+        }
+        currentProxies.inputProxies[i] = b;
+        std::cout << "added an input proxy at id: " << b->id() << ", position: " << b->getPosition().toString() << '\n';
+    }
+    for (int i=0; i<(int)customCircuit->outputPorts.size() && out; ++i) {
+        block_data_t data = packProxyData(customCircuit->getCircuitId(), i);
+        b = blockContainer.tryInsertBlock(position + Vector(1, i), Rotation::ZERO, BlockType::OUTPUT_PROXY, data, difference.get());
+        if (!b){
+            out = false;
+            break;
+        }
+        currentProxies.outputProxies[i] = b;
+        std::cout << "added an output proxy at id: " << b->id() << ", position: " << b->getPosition().toString() << '\n';
+    }
+    sendDifference(difference);
+    return out;
+}
+
 bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
+	Block* out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
+
+    if (out && blockType == BlockType::INPUT_PORT){ inputPorts.push_back(out);
+    } else if (out && blockType == BlockType::OUTPUT_PORT){ outputPorts.push_back(out); }
+
+    if (isCustomBlock()){
+        std::cout << "This block is now custom\n";
+    }
 	sendDifference(difference);
-	return out;
+	return out != nullptr;
 }
 
 bool Circuit::tryRemoveBlock(const Position& position) {
