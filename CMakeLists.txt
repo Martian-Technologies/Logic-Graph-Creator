@@ -68,6 +68,7 @@ if (Gatality_BuildApp)
 		set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
 		set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+
 	elseif (WIN32) # Windows
 		# Icon
 		set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
@@ -83,6 +84,28 @@ if (Gatality_BuildApp)
 	# Platform specific business after add_executable
 	if(APPLE) # MacOS
 		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+
+		# Bundle Properties 
+		set_target_properties(${PROJECT_NAME} PROPERTIES
+			MACOSX_BUNDLE TRUE
+			# indentification
+			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
+			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
+			MACOSX_BUNDLE_NAME "Gatality"
+			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
+			# version info
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_INFO_VERSION "6.0"
+			# Dev Region
+			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
+			# Doc Types that macos can handle
+			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
+			# Application category
+			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
+			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+		)
+		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
 	elseif (WIN32) # Windows
 		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
 			# Set WIN32_EXECUTABLE (Disables Console)
