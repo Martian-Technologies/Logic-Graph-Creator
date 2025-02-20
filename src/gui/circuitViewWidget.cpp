@@ -290,7 +290,7 @@ void CircuitViewWidget::save() {
     if (fileManager) {
         QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
         if (!filePath.isEmpty()) {
-            fileManager->saveToFile(filePath, circuitView.getCircuit()->getCircuitId());
+            fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
         }
     }
 }
@@ -300,12 +300,12 @@ void CircuitViewWidget::load(const QString& filePath) {
     if (!fileManager) return;
 
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
-    if (!fileManager->loadFromFile(filePath, parsed)) {
+    if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed);
+    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
     if (parsed->isValid()){
         circuitView.getToolManager().setPendingPreviewData(parsed);
         circuitView.getToolManager().changeTool("Preview Placement");
