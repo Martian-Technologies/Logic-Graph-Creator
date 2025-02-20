@@ -1,59 +1,34 @@
 #include "treeSystem.h"
-#include "backend/container/difference.h"
 
-TreeManager::TreeManager() : branchPosition(0), nodePosition(0) {}
+UndoTree::UndoTree() : currentBranch(new Branch()) { currentBranch->parent = nullptr; currentBranch->index = 0; }
+UndoTree::~UndoTree() { delete currentBranch; }
 
-// actions
-void TreeManager::add(DifferenceSharedPtr difference) {
-    nodeCount++;
-	branchHistory.clear();
-
-    if (nodePosition < tree[branchPosition].size()) { // creates a new branch history if not at newest node
-        tree.push_back({}); 
-
-        // pairs id to new branch
-        branchMap[nodeCount].push_back(std::make_pair(branchPosition, nodePosition)); // maps new node to where it branched off from
-        branchMap[tree[branchPosition][nodePosition].id].push_back(tree.size() - 1, 0); // maps old node to branch off
-
-        branchPosition = tree.size() - 1;
-        nodePosition = 0;
-    }
-
-    tree[branchPosition].emplace_back(difference, nodeCount); // creates a new Node
-    nodePosition++;
+void UndoTree::add(DifferenceSharedPtr difference) {	
+	if (currentBranch->index < currentBranch->nodes.size()-1) {
+		Branch* tmp = currentBranch;
+		tmp->nodes[index]->second.push_back(std::make_unique<Branch>());
+		currentBranch = tmp->nodes[index]->second[tmp->nodes[index]->second.size() - 1];
+		currentBranch->index = 0;
+		currentBranch->parent = tmp;
+	}
+	currentBranch->index++;
+	currentBranch->nodes.emplace_back(difference, {});
 }
 
-DifferenceSharedPtr TreeManager::undo() {
-    if (nodePosition == 0) { // start of branch, must go to location branch branched off from
-		branchHistory.push_back(branchPosition); // whenever changing branches, stores the value of the previous branch for going back upward
-		branchPosition = branchMap[tree[branchPosition][nodePosition].id][0]->first;
-		nodePosition = branchMap[tree[branchPosition][nodePosition].id][0]->second + 1;
-    }
-
-    return tree[branchPosition][nodePosition--].diff;
+DifferenceSharedPtr UndoTree::undo() {
+	if (currentBranch->index == 0) {
+		currentBranch = currentBranch->parent;
+		return currentBranch->nodes[currentBranch->index]->first;
+	}
+	return currentBranch->nodes[currentBranch->index--]->first;
 }
 
-DifferenceSharedPtr TreeManager::redo() {
-    // this wont redo to new trees
-    if (nodePosition+1 == tree[branchPosition].size()){
-		if(branchHistory.size()>0){
-			branchPosition = branchHistory.front();
-			branchHistory.pop_front();
-			return tree[branchPosition][nodePosition++].diff;
-		}
+DifferenceSharedPtr UndoTree::redo() {
+	if (currentBranch->index == currentBranch->nodes.size() - 1) {
 		return std::make_shared<Difference>();
 	}
-    return tree[branchPosition][nodePosition++].diff;
+	return currentBranch->nodes[currentBranch->index++]->first;
 }
-
-void TreeManager::changeBranch(int i) {
-    branchPosition = i;
-    nodePosition = 0;
-}
-
-
-
-
 
 
 

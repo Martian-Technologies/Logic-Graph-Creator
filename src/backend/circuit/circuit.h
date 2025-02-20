@@ -94,7 +94,7 @@ private:
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;
-	TreeManager undoSystem;
+	UndoTree undoSystem;
 	bool midUndo = false;
 	unsigned int updateCount = 0; // increases anytime the container is changed
 };
