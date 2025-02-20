@@ -39,17 +39,17 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 }
 
 // Utility methods
-CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
-	QWidget* w = new QWidget();
-	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
-	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
-	backend.linkCircuitView(circuitViewWidget->getCircuitView());
-	circuitViews.push_back(circuitViewWidget);
-	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
-	addDock(w, KDDockWidgets::Location_OnRight);
-	return circuitViewWidget;
-}
+// CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
+// 	QWidget* w = new QWidget();
+// 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
+// 	circuitViewUi->setupUi(w);
+// 	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+// 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
+// 	circuitViews.push_back(circuitViewWidget);
+// 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
+// 	addDock(w, KDDockWidgets::Location_OnRight);
+// 	return circuitViewWidget;
+// }
 
 void MainWindow::setUpMenuBar() {
 	QMenuBar* menubar = menuBar();
@@ -310,7 +310,7 @@ void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
 	static int nameIndex = 0;
 	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
 	dock->setWidget(widget);
-  Widget(dock, location);
+	addDockWidget(dock, location);
 	nameIndex++;
 }
 
