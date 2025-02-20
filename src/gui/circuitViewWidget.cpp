@@ -38,23 +38,21 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	circuitView.getRenderer().resize(w, h);
 	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
-	
+	// connect buttons and actions
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
-
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
-
+	
 	connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
-                std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
+                logInfo("linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
 			}
 		}
 	);
-
 	connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend) {
@@ -62,16 +60,14 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			}
 		}
 	);
-
 	connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
-                std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
+                logInfo("linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
 			}
 		}
-	);
-	
+	);	
 	connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitView.getCircuit()) {
@@ -142,6 +138,7 @@ void CircuitViewWidget::updateLoop() {
 			evaluatorSelector->setCurrentIndex(index);
 		}
 	}
+	
 	// update for re-render
 	update();
 }

@@ -23,11 +23,11 @@ bool CircuitValidator::validateDependencies() {
         // validate the dependency as a circuit itself
         CircuitValidator depValidator(*depCircuit, mergeCircuit);
         if (!depCircuit->valid) {
-            std::cout << "** Dependency circuit validation failed for " << depName << " **\n";
+            logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
             return false;
         }
-        std::cout << "\nDependency circuit validation success for " << depName << '\n';
+        logInfo("Dependency circuit validation success for " + depName);
 
         // Merge into one parsed circuit:
         if (!mergeCircuit){ continue; }
@@ -66,9 +66,7 @@ bool CircuitValidator::validateDependencies() {
         }
     }
 
-
-    std::cout << "File dependency size: " << parsedCircuit.dependencies.size() << '\n';
-
+    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()) + " MERGING DEPENDENCY CONNECTIONS");
     if (mergeCircuit){
         processExternalConnections();
         parsedCircuit.dependencies.clear(); // We have no more dependencies because they are merged

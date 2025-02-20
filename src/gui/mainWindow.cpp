@@ -15,24 +15,43 @@
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
 
-MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()){
-	resize(900, 600);
+MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
+	: KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()) {
 
+	// set up window
+	resize(900, 600);
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
-
+	// create default circuit and evaluator
 	circuit_id_t id = backend.createCircuit();
 	evaluator_id_t evalId1 = *backend.createEvaluator(id);
 
+	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
-
+	// create default hotbar and selector
 	openNewHotbarWindow();
 	openNewSelectorWindow();
 
-	// menubar setup
+	setUpMenuBar();
+}
+
+// Utility methods
+CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
+	QWidget* w = new QWidget();
+	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
+	circuitViewUi->setupUi(w);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+	backend.linkCircuitView(circuitViewWidget->getCircuitView());
+	circuitViews.push_back(circuitViewWidget);
+	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
+	addDock(w, KDDockWidgets::Location_OnRight);
+	return circuitViewWidget;
+}
+
+void MainWindow::setUpMenuBar() {
 	QMenuBar* menubar = menuBar();
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
@@ -56,7 +75,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
     QAction* exportProjectAction = fileMenu->addAction(tr("Export All Circuits"));
     connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
 
-    // Submenus
+	// submenu setup
 	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
     saveAction->setText("Save Circuit");
 	QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
@@ -291,7 +310,7 @@ void MainWindow::addDock(QWidget* widget, KDDockWidgets::Location location) {
 	static int nameIndex = 0;
 	auto dock = new KDDockWidgets::QtWidgets::DockWidget("dock" + QString::number(nameIndex));
 	dock->setWidget(widget);
-	addDockWidget(dock, location);
+  Widget(dock, location);
 	nameIndex++;
 }
 

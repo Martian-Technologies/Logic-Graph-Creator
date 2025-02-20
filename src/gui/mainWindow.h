@@ -21,6 +21,8 @@ class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
 	Q_OBJECT
 public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
+	
+	// actions
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
     void updateSaveMenu(bool saveAs = false);
@@ -31,7 +33,11 @@ public:
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
+
+private:
+	// utility
 	CircuitViewWidget* openNewCircuitViewWindow();
+	void setUpMenuBar();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
     bool eventFilter(QObject* obj, QEvent* event);
 
