@@ -141,6 +141,8 @@ if (Gatality_BuildTests)
 		"${TEST_DIR}/*.cpp"
 		"${TEST_DIR}/*.h"
 		"${SOURCE_DIR}/backend/*"
+		"${SOURCE_DIR}/logging/*"
+		"${SOURCE_DIR}/util/*"
 	)
 
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})

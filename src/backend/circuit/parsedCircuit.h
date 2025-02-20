@@ -89,6 +89,8 @@ public:
         }
     }
 
+    void setFilePath(const std::string& fpath) { fullFilePath = fpath; }
+    const std::string& getFilePath() const { return fullFilePath; }
 
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
@@ -110,6 +112,7 @@ private:
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
+    std::string fullFilePath;
     bool valid = true;
 
     std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> dependencies;
