@@ -1,8 +1,9 @@
 #include "singleItemDropWidget.h"
 
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QMimeData>
 #include <QDrag>
-#include <QDebug> // For debugging purposes
 
 SingleItemDropWidget::SingleItemDropWidget(QWidget* parent)
 	: QWidget(parent) {
@@ -41,21 +42,3 @@ void SingleItemDropWidget::dropEvent(QDropEvent* event) {
 		event->ignore();
 	}
 }
-
-// void SingleItemDropWidget::mousePressEvent(QMouseEvent* event) {
-// 	if (!currentItemText.isEmpty() && event->button() == Qt::LeftButton) {
-// 		// Start a drag operation with the current item
-// 		QMimeData* mimeData = new QMimeData;
-// 		mimeData->setText(currentItemText);
-
-// 		QDrag* drag = new QDrag(this);
-// 		drag->setMimeData(mimeData);
-
-// 		Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
-// 		if (dropAction == Qt::MoveAction) {
-// 			// Clear the item after it has been moved
-// 			clearItem();
-// 			update(); // Update the widget to reflect the cleared state
-// 		}
-// 	}
-// }

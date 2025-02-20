@@ -1,13 +1,15 @@
-#include <QJsonDocument>
+#include <QNativeGestureEvent>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QShortcut>
-#include <QNativeGestureEvent>
 #include <QGestureEvent>
+#include <QPainter>
+#include <QComboBox>
+#include <QWheelEvent>
+#include <QKeyEvent>
+#include <QTimer>
 
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"

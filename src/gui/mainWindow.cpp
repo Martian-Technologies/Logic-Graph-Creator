@@ -1,12 +1,13 @@
+#include <QGraphicsScene>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <QTreeView>
 #include <QCheckBox>
 #include <QMenuBar>
 #include <QEvent>
 #include <QMenu>
-#include <QFileDialog>
-#include <QMessageBox>
 
 #include "backend/circuit/validateCircuit.h"
 #include "selection/selectorWindow.h"

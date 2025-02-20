@@ -1,8 +1,8 @@
 #ifndef mainWindow_h
 #define mainWindow_h
 
-#include <QGraphicsScene>
 #include <QWidget>
+class QGraphicsScene;
 
 #include <kddockwidgets/MainWindow.h>
 #include <kddockwidgets/DockWidget.h>

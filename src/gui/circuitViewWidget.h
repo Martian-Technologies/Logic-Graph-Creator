@@ -2,13 +2,12 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QToolButton>
-#include <QWheelEvent>
-#include <QKeyEvent>
-#include <QComboBox>
-#include <QPainter>
 #include <QWidget>
-#include <QTimer>
+
+class QWheelEvent;
+class QKeyEvent;
+class QComboBox;
+class QTimer;
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
