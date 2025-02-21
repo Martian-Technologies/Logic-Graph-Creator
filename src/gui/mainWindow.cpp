@@ -174,7 +174,7 @@ void MainWindow::loadCircuit(bool loadMerged) {
     
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
-        logWarning("Failed to load Circuit file (mainWindow.cpp)");
+        logWarning("Failed to load Circuit (mainWindow.cpp)");
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
