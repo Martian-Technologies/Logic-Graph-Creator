@@ -28,12 +28,12 @@ void CircuitTool::activate() {
 }
 
 // This will also tell the tool to reset.
-void CircuitTool::setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolManagerInterface* toolManagerInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit) {
+void CircuitTool::setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit) {
 	setEvaluatorStateInterface(evaluatorStateInterface);
 	setCircuit(circuit);
 	this->elementCreator = elementCreator;
 	this->eventRegister = eventRegister;
-	this->toolManagerInterface = toolManagerInterface;
+	this->toolStackInterface = toolStackInterface;
 }
 
 void CircuitTool::unsetup() {

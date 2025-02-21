@@ -3,8 +3,7 @@
 
 #include "circuitTool.h"
 
-class ToolManager;
-class ToolManagerInterface;
+class ToolStackInterface;
 
 class CircuitToolHelper : public CircuitTool {
 public:

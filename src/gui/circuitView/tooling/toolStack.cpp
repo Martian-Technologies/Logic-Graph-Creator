@@ -1,6 +1,6 @@
-#include "toolManager.h"
+#include "toolStack.h"
 
-SharedCircuitTool ToolManager::getCurrentNonHelperTool() {
+SharedCircuitTool ToolStack::getCurrentNonHelperTool() {
 	unsigned int i = toolStack.size();
 	while (i != 0) {
 		i--;
@@ -11,7 +11,7 @@ SharedCircuitTool ToolManager::getCurrentNonHelperTool() {
 	return nullptr;
 }
 
-SharedCircuitTool ToolManager::getCurrentNonHelperTool() const {
+SharedCircuitTool ToolStack::getCurrentNonHelperTool() const {
 	unsigned int i = toolStack.size();
 	while (i != 0) {
 		i--;
@@ -22,37 +22,37 @@ SharedCircuitTool ToolManager::getCurrentNonHelperTool() const {
 	return nullptr;
 }
 
-SharedCircuitTool ToolManager::getCurrentTool() {
+SharedCircuitTool ToolStack::getCurrentTool() {
 	if (!toolStack.empty())
 		return toolStack.back();
 	return nullptr;
 }
 
-SharedCircuitTool ToolManager::getCurrentTool() const {
+SharedCircuitTool ToolStack::getCurrentTool() const {
 	if (!toolStack.empty())
 		return toolStack.back();
 	return nullptr;
 }
 
-void ToolManager::setMode(std::string mode) {
+void ToolStack::setMode(std::string mode) {
 	getCurrentNonHelperTool()->setMode(mode);
 }
 
 
-void ToolManager::reset() {
+void ToolStack::reset() {
 	if (toolStack.size())
 		toolStack.back()->reset();
 }
 
-void ToolManager::pushTool(SharedCircuitTool newTool) {
+void ToolStack::pushTool(SharedCircuitTool newTool) {
 	if (!toolStack.empty())
 		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
-	toolStack.back()->setup(ElementCreator(renderer), eventRegister, &toolManagerInterface, evaluatorStateInterface, circuit);
+	toolStack.back()->setup(ElementCreator(renderer), eventRegister, &toolStackInterface, evaluatorStateInterface, circuit);
 	toolStack.back()->activate();
 }
 
-void ToolManager::popTool() {
+void ToolStack::popTool() {
 	if (toolStack.empty()) return;
 	toolStack.back()->unsetup();
 	toolStack.pop_back();
@@ -62,19 +62,19 @@ void ToolManager::popTool() {
 	toolStack.back()->activate();
 }
 
-void ToolManager::clearTools() {
+void ToolStack::clearTools() {
 	for (auto tool : toolStack) {
 		tool->unsetup();
 	}
 	toolStack.clear();
 }
 
-void ToolManager::setCircuit(Circuit* circuit) {
+void ToolStack::setCircuit(Circuit* circuit) {
 	this->circuit = circuit;
 	clearTools();
 }
 
-void ToolManager::setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
+void ToolStack::setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
 	this->evaluatorStateInterface = evaluatorStateInterface;
 	if (!toolStack.empty()) toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
 }

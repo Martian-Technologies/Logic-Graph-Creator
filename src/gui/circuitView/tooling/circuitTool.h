@@ -6,11 +6,11 @@
 #include "backend/circuit/circuit.h"
 #include "../events/customEvents.h"
 
-class ToolManager;
-class ToolManagerInterface;
+class ToolStack;
+class ToolStackInterface;
 
 class CircuitTool {
-	friend class ToolManager;
+	friend class ToolStack;
 public:
 	virtual ~CircuitTool() { unregisterFunctions(); }
 	bool isHelper() { return helper; }
@@ -35,12 +35,12 @@ protected:
 	bool helper = false;
 
 	ElementCreator elementCreator;
-	ToolManagerInterface* toolManagerInterface;
+	ToolStackInterface* toolStackInterface;
 	EvaluatorStateInterface* evaluatorStateInterface = nullptr;
 
 private:
 	// This will also tell the tool to reset.
-	void setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolManagerInterface* toolManagerInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
+	void setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
 	void unsetup();
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
