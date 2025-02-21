@@ -174,8 +174,8 @@ void MainWindow::loadCircuit(bool loadMerged) {
     
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
-        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logWarning("Failed to load Circuit file (mainWindow.cpp)");
+        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
@@ -350,6 +350,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
         auto itr = activeWidgets.find(widget);
         if (itr != activeWidgets.end()){
             std::cout << "Widget (was showing " << itr->second->getCircuitView()->getCircuit()->getCircuitName() << ") closed\n";
+            logInfo("Widget (was showing " + itr->second->getCircuitView()->getCircuit()->getCircuitName() + ") closed (mainWindow.cpp)");
             widget->removeEventFilter(this);
             itr->second->close();
             activeWidgets.erase(itr);
