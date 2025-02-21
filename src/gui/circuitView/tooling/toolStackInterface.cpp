@@ -1,7 +1,7 @@
 #include "toolStackInterface.h"
 #include "toolStack.h"
 
-void ToolStackInterface::pushTool(SharedCircuitTool newTool) {
+void ToolStackInterface::pushTool(std::shared_ptr<CircuitTool> newTool) {
 	toolStack->pushTool(newTool);
 }
 

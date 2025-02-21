@@ -9,35 +9,13 @@
 class BlockPlacementTool : public CircuitTool {
 public:
 	BlockPlacementTool() {
-		activePlacementTool = std::make_shared<AreaPlaceTool>();
+		activePlacementTool = std::make_shared<SinglePlaceTool>();
 	}
 
-	void activate() override final {
-		if (activePlacementTool)
-			toolStackInterface->pushTool(activePlacementTool);
-	}
+	void activate() override final;
 
 	static inline std::vector<std::string> getModes() { return { "Single", "Area" }; }
-	void setMode(std::string toolMode) override final {
-		if (mode != toolMode) {
-			if (toolMode == "None") {
-				activePlacementTool = nullptr;
-				toolStackInterface->popTool();
-			} else {
-				if (mode == "None") {
-					toolStackInterface->popTool();
-				}
-				if (toolMode == "Single") {
-					activePlacementTool = std::make_shared<SinglePlaceTool>();
-				} else if (toolMode == "Area") {
-					activePlacementTool = std::make_shared<AreaPlaceTool>();
-				}
-				activePlacementTool->selectBlock(selectedBlock);
-				activePlacementTool->setRotation(rotation);
-				toolStackInterface->pushTool(activePlacementTool);
-			}
-		}
-	}
+	void setMode(std::string toolMode) override final;
 
 	inline void selectBlock(BlockType selectedBlock) {
 		this->selectedBlock = selectedBlock;

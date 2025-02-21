@@ -1,15 +1,14 @@
 #ifndef toolStackInterface_h
 #define toolStackInterface_h
 
-#include "circuitTool.h"
-
+class CircuitTool;
 class ToolStack;
 
 class ToolStackInterface {
 public:
 	inline ToolStackInterface(ToolStack* toolStack = nullptr) : toolStack(toolStack) { }
 
-	void pushTool(SharedCircuitTool newTool);
+	void pushTool(std::shared_ptr<CircuitTool> newTool);
 	void popTool();
 
 private:

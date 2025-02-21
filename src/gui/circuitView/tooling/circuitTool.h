@@ -5,9 +5,9 @@
 #include "../renderer/elementCreator.h"
 #include "backend/circuit/circuit.h"
 #include "../events/customEvents.h"
+#include "toolStackInterface.h"
 
 class ToolStack;
-class ToolStackInterface;
 
 class CircuitTool {
 	friend class ToolStack;

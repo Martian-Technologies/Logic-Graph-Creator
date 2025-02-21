@@ -35,7 +35,7 @@ public:
 	}
 
 	void setSelectedTool(std::string tool) {
-		toolManager.clearTools();
+		toolManager.selectTool(tool);
 	}
 
 	void setSelectedToolMode(std::string mode) {
@@ -43,11 +43,7 @@ public:
 	}
 
 	void setSelectedBlock(BlockType blockType) {
-		if (blockType != BlockType::NONE) {
-			toolManager.clearTools();
-			toolManager.pushTool(placementTool);
-			placementTool->selectBlock(blockType);
-		}
+		toolManager.selectBlock(blockType);
 	}
 
 	// --------------- Gettters ---------------

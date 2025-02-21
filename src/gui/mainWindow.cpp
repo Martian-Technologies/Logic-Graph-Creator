@@ -229,7 +229,7 @@ void MainWindow::setBlock(BlockType blockType) {
 
 void MainWindow::setTool(std::string tool) {
 	for (auto view : circuitViews) {
-		// view->getCircuitView()->setSelectedTool(tool);
+		view->getCircuitView()->setSelectedTool(tool);
 	}
 }
 
