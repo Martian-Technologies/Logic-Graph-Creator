@@ -46,6 +46,9 @@ private:
 	Position originPosition;
 	SharedSelection originSelection;
 
+	//toggle for tensor vs. single move
+	bool isTensorMove = false;
+
 	// tensor stuff
 	Vector step;
 	int tensorStage = -1;

@@ -8,6 +8,10 @@ bool MoveTool::click(const Event* event) {
 	if (!positionEvent) return false;
 
 	if (stage == 'o') {
+		//immediately switch to destination mode after picking origin for single move
+		if(!isTensorMove) {
+			stage = 'd';
+		}
 		if (tensorStage == -1) {
 			originPosition = positionEvent->getPosition();
 			originSelection = std::make_shared<CellSelection>(originPosition);
