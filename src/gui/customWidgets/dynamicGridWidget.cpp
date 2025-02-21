@@ -1,3 +1,5 @@
+#include <QGridLayout>
+
 #include "dynamicGridWidget.h"
 
 DynamicGridWidget::DynamicGridWidget(QWidget* parent, int minSize)

@@ -1,11 +1,11 @@
 #ifndef toolCell_h
 #define toolCell_h
 
-#include <QDragEnterEvent>
-#include <QMouseEvent>
 #include <QToolButton>
-#include <QDropEvent>
 #include <QString>
+
+class QDragEnterEvent;
+class QDropEvent;
 
 #include "gui/resourceLoaders/iconLoader.h"
 

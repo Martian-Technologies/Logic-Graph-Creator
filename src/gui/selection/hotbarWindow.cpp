@@ -1,3 +1,5 @@
+#include <QToolButton>
+#include <QVBoxLayout>
 #include <QString>
 #include <QLabel>
 #include <Qt>
