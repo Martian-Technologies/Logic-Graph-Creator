@@ -16,8 +16,9 @@
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
 
+
 MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
-	: KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()) {
+	: KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()), settingsWindow(nullptr) {
 
 	// set up window
 	resize(900, 600);
@@ -55,6 +56,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 void MainWindow::setUpMenuBar() {
 	QMenuBar* menubar = menuBar();
 
+	QMenu* gatalityMenu = new QMenu(QStringLiteral("Gatality"), this);
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
 	QMenu* fileMenu = new QMenu(QStringLiteral("File"), this);
     saveSubMenu = new QMenu("Save Circuit", this);
@@ -62,6 +64,7 @@ void MainWindow::setUpMenuBar() {
     loadIntoSubMenu = new QMenu("Load Circuit Into", this);
     loadMergedSubMenu = new QMenu("Load Merged Circuit Into", this);
 
+	menubar->addMenu(gatalityMenu);
 	menubar->addMenu(windowMenu);
 	menubar->addMenu(fileMenu);
 
@@ -75,6 +78,10 @@ void MainWindow::setUpMenuBar() {
 
     QAction* exportProjectAction = fileMenu->addAction(tr("Export All Circuits"));
     connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
+
+	QAction* newPreferencesAction = gatalityMenu->addAction(tr("Preferences"));
+	connect(newPreferencesAction, &QAction::triggered, this, &MainWindow::openPreferences);
+
 
 	// submenu setup
 	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
@@ -335,11 +342,10 @@ void MainWindow::setTool(std::string tool) {
 	}
 }
 
-void MainWindow::connectMenuBar() {
-    connect(ui->actionPreferences, &QAction::triggered, this, &MainWindow::onPreferenceClick);
-}
 
-void MainWindow::onPreferenceClick(){
-    // if(preferencesOpen)
-    SettingsWindow* sw = new SettingsWindow(this); 
+void MainWindow::openPreferences(){
+	if (settingsWindow == nullptr){
+		settingsWindow = new SettingsWindow(this); 
+	} 
+	settingsWindow->exec();
 }

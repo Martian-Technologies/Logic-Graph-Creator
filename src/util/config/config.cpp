@@ -1,11 +1,12 @@
 #include <fstream>
 #include <assert.h>
-#include "util/config/multiTypeMap.h"
+#include <unordered_map>
+#include "multiTypeMap.h"
 
 #define CONFIG_PATH "config.toml"
 #define CONFIG_DEFAULT_PATH "config.toml"
 
-MultiTypeMap CONFIG_SETTINGS; // all config settings will need to be checked by another file type
+MultiTypeMap* CONFIG_SETTINGS; // all config settings will need to be checked by another file type
 
 void createConfig(bool defaultConfig){
     // reads configurations from a file
@@ -16,11 +17,15 @@ void createConfig(bool defaultConfig){
     else file.open(CONFIG_DEFAULT_PATH);
     
     if (!defaultConfig && !file.is_open()) file.open(CONFIG_DEFAULT_PATH); 
-    if (!file.is_open()) assert("Error: failed to open /src/gui/preferences/config.toml");  // TODO: change later for better safety
+    if (!file.is_open()) assert("Error: failed to open /src/gui/preferences/config.toml");  // TODO: change later for better safety]
+	
+	std::unordered_map<std::string, std::any> mappings;
 
+	// parses file to establish mappings
     std::string prefix;
     std::string key;
-    while (file >> key) {
+    while (std::getline(file, key)) {
+		if (key.empty() || key[0] == '#') continue;
         if (key[0] == '[') {
             prefix = key.substr(1, key.size()-2);
             continue;
@@ -29,18 +34,20 @@ void createConfig(bool defaultConfig){
         std::string value;
         file >> value >> value;
 
-        std::any value_conversion;
-        if(value.size() == 1){
-            if(value[0] == '0') value_conversion = false;
-            else if(value[1] == '1') value_conversion = true;
-        }
-
-        // all values will be accessible by their parent and names ("color.AND" as key)
-        CONFIG_SETTINGS.set(prefix + '.' + key, value_conversion);
+		if (value.substr(1,3) == "0x") { // color match
+			mappings[prefix + '.' + key] = std::stoi(value.substr(3, 9));
+		} else if (value == "true"  || value == "True") { // booleans
+			mappings[prefix + '.' + key] = 1;
+		} else if (value == "false" || value == "False") {
+			mappings[prefix + '.' + key] = 0;
+		} else { // strings
+			mappings[prefix + '.' + key] = value;
+		}
     }
 }
 
-const MultiTypeMap& getConfig() {
+
+const MultiTypeMap* getConfig() {
     return CONFIG_SETTINGS;
 }
 

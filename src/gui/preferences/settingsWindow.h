@@ -1,3 +1,6 @@
+#ifndef SETTINGS_WINDOW_H
+#define SETTINGS_WINDOW_H
+
 #include <QDialog>
 #include <QPushButton>
 #include <QKeyEvent>
@@ -6,18 +9,20 @@
 #include <QScrollArea>
 
 #include "preferenceType.h"
-#include "tabs.h"
 
-class SettingsWindow : QDialog {
+class SettingsWindow : public QDialog {
     Q_OBJECT
 public:
     SettingsWindow(QWidget* parent = nullptr);
 
+
 protected: 
     void closeEvent(QCloseEvent* event) override { event->accept(); }
-    void keyPressEvent(QKeyEvent *event) override; // Override key press event to close on Esc key
-    //void mousePressEvent(QMouseEvent *event) override; // Override mouse press event to close on click outside of the popup
+    void keyPressEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override; 
+	
 private:
+	void centerDialog();
     void setupUI();
     void setupConnections();
     void readPreferences();
@@ -30,8 +35,9 @@ private:
 
     QWidget* parent;
 
-    QLineEdit* usernameLineEdit;
     QPushButton* cancelButton;
     QPushButton* saveButton;
     QPushButton* defaultButton;
 };
+
+#endif

@@ -9,5 +9,3 @@ NOT = "0x110000"
 [input.general]
 AND = "ctrl + a"
 OR  = "ctrl + o"
-
-

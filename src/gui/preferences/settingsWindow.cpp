@@ -2,18 +2,40 @@
 
 
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
-    setupUI();
+    setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+
+	setupUI();
     setupConnections();
+
+	centerDialog(); // places dialog center TODO needs the height to be centered too
+}
+
+void SettingsWindow::centerDialog() {
+    if (parent) {
+        QRect parentGeometry = parent->geometry();
+
+        // Calculate the center position
+        int x = parentGeometry.x() + (parentGeometry.width() - width()) / 2;
+        int y = parentGeometry.y() + (parentGeometry.height() - height()) / 2;
+
+        // Move the dialog to the center
+        move(x, y);
+    } else {
+        // If no parent, center on the screen
+        QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
+        int x = (screenGeometry.width() - width()) / 2;
+        int y = (screenGeometry.height() - height()) / 2;
+        move(x, y);
+    }
 }
 
 void SettingsWindow::setupUI() {
-    // Set window title
     setWindowTitle("Settings");
 
-    QWidget* window = new QWidget(this);
+    // Main layout for the dialog
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
     // Create UI elements
-    usernameLineEdit = new QLineEdit(this);
     cancelButton = new QPushButton("Cancel", this);
     saveButton = new QPushButton("Save", this);
     defaultButton = new QPushButton("Default", this);
@@ -24,57 +46,46 @@ void SettingsWindow::setupUI() {
     buttonLayout->addWidget(defaultButton);
     buttonLayout->addWidget(cancelButton);
 
+    // Scroll area for the settings content
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scrollArea->setWidgetResizable(true);
 
-    QScrollArea* scrollArea = new QScrollArea();
-    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
-    scrollArea->setWidgetResizable( true );
-    // area for scrollbar
-    QWidget* widget = new QWidget();
-    scrollArea->setWidget( widget );
+    // Widget to hold the scrollable content
+    QWidget* scrollContent = new QWidget();
+    QVBoxLayout* scrollLayout = new QVBoxLayout(scrollContent);
 
-    // attaching box of items to scroll widget
-    QVBoxLayout* layout = new QVBoxLayout();
-    widget->setLayout( layout );
-
-// TODO: replace with preferencetype qt blocks
+    // Add test labels to the scrollable content
     for (int i = 0; i < 10; i++) {
-        QLabel* button = new QLabel( tr("Test") + QString::number(i) );
-        layout->addWidget( button );
+        QLabel* label = new QLabel(tr("Test") + QString::number(i), scrollContent);
+        scrollLayout->addWidget(label);
     }
 
-    // main window
-    //window->addLayout(scrollArea);
-    //window->addLayout(buttonLayout);
+    // Set the scrollable content widget
+    scrollArea->setWidget(scrollContent);
 
-    // stop errors
+    // Add the scroll area and button layout to the main layout
+    mainLayout->addWidget(scrollArea);
+    mainLayout->addLayout(buttonLayout);
 
-    //setCentralWidget(scrollArea);
-
-    /*
-
-setGeometry(0, 0, 240, 320);
-QWidget *window = new QWidget(this);
-
-QVBoxLayout *vBoxLayout= new QVBoxLayout(window);
-
-for (int i = 0; i < 20; i++)
-{
-    QLabel *label=new QLabel(tr("Test ") + QString::number(i));
-    vBoxLayout->addWidget(label);
-}
-
-QScrollArea *scrollArea = new QScrollArea(this);
-scrollArea->setWidget(window);
-setCentralWidget(scrollArea);
-
-    */
+    // Set the main layout for the dialog
+    setLayout(mainLayout);
 }
 
 
 
 void SettingsWindow::setupConnections() {
-    // Connect the Cancel button to the close method
-    connect(cancelButton, &QPushButton::clicked, this, &SettingsWindow::close); 
+    connect(cancelButton, &QPushButton::clicked, this, &SettingsWindow::close); // Connect the Cancel button to the close method
+}
+
+void SettingsWindow::mousePressEvent(QMouseEvent* event) {
+	/*
+	if (!rect().contains(event->pos())) {
+		close(); // Close the dialog
+	}
+	*/
+	// Call the base class implementation
+	QDialog::mousePressEvent(event);
 }
 
 void SettingsWindow::keyPressEvent(QKeyEvent *event) {
@@ -86,8 +97,7 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void SettingsWindow::closeSettings(){
-    this->deleteLater();
-    //event->accept();
+
 }
 
 // todo

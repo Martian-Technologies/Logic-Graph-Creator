@@ -1,3 +1,6 @@
+#ifndef PREFERENCE_TYPE_H
+#define PREFERENCE_TYPE_H
+
 #include <QWidget>
 #include <QSlider>
 #include <QComboBox>
@@ -82,3 +85,4 @@ private:
     // empty 
 };
 
+#endif

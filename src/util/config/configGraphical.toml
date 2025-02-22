@@ -5,6 +5,7 @@ visual_mode = [ DROPDOWN ]
 AND = "0x000011"
 OR  = "0x001100"
 NOT = "0x110000"
+XOR = 0x000000
 
 [input.general]
 AND = "ctrl + a"

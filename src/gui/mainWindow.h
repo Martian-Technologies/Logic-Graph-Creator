@@ -11,6 +11,8 @@ class QGraphicsScene;
 #include "circuitView/renderer/qtRenderer.h"
 #include "backend/backend.h"
 
+#include "preferences/settingsWindow.h"
+
 namespace Ui {
 	class MainWindow;
 }
@@ -34,12 +36,14 @@ public:
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
 
+	void openPreferences();
 private:
 	// utility
 	CircuitViewWidget* openNewCircuitViewWindow();
 	void setUpMenuBar();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
     bool eventFilter(QObject* obj, QEvent* event);
+
 
 private:
 	QGraphicsScene* scene;
@@ -51,6 +55,8 @@ private:
 	std::vector<CircuitViewWidget*> circuitViews;
     std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;
+
+	SettingsWindow* settingsWindow;
 };
 
 #endif /* mainWindow_h */
