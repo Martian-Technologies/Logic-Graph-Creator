@@ -66,7 +66,7 @@ bool CircuitValidator::validateDependencies() {
         }
     }
 
-    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()) + " MERGING DEPENDENCY CONNECTIONS");
+    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()));
     if (mergeCircuit){
         processExternalConnections();
         parsedCircuit.dependencies.clear(); // We have no more dependencies because they are merged
