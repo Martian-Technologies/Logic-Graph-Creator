@@ -1,4 +1,6 @@
 #include "settingsWindow.h"
+#include "util/config/config.h"
+
 
 
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
@@ -6,37 +8,22 @@ SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent
 
 	setupUI();
     setupConnections();
-
-	centerDialog(); // places dialog center TODO needs the height to be centered too
-}
-
-void SettingsWindow::centerDialog() {
-    if (parent) {
-        QRect parentGeometry = parent->geometry();
-
-        // Calculate the center position
-        int x = parentGeometry.x() + (parentGeometry.width() - width()) / 2;
-        int y = parentGeometry.y() + (parentGeometry.height() - height()) / 2;
-
-        // Move the dialog to the center
-        move(x, y);
-    } else {
-        // If no parent, center on the screen
-        QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-        int x = (screenGeometry.width() - width()) / 2;
-        int y = (screenGeometry.height() - height()) / 2;
-        move(x, y);
-    }
 }
 
 void SettingsWindow::setupUI() {
     setWindowTitle("Settings");
 
-    // Main layout for the dialog
+	
+	std::string test = "test";
+    
+
+	logInfo("test");
+
+	// Main layout for the dialog
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
     // Create UI elements
-    cancelButton = new QPushButton("Cancel", this);
+    cancelButton = new QPushButton(QString::fromStdString(test), this);
     saveButton = new QPushButton("Save", this);
     defaultButton = new QPushButton("Default", this);
 
@@ -55,9 +42,9 @@ void SettingsWindow::setupUI() {
     QWidget* scrollContent = new QWidget();
     QVBoxLayout* scrollLayout = new QVBoxLayout(scrollContent);
 
-    // Add test labels to the scrollable content
+
     for (int i = 0; i < 10; i++) {
-        QLabel* label = new QLabel(tr("Test") + QString::number(i), scrollContent);
+        QLabel* label = new QLabel(tr("Test") + QString::fromStdString(test), scrollContent);
         scrollLayout->addWidget(label);
     }
 
@@ -70,6 +57,19 @@ void SettingsWindow::setupUI() {
 
     // Set the main layout for the dialog
     setLayout(mainLayout);
+
+
+	// Centers Dialog TODO need to also center it via adjusted height from ^
+	if (parent) {
+        QRect parentGeometry = parent->geometry();
+
+        // Calculate the center position
+        int x = parentGeometry.x() + (parentGeometry.width() - width()) / 2;
+        int y = parentGeometry.y() + (parentGeometry.height() - height()) / 2;
+
+        // Move the dialog to the center
+        move(x, y);
+    }
 }
 
 

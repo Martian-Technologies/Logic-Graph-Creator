@@ -7,7 +7,13 @@
 
 #include "gui/mainWindow.h"
 
+#include "util/config/config.h"
+
 int main(int argc, char* argv[]) {
+	// Creates config
+	createConfig();
+
+
 	// Create QT Application
 	QApplication app(argc, argv);
 	app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);

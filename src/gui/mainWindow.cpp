@@ -16,7 +16,6 @@
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
 
-
 MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	: KDDockWidgets::QtWidgets::MainWindow(QString("WINDOW"), options), circuitFileManager(&backend.getCircuitManager()), settingsWindow(nullptr) {
 
@@ -38,6 +37,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	openNewSelectorWindow();
 
 	setUpMenuBar();
+
 }
 
 // Utility methods

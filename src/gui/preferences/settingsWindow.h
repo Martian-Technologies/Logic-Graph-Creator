@@ -22,7 +22,6 @@ protected:
     void mousePressEvent(QMouseEvent *event) override; 
 	
 private:
-	void centerDialog();
     void setupUI();
     void setupConnections();
     void readPreferences();

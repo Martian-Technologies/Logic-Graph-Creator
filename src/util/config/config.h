@@ -3,8 +3,8 @@
 
 #include "multiTypeMap.h"
 
-void createConfig(bool defaultConfig = false); // defaultConfig: recreate the config object if the opened config file is corrupt
+void createConfig(); // defaultConfig: recreate the config object if the opened config file is corrupt
 
-const MultiTypeMap* getConfig(); // to access configurations: getConfig().get("graphics.block_color.AND")
+const MultiTypeMap& getConfig(); // to access configurations: getConfig().get("graphics.block_color.AND")
 
 #endif

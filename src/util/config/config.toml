@@ -1,5 +1,5 @@
 [graphics.general]
-visual_mode = [ DROPDOWN ]
+visual_mode = "Night"
 
 [graphics.colors]
 AND = "0x000011"
@@ -8,4 +8,4 @@ NOT = "0x110000"
 
 [input.general]
 AND = "ctrl + a"
-OR = "ctrl + o"
+OR  = "ctrl + o"
