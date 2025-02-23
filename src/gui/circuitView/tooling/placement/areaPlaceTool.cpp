@@ -5,9 +5,6 @@ void AreaPlaceTool::activate() {
 	BaseBlockPlacementTool::activate();
 	registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
 	registerFunction("tool secondary activate", std::bind(&AreaPlaceTool::startDeleteBlocks, this, std::placeholders::_1));
-	registerFunction("pointer move", std::bind(&AreaPlaceTool::pointerMove, this, std::placeholders::_1));
-	registerFunction("pointer enter view", std::bind(&AreaPlaceTool::enterBlockView, this, std::placeholders::_1));
-	registerFunction("pointer exit view", std::bind(&AreaPlaceTool::exitBlockView, this, std::placeholders::_1));
 }
 
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {
@@ -45,21 +42,6 @@ bool AreaPlaceTool::startDeleteBlocks(const Event* event) {
 		updateElements();
 		return true;
 	}
-}
-
-bool AreaPlaceTool::pointerMove(const Event* event) {
-	updateElements();
-	return false;
-}
-
-bool AreaPlaceTool::enterBlockView(const Event* event) {
-	updateElements();
-	return false;
-}
-
-bool AreaPlaceTool::exitBlockView(const Event* event) {
-	updateElements();
-	return false;
 }
 
 void AreaPlaceTool::updateElements() {

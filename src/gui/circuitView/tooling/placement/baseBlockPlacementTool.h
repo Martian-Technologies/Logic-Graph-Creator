@@ -15,8 +15,6 @@ public:
 	bool rotateBlockCCW(const Event* event);
 
 protected:
-	inline virtual void updateElements() { };
-
 	BlockType selectedBlock = BlockType::NONE;
 	Rotation rotation = Rotation::ZERO;
 };

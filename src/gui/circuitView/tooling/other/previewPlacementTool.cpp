@@ -4,13 +4,15 @@
 #include <QMessageBox>
 
 // Preview is only shown for the primary parsed circuit, not the dependencies that will be created in a different circuit
-void PreviewPlacementTool::updatePreviewElements() {
-	if (!usingTool || !continueRender) return;
-
+void PreviewPlacementTool::updateElements() {
+	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+	
+	if (!usingTool || !continueRender || !pointerInView) return;
+
 
 	// note that getMinPos will return an FVector but will have valid integer coordinates.
-	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(currentPosition.x, currentPosition.y);
+	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(lastPointerPosition.x, lastPointerPosition.y);
 	//bool isValid = validatePlacement(); // possible change preview colors if invalid
 
 	// only displays block previews, not connections
@@ -21,7 +23,7 @@ void PreviewPlacementTool::updatePreviewElements() {
 }
 
 bool PreviewPlacementTool::validatePlacement() const {
-	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(currentPosition.x, currentPosition.y);
+	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(lastPointerPosition.x, lastPointerPosition.y);
 
 	for (const auto& [id, block] : parsedCircuit->getBlocks()) {
 		Position testPos = block.pos.snap() + totalOffset;
@@ -30,17 +32,6 @@ bool PreviewPlacementTool::validatePlacement() const {
 		}
 	}
 	return true;
-}
-
-bool PreviewPlacementTool::pointerMove(const Event* event) {
-	if (!usingTool) return false;
-
-	if (const PositionEvent* posEvent = event->cast<PositionEvent>()) {
-		currentPosition = posEvent->getPosition();
-		updatePreviewElements();
-		return false;
-	}
-	return false;
 }
 
 // Places the primary parsed circuit in the current circuit.
@@ -54,7 +45,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
 		return false;
 	}
 
-	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(currentPosition.x, currentPosition.y);
+	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(lastPointerPosition.x, lastPointerPosition.y);
 	std::unordered_map<block_id_t, block_id_t> realIds;
 
 	for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
@@ -115,24 +106,4 @@ bool PreviewPlacementTool::cancelPlacement(const Event* event) {
 
 void PreviewPlacementTool::clearPreview() {
 	elementCreator.clear();
-}
-
-bool PreviewPlacementTool::enterBlockView(const Event* event) {
-	if (!usingTool) return true;
-	continueRender = true;
-
-	if (const PositionEvent* posEvent = event->cast<PositionEvent>()) {
-		currentPosition = posEvent->getPosition();
-		updatePreviewElements();
-		return true;
-	}
-	return false;
-}
-
-bool PreviewPlacementTool::exitBlockView(const Event* event) {
-	if (!usingTool) return true;
-	continueRender = false;
-
-	elementCreator.clear();
-	return false;
 }

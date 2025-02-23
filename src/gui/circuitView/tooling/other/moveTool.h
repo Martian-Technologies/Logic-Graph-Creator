@@ -17,24 +17,18 @@ public:
 		CircuitTool::activate();
 		registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
 		registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
-		registerFunction("pointer move", std::bind(&MoveTool::pointerMove, this, std::placeholders::_1));
-		// registerFunction("pointer enter view", std::bind(&MoveTool::enterBlockView, this, std::placeholders::_1));
-		// registerFunction("pointer exit view", std::bind(&MoveTool::exitBlockView, this, std::placeholders::_1));
 		registerFunction("tool rotate block cw", std::bind(&MoveTool::confirm, this, std::placeholders::_1));
 	}
+	void updateElements() override final;
 
 	bool click(const Event* event);
 	bool unclick(const Event* event);
 	bool confirm(const Event* event);
-	bool pointerMove(const Event* event);
-
-private:
-	void updateElements();
-
+	
+	private:
+	
 	char stage = 'o';
-
-	FPosition pointer;
-
+	
 	// blocks
 	Position originPosition;
 	SharedSelection originSelection;

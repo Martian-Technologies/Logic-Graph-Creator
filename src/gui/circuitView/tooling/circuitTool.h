@@ -20,12 +20,14 @@ protected:
 	void registerFunction(std::string eventName, EventFunction function);
 	void unregisterFunction(std::string eventName);
 	void unregisterFunctions();
-
+	
 	virtual void reset() { }
 	virtual void activate();
 	virtual void deactivate() { unregisterFunctions(); }
-
+	
 	virtual void setMode(std::string toolMode) { }
+	
+	virtual void updateElements() {}
 
 	bool pointerInView = false;
 	FPosition lastPointerFPosition;

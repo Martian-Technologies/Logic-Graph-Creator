@@ -41,27 +41,29 @@ void CircuitTool::unsetup() {
 	deactivate();
 }
 
-bool CircuitTool::enterBlockView(const Event* event) {
-	pointerInView = true;
+bool CircuitTool::enterBlockView(const Event* event) {	pointerInView = true;
 
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
 	if (positionEvent) {
 		lastPointerFPosition = positionEvent->getFPosition();
 		lastPointerPosition = positionEvent->getPosition();
 	}
-
+	updateElements();
 	return false;
 }
 
 bool CircuitTool::exitBlockView(const Event* event) {
 	pointerInView = false;
+	updateElements();
 	return false;
 }
 
 bool CircuitTool::pointerMove(const Event* event) {
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-	lastPointerFPosition = positionEvent->getFPosition();
-	lastPointerPosition = positionEvent->getPosition();
+	if (positionEvent) {
+		lastPointerFPosition = positionEvent->getFPosition();
+		lastPointerPosition = positionEvent->getPosition();
+	}
+	updateElements();
 	return false;
 }

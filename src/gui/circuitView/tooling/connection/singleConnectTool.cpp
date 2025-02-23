@@ -2,22 +2,20 @@
 
 bool SingleConnectTool::makeConnection(const Event* event) {
 	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
 
 	if (clicked) {
-		if (!circuit->tryRemoveConnection(clickPosition, positionEvent->getPosition())) {
-			circuit->tryCreateConnection(clickPosition, positionEvent->getPosition());
+		if (!circuit->tryRemoveConnection(clickPosition, lastPointerPosition)) {
+			circuit->tryCreateConnection(clickPosition, lastPointerPosition);
 		}
 		reset();
 		return true;
 	} else {
-		if (!circuit->getBlockContainer()->getOutputConnectionEnd(positionEvent->getPosition()).has_value()) {
+		if (!circuit->getBlockContainer()->getOutputConnectionEnd(lastPointerPosition).has_value()) {
 			return false;
 		}
 
 		clicked = true;
-		clickPosition = positionEvent->getPosition();
+		clickPosition = lastPointerPosition;
 		return true;
 	}
 }
@@ -30,47 +28,21 @@ bool SingleConnectTool::cancelConnection(const Event* event) {
 	return false;
 }
 
-bool SingleConnectTool::pointerMove(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-
-	updateElements(positionEvent->getFPosition());
-
-	return false;
-}
-
-bool SingleConnectTool::enterBlockView(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-
-	updateElements(positionEvent->getFPosition());
-
-	return false;
-}
-
-bool SingleConnectTool::exitBlockView(const Event* event) {
-	if (!circuit) return false;
-	elementCreator.clear();
-	return false;
-}
-
-void SingleConnectTool::updateElements(FPosition pointerPosition) {
-	if (!circuit) return;
+void SingleConnectTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
-
+	if (!(circuit && pointerInView)) return;
+	
 	if (clicked) {
-		bool valid = circuit->getBlockContainer()->getInputConnectionEnd(pointerPosition.snap()).has_value();
+		bool valid = circuit->getBlockContainer()->getInputConnectionEnd(lastPointerPosition).has_value();
 
-		if (valid) elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, pointerPosition.snap()));
-		else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(clickPosition, pointerPosition));
+		if (valid) elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, lastPointerPosition));
+		else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(clickPosition, lastPointerFPosition));
 
-		elementCreator.addSelectionElement(SelectionElement(pointerPosition.snap(), !valid));
+		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, !valid));
 	} else {
 		// TODO - change to use isvalid function
-		bool valid = circuit->getBlockContainer()->getOutputConnectionEnd(pointerPosition.snap()).has_value();
-		elementCreator.addSelectionElement(SelectionElement(pointerPosition.snap(), !valid));
+		bool valid = circuit->getBlockContainer()->getOutputConnectionEnd(lastPointerPosition).has_value();
+		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, !valid));
 	}
 }

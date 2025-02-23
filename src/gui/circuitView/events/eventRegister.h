@@ -20,13 +20,14 @@ public:
 
 	void unregisterFunction(const std::string& eventName, EventRegistrationSignature signature) {
 		auto iter = allEventFunctions.find(eventName);
+		if (iter == allEventFunctions.end()) return;
 		auto funcIter = std::find_if(
 			iter->second.begin(), iter->second.end(),
 			[&signature](const RegistrationPair& i) { return i.first == signature; }
 		);
 		if (funcIter != iter->second.end()) {
 			// keeps order
-			allEventFunctions.erase(iter);
+			iter->second.erase(funcIter);
 		}
 	}
 

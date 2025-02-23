@@ -8,6 +8,7 @@ public:
 	inline void reset() override final { memset(clicks, 'n', 2); }
 
 	void activate() override final;
+	void updateElements()  override final;
 
 	bool startPlaceBlock(const Event* event);
 	bool stopPlaceBlock(const Event* event);
@@ -18,8 +19,6 @@ public:
 	bool exitBlockView(const Event* event);
 
 private:
-	void updateElements() override;
-
 	char clicks[2] = { 'n', 'n' };
 };
 

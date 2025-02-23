@@ -3,18 +3,14 @@
 #include "tensorConnectTool.h"
 
 bool TensorConnectTool::click(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-
 	if (makingOutput) {
 		// orgin
 		if (outputStage == -1) {
-			outputPosition = positionEvent->getPosition();
+			outputPosition = lastPointerPosition;
 			outputSelection = std::make_shared<CellSelection>(outputPosition);
 			outputStage = 0;
 		} else if (outputStage % 2 == 0) { // step
-			step = positionEvent->getPosition() - outputPosition;
+			step = lastPointerPosition - outputPosition;
 			if (step.manhattenlength() == 0) {
 				outputSelection = std::make_shared<ProjectionSelection>(outputSelection, Vector(), 1);
 				outputStage += 2;
@@ -23,7 +19,7 @@ bool TensorConnectTool::click(const Event* event) {
 			}
 		} else { // count
 			int dis = step.length();
-			float length = positionEvent->getFPosition().lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
+			float length = lastPointerFPosition.lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
 			outputSelection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step : step * -1, count);
 			outputStage++;
@@ -32,11 +28,11 @@ bool TensorConnectTool::click(const Event* event) {
 		// orgin
 		if (outputStage <= inputStage) return false;
 		if (inputStage == -1) {
-			inputPosition = positionEvent->getPosition();
+			inputPosition = lastPointerPosition;
 			inputSelection = std::make_shared<CellSelection>(inputPosition);
 			inputStage = 0;
 		} else if (inputStage % 2 == 0) { // step
-			step = positionEvent->getPosition() - inputPosition;
+			step = lastPointerPosition - inputPosition;
 			if (step.manhattenlength() == 0) {
 				inputSelection = std::make_shared<ProjectionSelection>(inputSelection, Vector(), 1);
 				inputStage += 2;
@@ -54,7 +50,7 @@ bool TensorConnectTool::click(const Event* event) {
 			}
 		} else { // count
 			float dis = step.length();
-			float length = positionEvent->getFPosition().lengthAlongProjectToVec(inputPosition.free() + FVector(0.5f, 0.5f), step.free());
+			float length = lastPointerFPosition.lengthAlongProjectToVec(inputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
 			inputSelection = std::make_shared<ProjectionSelection>(inputSelection, (length > 0) ? step : step * -1, count);
 			inputStage++;
@@ -65,7 +61,6 @@ bool TensorConnectTool::click(const Event* event) {
 }
 
 bool TensorConnectTool::unclick(const Event* event) {
-	if (!circuit) return false;
 	if (makingOutput) {
 		if (outputStage == -1) return false;
 		// undo orgin
@@ -136,26 +131,52 @@ bool TensorConnectTool::confirm(const Event* event) {
 	return true;
 }
 
-bool TensorConnectTool::pointerMove(const Event* event) {
-	if (!circuit) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
-	pointer = positionEvent->getFPosition();
-	updateElements();
-	return false;
-}
-
 void TensorConnectTool::updateElements() {
-	if (!circuit) return;
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+	if (!pointerInView) {
+		if (makingOutput) {
+			if (outputStage != -1) {
+				if (outputStage % 2 == 1) {
+					elementCreator.addSelectionElement(SelectionObjectElement(
+						std::make_shared<ProjectionSelection>(outputSelection, step, 2),
+						SelectionObjectElement::RenderMode::ARROWS
+					));
+				} else {
+					elementCreator.addSelectionElement(SelectionObjectElement(
+						outputSelection, SelectionObjectElement::RenderMode::ARROWS
+					));
+				}
+			}
+		} else {
+			elementCreator.addSelectionElement(SelectionObjectElement(
+				outputSelection,
+				SelectionObjectElement::RenderMode::ARROWS
+			));
+			if (inputStage != -1) {
+				if (inputStage % 2 == 1) {
+					elementCreator.addSelectionElement(SelectionObjectElement(
+						std::make_shared<ProjectionSelection>(inputSelection, step, 2),
+						SelectionObjectElement::RenderMode::ARROWS
+					));
+				} else {
+					elementCreator.addSelectionElement(SelectionObjectElement(
+						inputSelection,
+						SelectionObjectElement::RenderMode::ARROWS
+					));
+				}
+			}
+		}
+		return;
+	}
+
 	SharedSelection selection;
 	if (makingOutput) {
 		// orgin
 		if (outputStage == -1) {
-			selection = std::make_shared<CellSelection>(pointer.snap());
+			selection = std::make_shared<CellSelection>(lastPointerFPosition.snap());
 		} else if (outputStage % 2 == 0) { // step
-			step = pointer.snap() - outputPosition;
+			step = lastPointerFPosition.snap() - outputPosition;
 			if (step.manhattenlength() == 0) {
 				selection = std::make_shared<ProjectionSelection>(outputSelection, Vector(), 1);
 			} else {
@@ -163,7 +184,7 @@ void TensorConnectTool::updateElements() {
 			}
 		} else { // count
 			float dis = step.length();
-			float length = pointer.lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
+			float length = lastPointerFPosition.lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
 			selection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step : step * -1, count);
 		}
@@ -176,9 +197,9 @@ void TensorConnectTool::updateElements() {
 			return;
 		}
 		if (inputStage == -1) {
-			selection = std::make_shared<CellSelection>(pointer.snap());
+			selection = std::make_shared<CellSelection>(lastPointerFPosition.snap());
 		} else if (inputStage % 2 == 0) { // step
-			step = pointer.snap() - inputPosition;
+			step = lastPointerFPosition.snap() - inputPosition;
 			if (step.manhattenlength() == 0) {
 				selection = std::make_shared<ProjectionSelection>(inputSelection, Vector(), 1);
 			} else {
@@ -195,7 +216,7 @@ void TensorConnectTool::updateElements() {
 			}
 		} else { // count
 			float dis = step.length();
-			float length = pointer.lengthAlongProjectToVec(inputPosition.free() + FVector(0.5f, 0.5f), step.free());
+			float length = lastPointerFPosition.lengthAlongProjectToVec(inputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
 			selection = std::make_shared<ProjectionSelection>(inputSelection, (length > 0) ? step : step * -1, count);
 		}
