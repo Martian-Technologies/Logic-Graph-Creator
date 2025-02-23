@@ -25,10 +25,8 @@ public:
 			[&signature](const RegistrationPair& i) { return i.first == signature; }
 		);
 		if (funcIter != iter->second.end()) {
-			allEventFunctions.erase(iter);
 			// keeps order
-			// *funcIter = iter->second.back();
-			// iter->second.pop_back();
+			allEventFunctions.erase(iter);
 		}
 	}
 

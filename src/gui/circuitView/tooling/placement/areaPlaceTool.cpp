@@ -49,17 +49,17 @@ bool AreaPlaceTool::startDeleteBlocks(const Event* event) {
 
 bool AreaPlaceTool::pointerMove(const Event* event) {
 	updateElements();
-	return true;
+	return false;
 }
 
 bool AreaPlaceTool::enterBlockView(const Event* event) {
 	updateElements();
-	return true;
+	return false;
 }
 
 bool AreaPlaceTool::exitBlockView(const Event* event) {
 	updateElements();
-	return true;
+	return false;
 }
 
 void AreaPlaceTool::updateElements() {

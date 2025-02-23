@@ -48,15 +48,14 @@ bool CircuitTool::enterBlockView(const Event* event) {
 	if (positionEvent) {
 		lastPointerFPosition = positionEvent->getFPosition();
 		lastPointerPosition = positionEvent->getPosition();
-
 	}
 
-	return true;
+	return false;
 }
 
 bool CircuitTool::exitBlockView(const Event* event) {
 	pointerInView = false;
-	return true;
+	return false;
 }
 
 bool CircuitTool::pointerMove(const Event* event) {
@@ -64,5 +63,5 @@ bool CircuitTool::pointerMove(const Event* event) {
 	if (!positionEvent) return false;
 	lastPointerFPosition = positionEvent->getFPosition();
 	lastPointerPosition = positionEvent->getPosition();
-	return true;
+	return false;
 }

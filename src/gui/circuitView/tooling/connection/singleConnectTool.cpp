@@ -47,13 +47,13 @@ bool SingleConnectTool::enterBlockView(const Event* event) {
 
 	updateElements(positionEvent->getFPosition());
 
-	return true;
+	return false;
 }
 
 bool SingleConnectTool::exitBlockView(const Event* event) {
 	if (!circuit) return false;
 	elementCreator.clear();
-	return true;
+	return false;
 }
 
 void SingleConnectTool::updateElements(FPosition pointerPosition) {

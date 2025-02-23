@@ -1,16 +1,21 @@
-#include "placement/blockPlacementTool.h"
-#include "logging/logging.h"
 #include "toolManager.h"
 
+// tools
+#include "placement/blockPlacementTool.h"
+#include "connection/singleConnectTool.h"
+#include "connection/tensorConnectTool.h"
+#include "other/previewPlacementTool.h"
+#include "other/logicToucher.h"
+#include "other/moveTool.h"
 
 void ToolManager::selectBlock(BlockType blockType) {
 	if (blockType != BlockType::NONE) {
-		selectTool("placement");
+		selectTool("placement/placement");
 		SharedBlockPlacementTool blockPlacementTool = std::dynamic_pointer_cast<BlockPlacementTool>(selectedTool);
 		if (blockPlacementTool) {
 			blockPlacementTool->selectBlock(blockType);
 		} else {
-			logError("BlockPlacementTool cast failed. Tool type should \"placement\". Tool type is \"" + selectedToolName + "\"");
+			logError("BlockPlacementTool cast failed. Tool type should \"placement/placement\". Tool type is \"" + selectedToolName + "\"");
 		}
 	}
 }
@@ -30,8 +35,11 @@ void ToolManager::selectTool(std::string toolName) {
 		toolStack.clearTools();
 		toolStack.pushTool(selectedTool);
 	} else {
-		if (toolName == "placement") instanceNewtool<BlockPlacementTool>("placement");
-		else if (toolName == "") instanceNewtool<BlockPlacementTool>("placement");
+		if (toolName == "placement/placement") instanceNewtool<BlockPlacementTool>("placement/placement");
+		else if (toolName == "placement/move") instanceNewtool<MoveTool>("placement/move");
+		else if (toolName == "connection/simple") instanceNewtool<SingleConnectTool>("connection/simple");
+		else if (toolName == "connection/tensor") instanceNewtool<TensorConnectTool>("connection/tensor");
+		else if (toolName == "interactive/state changer") instanceNewtool<BlockPlacementTool>("interactive/state changer");
 		else logError("Unknown tool name \"" + toolName + "\"");
 	}
 }

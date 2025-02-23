@@ -25,7 +25,7 @@ bool TensorConnectTool::click(const Event* event) {
 			int dis = step.length();
 			float length = positionEvent->getFPosition().lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
-			outputSelection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step : step*-1, count);
+			outputSelection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step : step * -1, count);
 			outputStage++;
 		}
 	} else {
@@ -142,7 +142,7 @@ bool TensorConnectTool::pointerMove(const Event* event) {
 	if (!positionEvent) return false;
 	pointer = positionEvent->getFPosition();
 	updateElements();
-	return true;
+	return false;
 }
 
 void TensorConnectTool::updateElements() {

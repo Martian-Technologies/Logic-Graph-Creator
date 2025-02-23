@@ -24,6 +24,8 @@ void SelectorWindow::updateToolModeOptions(std::vector<std::string> modes) {
 void SelectorWindow::updateSelected() {
 	for (QTreeWidgetItem* item : ui->SelectorTree->selectedItems()) {
 		if (item) {
+			QString str = item->text(0);
+			QString pathName = str;
 			if (item->childCount() > 0) continue;
 			bool isBlock;
 			QTreeWidgetItem* tmp = item;
@@ -33,13 +35,13 @@ void SelectorWindow::updateSelected() {
 				if (name == "Blocks") {
 					isBlock = true;
 					break;
-				}
-				if (name == "Tools") {
+				} else if (name == "Tools") {
 					isBlock = false;
 					break;
-				}				
+				} else {
+					pathName = name + "/" + pathName;
+				}
 			}
-			QString str = item->text(0);
 			if (isBlock) {
 				BlockType type = NONE;
 				if (str == "And") type = BlockType::AND;
@@ -54,7 +56,7 @@ void SelectorWindow::updateSelected() {
 				else if (str == "Light") type = BlockType::LIGHT;
 				emit selectedBlockChange(type);
 			} else {
-				emit selectedToolChange(str.toStdString());
+				emit selectedToolChange(pathName.toStdString());
 			}
 			return;
 		}

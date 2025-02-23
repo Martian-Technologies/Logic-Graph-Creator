@@ -1,7 +1,7 @@
 #include "singlePlaceTool.h"
 #include "gui/circuitView/renderer/renderer.h"
 
-void SinglePlaceTool::activate()  {
+void SinglePlaceTool::activate() {
 	BaseBlockPlacementTool::activate();
 	registerFunction("tool primary activate", std::bind(&SinglePlaceTool::startPlaceBlock, this, std::placeholders::_1));
 	registerFunction("tool primary deactivate", std::bind(&SinglePlaceTool::stopPlaceBlock, this, std::placeholders::_1));
@@ -105,46 +105,42 @@ bool SinglePlaceTool::stopDeleteBlocks(const Event* event) {
 
 bool SinglePlaceTool::pointerMove(const Event* event) {
 	if (!circuit) return false;
-	
+
 	bool returnVal = false; // used to make sure it updates the effect
 	updateElements();
 
 	switch (clicks[0]) {
 	case 'n':
-		return returnVal;
+		return false;
 	case 'r':
 		if (clicks[1] == 'p') {
 			if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
-			return selectedBlock != BlockType::NONE;
-		}
-		circuit->tryRemoveBlock(lastPointerPosition);
-		return true;
-	case 'p':
-		if (clicks[1] == 'r') {
+		} else {
 			circuit->tryRemoveBlock(lastPointerPosition);
-			return true;
 		}
-		if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
-		return selectedBlock != BlockType::NONE;
+		return false;
+	case 'p':
+		if (clicks[1] == 'r') circuit->tryRemoveBlock(lastPointerPosition);
+		else if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 	}
-	return returnVal;
+	return false;
 }
 
 bool SinglePlaceTool::enterBlockView(const Event* event) {
 	updateElements();
-	return true;
+	return false;
 }
 
 bool SinglePlaceTool::exitBlockView(const Event* event) {
 	updateElements();
-	return true;
+	return false;
 }
 
 void SinglePlaceTool::updateElements() {
 	if (!circuit) return;
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
-	
+
 	if (!pointerInView) return;
 
 	bool blockAtPosition = circuit->getBlockContainer()->getBlock(lastPointerPosition);

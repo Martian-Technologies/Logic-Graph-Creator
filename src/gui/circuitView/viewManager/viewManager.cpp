@@ -16,7 +16,7 @@ bool ViewManager::zoom(const Event* event) {
 	FVector pointerChange = newPointerPosition - pointerPosition;
 	viewCenter -= pointerChange;
 	applyLimits();
-	
+
 	viewChanged();
 	return true;
 }
@@ -56,10 +56,11 @@ bool ViewManager::pointerMove(const Event* event) {
 		viewCenter += delta;
 		applyLimits();
 		viewChanged();
-		return true;
+		return false;
 	}
 
 	pointerPosition = positionEvent->getFPosition();
+
 	return false;
 }
 

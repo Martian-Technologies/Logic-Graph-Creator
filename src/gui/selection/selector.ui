@@ -44,8 +44,11 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="SelectorTree">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
      <property name="dragDropMode">
-      <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+      <enum>QAbstractItemView::DragDropMode::DragOnly</enum>
      </property>
      <attribute name="headerVisible">
       <bool>false</bool>
@@ -109,11 +112,6 @@
         <string>Light</string>
        </property>
       </item>
-      <item>
-       <property name="text">
-        <string>Selection</string>
-       </property>
-      </item>
      </item>
      <item>
       <property name="text">
@@ -123,6 +121,11 @@
        <property name="text">
         <string>Placement</string>
        </property>
+       <item>
+        <property name="text">
+         <string>Placement</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>Move</string>
@@ -146,6 +149,11 @@
          <string>Tensor</string>
         </property>
        </item>
+      </item>
+      <item>
+       <property name="text">
+        <string>Selection</string>
+       </property>
       </item>
       <item>
        <property name="text">

@@ -81,7 +81,7 @@ bool MoveTool::pointerMove(const Event* event) {
 	if (!positionEvent) return false;
 	pointer = positionEvent->getFPosition();
 	updateElements();
-	return true;
+	return false;
 }
 
 void MoveTool::updateElements() {

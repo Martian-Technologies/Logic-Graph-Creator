@@ -31,13 +31,6 @@ public:
 	bool confirm(const Event* event);
 	bool pointerMove(const Event* event);
 
-	// bool startPlaceBlock(const Event* event);
-	// bool stopPlaceBlock(const Event* event);
-	// bool startDeleteBlocks(const Event* event);
-	// bool stopDeleteBlocks(const Event* event);
-	// bool enterBlockView(const Event* event);
-	// bool exitBlockView(const Event* event);
-
 private:
 	void updateElements();
 

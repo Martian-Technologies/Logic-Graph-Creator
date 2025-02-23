@@ -51,7 +51,6 @@ bool LogicToucher::pointerMove(const Event* event) {
 			evaluatorStateInterface->setState(Address(clickPosition), !evaluatorStateInterface->getState(Address(clickPosition)));
 			// std::cout << "press " << clickPosition.toString() << std::endl;
 		}
-		return true;
 	}
 
 	return false;
