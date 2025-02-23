@@ -2,13 +2,12 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QToolButton>
-#include <QWheelEvent>
-#include <QKeyEvent>
-#include <QComboBox>
-#include <QPainter>
 #include <QWidget>
-#include <QTimer>
+
+class QWheelEvent;
+class QKeyEvent;
+class QComboBox;
+class QTimer;
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
@@ -28,7 +27,10 @@ public:
 	void setSimSpeed(double speed);
 
 protected:
-	// events overrides
+	// important events
+	
+	// other events
+	bool event(QEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
@@ -39,7 +41,6 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void enterEvent(QEnterEvent* event) override;
 	void leaveEvent(QEvent* event) override;
-	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
 
@@ -58,7 +59,7 @@ private:
 
 	// update loop
 	QTimer* updateLoopTimer;
-	const float updateInterval = 0.0001f;
+	const float updateInterval = 0.008f;
 	void updateLoop();
 
 	// framerate statistics

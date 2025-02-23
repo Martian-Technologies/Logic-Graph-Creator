@@ -8,7 +8,7 @@ bool ViewManager::zoom(const Event* event) {
 	if (!deltaEvent) return false;
 
 	// adjust zoom level
-	viewHeight *= std::pow(2.f, -deltaEvent->getDelta());
+	viewScale *= std::pow(2.f, -deltaEvent->getDelta());
 	applyLimits();
 
 	// keep pointer position the same
@@ -77,8 +77,8 @@ bool ViewManager::pointerExitView(const Event* event) {
 }
 
 void ViewManager::applyLimits() {
-	if (viewHeight > 150.0f) viewHeight = 150.0f;
-	if (viewHeight < 0.5f) viewHeight = 0.5f;
+	if (viewScale > 150.0f) viewScale = 150.0f;
+	if (viewScale < 0.5f) viewScale = 0.5f;
 	if (viewCenter.x > 10000000) viewCenter.x = 10000000;
 	if (viewCenter.x < -10000000) viewCenter.x = -10000000;
 	if (viewCenter.y > 10000000) viewCenter.y = 10000000;

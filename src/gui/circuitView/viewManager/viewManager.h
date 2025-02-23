@@ -11,7 +11,7 @@
 
 class ViewManager {
 public:
-	ViewManager() : viewCenter(), viewHeight(8.0f), aspectRatio(16.0f / 9.0f) { }
+	ViewManager() : viewCenter(), viewScale(8.0f), aspectRatio(16.0f / 9.0f) { }
 
 	inline void initialize(EventRegister& eventRegister) {
 		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
@@ -34,21 +34,18 @@ public:
 	// view
 	inline void setAspectRatio(float value) { aspectRatio = value; viewChanged(); }
 	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
-	inline void setViewHeight(float value) { viewHeight = value; viewChanged(); }
 
 	inline FPosition getViewCenter() const { return viewCenter; }
-	inline float getViewHeight() const { return viewHeight; }
-	inline float getViewWidth() const { return viewHeight * aspectRatio; }
-	inline FPosition getTopLeft() const { return viewCenter - FVector(getViewWidth() / 2.0f, viewHeight / 2.0f); }
-	inline FPosition getBottomRight() const { return viewCenter + FVector(getViewWidth() / 2.0f, viewHeight / 2.0f); }
+	inline float getViewHeight() const { return viewScale / (aspectRatio <= 1.0f ? aspectRatio : 1.0f); }
+	inline float getViewWidth() const { return viewScale * (aspectRatio > 1.0f ? aspectRatio : 1.0f); }
+	inline FPosition getTopLeft() const { return viewCenter - FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
+	inline FPosition getBottomRight() const { return viewCenter + FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
 	inline const FPosition& getPointerPosition() const { return pointerPosition; }
 	inline float getAspectRatio() const { return aspectRatio; }
 
 	// coordinate system conversion
 	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FVector(getViewWidth() * view.x, getViewHeight() * view.y); }
-	Vec2 gridToView(FPosition position) const; // temporary until matrix
-	// glm::mat4 getViewMatrix() const;
-	// glm::mat4 getPerspectiveMatrix() const;
+	Vec2 gridToView(FPosition position) const;
 
 	// events
 	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
@@ -65,7 +62,7 @@ private:
 
 	// view
 	FPosition viewCenter;
-	float viewHeight;
+	float viewScale;
 	float aspectRatio;
 
 	// event

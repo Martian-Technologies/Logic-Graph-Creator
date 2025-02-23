@@ -69,17 +69,16 @@ std::string rotationToString(Rotation rotation) {
     }
 }
 
-bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<ParsedCircuit> outParsed) {
-    std::string currentFile = path.toStdString();
-    if (!loadedFiles.insert(currentFile).second){
-        std::cout << currentFile << " is already added as a dependency\n";
+bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+    if (!loadedFiles.insert(path).second){
+        logInfo(path + " is already added as a dependency", "FileManager");
         return false;
     }
-    std::cout << "Inserted current file as a dependency: " << currentFile << '\n';
+    logInfo("Inserted current file as a dependency: " + path, "FileManager");
 
-    std::ifstream inputFile(currentFile);
+    std::ifstream inputFile(path);
     if (!inputFile.is_open()) {
-        qWarning("Couldn't open file.");
+        logWarning("Couldn't open file at path: " + path, "FileManager");
         return false;
     }
 
@@ -88,7 +87,7 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
     inputFile >> token;
 
     if (token != "version_1") {
-        qWarning("Invalid file type.");
+        logWarning("Invalid circuit file version", "FileManager");
         return false;
     }
 
@@ -103,14 +102,14 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
             std::string importFileName;
             inputFile >> std::quoted(importFileName);
 
-            QString fullPath = QFileInfo(path).absoluteDir().filePath(QString::fromStdString(importFileName));
+            QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
             std::shared_ptr<ParsedCircuit> dependency = std::make_shared<ParsedCircuit>();
-            std::cout << "File to access: " << fullPath.toStdString() << '\n';
-            if (loadFromFile(fullPath, dependency)){
-                std::cout << "Successfully imported dependency: " << importFileName << '\n';
+            logInfo("File to access: " + fullPath.toStdString(), "FileManager");
+            if (loadFromFile(fullPath.toStdString(), dependency)){
+                logInfo("Successfully imported dependency: " + importFileName, "FileManager");
                 outParsed->addDependency(importFileName, dependency);
             }else{
-                std::cout << "Failed to import dependency: " << importFileName << '\n';
+                logWarning("Failed to import dependency: " + importFileName, "FileManager");
             }
             continue;
         }else if (token == "external"){
@@ -163,18 +162,18 @@ bool CircuitFileManager::loadFromFile(const QString& path, std::shared_ptr<Parse
         }
     }
     outParsed->makePositionsRelative();
+    outParsed->setFilePath(path);
     inputFile.close();
-    loadedFiles.erase(currentFile);
+    loadedFiles.erase(path);
     return true;
 }
 
-bool CircuitFileManager::saveToFile(const QString& path, circuit_id_t circuitId) {
-    SharedCircuit circuitPtr = circuitManager->getCircuit(circuitId);
+bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr) {
     if (!circuitPtr) return false;
 
-    std::ofstream outputFile(path.toStdString());
+    std::ofstream outputFile(path);
     if (!outputFile.is_open()){
-        qWarning("Couldn't open file.");
+        logWarning("Couldn't open file at path: " + path, "FileManager");
         return false;
     }
 
