@@ -11,7 +11,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-#include "gui/circuitView/tooling/other/previewPlacementTool.h"
+#include "gui/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
 #include "circuitViewWidget.h"

@@ -7,10 +7,10 @@
 #include "backend/circuit/circuit.h"
 #include "backend/evaluator/evaluator.h"
 #include "events/eventRegister.h"
-#include "tooling/toolManager.h"
+#include "tools/toolManager.h"
 #include "renderer/renderer.h"
 #include "viewManager/viewManager.h"
-#include "tooling/placement/blockPlacementTool.h"
+#include "tools/placement/blockPlacementTool.h"
 
 class Backend;
 
