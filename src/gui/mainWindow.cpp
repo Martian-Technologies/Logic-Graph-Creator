@@ -61,7 +61,6 @@ void MainWindow::setUpMenuBar() {
     saveSubMenu = new QMenu("Save Circuit", this);
     saveAsSubMenu = new QMenu("Save Circuit As", this);
     loadIntoSubMenu = new QMenu("Load Circuit Into", this);
-    loadMergedSubMenu = new QMenu("Load Merged Circuit Into", this);
 
 	menubar->addMenu(windowMenu);
 	menubar->addMenu(fileMenu);
@@ -85,13 +84,11 @@ void MainWindow::setUpMenuBar() {
 
 	QAction* loadAction = fileMenu->addMenu(loadIntoSubMenu); // should expand to show 1 through circuitViews.size()
     loadAction->setText("Load Circuit Into");
-	QAction* loadMergedAction = fileMenu->addMenu(loadMergedSubMenu); // should expand to show 1 through circuitViews.size()
-    loadMergedAction->setText("Load Merged Circuit Into");
+
 
     connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
     connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
-    connect(loadIntoSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(false); });
-    connect(loadMergedSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(true); });
+    connect(loadIntoSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(); });
 }
 
 void MainWindow::updateSaveMenu(bool saveAs) {
@@ -114,8 +111,8 @@ void MainWindow::updateSaveMenu(bool saveAs) {
     }
 }
 
-void MainWindow::updateLoadIntoMenu(bool loadMerged) {
-    QMenu* subMenu = loadMerged ? loadMergedSubMenu : loadIntoSubMenu;
+void MainWindow::updateLoadIntoMenu() {
+    QMenu* subMenu = loadIntoSubMenu;
 
     subMenu->clear();
     for (std::pair<QWidget*, CircuitViewWidget*> p : activeWidgets) {
@@ -123,11 +120,11 @@ void MainWindow::updateLoadIntoMenu(bool loadMerged) {
         Circuit* circuit = circuitView->getCircuit();
         if (!circuit) continue; // "None"
         QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitName()));
-        connect(action, &QAction::triggered, this, [this, circuitView, loadMerged]() { loadCircuitInto(circuitView, loadMerged); });
+        connect(action, &QAction::triggered, this, [this, circuitView]() { loadCircuitInto(circuitView); });
     }
 
     QAction* action = subMenu->addAction("New Circuit");
-    connect(action, &QAction::triggered, this, [this, loadMerged]() { loadCircuit(loadMerged); });
+    connect(action, &QAction::triggered, this, [this]() { loadCircuit(); });
 }
 
 void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
@@ -172,17 +169,17 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 }
 
 // Loads circuit and all dependencies onto newly created circuits.
-void MainWindow::loadCircuit(bool loadMerged) {
+void MainWindow::loadCircuit() {
     std::string filePath =
         QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.circuit);;All Files (*)") .toStdString();
     
-    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath, parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed, loadMerged);
+    CircuitValidator validator(*parsed);
     if (parsed->isValid()){
         circuit_id_t id = backend.createCircuit();
         evaluator_id_t evalId = *backend.createEvaluator(id);
@@ -208,17 +205,17 @@ void MainWindow::loadCircuit(bool loadMerged) {
 
 // Loads the primary circuit onto an existing circuit, where the user places down the primary.
 // All dependencies are still loaded into their own circuits, upon the placement of the primary.
-void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView, bool loadMerged) {
+void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
     QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
     if (filePath.isEmpty()) return;
     
-    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed, loadMerged);
+    CircuitValidator validator(*parsed);
     if (parsed->isValid()){
         // circuitView->getToolManager().setPendingPreviewData(parsed);
         // circuitView->getToolManager().changeTool("Preview Placement");

@@ -17,7 +17,7 @@ public:
     }
 	void updateElements()  override final;
 
-    void loadParsedCircuit(std::shared_ptr<ParsedCircuit> circuitData) {
+    void loadParsedCircuit(SharedParsedCircuit circuitData) {
         parsedCircuit = circuitData;
     }
 
@@ -39,7 +39,7 @@ private:
     void clearPreview();
     bool validatePlacement() const;
 
-    std::shared_ptr<ParsedCircuit> parsedCircuit;
+    SharedParsedCircuit parsedCircuit;
     Backend* backend;
     bool usingTool = true;
     bool continueRender = true;

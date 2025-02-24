@@ -301,13 +301,13 @@ void CircuitViewWidget::save() {
 void CircuitViewWidget::load(const QString& filePath) {
 	if (!fileManager) return;
 
-    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed); // validate and dont merge dependencies
     if (parsed->isValid()){
         // circuitView.getToolManager().setPendingPreviewData(parsed);
         // circuitView.getToolManager().changeTool("Preview Placement");

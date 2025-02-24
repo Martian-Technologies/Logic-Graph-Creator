@@ -27,10 +27,10 @@ public:
 	void setTool(std::string tool);
 	void setMode(std::string tool);
     void updateSaveMenu(bool saveAs);
-    void updateLoadIntoMenu(bool loadMerged);
+    void updateLoadIntoMenu();
     void saveCircuit(circuit_id_t id, bool saveAs);
-    void loadCircuit(bool loadMerged);
-    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged);
+    void loadCircuit();
+    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();

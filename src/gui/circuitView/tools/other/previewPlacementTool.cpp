@@ -77,7 +77,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
 
 	// Place all dependencies in their own circuits
 	if (backend) {
-		std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
+		std::unordered_map<std::string, SharedParsedCircuit> deps = parsedCircuit->getDependencies();
 		// for (auto itr = deps.begin(); itr != deps.end(); ++itr){
 		//     circuit_id_t id = backend->createCircuit();
 		//     backend->createEvaluator(id);

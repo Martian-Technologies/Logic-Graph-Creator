@@ -5,6 +5,7 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
+#include "parsedCircuit.h"
 #include "undoSystem.h"
 
 typedef unsigned int circuit_id_t;
@@ -51,6 +52,9 @@ public:
 	void tryRemoveOverArea(Position cellA, Position cellB);
 
 	bool checkCollision(const SharedSelection& selection);
+
+	// Trys to place a parsed circuit at a position
+	bool tryInsertParsedCircuit(SharedParsedCircuit parsedCircuit, const Position& position);
 
 	/* ----------- block data ----------- */
 

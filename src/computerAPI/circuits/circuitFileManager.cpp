@@ -1,10 +1,8 @@
-#include <QFile>
-#include <fstream>
 #include <QTextStream>
-#include <string>
 #include <QFileInfo>
-#include <QDir>
 #include <QString>
+#include <QFile>
+#include <QDir>
 
 
 #include "circuitFileManager.h"
@@ -69,7 +67,7 @@ std::string rotationToString(Rotation rotation) {
     }
 }
 
-bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
     if (!loadedFiles.insert(path).second){
         logInfo(path + " is already added as a dependency", "FileManager");
         return false;
@@ -103,7 +101,7 @@ bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<P
             inputFile >> std::quoted(importFileName);
 
             QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
-            std::shared_ptr<ParsedCircuit> dependency = std::make_shared<ParsedCircuit>();
+            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fullPath.toStdString(), "FileManager");
             if (loadFromFile(fullPath.toStdString(), dependency)){
                 logInfo("Successfully imported dependency: " + importFileName, "FileManager");
@@ -111,21 +109,6 @@ bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<P
             }else{
                 logWarning("Failed to import dependency: " + importFileName, "FileManager");
             }
-            continue;
-        }else if (token == "external"){
-            ParsedCircuit::ExternalConnection ec;
-            std::string file1, file2;
-
-            inputFile >> std::quoted(file1)
-                      >> ec.localBlockId
-                      >> ec.localConnectionId
-                      >> ec.externalBlockId
-                      >> ec.externalConnectionId
-                      >> std::quoted(file2);
-
-            ec.localFile = file1; // "." for the current file.
-            ec.dependencyFile = file2;
-            outParsed->addExternalConnection(ec);
             continue;
         }
 
