@@ -7,6 +7,7 @@
 #include <optional>
 #include <utility>
 #include <memory>
+#include <cassert>
 
 #include <unordered_map>
 #include <unordered_set>
