@@ -44,7 +44,7 @@ bool PreviewPlacementTool::pointerMove(const Event* event) {
 }
 
 // Places the primary parsed circuit in the current circuit.
-// Places all dependencies on their own circuits.
+// Places all dependencies on their own circuits, unless we are merging circuits into one.
 bool PreviewPlacementTool::commitPlacement(const Event* event) {
     if (!usingTool) return true;
 
@@ -61,45 +61,52 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
         Position targetPos = block.pos.snap() + totalOffset;
         block_id_t newId;
         if (!circuit->tryInsertBlock(targetPos, block.rotation, block.type)) {
-            qWarning("Failed to insert block.");
+            logWarning("Failed to insert block", "LoadingPreview");
         }
-        std::cout << "Inserted block. ID=" << oldId << ", Rot=" << rotationToString(block.rotation) << ", Type=" << blockTypeToString(block.type) <<  std::endl;
+        //logInfo("Inserted block. ID=" + std::to_string(oldId) + ", Rot=" + rotationToString(block.rotation) + ", Type=" + blockTypeToString(block.type), "LoadingPreview");
         realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos)->id();;
     }
 
     for (const auto& conn : parsedCircuit->getConns()) {
         const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
         if (!b){
-            qWarning("Could not get block from parsed circuit");
+            logWarning("Could not get block from parsed circuit", "LoadingPreview");
             break;
         }
         if (isConnectionInput(b->type, conn.outputId)){
             // skip inputs
             continue;
         }
-        std::cout << "connecting [block=" << conn.outputBlockId << ", id=" << conn.outputId << " --> " << "block=" << conn.inputBlockId << ", id=" << conn.inputId << "]\n";
+        //logInfo("connecting [block=" + std::to_string(conn.outputBlockId) + ", id=" + std::to_string(conn.outputId) + " --> " + "block=" + std::to_string(conn.inputBlockId) + ", id=" + std::to_string(conn.inputId) + "]", "LoadingPreview");
 
         ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
         ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
         if (!circuit->tryCreateConnection(output, input)) {
-            qWarning("Failed to create connection.");
+            logWarning("Failed to create connection.", "LoadingPreview");
         }
     }
 
     // Place all dependencies in their own circuits
+    // Note that this is done here so that we recursively place all dependencies of dependencies
     if (backend) {
         std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
         for (auto itr = deps.begin(); itr != deps.end(); ++itr){
             circuit_id_t id = backend->createCircuit();
             backend->createEvaluator(id);
 
+            Circuit* depCircuit = backend->getCircuit(id).get();
+
             loadParsedCircuit(itr->second);
-            setCircuit(backend->getCircuit(id).get());
+            setCircuit(depCircuit);
             commitPlacement(nullptr);
             reUse();
+
+            depCircuit->setSaved();
+            depCircuit->setSaveFilePath(itr->second->getFilePath());
+            logInfo("Loaded and marked dependency circuit as saved: " + itr->second->getFilePath(), "LoadingPreview");
         }
     } else {
-        std::cout << "Backed is not initialized to place the dependencies\n";
+        logInfo("Backed is not initialized to place the dependencies", "LoadingPreview");
     }
 
     clearPreview();

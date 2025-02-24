@@ -16,9 +16,12 @@ void CircuitValidator::validate() {
 bool CircuitValidator::validateDependencies() {
     int numImports = 0;
 
+    // Setup offset for possibly merging dependencies
+    Vector offset(parsedCircuit.maxPos.dx + (parsedCircuit.blocks.empty()?0:3), parsedCircuit.minPos.dy);
+
     for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
         // validate the dependency as a circuit itself
-        CircuitValidator depValidator(*depCircuit);
+        CircuitValidator depValidator(*depCircuit, mergeCircuit);
         if (!depCircuit->valid) {
             logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
@@ -26,8 +29,24 @@ bool CircuitValidator::validateDependencies() {
         }
         logInfo("Dependency circuit validation success for " + depName);
 
-        /*
-        TODO: we don't want to make the connections directly anymore, need to implement custom blocks first
+        // Merge into one parsed circuit:
+        if (!mergeCircuit){ continue; }
+
+        Vector depSize = depCircuit->maxPos - depCircuit->minPos;
+        Vector currOffset = offset;
+
+        // merge the blocks to the current parsedCircuit with their offsets
+        std::unordered_map<block_id_t, block_id_t> idMap;
+        for (const auto& [id, block] : depCircuit->getBlocks()) {
+            block_id_t newId = generateNewBlockId();
+            idMap[id] = newId;
+
+            ParsedCircuit::BlockData newBlock = block;
+            newBlock.pos.x += currOffset.dx;
+            newBlock.pos.y += currOffset.dy;
+            parsedCircuit.addBlock(newId, newBlock);
+        }
+
         // merge internal connections, adjusting old ids
         for (const auto& conn : depCircuit->connections) {
             ParsedCircuit::ConnectionData newConn = conn;
@@ -38,18 +57,24 @@ bool CircuitValidator::validateDependencies() {
 
         // store ID mapping for this specific dependency
         dependencyMappings[depName] = idMap;
-        */
+
+        // update offset for next dependency
+        offset.dx += depSize.dx + 3;
+        if ((++numImports % 3) == 0) {
+            offset.dx = 0;
+            offset.dy += depSize.dy + 2;
+        }
     }
 
-
-    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()) + " MERGING DEPENDENCY CONNECTIONS");
-    //processExternalConnections();
+    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()));
+    if (mergeCircuit){
+        processExternalConnections();
+        parsedCircuit.dependencies.clear(); // We have no more dependencies because they are merged
+    }
 
     return true;
 }
 
-/*
-// TODO: Need to implement custom blocks so that we can make these connections between different circuits.
 void CircuitValidator::processExternalConnections() {
     // collect connections from dependencies
     for (const auto& [depName, depCircuit] : parsedCircuit.dependencies) {
@@ -82,7 +107,6 @@ void CircuitValidator::processExternalConnections() {
     }
     std::cout << "Finished connecting external dependencies\n\n";
 }
-*/
 
 bool CircuitValidator::setBlockPositionsInt() {
     for (auto& [id, block] : parsedCircuit.blocks) {

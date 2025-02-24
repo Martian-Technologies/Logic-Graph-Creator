@@ -1,8 +1,9 @@
 #ifndef dynamicGridWidget_h
 #define dynamicGridWidget_h
 
-#include <QGridLayout>
 #include <QWidget>
+
+class QGridLayout;
 
 class DynamicGridWidget : public QWidget {
 	Q_OBJECT
