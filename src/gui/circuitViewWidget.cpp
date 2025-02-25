@@ -75,13 +75,14 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	layout->setSpacing(0);
 	this->setLayout(layout);
 
-	createVulkanWindow();
+	
 }
 
 void CircuitViewWidget::showEvent(QShowEvent* event) {
 	float w = size().width();
 	float h = size().height();
 
+	createVulkanWindow();
 	// initialize renderer with width and height
 	circuitView.getRenderer().resize(w, h);
 	circuitView.getRenderer().run();

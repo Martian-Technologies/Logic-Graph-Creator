@@ -7,7 +7,7 @@ std::vector<std::string> getRequiredInstanceExtensions() {
 #ifdef __APPLE__
 	// we don't have a library for this on apple, so this will have to work. May not age very well
 	// we should expand the device picking code to set these more accurately
-	std::vector<std::string> extensions = { "VK_KHR_surface", "VK_KHR_portability_enumeration", "VK_KHR_portability_subset", "VK_MVK_macos_surface", "VK_EXT_debug_utils"};
+	std::vector<std::string> extensions = { "VK_KHR_surface", "VK_KHR_portability_enumeration", "VK_MVK_macos_surface", "VK_EXT_debug_utils"};
 	return extensions;
 	
 #else
