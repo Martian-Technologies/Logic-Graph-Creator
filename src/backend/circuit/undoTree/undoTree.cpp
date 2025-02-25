@@ -4,106 +4,64 @@
 // Class UndoTree implementation
 
 UndoTree::UndoTree():
-    currentBranch(new Branch()) { }
+    mainBranch(new Branch(this)), numNodes(0) {
+    branches.insert(mainBranch);
+    mainBranch->nodes.emplace_back(DifferenceSharedPtr(new Difference));
+}
 UndoTree::~UndoTree() {
-    Branch* mainBranch = currentBranch;
-    currentBranch = nullptr;
-    while (mainBranch->parentBranch != nullptr) {
-        mainBranch = mainBranch->parentBranch;
+    for (Branch* branch : branches) {
+        delete branch;
     }
-    delete mainBranch;
+    branches.clear();
+    mainBranch = nullptr;
 }
 
-void UndoTree::insert_diff(DifferenceSharedPtr diff) {
-    assert(diff != nullptr);
-    currentBranch = currentBranch->add_diff(diff);
+size_t UndoTree::size() const {
+    return numNodes;
 }
-DifferenceSharedPtr UndoTree::undo() {
-    DifferenceSharedPtr diff = currentBranch->currentDiff();
-    currentBranch = currentBranch->ascend();
-    if (diff == currentBranch->currentDiff()) {
-        return DifferenceSharedPtr(new Difference);
-    } else return diff;
+size_t UndoTree::numBranches() const {
+    return branches.size();
 }
-DifferenceSharedPtr UndoTree::redo(int branch) {
-    DifferenceSharedPtr diff = currentBranch->currentDiff();
-    currentBranch = currentBranch->descend(branch);
-    if (diff == currentBranch->currentDiff()) {
-        return DifferenceSharedPtr(new Difference);
-    } else return diff;
+
+UndoTree::iterator UndoTree::insert(const iterator& it, DifferenceSharedPtr diff) {
+    // Make sure the iterator is on this tree
+    assert(branches.contains(it.branch));
+
+    // If the iterator is at the end of its branch append the new diff
+    if (&it.branch->nodes.back() == it.pt) {
+        it.branch->nodes.emplace_back(Branch::Node(diff));
+        return iterator(it.branch, &it.branch->nodes.back());
+    // If the iterator is not at the end of its branch make a new branch
+    } else {
+        Branch* newBranch = new Branch(this, it.pt, diff);
+        branches.insert(newBranch);
+        if (it.pt->branches == nullptr) {
+            it.pt->branches = new std::vector<Branch*>;
+        }
+        it.pt->branches->push_back(newBranch);
+        return iterator(newBranch, &newBranch->nodes.back());
+    }
+}
+
+void UndoTree::clear() {
+    for (Branch* branch : branches) {
+        delete branch;
+    }
+    branches.clear();
+    mainBranch = new Branch(this);
+    mainBranch->nodes.emplace_back(DifferenceSharedPtr(new Difference));
+    branches.insert(mainBranch);
+    numNodes = 0;
 }
 
 // ================================================================================================
 // Class UndoTree::Branch implementation
 
-UndoTree::Branch::Branch():
-    parentBranch(nullptr), position(0) { }
-
-UndoTree::Branch::Branch(DifferenceSharedPtr diff):
-    parentBranch(nullptr), position(0) {
-    tree.emplace_back(Node(diff));
-}
-UndoTree::Branch::Branch(Branch* parent, DifferenceSharedPtr diff):
-    parentBranch(parent), position(0) {
-    tree.emplace_back(Node(diff));
-}
-UndoTree::Branch::~Branch() {
-    for (Node node : tree) {
-        if (node.branches != nullptr) {
-            delete node.branches;
-            node.branches = nullptr;
-        }
-    }
-}
-
-DifferenceSharedPtr UndoTree::Branch::currentDiff() const {
-    return tree[position].diff;
-}
-
-UndoTree::Branch* UndoTree::Branch::add_diff(DifferenceSharedPtr diff) {
-    // If at the end of branch, extend branch
-    if (atBranchEnd()) {
-        tree.emplace_back(Node(diff));
-        position = tree.size() -1;
-        return this;
-
-    // Otherwise create a new branch
-    } else {
-        if (tree[position].branches == nullptr) {
-            tree[position].branches = new std::vector<Branch>;
-        }
-        tree[position].branches->emplace_back(Branch(this, diff));
-        return &tree[position].branches->back();
-    }
-}
-UndoTree::Branch* UndoTree::Branch::ascend() {
-    if (!atBranchBegin()) {
-        position--;
-        return this;
-    } else {
-        if (parentBranch == nullptr) {
-            return this;
-        } else return parentBranch;
-    }
-}
-UndoTree::Branch* UndoTree::Branch::descend(int branch) {
-    if (atBranchEnd()) {
-        return this;
-    } else if (branch == -1) {
-        position++;
-        return this;
-    } else return &(*tree[position].branches)[branch];
-}
-
-bool UndoTree::Branch::atBranchBegin() const {
-    return position == 0;
-}
-bool UndoTree::Branch::atBranchEnd() const {
-    bool atEnd = tree.empty();
-    if (!atEnd) {
-        atEnd = position == tree.size() - 1;
-    }
-    return atEnd;
+UndoTree::Branch::Branch(UndoTree* tree):
+    tree(tree), parentNode(nullptr) { }
+UndoTree::Branch::Branch(UndoTree* tree, Node* parent, DifferenceSharedPtr diff):
+    tree(tree), parentNode(parent) {
+    nodes.emplace_back(Node(diff));
 }
 
 // ================================================================================================
@@ -111,4 +69,3 @@ bool UndoTree::Branch::atBranchEnd() const {
 
 UndoTree::Branch::Node::Node(DifferenceSharedPtr diff):
     diff(diff), branches(nullptr) { }
-
