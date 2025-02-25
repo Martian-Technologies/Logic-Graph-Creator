@@ -152,7 +152,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 
     // "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
     std::string filePath =
-        QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)").toStdString();
+        QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
     if (filePath.empty()) {
         logWarning("Filepath not provided for save", "FileSaving");
         return;
@@ -173,7 +173,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit(bool loadMerged) {
     std::string filePath =
-        QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.circuit);;All Files (*)") .toStdString();
+        QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)") .toStdString();
     
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath, parsed)) {
@@ -208,7 +208,7 @@ void MainWindow::loadCircuit(bool loadMerged) {
 // Loads the primary circuit onto an existing circuit, where the user places down the primary.
 // All dependencies are still loaded into their own circuits, upon the placement of the primary.
 void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView, bool loadMerged) {
-    QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
+    QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
     if (filePath.isEmpty()) return;
     
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
@@ -274,7 +274,7 @@ void MainWindow::exportProject() {
         if (!filepath.isEmpty()) {
             filename = QFileInfo(filepath).fileName();
         } else {
-            filename = QString("Untitled_%1.circuit").arg(p.first);
+            filename = QString("Untitled_%1.cir").arg(p.first);
         }
 
         std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();

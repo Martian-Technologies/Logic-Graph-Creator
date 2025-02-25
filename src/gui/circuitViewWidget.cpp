@@ -290,7 +290,7 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 void CircuitViewWidget::save() {
     std::cout << "Trying to save\n";
     if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
+        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
         if (!filePath.isEmpty()) {
             fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
         }

@@ -87,7 +87,7 @@ void CircuitValidator::processExternalConnections() {
         if (conn.localFile == ".") {
             resolvedLocalBlock = conn.localBlockId;
         } else {
-            std::cout << "Trying to access local file at: " << conn.localFile << std::endl;
+            logInfo("Trying to access local file for external connection at: " + conn.localFile, "CircuitValidator");
             const auto& depMap = dependencyMappings.at(conn.localFile);
             resolvedLocalBlock = depMap.at(conn.localBlockId);
         }
@@ -96,7 +96,7 @@ void CircuitValidator::processExternalConnections() {
         if (conn.dependencyFile == ".") {
             resolvedExternalBlock = conn.localBlockId;
         } else {
-            std::cout << "Trying to access dependency at: " << conn.dependencyFile << std::endl;
+            logInfo("Trying to access dependency at: " + conn.dependencyFile, "CircuitValidator");
             const auto& extDepMap = dependencyMappings.at(conn.dependencyFile);
             resolvedExternalBlock = extDepMap.at(conn.externalBlockId);
         }
@@ -105,13 +105,13 @@ void CircuitValidator::processExternalConnections() {
         // add the reciprocated connection
         parsedCircuit.addConnection({resolvedExternalBlock, conn.externalConnectionId, resolvedLocalBlock, conn.localConnectionId});
     }
-    std::cout << "Finished connecting external dependencies\n\n";
+    logInfo("Finished connecting external dependencies", "CircuitValidator");
 }
 
 bool CircuitValidator::setBlockPositionsInt() {
     for (auto& [id, block] : parsedCircuit.blocks) {
         if (!isIntegerPosition(block.pos)) {
-            std::cout << "Converted block id=" << id << " position from " << block.pos.toString() << " to ";
+            FPosition oldPosition = block.pos;
             block.pos.x = std::floor(block.pos.x);
             block.pos.y = std::floor(block.pos.y);
             if (block.pos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = block.pos.x;
@@ -119,7 +119,9 @@ bool CircuitValidator::setBlockPositionsInt() {
             if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
             if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
 
-            std::cout << block.pos.toString() << '\n';
+            logInfo("Converted block id=" + std::to_string(id) +
+                        " position from " + oldPosition.toString() + " to " + block.pos.toString(),
+                    "CircuitValidator");
         }
     }
     return true;
@@ -147,7 +149,12 @@ bool CircuitValidator::handleInvalidConnections() {
 
         if(--connectionCounts[reversePair] < 0){
             parsedCircuit.connections.push_back(reversePair);
-            std::cout << "Added a reciprocated connection between: (" << conn.inputBlockId << ' ' << conn.outputBlockId << ") and (" << reversePair.inputBlockId << ' ' << reversePair.outputBlockId << ")\n";
+            logInfo("Added reciprocated connection between: (" +
+                        std::to_string(conn.inputBlockId) + ' ' +
+                        std::to_string(conn.outputBlockId) + ") and (" +
+                        std::to_string(reversePair.inputBlockId) + ' ' +
+                        std::to_string(reversePair.outputBlockId) + ")",
+                    "CircuitValidator");
             connectionCounts[reversePair] = 0;
         }
         ++i;
@@ -156,7 +163,11 @@ bool CircuitValidator::handleInvalidConnections() {
     // check all remaining connections were found
     for (const auto& [pair, count] : connectionCounts) {
         if (count != 0){
-            std::cout << "Invalid connection handling, connection frequency: (" << pair.outputBlockId << ' ' << pair.inputBlockId << ") " << count << '\n';
+            logWarning("Invalid connection handling, connection frequency: (" +
+                         std::to_string(pair.outputBlockId) + ' ' +
+                         std::to_string(pair.inputBlockId) + ") " +
+                         std::to_string(count),
+                     "CircuitValidator");
             return false;
         }
     }
@@ -171,7 +182,7 @@ bool CircuitValidator::setOverlapsUnpositioned() {
         Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
         if (!occupiedPositions.insert(intPos).second){
             // set the block position as effectively undefined
-            std::cout << "Found overlapped block position at " << block.pos.toString() << " --> " << intPos.toString() << ", setting to undefined position\n";
+            logInfo("Found overlapped block position at " + block.pos.toString() + " --> " + intPos.toString() + ", setting to undefined position", "CircuitValidator");
             block.pos.x = std::numeric_limits<float>::max();
             block.pos.y = std::numeric_limits<float>::max();
         }
@@ -214,7 +225,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
             if (currentPos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = currentPos.y;
             if (currentPos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = currentPos.x;
             if (currentPos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = currentPos.y;
-            std::cout << "Found new empty block position: " << block.pos.toString() << " --> " << block.pos.snap().toString() << '\n';
+            logInfo("Found new empty block position: " + block.pos.toString() + " --> " + block.pos.snap().toString(), "CircuitValidator");
             occupiedPositions.insert(currentPos);
         }
     }
