@@ -481,7 +481,7 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
     };
 
     // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
-    const double posScale = 0.05;
+    const double posScale = 0.02;
     for (const std::pair<const int, OpenCircuitsBlockInfo>& p: filteredBlocks) {
         outParsed->addBlock(p.first, {p.second.position*posScale,
                                 Rotation(std::lrint(p.second.angle * (2 / M_PI)) % 4),
@@ -497,13 +497,12 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
             // other connection end id will be an output for the other, connection id 0 if it doesn't have any inputs
         }
 
-        int currConnId = 0;
-        if (!p.second.inputBlocks.empty()) currConnId = 1;
+        int outputConnId = !p.second.inputBlocks.empty();
 
         for (int b : p.second.outputBlocks){
             outParsed->addConnection({
                     static_cast<block_id_t>(p.first),
-                    static_cast<connection_end_id_t>(currConnId),
+                    static_cast<connection_end_id_t>(outputConnId),
                     static_cast<block_id_t>(b),
                     static_cast<connection_end_id_t>(0) // outputs will always go to inputs
                     });

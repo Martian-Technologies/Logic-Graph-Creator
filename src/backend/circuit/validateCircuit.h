@@ -35,6 +35,9 @@ private:
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
+
+
+    std::vector<block_id_t> getSuccessors(block_id_t node);
     bool handleUnpositionedBlocks();
 
     bool isIntegerPosition(const FPosition& pos) const {
