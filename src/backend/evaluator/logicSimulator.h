@@ -64,6 +64,11 @@ private:
 
 	std::atomic<int64_t> nextTick_us;
 
+	std::mutex killThreadsMux;
+	std::atomic<bool> killThreadsFlag;
+	std::condition_variable killThreadsCv;
+
+
 	void simulationLoop();
 	void tickrateMonitor();
 };
