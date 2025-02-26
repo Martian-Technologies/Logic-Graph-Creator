@@ -40,6 +40,7 @@ void ToolManager::selectTool(std::string toolName) {
 		else if (toolName == "connection/simple") instanceNewtool<SingleConnectTool>("connection/simple");
 		else if (toolName == "connection/tensor") instanceNewtool<TensorConnectTool>("connection/tensor");
 		else if (toolName == "interactive/state changer") instanceNewtool<BlockPlacementTool>("interactive/state changer");
+		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>("preview placement tool");
 		else logError("Unknown tool name \"" + toolName + "\"");
 	}
 }

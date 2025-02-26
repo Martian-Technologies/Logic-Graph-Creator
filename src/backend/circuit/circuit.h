@@ -54,7 +54,7 @@ public:
 	bool checkCollision(const SharedSelection& selection);
 
 	// Trys to place a parsed circuit at a position
-	bool tryInsertParsedCircuit(SharedParsedCircuit parsedCircuit, const Position& position);
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
 
 	/* ----------- block data ----------- */
 

@@ -10,7 +10,8 @@ public:
 	void selectBlock(BlockType blockType);
 
 	void selectTool(std::string toolName);
-	inline std::string getSelectedTool() { return selectedToolName; }
+	inline CircuitTool* getSelectedTool() { return selectedTool.get(); }
+	inline std::string getSelectedToolName() { return selectedToolName; }
 
 	void setMode(std::string mode);
 

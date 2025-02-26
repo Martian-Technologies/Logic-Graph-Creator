@@ -8,7 +8,7 @@ void PreviewPlacementTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	
-	if (!usingTool || !continueRender || !pointerInView) return;
+	if (!active || !pointerInView) return;
 
 
 	// note that getMinPos will return an FVector but will have valid integer coordinates.
@@ -37,70 +37,24 @@ bool PreviewPlacementTool::validatePlacement() const {
 // Places the primary parsed circuit in the current circuit.
 // Places all dependencies on their own circuits.
 bool PreviewPlacementTool::commitPlacement(const Event* event) {
-	if (!usingTool) return true;
+	if (!active) return false;
 
 	if (!validatePlacement()) {
 		QMessageBox::warning(nullptr, "Collision Detected", "Cannot place circuit in occupied positions");
-		continueRender = true;
-		return false;
+		return true;
 	}
-
-	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(lastPointerPosition.x, lastPointerPosition.y);
-	std::unordered_map<block_id_t, block_id_t> realIds;
-
-	for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
-		Position targetPos = block.pos.snap() + totalOffset;
-		block_id_t newId;
-		if (!circuit->tryInsertBlock(targetPos, block.rotation, block.type)) {
-			qWarning("Failed to insert block.");
-		}
-		realIds[oldId] = circuit->getBlockContainer()->getBlock(targetPos)->id();;
-	}
-
-	for (const auto& conn : parsedCircuit->getConns()) {
-		const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
-		if (!b) {
-			qWarning("Could not get block from parsed circuit");
-			break;
-		}
-		if (isConnectionInput(b->type, conn.outputId)) {
-			// skip inputs
-			continue;
-		}
-
-		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
-		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
-		if (!circuit->tryCreateConnection(output, input)) {
-			qWarning("Failed to create connection.");
-		}
-	}
-
-	// Place all dependencies in their own circuits
-	if (backend) {
-		std::unordered_map<std::string, SharedParsedCircuit> deps = parsedCircuit->getDependencies();
-		// for (auto itr = deps.begin(); itr != deps.end(); ++itr){
-		//     circuit_id_t id = backend->createCircuit();
-		//     backend->createEvaluator(id);
-
-		//     loadParsedCircuit(itr->second);
-		//     setCircuit(backend->getCircuit(id).get());
-		//     commitPlacement(nullptr);
-		//     reUse();
-		// } TODO make backend or Ciruit manager do this with no placement preview
-	} else {
-		std::cout << "Backed is not initialized to place the dependencies\n";
-	}
+	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition);
 
 	clearPreview();
-	usingTool = continueRender = false;
+	active = false;
 	return true;
 }
 
 bool PreviewPlacementTool::cancelPlacement(const Event* event) {
-	if (!usingTool) return true;
+	if (!active) return false;
 
 	clearPreview();
-	usingTool = continueRender = false;
+	active = false;
 	return true;
 }
 

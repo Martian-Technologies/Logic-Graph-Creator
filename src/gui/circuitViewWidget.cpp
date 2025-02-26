@@ -309,14 +309,14 @@ void CircuitViewWidget::load(const QString& filePath) {
 
     CircuitValidator validator(*parsed); // validate and dont merge dependencies
     if (parsed->isValid()){
-        // circuitView.getToolManager().setPendingPreviewData(parsed);
-        // circuitView.getToolManager().changeTool("Preview Placement");
-        // PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
-        // if (previewTool) {
-        //     previewTool->setBackend(circuitView.getBackend());
-        // }else{
-        //     std::cout << "Preview tool failed to cast\n";
-        // }
+		circuitView.getToolManager().selectTool("preview placement tool");
+        // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getSelectedTool());
+        if (previewTool) {
+            previewTool->setParsedCircuit(parsed);
+        }else{
+            std::cout << "Preview tool failed to cast\n";
+        }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
     }

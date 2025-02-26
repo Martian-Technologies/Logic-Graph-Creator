@@ -10,27 +10,23 @@ class PreviewPlacementTool : public CircuitTool {
 public:
     PreviewPlacementTool() = default;
 
-    void activate() override {
+    void activate() override final {
         CircuitTool::activate();
         registerFunction("tool primary activate", std::bind(&PreviewPlacementTool::commitPlacement, this, std::placeholders::_1));
         registerFunction("tool secondary activate", std::bind(&PreviewPlacementTool::cancelPlacement, this, std::placeholders::_1));
     }
-	void updateElements()  override final;
+	void updateElements() override final;
 
-    void loadParsedCircuit(SharedParsedCircuit circuitData) {
+    void setParsedCircuit(SharedParsedCircuit circuitData) {
         parsedCircuit = circuitData;
-    }
-
-    void setBackend(Backend* backend){
-        this->backend = backend;
+		active = true;
     }
 
     void startPreview() {
         updateElements();
     }
 
-    void reset() override { clearPreview(); }
-    void reUse() { usingTool = continueRender = true; }
+    void reset() override final { clearPreview(); }
 
     bool commitPlacement(const Event* event);
     bool cancelPlacement(const Event* event);
@@ -40,8 +36,7 @@ private:
     bool validatePlacement() const;
 
     SharedParsedCircuit parsedCircuit;
-    Backend* backend;
-    bool usingTool = true;
-    bool continueRender = true;
+    bool active = true;
 };
+
 #endif /* previewPlacementTool_h */ 

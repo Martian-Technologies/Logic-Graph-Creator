@@ -25,6 +25,9 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
+	
+	void load(const QString& filePath);
+	void save();
 
 protected:
 	// important events
@@ -45,9 +48,6 @@ protected:
 	void dropEvent(QDropEvent* event) override;
 
 private:
-	void save();
-	void load(const QString& filePath);
-
 	// utility functions
 	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
 	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }

@@ -42,7 +42,6 @@ void CircuitTool::unsetup() {
 }
 
 bool CircuitTool::enterBlockView(const Event* event) {	pointerInView = true;
-
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
 	if (positionEvent) {
 		lastPointerFPosition = positionEvent->getFPosition();

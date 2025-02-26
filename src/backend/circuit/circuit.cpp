@@ -110,19 +110,19 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 	return false;
 }
 
-bool Circuit::tryInsertParsedCircuit(SharedParsedCircuit parsedCircuit, const Position& position) {
-	if (!parsedCircuit->isValid()) return false;
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position) {
+	if (!parsedCircuit.isValid()) return false;
 	
-	Vector totalOffset = (parsedCircuit->getMinPos() * -1) + Vector(position.x, position.y);
-	for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
-		if (!blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
+	Vector totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
+		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
 			return false;
 		}
 	}
 	logInfo("all blocks can be placed");
 	
 	std::unordered_map<block_id_t, block_id_t> realIds;
-	for (const auto& [oldId, block] : parsedCircuit->getBlocks()) {
+	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		Position targetPos = block.pos.snap() + totalOffset;
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
@@ -131,8 +131,8 @@ bool Circuit::tryInsertParsedCircuit(SharedParsedCircuit parsedCircuit, const Po
 		realIds[oldId] = blockContainer.getBlock(targetPos)->id();;
 	}
 
-	for (const auto& conn : parsedCircuit->getConns()) {
-		const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(conn.outputBlockId);
+	for (const auto& conn : parsedCircuit.getConns()) {
+		const ParsedCircuit::BlockData* b = parsedCircuit.getBlock(conn.outputBlockId);
 		if (!b) {
 			logError("Could not get block from parsed circuit while inserting block.");
 			break;

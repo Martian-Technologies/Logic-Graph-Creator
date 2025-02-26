@@ -8,8 +8,6 @@ void SinglePlaceTool::activate() {
 	registerFunction("tool secondary activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("tool secondary deactivate", std::bind(&SinglePlaceTool::stopDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("pointer move", std::bind(&SinglePlaceTool::pointerMove, this, std::placeholders::_1));
-	registerFunction("pointer enter view", std::bind(&SinglePlaceTool::enterBlockView, this, std::placeholders::_1));
-	registerFunction("pointer exit view", std::bind(&SinglePlaceTool::exitBlockView, this, std::placeholders::_1));
 }
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {
@@ -123,16 +121,6 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 		if (clicks[1] == 'r') circuit->tryRemoveBlock(lastPointerPosition);
 		else if (selectedBlock != BlockType::NONE) circuit->tryInsertBlock(lastPointerPosition, rotation, selectedBlock);
 	}
-	return false;
-}
-
-bool SinglePlaceTool::enterBlockView(const Event* event) {
-	updateElements();
-	return false;
-}
-
-bool SinglePlaceTool::exitBlockView(const Event* event) {
-	updateElements();
 	return false;
 }
 
