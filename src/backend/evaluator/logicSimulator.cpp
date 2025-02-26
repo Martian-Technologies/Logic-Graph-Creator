@@ -28,6 +28,10 @@ LogicSimulator::~LogicSimulator() {
 	running.store(false, std::memory_order_release);
 	// Signal to proceed in case thread is waiting
 	signalToProceed();
+	{
+		std::unique_lock<std::mutex> lock(killThreadsMux);
+		killThreadsCv.notify_all();
+	}
 	if (simulationThread.joinable()) {
 		simulationThread.join();
 	}
@@ -362,7 +366,8 @@ void LogicSimulator::tickrateMonitor() {
 		const long long int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
 		realTickrate.store(ticks, std::memory_order_release);
 		// std::cout << "Tickrate: " << ticks << std::endl;
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::unique_lock<std::mutex> lk(killThreadsMux);
+		killThreadsCv.wait_for(lk, std::chrono::seconds(1));
 	}
 }
 
@@ -373,5 +378,4 @@ void LogicSimulator::setTargetTickrate(unsigned long long tickrate) {
 
 void LogicSimulator::triggerNextTickReset() {
 	nextTick_us.store(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), std::memory_order_release);
-
 }
