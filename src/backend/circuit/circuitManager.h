@@ -17,8 +17,9 @@ public:
 	}
 
 	inline circuit_id_t createNewCircuit() {
-		circuits.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId()));
-		return getLastCreatedCircuitId();
+		circuit_id_t id = getNewCircuitId();
+		circuits.emplace(id, std::make_shared<Circuit>(id));
+		return id;
 	}
 
 	inline void destroyCircuit(circuit_id_t id) {
