@@ -19,25 +19,25 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 	}
 	
 	switch (type) {
+	//output logs to cout
 	case LogType::Info:
 		categoryText = "Info" + categoryText;
-		outputFileStream << "[" << categoryText << "] " << message << "\n";
 		std::cout << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Warning:
 		categoryText = "Warning" + categoryText;
-		outputFileStream << "[" << categoryText << "] " << message << "\n";
 		std::cout << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Error:
 		categoryText = "ERROR" + categoryText;
-		outputFileStream << "[" << categoryText << "] " << message << "\n";
 		std::cerr << "[" << ANSI_ERROR << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Fatal:
 		categoryText = "FATAL" + categoryText;
-		outputFileStream << "[" << categoryText << "] " << message << "\n";
 		std::cerr << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	}
+	//and output to the log file
+	outputFileStream << "[" << categoryText << "] " << message << "\n";
+	outputFileStream.flush();
 }
