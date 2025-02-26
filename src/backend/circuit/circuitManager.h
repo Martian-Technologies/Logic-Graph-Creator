@@ -40,7 +40,6 @@ public:
 
 private:
 	circuit_id_t getNewCircuitId() { return ++lastId; }
-	circuit_id_t getLastCreatedCircuitId() { return lastId; }
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;

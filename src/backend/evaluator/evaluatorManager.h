@@ -17,8 +17,9 @@ public:
 	}
 
 	inline evaluator_id_t createNewEvaluator(SharedCircuit circuit) {
-		evaluators.emplace(getNewEvaluatorId(), std::make_shared<Evaluator>(getLastCreatedEvaluatorId(), circuit));
-		return getLastCreatedEvaluatorId();
+		evaluator_id_t id = getNewEvaluatorId();
+		evaluators.emplace(id, std::make_shared<Evaluator>(id, circuit));
+		return id;
 	}
 	inline void destroyEvaluator(evaluator_id_t id) {
 		auto iter = evaluators.find(id);
@@ -37,7 +38,6 @@ public:
 
 private:
 	evaluator_id_t getNewEvaluatorId() { return ++lastId; }
-	evaluator_id_t getLastCreatedEvaluatorId() { return lastId; }
 
 	evaluator_id_t lastId = 0;
 	std::map<evaluator_id_t, SharedEvaluator> evaluators;
