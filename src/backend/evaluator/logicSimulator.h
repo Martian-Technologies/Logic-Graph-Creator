@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
 #include "logicState.h"
 #include "gateType.h"
