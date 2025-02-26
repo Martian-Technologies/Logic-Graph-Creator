@@ -15,9 +15,123 @@ enum PreferenceTypeList {
     DROPDOWN,
     SLIDER,
     CHECKBOX,
-    USERINPUT
+    USERINPUT,
+	COLOR,
+	HEADER
 };
 
+class PreferenceManager {
+public:
+	PreferenceManager();
+
+	void populateTab(const std::string& name);
+private:
+	std::vector<std::string> general[32] = {
+		{ "visual_mode", "DROPDOWN", "Dark", "Light" },  
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+	};
+	std::vector<std::string> appearance[32] = {
+		{ "Blocks", "HEADER" },
+			{ "and", "COLOR" },
+			{ "or", "COLOR" },
+			{ "xor", "COLOR" },
+			{ "nand", "COLOR" },
+			{ "nor", "COLOR" },
+			{ "xnor", "COLOR" },
+			{ "switch", "COLOR" },
+			{ "button", "COLOR" },
+			{ "tick_button", "COLOR" },
+			{ "light", "COLOR" },
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{}, 
+		{},
+		{}, 
+		{}, 
+		{}, 
+		{}
+	};
+	std::string keybind[32] = {
+		"H_Blocks",
+			"and",
+			"or",
+			"xor", 
+			"nand", 
+			"nor", 
+			"xnor", 
+			"switch",
+			"button",
+			"tick_button",
+			"light",
+		"H_Placement", 
+			"single_place",
+			"area_place",
+			"move",
+		"H_Connection",
+			"simple",
+			"tensor",
+		"H_Selection",
+		"H_Interactive",
+			"state_changer",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		""
+	};
+};
+
+
+/*
 // Abstract base class for preference types
 class PreferenceType {
 public:
@@ -84,5 +198,7 @@ public:
 private:
     // empty 
 };
+*/
+
 
 #endif

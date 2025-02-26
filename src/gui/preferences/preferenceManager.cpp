@@ -1,5 +1,49 @@
-#include "preferenceType.h"
+#include "preferenceManager.h"
 
+void PreferenceManager::populateTabInfo() {
+	general = {
+		{ "visual_mode", "DROPDOWN", "Dark", "Light" }, 
+	};
+	appearance = {
+		{ "Blocks", "HEADER" },
+			{ "and", "COLOR" },
+			{ "or", "COLOR" },
+			{ "xor", "COLOR" },
+			{ "nand", "COLOR" },
+			{ "nor", "COLOR" },
+			{ "xnor", "COLOR" },
+			{ "switch", "COLOR" },
+			{ "button", "COLOR" },
+			{ "tick_button", "COLOR" },
+			{ "light", "COLOR" },
+			
+	};
+	keybind = {
+		"H_Blocks",
+			"and",
+			"or",
+			"xor", 
+			"nand", 
+			"nor", 
+			"xnor", 
+			"switch",
+			"button",
+			"tick_button",
+			"light",
+		"H_Placement", 
+			"single_place",
+			"area_place",
+			"move",
+		"H_Connection",
+			"simple",
+			"tensor",
+		"H_Selection",
+		"H_Interactive",
+			"state_changer"
+	};
+}
+
+/*
 // -------------------- slider --------------------
 QWidget* SliderPreference::render() {
     QSlider *slider = new QSlider(Qt::Horizontal);
@@ -95,3 +139,4 @@ PreferenceManager::PreferenceManager(PreferenceTypeList type, std::vector<QStrin
         layout()->addWidget(widget);
     }
 } 
+*/

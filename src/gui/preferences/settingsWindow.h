@@ -7,8 +7,8 @@
 #include <QFormLayout>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QLabel>
 
-#include "preferenceType.h"
 
 class SettingsWindow : public QDialog {
     Q_OBJECT
@@ -28,7 +28,7 @@ private:
     void createTabs();
     void populateTabs();
 
-    void changeTabs();
+    void changeTabContent(QVBoxLayout* scrollLayout, const QString& content);
 
     void closeSettings();
 

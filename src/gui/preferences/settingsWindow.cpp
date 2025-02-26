@@ -10,66 +10,92 @@ SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent
     setupConnections();
 }
 
+
 void SettingsWindow::setupUI() {
     setWindowTitle("Settings");
 
-	
-	std::string test = "test";
-    
-
-	logInfo("test");
-
-	// Main layout for the dialog
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-    // Create UI elements
-    cancelButton = new QPushButton(QString::fromStdString(test), this);
-    saveButton = new QPushButton("Save", this);
-    defaultButton = new QPushButton("Default", this);
+    QHBoxLayout* contentLayout = new QHBoxLayout();
 
-    // Vertical layout for buttons
-    QVBoxLayout* buttonLayout = new QVBoxLayout;
-    buttonLayout->addWidget(saveButton);
-    buttonLayout->addWidget(defaultButton);
-    buttonLayout->addWidget(cancelButton);
+    // ------------------------- TOP LEFT -------------------------
+    QVBoxLayout* tabButtonLayout = new QVBoxLayout();
+    QPushButton* generalTab = new QPushButton("Tab 1", this);
+    QPushButton* appearanceTab = new QPushButton("Tab 2", this);
+    QPushButton* keybindTab = new QPushButton("Tab 3", this);
 
-    // Scroll area for the settings content
+    tabButtonLayout->addWidget(generalTab);
+    tabButtonLayout->addWidget(appearanceTab);
+    tabButtonLayout->addWidget(keybindTab);
+    tabButtonLayout->addStretch(); // Add stretch to push buttons to the top
+
+    
+    // ------------------------- TOP RIGHT -------------------------
     QScrollArea* scrollArea = new QScrollArea(this);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea->setWidgetResizable(true);
 
-    // Widget to hold the scrollable content
+    // CURRENT
     QWidget* scrollContent = new QWidget();
     QVBoxLayout* scrollLayout = new QVBoxLayout(scrollContent);
 
-
-    for (int i = 0; i < 10; i++) {
-        QLabel* label = new QLabel(tr("Test") + QString::fromStdString(test), scrollContent);
-        scrollLayout->addWidget(label);
-    }
-
-    // Set the scrollable content widget
     scrollArea->setWidget(scrollContent);
 
-    // Add the scroll area and button layout to the main layout
-    mainLayout->addWidget(scrollArea);
-    mainLayout->addLayout(buttonLayout);
+    // Add the tab buttons and scroll area to the content layout (horizontally)
+    contentLayout->addLayout(tabButtonLayout, 1); 
+    contentLayout->addWidget(scrollArea, 3); 
 
-    // Set the main layout for the dialog
+    // ------------------------- BOTTOM FORM ACTIONS -------------------------
+	QHBoxLayout* formActions = new QHBoxLayout();
+    QPushButton* saveAction = new QPushButton("Save", this);
+    QPushButton* defaultAction = new QPushButton("Default", this);
+    QPushButton* cancelAction = new QPushButton("Cancel", this);
+
+    formActions->addWidget(saveAction);
+    formActions->addWidget(defaultAction);
+    formActions->addWidget(cancelAction);
+
+    // Set Layout
+    mainLayout->addLayout(contentLayout);
+    mainLayout->addLayout(formActions);
     setLayout(mainLayout);
 
+    // Connecting tab to scroll area
+	connect(cancelButton, &QPushButton::clicked, this, &QDialog::close);
+    connect(generalTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 1 Content"); });
+    connect(appearanceTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 2 Content"); });
+    connect(keybindTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 3 Content"); });
+	
+    // Set initial tab content
+    changeTabContent(scrollLayout, "Tab 1 Content");
 
-	// Centers Dialog TODO need to also center it via adjusted height from ^
-	if (parent) {
+    if (parent) {
         QRect parentGeometry = parent->geometry();
 
-        // Calculate the center position
-        int x = parentGeometry.x() + (parentGeometry.width() - width()) / 2;
-        int y = parentGeometry.y() + (parentGeometry.height() - height()) / 2;
+        // Resizes window
+        int width = parentGeometry.width() * 0.75;
+        int height = parentGeometry.height() * 0.75;
+        resize(width, height);
 
-        // Move the dialog to the center
+        // Centers Window
+        int x = parentGeometry.x() + (parentGeometry.width() - width) / 2;
+        int y = parentGeometry.y() + (parentGeometry.height() - height) / 2;
         move(x, y);
     }
+}
+
+
+void SettingsWindow::changeTabContent(QVBoxLayout* scrollLayout, const QString& content) {
+	QLayoutItem* item = scrollLayout->takeAt(0);
+	while (item != nullptr) {
+		delete item->widget();
+		delete item;
+		item = scrollLayout->takeAt(0);
+	}
+
+	// Add new content
+	QLabel* label = new QLabel(content, this);
+	scrollLayout->addWidget(label);
 }
 
 

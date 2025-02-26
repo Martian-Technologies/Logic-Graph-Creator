@@ -10,8 +10,7 @@ MultiTypeMap CONFIG_SETTINGS; // all config settings will need to be checked by 
 
 void createConfig() {
     // reads configurations from a file
-    std::ifstream file("../resources/config.toml");
-	std::ofstream outfl("test.txt");
+    std::ifstream file("resources/config.toml");
 	
     // opens file, if fails to open file, grabs default file(will be added later)
     // if (!defaultConfig) file.open(CONFIG_PATH);
@@ -21,6 +20,8 @@ void createConfig() {
     // if (!file.is_open()) assert("Error: failed to open /src/gui/preferences/config.toml");  // TODO: change later for better safety]
 	
 	// parses file to establish mappings
+	
+
     std::string prefix;
     std::string line;
     while (std::getline(file, line)) {
@@ -33,16 +34,17 @@ void createConfig() {
 		size_t pos = line.find('=');
 		if (pos == std::string::npos) continue; // empty line skips
 
+		while (line[pos-1] == ' ') pos--; // gets value before '='
         std::string fullKey = prefix + '.' + line.substr(0, pos);
-        std::string value = line.substr(pos + 1);
 
-		if (value.substr(1,3) == "0x") 				   CONFIG_SETTINGS.set(fullKey, std::stoi(value.substr(3, 9)));
+		while (line[pos] == ' ' || line[pos] == '=') pos++; // gets value after '=' 
+        std::string value = line.substr(pos);
+
+		// logInfo(value.substr(1,2) + "|" + value.substr(3,7));
+		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set(fullKey, std::stoi(value.substr(3,6), nullptr, 16));
 		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set(fullKey, 1);
 		else if (value == "false" || value == "False") CONFIG_SETTINGS.set(fullKey, 0);
 		else										   CONFIG_SETTINGS.set(fullKey, value);
-
-		outfl << fullKey << std::endl;
-		outfl.flush();
     }
 
 	file.close();
