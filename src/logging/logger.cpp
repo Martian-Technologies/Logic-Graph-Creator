@@ -23,10 +23,12 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 	case LogType::Info:
 		categoryText = "Info" + categoryText;
 		std::cout << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
+		std::cout.flush();
 		break;
 	case LogType::Warning:
 		categoryText = "Warning" + categoryText;
 		std::cout << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
+		std::cout.flush();
 		break;
 	case LogType::Error:
 		categoryText = "ERROR" + categoryText;
@@ -37,6 +39,7 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 		std::cerr << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	}
+
 	//and output to the log file
 	outputFileStream << "[" << categoryText << "] " << message << "\n";
 	outputFileStream.flush();
