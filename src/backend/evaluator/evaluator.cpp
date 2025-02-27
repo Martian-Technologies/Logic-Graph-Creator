@@ -19,10 +19,10 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
 void Evaluator::setPause(bool pause) {
 	paused = pause;
 	if (pause) {
-		logInfo("Pausing simulation");
+		logInfo("Pausing simulation (evaluator.cpp)");
 		logicSimulator.signalToPause();
 	} else {
-		logInfo("Unpausing simulation");
+		logInfo("Unpausing simulation (evaluator.cpp)");
 		logicSimulator.triggerNextTickReset();
 		logicSimulator.signalToProceed();
 	}
