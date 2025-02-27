@@ -18,20 +18,36 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	windowWidth = w;
 	windowHeight = h;
 
+	// set up swapchain
 	swapchain = createSwapchain(surface, windowWidth, windowHeight);
 	createFrameDatas(frames, FRAME_OVERLAP);
 
+	// create pipeline
 	vertShader = createShaderModule(readFileAsBytes(":/shaders/shader.vert.spv"));
 	fragShader = createShaderModule(readFileAsBytes(":/shaders/shader.frag.spv"));
 	pipeline = createPipeline(swapchain, vertShader, fragShader);
+
+	// create framebuffer
 	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 
+	initialized = true;
 	logInfo("Renderer initialized", "Vulkan");
 }
 
 void VulkanRenderer::setCircuit(Circuit* circuit) {
+	// temp - don't update circuits while running
 	if (running) return;
 
+	// lock rendering mutex
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+
+	// delete existing circuit if it exists
+	if (hasCircuit()) {
+		destroyBuffer(vertexBuffer);
+	}
+
+	this->circuit = circuit;
+	
 	if (circuit) {
 		size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
 		vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
@@ -45,9 +61,9 @@ void VulkanRenderer::setCircuit(Circuit* circuit) {
 }
 
 void VulkanRenderer::destroy() {
-	if (running) stop();
+	stop();
 
-	destroyBuffer(vertexBuffer);
+	setCircuit(nullptr);
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
 	destroyShaderModule(vertShader);
@@ -56,47 +72,50 @@ void VulkanRenderer::destroy() {
 }
 
 void VulkanRenderer::resize(int w, int h) {
+	if (!initialized) return;
+	
+	// lock rendering mutex
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	
 	windowWidth = w;
 	windowHeight = h;
 
-	resizeNeeded = true;
+	handleResize();
 }
 
 // TODO - ghetto render thread
 void VulkanRenderer::run() {
+	if (!initialized) return;
 	if (running) return;
 	
 	running = true;
 	renderThread = std::thread(&VulkanRenderer::renderLoop, this);
 	logInfo("Renderer started", "Vulkan");
 }
+
 void VulkanRenderer::stop() {
 	if (!running) return;
 	
 	running = false;
 	if (renderThread.joinable()) renderThread.join();
-
 	
 	logInfo("Renderer stopped", "Vulkan");
 }
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
-		// resize if needed
-		if (resizeNeeded) {
-			handleResize();
-			resizeNeeded = false;
-		}
-		
 		// get next frame
 		FrameData& frame = getCurrentFrame();		
 		// wait for frame end
 		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
 
+		// lock rendering mutex
+		std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+
 		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
 		VkQueue& presentQueue = Vulkan::getSingleton().requestPresentQueue();
 
-		// get next swapchain image to render too
+		// get next swapchain image to render to
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {

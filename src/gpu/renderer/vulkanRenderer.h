@@ -9,10 +9,12 @@
 #include "vulkanFrame.h"
 
 // STATES of a vulkan renderer:
-// - initialized surface and swapchain
-// - initialized with circuit
-// - running
-// - not running
+// - constructed
+// - initialized
+// - has circuit / not has circuit
+// - running / not running
+
+// 
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -22,6 +24,8 @@ class VulkanRenderer : public Renderer {
 public:
 	void initialize(VkSurfaceKHR surface, int w, int h);
 	void destroy();
+
+	// screen size updates should be sent regardless of state
 	void resize(int w, int h);
 	
 	void run();
@@ -30,12 +34,19 @@ public:
 private:
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
 	void handleResize();
+
+	inline bool hasCircuit() const { return circuit != nullptr; }
 	
 private:
+	// state
+	std::atomic<bool> initialized = false;
+	std::atomic<bool> running = false;
+	Circuit* circuit = nullptr;
 	int windowWidth, windowHeight;
+	std::mutex cpuRenderingMutex;
 	glm::mat4 orthoMat = glm::mat4(1.0f);
 
-	// vulkan
+	// screen and frame
 	VkSurfaceKHR surface;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
@@ -53,10 +64,6 @@ private:
 	// frame counting
 	int frameNumber = 0;
 	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
-
-	// state
-	std::atomic<bool> running = false;
-	std::atomic<bool> resizeNeeded = false;
 	
 	// INTERFACE --------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
