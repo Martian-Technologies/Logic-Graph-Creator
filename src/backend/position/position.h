@@ -126,6 +126,7 @@ struct FPosition {
 	inline FVector operator-(const FPosition& position) const { return FVector(x - position.x, y - position.y); }
 	inline FPosition operator-(const FVector& vector) const { return FPosition(x - vector.dx, y - vector.dy); }
 	inline FPosition& operator-=(const FVector& vector) { x -= vector.dx; y -= vector.dy; return *this; }
+	inline FPosition operator*(f_cord_t scalar) const { return FPosition(x * scalar, y * scalar); }
 	inline f_cord_t lengthAlongProjectToVec(const FPosition& orginOfVec, const FVector& vector) const { return (*this - orginOfVec).lengthAlongProjectToVec(vector); }
 	inline FPosition projectToVec(const FPosition& orginOfVec, const FVector& vector) const { return orginOfVec + (*this - orginOfVec).projectToVec(vector); }
 
