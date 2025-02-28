@@ -213,8 +213,8 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 		vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 		// draw
-		// TODO - something else should (maybe) be in charge of making draw calls here? certainly multiplying num blocks by three
-		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlockVertices * 3), 1, 0, 0);
+		// TODO - something else should (maybe) be in charge of making draw calls here?
+		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlockVertices), 1, 0, 0);
 	}
 
 	// end

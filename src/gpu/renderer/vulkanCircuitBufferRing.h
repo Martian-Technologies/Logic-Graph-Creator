@@ -50,6 +50,7 @@ public:
 	inline bool hasCircuit() const { return circuit != nullptr; }
 
 private:
+	void createCircuitBuffer();
 	void generateVertices(std::vector<Vertex>& vertices, Circuit* circuit);
 	
 private:
