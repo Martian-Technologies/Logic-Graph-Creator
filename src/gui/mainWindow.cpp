@@ -26,11 +26,13 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
 	// create default circuit and evaluator
+    logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();
 	evaluator_id_t evalId1 = *backend.createEvaluator(id);
-
+    
 	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
+    logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
 	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
@@ -43,6 +45,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 // Utility methods
 
 void MainWindow::setUpMenuBar() {
+    logInfo("Creating MenuBar");
 	QMenuBar* menubar = menuBar();
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
@@ -66,6 +69,7 @@ void MainWindow::setUpMenuBar() {
 	connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
 
 	// submenu setup
+    logInfo("Setting up MenuBar submenus");
 	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
 	saveAction->setText("Save Circuit");
 	QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
@@ -195,6 +199,7 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
 	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        logError("Failed to load Circuit file");
         return;
     }
 
@@ -206,9 +211,9 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
         if (previewTool) {
             previewTool->setParsedCircuit(parsed);
         }else{
-	        logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
+	        logError("Preview tool in mainWindow failed to cast", "FileLoading");
         }
-    }else {
+    } else {
         logWarning("Parsed circuit is not valid to be placed", "FileLoading");
     }
 }
@@ -225,6 +230,7 @@ void MainWindow::exportProject() {
 
 	QString projectPath = QDir(baseDir).filePath(projectName);
 
+
 	logInfo("Export full path: " + projectPath.toStdString(), "FileSaving");
 
 	if (QDir(baseDir).exists(projectName)) {
@@ -240,6 +246,7 @@ void MainWindow::exportProject() {
 
 	if (!QDir(baseDir).mkpath(projectPath)) {
 		QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
+    logWarning("Failed to create Project directory");
 		return;
 	}
 
@@ -269,8 +276,10 @@ void MainWindow::exportProject() {
 
 	if (errorsOccurred) {
 		QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
+    logWarning("Partially exported Project; some Circuits could not be exported");
 	} else {
 		QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
+    logInfo("Successfully exported Project");
 	}
 }
 
