@@ -70,14 +70,19 @@ private:
 //       - [x] Queue requests
 //       - [x] Memory allocation
 // - [x] Drawing with vertex buffers
+// - [x] Better buffer management
 // - [ ] Prototype block renderer with
 //       - [x] Push constant view matrix
 //       - [ ] Blocks and textures
-// - [ ] Butter buffer management. Staging buffer?
-// - [ ] New object management scheme
+
+// VULKAN IMPROVEMENTS -
+// - [ ] New object management scheme to play nicer with RAII and be more safe
 //       -  Possibly RAII?
 //       -  Possibly deletion queue
 //       -  Builder pattern (for pipeline at least)
+// - [ ] Staging bfufer
+// - [ ] Use dynamic rendering extension to simplify code
+// - [ ] generate vertices on the gpu
 // - [ ] Don't draw directly to swapchain
 // - [ ] IMGUI for debug
 // - [ ] Switch from singleton to top down design

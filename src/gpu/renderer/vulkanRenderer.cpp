@@ -27,20 +27,6 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	logInfo("Renderer initialized", "Vulkan");
 }
 
-void VulkanRenderer::setCircuit(Circuit* circuit) {
-	// lock rendering mutex
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
-
-	circuitBufferRing.setCircuit(circuit);
-	
-	if (circuit) {
-		logInfo("Renderer circuit assigned and setup", "Vulkan");
-	}
-	else {
-		logInfo("Renderer circuit set to nothing", "Vulkan");
-	}
-}
-
 void VulkanRenderer::destroy() {
 	stop();
 
@@ -55,21 +41,21 @@ void VulkanRenderer::destroy() {
 void VulkanRenderer::resize(int w, int h) {
 	if (!initialized) return;
 	
-	// lock rendering mutex
+	// lock rendering mutex (synchronized to start of frame)
 	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 	
 	windowWidth = w;
 	windowHeight = h;
+	// TODO - handle this more elegantly
+	vkDeviceWaitIdle(Vulkan::getDevice());
 
-	handleResize();
-}
-
-void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
-	
+	destroySwapchain(swapchain);
+	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 }
 
 void VulkanRenderer::updateView(ViewManager* viewManager) {
-	// lock rendering mutex
+	// lock rendering mutex (synchronized to start of frame)
 	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 	
 	FPosition topLeft = viewManager->getTopLeft();
@@ -78,9 +64,25 @@ void VulkanRenderer::updateView(ViewManager* viewManager) {
 	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
 }
 
+void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
+	
+}
+
+void VulkanRenderer::setCircuit(Circuit* circuit) {
+	// no fancy synchronization needed, that's what the buffer ring is for
+	
+	circuitBufferRing.setCircuit(circuit);
+	
+	if (circuit) {
+		logInfo("Renderer circuit assigned and setup", "Vulkan");
+	}
+	else {
+		logInfo("Renderer circuit set to nothing", "Vulkan");
+	}
+}
+
 void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	// lock rendering mutex
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	// no fancy synchronization needed, that's what the buffer ring is for
 	
 	circuitBufferRing.updateCircuit(diff);
 }
@@ -243,14 +245,6 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
-}
-
-void VulkanRenderer::handleResize() {
-	vkDeviceWaitIdle(Vulkan::getDevice());
-
-	destroySwapchain(swapchain);
-	swapchain = createSwapchain(surface, windowWidth, windowHeight);
-	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
 }
 
 // elements -----------------------------

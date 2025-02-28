@@ -3,7 +3,6 @@
 
 #include "gui/circuitView/renderer/renderer.h"
 
-#include "gpu/vulkanBuffer.h"
 #include "vulkanCircuitBufferRing.h"
 #include "vulkanSwapchain.h"
 #include "vulkanPipeline.h"
@@ -12,10 +11,7 @@
 // STATES of a vulkan renderer:
 // - constructed
 // - initialized
-// - has circuit / not has circuit
 // - running / not running
-
-// 
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -34,7 +30,6 @@ public:
 
 private:
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
-	void handleResize();
 	
 private:
 	// state
