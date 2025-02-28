@@ -22,7 +22,7 @@ class MainWindow : public KDDockWidgets::QtWidgets::MainWindow {
 public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 
-	void closeEvent(QCloseEvent* event) override;
+	void closeEvent(QCloseEvent* event);
 	
 	// actions
 	void setBlock(BlockType blockType);
