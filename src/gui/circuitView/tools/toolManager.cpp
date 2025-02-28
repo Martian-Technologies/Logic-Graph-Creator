@@ -37,7 +37,7 @@ void ToolManager::selectTool(std::string toolName) {
 		if (toolName == "placement/placement") instanceNewtool<BlockPlacementTool>(toolName);
 		else if (toolName == "placement/move") instanceNewtool<MoveTool>(toolName);
 		else if (toolName == "connection/connection") instanceNewtool<ConnectionTool>(toolName);
-		else if (toolName == "interactive/state changer") instanceNewtool<BlockPlacementTool>(toolName);
+		else if (toolName == "interactive/state changer") instanceNewtool<LogicToucher>(toolName);
 		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>(toolName);
 		else logError("Unknown tool name \"" + toolName + "\"");
 	}
