@@ -11,7 +11,7 @@
 
 int main(int argc, char* argv[]) {
 	// Creates config
-	createConfig();
+	Settings::createConfig();
 
 
 	// Create QT Application

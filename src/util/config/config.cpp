@@ -8,7 +8,7 @@
 
 MultiTypeMap CONFIG_SETTINGS; // all config settings will need to be checked by another file type
 
-void createConfig() {
+void Settings::createConfig() {
     // reads configurations from a file
     std::ifstream file("resources/config.toml");
 	
@@ -40,8 +40,8 @@ void createConfig() {
 		while (line[pos] == ' ' || line[pos] == '=') pos++; // gets value after '=' 
         std::string value = line.substr(pos);
 
-		// logInfo(value.substr(1,2) + "|" + value.substr(3,7));
-		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set(fullKey, std::stoi(value.substr(3,6), nullptr, 16));
+		// CONFIG_SETTINGS.set(fullKey, std::stoi(value.substr(3,6), nullptr, 16));
+		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set(fullKey, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
 		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set(fullKey, 1);
 		else if (value == "false" || value == "False") CONFIG_SETTINGS.set(fullKey, 0);
 		else										   CONFIG_SETTINGS.set(fullKey, value);
@@ -50,9 +50,13 @@ void createConfig() {
 	file.close();
 }
 
+template<typename T>
+VariantType Settings::get(const std::string& key) {
+	return CONFIG_SETTINGS.get<T>(key);
+}
 
-const MultiTypeMap& getConfig() {
-    return CONFIG_SETTINGS;
+void Settings::set(const std::string& key, const VariantType& value) {
+	CONFIG_SETTINGS.set(key, value);
 }
 
 

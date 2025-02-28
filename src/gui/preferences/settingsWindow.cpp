@@ -5,9 +5,11 @@
 
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+	
+	preferenceManager = new PreferenceManager();
+	cq = new ColorQuery(this);
 
 	setupUI();
-    setupConnections();
 }
 
 
@@ -20,9 +22,9 @@ void SettingsWindow::setupUI() {
 
     // ------------------------- TOP LEFT -------------------------
     QVBoxLayout* tabButtonLayout = new QVBoxLayout();
-    QPushButton* generalTab = new QPushButton("Tab 1", this);
-    QPushButton* appearanceTab = new QPushButton("Tab 2", this);
-    QPushButton* keybindTab = new QPushButton("Tab 3", this);
+    QPushButton* generalTab = new QPushButton("General", this);
+    QPushButton* appearanceTab = new QPushButton("Appearance", this);
+    QPushButton* keybindTab = new QPushButton("Keybind", this);
 
     tabButtonLayout->addWidget(generalTab);
     tabButtonLayout->addWidget(appearanceTab);
@@ -35,13 +37,13 @@ void SettingsWindow::setupUI() {
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea->setWidgetResizable(true);
 
-    // CURRENT
+    // Content for scroll area
     QWidget* scrollContent = new QWidget();
     QVBoxLayout* scrollLayout = new QVBoxLayout(scrollContent);
 
     scrollArea->setWidget(scrollContent);
 
-    // Add the tab buttons and scroll area to the content layout (horizontally)
+	// Adds content widgets to contentLayout
     contentLayout->addLayout(tabButtonLayout, 1); 
     contentLayout->addWidget(scrollArea, 3); 
 
@@ -60,14 +62,16 @@ void SettingsWindow::setupUI() {
     mainLayout->addLayout(formActions);
     setLayout(mainLayout);
 
-    // Connecting tab to scroll area
-	connect(cancelButton, &QPushButton::clicked, this, &QDialog::close);
-    connect(generalTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 1 Content"); });
-    connect(appearanceTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 2 Content"); });
-    connect(keybindTab, &QPushButton::clicked, this, [scrollLayout, this]() { changeTabContent(scrollLayout, "Tab 3 Content"); });
+    // Button Connections
+	connect(saveAction, &QPushButton::clicked, this, &SettingsWindow::saveSettings);
+	connect(defaultAction, &QPushButton::clicked, this, &SettingsWindow::resetSettings);
+	connect(cancelAction, &QPushButton::clicked, this, &QDialog::close);
+	connect(generalTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "General"); });
+	connect(appearanceTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "Appearance"); });
+	connect(keybindTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "Keybind"); });
 	
     // Set initial tab content
-    changeTabContent(scrollLayout, "Tab 1 Content");
+    changeTabContent(scrollLayout, "General");
 
     if (parent) {
         QRect parentGeometry = parent->geometry();
@@ -86,23 +90,10 @@ void SettingsWindow::setupUI() {
 
 
 void SettingsWindow::changeTabContent(QVBoxLayout* scrollLayout, const QString& content) {
-	QLayoutItem* item = scrollLayout->takeAt(0);
-	while (item != nullptr) {
-		delete item->widget();
-		delete item;
-		item = scrollLayout->takeAt(0);
-	}
-
-	// Add new content
-	QLabel* label = new QLabel(content, this);
-	scrollLayout->addWidget(label);
+	preferenceManager->populateSettingsForm(this, scrollLayout, content);
 }
 
 
-
-void SettingsWindow::setupConnections() {
-    connect(cancelButton, &QPushButton::clicked, this, &SettingsWindow::close); // Connect the Cancel button to the close method
-}
 
 void SettingsWindow::mousePressEvent(QMouseEvent* event) {
 	/*
@@ -122,15 +113,25 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void SettingsWindow::closeSettings(){
+// todo
+void SettingsWindow::saveSettings() {
+	std::vector<std::pair<std::string, std::string>> data = preferenceManager->getDataEntry();
 
+	for (int i = 0; i < data.size(); i++) {
+		std::string value = data[i].second;
+		if (value.substr(1,2) == "0x") 				   Settings::set(data[i].first, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
+		else if (value == "true"  || value == "True")  Settings::set(data[i].first, 1);
+		else if (value == "false" || value == "False") Settings::set(data[i].first, 0);
+		else										   Settings::set(data[i].first, value);
+	}
+
+
+	// cq->exec();
+	// cq->raise();
+	// cq->activateWindow();
+	logWarning("settings saved");
 }
 
-// todo
-
-void readPreferences() {}
-
-void createTabs() {}
-
-void populateTabs() {}
-
+void SettingsWindow::resetSettings() {
+	logWarning("settings reset");
+}

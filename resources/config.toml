@@ -6,6 +6,28 @@ AND = "0x000011"
 OR  = "0x001100"
 NOT = "0x110000"
 
-[input.general]
+[keybinds.blocks]
 AND = "ctrl + a"
-OR  = "ctrl + o"
+OR = "ctrl + a"
+XOR = "ctrl + a"
+NAND = "ctrl + a"
+NOR = "ctrl + a"
+XNOR = "ctrl + a"
+SWITCH = "ctrl + a"
+BUTTON = "ctrl + a"
+TICK_BUTTON = "ctrl + a"
+LIGHT = "ctrl + a"
+
+
+
+#		"H_Placement", 
+#			"single_place",
+#			"area_place",
+#			"move",
+#		"H_Connection",
+#			"simple",
+#			"tensor",
+#		"H_Selection",
+#		"H_Interactive",
+#			"state_changer",
+#		"",

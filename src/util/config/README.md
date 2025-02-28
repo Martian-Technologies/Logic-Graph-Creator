@@ -1,34 +1,40 @@
-This file is for workign in thsi directory
-
 # multiTypeMap.h 
+Generic file that currently holds 5 types:
+    - booleans
+    - int
+    - string
+    - color
+    - float
+If you would like to update types with a unique one, change varient type or ask `@Pokun`
+
+## Accessing Values
+To access these values: `#include "util/config/config.toml"`
+
+Get Values: `Settings::get<"type">(key)`
+    - when you get a value, you must provide a type, view 'multiTypeMap.h' for types, that is the same value that is returned
+    - key is a string defined as `group.subgroup.key_name`
+Set Values: `Settings::set(key, value)`
+    - when setting a value, the value must be of same type that its set as in config.toml 
 
 # config.toml
-This file will hold all values that the user should be able to modify within particular parameters
+This file will hold all values that the user should be able to modify within particular parameters, found in `resources/config.toml`
 `
 [graphical.block_color]
 AND = "0xff00ff"
 `
-Each line will be under a "subgrouping"
+Each line will be under a "grouping.subgrouping"
 Each "subgroup" is defined after a "grouping"
-** Groupings: ** graphical, input, ... 
-If you do want to add a grouping, please consult me(Pojin) on gatality discord
+** Groupings: ** graphical, appearance, keybinds (more to come)
+** Subgrouping: ** these you'll define or append to previously created subgroupings, when adding please go to the next section for general instructions 
 
-The "grouping" is then seperated by a '.' from the subgrouping, which you'll define or add to previous subgrouping that makes sense
-Under it, you can add an item that will be able to be changed by the user that will be in the format `name = "value"`
-Integers and booleans should have ""
-Each will link to some behavior you want to see graphical(please look at configGraphical.toml for more instructions on graphical look)
+# preferenceManager.cpp
+This only matters if you want to add a setting value
+    - Depending on the grouping you add, go to `src/gui/preferences/preferenceManager.h` to add to the std::vector
+    - there's a vector for each group, choice one and add:
+        - at the top of the file is a ** FORM TYPE ** area, add in the
 
-## Accessing Values
-To access these values, it you'll `#include "util/config/config.toml"`
-call `getConfig()` to get a returned object "MultiTypeMap" 
-With this you can access elements with `.get("graphical.block_color.AND")` and set values with `.set("graphical.block_color.AND", "0x00ff00)`
-As shown, each value is accessible by "group.subgroup.typename" which will return the respective value
 
-** PLEASE REFERENCE NEXT HEADING WHENEVER YOU ADD AN ITEM TO THIS FILE **
   
-# configGraphical.toml
-Everything in this file is **only** for the use of ./gui/preferences/settingsWindow.cpp. **DO NOT INCLUDE OR USE THIS IN YOUR OWN FILES**
-This file will have a **new entry** whenever you add something to **config.toml** or it will **crash the program**
 
 ## Formatting
 `
@@ -36,9 +42,5 @@ This file will have a **new entry** whenever you add something to **config.toml*
 [graphical.block_color]
 AND = [ "color" ]
 `
-### WidgetType 
-DROPDOWN, SLIDER, CHECKBOX, USERINPUT
 
-### Key Types
-These follow the value and will define how the user can define each setting 
 

@@ -10,30 +10,40 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDebug>
+#include <QObject>
 
-enum PreferenceTypeList {
+/* ------------ FORM TYPE ------------
     DROPDOWN,
     SLIDER,
     CHECKBOX,
     USERINPUT,
 	COLOR,
-	HEADER
-};
+	HEADER,
+	FILEPATH
+*/
 
 class PreferenceManager {
 public:
-	PreferenceManager();
+	PreferenceManager() : popupSettings(nullptr) {}
 
-	void populateTab(const std::string& name);
+	void populateSettingsForm(QWidget* parent, QVBoxLayout* scrollLayout, const QString& tabType);
+	std::vector<std::pair<std::string, std::string>>& getDataEntry() { return dataEntry; }
 private:
-	std::vector<std::string> general[32] = {
+	QWidget* generateFormType(const std::string& preferenceType, QWidget* scrollLayout, const std::vector<std::string>& itemization);
+	void recordData(const std::string& key, const std::string& value);
+
+	std::vector<std::pair<std::string, std::string>> dataEntry;
+	
+	QVBoxLayout* popupSettings;
+
+	const std::vector<std::string> general[32] = {
 		{ "visual_mode", "DROPDOWN", "Dark", "Light" },  
-		{}, 
-		{},
-		{}, 
-		{}, 
-		{}, 
-		{}, 
+		{ "Files", "HEADER" }, 
+			{ "save_path", "FILEPATH" },
+			{ "open_path", "FILEPATH" }, 
+			{}, 
+			{}, 
+			{}, 
 		{}, 
 		{}, 
 		{},
@@ -60,7 +70,7 @@ private:
 		{}, 
 		{}, 
 	};
-	std::vector<std::string> appearance[32] = {
+	const std::vector<std::string> appearance[32] = {
 		{ "Blocks", "HEADER" },
 			{ "and", "COLOR" },
 			{ "or", "COLOR" },
@@ -72,15 +82,15 @@ private:
 			{ "button", "COLOR" },
 			{ "tick_button", "COLOR" },
 			{ "light", "COLOR" },
-		{},
-		{}, 
-		{}, 
-		{}, 
-		{}, 
-		{}, 
-		{}, 
-		{}, 
-		{},
+		{ "Wires", "HEADER"},
+			{ "general", "COLOR"}, 
+			{ "crossing", "COLOR"}, 
+			{ "generic", "COLOR" }, 
+			{ "testing", "COLOR"}, 
+		{ "Text", "HEADER" }, 
+			{ "font_size", "USERINPUT" }, 
+			{ "font_family", "USERINPUT"}, 
+			{},
 		{}, 
 		{}, 
 		{}, 
@@ -94,7 +104,7 @@ private:
 		{}, 
 		{}
 	};
-	std::string keybind[32] = {
+	const std::string keybind[32] = {
 		"H_Blocks",
 			"and",
 			"or",
