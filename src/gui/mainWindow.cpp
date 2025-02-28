@@ -35,7 +35,6 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
 	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
 	// create default hotbar and selector
-	openNewHotbarWindow();
 	openNewSelectorWindow();
 
 	setUpMenuBar();
