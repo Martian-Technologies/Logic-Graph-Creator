@@ -171,10 +171,8 @@ void MainWindow::loadCircuit() {
 	CircuitValidator validator(*parsed);
 	if (parsed->isValid()) {
 		circuit_id_t id = backend.createCircuit();
-		evaluator_id_t evalId = *backend.createEvaluator(id);
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-		backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId, Address());
 
 		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
 		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position());
@@ -194,25 +192,25 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
 	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 	if (filePath.isEmpty()) return;
 
-	std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
-	if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
-		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
-		return;
-	}
+	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+    if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
+        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        return;
+    }
 
-	// CircuitValidator validator(*parsed);
-	// if (parsed->isValid()){
-	//     // circuitView->getToolManager().setPendingPreviewData(parsed);
-	//     // circuitView->getToolManager().changeTool("Preview Placement");
-	//     // PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getCurrentTool().get());
-	//     if (previewTool) {
-	//         previewTool->setBackend(&backend);
-	//     }else{
-	//         logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
-	//     }
-	// }else {
-	//     logWarning("Parsed circuit is not valid to be placed", "FileLoading");
-	// }
+    CircuitValidator validator(*parsed); // validate and dont merge dependencies
+    if (parsed->isValid()){
+		circuitView->getToolManager().selectTool("preview placement tool");
+        // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
+        if (previewTool) {
+            previewTool->setParsedCircuit(parsed);
+        }else{
+	        logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
+        }
+    }else {
+        logWarning("Parsed circuit is not valid to be placed", "FileLoading");
+    }
 }
 
 void MainWindow::exportProject() {

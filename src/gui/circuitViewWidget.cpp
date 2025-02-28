@@ -314,7 +314,7 @@ void CircuitViewWidget::load(const QString& filePath) {
         if (previewTool) {
             previewTool->setParsedCircuit(parsed);
         }else{
-            std::cout << "Preview tool failed to cast\n";
+	        logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
         }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
