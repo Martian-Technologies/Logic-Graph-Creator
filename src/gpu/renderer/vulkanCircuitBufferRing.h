@@ -7,7 +7,7 @@
 
 struct CircuitBuffer {
 	AllocatedBuffer blockBuffer;
-	uint32_t numBlocks;
+	uint32_t numBlockVertices;
 };
 
 struct Vertex {
@@ -47,7 +47,11 @@ public:
 	void destroy();
 	
 	const CircuitBuffer& getAvaiableBuffer();
+	inline bool hasCircuit() const { return circuit != nullptr; }
 
+private:
+	void generateVertices(std::vector<Vertex>& vertices, Circuit* circuit);
+	
 private:
 	Circuit* circuit = nullptr;
 

@@ -31,7 +31,6 @@ void VulkanRenderer::setCircuit(Circuit* circuit) {
 	// lock rendering mutex
 	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 
-	this->circuit = circuit;
 	circuitBufferRing.setCircuit(circuit);
 	
 	if (circuit) {
@@ -184,7 +183,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// only draw with pipeline if we have a circuit (vertex buffer)
-	if (hasCircuit()) {
+	if (circuitBufferRing.hasCircuit()) {
 		// bind render pipeline
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
@@ -214,7 +213,8 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 		vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 		// draw
-		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlocks * 3), 1, 0, 0);
+		// TODO - something else should (maybe) be in charge of making draw calls here? certainly multiplying num blocks by three
+		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlockVertices * 3), 1, 0, 0);
 	}
 
 	// end

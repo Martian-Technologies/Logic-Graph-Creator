@@ -35,14 +35,11 @@ public:
 private:
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
 	void handleResize();
-
-	inline bool hasCircuit() const { return circuit != nullptr; }
 	
 private:
 	// state
 	std::atomic<bool> initialized = false;
 	std::atomic<bool> running = false;
-	Circuit* circuit = nullptr;
 	int windowWidth, windowHeight;
 	std::mutex cpuRenderingMutex;
 	glm::mat4 orthoMat = glm::mat4(1.0f);
