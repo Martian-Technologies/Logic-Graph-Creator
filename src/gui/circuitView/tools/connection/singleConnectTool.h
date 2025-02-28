@@ -1,9 +1,9 @@
 #ifndef singleConnectTool_h
 #define singleConnectTool_h
 
-#include "../circuitTool.h"
+#include "../circuitToolHelper.h"
 
-class SingleConnectTool : public CircuitTool {
+class SingleConnectTool : public CircuitToolHelper {
 public:
 	void activate() override final {
 		CircuitTool::activate();

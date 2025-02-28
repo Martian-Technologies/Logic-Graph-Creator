@@ -2,19 +2,15 @@
 #define blockPlacementTool_h
 
 #include "baseBlockPlacementTool.h"
-#include "singlePlaceTool.h"
-#include "areaPlaceTool.h"
 #include "../circuitTool.h"
 
 class BlockPlacementTool : public CircuitTool {
 public:
-	BlockPlacementTool() {
-		activePlacementTool = std::make_shared<SinglePlaceTool>();
-	}
+	BlockPlacementTool();
 
 	void activate() override final;
 
-	static inline std::vector<std::string> getModes() { return { "Single", "Area" }; }
+	inline std::vector<std::string> getModes() { return { "Single", "Area" }; }
 	void setMode(std::string toolMode) override final;
 
 	inline void selectBlock(BlockType selectedBlock) {

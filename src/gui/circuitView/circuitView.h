@@ -10,19 +10,16 @@
 #include "tools/toolManager.h"
 #include "renderer/renderer.h"
 #include "viewManager/viewManager.h"
-#include "tools/placement/blockPlacementTool.h"
 
 class Backend;
 
 template <class RENDERER_TYPE>
-// typename std::enable_if<std::is_base_of<Renderer, RENDERER_TYPE>::value, void>::type // idk if we can get this working
 class CircuitView {
 	friend class Backend;
 public:
 	CircuitView() : toolManager(&eventRegister, &renderer) {
 		viewManager.initialize(eventRegister);
 		viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
-		placementTool = std::make_shared<BlockPlacementTool>();
 	}
 
 	void viewChanged() {
@@ -103,7 +100,6 @@ private:
 	RENDERER_TYPE renderer;
 	ToolManager toolManager;
 	Backend* backend;
-	SharedBlockPlacementTool placementTool;
 };
 
 #endif /* circuitView_h */

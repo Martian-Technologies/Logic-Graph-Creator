@@ -2,8 +2,7 @@
 
 // tools
 #include "placement/blockPlacementTool.h"
-#include "connection/singleConnectTool.h"
-#include "connection/tensorConnectTool.h"
+#include "connection/connectionTool.h"
 #include "other/previewPlacementTool.h"
 #include "other/logicToucher.h"
 #include "other/moveTool.h"
@@ -35,12 +34,11 @@ void ToolManager::selectTool(std::string toolName) {
 		toolStack.clearTools();
 		toolStack.pushTool(selectedTool);
 	} else {
-		if (toolName == "placement/placement") instanceNewtool<BlockPlacementTool>("placement/placement");
-		else if (toolName == "placement/move") instanceNewtool<MoveTool>("placement/move");
-		else if (toolName == "connection/simple") instanceNewtool<SingleConnectTool>("connection/simple");
-		else if (toolName == "connection/tensor") instanceNewtool<TensorConnectTool>("connection/tensor");
-		else if (toolName == "interactive/state changer") instanceNewtool<BlockPlacementTool>("interactive/state changer");
-		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>("preview placement tool");
+		if (toolName == "placement/placement") instanceNewtool<BlockPlacementTool>(toolName);
+		else if (toolName == "placement/move") instanceNewtool<MoveTool>(toolName);
+		else if (toolName == "connection/connection") instanceNewtool<ConnectionTool>(toolName);
+		else if (toolName == "interactive/state changer") instanceNewtool<BlockPlacementTool>(toolName);
+		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>(toolName);
 		else logError("Unknown tool name \"" + toolName + "\"");
 	}
 }

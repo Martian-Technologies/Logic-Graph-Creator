@@ -138,15 +138,10 @@
        </property>
        <item>
         <property name="text">
-         <string>Simple</string>
+         <string>Connection</string>
         </property>
         <property name="toolTip">
          <string>Create a single connection</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Tensor</string>
         </property>
        </item>
       </item>

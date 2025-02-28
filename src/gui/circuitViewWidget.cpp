@@ -95,7 +95,6 @@ void CircuitViewWidget::setSimSpeed(double speed) {
 		circuitView.getEvaluator()->setTickrate(std::round(speed * 60));
 }
 
-
 void CircuitViewWidget::updateLoop() {
 	if (circuitSelector) {
 		const Backend* backend = circuitView.getBackend();

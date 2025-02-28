@@ -54,7 +54,7 @@ private:
     CircuitFileManager circuitFileManager;
 
 signals:
-	void toolModeOptionsChanged(std::vector<std::string> modes);
+	void toolModeOptionsChanged(const std::vector<std::string>* modes);
 };
 
 #endif /* mainWindow_h */

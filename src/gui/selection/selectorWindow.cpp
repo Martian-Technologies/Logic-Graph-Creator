@@ -14,9 +14,10 @@ SelectorWindow::~SelectorWindow() {
 	delete ui;
 }
 
-void SelectorWindow::updateToolModeOptions(std::vector<std::string> modes) {
+void SelectorWindow::updateToolModeOptions(const std::vector<std::string>* modes) {
 	ui->ToolModes->clear();
-	for (auto mode : modes) {
+	if (!modes) return;
+	for (auto mode : *modes) {
 		ui->ToolModes->addItem(QString::fromStdString(mode));
 	}
 }

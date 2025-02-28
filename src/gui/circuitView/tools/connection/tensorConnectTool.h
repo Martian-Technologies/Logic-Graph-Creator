@@ -2,9 +2,9 @@
 #define tensorConnectTool_h
 
 #include "backend/selection.h"
-#include "../circuitTool.h"
+#include "../circuitToolHelper.h"
 
-class TensorConnectTool : public CircuitTool {
+class TensorConnectTool : public CircuitToolHelper {
 public:
 	inline void reset() override final {
 		outputStage = -1;

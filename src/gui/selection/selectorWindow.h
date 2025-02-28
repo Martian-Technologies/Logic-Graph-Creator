@@ -16,7 +16,7 @@ public:
 	SelectorWindow(QWidget* parent = nullptr);
 	~SelectorWindow();
 	
-	void updateToolModeOptions(std::vector<std::string> modes);
+	void updateToolModeOptions(const std::vector<std::string>* modes);
 
 private:
 	void updateSelected();
