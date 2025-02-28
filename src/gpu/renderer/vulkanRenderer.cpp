@@ -64,7 +64,28 @@ void VulkanRenderer::resize(int w, int h) {
 	handleResize();
 }
 
-// TODO - ghetto render thread
+void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
+	
+}
+
+void VulkanRenderer::updateView(ViewManager* viewManager) {
+	// lock rendering mutex
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	
+	FPosition topLeft = viewManager->getTopLeft();
+    FPosition bottomRight = viewManager->getBottomRight();
+	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
+	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+}
+
+void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
+	// lock rendering mutex
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	
+	circuitBufferRing.updateCircuit(diff);
+}
+
+// TODO - fix ghetto render thread
 void VulkanRenderer::run() {
 	if (!initialized) return;
 	if (running) return;
@@ -230,26 +251,6 @@ void VulkanRenderer::handleResize() {
 	destroySwapchain(swapchain);
 	swapchain = createSwapchain(surface, windowWidth, windowHeight);
 	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
-}
-
-// Vulkan Setup
-
-// INTERFACE
-// ======================================================================
-
-void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
-	
-}
-
-void VulkanRenderer::updateView(ViewManager* viewManager) {
-	FPosition topLeft = viewManager->getTopLeft();
-    FPosition bottomRight = viewManager->getBottomRight();
-	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
-	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
-}
-
-void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	circuitBufferRing.updateCircuit(diff);
 }
 
 // elements -----------------------------
