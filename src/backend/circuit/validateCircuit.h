@@ -28,11 +28,12 @@ private:
     std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
-    void processExternalConnections();
     bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
+
+
     bool handleUnpositionedBlocks();
 
     bool isIntegerPosition(const FPosition& pos) const {

@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include <filesystem>
+#include <mutex>
 
 enum LogType {
 	Info = 1,

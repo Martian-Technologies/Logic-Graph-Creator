@@ -14,7 +14,6 @@
 class Backend;
 
 template <class RENDERER_TYPE>
-// typename std::enable_if<std::is_base_of<Renderer, RENDERER_TYPE>::value, void>::type // idk if we can get this working
 class CircuitView {
 	friend class Backend;
 public:
@@ -33,7 +32,11 @@ public:
 	}
 
 	void setSelectedTool(std::string tool) {
-		toolManager.changeTool(tool);
+		toolManager.selectTool(tool);
+	}
+
+	void setSelectedToolMode(std::string mode) {
+		toolManager.setMode(mode);
 	}
 
 	void setSelectedBlock(BlockType blockType) {

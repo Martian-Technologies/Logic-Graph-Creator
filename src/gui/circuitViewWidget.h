@@ -2,13 +2,12 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QToolButton>
-#include <QWheelEvent>
-#include <QKeyEvent>
-#include <QComboBox>
-#include <QPainter>
 #include <QWidget>
-#include <QTimer>
+
+class QWheelEvent;
+class QKeyEvent;
+class QComboBox;
+class QTimer;
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
@@ -26,9 +25,15 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
+	
+	void load(const QString& filePath);
+	void save();
 
 protected:
-	// events overrides
+	// important events
+	
+	// other events
+	bool event(QEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
@@ -39,14 +44,10 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void enterEvent(QEnterEvent* event) override;
 	void leaveEvent(QEvent* event) override;
-	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
 
 private:
-	void save();
-	void load(const QString& filePath);
-
 	// utility functions
 	inline Vec2 pixelsToView(QPointF point) { return Vec2((float)point.x() / (float)rect().width(), (float)point.y() / (float)rect().height()); }
 	inline bool insideWindow(const QPoint& point) const { return point.x() >= 0 && point.y() >= 0 && point.x() < size().width() && point.y() < size().height(); }

@@ -1,3 +1,5 @@
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QMimeData>
 
 #include "toolCell.h"

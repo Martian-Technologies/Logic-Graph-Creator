@@ -1,9 +1,11 @@
 #ifndef parsedCircuit_h
 #define parsedCircuit_h
 
-#include "backend/container/block/blockDefs.h"
 #include "backend/container/block/connectionEnd.h"
 #include "backend/position/position.h"
+
+class ParsedCircuit;
+typedef std::shared_ptr<ParsedCircuit> SharedParsedCircuit;
 
 class ParsedCircuit {
     friend class CircuitValidator;
@@ -26,22 +28,9 @@ public:
                    outputBlockId == other.outputBlockId && inputBlockId == other.inputBlockId;
         }
     };
-    struct ExternalConnection {
-        std::string localFile;
-        block_id_t localBlockId;
-        connection_end_id_t localConnectionId;
-        block_id_t externalBlockId;
-        connection_end_id_t externalConnectionId;
-        std::string dependencyFile;
-    };
 
-    void addDependency(const std::string& filename, std::shared_ptr<ParsedCircuit> dependency) {
+    void addDependency(const std::string& filename, SharedParsedCircuit dependency) {
         dependencies[filename] = dependency;
-    }
-
-    void addExternalConnection(const ExternalConnection& conn) {
-        externalConnections.push_back(conn);
-        valid = false;
     }
 
     void addBlock(block_id_t id, const BlockData& block) {
@@ -89,6 +78,8 @@ public:
         }
     }
 
+    void setFilePath(const std::string& fpath) { fullFilePath = fpath; }
+    const std::string& getFilePath() const { return fullFilePath; }
 
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
@@ -103,17 +94,16 @@ public:
     const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
     const std::vector<ConnectionData>& getConns() const { return connections; }
 
-    const std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>>& getDependencies() const { return dependencies; }
-    const std::vector<ExternalConnection>& getExternalConnections() const { return externalConnections; }
+    const std::unordered_map<std::string, SharedParsedCircuit>& getDependencies() const { return dependencies; }
 private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
+    std::string fullFilePath;
     bool valid = true;
 
-    std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> dependencies;
-    std::vector<ExternalConnection> externalConnections;
+    std::unordered_map<std::string, SharedParsedCircuit> dependencies;
 };
 
 #endif /* parsedCircuit_h */

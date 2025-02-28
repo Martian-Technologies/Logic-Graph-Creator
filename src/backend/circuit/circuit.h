@@ -5,6 +5,7 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
+#include "parsedCircuit.h"
 #include "undoSystem.h"
 
 typedef unsigned int circuit_id_t;
@@ -16,6 +17,11 @@ public:
 
 	inline circuit_id_t getCircuitId() const { return circuitId; }
 	inline std::string getCircuitName() const { return "Circuit " + std::to_string(circuitId); }
+
+    inline bool isSaved() const { return saved; }
+    inline void setSaved() { saved = true; }
+    inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
+    inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
 
 	/* ----------- listener ----------- */
@@ -46,6 +52,9 @@ public:
 	void tryRemoveOverArea(Position cellA, Position cellB);
 
 	bool checkCollision(const SharedSelection& selection);
+
+	// Trys to place a parsed circuit at a position
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
 
 	/* ----------- block data ----------- */
 
@@ -89,14 +98,16 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; saved = false; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;
 	UndoSystem undoSystem;
 	bool midUndo = false;
-	unsigned int updateCount = 0; // increases anytime the container is changed
+
+    bool saved = false;
+    std::string saveFilePath;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;

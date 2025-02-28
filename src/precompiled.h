@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <cmath>
+#include <cstring>
 
 // do we need these?
 #include <iostream>
