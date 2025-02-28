@@ -101,8 +101,8 @@ void MainWindow::updateSaveMenu(bool saveAs) {
 
         int i = p.first;
         std::string text;
-        if (p.second && !p.second->getCircuitName().empty()) {
-            text = p.second->getCircuitName();
+        if (p.second && !p.second->getCircuitNameNumber().empty()) {
+            text = p.second->getCircuitNameNumber();
             if (!saveAs)  text += " - " + p.second->getSaveFilePath();
         } else {
             logWarning("Circuit name not found for save menu", "FileSaving");
@@ -121,7 +121,7 @@ void MainWindow::updateLoadIntoMenu(bool loadMerged) {
         CircuitView<QtRenderer>* circuitView = p.second->getCircuitView();
         Circuit* circuit = circuitView->getCircuit();
         if (!circuit) continue; // "None"
-        QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitName()));
+        QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitNameNumber()));
         connect(action, &QAction::triggered, this, [this, circuitView, loadMerged]() { loadCircuitInto(circuitView, loadMerged); });
     }
 
@@ -183,7 +183,7 @@ void MainWindow::loadCircuit(bool loadMerged) {
 
     CircuitValidator validator(*parsed, loadMerged);
     if (parsed->isValid()){
-        circuit_id_t id = backend.createCircuit();
+        circuit_id_t id = backend.createCircuit(parsed->getUUID(), parsed->getName());
         evaluator_id_t evalId = *backend.createEvaluator(id);
         CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
         backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
@@ -341,7 +341,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     if (widget && event->type() == QEvent::Close) {
         auto itr = activeWidgets.find(widget);
         if (itr != activeWidgets.end()){
-            logInfo("Widget (was showing " + itr->second->getCircuitView()->getCircuit()->getCircuitName() + ") closed");
+            logInfo("Widget (was showing " + itr->second->getCircuitView()->getCircuit()->getCircuitNameNumber() + ") closed");
             widget->removeEventFilter(this);
             itr->second->close();
             activeWidgets.erase(itr);

@@ -4,11 +4,12 @@
 #include "gui/circuitView/circuitView.h"
 #include "evaluator/evaluatorManager.h"
 #include "circuit/circuitManager.h"
+#include "util/uuid.h"
 
 class Backend {
 public:
 	// Creates a new Circuit. Returns circuit_id_t.
-	circuit_id_t createCircuit();
+	circuit_id_t createCircuit(const std::string& uuid = generate_uuid_v4(), const std::string& name = "Circuit");
 	// Attempts to create a Evaluator for a Circuit. Returns evaluator_id_t if successful.
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 

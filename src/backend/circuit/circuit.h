@@ -12,16 +12,18 @@ typedef unsigned int circuit_update_count;
 
 class Circuit {
 public:
-	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
+	inline Circuit(circuit_id_t circuitId, const std::string& uuid, const std::string& name) :
+        circuitId(circuitId), circuitUUID(uuid), circuitName(name) { }
 
+	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
-	inline std::string getCircuitName() const { return "Circuit " + std::to_string(circuitId); }
+	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
+	inline const std::string& getCircuitName() const { return circuitName; }
 
     inline bool isSaved() const { return saved; }
     inline void setSaved() { saved = true; }
     inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
-
 
 	/* ----------- listener ----------- */
 
@@ -96,6 +98,8 @@ private:
 
 	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; saved = false; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
+    std::string circuitName;
+    std::string circuitUUID;
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 	std::map<void*, ListenerFunction> listenerFunctions;

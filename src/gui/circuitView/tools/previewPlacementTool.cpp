@@ -91,7 +91,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
     if (backend) {
         std::unordered_map<std::string, std::shared_ptr<ParsedCircuit>> deps = parsedCircuit->getDependencies();
         for (auto itr = deps.begin(); itr != deps.end(); ++itr){
-            circuit_id_t id = backend->createCircuit();
+            circuit_id_t id = backend->createCircuit(itr->second->getUUID(), itr->second->getName());
             backend->createEvaluator(id);
 
             Circuit* depCircuit = backend->getCircuit(id).get();

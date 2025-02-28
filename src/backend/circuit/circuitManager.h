@@ -16,8 +16,8 @@ public:
 		return iter->second;
 	}
 
-	inline circuit_id_t createNewCircuit() {
-		circuits.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId()));
+	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
+		circuits.emplace(getNewCircuitId(), std::make_shared<Circuit>(getLastCreatedCircuitId(), uuid, name));
 		return getLastCreatedCircuitId();
 	}
 
