@@ -4,6 +4,7 @@
 #include "gui/circuitView/renderer/renderer.h"
 
 #include "gpu/vulkanBuffer.h"
+#include "vulkanCircuitBufferRing.h"
 #include "vulkanSwapchain.h"
 #include "vulkanPipeline.h"
 #include "vulkanFrame.h"
@@ -52,10 +53,10 @@ private:
 	FrameData frames[FRAME_OVERLAP];
 
 	// pipeline
+	VulkanCircuitBufferRing circuitBufferRing;
 	PipelineData pipeline;
 	VkShaderModule vertShader;
 	VkShaderModule fragShader;
-	AllocatedBuffer vertexBuffer;
 
 	// render loop
 	std::thread renderThread;

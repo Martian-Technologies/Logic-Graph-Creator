@@ -3,14 +3,7 @@
 #include "computerAPI/fileLoader.h"
 #include "gpu/vulkanManager.h"
 #include "gpu/vulkanUtil.h"
-#include "vulkanVertices.h"
 #include <glm/gtc/matrix_transform.hpp>
-
-const std::vector<Vertex> vertices = {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-};
 
 void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 {
@@ -35,24 +28,13 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 }
 
 void VulkanRenderer::setCircuit(Circuit* circuit) {
-	// temp - don't update circuits while running
-	if (running) return;
-
 	// lock rendering mutex
 	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 
-	// delete existing circuit if it exists
-	if (hasCircuit()) {
-		destroyBuffer(vertexBuffer);
-	}
-
 	this->circuit = circuit;
+	circuitBufferRing.setCircuit(circuit);
 	
 	if (circuit) {
-		size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
-		vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
-
 		logInfo("Renderer circuit assigned and setup", "Vulkan");
 	}
 	else {
@@ -63,7 +45,7 @@ void VulkanRenderer::setCircuit(Circuit* circuit) {
 void VulkanRenderer::destroy() {
 	stop();
 
-	setCircuit(nullptr);
+	circuitBufferRing.destroy();
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
 	destroyShaderModule(vertShader);
@@ -195,41 +177,45 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain.extent;
 
-	VkClearValue clearColor = {{{0.0, 0.0f, 0.0f, 1.0f}}};
+	VkClearValue clearColor = {{{0.93f, 0.93f, 0.93f, 1.0f}}};
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 	
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	// bind render pipeline
-	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+	// only draw with pipeline if we have a circuit (vertex buffer)
+	if (hasCircuit()) {
+		// bind render pipeline
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
-	// bind push constants
-	VertexPushConstants pushConstants{};
-	pushConstants.mvp = orthoMat;
-	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(VertexPushConstants), &pushConstants);
+		// bind push constants
+		VertexPushConstants pushConstants{};
+		pushConstants.mvp = orthoMat;
+		vkCmdPushConstants(frame.mainCommandBuffer, pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(VertexPushConstants), &pushConstants);
 
-	// set dynamic state
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(swapchain.extent.width);
-	viewport.height = static_cast<float>(swapchain.extent.height);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewport);
-	VkRect2D scissor{};
-	scissor.offset = {0, 0};
-	scissor.extent = swapchain.extent;
-	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
+		// set dynamic state
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(swapchain.extent.width);
+		viewport.height = static_cast<float>(swapchain.extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewport);
+		VkRect2D scissor{};
+		scissor.offset = {0, 0};
+		scissor.extent = swapchain.extent;
+		vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
 
-	// bind vertex buffers
-	VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
+		// bind vertex buffers
+		const CircuitBuffer& circuitBuffer = circuitBufferRing.getAvaiableBuffer();
+		VkBuffer vertexBuffers[] = { circuitBuffer.blockBuffer.buffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
-	// draw
-	vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		// draw
+		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlocks * 3), 1, 0, 0);
+	}
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);
@@ -263,7 +249,7 @@ void VulkanRenderer::updateView(ViewManager* viewManager) {
 }
 
 void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	
+	circuitBufferRing.updateCircuit(diff);
 }
 
 // elements -----------------------------

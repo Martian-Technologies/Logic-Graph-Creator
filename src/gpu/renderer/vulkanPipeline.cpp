@@ -1,7 +1,7 @@
 #include "vulkanPipeline.h"
 
 #include "gpu/vulkanManager.h"
-#include "vulkanVertices.h"
+#include "vulkanCircuitBufferRing.h"
 
 const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_VIEWPORT,
@@ -184,5 +184,4 @@ void destroyPipeline(PipelineData& pipeline) {
 	vkDestroyPipeline(Vulkan::getDevice(), pipeline.handle, nullptr);
 	vkDestroyPipelineLayout(Vulkan::getDevice(), pipeline.layout, nullptr);
 	vkDestroyRenderPass(Vulkan::getDevice(), pipeline.renderPass, nullptr);
-
 }
