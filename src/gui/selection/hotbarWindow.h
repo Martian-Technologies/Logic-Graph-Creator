@@ -1,7 +1,6 @@
 #ifndef hotbarWindow_h
 #define hotbarWindow_h
 
-#include <QToolButton>
 #include <QWidget>
 
 #include "backend/container/block/blockDefs.h"

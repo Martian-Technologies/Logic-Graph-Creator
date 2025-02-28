@@ -1,13 +1,15 @@
-#include <QJsonDocument>
+#include <QNativeGestureEvent>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QShortcut>
-#include <QNativeGestureEvent>
 #include <QGestureEvent>
+#include <QPainter>
+#include <QComboBox>
+#include <QWheelEvent>
+#include <QKeyEvent>
+#include <QTimer>
 
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
@@ -27,23 +29,22 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
 	updateLoopTimer->start();
 	connect(updateLoopTimer, &QTimer::timeout, this, &CircuitViewWidget::updateLoop);
-
+	
+	// connect buttons and actions
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
-
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
-
+	
 	connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
-                std::cout << "linked to new circuit view: " << this->circuitSelector->itemData(index).value<int>() << "\n";
+        logInfo("CircuitViewWidget linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
 			}
 		}
 	);
-
 	connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend) {
@@ -51,16 +52,14 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			}
 		}
 	);
-
 	connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
-                std::cout << "linked to evalutor: " << this->evaluatorSelector->itemData(index).value<int>() << "\n";
+        logInfo("CircuitViewWidget linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
 			}
 		}
-	);
-	
+	);	
 	connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed){
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitView.getCircuit()) {
@@ -192,6 +191,7 @@ void CircuitViewWidget::updateLoop() {
 			evaluatorSelector->setCurrentIndex(index);
 		}
 	}
+	
 	// update for re-render
 	update();
 }
@@ -339,9 +339,9 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 void CircuitViewWidget::save() {
     std::cout << "Trying to save\n";
     if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
+        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
         if (!filePath.isEmpty()) {
-            fileManager->saveToFile(filePath, circuitView.getCircuit()->getCircuitId());
+            fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
         }
     }
 }
@@ -351,12 +351,12 @@ void CircuitViewWidget::load(const QString& filePath) {
     if (!fileManager) return;
 
     std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
-    if (!fileManager->loadFromFile(filePath, parsed)) {
+    if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed);
+    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
     if (parsed->isValid()){
         circuitView.getToolManager().setPendingPreviewData(parsed);
         circuitView.getToolManager().changeTool("Preview Placement");

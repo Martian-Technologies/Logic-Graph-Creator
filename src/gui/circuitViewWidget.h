@@ -2,13 +2,12 @@
 #define logicGridWindow_h
 
 #include <QApplication>
-#include <QToolButton>
-#include <QWheelEvent>
-#include <QKeyEvent>
-#include <QComboBox>
-#include <QPainter>
 #include <QWidget>
-#include <QTimer>
+
+class QWheelEvent;
+class QKeyEvent;
+class QComboBox;
+class QTimer;
 
 #include "circuitView/circuitView.h"
 #include "gpu/renderer/vulkanRenderer.h"
@@ -33,9 +32,10 @@ public:
 	void setSimSpeed(double speed);
 
 protected:
-	// events overrides
+	// event overrides
 	void showEvent(QShowEvent* event) override;
 	void hideEvent(QHideEvent* event) override;
+	bool event(QEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
@@ -46,7 +46,6 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void enterEvent(QEnterEvent* event) override;
 	void leaveEvent(QEvent* event) override;
-	bool event(QEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
 

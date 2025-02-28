@@ -1,14 +1,14 @@
 #ifndef mainWindow_h
 #define mainWindow_h
 
-#include <QGraphicsScene>
 #include <QWidget>
-#include <QVulkanInstance>
+class QGraphicsScene;
 
 #include <kddockwidgets/MainWindow.h>
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "gpu/renderer/vulkanRenderer.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -24,26 +24,34 @@ public:
 
 	void closeEvent(QCloseEvent* event) override;
 	
+	// actions
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
-    void updateSaveMenu();
-    void updateLoadIntoMenu();
-    void saveCircuit(int id);
-    void saveCircuitIndex(int index);
-    void saveCircuitAs();
-    void loadCircuit();
-    void loadCircuitInto(int index);
+    void updateSaveMenu(bool saveAs);
+    void updateLoadIntoMenu(bool loadMerged);
+    void saveCircuit(circuit_id_t id, bool saveAs);
+    void loadCircuit(bool loadMerged);
+    void loadCircuitInto(CircuitView<VulkanRenderer>* circuitWidget, bool loadMerged);
+    void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
+
+private:
+	// utility
 	CircuitViewWidget* openNewCircuitViewWindow();
+	void setUpMenuBar();
 	void addDock(QWidget* widget, KDDockWidgets::Location location);
+    bool eventFilter(QObject* obj, QEvent* event);
 
 private:
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
+    QMenu* saveAsSubMenu;
     QMenu* loadIntoSubMenu;
+    QMenu* loadMergedSubMenu;
 	Backend backend;
 	std::vector<CircuitViewWidget*> circuitViews;
+    std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;
 };
 

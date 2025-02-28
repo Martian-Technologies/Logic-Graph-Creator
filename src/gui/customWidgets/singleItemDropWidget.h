@@ -1,11 +1,11 @@
 #ifndef singleItemDropWidget_h
 #define singleItemDropWidget_h
 
-#include <QDragEnterEvent>
-#include <QMouseEvent>
-#include <QDropEvent>
 #include <QWidget>
 #include <QString>
+
+class QDragEnterEvent;
+class QDropEvent;
 
 class SingleItemDropWidget : public QWidget {
 	Q_OBJECT
@@ -19,7 +19,6 @@ signals:
 protected:
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
-	// void mousePressEvent(QMouseEvent* event) override;
 
 };
 

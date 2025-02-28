@@ -1,5 +1,4 @@
 #include <QImageReader>
-#include <QDebug>
 
 #include "iconLoader.h"
 
