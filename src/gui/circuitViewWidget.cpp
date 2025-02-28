@@ -92,10 +92,12 @@ void CircuitViewWidget::showEvent(QShowEvent* event) {
 }
 
 void CircuitViewWidget::hideEvent(QHideEvent* event) {
-	circuitView.getRenderer().stop();
+	destroyVulkanWindow();
 }
 
 void CircuitViewWidget::createVulkanWindow() {
+	if (vulkanWindowOpen) return;
+	
 	// create vulkan window
 	vulkanWindow = new VulkanQtWindow();
 	vulkanWindow->setFlag(Qt::WindowTransparentForInput, true);
@@ -111,13 +113,22 @@ void CircuitViewWidget::createVulkanWindow() {
 	
 	// initialize renderer
 	circuitView.getRenderer().initialize(vulkanWindow->createSurface(), size().width(), size().height());
+
+	vulkanWindowOpen = true;
 }
 
 void CircuitViewWidget::destroyVulkanWindow() {
+	if (!vulkanWindowOpen) return;
+	
 	circuitView.getRenderer().destroy();
 	vulkanWindow->destroySurface();
 	vulkanWindow->destroy();
+	vulkanWindow = nullptr;
+	
 	layout()->removeWidget(vulkanWindowWrapper);
+	vulkanWindowWrapper = nullptr;
+	
+	vulkanWindowOpen = false;
 }
 
 void CircuitViewWidget::setSimState(bool state) {

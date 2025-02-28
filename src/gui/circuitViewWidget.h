@@ -73,6 +73,7 @@ private:
 	const int numTimesInAverage = 20;
 
 	// vulkan
+	bool vulkanWindowOpen = false;
 	VulkanQtWindow* vulkanWindow;
 	QWidget* vulkanWindowWrapper;
 

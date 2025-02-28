@@ -21,7 +21,6 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options) : KDDockWidgets
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
-
 	circuit_id_t id = backend.createCircuit();
 	evaluator_id_t evalId1 = *backend.createEvaluator(id);
 
