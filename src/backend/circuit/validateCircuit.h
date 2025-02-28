@@ -35,6 +35,8 @@ private:
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
+
+
     bool handleUnpositionedBlocks();
 
     bool isIntegerPosition(const FPosition& pos) const {

@@ -27,11 +27,11 @@ public:
 	// actions
 	void setBlock(BlockType blockType);
 	void setTool(std::string tool);
-    void updateSaveMenu(bool saveAs = false);
-    void updateLoadIntoMenu(bool loadMerged = false);
-    void saveCircuit(circuit_id_t id, bool saveAs = false);
-    void loadCircuit(bool loadMerged = false);
-    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged = false);
+    void updateSaveMenu(bool saveAs);
+    void updateLoadIntoMenu(bool loadMerged);
+    void saveCircuit(circuit_id_t id, bool saveAs);
+    void loadCircuit(bool loadMerged);
+    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged);
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();

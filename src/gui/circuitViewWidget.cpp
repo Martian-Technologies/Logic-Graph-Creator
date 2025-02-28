@@ -51,7 +51,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
-                logInfo("linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
+        logInfo("CircuitViewWidget linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
 			}
 		}
 	);
@@ -66,7 +66,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView.getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
-                logInfo("linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
+        logInfo("CircuitViewWidget linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
 			}
 		}
 	);	
@@ -290,7 +290,7 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 void CircuitViewWidget::save() {
     std::cout << "Trying to save\n";
     if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.circuit);;All Files (*)");
+        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
         if (!filePath.isEmpty()) {
             fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
         }
