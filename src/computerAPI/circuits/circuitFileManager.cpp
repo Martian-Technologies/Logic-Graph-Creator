@@ -12,6 +12,7 @@
 
 
 #include "circuitFileManager.h"
+#include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
@@ -31,6 +32,8 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "LIGHT") return LIGHT;
     if (str == "CUSTOM") return CUSTOM;
     if (str == "TYPE_COUNT") return TYPE_COUNT;
+
+    // else it is a custom block, return none for now
     return NONE;
 }
 
@@ -115,8 +118,8 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
     char cToken;
     inputFile >> token;
 
-    if (token != "version_1") {
-        logError("Invalid circuit file version", "FileManager");
+    if (token != "version_2") {
+        logError("Invalid circuit file version, expecting version_2", "FileManager");
         return false;
     }
 
@@ -135,17 +138,50 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fullPath.toStdString(), "FileManager");
             if (loadFromFile(fullPath.toStdString(), dependency)){
-                logInfo("Successfully imported dependency: " + importFileName, "FileManager");
                 outParsed->addDependency(importFileName, dependency);
+                outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
+                logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "FileManager");
             }else{
                 logError("Failed to import dependency: " + importFileName, "FileManager");
             }
+            continue;
+        } else if (token == "Circuit:") {
+            std::string circuitName;
+            inputFile >> std::quoted(circuitName);
+            outParsed->setName(circuitName);
+            logInfo("\tSet circuit: " + circuitName, "FileManager");
+            continue;
+        } else if (token == "UUID:") {
+            std::string uuid;
+            inputFile >> uuid;
+            outParsed->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
+            logInfo("\tSet UUID: " + uuid, "FileManager");
             continue;
         }
 
         inputFile >> blockId;
         inputFile >> token;
         blockType = stringToBlockType(token);
+
+        // Determine if block is a sub-circuit or primitive
+        if (blockType == BlockType::NONE){
+            if (token.front() != '"' || token.back() != '"') {
+                logError("Incorrect formatting of load file sub-circuit", "FileManager");
+                return false;
+            }
+            std::string circuitName = token.substr(1, token.size() - 2); // remove quotes
+            auto it = outParsed->getCircuitNameToUUID().find(circuitName);
+            if (it == outParsed->getCircuitNameToUUID().end()) {
+                logError("Circuit '" + circuitName + "' not imported due to save file formatting", "FileManager");
+                return false;
+            }
+            // Can't implement until custom blocks are added
+            std::getline(inputFile, token); // conn id 0
+            if (!token.starts_with("(connId:0)")){ logError("Invalid parsing with custom block"); return false; }
+            std::getline(inputFile, token); // conn id 1
+            if (!token.starts_with("(connId:1)")){ logError("Invalid parsing with custom block"); return false; }
+            continue;
+        }
 
         inputFile >> token;
         if (token == "null") posX = std::numeric_limits<float>::max();
@@ -191,7 +227,9 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
         return false;
     }
 
-    outputFile << "version_1\n";
+    outputFile  << "version_2\n"
+                << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
+                << "UUID: " << circuitPtr->getUUID() << '\n';;
 
     const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
     std::unordered_map<block_id_t, Block>::const_iterator itr = blockContainer->begin();

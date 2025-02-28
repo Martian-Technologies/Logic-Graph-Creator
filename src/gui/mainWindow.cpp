@@ -92,7 +92,7 @@ void MainWindow::updateSaveMenu(bool saveAs) {
 
 		int i = p.first;
 		std::string text;
-		if (p.second && !p.second->getCircuitName().empty()) {
+		if (p.second && !p.second->getCircuitNameNumber().empty()) {
 			text = p.second->getCircuitName();
 			if (!saveAs)  text += " - " + p.second->getSaveFilePath();
 		} else {
@@ -112,7 +112,7 @@ void MainWindow::updateLoadIntoMenu() {
 		CircuitView<QtRenderer>* circuitView = p.second->getCircuitView();
 		Circuit* circuit = circuitView->getCircuit();
 		if (!circuit) continue; // "None"
-		QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitName()));
+		QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitNameNumber()));
 		connect(action, &QAction::triggered, this, [this, circuitView]() { loadCircuitInto(circuitView); });
 	}
 
