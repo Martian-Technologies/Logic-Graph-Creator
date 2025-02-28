@@ -13,12 +13,19 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 	return false;
 }
 
+bool BlockContainer::checkCollision(const Position& position, Rotation rotation, BlockType blockType) {
+	return checkCollision(position, position + Vector(
+		getBlockWidth(blockType, rotation) - 1,
+		getBlockHeight(blockType, rotation) - 1
+	));
+}
+
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	if (
 		blockType == BlockType::NONE ||
 		blockType == BlockType::BLOCK ||
 		blockType >= BlockType::TYPE_COUNT ||
-		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
+		checkCollision(position, rotation, blockType)
 		) return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
@@ -50,15 +57,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position) {
 bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
-	if (
-		checkCollision(
-			position,
-			position + Vector(
-				getBlockWidth(block->type(), block->getRotation()),
-				getBlockHeight(block->type(), block->getRotation())
-			)
-		)
-		) return false;
+	if (checkCollision(position, block->getRotation(), block->type())) return false;
 	removeBlockCells(block);
 	block->setPosition(position);
 	placeBlockCells(block);
@@ -70,7 +69,7 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
 		blockType == BlockType::NONE ||
 		blockType == BlockType::BLOCK ||
 		blockType == BlockType::TYPE_COUNT ||
-		checkCollision(position, position + Vector(getBlockWidth(blockType, rotation) - 1, getBlockHeight(blockType, rotation) - 1))
+		checkCollision(position, rotation, blockType)
 		) return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
@@ -113,18 +112,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
-	if (
-		checkCollision(
-			position,
-			position + Vector(
-				getBlockWidth(block->type(), block->getRotation()) - 1,
-				getBlockHeight(block->type(), block->getRotation()) - 1
-			)
-		)
-	) {
-		return false;
-	}
-
+	if (checkCollision(position, block->getRotation(), block->type())) return false;
 	// do move
 	difference->addMovedBlock(block->getPosition(), position);
 	removeBlockCells(block);

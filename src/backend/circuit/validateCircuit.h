@@ -15,9 +15,7 @@
 // - if we are importing blocks that don't have position (ie they are floatmax or floatmin), they should be given a position and it should be some organized structure.
 class CircuitValidator {
 public:
-    CircuitValidator(ParsedCircuit& parsedCircuit, bool mergeCircuit)
-        : parsedCircuit(parsedCircuit), mergeCircuit(mergeCircuit)
-    { validate(); }
+    CircuitValidator(ParsedCircuit& parsedCircuit) : parsedCircuit(parsedCircuit) { validate(); }
 private:
     struct ConnectionHash {
         size_t operator()(const ParsedCircuit::ConnectionData& p) const {
@@ -30,7 +28,6 @@ private:
     std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
-    void processExternalConnections();
     bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
@@ -51,7 +48,6 @@ private:
     }
 
     ParsedCircuit& parsedCircuit;
-    bool mergeCircuit;
 };
 
 #endif /* validateCircuit_h */

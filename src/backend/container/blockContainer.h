@@ -13,7 +13,7 @@ public:
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge);
-
+	bool checkCollision(const Position& position, Rotation rotation, BlockType blockType);
 	/* ----------- blocks ----------- */
 	// -- getters --
 	// Gets the cell at that position. Returns nullptr the cell is empty

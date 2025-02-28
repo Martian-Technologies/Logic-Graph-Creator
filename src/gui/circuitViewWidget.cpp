@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 
+#include "gui/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
 #include "circuitViewWidget.h"
@@ -94,7 +95,6 @@ void CircuitViewWidget::setSimSpeed(double speed) {
 		circuitView.getEvaluator()->setTickrate(std::round(speed * 60));
 }
 
-
 void CircuitViewWidget::updateLoop() {
 	if (circuitSelector) {
 		const Backend* backend = circuitView.getBackend();
@@ -102,7 +102,7 @@ void CircuitViewWidget::updateLoop() {
 			for (auto pair : backend->getCircuitManager()) {
 				QString name = QString::fromStdString(pair.second->getCircuitName());
 				if (circuitSelector->findText(name) == -1) {
-					circuitSelector->insertItem(circuitSelector->count()-1, name, pair.second->getCircuitId());
+					circuitSelector->insertItem(circuitSelector->count() - 1, name, pair.second->getCircuitId());
 				}
 			}
 		}
@@ -110,7 +110,7 @@ void CircuitViewWidget::updateLoop() {
 		if (circuit != nullptr) {
 			QString name = QString::fromStdString(circuit->getCircuitName());
 			int index = circuitSelector->findText(name);
-			if ( index != -1 ) { // -1 for not found
+			if (index != -1) { // -1 for not found
 				circuitSelector->setCurrentIndex(index);
 			}
 		} else {
@@ -124,7 +124,7 @@ void CircuitViewWidget::updateLoop() {
 			for (auto pair : backend->getEvaluatorManager()) {
 				QString name = QString::fromStdString(pair.second->getEvaluatorName());
 				if (evaluatorSelector->findText(name) == -1) {
-					evaluatorSelector->insertItem(evaluatorSelector->count()-1, name, pair.second->getEvaluatorId());
+					evaluatorSelector->insertItem(evaluatorSelector->count() - 1, name, pair.second->getEvaluatorId());
 				}
 			}
 		}
@@ -132,7 +132,7 @@ void CircuitViewWidget::updateLoop() {
 		if (evaluator != nullptr) {
 			QString name = QString::fromStdString(evaluator->getEvaluatorName());
 			int index = evaluatorSelector->findText(name);
-			if ( index != -1 ) { // -1 for not found
+			if (index != -1) { // -1 for not found
 				evaluatorSelector->setCurrentIndex(index);
 			}
 		} else {
@@ -213,8 +213,7 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 			if (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) {
 				// do zoom
 				if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 100.f))) event->accept();
-			}
-			else {
+			} else {
 				if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
 					"view pan",
 					numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
@@ -299,23 +298,23 @@ void CircuitViewWidget::save() {
 
 // for drag and drop load directly onto this circuit view widget
 void CircuitViewWidget::load(const QString& filePath) {
-    if (!fileManager) return;
+	if (!fileManager) return;
 
-    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed); // validate and dont merge dependencies
     if (parsed->isValid()){
-        circuitView.getToolManager().setPendingPreviewData(parsed);
-        circuitView.getToolManager().changeTool("Preview Placement");
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
+		circuitView.getToolManager().selectTool("preview placement tool");
+        // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getSelectedTool());
         if (previewTool) {
-            previewTool->setBackend(circuitView.getBackend());
+            previewTool->setParsedCircuit(parsed);
         }else{
-            std::cout << "Preview tool failed to cast\n";
+	        logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
         }
     }else {
         qWarning("Parsed circuit is not valid to be placed");

@@ -22,91 +22,18 @@ bool CircuitValidator::validateDependencies() {
 
     for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
         // validate the dependency as a circuit itself
-        CircuitValidator depValidator(*depCircuit, mergeCircuit);
+        CircuitValidator depValidator(*depCircuit);
         if (!depCircuit->valid) {
             logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
             return false;
         }
         logInfo("Dependency circuit validation success for " + depName);
-
-        // Merge into one parsed circuit:
-        if (!mergeCircuit){ continue; }
-
-        Vector depSize = depCircuit->maxPos - depCircuit->minPos;
-        Vector currOffset = offset;
-
-        // merge the blocks to the current parsedCircuit with their offsets
-        std::unordered_map<block_id_t, block_id_t> idMap;
-        for (const auto& [id, block] : depCircuit->getBlocks()) {
-            block_id_t newId = generateNewBlockId();
-            idMap[id] = newId;
-
-            ParsedCircuit::BlockData newBlock = block;
-            newBlock.pos.x += currOffset.dx;
-            newBlock.pos.y += currOffset.dy;
-            parsedCircuit.addBlock(newId, newBlock);
-        }
-
-        // merge internal connections, adjusting old ids
-        for (const auto& conn : depCircuit->connections) {
-            ParsedCircuit::ConnectionData newConn = conn;
-            newConn.outputBlockId = idMap[conn.outputBlockId];
-            newConn.inputBlockId = idMap[conn.inputBlockId];
-            parsedCircuit.connections.push_back(newConn);
-        }
-
-        // store ID mapping for this specific dependency
-        dependencyMappings[depName] = idMap;
-
-        // update offset for next dependency
-        offset.dx += depSize.dx + 3;
-        if ((++numImports % 3) == 0) {
-            offset.dx = 0;
-            offset.dy += depSize.dy + 2;
-        }
     }
 
     logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()));
-    if (mergeCircuit){
-        processExternalConnections();
-        parsedCircuit.dependencies.clear(); // We have no more dependencies because they are merged
-    }
 
     return true;
-}
-
-void CircuitValidator::processExternalConnections() {
-    // collect connections from dependencies
-    for (const auto& [depName, depCircuit] : parsedCircuit.dependencies) {
-        const auto& depConns = depCircuit->getExternalConnections();
-        parsedCircuit.externalConnections.insert(parsedCircuit.externalConnections.end(), depConns.begin(), depConns.end());
-    }
-
-    for (const auto& conn : parsedCircuit.externalConnections) {
-        block_id_t resolvedLocalBlock;
-        if (conn.localFile == ".") {
-            resolvedLocalBlock = conn.localBlockId;
-        } else {
-            logInfo("Trying to access local file for external connection at: " + conn.localFile, "CircuitValidator");
-            const auto& depMap = dependencyMappings.at(conn.localFile);
-            resolvedLocalBlock = depMap.at(conn.localBlockId);
-        }
-
-        block_id_t resolvedExternalBlock;
-        if (conn.dependencyFile == ".") {
-            resolvedExternalBlock = conn.localBlockId;
-        } else {
-            logInfo("Trying to access dependency at: " + conn.dependencyFile, "CircuitValidator");
-            const auto& extDepMap = dependencyMappings.at(conn.dependencyFile);
-            resolvedExternalBlock = extDepMap.at(conn.externalBlockId);
-        }
-
-        parsedCircuit.addConnection({resolvedLocalBlock, conn.localConnectionId, resolvedExternalBlock, conn.externalConnectionId});
-        // add the reciprocated connection
-        parsedCircuit.addConnection({resolvedExternalBlock, conn.externalConnectionId, resolvedLocalBlock, conn.localConnectionId});
-    }
-    logInfo("Finished connecting external dependencies", "CircuitValidator");
 }
 
 bool CircuitValidator::setBlockPositionsInt() {

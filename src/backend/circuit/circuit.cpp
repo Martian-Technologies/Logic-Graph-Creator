@@ -1,4 +1,5 @@
 #include "circuit.h"
+#include "logging/logging.h"
 
 bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
@@ -107,6 +108,47 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 		}
 	}
 	return false;
+}
+
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position) {
+	if (!parsedCircuit.isValid()) return false;
+	
+	Vector totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
+		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
+			return false;
+		}
+	}
+	logInfo("all blocks can be placed");
+	
+	std::unordered_map<block_id_t, block_id_t> realIds;
+	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
+		Position targetPos = block.pos.snap() + totalOffset;
+		block_id_t newId;
+		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
+			logError("Failed to insert block while inserting block.");
+		}
+		realIds[oldId] = blockContainer.getBlock(targetPos)->id();;
+	}
+
+	for (const auto& conn : parsedCircuit.getConns()) {
+		const ParsedCircuit::BlockData* b = parsedCircuit.getBlock(conn.outputBlockId);
+		if (!b) {
+			logError("Could not get block from parsed circuit while inserting block.");
+			break;
+		}
+		if (isConnectionInput(b->type, conn.outputId)) {
+			// skip inputs
+			continue;
+		}
+
+		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
+		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
+		if (!tryCreateConnection(output, input)) {
+			logError("Failed to create connection while inserting block.");
+		}
+	}
+	return true;
 }
 
 bool Circuit::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
