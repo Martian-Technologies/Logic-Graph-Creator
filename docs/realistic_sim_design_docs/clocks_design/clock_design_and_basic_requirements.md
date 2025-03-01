@@ -18,3 +18,10 @@ Most logic circuits use 0V for low and (3.3V or 5.0) for high.  In this example 
 
 1. Clocks must be able to run at different frequencies.  This is because microcontrollers have tons of clocks all that run at different speeds.  Additionally, some clocks are used for driving things like GPIO pins.
 2. Designed chips (like reigsters) must have functionality to change output on a clock edge.
+3. Clocks should be able to be configured for pulse width - ie) high for 9us low for 1us.
+4. A clock should be able to tick even when a signal is propagating through logic gates.  This will allow the user to see where a clock cycle interferes with propagation.
+
+## Design Inferences
+
+1. The way that we currently evaluate logic will not work since a clock tick could occur while the signal is still propagating.
+2. Using a scheduling system may be the most accurate way to simulate -> may be too slow though.  Can we optimize for nodes that don't depend on each other?
