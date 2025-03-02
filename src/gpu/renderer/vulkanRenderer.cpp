@@ -106,6 +106,7 @@ void VulkanRenderer::renderLoop() {
 		// wait for frame end
 		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
 
+		// try to start rendering the frame
 		// lock rendering mutex
 		std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 
@@ -116,14 +117,19 @@ void VulkanRenderer::renderLoop() {
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
-			// wait for a resize event
+			// wait for a resize event by going to the next frame
 			continue;
 		} else if (imageGetResult != VK_SUCCESS && imageGetResult != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
+		// actually start rendering the frame
 		// reset render fence
 		vkResetFences(Vulkan::getDevice(), 1, &frame.renderFence);
+		// update frame times
+		auto currentTime = std::chrono::system_clock::now();
+		lastFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - frame.lastStartTime).count();
+		frame.lastStartTime = currentTime;
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -153,7 +159,7 @@ void VulkanRenderer::renderLoop() {
 		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
-
+		
 		// present
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

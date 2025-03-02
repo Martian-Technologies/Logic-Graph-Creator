@@ -47,6 +47,7 @@ private:
 	QueueFamilies queueFamilies;
 
 	// stupid shit
+	std::mutex queueMutex;
 	std::vector<VkQueue> graphicsQueues;
 	std::vector<VkQueue> presentQueues;
 	// TODO - temporary round robin queue distributions

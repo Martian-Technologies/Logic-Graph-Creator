@@ -25,11 +25,13 @@ public:
 	void run();
 	void stop();
 
-	// cpu synchronized with render loop
+	// cpu synchronized with render loop (if the cpu is telling the gpu to render, this will wait until it is done)
+	// should not lock up the caller thread for any significant time
 	void resize(int w, int h);
 	void updateView(ViewManager* viewManager) override;
 
 	// synchronized separately (independent of render loop) (will not block thread for render loop)
+	// may lock up the caller thread temporarily for uploads (this can be addressed in the future)
 	void setCircuit(Circuit* circuit) override;
 	void updateCircuit(DifferenceSharedPtr diff) override;
 	void setEvaluator(Evaluator* evaluator) override;
@@ -44,6 +46,7 @@ private:
 	// state
 	std::atomic<bool> initialized = false;
 	std::atomic<bool> running = false;
+	std::atomic<float> lastFrameTime = 0.0f;
 	int windowWidth, windowHeight;
 	glm::mat4 orthoMat = glm::mat4(1.0f);
 	std::mutex cpuRenderingMutex;
@@ -81,9 +84,6 @@ private:
 	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override;
 
 	void spawnConfetti(FPosition start) override;
-
-private:
-	float lastFrameTime = 0.0f;
 
 };
 

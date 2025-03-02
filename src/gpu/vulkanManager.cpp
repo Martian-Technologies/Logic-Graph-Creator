@@ -267,12 +267,16 @@ void Vulkan::createAllocator() {
 }
 
 VkQueue& Vulkan::requestGraphicsQueue(bool important) {
+	std::lock_guard<std::mutex> lock(queueMutex);
+	
 	VkQueue& queue = graphicsQueues[graphicsRoundRobin];
 	graphicsRoundRobin = (graphicsRoundRobin + 1) % queueFamilies.graphicsFamily.value().queueCount;
 	return queue;
 }
 
 VkQueue& Vulkan::requestPresentQueue(bool important) {
+	std::lock_guard<std::mutex> lock(queueMutex);
+	
 	VkQueue& queue = presentQueues[presentRoundRobin];
 	presentRoundRobin = (presentRoundRobin + 1) % queueFamilies.presentFamily.value().queueCount;
 	return queue;
