@@ -1,14 +1,13 @@
 #include "vulkanPipeline.h"
 
 #include "gpu/vulkanManager.h"
-#include "vulkanCircuitBufferRing.h"
 
 const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_VIEWPORT,
 	VK_DYNAMIC_STATE_SCISSOR
 };
 
-PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkShaderModule frag) {
+PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, std::vector<VkVertexInputBindingDescription> bindingDescriptions, std::vector<VkVertexInputAttributeDescription> attributeDescriptions, VkRenderPass renderPass) {
 	PipelineData pipeline;
 
 	// shader stages
@@ -33,11 +32,9 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	// vertex input state (vertex buffers)
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	auto bindingDescription = Vertex::getBindingDescription();
-	auto attributeDescriptions = Vertex::getAttributeDescriptions();
-	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
 	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	// input assembly state
@@ -103,7 +100,7 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	// pipeline layout
 	VkPushConstantRange pushConstant{};
 	pushConstant.offset = 0;
-	pushConstant.size = sizeof(VertexPushConstants);
+	pushConstant.size = sizeof(ViewPushConstants);
 	pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -113,45 +110,6 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
 	if (vkCreatePipelineLayout(Vulkan::getDevice(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
-	}
-
-	// render pass
-	VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapchain.imageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	// subpass
-	VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	// subpass dependency
-	VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	// create pass
-	VkRenderPassCreateInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = 1;
-	renderPassInfo.pAttachments = &colorAttachment;
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
-	if (vkCreateRenderPass(Vulkan::getDevice(), &renderPassInfo, nullptr, &pipeline.renderPass) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create render pass!");
 	}
 
 	// create pipeline
@@ -168,7 +126,7 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipeline.layout;
-	pipelineInfo.renderPass = pipeline.renderPass;
+	pipelineInfo.renderPass = renderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // unused
 	pipelineInfo.basePipelineIndex = -1; // unused
@@ -183,5 +141,4 @@ PipelineData createPipeline(SwapchainData& swapchain, VkShaderModule vert, VkSha
 void destroyPipeline(PipelineData& pipeline) {
 	vkDestroyPipeline(Vulkan::getDevice(), pipeline.handle, nullptr);
 	vkDestroyPipelineLayout(Vulkan::getDevice(), pipeline.layout, nullptr);
-	vkDestroyRenderPass(Vulkan::getDevice(), pipeline.renderPass, nullptr);
 }

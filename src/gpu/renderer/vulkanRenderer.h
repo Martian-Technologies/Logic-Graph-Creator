@@ -3,10 +3,11 @@
 
 #include "gui/circuitView/renderer/renderer.h"
 
-#include "vulkanCircuitBufferRing.h"
+#include "vulkanBlockRenderer.h"
 #include "vulkanSwapchain.h"
-#include "vulkanPipeline.h"
 #include "vulkanFrame.h"
+
+#include <glm/mat4x4.hpp>
 
 // STATES of a vulkan renderer:
 // - constructed
@@ -16,39 +17,45 @@
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanRenderer : public Renderer {
-	// VULKAN -----------------------------------------------------------------------------
-	// ------------------------------------------------------------------------------------
 public:
+	// setup and management
 	void initialize(VkSurfaceKHR surface, int w, int h);
 	void destroy();
 
-	// screen size updates should be sent regardless of state
-	void resize(int w, int h);
-	
 	void run();
 	void stop();
 
+	// cpu synchronized with render loop
+	void resize(int w, int h);
+	void updateView(ViewManager* viewManager) override;
+
+	// synchronized separately (independent of render loop) (will not block thread for render loop)
+	void setCircuit(Circuit* circuit) override;
+	void updateCircuit(DifferenceSharedPtr diff) override;
+	void setEvaluator(Evaluator* evaluator) override;
+
+	inline float getLastFrameTimeMs() const override { return lastFrameTime; }
+
 private:
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
+	void createRenderPass(SwapchainData& swapchain);
 	
 private:
 	// state
 	std::atomic<bool> initialized = false;
 	std::atomic<bool> running = false;
 	int windowWidth, windowHeight;
-	std::mutex cpuRenderingMutex;
 	glm::mat4 orthoMat = glm::mat4(1.0f);
+	std::mutex cpuRenderingMutex;
 
-	// screen and frame
+	// vulkan objects
 	VkSurfaceKHR surface;
+	VkRenderPass renderPass;
 	SwapchainData swapchain;
 	FrameData frames[FRAME_OVERLAP];
 
-	// pipeline
-	VulkanCircuitBufferRing circuitBufferRing;
-	PipelineData pipeline;
-	VkShaderModule vertShader;
-	VkShaderModule fragShader;
+	// sub renderers
+	VulkanBlockRenderer blockRenderer;
 
 	// render loop
 	std::thread renderThread;
@@ -57,18 +64,6 @@ private:
 	// frame counting
 	int frameNumber = 0;
 	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
-	
-	// INTERFACE --------------------------------------------------------------------------
-	// ------------------------------------------------------------------------------------
-public:
-	// updating
-	void setCircuit(Circuit* circuit) override;
-	void setEvaluator(Evaluator* evaluator) override;
-
-	void updateView(ViewManager* viewManager) override;
-	virtual void updateCircuit(DifferenceSharedPtr diff) override;
-
-	inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 
 private:
 	// elements

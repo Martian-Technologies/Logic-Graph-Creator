@@ -1,8 +1,6 @@
 #include "vulkanRenderer.h"
 
-#include "computerAPI/fileLoader.h"
 #include "gpu/vulkanManager.h"
-#include "gpu/vulkanUtil.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
@@ -14,15 +12,14 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	// set up swapchain
 	swapchain = createSwapchain(surface, windowWidth, windowHeight);
 	createFrameDatas(frames, FRAME_OVERLAP);
+	
+	// create render pass and framebuffers
+	createRenderPass(swapchain);
+	createSwapchainFramebuffers(swapchain, renderPass);
 
 	// create pipeline
-	vertShader = createShaderModule(readFileAsBytes(":/shaders/shader.vert.spv"));
-	fragShader = createShaderModule(readFileAsBytes(":/shaders/shader.frag.spv"));
-	pipeline = createPipeline(swapchain, vertShader, fragShader);
-
-	// create framebuffer
-	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
-
+	blockRenderer.initialize(renderPass);
+	
 	initialized = true;
 	logInfo("Renderer initialized", "Vulkan");
 }
@@ -30,61 +27,10 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 void VulkanRenderer::destroy() {
 	stop();
 
-	circuitBufferRing.destroy();
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
-	destroyShaderModule(vertShader);
-	destroyShaderModule(fragShader);
-	destroyPipeline(pipeline);
-}
-
-void VulkanRenderer::resize(int w, int h) {
-	if (!initialized) return;
-	
-	// lock rendering mutex (synchronized to start of frame)
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
-	
-	windowWidth = w;
-	windowHeight = h;
-	// TODO - handle this more elegantly
-	vkDeviceWaitIdle(Vulkan::getDevice());
-
-	destroySwapchain(swapchain);
-	swapchain = createSwapchain(surface, windowWidth, windowHeight);
-	createSwapchainFramebuffers(swapchain, pipeline.renderPass);
-}
-
-void VulkanRenderer::updateView(ViewManager* viewManager) {
-	// lock rendering mutex (synchronized to start of frame)
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
-	
-	FPosition topLeft = viewManager->getTopLeft();
-    FPosition bottomRight = viewManager->getBottomRight();
-	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
-	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
-}
-
-void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
-	
-}
-
-void VulkanRenderer::setCircuit(Circuit* circuit) {
-	// no fancy synchronization needed, that's what the buffer ring is for
-	
-	circuitBufferRing.setCircuit(circuit);
-	
-	if (circuit) {
-		logInfo("Renderer circuit assigned and setup", "Vulkan");
-	}
-	else {
-		logInfo("Renderer circuit set to nothing", "Vulkan");
-	}
-}
-
-void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	// no fancy synchronization needed, that's what the buffer ring is for
-	
-	circuitBufferRing.updateCircuit(diff);
+	blockRenderer.destroy();
+	vkDestroyRenderPass(Vulkan::getDevice(), renderPass, nullptr);
 }
 
 // TODO - fix ghetto render thread
@@ -104,6 +50,53 @@ void VulkanRenderer::stop() {
 	if (renderThread.joinable()) renderThread.join();
 	
 	logInfo("Renderer stopped", "Vulkan");
+}
+
+void VulkanRenderer::resize(int w, int h) {
+	if (!initialized) return;
+	
+	// lock rendering mutex (synchronized to start of frame)
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	
+	windowWidth = w;
+	windowHeight = h;
+	// TODO - handle this more elegantly
+	vkDeviceWaitIdle(Vulkan::getDevice());
+
+	destroySwapchain(swapchain);
+	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	createSwapchainFramebuffers(swapchain, renderPass);
+}
+
+void VulkanRenderer::updateView(ViewManager* viewManager) {
+	// lock rendering mutex (synchronized to start of frame)
+	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	
+	FPosition topLeft = viewManager->getTopLeft();
+	FPosition bottomRight = viewManager->getBottomRight();
+	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
+	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+}
+
+void VulkanRenderer::setCircuit(Circuit* circuit) {
+	// no fancy synchronization needed, that's what the buffer ring is for
+	blockRenderer.setCircuit(circuit);
+		
+	if (circuit) {
+		logInfo("Renderer circuit assigned and setup", "Vulkan");
+	}
+	else {
+		logInfo("Renderer circuit set to nothing", "Vulkan");
+	}
+}
+
+void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
+	// no fancy synchronization needed, that's what the buffer ring is for	
+	blockRenderer.updateCircuit(diff);
+}
+
+void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
+	
 }
 
 void VulkanRenderer::renderLoop() {
@@ -194,7 +187,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	// begin render pass
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = pipeline.renderPass;
+	renderPassInfo.renderPass = renderPass;
 	renderPassInfo.framebuffer = swapchain.framebuffers[imageIndex];
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain.extent;
@@ -205,45 +198,54 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	// only draw with pipeline if we have a circuit (vertex buffer)
-	if (circuitBufferRing.hasCircuit()) {
-		// bind render pipeline
-		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
-
-		// bind push constants
-		VertexPushConstants pushConstants{};
-		pushConstants.mvp = orthoMat;
-		vkCmdPushConstants(frame.mainCommandBuffer, pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(VertexPushConstants), &pushConstants);
-
-		// set dynamic state
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain.extent.width);
-		viewport.height = static_cast<float>(swapchain.extent.height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewport);
-		VkRect2D scissor{};
-		scissor.offset = {0, 0};
-		scissor.extent = swapchain.extent;
-		vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
-
-		// bind vertex buffers
-		const CircuitBuffer& circuitBuffer = circuitBufferRing.getAvaiableBuffer();
-		VkBuffer vertexBuffers[] = { circuitBuffer.blockBuffer.buffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
-
-		// draw
-		// TODO - something else should (maybe) be in charge of making draw calls here?
-		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(circuitBuffer.numBlockVertices), 1, 0, 0);
-	}
+	// render all renderers
+	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, orthoMat);
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);
 	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
+void VulkanRenderer::createRenderPass(SwapchainData& swapchain) {
+	// render pass
+	VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = swapchain.imageFormat;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	// subpass
+	VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+	// subpass dependency
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	// create pass
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+	if (vkCreateRenderPass(Vulkan::getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
 	}
 }
 
