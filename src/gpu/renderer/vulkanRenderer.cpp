@@ -27,6 +27,8 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 void VulkanRenderer::destroy() {
 	stop();
 
+	initialized = false;
+
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
 	blockRenderer.destroy();
@@ -60,8 +62,8 @@ void VulkanRenderer::resize(int w, int h) {
 	
 	windowWidth = w;
 	windowHeight = h;
-	// TODO - handle this more elegantly
-	vkDeviceWaitIdle(Vulkan::getDevice());
+
+	finishAllFrames();
 
 	destroySwapchain(swapchain);
 	swapchain = createSwapchain(surface, windowWidth, windowHeight);
@@ -101,19 +103,19 @@ void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
-		// get next frame
-		FrameData& frame = getCurrentFrame();		
-		// wait for frame end
+		FrameData& frame = getCurrentFrame();
+		
+		// wait until current frame is avaiable for rendering (slumber)
 		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-
-		// try to start rendering the frame
-		// lock rendering mutex
+		// lock rendering mutex (confirm nothing else is fucking with renderer internals)
 		std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 
-		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
-		VkQueue& presentQueue = Vulkan::getSingleton().requestPresentQueue();
+		// see what's knew after we awake from slumber
+		// we can exit if we no longer want to render
+		if (!running) break;
 
-		// get next swapchain image to render to
+		// try to start rendering the frame
+		// get next swapchain image to render to (or fail and try again)
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -130,6 +132,10 @@ void VulkanRenderer::renderLoop() {
 		auto currentTime = std::chrono::system_clock::now();
 		lastFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - frame.lastStartTime).count();
 		frame.lastStartTime = currentTime;
+
+		// get queues
+		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
+		VkQueue& presentQueue = Vulkan::getSingleton().requestPresentQueue();
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
@@ -177,7 +183,16 @@ void VulkanRenderer::renderLoop() {
 		++frameNumber;
 	}
 
-	vkDeviceWaitIdle(Vulkan::getDevice());
+	finishAllFrames();
+}
+
+void VulkanRenderer::finishAllFrames() {
+	for (int i = 0; i < FRAME_OVERLAP; ++i) {
+		FrameData& frame = getCurrentFrame(i);
+
+		// wait for frame to finish
+		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+	}
 }
 
 void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {

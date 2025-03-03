@@ -39,6 +39,7 @@ public:
 	inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 
 private:
+	void finishAllFrames();
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
 	void createRenderPass(SwapchainData& swapchain);
 	
@@ -66,7 +67,7 @@ private:
 
 	// frame counting
 	int frameNumber = 0;
-	inline FrameData& getCurrentFrame() { return frames[frameNumber % FRAME_OVERLAP]; };
+	inline FrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAME_OVERLAP]; };
 
 private:
 	// elements
