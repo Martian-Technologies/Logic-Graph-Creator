@@ -9,8 +9,7 @@ bool LogicToucher::press(const Event* event) {
 		return false;
 	} else {
 		clickPosition = lastPointerPosition;
-		const Block* block = circuit->getBlockContainer()->getBlock(clickPosition);
-		if (block) {
+		if (circuit->getBlockContainer()->checkCollision(clickPosition)) {
 			bool stateToSet = true;
 			evaluatorStateInterface->setState(Address(clickPosition), !evaluatorStateInterface->getState(Address(clickPosition)));
 		}
@@ -41,8 +40,7 @@ bool LogicToucher::pointerMove(const Event* event) {
 			evaluatorStateInterface->setState(Address(clickPosition), false);
 		}
 		clickPosition = lastPointerPosition;
-		block = circuit->getBlockContainer()->getBlock(clickPosition);
-		if (block) {
+		if (circuit->getBlockContainer()->checkCollision(clickPosition)) {
 			evaluatorStateInterface->setState(Address(clickPosition), !evaluatorStateInterface->getState(Address(clickPosition)));
 		}
 	}

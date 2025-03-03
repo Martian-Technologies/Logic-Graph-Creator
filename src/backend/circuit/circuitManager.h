@@ -5,6 +5,8 @@
 
 class CircuitManager {
 public:
+	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
+
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter == circuits.end()) return nullptr;
@@ -18,7 +20,7 @@ public:
 
 	inline circuit_id_t createNewCircuit() {
 		circuit_id_t id = getNewCircuitId();
-		circuits.emplace(id, std::make_shared<Circuit>(id));
+		circuits.emplace(id, std::make_shared<Circuit>(id, &blockDataManager));
 		return id;
 	}
 
@@ -40,6 +42,8 @@ public:
 
 private:
 	circuit_id_t getNewCircuitId() { return ++lastId; }
+
+	BlockDataManager blockDataManager;
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;

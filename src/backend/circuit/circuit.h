@@ -5,6 +5,7 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
+#include "circuitBlockData.h"
 #include "parsedCircuit.h"
 #include "undoSystem.h"
 
@@ -13,7 +14,7 @@ typedef unsigned int circuit_update_count;
 
 class Circuit {
 public:
-	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager ) : circuitId(circuitId), blockContainer(blockDataManager) { }
 
 	inline circuit_id_t getCircuitId() const { return circuitId; }
 	inline std::string getCircuitName() const { return "Circuit " + std::to_string(circuitId); }
@@ -23,6 +24,7 @@ public:
     inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
+	inline const CircuitBlockData& getCircuitBlockData() const { return circuitBlockData; }
 
 	/* ----------- listener ----------- */
 
@@ -102,7 +104,10 @@ private:
 
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
+	CircuitBlockData circuitBlockData;
+
 	std::map<void*, ListenerFunction> listenerFunctions;
+	
 	UndoSystem undoSystem;
 	bool midUndo = false;
 

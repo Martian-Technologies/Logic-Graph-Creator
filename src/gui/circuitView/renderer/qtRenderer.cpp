@@ -65,22 +65,11 @@ void QtRenderer::render(QPainter* painter) {
 	QElapsedTimer timer;
 	timer.start();
 
-	// render lambdas ---
-	auto renderCell = [&](FPosition position, BlockType type) -> void {
-		QPointF point = gridToQt(position);
-		QPointF pointBR = gridToQt(position + FVector(1.0f, 1.0f));
-
-		Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, false);
-		Vec2Int tileSize = tileSetInfo->getCellPixelSize();
-
-		QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
-			QSizeF(tileSize.x, tileSize.y));
-
-		painter->drawPixmap(QRectF(point, pointBR),
-			tileSet,
-			tileSetRect);
-		};
 	// --- end of render lambdas
+
+	Vec2Int emptyTilePoint = tileSetInfo->getTopLeftPixel(0, false);
+	Vec2Int emptyTileSize = tileSetInfo->getCellPixelSize();
+	QRectF emptyTileSetRect(QPointF(emptyTilePoint.x, emptyTilePoint.y), QSizeF(emptyTileSize.x, emptyTileSize.y));
 
 	// get bounds
 	Position topLeftBound = viewManager->getTopLeft().snap();
@@ -99,7 +88,9 @@ void QtRenderer::render(QPainter* painter) {
 		// render grid
 		for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
 			for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
-				renderCell(FPosition(x, y), BlockType::NONE);
+				QPointF point = gridToQt(FPosition(x, y));
+				QPointF pointBR = gridToQt(FPosition(x + 1, y + 1));
+				painter->drawPixmap(QRectF(point, pointBR), tileSet, emptyTileSetRect);
 			}
 		}
 		// render blocks
@@ -156,7 +147,9 @@ void QtRenderer::render(QPainter* painter) {
 		// render grid
 		for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
 			for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
-				renderCell(FPosition(x, y), BlockType::NONE);
+				QPointF point = gridToQt(FPosition(x, y));
+				QPointF pointBR = gridToQt(FPosition(x + 1, y + 1));
+				painter->drawPixmap(QRectF(point, pointBR), tileSet, emptyTileSetRect);
 			}
 		}
 
@@ -352,7 +345,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
-	Vector gridSize(getBlockWidth(type), getBlockHeight(type));
+	Vector gridSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type), circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(type));
 
 	// block
 	QPointF topLeft = gridToQt(position.free());
@@ -362,7 +355,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 	QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
 
 	// get tile set coordinate
-	Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type, state);
+	Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type+1, state);
 	Vec2Int tileSize = tileSetInfo->getCellPixelSize();
 
 	QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
@@ -449,7 +442,6 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPo
 	// Socket offsets will be retrieved data later, this code will go
 	const Block* a = circuit->getBlockContainer()->getBlock(aPos);
 	const Block* b = circuit->getBlockContainer()->getBlock(bPos);
-
 
 	renderConnection(painter, aPos, a, bPos, b, state);
 }

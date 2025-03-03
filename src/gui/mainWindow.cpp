@@ -172,7 +172,7 @@ void MainWindow::loadCircuit() {
 		return;
 	}
 
-	CircuitValidator validator(*parsed);
+	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
 		circuit_id_t id = backend.createCircuit();
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
@@ -203,7 +203,7 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
         return;
     }
 
-    CircuitValidator validator(*parsed); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed, backend.getBlockDataManager()); // validate and dont merge dependencies
     if (parsed->isValid()){
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);

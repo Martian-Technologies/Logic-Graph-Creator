@@ -127,8 +127,9 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
 			logError("Failed to insert block while inserting block.");
+		} else {
+			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
 		}
-		realIds[oldId] = blockContainer.getBlock(targetPos)->id();;
 	}
 
 	for (const auto& conn : parsedCircuit.getConns()) {
@@ -137,7 +138,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 			logError("Could not get block from parsed circuit while inserting block.");
 			break;
 		}
-		if (isConnectionInput(b->type, conn.outputId)) {
+		if (blockContainer.getBlockDataManager()->isConnectionInput(b->type, conn.outputId)) {
 			// skip inputs
 			continue;
 		}
@@ -175,6 +176,7 @@ bool Circuit::tryRemoveConnection(const Position& outputPosition, const Position
 bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
 	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
 	const Block* inputBlock = blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	if (!outputBlock || !inputBlock) return false;
 	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
 	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
 	if (!outputOut.second || !inputOut.second) return false;
@@ -184,6 +186,7 @@ bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, cons
 bool Circuit::tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
 	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
 	const Block* inputBlock =  blockContainer.getBlock(inputConnectionEnd.getBlockId());
+	if (!outputBlock || !inputBlock) return false;
 	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
 	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
 	if (!outputOut.second || !inputOut.second) return false;
