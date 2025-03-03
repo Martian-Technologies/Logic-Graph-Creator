@@ -284,7 +284,8 @@ void MainWindow::exportProject() {
 }
 
 void MainWindow::openNewSelectorWindow() {
-	SelectorWindow* selector = new SelectorWindow();
+	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager());
+	selector->updateBlockList();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
 	connect(selector, &SelectorWindow::selectedModeChange, this, &MainWindow::setMode);

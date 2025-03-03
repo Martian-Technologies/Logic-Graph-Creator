@@ -1,7 +1,7 @@
 #include "selectorWindow.h"
 #include "ui_selector.h"
 
-SelectorWindow::SelectorWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Selector) {
+SelectorWindow::SelectorWindow(const BlockDataManager* blockDataManager, QWidget* parent) : blockDataManager(blockDataManager), QWidget(parent), ui(new Ui::Selector) {
 	// Load the UI file
 	ui->setupUi(this);
 
@@ -19,6 +19,36 @@ void SelectorWindow::updateToolModeOptions(const std::vector<std::string>* modes
 	if (!modes) return;
 	for (auto mode : *modes) {
 		ui->ToolModes->addItem(QString::fromStdString(mode));
+	}
+}
+
+void SelectorWindow::updateBlockList() {
+	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
+		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
+
+		QList<QString> parts = QString::fromStdString(blockDataManager->getPath((BlockType)blockType)).split("/");
+		parts.push_front("Blocks");
+		parts.push_back(QString::fromStdString(blockDataManager->getName((BlockType)blockType)));
+		
+		QTreeWidgetItem* parentItem = ui->SelectorTree->invisibleRootItem();
+		for (const QString& part : parts) {
+			// find item with name
+			QTreeWidgetItem* foundItem = nullptr;
+			for (unsigned int i = 0; i < parentItem->childCount(); i++) {
+				if (parentItem->child(i)->text(0) == part) {
+					foundItem = parentItem->child(i);
+					break;;
+				}
+			}
+			// add if does not exixts
+			if (!foundItem) {
+				foundItem = new QTreeWidgetItem();
+				foundItem->setText(0, part);
+				parentItem->addChild(foundItem);
+			}
+			// next level
+			parentItem = foundItem;
+		}
 	}
 }
 

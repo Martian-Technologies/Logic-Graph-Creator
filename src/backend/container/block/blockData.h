@@ -2,6 +2,7 @@
 #define blockData_h
 
 #include "backend/position/position.h"
+#include "connectionEnd.h"
 #include "blockDefs.h"
 
 class BlockData {
@@ -35,9 +36,15 @@ public:
 		for (auto pair : inputs) if (pair.second == connectionId) return true;
 		return false;
 	}
+	inline bool isPlaceable() const noexcept { return placeable; }
+	inline const std::string& getName() const noexcept { return name; }
+	inline const std::string& getPath() const noexcept { return path; }
 
 private:
 	bool defaultData = true;
+	bool placeable = true;
+	std::string name = "Unnamed Block";
+	std::string path = "Basic";
 	block_size_t width = 1;
 	block_size_t height = 1;
 	std::vector<std::pair<Vector, connection_end_id_t>> inputs;
