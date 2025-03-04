@@ -7,47 +7,43 @@ class BlockDataManager {
 public:
 	BlockDataManager() {
 		// load default data
-		// AND			1
-		// OR			2
-		// XOR			3
-		// NAND			4
-		// NOR			5
-		// XNOR			6
-		// //TIMER		7
-		// BUTTON		8
-		// TICK_BUTTON	9
-		// SWITCH		10
-		// CONSTANT		11
-		// LIGHT		12
 		blockData.resize(12);
-		blockData[BlockType::AND-1].name = "And";
-		blockData[BlockType::OR-1].name = "Or";
-		blockData[BlockType::XOR-1].name = "Xor";
-		blockData[BlockType::NAND-1].name = "Nand";
-		blockData[BlockType::NOR-1].name = "Nor";
-		blockData[BlockType::XNOR-1].name = "Xnor";
+		getBlockData(BlockType::AND)->setName("And");
+		getBlockData(BlockType::OR)->setName("Or");
+		getBlockData(BlockType::XOR)->setName("Xor");
+		getBlockData(BlockType::NAND)->setName("Nand");
+		getBlockData(BlockType::NOR)->setName("Nor");
+		getBlockData(BlockType::XNOR)->setName("Xnor");
 		// BUTTON
-		blockData[BlockType::BUTTON-1].name = "Button";
-		blockData[BlockType::BUTTON-1].defaultData = false;
-		blockData[BlockType::BUTTON-1].outputs.emplace_back(Vector(0, 0), 0);
+		getBlockData(BlockType::BUTTON)->setName("Button");
+		getBlockData(BlockType::BUTTON)->setDefaultData(false);
+		getBlockData(BlockType::BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
 		// TICK_BUTTON
-		blockData[BlockType::TICK_BUTTON-1].name = "Tick Button";
-		blockData[BlockType::TICK_BUTTON-1].defaultData = false;
-		blockData[BlockType::TICK_BUTTON-1].outputs.emplace_back(Vector(0, 0), 0);
+		getBlockData(BlockType::TICK_BUTTON)->setName("Tick Button");
+		getBlockData(BlockType::TICK_BUTTON)->setDefaultData(false);
+		getBlockData(BlockType::TICK_BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
 		// SWITCH
-		blockData[BlockType::SWITCH-1].name = "Switch";
-		blockData[BlockType::SWITCH-1].defaultData = false;
-		blockData[BlockType::SWITCH-1].outputs.emplace_back(Vector(0, 0), 0);
+		getBlockData(BlockType::SWITCH)->setName("Switch");
+		getBlockData(BlockType::SWITCH)->setDefaultData(false);
+		getBlockData(BlockType::SWITCH)->trySetConnectionOutput(Vector(0, 0), 0);
 		// CONSTANT
-		blockData[BlockType::CONSTANT-1].name = "Constant";
-		blockData[BlockType::CONSTANT-1].defaultData = false;
-		blockData[BlockType::CONSTANT-1].placeable = false;
-		blockData[BlockType::CONSTANT-1].outputs.emplace_back(Vector(0, 0), 0);
+		getBlockData(BlockType::CONSTANT)->setName("Constant");
+		getBlockData(BlockType::CONSTANT)->setDefaultData(false);
+		getBlockData(BlockType::CONSTANT)->setIsPlaceable(false);
+		getBlockData(BlockType::CONSTANT)->trySetConnectionOutput(Vector(0, 0), 0);
 		// LIGHT
-		blockData[BlockType::LIGHT-1].name = "Light";
-		blockData[BlockType::LIGHT-1].defaultData = false;
-		blockData[BlockType::LIGHT-1].inputs.emplace_back(Vector(0, 0), 0);
+		getBlockData(BlockType::LIGHT)->setName("Light");
+		getBlockData(BlockType::LIGHT)->setDefaultData(false);
+		getBlockData(BlockType::LIGHT)->trySetConnectionInput(Vector(0, 0), 0);
 	}
+
+	inline BlockType addBlock() noexcept {
+		blockData.emplace_back();
+		return (BlockType) blockData.size();
+	}
+
+	inline const BlockData* getBlockData(BlockType type) const noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
+	inline BlockData* getBlockData(BlockType type) noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
 
 	inline unsigned int maxBlockId() const noexcept { return blockData.size(); }
 	inline bool blockExists(BlockType type) const noexcept { return type != BlockType::NONE && type < blockData.size(); }
