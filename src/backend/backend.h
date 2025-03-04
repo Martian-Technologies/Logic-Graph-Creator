@@ -17,6 +17,7 @@ public:
 	// Attempts to create a Evaluator for a Circuit. Returns evaluator_id_t if successful.
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
+	inline const BlockDataManager* getBlockDataManager() const { return getCircuitManager().getBlockDataManager(); }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }
 	inline const EvaluatorManager& getEvaluatorManager() const { return evaluatorManager; }
 	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }

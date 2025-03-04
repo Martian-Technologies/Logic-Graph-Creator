@@ -22,7 +22,7 @@ bool CircuitValidator::validateDependencies() {
 
     for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
         // validate the dependency as a circuit itself
-        CircuitValidator depValidator(*depCircuit);
+        CircuitValidator depValidator(*depCircuit, blockDataManager);
         if (!depCircuit->valid) {
             logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
@@ -167,7 +167,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
                 block_id_t from = conn.inputBlockId;
                 //logInfo("From: " + std::to_string(from) + "("+std::to_string(conn.outputId)+")" + 
                 //        ", To: " + std::to_string(to) + "("+std::to_string(conn.inputId)+")");
-                if (isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type, conn.outputId)){
+                if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type, conn.outputId)){
                     adj[from].push_back(to);
                 }
             }

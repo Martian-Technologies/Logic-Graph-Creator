@@ -15,7 +15,7 @@
 // - if we are importing blocks that don't have position (ie they are floatmax or floatmin), they should be given a position and it should be some organized structure.
 class CircuitValidator {
 public:
-    CircuitValidator(ParsedCircuit& parsedCircuit) : parsedCircuit(parsedCircuit) { validate(); }
+    CircuitValidator(ParsedCircuit& parsedCircuit, const BlockDataManager* blockDataManager) : parsedCircuit(parsedCircuit), blockDataManager(blockDataManager) { validate(); }
 private:
     struct ConnectionHash {
         size_t operator()(const ParsedCircuit::ConnectionData& p) const {
@@ -47,6 +47,7 @@ private:
         return id;
     }
 
+	const BlockDataManager* blockDataManager;
     ParsedCircuit& parsedCircuit;
 };
 

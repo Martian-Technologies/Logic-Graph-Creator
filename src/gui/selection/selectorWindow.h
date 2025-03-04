@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QListWidgetItem>
 
-#include "backend/container/block/blockDefs.h"
+#include "backend/container/block/blockDataManager.h"
 
 namespace Ui {
 	class Selector;
@@ -13,15 +13,17 @@ namespace Ui {
 class SelectorWindow : public QWidget {
 	Q_OBJECT
 public:
-	SelectorWindow(QWidget* parent = nullptr);
+	SelectorWindow(const BlockDataManager* blockDataManager, QWidget* parent = nullptr);
 	~SelectorWindow();
 	
 	void updateToolModeOptions(const std::vector<std::string>* modes);
+	void updateBlockList();
 
 private:
 	void updateSelected();
 	void updateSelectedMode(QListWidgetItem *current, QListWidgetItem *previous);
 
+	const BlockDataManager* blockDataManager;
 	Ui::Selector* ui;
 
 signals:

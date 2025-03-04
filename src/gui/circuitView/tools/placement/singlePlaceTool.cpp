@@ -131,8 +131,8 @@ void SinglePlaceTool::updateElements() {
 
 	if (!pointerInView) return;
 
-	bool blockAtPosition = circuit->getBlockContainer()->getBlock(lastPointerPosition);
-	elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, blockAtPosition));
+	bool canPlace = circuit->getBlockContainer()->checkCollision(lastPointerPosition, rotation, selectedBlock);
+	elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, canPlace));
 
-	if (!blockAtPosition) elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
+	if (!canPlace) elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
 }

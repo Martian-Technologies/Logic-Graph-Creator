@@ -62,56 +62,6 @@
       <property name="text">
        <string>Blocks</string>
       </property>
-      <item>
-       <property name="text">
-        <string>And</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Or</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Xor</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Nand</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Nor</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Xnor</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Switch</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Button</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Tick Button</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Light</string>
-       </property>
-      </item>
      </item>
      <item>
       <property name="text">
