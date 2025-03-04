@@ -2,7 +2,6 @@
 #define SETTINGS_WINDOW_H
 
 #include "colorQuery.h"
-#include "preferenceManager.h"
 
 #include <QDialog>
 #include <QPushButton>
@@ -27,21 +26,17 @@ protected:
 	
 private:
     void setupUI();
-    void setupConnections();
+
     void readPreferences();
-    void createTabs();
-    void populateTabs();
 	void saveSettings();
 	void resetSettings();
 
-	void applyAllChanges(); // once save is clicked, applies all changes to where they need to be applied
+	void changeSettingsForm(QScrollArea* scrollArea, QVBoxLayout* scrollLayout);
 
-    void changeTabContent(QVBoxLayout* scrollLayout, const QString& content);
+	// void applyAllChanges(const QString& tabType); // once save is clicked, applies all changes to where they need to be applied
 
-    void closeSettings();
 
     QWidget* parent;
-	PreferenceManager* preferenceManager;
 	ColorQuery* cq;
 
 };

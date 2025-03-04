@@ -1,4 +1,5 @@
 #include "settingsWindow.h"
+#include "gui/preferences/formManager.h"
 #include "util/config/config.h"
 
 
@@ -6,7 +7,6 @@
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
 	
-	preferenceManager = new PreferenceManager();
 	cq = new ColorQuery(this);
 
 	setupUI();
@@ -39,7 +39,11 @@ void SettingsWindow::setupUI() {
 
     // Content for scroll area
     QWidget* scrollContent = new QWidget();
-    QVBoxLayout* scrollLayout = new QVBoxLayout(scrollContent);
+	FormManager* formManager = new FormManager(scrollContent);
+	formManager->setForm("General"); // default for form
+
+	// Set the layout inside the scrollContent widget
+	scrollContent->setLayout(formManager->layout());
 
     scrollArea->setWidget(scrollContent);
 
@@ -62,16 +66,13 @@ void SettingsWindow::setupUI() {
     mainLayout->addLayout(formActions);
     setLayout(mainLayout);
 
-    // Button Connections
+	// Button Connections
 	connect(saveAction, &QPushButton::clicked, this, &SettingsWindow::saveSettings);
 	connect(defaultAction, &QPushButton::clicked, this, &SettingsWindow::resetSettings);
 	connect(cancelAction, &QPushButton::clicked, this, &QDialog::close);
-	connect(generalTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "General"); });
-	connect(appearanceTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "Appearance"); });
-	connect(keybindTab, &QPushButton::clicked, this, [this, scrollLayout]() { changeTabContent(scrollLayout, "Keybind"); });
-	
-    // Set initial tab content
-    changeTabContent(scrollLayout, "General");
+	connect(generalTab, &QPushButton::clicked, this,    [formManager]()    { formManager->setForm("General"); });
+	connect(appearanceTab, &QPushButton::clicked, this, [formManager]() { formManager->setForm("Appearance"); });
+	connect(keybindTab, &QPushButton::clicked, this,    [formManager]()    { formManager->setForm("Keybind"); });
 
     if (parent) {
         QRect parentGeometry = parent->geometry();
@@ -88,12 +89,35 @@ void SettingsWindow::setupUI() {
     }
 }
 
+void SettingsWindow::changeSettingsForm(QScrollArea* scrollArea, QVBoxLayout* scrollLayout) {
+	// clears the object
+	QLayoutItem* item = scrollLayout->takeAt(0);
+	while (item != nullptr) {
+		if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+		if (item->layout()) {
+            QLayoutItem* innerItem;
+            while ((innerItem = item->layout()->takeAt(0)) != nullptr) {
+                if (innerItem->widget()) {
+                    innerItem->widget()->deleteLater();
+                }
+                delete innerItem;
+			}
+        }
+		delete item;
+		item = scrollLayout->takeAt(0);
+	}
 
-void SettingsWindow::changeTabContent(QVBoxLayout* scrollLayout, const QString& content) {
-	preferenceManager->populateSettingsForm(this, scrollLayout, content);
+	QWidget* scrollContent = new QWidget();
+    QVBoxLayout* newScrollLayout = new QVBoxLayout(scrollContent);
+
+
+
+	scrollArea->setWidget(scrollContent);
 }
 
-
+void SettingsWindow::readPreferences() {}
 
 void SettingsWindow::mousePressEvent(QMouseEvent* event) {
 	/*
@@ -113,8 +137,8 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-// todo
 void SettingsWindow::saveSettings() {
+	/*
 	std::vector<std::pair<std::string, std::string>> data = preferenceManager->getDataEntry();
 
 	for (int i = 0; i < data.size(); i++) {
@@ -129,9 +153,10 @@ void SettingsWindow::saveSettings() {
 	// cq->exec();
 	// cq->raise();
 	// cq->activateWindow();
+	*/
 	logWarning("settings saved");
 }
 
-void SettingsWindow::resetSettings() {
+void SettingsWindow::resetSettings() {	
 	logWarning("settings reset");
 }

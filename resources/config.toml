@@ -27,7 +27,7 @@ LIGHT = "ctrl + a"
 #		"H_Connection",
 #			"simple",
 #			"tensor",
-#		"H_Selection",
+#		H_Selection",
 #		"H_Interactive",
 #			"state_changer",
 #		"",
