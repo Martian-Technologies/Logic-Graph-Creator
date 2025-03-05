@@ -25,6 +25,9 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
+	// set default keybinds
+	keybindManager.setKeybind("Save", "Ctrl+S");
+
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();

@@ -4,6 +4,7 @@
 #include <QAction>
 #include <QWidget>
 #include <QObject>
+#include <QKeySequence>
 
 #include <string>
 #include <unordered_map>
@@ -11,12 +12,13 @@
 class KeybindManager : public QObject {
   Q_OBJECT
 public:
-	//KeybindManager();
+	// give a keybind a name and set the key sequence that triggers it
   void setKeybind(const std::string& bindName, const std::string& keyString);
-  std::string getKeybind(const std::string& bindName);
-  QAction* createAction(const std::string& bindName, QWidget* parent);
+  // create a QShortcut that is activated by its keybind's key sequence
+  QShortcut* createShortcut(const std::string& bindName, QWidget* parent);
 private:
-  std::unordered_map<std::string, std::string> keybinds;
+  std::unordered_map<std::string, QKeySequence> keybinds;
+  std::unordered_map<std::string, std::vector<QShortcut*>> shortcuts;
 };
 
 #endif /* keybindManager_h */
