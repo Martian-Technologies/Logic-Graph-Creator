@@ -1,9 +1,5 @@
 #include "keybindManager.h"
 
-#include <QString>
-#include <QKeySequence>
-#include <QShortcut>
-
 void KeybindManager::setKeybind(const std::string& bindName, const std::string& keyString) {
   QKeySequence keySequence = QKeySequence(QString::fromStdString(keyString));
   auto keybind_itr = keybinds.find(bindName);
