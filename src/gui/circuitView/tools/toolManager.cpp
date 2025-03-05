@@ -5,7 +5,7 @@
 #include "connection/connectionTool.h"
 #include "other/previewPlacementTool.h"
 #include "other/logicToucher.h"
-#include "other/moveTool.h"
+#include "movement/moveTool.h"
 
 void ToolManager::selectBlock(BlockType blockType) {
 	if (blockType != BlockType::NONE) {

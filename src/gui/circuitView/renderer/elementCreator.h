@@ -7,9 +7,12 @@ class ElementCreator {
 public:
 	ElementCreator() : renderer(nullptr) { }
 	ElementCreator(Renderer* renderer) : renderer(renderer), ids() { assert(renderer); }
+	ElementCreator(const ElementCreator& elementCreator) = delete;
+	ElementCreator& operator=(const ElementCreator& elementCreator) = delete;
 
 	~ElementCreator() { clear(); }
 
+	void setup(Renderer* renderer) { if (this->renderer) clear(); this->renderer = renderer; }
 	bool isSetup() { return (bool)renderer; }
 
 	void removeElement(ElementID id) {
@@ -97,6 +100,8 @@ public:
 	}
 
 private:
+	int getCreatorId() const;
+
 	enum ElementType {
 		SelectionElement,
 		ConnectionPreview,

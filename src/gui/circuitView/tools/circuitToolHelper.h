@@ -8,6 +8,7 @@ class ToolStackInterface;
 class CircuitToolHelper : public CircuitTool {
 public:
 	CircuitToolHelper() { helper = true; }
+	inline void restart() { reset(); }
 };
 
 #endif /* circuitToolHelper_h */

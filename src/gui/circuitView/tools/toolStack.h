@@ -10,12 +10,17 @@
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, Renderer* renderer) : eventRegister(eventRegister), renderer(renderer), toolStackInterface(this) { }
+	inline ToolStack(EventRegister* eventRegister, Renderer* renderer) : eventRegister(eventRegister), renderer(renderer), toolStackInterface(this) {
+		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
+		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
+		eventRegister->registerFunction("pointer move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
+	}
 
 	void reset();
 	void pushTool(SharedCircuitTool newTool);
 	void popTool();
 	void clearTools();
+	void popAbove(CircuitTool* toolNotToPop);
 
 	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;
@@ -26,9 +31,17 @@ public:
 	void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface);
 
 private:
-	SharedCircuitTool getCurrentNonHelperTool();
-	SharedCircuitTool getCurrentTool();
+	SharedCircuitTool getCurrentNonHelperTool_();
+	SharedCircuitTool getCurrentTool_();
 
+	// mouse data for tool when setup
+	bool enterBlockView(const Event* event);
+	bool exitBlockView(const Event* event);
+	bool pointerMove(const Event* event);
+
+	bool pointerInView = false;
+	FPosition lastPointerFPosition;
+	Position lastPointerPosition;
 
 	// current block container
 	Circuit* circuit;

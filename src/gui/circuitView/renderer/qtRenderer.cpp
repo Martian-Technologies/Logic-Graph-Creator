@@ -357,7 +357,6 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 		blockSize.dy,
 		rotation
 	);
-	logInfo(blockOriginOffset.toString());
 
 	QPointF size = gridToQt(blockSize.free());
 	QPointF rotationPoint = gridToQt((position + blockOriginOffset).free() + FVector(0.5f, 0.5f));
