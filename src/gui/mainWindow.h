@@ -23,7 +23,7 @@ public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 	
 	// actions
-	void setBlock(BlockType blockType);
+	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
 	void setMode(std::string tool);
     void updateSaveMenu(bool saveAs);

@@ -91,3 +91,10 @@ Vec2 ViewManager::gridToView(FPosition position) const {
 		(position.y - viewCenter.y) / getViewHeight() + 0.5f
 	);
 }
+
+Vec2 ViewManager::gridToView(FVector vector) const {
+	return Vec2(
+		(vector.dx) / getViewWidth(),
+		(vector.dy) / getViewHeight()
+	);
+}

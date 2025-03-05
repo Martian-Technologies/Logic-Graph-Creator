@@ -46,7 +46,8 @@ public:
 	// coordinate system conversion
 	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FVector(getViewWidth() * view.x, getViewHeight() * view.y); }
 	Vec2 gridToView(FPosition position) const;
-
+	Vec2 gridToView(FVector vector) const;
+	
 	// events
 	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
 

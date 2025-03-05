@@ -55,8 +55,7 @@ void SelectorWindow::updateBlockList() {
 void SelectorWindow::updateSelected() {
 	for (QTreeWidgetItem* item : ui->SelectorTree->selectedItems()) {
 		if (item) {
-			QString str = item->text(0);
-			QString pathName = str;
+			QString pathName = item->text(0);
 			if (item->childCount() > 0) continue;
 			bool isBlock;
 			QTreeWidgetItem* tmp = item;
@@ -74,18 +73,7 @@ void SelectorWindow::updateSelected() {
 				}
 			}
 			if (isBlock) {
-				BlockType type = NONE;
-				if (str == "And") type = BlockType::AND;
-				else if (str == "Or") type = BlockType::OR;
-				else if (str == "Xor") type = BlockType::XOR;
-				else if (str == "Nand") type = BlockType::NAND;
-				else if (str == "Nor") type = BlockType::NOR;
-				else if (str == "Xnor") type = BlockType::XNOR;
-				else if (str == "Switch") type = BlockType::SWITCH;
-				else if (str == "Button") type = BlockType::BUTTON;
-				else if (str == "Tick Button") type = BlockType::TICK_BUTTON;
-				else if (str == "Light") type = BlockType::LIGHT;
-				emit selectedBlockChange(type);
+				emit selectedBlockChange(pathName.toStdString());
 			} else {
 				emit selectedToolChange(pathName.toStdString());
 			}
