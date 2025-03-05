@@ -16,14 +16,12 @@ public:
     MultiTypeMap() : edited(false) {}
 
     // -- Getters --
-    template <typename T>
-    T get(const std::string& key) const {
-        auto itr = mappings.find(key);
-        if (itr == mappings.end()) return getDefaultValue<T>();
+    VariantType get(const std::string& key) const {
+		auto itr = mappings.find(key);
+		if (itr == mappings.end()) return VariantType{}; 
 
-        if (auto val = std::get_if<T>(&itr->second)) return *val;
-        else logError("Type mismatch in MultiTypeMap for key: " + key);
-    }
+		return itr->second;
+	}
 
     bool hasKey(const std::string& key) const { return mappings.find(key) != mappings.end(); }
     bool isEdited() const { return edited; }

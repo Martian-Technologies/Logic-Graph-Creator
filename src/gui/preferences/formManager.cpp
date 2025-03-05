@@ -1,10 +1,12 @@
 #include "formManager.h"
+#include "util/config/config.h"
 
 #include <QLabel>
 #include <QLineEdit>
-#include <QDialog>
+#include <QColorDialog>
 #include <QPushButton>
 #include <QComboBox>
+#include <QPointer>
 
 FormManager::FormManager(QWidget* parent)
     : QWidget(parent), form(new QVBoxLayout(this)) {
@@ -45,9 +47,10 @@ void FormManager::setForm(const std::string& formType) {
 			form->addWidget(generateFormWidget("HEADER", (*graphicsData)[i]));
 			continue;
 		}
+
 		QHBoxLayout* contentLayout = new QHBoxLayout();
-		contentLayout->addWidget(new QLabel(QString::fromStdString((*graphicsData)[i][0]), this));	
-		contentLayout->addWidget(generateFormWidget((*graphicsData)[i][1], (*graphicsData)[i]));
+		contentLayout->addWidget(new QLabel(QString::fromStdString((*graphicsData)[i][0].substr((*graphicsData)[i][0].rfind('.') + 1)), this));	
+		contentLayout->addWidget(generateFormWidget((*graphicsData)[i][1], (*graphicsData)[i]), 0, Qt::AlignRight);
 
 		form->addLayout(contentLayout);
 	}	
@@ -69,24 +72,35 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 			editor->addItem(QString::fromStdString(itemization[j]));
 		}
 		
-		// connect(editor, &QComboBox::currentIndexChanged, popupSettings, [popupSettings, editor]() {
-		// 	std::string text = editor->currentText().toStdString();
-		// 	std::string data = editor->currentData().toString().toStdString();
-		// 	recordData(text.c_str(), data.c_str());
-		// });
+		connect(editor, &QComboBox::currentIndexChanged, this, [this, editor, &itemization]() {
+			dataEntry.emplace_back(itemization[0], editor->currentText().toStdString()); 
+		});
 		return editor;
 	} else if (preferenceType == "COLOR") {
 		QLineEdit* editor = new QLineEdit(this);
 		editor->setPlaceholderText("Choose a hex color");
 		editor->setReadOnly(true);
+		editor->setFixedWidth(parentWidget()->width() * .2);
+
+		/*
+		int hexColor = Settings::get<int>(itemization[0]);
+		int red = (hexColor >> 16) & 0xFF;
+		int green = (hexColor >> 8) & 0xFF;
+		int blue = hexColor & 0xFF;
+
+		QColor color(red, green, blue);
+		editor->setText(color.name());
+		editor->setStyleSheet(QString("background-color: %1; color: %2")
+					.arg(color.name())
+					.arg(color.lightness() < 128 ? "white" : "black"));
+		*/
 
 		QPushButton* colorButton = new QPushButton(this);
-        colorButton->setIcon(QIcon("resource/colorpick.png")); 
+        colorButton->setIcon(QIcon("resources/color-picker-white.png")); 
         colorButton->setIconSize(QSize(16, 16)); 
 		colorButton->setToolTip("Choose a color"); 
 
-       /* 
-		connect(colorButton, &QPushButton::clicked, parent, [editor]() {
+		connect(colorButton, &QPushButton::clicked, this, [this, &itemization, editor]() {
 			QPointer<QLineEdit> safeEditor = editor;
 			QColor color = QColorDialog::getColor(Qt::white, safeEditor ? safeEditor->parentWidget() : nullptr, "Choose a Color");
 
@@ -95,15 +109,16 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 				safeEditor->setStyleSheet(QString("background-color: %1; color: %2")
 					.arg(color.name())
 					.arg(color.lightness() < 128 ? "white" : "black"));
+				dataEntry.emplace_back(itemization[0], color.name().toStdString());
 			}
 		});
-		*/
 
 		QHBoxLayout* layout = new QHBoxLayout(this);
-        layout->addWidget(editor);
         layout->addWidget(colorButton);
+        layout->addWidget(editor);
         layout->setContentsMargins(0, 0, 0, 0); 
-        layout->setSpacing(0); 
+        layout->setSpacing(2); 
+
 
 		QWidget* container = new QWidget(this);
         container->setLayout(layout);
@@ -113,9 +128,9 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 		QLineEdit* editor = new QLineEdit(this);
 		editor->setFixedWidth(this->parentWidget()->width() * 0.2); 
 
-		// connection(editor, &QLineEdit::returnPressed, parent, [parent, editor, itemization]() {
-		//		recordData(editor, itemization[0]);
-		// });
+		connect(editor, &QLineEdit::returnPressed, this, [this, &itemization, editor]() {
+			dataEntry.emplace_back(itemization[0], editor->text().toStdString());
+		});
 		return editor;
 	} else if (preferenceType == "FILEPATH") {
 		QLineEdit* editor = new QLineEdit(this);
@@ -132,7 +147,7 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 
 QHBoxLayout* FormManager::generateKeybindForm(const std::string& itemization) {
 	QHBoxLayout* contentLayout = new QHBoxLayout();
-	QLabel* infoName = new QLabel(QString::fromStdString(itemization), this);
+	QLabel* infoName = new QLabel(QString::fromStdString(itemization.substr(itemization.rfind('.') + 1)), this);
 	QLineEdit* editor = new QLineEdit(this);
 	editor->setFixedWidth(this->parentWidget()->width() * 0.2); 
 	contentLayout->addWidget(infoName);
@@ -162,3 +177,4 @@ void FormManager::clearForm() {
 		item = form->takeAt(0);
 	}
 }
+

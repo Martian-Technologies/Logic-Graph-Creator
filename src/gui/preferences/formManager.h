@@ -11,6 +11,7 @@ public:
 	FormManager(QWidget* parent = nullptr);
 	
 	void setForm(const std::string& formType);
+	const std::vector<std::pair<std::string, std::string>>& getDataEntry() const { return dataEntry; }
 
 private:
 	void clearForm();
@@ -19,8 +20,12 @@ private:
 	QWidget* generateFormWidget(const std::string& preferenceType, const std::vector<std::string> & itemization);
 	QHBoxLayout* generateKeybindForm(const std::string& itemization);
 
+	void updateConfig(const std::string& key, const std::string& value);
+
 private:
 	QVBoxLayout* form;
+
+	std::vector<std::pair<std::string, std::string>> dataEntry;
 
 /* ------------ FORM TYPE ------------
 	DROPDOWN,
@@ -30,14 +35,14 @@ private:
 	COLOR,
 	HEADER,
 	FILEPATH
+
+@INFO
+	Only edit this with graphical data information, 
+		- if something is a HEADER, it should be preceded with the name of the header
+		- for setting types, please enter the name of how the items would be gotten from utils/config.h
+		- do not remove any prexisting "graphic data", only rearange if necessary
+			- if you believe it is more important to the user, please do put it more towards the top of the header
 */
-	/* @INFO
-	 Only edit this are with graphical data information, 
-	 - if something is a HEADER, it should be preceded with the name of the header
-	 - for setting types, please enter the name of how the items would be gotten from utils/config.h
-	 - do not remove any prexisting "graphic data", only rearange if necessary
-	 	- if you believe it is more important to the user, please do put it more towards the top of the header
-	*/
 	const std::vector<std::string> general[32] = {
 		{ "general.visual_mode", "DROPDOWN", "Dark", "Light" },  
 		{ "Files", "HEADER" }, 
@@ -85,13 +90,13 @@ private:
 			{ "appearance.blocks.tick_button", "COLOR" },
 			{ "appearance.blocks.light", "COLOR" },
 		{ "Wires", "HEADER"},
-			{ "appearance.blocks.general", "COLOR"}, 
-			{ "appearance.blocks.crossing", "COLOR"}, 
-			{ "appearance.blocks.generic", "COLOR" }, 
+			{ "appearance.wires.general", "COLOR"}, 
+			{ "appearance.wires.crossing", "COLOR"}, 
+			{ "appearance.wires.generic", "COLOR" }, 
 			{ "appearance.wires.testing", "COLOR"}, 
 		{ "Text", "HEADER" }, 
-			{ "appearance.blocks.font_size", "USERINPUT" }, 
-			{ "appearance.blocks.font_family", "USERINPUT"}, 
+			{ "appearance.text.font_size", "USERINPUT" }, 
+			{ "appearance.text.font_family", "USERINPUT"}, 
 			{},
 		{}, 
 		{}, 

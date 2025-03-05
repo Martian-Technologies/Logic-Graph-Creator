@@ -1,5 +1,4 @@
 #include "settingsWindow.h"
-#include "gui/preferences/formManager.h"
 #include "util/config/config.h"
 
 
@@ -7,8 +6,6 @@
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
 	
-	cq = new ColorQuery(this);
-
 	setupUI();
 }
 
@@ -39,7 +36,7 @@ void SettingsWindow::setupUI() {
 
     // Content for scroll area
     QWidget* scrollContent = new QWidget();
-	FormManager* formManager = new FormManager(scrollContent);
+	formManager = new FormManager(scrollContent);
 	formManager->setForm("General"); // default for form
 
 	// Set the layout inside the scrollContent widget
@@ -70,9 +67,9 @@ void SettingsWindow::setupUI() {
 	connect(saveAction, &QPushButton::clicked, this, &SettingsWindow::saveSettings);
 	connect(defaultAction, &QPushButton::clicked, this, &SettingsWindow::resetSettings);
 	connect(cancelAction, &QPushButton::clicked, this, &QDialog::close);
-	connect(generalTab, &QPushButton::clicked, this,    [formManager]()    { formManager->setForm("General"); });
-	connect(appearanceTab, &QPushButton::clicked, this, [formManager]() { formManager->setForm("Appearance"); });
-	connect(keybindTab, &QPushButton::clicked, this,    [formManager]()    { formManager->setForm("Keybind"); });
+	connect(generalTab, &QPushButton::clicked, this,    [this]()    { formManager->setForm("General"); });
+	connect(appearanceTab, &QPushButton::clicked, this, [this]() { formManager->setForm("Appearance"); });
+	connect(keybindTab, &QPushButton::clicked, this,    [this]()    { formManager->setForm("Keybind"); });
 
     if (parent) {
         QRect parentGeometry = parent->geometry();
@@ -138,12 +135,17 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void SettingsWindow::saveSettings() {
-	/*
-	std::vector<std::pair<std::string, std::string>> data = preferenceManager->getDataEntry();
+	logWarning("settings registering...");
+	std::vector<std::pair<std::string, std::string>> data = formManager->getDataEntry();
+	for (size_t i = 0; i < data.size(); i++) {
+		std::cout << data[i].first << " | " << data[i].second << std::endl;
+	}	
 
+
+	/*
 	for (int i = 0; i < data.size(); i++) {
 		std::string value = data[i].second;
-		if (value.substr(1,2) == "0x") 				   Settings::set(data[i].first, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
+		if (value[0] == '#') 				   Settings::set(data[i].first, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
 		else if (value == "true"  || value == "True")  Settings::set(data[i].first, 1);
 		else if (value == "false" || value == "False") Settings::set(data[i].first, 0);
 		else										   Settings::set(data[i].first, value);

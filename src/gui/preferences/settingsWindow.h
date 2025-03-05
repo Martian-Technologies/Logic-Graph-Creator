@@ -2,6 +2,7 @@
 #define SETTINGS_WINDOW_H
 
 #include "colorQuery.h"
+#include "gui/preferences/formManager.h"
 
 #include <QDialog>
 #include <QPushButton>
@@ -37,8 +38,7 @@ private:
 
 
     QWidget* parent;
-	ColorQuery* cq;
-
+	FormManager* formManager;
 };
 
 #endif

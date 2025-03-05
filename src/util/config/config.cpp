@@ -50,10 +50,7 @@ void Settings::createConfig() {
 	file.close();
 }
 
-template<typename T>
-VariantType Settings::get(const std::string& key) {
-	return CONFIG_SETTINGS.get<T>(key);
-}
+MultiTypeMap& Settings::getConfig() { return CONFIG_SETTINGS; }
 
 void Settings::set(const std::string& key, const VariantType& value) {
 	CONFIG_SETTINGS.set(key, value);
