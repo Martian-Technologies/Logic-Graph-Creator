@@ -3,11 +3,9 @@
 
 #include <QKeySequence>
 #include <QShortcut>
-#include <QObject>
 #include <QWidget>
 
-class KeybindManager : public QObject {
-  Q_OBJECT
+class KeybindManager {
 public:
 	// give a keybind a name and set/reset the key sequence that triggers it
   void setKeybind(const std::string& bindName, const std::string& keyString);
