@@ -41,9 +41,20 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	circuitView.getRenderer().resize(w, h);
 	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
-	// connect save keybind
-	QShortcut* saveShortcut = keybindManager->createShortcut("Save", this);
-	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
+	// create keybind shortcuts and connect them
+	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
+	connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() { 
+		circuitView.getCircuit()->undo(); 
+	});
+	connect(keybindManager->createShortcut("Redo", this), &QShortcut::activated, this, [this]() { 
+		circuitView.getCircuit()->redo(); 
+	});
+	connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"));
+	});
+	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView.getEventRegister().doEvent(Event("tool rotate block cw"));
+	});
 	
 	// connect buttons and actions
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
@@ -227,21 +238,22 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 }
 
 void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
-	if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-		circuitView.getCircuit()->undo();
-		event->accept();
-	} else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-		circuitView.getCircuit()->redo();
-		event->accept();
-	} else if (event->key() == Qt::Key_Q) {
-		if (circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
-			event->accept();
-		}
-	} else if (event->key() == Qt::Key_E) {
-		if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
-			event->accept();
-		}
-	}
+	// if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
+	// 	circuitView.getCircuit()->undo();
+	// 	event->accept();
+	// } else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
+	// 	circuitView.getCircuit()->redo();
+	// 	event->accept();
+	// } else 
+	// if (event->key() == Qt::Key_Q) {
+	// 	if (circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
+	// 		event->accept();
+	// 	}
+	// } else if (event->key() == Qt::Key_E) {
+	// 	if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
+	// 		event->accept();
+	// 	}
+	// }
 }
 
 void CircuitViewWidget::keyReleaseEvent(QKeyEvent* event) { }
