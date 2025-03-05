@@ -304,7 +304,7 @@ CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
 	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager, &keybindManager);
 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
 	circuitViews.push_back(circuitViewWidget);
 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);

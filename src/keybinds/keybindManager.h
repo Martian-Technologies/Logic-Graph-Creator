@@ -3,11 +3,13 @@
 
 #include <QAction>
 #include <QWidget>
+#include <QObject>
 
 #include <string>
 #include <unordered_map>
 
-class KeybindManager {
+class KeybindManager : public QObject {
+  Q_OBJECT
 public:
 	//KeybindManager();
   void setKeybind(const std::string& bindName, const std::string& keyString);

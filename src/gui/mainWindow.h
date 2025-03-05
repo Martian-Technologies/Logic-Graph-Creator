@@ -9,6 +9,7 @@ class QGraphicsScene;
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
+#include "keybinds/keybindManager.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -49,6 +50,7 @@ private:
     QMenu* loadIntoSubMenu;
     QMenu* loadMergedSubMenu;
 	Backend backend;
+	KeybindManager keybindManager;
 	std::vector<CircuitViewWidget*> circuitViews;
     std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;

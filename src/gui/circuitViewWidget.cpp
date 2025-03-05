@@ -17,8 +17,8 @@
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager) :
-	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
+	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -41,9 +41,14 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	circuitView.getRenderer().resize(w, h);
 	circuitView.getRenderer().initializeTileSet(":logicTiles.png");
 
+	// making save keybind
+	keybindManager->setKeybind("Save", "Ctrl+S");
+	QAction* saveAction = keybindManager->createAction("Save", this);
+	connect(saveAction, &QAction::triggered, this, &CircuitViewWidget::save);
+
 	// connect buttons and actions
-	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
+	// QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
+	// connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
