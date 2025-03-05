@@ -21,14 +21,27 @@ testing  = "0x000000"
 
 
 [keybinds.blocks]
-AND = "ctrl + a"
-OR = "ctrl + a"
-XOR = "ctrl + a"
-NAND = "ctrl + a"
-NOR = "ctrl + a"
-XNOR = "ctrl + a"
-SWITCH = "ctrl + a"
-BUTTON = "ctrl + a"
-TICK_BUTTON = "ctrl + a"
-LIGHT = "ctrl + a"
+and         = "ctrl + a"
+or          = "ctrl + a"
+xor         = "ctrl + a"
+nand        = "ctrl + a"
+nor         = "ctrl + a"
+xnor        = "ctrl + a"
+switch      = "ctrl + a"
+button      = "ctrl + a"
+tick_button = "ctrl + a"
+light       = "ctrl + a"
 
+[keybind.placement]
+single_place = "ctrl + s + p"
+area_place   = "ctrl + a + p"
+move         = "ctrl + m"
+
+[keybind.connection]
+simple = "ctrl + s"
+tensor = "ctrl + t"
+
+[keybind.selection]
+
+[keybind.interactive]
+state_changer = "ctrl + s + c"

@@ -67,9 +67,9 @@ void SettingsWindow::setupUI() {
 	connect(saveAction, &QPushButton::clicked, this, &SettingsWindow::saveSettings);
 	connect(defaultAction, &QPushButton::clicked, this, &SettingsWindow::resetSettings);
 	connect(cancelAction, &QPushButton::clicked, this, &QDialog::close);
-	connect(generalTab, &QPushButton::clicked, this,    [this]()    { formManager->setForm("General"); });
+	connect(generalTab, &QPushButton::clicked, this,    [this]() { formManager->setForm("General"); });
 	connect(appearanceTab, &QPushButton::clicked, this, [this]() { formManager->setForm("Appearance"); });
-	connect(keybindTab, &QPushButton::clicked, this,    [this]()    { formManager->setForm("Keybind"); });
+	connect(keybindTab, &QPushButton::clicked, this,    [this]() { formManager->setForm("Keybind"); });
 
     if (parent) {
         QRect parentGeometry = parent->geometry();

@@ -54,6 +54,7 @@ void FormManager::setForm(const std::string& formType) {
 
 		form->addLayout(contentLayout);
 	}	
+	form->addStretch();
 }
 
 QWidget* FormManager::generateFormWidget(const std::string& preferenceType, const std::vector<std::string> & itemization) {
@@ -105,12 +106,27 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 			QColor color = QColorDialog::getColor(Qt::white, safeEditor ? safeEditor->parentWidget() : nullptr, "Choose a Color");
 
 			if (safeEditor && color.isValid()) {
+				// changes input field to new color 
 				safeEditor->setText(color.name());
 				safeEditor->setStyleSheet(QString("background-color: %1; color: %2")
 					.arg(color.name())
 					.arg(color.lightness() < 128 ? "white" : "black"));
 				dataEntry.emplace_back(itemization[0], color.name().toStdString());
 			}
+		}); 
+		connect(editor, &QLineEdit::returnPressed, this, [this, editor, &itemization]() {
+			QColor color = QColorDialog::getColor(Qt::white, editor ? editor->parentWidget() : nullptr, "Choose a Color");
+
+			if (color.isValid()) {
+				editor->setText(color.name());
+				editor->setStyleSheet(QString("background-color: %1; color: %2")
+					.arg(color.name())
+					.arg(color.lightness() < 128 ? "white" : "black"));
+				dataEntry.emplace_back(itemization[0], color.name().toStdString());
+			} else {
+				logWarning("invalid color, todo gui/preferences/formManager.cpp");
+			}
+
 		});
 
 		QHBoxLayout* layout = new QHBoxLayout(this);
@@ -152,10 +168,12 @@ QHBoxLayout* FormManager::generateKeybindForm(const std::string& itemization) {
 	editor->setFixedWidth(this->parentWidget()->width() * 0.2); 
 	contentLayout->addWidget(infoName);
 	contentLayout->addWidget(editor);
+
+	editor->installEventFilter(this);
+	editor->setReadOnly(true);
 	
 	return contentLayout;
 }	
-
 
 void FormManager::clearForm() {
 	QLayoutItem* item = form->takeAt(0);
@@ -177,4 +195,7 @@ void FormManager::clearForm() {
 		item = form->takeAt(0);
 	}
 }
+
+
+
 

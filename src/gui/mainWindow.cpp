@@ -383,5 +383,6 @@ void MainWindow::openPreferences(){
 	if (settingsWindow == nullptr){
 		settingsWindow = new SettingsWindow(this); 
 	} 
+	// settingsWindow->setModal(true);
 	settingsWindow->exec();
 }
