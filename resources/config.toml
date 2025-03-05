@@ -2,16 +2,16 @@
 visual_mode = "Night"
 
 [appearance.blocks]
-and         = "0x000011"
-or          = "0x001100"
-xor         = "0x110000"
-nand        = "0x110000"
-nor         = "0x110000"
-xnor        = "0x110000"
-switch      = "0x110000"
-button      = "0x110000"
-tick_button = "0x110000"
-light       = "0x110000"
+and         = "0xff8e66"
+or          = "0xff2d12"
+xor         = "0xff2d12"
+nand        = "0xff2d12"
+nor         = "0xff2d12"
+xnor        = "0xff2d12"
+switch      = "0xff2d12"
+button      = "0xff2d12"
+tick_button = "0xff2d12"
+light       = "0xff2d12"
 
 [appearance.wires]
 general  = "0x000000"
@@ -20,7 +20,7 @@ generic  = "0x000000"
 testing  = "0x000000"
 
 
-[keybinds.blocks]
+[keybind.blocks]
 and         = "ctrl + a"
 or          = "ctrl + a"
 xor         = "ctrl + a"

@@ -3,15 +3,9 @@
 
 #include "gui/preferences/formManager.h"
 
-#include <QDialog>
-#include <QPushButton>
 #include <QKeyEvent>
-#include <QFormLayout>
-#include <QMessageBox>
+#include <QDialog>
 #include <QScrollArea>
-#include <QLabel>
-#include <QLineEdit>
-
 
 class SettingsWindow : public QDialog {
     Q_OBJECT
@@ -32,9 +26,6 @@ private:
 	void resetSettings();
 
 	void changeSettingsForm(QScrollArea* scrollArea, QVBoxLayout* scrollLayout);
-
-	// void applyAllChanges(const QString& tabType); // once save is clicked, applies all changes to where they need to be applied
-
 
     QWidget* parent;
 	FormManager* formManager;

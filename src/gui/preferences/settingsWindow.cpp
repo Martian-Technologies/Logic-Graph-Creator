@@ -1,11 +1,15 @@
 #include "settingsWindow.h"
 #include "util/config/config.h"
 
-
+#include <QPushButton>
+#include <QFormLayout>
+#include <QMessageBox>
+#include <QLabel>
+#include <QLineEdit>
 
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
-	
+
 	setupUI();
 }
 
@@ -46,7 +50,7 @@ void SettingsWindow::setupUI() {
 
 	// Adds content widgets to contentLayout
     contentLayout->addLayout(tabButtonLayout, 1); 
-    contentLayout->addWidget(scrollArea, 3); 
+    contentLayout->addWidget(scrollArea, 4); 
 
     // ------------------------- BOTTOM FORM ACTIONS -------------------------
 	QHBoxLayout* formActions = new QHBoxLayout();
@@ -109,8 +113,6 @@ void SettingsWindow::changeSettingsForm(QScrollArea* scrollArea, QVBoxLayout* sc
 	QWidget* scrollContent = new QWidget();
     QVBoxLayout* newScrollLayout = new QVBoxLayout(scrollContent);
 
-
-
 	scrollArea->setWidget(scrollContent);
 }
 
@@ -142,20 +144,14 @@ void SettingsWindow::saveSettings() {
 	}	
 
 
-	/*
 	for (int i = 0; i < data.size(); i++) {
 		std::string value = data[i].second;
-		if (value[0] == '#') 				   Settings::set(data[i].first, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
+		if (value[0] == '#') 				           Settings::set(data[i].first, Color(std::stoi(value.substr(1,2), nullptr, 16)/255.0f, std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f));
 		else if (value == "true"  || value == "True")  Settings::set(data[i].first, 1);
 		else if (value == "false" || value == "False") Settings::set(data[i].first, 0);
 		else										   Settings::set(data[i].first, value);
 	}
 
-
-	// cq->exec();
-	// cq->raise();
-	// cq->activateWindow();
-	*/
 	logWarning("settings saved");
 }
 
