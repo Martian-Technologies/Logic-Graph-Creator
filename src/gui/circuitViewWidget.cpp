@@ -287,13 +287,14 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 void CircuitViewWidget::save() {
-    std::cout << "Trying to save\n";
-    if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-        if (!filePath.isEmpty()) {
-            fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
-        }
-    }
+	logInfo("Trying to save Circuit");
+	if (fileManager) {
+		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+		if (!filePath.isEmpty()) {
+			fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
+			logInfo("Successfully saved Circuit to: " + filePath.toStdString());
+		}
+	}
 }
 
 // for drag and drop load directly onto this circuit view widget
