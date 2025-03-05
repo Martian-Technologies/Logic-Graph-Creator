@@ -237,27 +237,6 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 	}
 }
 
-void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
-	// if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-	// 	circuitView.getCircuit()->undo();
-	// 	event->accept();
-	// } else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-	// 	circuitView.getCircuit()->redo();
-	// 	event->accept();
-	// } else 
-	// if (event->key() == Qt::Key_Q) {
-	// 	if (circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
-	// 		event->accept();
-	// 	}
-	// } else if (event->key() == Qt::Key_E) {
-	// 	if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
-	// 		event->accept();
-	// 	}
-	// }
-}
-
-void CircuitViewWidget::keyReleaseEvent(QKeyEvent* event) { }
-
 void CircuitViewWidget::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
