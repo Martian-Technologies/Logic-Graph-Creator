@@ -13,33 +13,20 @@
 
 class Backend;
 
-template <class RENDERER_TYPE>
 class CircuitView {
 	friend class Backend;
 public:
-	CircuitView() : toolManager(&eventRegister, &renderer) {
-		viewManager.initialize(eventRegister);
-		viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
-	}
+	CircuitView(Renderer* renderer);
 
-	void viewChanged() {
-		renderer.updateView(&viewManager);
-		eventRegister.doEvent(PositionEvent("pointer move", viewManager.getPointerPosition()));
-	}
-
-	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId) {
-		renderer.updateCircuit(difference);
-	}
-
-	void setSelectedTool(std::string tool) {
+	inline void setSelectedTool(std::string tool) {
 		toolManager.selectTool(tool);
 	}
 
-	void setSelectedToolMode(std::string mode) {
+	inline void setSelectedToolMode(std::string mode) {
 		toolManager.setMode(mode);
 	}
 
-	void setSelectedBlock(BlockType blockType) {
+	inline void setSelectedBlock(BlockType blockType) {
 		toolManager.selectBlock(blockType);
 	}
 
@@ -63,43 +50,31 @@ public:
 	inline ViewManager& getViewManager() { return viewManager; }
 	inline const ViewManager& getViewManager() const { return viewManager; }
 
-	inline RENDERER_TYPE& getRenderer() { return renderer; }
-	inline const RENDERER_TYPE& getRenderer() const { return renderer; }
+	inline Renderer* getRenderer() { return renderer; }
+	inline const Renderer* getRenderer() const { return renderer; }
 
 	inline Backend* getBackend() { return backend; }
 	inline const Backend* getBackend() const { return backend; }
 
 private:
-	inline void setBackend(Backend* backend) {
-		this->backend = backend;
-	}
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
+	void setCircuit(SharedCircuit circuit);
+	void setBackend(Backend* backend);
 
-	inline void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-		renderer.setEvaluator(evaluator.get());
-		evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
-		toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
-		this->evaluator = evaluator;
-	}
+	void viewChanged();
+	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId);
 
-	inline void setCircuit(SharedCircuit circuit) {
-		if (this->circuit) this->circuit->disconnectListener(this);
-
-		this->circuit = circuit;
-		toolManager.setCircuit(circuit.get());
-		renderer.setCircuit(circuit.get());
-		if (circuit) {
-			circuit->connectListener(this, std::bind(&CircuitView<RENDERER_TYPE>::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
-		}
-	}
-
+private:
+	Backend* backend;
+	
 	SharedCircuit circuit;
+	Renderer* renderer;
 	std::shared_ptr<Evaluator> evaluator;
+	
 	EvaluatorStateInterface evaluatorStateInterface;
 	EventRegister eventRegister;
 	ViewManager viewManager;
-	RENDERER_TYPE renderer;
 	ToolManager toolManager;
-	Backend* backend;
 };
 
 #endif /* circuitView_h */

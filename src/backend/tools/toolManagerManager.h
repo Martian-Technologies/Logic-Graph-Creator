@@ -1,13 +1,11 @@
 #ifndef toolManagerManager_h
 #define toolManagerManager_h
 
-#include "gui/circuitView/renderer/qtRenderer.h" // super super temp!!!
-
 #include "gui/circuitView/circuitView.h"
 
 class ToolManagerManager {
 public:
-	ToolManagerManager(std::set<CircuitView<QtRenderer>*>* circuitViews) : circuitViews(circuitViews) {}
+	ToolManagerManager(std::set<CircuitView*>* circuitViews) : circuitViews(circuitViews) {}
 
 	inline const std::string& getActiveToo() const { return activeTool; }
 	
@@ -58,7 +56,7 @@ private:
 		for (auto pair : listenerFunctions) pair.second(*this);
 	}
 
-	std::set<CircuitView<QtRenderer>*>* circuitViews;
+	std::set<CircuitView*>* circuitViews;
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
