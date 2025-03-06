@@ -11,18 +11,39 @@
 
 class ViewManager {
 public:
+	// initialization
 	ViewManager() : viewCenter(), viewScale(8.0f), aspectRatio(16.0f / 9.0f) { }
+	void setUpEvents(EventRegister& eventRegister);
 
-	inline void initialize(EventRegister& eventRegister) {
-		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
-		eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
-		eventRegister.registerFunction("view attach anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("view dettach anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
-	}
+	// event output
+	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
 
+	// setters
+	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); } 
+	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
+
+	// getters
+	inline FPosition getViewCenter() const { return viewCenter; }
+	inline const FPosition& getPointerPosition() const { return pointerPosition; }
+	inline float getAspectRatio() const { return aspectRatio; }
+
+	// auxiliary getters
+	inline float getViewHeight() const { return viewScale / (aspectRatio <= 1.0f ? aspectRatio : 1.0f); }
+	inline float getViewWidth() const { return viewScale * (aspectRatio > 1.0f ? aspectRatio : 1.0f); }
+	inline FPosition getTopLeft() const { return viewCenter - FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
+	inline FPosition getBottomRight() const { return viewCenter + FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
+
+	// coordinate system conversion
+	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FVector(getViewWidth() * view.x, getViewHeight() * view.y); }
+	Vec2 gridToView(FPosition position) const;
+	Vec2 gridToView(FVector vector) const;
+
+private:
+	// helpers
+	void applyLimits();
+	inline void viewChanged() { pointerPosition = viewToGrid(pointerViewPosition); if (viewChangedListener) viewChangedListener(); }
+
+	// input events (called by listeners)
 	bool zoom(const Event* event);
 	bool pan(const Event* event);
 	bool attachAnchor(const Event* event);
@@ -30,31 +51,8 @@ public:
 	bool pointerMove(const Event* event);
 	bool pointerEnterView(const Event* event);
 	bool pointerExitView(const Event* event);
-
-	// view
-	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); } 
-	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
-
-	inline FPosition getViewCenter() const { return viewCenter; }
-	inline float getViewHeight() const { return viewScale / (aspectRatio <= 1.0f ? aspectRatio : 1.0f); }
-	inline float getViewWidth() const { return viewScale * (aspectRatio > 1.0f ? aspectRatio : 1.0f); }
-	inline FPosition getTopLeft() const { return viewCenter - FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
-	inline FPosition getBottomRight() const { return viewCenter + FVector(getViewWidth() / 2.0f, getViewHeight() / 2.0f); }
-	inline const FPosition& getPointerPosition() const { return pointerPosition; }
-	inline float getAspectRatio() const { return aspectRatio; }
-
-	// coordinate system conversion
-	inline FPosition viewToGrid(Vec2 view) const { return getTopLeft() + FVector(getViewWidth() * view.x, getViewHeight() * view.y); }
-	Vec2 gridToView(FPosition position) const;
-	Vec2 gridToView(FVector vector) const;
-	
-	// events
-	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
-
 private:
-	void applyLimits();
-	inline void viewChanged() { pointerPosition = viewToGrid(pointerViewPosition); if (viewChangedListener) viewChangedListener(); }
-
+	
 	// pointer
 	bool doPointerMovement = false;
 	bool pointerActive = false;

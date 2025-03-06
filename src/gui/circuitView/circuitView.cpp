@@ -2,7 +2,7 @@
 
 CircuitView::CircuitView(Renderer* renderer)
 	: renderer(renderer), toolManager(&eventRegister, renderer) {
-	viewManager.initialize(eventRegister);
+	viewManager.setUpEvents(eventRegister);
 	viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
 }
 
