@@ -31,21 +31,14 @@ public:
         edited = true;
         mappings[key] = value;
     }
+
 private:
     bool edited;
     std::unordered_map<std::string, VariantType> mappings;
 
 	std::string firstValue;
 
-    template <typename T>
-    static T getDefaultValue() {
-        if constexpr (std::is_same_v<T, std::string>) return "";
-        if constexpr (std::is_same_v<T, bool>) return false;
-        if constexpr (std::is_same_v<T, int>) return 0;
-        if constexpr (std::is_same_v<T, float>) return 0.0f;
-		if constexpr (std::is_same_v<T, Color>) return Color(0.0f,0.0f,0.0f);
-        throw std::runtime_error("Unsupported type requested from MultiTypeMap");
-    }
+
 };
 
 

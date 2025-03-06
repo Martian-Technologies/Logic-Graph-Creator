@@ -1,5 +1,9 @@
+#include <cctype>
 #include <fstream>
 #include <assert.h>
+#include <bitset>
+#include <iomanip>
+
 #include "config.h"
 #include "multiTypeMap.h"
 
@@ -24,7 +28,8 @@
 			- if you believe it is more important to the user, please do put it more towards the top of the header
 */
 const std::vector<std::string> general[32] = {
-	{ "general.visual_mode", "DROPDOWN", "Dark", "Light" },  
+	{"General", "HEADER"},
+	{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },  
 	{ "Files", "HEADER" }, 
 		{ "general.files.save_path", "DIRPATH" },
 		{ "general.files.open_path", "FILEPATH" }, 
@@ -50,7 +55,6 @@ const std::vector<std::string> general[32] = {
 	{}, 
 	{}, 
 	{},
-	{}, 
 	{}, 
 	{}, 
 	{}, 
@@ -166,20 +170,23 @@ void Settings::createConfig() {
             continue;
         }
 
-		size_t pos = line.find('=');
+		size_t pos = line.find('=') - 1;
 		if (pos == std::string::npos) continue; 
 
-		while (line[pos-1] == ' ') pos--; // gets value before '='
+		while (line[pos-1] == ' ' || line[pos-1] == '\t') pos--; // gets value before '='
         std::string fullKey = prefix + '.' + line.substr(0, pos);
 
-		while (line[pos] == ' ' || line[pos] == '=') pos++; // gets value after '=' 
+		pos = line.find('=');
+		while (line[pos] == ' ' || line[pos] == '=' || line[pos] == '\t') pos++; // gets value after '=' 
         std::string value = line.substr(pos);
+		value = value.substr(0, value.rfind("\""));
 
-		// CONFIG_SETTINGS.set(fullKey, std::stoi(value.substr(3,6), nullptr, 16));
 		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set(fullKey, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
 		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set(fullKey, 1);
 		else if (value == "false" || value == "False") CONFIG_SETTINGS.set(fullKey, 0);
-		else										   CONFIG_SETTINGS.set(fullKey, value.substr(1, value.size()-2));
+		else										   CONFIG_SETTINGS.set(fullKey, value.substr(1, value.size())); 
+
+		//logInfo(fullKey + "|" + value);
     }
 
 	file.close();
@@ -187,16 +194,75 @@ void Settings::createConfig() {
 
 void Settings::saveSettings() {
 	std::ofstream file("resources/config.toml", std::ios::trunc);
+	std::string value;
+
+
+	auto toHex = [](float component) -> std::string {
+        int intValue = static_cast<int>(std::round(component * 255));
+        std::ostringstream hexStream;
+        hexStream << std::hex << std::setw(2) << std::setfill('0') << intValue;
+        return hexStream.str();
+    };
+
+	auto getKey = [](std::string component) -> std::string {
+		return component.substr(component.rfind('.')+1);
+	};
+
 
 	for (uint8_t i = 0; i < 3; i++) {
+		switch(i) {
+			case 0:
+				file << "# -------------------- General --------------------";
+				break;
+			case 1:
+				file << "# -------------------- Appearance --------------------";
+				break;
+			case 2:
+				file << "# -------------------- Keybinds --------------------";
+				break;
+			default:
+				break;
+		}
+
 		for (uint8_t j = 0; j < 32; j++) {
+			value.clear();
+
 			if (i == 0) {
-				// file << Settings::(general[j][0])
+				if (general[j].empty()) break;
+
+				if (general[j][1] == "HEADER") {
+					file << "\n[general." << std::string(1, std::tolower(static_cast<unsigned char>(general[j][0][0]))) << general[j][0].substr(1) << "]\n";
+					continue;
+				}
+
+				value = getKey(general[j][0]) + " = \"" + Settings::get<std::string>(general[j][0]) + "\"";
 			} else if (i == 1) {
+				if (appearance[j].empty()) break;
 
+				if (appearance[j][1] == "HEADER") {
+					file << "\n[appearance." << std::string(1, std::tolower(static_cast<unsigned char>(appearance[j][0][0]))) << appearance[j][0].substr(1) << "]\n";
+					continue;
+				}
+
+				value += getKey(appearance[j][0]) + " = \"";
+				if (appearance[j][1] == "COLOR") {
+					Color clr = Settings::get<Color>(appearance[j][0]);
+					value += "0x" + toHex(clr.r) + toHex(clr.g) + toHex(clr.b);
+				} else if (appearance[j][1] == "USERINPUT") {
+					value += Settings::get<std::string>(appearance[j][0]);
+				}	
+				value += "\"";
 			} else if (i == 2) {
+				if (keybind[j].empty()) break;
 
+				if (keybind[j].substr(0,2) == "H_") {
+					file << "\n[keybind." << std::string(1, std::tolower(static_cast<unsigned char>(keybind[j][2]))) << keybind[j].substr(3) << "]\n";
+					continue;
+				}
+
+				value = getKey(keybind[j]) + " = \"" + Settings::get<std::string>(keybind[j]) + "\"";
 			}
+			file << value << '\n';
 		}
 		file << '\n';
 	}

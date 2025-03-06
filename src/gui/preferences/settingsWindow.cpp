@@ -140,9 +140,8 @@ void SettingsWindow::saveSettings() {
 	logWarning("settings registering...");
 	std::vector<std::pair<std::string, std::string>> data = formManager->getDataEntry();
 	for (size_t i = 0; i < data.size(); i++) {
-		std::cout << data[i].first << " | " << data[i].second << std::endl;
+		logInfo(data[i].first + " | " + data[i].second);
 	}	
-
 
 	for (int i = 0; i < data.size(); i++) {
 		std::string value = data[i].second;
@@ -151,6 +150,8 @@ void SettingsWindow::saveSettings() {
 		else if (value == "false" || value == "False") Settings::set(data[i].first, 0);
 		else										   Settings::set(data[i].first, value);
 	}
+
+	Settings::saveSettings();
 
 	logWarning("settings saved");
 }

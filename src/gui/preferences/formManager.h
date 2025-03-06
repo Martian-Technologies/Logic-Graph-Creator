@@ -28,7 +28,8 @@ protected:
 				return QWidget::eventFilter(obj, event); 
 			} else if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
 				editor->clearFocus();
-				logInfo(editor->text().toStdString());
+				// Settings::set(editor->text())
+				logWarning("keybinds not saving");
 				return QWidget::eventFilter(obj, event); 
 			} else if (keyEvent->key() == Qt::Key_Escape) {
 				editor->clearFocus();
