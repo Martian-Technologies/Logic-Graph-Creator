@@ -21,7 +21,7 @@ light = "0xff7949"
 
 [appearance.wires]
 general = "0x488dff"
-crossing = "0x000000"
+crossing = "0x1efff7"
 generic = "0x000000"
 testing = "0x000000"
 

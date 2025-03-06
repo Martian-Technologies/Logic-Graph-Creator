@@ -9,6 +9,7 @@
 
 SettingsWindow::SettingsWindow(QWidget* parent) : QDialog(parent), parent(parent) {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	setupUI();
 }
