@@ -5,10 +5,6 @@
 #include "backend/position/position.h"
 #include "util/vec2.h"
 
-// TODO - there are one million magic numbers that should probably be settings
-// TODO - eliminate traces of QT
-// TODO - clear up difference between usingMouse, doMouseMovement, etc
-
 class ViewManager {
 public:
 	// initialization
@@ -54,7 +50,7 @@ private:
 private:
 	
 	// pointer
-	bool doPointerMovement = false;
+	bool anchored = false;
 	bool pointerActive = false;
 	FPosition pointerPosition;
 	Vec2 pointerViewPosition;

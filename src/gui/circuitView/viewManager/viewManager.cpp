@@ -42,14 +42,14 @@ bool ViewManager::pan(const Event* event) {
 }
 
 bool ViewManager::attachAnchor(const Event* event) {
-	if (doPointerMovement) return false;
-	doPointerMovement = true;
+	if (anchored) return false;
+	anchored = true;
 	return true;
 }
 
 bool ViewManager::dettachAnchor(const Event* event) {
-	if (!doPointerMovement) return false;
-	doPointerMovement = false;
+	if (!anchored) return false;
+	anchored = false;
 	return true;
 }
 
@@ -60,7 +60,7 @@ bool ViewManager::pointerMove(const Event* event) {
 
 	pointerViewPosition = gridToView(positionEvent->getFPosition());
 
-	if (doPointerMovement) {
+	if (anchored) {
 		FVector delta = pointerPosition - positionEvent->getFPosition();
 		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos
 		viewCenter += delta;
