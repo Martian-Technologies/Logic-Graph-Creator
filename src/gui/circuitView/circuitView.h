@@ -31,6 +31,22 @@ public:
 		renderer.updateCircuit(difference);
 	}
 
+	void setInteractive(bool isInteractive) {
+		if (isInteractive) {
+			toolManager.selectTool("interactive/state changer");
+		} else {
+			toolManager.selectStack(0);
+		}
+	}
+
+	void toggleInteractive() {
+		if (toolManager.getStack() != 1) {
+			toolManager.selectTool("interactive/state changer");
+		} else {
+			toolManager.selectStack(0);
+		}
+	}
+
 	void setSelectedTool(std::string tool) {
 		toolManager.selectTool(tool);
 	}

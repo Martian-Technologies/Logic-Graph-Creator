@@ -239,6 +239,9 @@ void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
 		if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
 			event->accept();
 		}
+	} else if (event->key() == Qt::Key_I) {
+		circuitView.toggleInteractive();
+		event->accept();
 	}
 }
 
