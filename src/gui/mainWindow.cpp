@@ -34,6 +34,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
     logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
+	
 	// create default hotbar and selector
 	openNewSelectorWindow();
 
