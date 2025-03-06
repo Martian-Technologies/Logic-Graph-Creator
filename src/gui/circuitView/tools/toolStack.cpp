@@ -1,5 +1,18 @@
 #include "toolStack.h"
 
+void ToolStack::activate() {
+	if (!toolStack.empty()) {
+		if (pointerInView) { 
+			PositionEvent event("Stack Updating Position", lastPointerFPosition);
+			toolStack.back()->enterBlockView(&event);
+		} else {
+			PositionEvent event("Stack Updating Position", lastPointerFPosition);
+			toolStack.back()->exitBlockView(&event);
+		}
+		toolStack.back()->activate();
+	}
+}
+
 SharedCircuitTool ToolStack::getCurrentNonHelperTool_() {
 	unsigned int i = toolStack.size();
 	while (i != 0) {
@@ -83,7 +96,7 @@ void ToolStack::clearTools() {
 }
 
 void ToolStack::popAbove(CircuitTool* toolNotToPop) {
-	while (getCurrentTool() != nullptr && getCurrentTool().get() != toolNotToPop) {
+	while (toolStack.back() != nullptr && toolStack.back().get() != toolNotToPop) {
 		toolStack.back()->unsetup();
 		toolStack.pop_back();
 	}

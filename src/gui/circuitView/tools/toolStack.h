@@ -15,6 +15,11 @@ public:
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
 	}
+	inline ToolStack(const ToolStack& other) = delete;
+	inline ToolStack& operator=(const ToolStack& other) = delete;
+
+	void activate();
+	void deactivate() { if (!toolStack.empty()) { toolStack.back()->deactivate(); toolStack.back()->elementCreator.clear(); } }
 
 	void reset();
 	void pushTool(SharedCircuitTool newTool);

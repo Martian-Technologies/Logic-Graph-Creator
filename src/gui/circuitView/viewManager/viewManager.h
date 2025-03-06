@@ -32,7 +32,7 @@ public:
 	bool pointerExitView(const Event* event);
 
 	// view
-	inline void setAspectRatio(float value) { aspectRatio = value; viewChanged(); }
+	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); } 
 	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
 
 	inline FPosition getViewCenter() const { return viewCenter; }
