@@ -107,7 +107,7 @@ void MainWindow::updateLoadIntoMenu() {
 
 	subMenu->clear();
 	for (std::pair<QWidget*, CircuitViewWidget*> p : activeWidgets) {
-		CircuitView<QtRenderer>* circuitView = p.second->getCircuitView();
+		CircuitView* circuitView = p.second->getCircuitView();
 		Circuit* circuit = circuitView->getCircuit();
 		if (!circuit) continue; // "None"
 		QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitName()));
@@ -190,7 +190,7 @@ void MainWindow::loadCircuit() {
 
 // Loads the primary circuit onto an existing circuit, where the user places down the primary.
 // All dependencies are still loaded into their own circuits, upon the placement of the primary.
-void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
+void MainWindow::loadCircuitInto(CircuitView* circuitView) {
 	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 	if (filePath.isEmpty()) return;
 

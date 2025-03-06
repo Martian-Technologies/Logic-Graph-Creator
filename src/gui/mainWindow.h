@@ -8,7 +8,6 @@ class QGraphicsScene;
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "circuitView/renderer/qtRenderer.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -30,7 +29,7 @@ public:
     void updateLoadIntoMenu();
     void saveCircuit(circuit_id_t id, bool saveAs);
     void loadCircuit();
-    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget);
+    void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
