@@ -7,15 +7,28 @@
 
 #include "gui/mainWindow.h"
 
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
+
 int main(int argc, char* argv[]) {
-	// Create QT Application
+	// Create QT application
 	logInfo("Creating QT Application");
 	QApplication app(argc, argv);
 	app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 	app.setStyle(QStyleFactory::create("Fusion"));
 	logInfo("Successfully created QT Application");
 
-	// Initialize KDDockWidgets
+	KDDockWidgets::MainWindowOptions options = setUpKDDockWidgets();
+	
+	// Create main window
+	logInfo("Creating Main Window");
+	MainWindow window(options);
+	window.show();
+	logInfo("Successfully created Main Window");
+
+	return app.exec();
+}
+
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets() {
 	logInfo("Initializing KDDockWidgets and setting flags");
 	KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 	KDDockWidgets::Config::self().setSeparatorThickness(5);
@@ -35,12 +48,6 @@ int main(int argc, char* argv[]) {
 	// options = KDDockWidgets::MainWindowOption_HasCentralGroup;
 	// options |= KDDockWidgets::MainWindowOption_HasCentralWidget;
 	logInfo("Successfully initialized KDDockWidgets and set flags");
-	
-	// Create Main Window
-	logInfo("Creating Main Window");
-	MainWindow window(options);
-	window.show();
-	logInfo("Successfully created Main Window");
 
-	return app.exec();
+	return options;
 }

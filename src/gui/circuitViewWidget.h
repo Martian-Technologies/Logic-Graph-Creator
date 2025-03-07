@@ -22,7 +22,7 @@ public:
     CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager);
 
 	// setup
-	inline CircuitView<QtRenderer>* getCircuitView() { return &circuitView; }
+	inline CircuitView* getCircuitView() { return circuitView.get(); }
 	void setSimState(bool state);
 	void simUseSpeed(Qt::CheckState state);
 	void setSimSpeed(double speed);
@@ -53,7 +53,8 @@ private:
 	inline float getPixelsWidth() { return (float)rect().width(); }
 	inline float getPixelsHeight() { return (float)rect().height(); }
 
-	CircuitView<QtRenderer> circuitView;
+	std::unique_ptr<CircuitView> circuitView;
+	std::unique_ptr<QtRenderer> renderer;
     CircuitFileManager* fileManager;
 
 	KeybindManager* keybindManager;

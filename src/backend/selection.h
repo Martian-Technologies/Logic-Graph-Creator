@@ -118,5 +118,19 @@ inline bool sameSelectionShape(SharedSelection selectionA, SharedSelection selec
 	}
 	return false;
 }
+inline Position getSelectionOrigin(SharedSelection selection) {
+	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+	if (dimensionalSelection) {
+		return getSelectionOrigin(dimensionalSelection->getSelection(0));
+	} 
+
+	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+	if (cellSelection) {
+		return cellSelection->getPosition();
+	}
+
+	logError("Could not find origin of selection. Selection not Cell or Dimensional Selection.", "Selection");
+	return Position();
+}
 
 #endif /* selection_h */

@@ -9,6 +9,7 @@ public:
 	inline ToolStackInterface(ToolStack* toolStack = nullptr) : toolStack(toolStack) { }
 
 	void pushTool(std::shared_ptr<CircuitTool> newTool);
+	void popAbove(CircuitTool* toolNotToPop);
 	void popTool();
 
 private:

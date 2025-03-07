@@ -345,34 +345,38 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 }
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
-	Vector gridSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type), circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(type));
-
 	// block
-	QPointF topLeft = gridToQt(position.free());
-	QPointF bottomRight = gridToQt((position + gridSize).free());
-	float width = bottomRight.x() - topLeft.x();
-	float height = bottomRight.y() - topLeft.y();
-	QPointF center = topLeft + QPointF(width / 2.0f, height / 2.0f);
+	Vector blockSize(
+		circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type),
+		circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(type)
+	);
 
+	Vector blockOriginOffset = rotateVectorWithArea(
+		Vector(0, 0),
+		blockSize.dx,
+		blockSize.dy,
+		rotation
+	);
+
+	QPointF size = gridToQt(blockSize.free());
+	QPointF rotationPoint = gridToQt((position + blockOriginOffset).free() + FVector(0.5f, 0.5f));
 	// get tile set coordinate
 	Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type+1, state);
 	Vec2Int tileSize = tileSetInfo->getCellPixelSize();
 
-	QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y),
-		QSizeF(tileSize.x, tileSize.y));
+	QRectF tileSetRect(QPointF(tilePoint.x, tilePoint.y), QSizeF(tileSize.x, tileSize.y));
 
 	// rotate and position painter to center of block
-	painter->translate(center);
+	painter->translate(rotationPoint);
 	painter->rotate(getDegrees(rotation));
+
 	// draw the block from the center
-	QRectF drawRect = QRectF(QPointF(-width / 2.0f, -height / 2.0f), QSizeF(width, height));
-	painter->drawPixmap(drawRect,
-		tileSet,
-		tileSetRect);
+	QRectF drawRect = QRectF(gridToQt(FVector(-0.5f, -0.5f)), QSizeF(size.x(), size.y()));
+	painter->drawPixmap(drawRect, tileSet, tileSetRect);
 
 	// undo transformations
 	painter->rotate(-getDegrees(rotation));
-	painter->translate(-center);
+	painter->translate(-rotationPoint);
 }
 
 const char* connectionOFF = "#97A9E1";
@@ -469,6 +473,13 @@ QPointF QtRenderer::gridToQt(FPosition position) {
 	assert(viewManager);
 
 	Vec2 viewPos = viewManager->gridToView(position);
+	return QPointF(viewPos.x * w, viewPos.y * h);
+}
+
+QPointF QtRenderer::gridToQt(FVector vector) {
+	assert(viewManager);
+
+	Vec2 viewPos = viewManager->gridToView(vector);
 	return QPointF(viewPos.x * w, viewPos.y * h);
 }
 

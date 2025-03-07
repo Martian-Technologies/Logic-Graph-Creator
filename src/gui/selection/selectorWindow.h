@@ -27,7 +27,7 @@ private:
 	Ui::Selector* ui;
 
 signals:
-	void selectedBlockChange(BlockType blockType);
+	void selectedBlockChange(std::string blockPath);
 	void selectedToolChange(std::string tool);
 	void selectedModeChange(std::string mode);
 };

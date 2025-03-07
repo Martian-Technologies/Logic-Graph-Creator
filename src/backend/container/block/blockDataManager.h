@@ -7,13 +7,21 @@ class BlockDataManager {
 public:
 	BlockDataManager() {
 		// load default data
-		blockData.resize(12);
+		blockData.resize(14);
 		getBlockData(BlockType::AND)->setName("And");
 		getBlockData(BlockType::OR)->setName("Or");
 		getBlockData(BlockType::XOR)->setName("Xor");
 		getBlockData(BlockType::NAND)->setName("Nand");
 		getBlockData(BlockType::NOR)->setName("Nor");
 		getBlockData(BlockType::XNOR)->setName("Xnor");
+		getBlockData(BlockType::BUFFER)->setName("Buffer");
+		// TRISTATE_BUFFER
+		getBlockData(BlockType::TRISTATE_BUFFER)->setName("Tristate Buffer");
+		getBlockData(BlockType::TRISTATE_BUFFER)->setDefaultData(false);
+		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 0), 0);
+		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 1), 1);
+		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionOutput(Vector(0, 0), 2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setHeight(2);
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");
 		getBlockData(BlockType::BUTTON)->setDefaultData(false);
@@ -40,6 +48,15 @@ public:
 	inline BlockType addBlock() noexcept {
 		blockData.emplace_back();
 		return (BlockType) blockData.size();
+	}
+
+	inline BlockType getBlockType(const std::string& blockPath) const {
+		for (unsigned int i = 0; i < blockData.size(); i++) {
+			if (blockData[i].getPath() + "/" + blockData[i].getName() == blockPath) {
+				return (BlockType)(i + 1);
+			}
+		}
+		return BlockType::NONE;
 	}
 
 	inline const BlockData* getBlockData(BlockType type) const noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
@@ -85,16 +102,12 @@ public:
 		return blockData[type-1].getOutputConnectionId(vector);
 	}
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, const Vector& vector) const noexcept {
-		if (isRotated(rotation)) {
-			return getInputConnectionId(type, Vector(vector.dy, vector.dx));
-		}
-		return getInputConnectionId(type, vector);
+		if (!blockExists(type)) return {0, false};
+		return blockData[type-1].getInputConnectionId(vector, rotation);
 	}
 	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, const Vector& vector) const noexcept {
-		if (isRotated(rotation)) {
-			return getOutputConnectionId(type, Vector(vector.dy, vector.dx));
-		}
-		return getOutputConnectionId(type, vector);
+		if (!blockExists(type)) return {0, false};
+		return blockData[type-1].getOutputConnectionId(vector, rotation);
 	}
 
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
@@ -102,10 +115,8 @@ public:
 		return blockData[type-1].getConnectionVector(connectionId);
 	}
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, Rotation rotation, connection_end_id_t connectionId) const noexcept {
-		if (isRotated(rotation)) {
-			return getConnectionVector(type, connectionId);
-		}
-		return getConnectionVector(type, connectionId);
+		if (!blockExists(type)) return {Vector(), false};
+		return blockData[type-1].getConnectionVector(connectionId, rotation);
 	}
 
 	inline connection_end_id_t getMaxConnectionId(BlockType type) const noexcept {

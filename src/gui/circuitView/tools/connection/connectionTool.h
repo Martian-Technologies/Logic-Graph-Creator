@@ -15,8 +15,6 @@ public:
 private:
 	std::string mode = "None";
 	SharedCircuitTool activeConnectionTool = nullptr;
-	BlockType selectedBlock = BlockType::NONE;
-	Rotation rotation = Rotation::ZERO;
 };
 
 typedef std::shared_ptr<ConnectionTool> SharedConnectionTool;

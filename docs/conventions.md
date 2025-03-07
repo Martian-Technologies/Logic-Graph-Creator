@@ -1,5 +1,5 @@
-# Conventions and feature usage guidelines
-There are obviously some exceptions, and **some** (eg. pointers) may be temporarily omitted while developing.
+# Conventions and programming guidelines
+There are obviously some exceptions, and **some** may be temporarily omitted while developing.
 
 ### Includes
 Usage
@@ -54,6 +54,9 @@ Order should be:
 - protected vars
 - private functions
 - private vars
+
+### Friend Classes
+You can use friend classes to simplify APIs. Please indicate which private functions are meant to be used by which friend classes.
 
 ### Assertions
 For now, you can use assertions to confirm state that is **essential** for the program to run.
