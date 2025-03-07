@@ -8,10 +8,11 @@
 class BlockData {
 	friend class BlockDataManager;
 public:
-	inline std::shared_ptr<const CircuitBlockData> getCircuitBlockData() const noexcept { return circuitBlockData; }
-
 	inline void setDefaultData(bool defaultData) noexcept { this->defaultData = defaultData; }
 	inline bool isDefaultData() const noexcept { return defaultData; }
+
+	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; }
+	inline bool isPrimitive() const noexcept { return primitive; }
 
 	inline void setWidth(block_size_t width) noexcept { this->width = width; }
 	inline void setHeight(block_size_t height) noexcept { this->height = height; }
@@ -111,9 +112,9 @@ public:
 			true
 		};
 	}
-	inline connection_end_id_t getMaxConnectionId() const noexcept {
-		if (defaultData) return 1;
-		return connections.size() - 1;
+	inline connection_end_id_t getConnectionCount() const noexcept {
+		if (defaultData) return 2;
+		return connections.size();
 	}
 	inline bool isConnectionInput(connection_end_id_t connectionId) const noexcept {
 		if (defaultData) return connectionId == 0;
@@ -121,10 +122,8 @@ public:
 	}
 
 private:
-	// allows the reader to spend less time if we are looking at 1x1 blocks with one input and one output
-	std::shared_ptr<CircuitBlockData> circuitBlockData;
-
 	bool defaultData = true;
+	bool primitive = true; // true if defined by default (And, Or, Xor...)
 	bool placeable = true;
 	std::string name = "Unnamed Block";
 	std::string path = "Basic";

@@ -7,6 +7,7 @@
 #include <QTreeView>
 #include <QCheckBox>
 #include <QMenuBar>
+#include <QTimer>
 #include <QEvent>
 #include <QMenu>
 
@@ -32,6 +33,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
 	keybindManager.setKeybind("BlockRotateCW", "E");
 	keybindManager.setKeybind("ToggleInteractive", "I");
+	keybindManager.setKeybind("MakeCircuitBlock", "B");
 
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
@@ -47,6 +49,11 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	openNewSelectorWindow();
 
 	setUpMenuBar();
+
+	updateLoopTimer = new QTimer(this);
+	updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
+	updateLoopTimer->start();
+	connect(updateLoopTimer, &QTimer::timeout, this, &MainWindow::updateLoop);
 }
 
 // Utility methods
@@ -297,6 +304,7 @@ void MainWindow::openNewSelectorWindow() {
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
 	connect(selector, &SelectorWindow::selectedModeChange, this, &MainWindow::setMode);
 	connect(this, &MainWindow::toolModeOptionsChanged, selector, &SelectorWindow::updateToolModeOptions);
+	connect(this, &MainWindow::updateBlockList, selector, &SelectorWindow::updateBlockList);
 	addDock(selector, KDDockWidgets::Location_OnLeft);
 }
 
@@ -357,3 +365,6 @@ void MainWindow::setMode(std::string mode) {
 	backend.getToolManagerManager().setMode(mode);
 }
 
+void MainWindow::updateLoop() {
+	emit updateBlockList();
+}

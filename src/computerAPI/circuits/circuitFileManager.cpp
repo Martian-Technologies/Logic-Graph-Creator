@@ -195,7 +195,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
         const Position& pos = block.getPosition();
 
         const ConnectionContainer& blockCC = block.getConnectionContainer();
-        connection_end_id_t connectionNum = blockCC.getMaxConnectionId() + 1;
+        connection_end_id_t connectionNum = blockCC.getConnectionCount();
 
         outputFile << "blockId " << itr->first << ' '
                    << blockTypeToString(block.type()) << ' ' << pos.x << ' '

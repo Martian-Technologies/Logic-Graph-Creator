@@ -7,7 +7,7 @@ class BlockDataManager {
 public:
 	BlockDataManager() {
 		// load default data
-		blockData.resize(14);
+		blockData.resize(13);
 		getBlockData(BlockType::AND)->setName("And");
 		getBlockData(BlockType::OR)->setName("Or");
 		getBlockData(BlockType::XOR)->setName("Xor");
@@ -63,7 +63,7 @@ public:
 	inline BlockData* getBlockData(BlockType type) noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
 
 	inline unsigned int maxBlockId() const noexcept { return blockData.size(); }
-	inline bool blockExists(BlockType type) const noexcept { return type != BlockType::NONE && type < blockData.size(); }
+	inline bool blockExists(BlockType type) const noexcept { return type != BlockType::NONE && type <= blockData.size(); }
 	inline bool isPlaceable(BlockType type) const noexcept {
 		if (!blockExists(type)) return false;
 		return blockData[type-1].isPlaceable();
@@ -119,9 +119,9 @@ public:
 		return blockData[type-1].getConnectionVector(connectionId, rotation);
 	}
 
-	inline connection_end_id_t getMaxConnectionId(BlockType type) const noexcept {
+	inline connection_end_id_t getConnectionCount(BlockType type) const noexcept {
 		if (!blockExists(type)) return 0;
-		return blockData[type-1].getMaxConnectionId();
+		return blockData[type-1].getConnectionCount();
 	}
 	inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;

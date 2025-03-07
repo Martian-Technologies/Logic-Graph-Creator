@@ -2,6 +2,7 @@
 #define mainWindow_h
 
 #include <QWidget>
+class QTimer;
 class QGraphicsScene;
 
 #include <kddockwidgets/MainWindow.h>
@@ -44,6 +45,11 @@ private:
     bool eventFilter(QObject* obj, QEvent* event);
 
 private:
+	// update loop
+	QTimer* updateLoopTimer;
+	const float updateInterval = 0.1f;
+	void updateLoop();
+
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
     QMenu* saveAsSubMenu;
@@ -57,6 +63,7 @@ private:
 
 signals:
 	void toolModeOptionsChanged(const std::vector<std::string>* modes);
+	void updateBlockList();
 };
 
 #endif /* mainWindow_h */

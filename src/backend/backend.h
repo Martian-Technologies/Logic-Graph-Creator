@@ -16,10 +16,14 @@ public:
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
 	inline const BlockDataManager* getBlockDataManager() const { return getCircuitManager().getBlockDataManager(); }
+	
+	inline CircuitManager& getCircuitManager() { return circuitManager; }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }
+
 	inline const EvaluatorManager& getEvaluatorManager() const { return evaluatorManager; }
-	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
+
 	inline ToolManagerManager& getToolManagerManager() { return toolManagerManager; }
+	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
 
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
