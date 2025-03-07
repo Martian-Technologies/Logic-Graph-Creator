@@ -25,9 +25,10 @@ This file will hold all values that the user should be able to modify within par
 AND = "0xff00ff"
 `
 Each line will be under a "grouping.subgrouping"
+
 Each "subgroup" is defined after a "grouping"
-**Groupings:** graphical, appearance, keybinds (more to come)
-**Subgrouping:** these you'll define or append to previously created subgroupings, when adding please go to the next section for general instructions 
+- **Groupings:** graphical, appearance, keybinds (more to come)
+- **Subgrouping:** these you'll define or append to previously created subgroupings, when adding please go to the next section for general instructions 
 
 # preferenceManager.cpp
 This only matters if you want to add a setting value
