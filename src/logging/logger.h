@@ -1,6 +1,8 @@
 #ifndef logger_h
 #define logger_h
 
+#include <mutex>
+
 #include <filesystem>
 #include <mutex>
 

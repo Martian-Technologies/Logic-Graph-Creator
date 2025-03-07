@@ -3,8 +3,6 @@
 #include "connectionContainer.h"
 #include "block.h"
 
-ConnectionContainer::ConnectionContainer(BlockType blockType) : blockType(blockType), connections(::getMaxConnectionId(blockType) + 1) { }
-
 bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
 	// not a valid Id
 	if (thisEndId > getMaxConnectionId() || hasConnection(thisEndId, otherConnectionEnd)) return false;
@@ -37,6 +35,6 @@ bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, const Con
 	return (
 		thisEndId <= getMaxConnectionId() &&
 		contains(connections[thisEndId].begin(), connections[thisEndId].end(), otherConnectionEnd)
-		);
+	);
 }
 

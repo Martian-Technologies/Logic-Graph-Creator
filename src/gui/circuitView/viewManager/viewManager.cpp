@@ -3,6 +3,16 @@
 #include "viewManager.h"
 #include "gui/circuitView/events/customEvents.h"
 
+void ViewManager::setUpEvents(EventRegister& eventRegister) {
+		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
+		eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
+		eventRegister.registerFunction("view attach anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
+		eventRegister.registerFunction("view dettach anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
+		eventRegister.registerFunction("pointer move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
+		eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
+		eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
+	}
+
 bool ViewManager::zoom(const Event* event) {
 	const DeltaEvent* deltaEvent = event->cast<DeltaEvent>();
 	if (!deltaEvent) return false;
@@ -16,7 +26,7 @@ bool ViewManager::zoom(const Event* event) {
 	FVector pointerChange = newPointerPosition - pointerPosition;
 	viewCenter -= pointerChange;
 	applyLimits();
-	
+
 	viewChanged();
 	return true;
 }
@@ -32,14 +42,14 @@ bool ViewManager::pan(const Event* event) {
 }
 
 bool ViewManager::attachAnchor(const Event* event) {
-	if (doPointerMovement) return false;
-	doPointerMovement = true;
+	if (anchored) return false;
+	anchored = true;
 	return true;
 }
 
 bool ViewManager::dettachAnchor(const Event* event) {
-	if (!doPointerMovement) return false;
-	doPointerMovement = false;
+	if (!anchored) return false;
+	anchored = false;
 	return true;
 }
 
@@ -50,16 +60,17 @@ bool ViewManager::pointerMove(const Event* event) {
 
 	pointerViewPosition = gridToView(positionEvent->getFPosition());
 
-	if (doPointerMovement) {
+	if (anchored) {
 		FVector delta = pointerPosition - positionEvent->getFPosition();
 		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos
 		viewCenter += delta;
 		applyLimits();
 		viewChanged();
-		return true;
+		return false;
 	}
 
 	pointerPosition = positionEvent->getFPosition();
+
 	return false;
 }
 
@@ -88,5 +99,12 @@ Vec2 ViewManager::gridToView(FPosition position) const {
 	return Vec2(
 		(position.x - viewCenter.x) / getViewWidth() + 0.5f,
 		(position.y - viewCenter.y) / getViewHeight() + 0.5f
+	);
+}
+
+Vec2 ViewManager::gridToView(FVector vector) const {
+	return Vec2(
+		(vector.dx) / getViewWidth(),
+		(vector.dy) / getViewHeight()
 	);
 }

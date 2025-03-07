@@ -1,10 +1,8 @@
-#include <QFile>
-#include <fstream>
 #include <QTextStream>
-#include <string>
 #include <QFileInfo>
-#include <QDir>
 #include <QString>
+#include <QFile>
+#include <QDir>
 
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
@@ -19,7 +17,6 @@ CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : c
 
 BlockType stringToBlockType(const std::string& str) {
     if (str == "NONE") return NONE;
-    if (str == "BLOCK") return BLOCK;
     if (str == "AND") return AND;
     if (str == "OR") return OR;
     if (str == "XOR") return XOR;
@@ -31,8 +28,6 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "SWITCH") return SWITCH;
     if (str == "CONSTANT") return CONSTANT;
     if (str == "LIGHT") return LIGHT;
-    if (str == "CUSTOM") return CUSTOM;
-    if (str == "TYPE_COUNT") return TYPE_COUNT;
     return NONE;
 }
 
@@ -47,7 +42,6 @@ Rotation stringToRotation(const std::string& str) {
 std::string blockTypeToString(BlockType type) {
     switch (type) {
         case NONE: return "NONE";
-        case BLOCK: return "BLOCK";
         case AND: return "AND";
         case OR: return "OR";
         case XOR: return "XOR";
@@ -59,8 +53,6 @@ std::string blockTypeToString(BlockType type) {
         case SWITCH: return "SWITCH";
         case CONSTANT: return "CONSTANT";
         case LIGHT: return "LIGHT";
-        case CUSTOM: return "CUSTOM";
-        case TYPE_COUNT: return "TYPE_COUNT";
         default: return "UNKNOWN";
     }
 }
@@ -134,7 +126,7 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
             inputFile >> std::quoted(importFileName);
 
             QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
-            std::shared_ptr<ParsedCircuit> dependency = std::make_shared<ParsedCircuit>();
+            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fullPath.toStdString(), "FileManager");
             if (loadFromFile(fullPath.toStdString(), dependency)){
                 logInfo("Successfully imported dependency: " + importFileName, "FileManager");
@@ -142,21 +134,6 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
             }else{
                 logError("Failed to import dependency: " + importFileName, "FileManager");
             }
-            continue;
-        }else if (token == "external"){
-            ParsedCircuit::ExternalConnection ec;
-            std::string file1, file2;
-
-            inputFile >> std::quoted(file1)
-                      >> ec.localBlockId
-                      >> ec.localConnectionId
-                      >> ec.externalBlockId
-                      >> ec.externalConnectionId
-                      >> std::quoted(file2);
-
-            ec.localFile = file1; // "." for the current file.
-            ec.dependencyFile = file2;
-            outParsed->addExternalConnection(ec);
             continue;
         }
 

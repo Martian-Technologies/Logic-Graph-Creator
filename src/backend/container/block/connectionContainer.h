@@ -9,9 +9,7 @@ class BlockContainer;
 class ConnectionContainer {
 	friend BlockContainer;
 public:
-	ConnectionContainer(BlockType blockType);
-
-	BlockType getBlockType() const { return blockType; }
+	ConnectionContainer(unsigned int maxConnectionId) : connections(maxConnectionId + 1) { }
 
 	inline connection_end_id_t getMaxConnectionId() const { return connections.size() - 1; }
 
@@ -25,7 +23,6 @@ private:
 	bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 	bool tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
 
-	BlockType blockType;
 	std::vector<std::vector<ConnectionEnd>> connections;
 };
 

@@ -8,7 +8,7 @@ class QGraphicsScene;
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "gpu/renderer/vulkanRenderer.h"
+#include "keybinds/keybindManager.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -25,13 +25,14 @@ public:
 	void closeEvent(QCloseEvent* event);
 	
 	// actions
-	void setBlock(BlockType blockType);
+	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
+	void setMode(std::string tool);
     void updateSaveMenu(bool saveAs);
-    void updateLoadIntoMenu(bool loadMerged);
+    void updateLoadIntoMenu();
     void saveCircuit(circuit_id_t id, bool saveAs);
-    void loadCircuit(bool loadMerged);
-    void loadCircuitInto(CircuitView<VulkanRenderer>* circuitWidget, bool loadMerged);
+    void loadCircuit();
+    void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
@@ -50,9 +51,13 @@ private:
     QMenu* loadIntoSubMenu;
     QMenu* loadMergedSubMenu;
 	Backend backend;
+	KeybindManager keybindManager;
 	std::vector<CircuitViewWidget*> circuitViews;
     std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;
+
+signals:
+	void toolModeOptionsChanged(const std::vector<std::string>* modes);
 };
 
 #endif /* mainWindow_h */

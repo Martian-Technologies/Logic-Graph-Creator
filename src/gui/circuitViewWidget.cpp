@@ -11,13 +11,19 @@
 #include <QKeyEvent>
 #include <QTimer>
 
+#include "gui/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager) :
-	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
+	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
+
+	// create circuitView
+	renderer = std::make_unique<VulkanRenderer>();
+	circuitView = std::make_unique<CircuitView>(renderer.get());
+    
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -29,41 +35,57 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
 	updateLoopTimer->start();
 	connect(updateLoopTimer, &QTimer::timeout, this, &CircuitViewWidget::updateLoop);
+
+	// create keybind shortcuts and connect them
+	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
+	connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getCircuit()->undo(); 
+	});
+	connect(keybindManager->createShortcut("Redo", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getCircuit()->redo(); 
+	});
+	connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getEventRegister().doEvent(Event("tool rotate block ccw"));
+	});
+	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getEventRegister().doEvent(Event("tool rotate block cw"));
+	});
+  connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
+		circuitView->toggleInteractive(); 
+	});
 	
 	// connect buttons and actions
-	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
 	
 	connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index){
-			Backend* backend = this->circuitView.getBackend();
+			Backend* backend = this->circuitView->getBackend();
 			if (backend && this->circuitSelector) {
-				backend->linkCircuitViewWithCircuit(&(this->circuitView), this->circuitSelector->itemData(index).value<int>());
+				backend->linkCircuitViewWithCircuit(this->circuitView.get(), this->circuitSelector->itemData(index).value<int>());
         logInfo("CircuitViewWidget linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
 			}
 		}
 	);
 	connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed){
-			Backend* backend = this->circuitView.getBackend();
+			Backend* backend = this->circuitView->getBackend();
 			if (backend) {
 				backend->createCircuit();
 			}
 		}
 	);
 	connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index){
-			Backend* backend = this->circuitView.getBackend();
+			Backend* backend = this->circuitView->getBackend();
 			if (backend && this->evaluatorSelector) {
-				backend->linkCircuitViewWithEvaluator(&(this->circuitView), this->evaluatorSelector->itemData(index).value<int>(), Address());
+				backend->linkCircuitViewWithEvaluator(this->circuitView.get(), this->evaluatorSelector->itemData(index).value<int>(), Address());
         logInfo("CircuitViewWidget linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
 			}
 		}
 	);	
 	connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed){
-			Backend* backend = this->circuitView.getBackend();
-			if (backend && this->circuitView.getCircuit()) {
-				backend->createEvaluator(this->circuitView.getCircuit()->getCircuitId());
+			Backend* backend = this->circuitView->getBackend();
+			if (backend && this->circuitView->getCircuit()) {
+				backend->createEvaluator(this->circuitView->getCircuit()->getCircuitId());
 			}
 		}
 	);
@@ -72,9 +94,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0); 
 	layout->setSpacing(0);
-	this->setLayout(layout);
-
-	
+	this->setLayout(layout);	
 }
 
 void CircuitViewWidget::showEvent(QShowEvent* event) {
@@ -83,11 +103,11 @@ void CircuitViewWidget::showEvent(QShowEvent* event) {
 
 	createVulkanWindow();
 	// initialize renderer with width and height
-	circuitView.getRenderer().resize(w, h);
-	circuitView.getRenderer().run();
+	renderer->resize(w, h);
+	renderer->run();
 	
 	// set viewmanager aspect ratio to begin with
-	circuitView.getViewManager().setAspectRatio(w / h);
+	circuitView->getViewManager().setAspectRatio(w / h);
 }
 
 void CircuitViewWidget::hideEvent(QHideEvent* event) {
@@ -111,7 +131,7 @@ void CircuitViewWidget::createVulkanWindow() {
 	layout()->addWidget(vulkanWindowWrapper);
 	
 	// initialize renderer
-	circuitView.getRenderer().initialize(vulkanWindow->createSurface(), size().width(), size().height());
+	renderer->initialize(vulkanWindow->createSurface(), size().width(), size().height());
 
 	vulkanWindowOpen = true;
 }
@@ -119,7 +139,7 @@ void CircuitViewWidget::createVulkanWindow() {
 void CircuitViewWidget::destroyVulkanWindow() {
 	if (!vulkanWindowOpen) return;
 	
-	circuitView.getRenderer().destroy();
+	renderer->destroy();
 	vulkanWindow->destroySurface();
 	vulkanWindow->destroy();
 	vulkanWindow = nullptr;
@@ -131,37 +151,36 @@ void CircuitViewWidget::destroyVulkanWindow() {
 }
 
 void CircuitViewWidget::setSimState(bool state) {
-	if (circuitView.getEvaluator())
-		circuitView.getEvaluator()->setPause(!state);
+	if (circuitView->getEvaluator())
+		circuitView->getEvaluator()->setPause(!state);
 }
 
 void CircuitViewWidget::simUseSpeed(Qt::CheckState state) {
-	if (circuitView.getEvaluator())
-		circuitView.getEvaluator()->setUseTickrate(state == Qt::CheckState::Checked);
+	if (circuitView->getEvaluator())
+		circuitView->getEvaluator()->setUseTickrate(state == Qt::CheckState::Checked);
 }
 
 void CircuitViewWidget::setSimSpeed(double speed) {
-	if (circuitView.getEvaluator())
-		circuitView.getEvaluator()->setTickrate(std::round(speed * 60));
+	if (circuitView->getEvaluator())
+		circuitView->getEvaluator()->setTickrate(std::round(speed * 60));
 }
-
 
 void CircuitViewWidget::updateLoop() {
 	if (circuitSelector) {
-		const Backend* backend = circuitView.getBackend();
+		const Backend* backend = circuitView->getBackend();
 		if (backend) {
 			for (auto pair : backend->getCircuitManager()) {
 				QString name = QString::fromStdString(pair.second->getCircuitName());
 				if (circuitSelector->findText(name) == -1) {
-					circuitSelector->insertItem(circuitSelector->count()-1, name, pair.second->getCircuitId());
+					circuitSelector->insertItem(circuitSelector->count() - 1, name, pair.second->getCircuitId());
 				}
 			}
 		}
-		const Circuit* circuit = circuitView.getCircuit();
+		const Circuit* circuit = circuitView->getCircuit();
 		if (circuit != nullptr) {
 			QString name = QString::fromStdString(circuit->getCircuitName());
 			int index = circuitSelector->findText(name);
-			if ( index != -1 ) { // -1 for not found
+			if (index != -1) { // -1 for not found
 				circuitSelector->setCurrentIndex(index);
 			}
 		} else {
@@ -170,20 +189,20 @@ void CircuitViewWidget::updateLoop() {
 		}
 	}
 	if (evaluatorSelector) {
-		const Backend* backend = circuitView.getBackend();
+		const Backend* backend = circuitView->getBackend();
 		if (backend) {
 			for (auto pair : backend->getEvaluatorManager()) {
 				QString name = QString::fromStdString(pair.second->getEvaluatorName());
 				if (evaluatorSelector->findText(name) == -1) {
-					evaluatorSelector->insertItem(evaluatorSelector->count()-1, name, pair.second->getEvaluatorId());
+					evaluatorSelector->insertItem(evaluatorSelector->count() - 1, name, pair.second->getEvaluatorId());
 				}
 			}
 		}
-		const Evaluator* evaluator = circuitView.getEvaluator();
+		const Evaluator* evaluator = circuitView->getEvaluator();
 		if (evaluator != nullptr) {
 			QString name = QString::fromStdString(evaluator->getEvaluatorName());
 			int index = evaluatorSelector->findText(name);
-			if ( index != -1 ) { // -1 for not found
+			if (index != -1) { // -1 for not found
 				evaluatorSelector->setCurrentIndex(index);
 			}
 		} else {
@@ -202,14 +221,14 @@ bool CircuitViewWidget::event(QEvent* event) {
 	if (event->type() == QEvent::NativeGesture) {
 		QNativeGestureEvent* nge = dynamic_cast<QNativeGestureEvent*>(event);
 		if (nge && nge->gestureType() == Qt::ZoomNativeGesture) {
-			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", nge->value() - 1))) event->accept();
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", nge->value() - 1))) event->accept();
 			return true;
 		}
 	} else if (event->type() == QEvent::Gesture) {
 		QGestureEvent* gestureEvent = dynamic_cast<QGestureEvent*>(event);
 		if (gestureEvent) {
 			QPinchGesture* pinchGesture = dynamic_cast<QPinchGesture*>(gestureEvent->gesture(Qt::PinchGesture));
-			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", pinchGesture->scaleFactor() - 1))) event->accept();
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", pinchGesture->scaleFactor() - 1))) event->accept();
 
 			return true;
 		}
@@ -221,7 +240,7 @@ void CircuitViewWidget::paintEvent(QPaintEvent* event) {
 	QPainter* painter = new QPainter(this);
 	
 	// rolling average for frame time
-	pastFrameTimes.push_back(circuitView.getRenderer().getLastFrameTimeMs());
+	pastFrameTimes.push_back(renderer->getLastFrameTimeMs());
 	int numPops = pastFrameTimes.size() - numTimesInAverage;
 	for (int i = 0; i < numPops; ++i) {
 		pastFrameTimes.pop_front();
@@ -236,7 +255,7 @@ void CircuitViewWidget::paintEvent(QPaintEvent* event) {
 
 	// tps
 	std::stringstream stream2;
-	stream2 << std::fixed << std::setprecision(3) << circuitView.getEvaluatorStateInterface().getRealTickrate();
+	stream2 << std::fixed << std::setprecision(3) << circuitView->getEvaluatorStateInterface().getRealTickrate();
 	std::string tpsStr = "tps: " + stream2.str();
 	painter->drawText(QRect(QPoint(0, 16), size()), Qt::AlignTop, QString(tpsStr.c_str()));
 
@@ -247,8 +266,8 @@ void CircuitViewWidget::resizeEvent(QResizeEvent* event) {
 	int w = event->size().width();
 	int h = event->size().height();
 
-	circuitView.getRenderer().resize(w, h);
-	circuitView.getViewManager().setAspectRatio((float)w / (float)h);
+	renderer->resize(w, h);
+	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
 }
 
 void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
@@ -257,60 +276,39 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 
 	if (!numPixels.isNull()) {
 		if (mouseControls) {
-			if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 200.f))) event->accept();
 		} else {
 			if (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) {
 				// do zoom
-				if (circuitView.getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 100.f))) event->accept();
-			}
-			else {
-				if (circuitView.getEventRegister().doEvent(DeltaXYEvent(
+				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(numPixels.y()) / 100.f))) event->accept();
+			} else {
+				if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
 					"view pan",
-					numPixels.x() / getPixelsWidth() * circuitView.getViewManager().getViewWidth(),
-					numPixels.y() / getPixelsHeight() * circuitView.getViewManager().getViewHeight()
+					numPixels.x() / getPixelsWidth() * circuitView->getViewManager().getViewWidth(),
+					numPixels.y() / getPixelsHeight() * circuitView->getViewManager().getViewHeight()
 				))) event->accept();
 			}
 		}
 	}
 }
 
-void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
-	if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-		circuitView.getCircuit()->undo();
-		event->accept();
-	} else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-		circuitView.getCircuit()->redo();
-		event->accept();
-	} else if (event->key() == Qt::Key_Q) {
-		if (circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"))) {
-			event->accept();
-		}
-	} else if (event->key() == Qt::Key_E) {
-		if (circuitView.getEventRegister().doEvent(Event("tool rotate block cw"))) {
-			event->accept();
-		}
-	}
-}
-
-void CircuitViewWidget::keyReleaseEvent(QKeyEvent* event) { }
-
 void CircuitViewWidget::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
-			if (circuitView.getEventRegister().doEvent(PositionEvent("view attach anchor", circuitView.getViewManager().getPointerPosition()))) { event->accept(); return; }
+			if (circuitView->getEventRegister().doEvent(PositionEvent("view attach anchor", circuitView->getViewManager().getPointerPosition()))) { event->accept(); return; }
 		}
-		if (circuitView.getEventRegister().doEvent(PositionEvent("tool primary activate", circuitView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("tool primary activate", circuitView->getViewManager().getPointerPosition()))) event->accept();
 	} else if (event->button() == Qt::RightButton) {
-		if (circuitView.getEventRegister().doEvent(PositionEvent("tool secondary activate", circuitView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("tool secondary activate", circuitView->getViewManager().getPointerPosition()))) event->accept();
 	}
 }
 
 void CircuitViewWidget::mouseReleaseEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
-		if (circuitView.getEventRegister().doEvent(PositionEvent("view dettach anchor", circuitView.getViewManager().getPointerPosition()))) event->accept();
-		else if (circuitView.getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("view dettach anchor", circuitView->getViewManager().getPointerPosition()))) event->accept();
+		else if (circuitView->getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView->getViewManager().getPointerPosition()))) event->accept();
 	} else if (event->button() == Qt::RightButton) {
-		if (circuitView.getEventRegister().doEvent(PositionEvent("tool secondary deactivate", circuitView.getViewManager().getPointerPosition()))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("tool secondary deactivate", circuitView->getViewManager().getPointerPosition()))) event->accept();
 	}
 }
 
@@ -318,7 +316,7 @@ void CircuitViewWidget::mouseMoveEvent(QMouseEvent* event) {
 	QPoint point = event->pos();
 	if (insideWindow(point)) { // inside the widget
 		Vec2 viewPos = pixelsToView(point);
-		if (circuitView.getEventRegister().doEvent(PositionEvent("pointer move", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("pointer move", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 	}
 }
 
@@ -327,44 +325,45 @@ void CircuitViewWidget::enterEvent(QEnterEvent* event) {
 	setFocus(Qt::MouseFocusReason);
 
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
+	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void CircuitViewWidget::leaveEvent(QEvent* event) {
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
-	if (circuitView.getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
+	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 void CircuitViewWidget::save() {
-    std::cout << "Trying to save\n";
-    if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-        if (!filePath.isEmpty()) {
-            fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
-        }
-    }
+	logInfo("Trying to save Circuit");
+	if (fileManager) {
+		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+		if (!filePath.isEmpty()) {
+			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
+			logInfo("Successfully saved Circuit to: " + filePath.toStdString());
+		}
+	}
 }
 
 // for drag and drop load directly onto this circuit view widget
 void CircuitViewWidget::load(const QString& filePath) {
-    if (!fileManager) return;
+	if (!fileManager) return;
 
-    std::shared_ptr<ParsedCircuit> parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         return;
     }
 
-    CircuitValidator validator(*parsed, false); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed, circuitView->getBackend()->getBlockDataManager()); // validate and dont merge dependencies
     if (parsed->isValid()){
-        circuitView.getToolManager().setPendingPreviewData(parsed);
-        circuitView.getToolManager().changeTool("Preview Placement");
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView.getToolManager().getCurrentTool().get());
+		circuitView->getToolManager().selectTool("preview placement tool");
+        // circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
         if (previewTool) {
-            previewTool->setBackend(circuitView.getBackend());
+            previewTool->setParsedCircuit(parsed);
         }else{
-            std::cout << "Preview tool failed to cast\n";
+	        logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
         }
     }else {
         qWarning("Parsed circuit is not valid to be placed");
@@ -382,7 +381,7 @@ void CircuitViewWidget::dropEvent(QDropEvent* event) {
 	QPoint point = event->position().toPoint();
 	if (insideWindow(point)) {
 		Vec2 viewPos = pixelsToView(point);
-		if (circuitView.getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView.getViewManager().viewToGrid(viewPos)))) event->accept();
+		if (circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 
 		// Get the list of URLs from the event
 		const QList<QUrl> urls = event->mimeData()->urls();

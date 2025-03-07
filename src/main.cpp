@@ -11,19 +11,38 @@
 #include "gpu/vulkanManager.h"
 
 void setupVulkan();
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
 
 int main(int argc, char* argv[]) {
-	// Create QT Application
+	// Create QT application
 	logInfo("Creating QT Application");
 	QApplication app(argc, argv);
 	app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 	app.setStyle(QStyleFactory::create("Fusion"));
 	logInfo("Successfully created QT Application");
 
-	// initialize vulkan
+	// set up Vulkan
 	setupVulkan();
+
+	// set up KDDockWidgets
+	KDDockWidgets::MainWindowOptions options = setUpKDDockWidgets();
 	
-	// Initialize KDDockWidgets
+	// Create main window
+	logInfo("Creating Main Window");
+	MainWindow window(options);
+	window.show();
+	logInfo("Successfully created Main Window");
+
+	// run app
+	int out = app.exec();
+
+	// shutdown vulkan
+	Vulkan::getSingleton().destroy();
+
+	return out;
+}
+
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets() {
 	logInfo("Initializing KDDockWidgets and setting flags");
 	KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 	KDDockWidgets::Config::self().setSeparatorThickness(5);
@@ -44,19 +63,7 @@ int main(int argc, char* argv[]) {
 	// options |= KDDockWidgets::MainWindowOption_HasCentralWidget;
 	logInfo("Successfully initialized KDDockWidgets and set flags");
 	
-	// Create Main Window
-	logInfo("Creating Main Window");
-	MainWindow window(options);
-	window.show();
-	logInfo("Successfully created Main Window");
-
-	// run app
-	int out = app.exec();
-
-	// shutdown vulkan
-	Vulkan::getSingleton().destroy();
-
-	return out;
+	return options;
 }
 
 void setupVulkan() {
