@@ -32,9 +32,9 @@ Each "subgroup" is defined after a "grouping"
 
 # preferenceManager.cpp
 This only matters if you want to add a setting value
-- Depending on the grouping you add, go to `src/gui/preferences/preferenceManager.h` to add to the std::vector
+- Depending on the grouping you add, go to `src/util/config/config.cpp` to add to the std::vector
 - there's a vector for each group, choice one and add:
- - at the top of the file is a ** FORM TYPE ** area, add in the
+ - at the top of the file is a **FORM TYPE** area, add in the
 
 
   
