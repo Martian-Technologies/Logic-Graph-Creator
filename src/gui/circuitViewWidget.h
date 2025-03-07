@@ -12,13 +12,14 @@ class QTimer;
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
 #include "circuitView/circuitView.h"
+#include "keybinds/keybindManager.h"
 #include "ui_circuitViewUi.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget : public QWidget {
 	Q_OBJECT
 public:
-    CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager);
+    CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager);
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
@@ -37,8 +38,6 @@ protected:
 	void paintEvent(QPaintEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
-	void keyPressEvent(QKeyEvent* event) override;
-	void keyReleaseEvent(QKeyEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 	void mouseReleaseEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
@@ -57,6 +56,8 @@ private:
 	std::unique_ptr<CircuitView> circuitView;
 	std::unique_ptr<QtRenderer> renderer;
     CircuitFileManager* fileManager;
+
+	KeybindManager* keybindManager;
 
 	// update loop
 	QTimer* updateLoopTimer;
