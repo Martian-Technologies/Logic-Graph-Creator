@@ -12,9 +12,10 @@ If you would like to update types with a unique one, change varient type or ask 
 To access these values: `#include "util/config/config.toml"`
 
 Get Values: `Settings::get<"type">(key)`
-- when you get a value, you must provide a type, view 'multiTypeMap.h' for types, that is the same value that is returned
+- when you get a value, you must provide a type, view 'config.cpp' for types, that is the same value that is returned
 - key is a string defined as `group.subgroup.key_name`
-Set Values: `Settings::set(key, value)`
+
+Set Values: `Settings::set(group.subgroup.key_name, value)`
 - when setting a value, the value must be of same type that its set as in config.toml 
 
 # config.toml
