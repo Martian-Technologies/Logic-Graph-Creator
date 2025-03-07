@@ -20,10 +20,10 @@ Set Values: `Settings::set(group.subgroup.key_name, value)`
 
 # config.toml
 This file will hold all values that the user should be able to modify within particular parameters, found in `resources/config.toml`
-`
+``` toml
 [graphical.block_color]
 AND = "0xff00ff"
-`
+```
 Each line will be under a "grouping.subgrouping"
 
 Each "subgroup" is defined after a "grouping"
@@ -42,8 +42,17 @@ This only matters if you want to add a setting value
 ## Formatting
 ``` toml
 # Example
+[general.general]
+visual = "Dark"
+
 [graphical.block_color]
-AND = [ "color" ]
+AND = "0x111111" 
+```
+``` cpp
+// requires #include "gui/circuitView/renderer/color.h" 
+Color color_obj = Settings::get<Color>("graphical.block_color.AND");
+// or
+std::string visual_string = Settings::get<std::string>("general.general.visual");
 ```
 
 
