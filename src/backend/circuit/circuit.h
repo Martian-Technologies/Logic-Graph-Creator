@@ -24,7 +24,7 @@ public:
     inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
-	inline const CircuitBlockData& getCircuitBlockData() const { return circuitBlockData; }
+	std::shared_ptr<const CircuitBlockData> getCircuitBlockData() const { return circuitBlockData.lock(); };
 
 	/* ----------- listener ----------- */
 
@@ -104,7 +104,7 @@ private:
 
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
-	CircuitBlockData circuitBlockData;
+	std::weak_ptr<CircuitBlockData> circuitBlockData;
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	
