@@ -49,19 +49,19 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	// create keybind shortcuts and connect them
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
 	connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() { 
-		circuitView.getCircuit()->undo(); 
+		circuitView->getCircuit()->undo(); 
 	});
 	connect(keybindManager->createShortcut("Redo", this), &QShortcut::activated, this, [this]() { 
-		circuitView.getCircuit()->redo(); 
+		circuitView->getCircuit()->redo(); 
 	});
 	connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() { 
-		circuitView.getEventRegister().doEvent(Event("tool rotate block ccw"));
+		circuitView->getEventRegister().doEvent(Event("tool rotate block ccw"));
 	});
 	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
-		circuitView.getEventRegister().doEvent(Event("tool rotate block cw"));
+		circuitView->getEventRegister().doEvent(Event("tool rotate block cw"));
 	});
-  connect(keybindManager->createShortcut("Toggle Interactive", this), &QShortcut::activated, this, [this]() { 
-		circuitView.getCircuit()->toggleInteractive(); 
+  connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
+		circuitView->toggleInteractive(); 
 	});
 	
 	// connect buttons and actions
@@ -292,7 +292,7 @@ void CircuitViewWidget::save() {
 	if (fileManager) {
 		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 		if (!filePath.isEmpty()) {
-			fileManager->saveToFile(filePath.toStdString(), circuitView.getCircuit());
+			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
 			logInfo("Successfully saved Circuit to: " + filePath.toStdString());
 		}
 	}

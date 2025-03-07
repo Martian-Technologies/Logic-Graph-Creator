@@ -31,6 +31,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	keybindManager.setKeybind("Redo", "Y");
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
 	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("ToggleInteractive", "I");
 
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
