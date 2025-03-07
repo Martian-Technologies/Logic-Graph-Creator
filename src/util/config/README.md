@@ -41,7 +41,7 @@ This only matters if you want to add a setting value
 
 ## Formatting
 ``` toml
-// Example
+# Example
 [graphical.block_color]
 AND = [ "color" ]
 ```
