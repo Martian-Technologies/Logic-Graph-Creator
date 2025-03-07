@@ -30,7 +30,7 @@ Each "subgroup" is defined after a "grouping"
 - **Groupings:** graphical, appearance, keybinds (more to come)
 - **Subgrouping:** these you'll define or append to previously created subgroupings, when adding please go to the next section for general instructions 
 
-# preferenceManager.cpp
+# config.cpp
 This only matters if you want to add a setting value
 - Depending on the grouping you add, go to `src/util/config/config.cpp` to add to the std::vector
 - there's a vector for each group, choice one and add:
