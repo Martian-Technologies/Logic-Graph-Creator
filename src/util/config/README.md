@@ -5,6 +5,7 @@ Generic file that currently holds 5 types:
 - string
 - color
 - float
+
 If you would like to update types with a unique one, change varient type or ask `@Pokun`
 
 ## Accessing Values
