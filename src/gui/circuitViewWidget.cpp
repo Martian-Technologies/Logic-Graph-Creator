@@ -17,13 +17,13 @@
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
 
-CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager) :
-	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager) {
+CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
+	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
 
 	// create circuitView
 	renderer = std::make_unique<QtRenderer>();
 	circuitView = std::make_unique<CircuitView>(renderer.get());
-	
+    
 	// qt settings
 	setFocusPolicy(Qt::StrongFocus);
 	grabGesture(Qt::PinchGesture);
@@ -46,9 +46,25 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	renderer->resize(w, h);
 	renderer->initializeTileSet(":logicTiles.png");
 
+	// create keybind shortcuts and connect them
+	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
+	connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getCircuit()->undo(); 
+	});
+	connect(keybindManager->createShortcut("Redo", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getCircuit()->redo(); 
+	});
+	connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getEventRegister().doEvent(Event("tool rotate block ccw"));
+	});
+	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getEventRegister().doEvent(Event("tool rotate block cw"));
+	});
+  connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
+		circuitView->toggleInteractive(); 
+	});
+	
 	// connect buttons and actions
-	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &CircuitViewWidget::save);
 	connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
 	connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
 	connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
@@ -229,29 +245,6 @@ void CircuitViewWidget::wheelEvent(QWheelEvent* event) {
 	}
 }
 
-void CircuitViewWidget::keyPressEvent(QKeyEvent* event) {
-	if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Z) {
-		circuitView->getCircuit()->undo();
-		event->accept();
-	} else if (/*event->modifiers() & Qt::MetaModifier && */event->key() == Qt::Key_Y) {
-		circuitView->getCircuit()->redo();
-		event->accept();
-	} else if (event->key() == Qt::Key_Q) {
-		if (circuitView->getEventRegister().doEvent(Event("tool rotate block ccw"))) {
-			event->accept();
-		}
-	} else if (event->key() == Qt::Key_E) {
-		if (circuitView->getEventRegister().doEvent(Event("tool rotate block cw"))) {
-			event->accept();
-		}
-	} else if (event->key() == Qt::Key_I) {
-		circuitView->toggleInteractive();
-		event->accept();
-	}
-}
-
-void CircuitViewWidget::keyReleaseEvent(QKeyEvent* event) { }
-
 void CircuitViewWidget::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		if (QGuiApplication::keyboardModifiers().testFlag(Qt::AltModifier)) {
@@ -295,13 +288,14 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 void CircuitViewWidget::save() {
-    std::cout << "Trying to save\n";
-    if (fileManager) {
-        QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-        if (!filePath.isEmpty()) {
-            fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
-        }
-    }
+	logInfo("Trying to save Circuit");
+	if (fileManager) {
+		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+		if (!filePath.isEmpty()) {
+			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
+			logInfo("Successfully saved Circuit to: " + filePath.toStdString());
+		}
+	}
 }
 
 // for drag and drop load directly onto this circuit view widget

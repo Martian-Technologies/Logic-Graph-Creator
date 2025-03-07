@@ -25,6 +25,14 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
+	// set default keybinds
+	keybindManager.setKeybind("Save", "Ctrl+S");
+	keybindManager.setKeybind("Undo", "Z");
+	keybindManager.setKeybind("Redo", "Y");
+	keybindManager.setKeybind("BlockRotateCCW", "Q");
+	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("ToggleInteractive", "I");
+
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();
@@ -303,7 +311,7 @@ CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
 	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager, &keybindManager);
 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
 	circuitViews.push_back(circuitViewWidget);
 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
