@@ -17,54 +17,58 @@
 CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
 BlockType stringToBlockType(const std::string& str) {
-    if (str == "NONE") return NONE;
-    if (str == "AND") return AND;
-    if (str == "OR") return OR;
-    if (str == "XOR") return XOR;
-    if (str == "NAND") return NAND;
-    if (str == "NOR") return NOR;
-    if (str == "XNOR") return XNOR;
-    if (str == "BUTTON") return BUTTON;
-    if (str == "TICK_BUTTON") return TICK_BUTTON;
-    if (str == "SWITCH") return SWITCH;
-    if (str == "CONSTANT") return CONSTANT;
-    if (str == "LIGHT") return LIGHT;
-    return NONE;
+    if (str == "NONE") return BlockType::NONE;
+    if (str == "AND") return BlockType::AND;
+    if (str == "OR") return BlockType::OR;
+    if (str == "XOR") return BlockType::XOR;
+    if (str == "NAND") return BlockType::NAND;
+    if (str == "NOR") return BlockType::NOR;
+    if (str == "XNOR") return BlockType::XNOR;
+    if (str == "BUFFER") return BlockType::BUFFER;
+    if (str == "TRISTATE_BUFFER") return BlockType::TRISTATE_BUFFER;
+    if (str == "BUTTON") return BlockType::BUTTON;
+    if (str == "TICK_BUTTON") return BlockType::TICK_BUTTON;
+    if (str == "SWITCH") return BlockType::SWITCH;
+    if (str == "CONSTANT") return BlockType::CONSTANT;
+    if (str == "LIGHT") return BlockType::LIGHT;
+    return BlockType::NONE;
 }
 
 Rotation stringToRotation(const std::string& str) {
-    if (str == "ZERO") return ZERO;
-    if (str == "NINETY") return NINETY;
-    if (str == "ONE_EIGHTY") return ONE_EIGHTY;
-    if (str == "TWO_SEVENTY") return TWO_SEVENTY;
-    return ZERO;
+    if (str == "ZERO") return Rotation::ZERO;
+    if (str == "NINETY") return Rotation::NINETY;
+    if (str == "ONE_EIGHTY") return Rotation::ONE_EIGHTY;
+    if (str == "TWO_SEVENTY") return Rotation::TWO_SEVENTY;
+    return Rotation::ZERO;
 }
 
 std::string blockTypeToString(BlockType type) {
     switch (type) {
-        case NONE: return "NONE";
-        case AND: return "AND";
-        case OR: return "OR";
-        case XOR: return "XOR";
-        case NAND: return "NAND";
-        case NOR: return "NOR";
-        case XNOR: return "XNOR";
-        case BUTTON: return "BUTTON";
-        case TICK_BUTTON: return "TICK_BUTTON";
-        case SWITCH: return "SWITCH";
-        case CONSTANT: return "CONSTANT";
-        case LIGHT: return "LIGHT";
-        default: return "UNKNOWN";
+        case BlockType::NONE: return "NONE";
+        case BlockType::AND: return "AND";
+        case BlockType::OR: return "OR";
+        case BlockType::XOR: return "XOR";
+        case BlockType::NAND: return "NAND";
+        case BlockType::NOR: return "NOR";
+        case BlockType::XNOR: return "XNOR";
+        case BlockType::BUFFER: return "BUFFER";
+        case BlockType::TRISTATE_BUFFER: return "TRISTATE_BUFFER";
+        case BlockType::BUTTON: return "BUTTON";
+        case BlockType::TICK_BUTTON: return "TICK_BUTTON";
+        case BlockType::SWITCH: return "SWITCH";
+        case BlockType::CONSTANT: return "CONSTANT";
+        case BlockType::LIGHT: return "LIGHT";
+        default: return "NONE";
     }
 }
 
 std::string rotationToString(Rotation rotation) {
     switch (rotation) {
-        case ZERO: return "ZERO";
-        case NINETY: return "NINETY";
-        case ONE_EIGHTY: return "ONE_EIGHTY";
-        case TWO_SEVENTY: return "TWO_SEVENTY";
-        default: return "UNKNOWN";
+        case Rotation::ZERO: return "ZERO";
+        case Rotation::NINETY: return "NINETY";
+        case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
+        case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
+        default: return "ZERO";
     }
 }
 
@@ -442,7 +446,7 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
 
     std::unordered_set<std::string> validOpenCircuitsTypes =
         {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
-        "Switch", "Button", "Clock", "LED", "NOTGate", "BUFGate"};
+        "BUFGate", "Switch", "Button", "Clock", "LED", "NOTGate"};
 
     // filter blocks to only include specified types
     std::unordered_map<int, OpenCircuitsBlockInfo> filteredBlocks;
@@ -488,9 +492,9 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
 
     std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
         {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
-        {"XNORGate", "XNOR"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
+        {"XNORGate", "XNOR"}, {"BUFGate", "BUFFER"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
+        {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
         {"NOTGate", "NOR"}, // NOR for not
-        {"BUFGate", "OR"}, // OR for buf
     };
 
     // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
