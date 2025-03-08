@@ -25,17 +25,24 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	setWindowTitle(tr("Gatality"));
 	setWindowIcon(QIcon(":/gateIcon.ico"));
 
+	// set default keybinds
+	keybindManager.setKeybind("Save", "Ctrl+S");
+	keybindManager.setKeybind("Undo", "Z");
+	keybindManager.setKeybind("Redo", "Y");
+	keybindManager.setKeybind("BlockRotateCCW", "Q");
+	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("ToggleInteractive", "I");
+
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();
-	evaluator_id_t evalId1 = *backend.createEvaluator(id);
     
 	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
     logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	backend.linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evalId1, Address());
 	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
+	
 	// create default hotbar and selector
 	openNewSelectorWindow();
 
@@ -57,11 +64,11 @@ void MainWindow::setUpMenuBar() {
 	menubar->addMenu(windowMenu);
 	menubar->addMenu(fileMenu);
 
-	QAction* newHotbarAction = windowMenu->addAction(QStringLiteral("New Hotbar"));
+	// QAction* newHotbarAction = windowMenu->addAction(QStringLiteral("New Hotbar"));
 	QAction* newSelectorAction = windowMenu->addAction(QStringLiteral("New Selector"));
 	QAction* newCircuitViewAction = windowMenu->addAction(QStringLiteral("New Circuit View"));
 
-	connect(newHotbarAction, &QAction::triggered, this, &MainWindow::openNewHotbarWindow);
+	// connect(newHotbarAction, &QAction::triggered, this, &MainWindow::openNewHotbarWindow);
 	connect(newSelectorAction, &QAction::triggered, this, &MainWindow::openNewSelectorWindow);
 	connect(newCircuitViewAction, &QAction::triggered, this, &MainWindow::openNewCircuitViewWindow);
 
@@ -109,7 +116,7 @@ void MainWindow::updateLoadIntoMenu() {
 
 	subMenu->clear();
 	for (std::pair<QWidget*, CircuitViewWidget*> p : activeWidgets) {
-		CircuitView<QtRenderer>* circuitView = p.second->getCircuitView();
+		CircuitView* circuitView = p.second->getCircuitView();
 		Circuit* circuit = circuitView->getCircuit();
 		if (!circuit) continue; // "None"
 		QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitNameNumber()));
@@ -172,7 +179,7 @@ void MainWindow::loadCircuit() {
 		return;
 	}
 
-	CircuitValidator validator(*parsed);
+	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
 		circuit_id_t id = backend.createCircuit();
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
@@ -192,7 +199,7 @@ void MainWindow::loadCircuit() {
 
 // Loads the primary circuit onto an existing circuit, where the user places down the primary.
 // All dependencies are still loaded into their own circuits, upon the placement of the primary.
-void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
+void MainWindow::loadCircuitInto(CircuitView* circuitView) {
 	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 	if (filePath.isEmpty()) return;
 
@@ -203,7 +210,7 @@ void MainWindow::loadCircuitInto(CircuitView<QtRenderer>* circuitView) {
         return;
     }
 
-    CircuitValidator validator(*parsed); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed, backend.getBlockDataManager()); // validate and dont merge dependencies
     if (parsed->isValid()){
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
@@ -284,7 +291,8 @@ void MainWindow::exportProject() {
 }
 
 void MainWindow::openNewSelectorWindow() {
-	SelectorWindow* selector = new SelectorWindow();
+	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager());
+	selector->updateBlockList();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
 	connect(selector, &SelectorWindow::selectedModeChange, this, &MainWindow::setMode);
@@ -292,18 +300,18 @@ void MainWindow::openNewSelectorWindow() {
 	addDock(selector, KDDockWidgets::Location_OnLeft);
 }
 
-void MainWindow::openNewHotbarWindow() {
-	HotbarWindow* selector = new HotbarWindow();
-	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
-	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
-	addDock(selector, KDDockWidgets::Location_OnBottom);
-}
+// void MainWindow::openNewHotbarWindow() {
+// 	HotbarWindow* selector = new HotbarWindow();
+// 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
+// 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
+// 	addDock(selector, KDDockWidgets::Location_OnBottom);
+// }
 
 CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
 	Ui::CircuitViewUi* circuitViewUi = new Ui::CircuitViewUi();
 	circuitViewUi->setupUi(w);
-	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager);
+	CircuitViewWidget* circuitViewWidget = new CircuitViewWidget(w, circuitViewUi, &circuitFileManager, &keybindManager);
 	backend.linkCircuitView(circuitViewWidget->getCircuitView());
 	circuitViews.push_back(circuitViewWidget);
 	circuitViewUi->verticalLayout_2->addWidget(circuitViewWidget);
@@ -336,7 +344,8 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	return QObject::eventFilter(obj, event);
 }
 
-void MainWindow::setBlock(BlockType blockType) {
+void MainWindow::setBlock(std::string blockPath) {
+	BlockType blockType = backend.getBlockDataManager()->getBlockType(blockPath);
 	backend.getToolManagerManager().setBlock(blockType);
 }
 

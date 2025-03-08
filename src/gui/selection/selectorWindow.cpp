@@ -1,7 +1,7 @@
 #include "selectorWindow.h"
 #include "ui_selector.h"
 
-SelectorWindow::SelectorWindow(QWidget* parent) : QWidget(parent), ui(new Ui::Selector) {
+SelectorWindow::SelectorWindow(const BlockDataManager* blockDataManager, QWidget* parent) : blockDataManager(blockDataManager), QWidget(parent), ui(new Ui::Selector) {
 	// Load the UI file
 	ui->setupUi(this);
 
@@ -22,11 +22,40 @@ void SelectorWindow::updateToolModeOptions(const std::vector<std::string>* modes
 	}
 }
 
+void SelectorWindow::updateBlockList() {
+	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
+		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
+
+		QList<QString> parts = QString::fromStdString(blockDataManager->getPath((BlockType)blockType)).split("/");
+		parts.push_front("Blocks");
+		parts.push_back(QString::fromStdString(blockDataManager->getName((BlockType)blockType)));
+		
+		QTreeWidgetItem* parentItem = ui->SelectorTree->invisibleRootItem();
+		for (const QString& part : parts) {
+			// find item with name
+			QTreeWidgetItem* foundItem = nullptr;
+			for (unsigned int i = 0; i < parentItem->childCount(); i++) {
+				if (parentItem->child(i)->text(0) == part) {
+					foundItem = parentItem->child(i);
+					break;;
+				}
+			}
+			// add if does not exixts
+			if (!foundItem) {
+				foundItem = new QTreeWidgetItem();
+				foundItem->setText(0, part);
+				parentItem->addChild(foundItem);
+			}
+			// next level
+			parentItem = foundItem;
+		}
+	}
+}
+
 void SelectorWindow::updateSelected() {
 	for (QTreeWidgetItem* item : ui->SelectorTree->selectedItems()) {
 		if (item) {
-			QString str = item->text(0);
-			QString pathName = str;
+			QString pathName = item->text(0);
 			if (item->childCount() > 0) continue;
 			bool isBlock;
 			QTreeWidgetItem* tmp = item;
@@ -44,18 +73,7 @@ void SelectorWindow::updateSelected() {
 				}
 			}
 			if (isBlock) {
-				BlockType type = NONE;
-				if (str == "And") type = BlockType::AND;
-				else if (str == "Or") type = BlockType::OR;
-				else if (str == "Xor") type = BlockType::XOR;
-				else if (str == "Nand") type = BlockType::NAND;
-				else if (str == "Nor") type = BlockType::NOR;
-				else if (str == "Xnor") type = BlockType::XNOR;
-				else if (str == "Switch") type = BlockType::SWITCH;
-				else if (str == "Button") type = BlockType::BUTTON;
-				else if (str == "Tick Button") type = BlockType::TICK_BUTTON;
-				else if (str == "Light") type = BlockType::LIGHT;
-				emit selectedBlockChange(type);
+				emit selectedBlockChange(pathName.toStdString());
 			} else {
 				emit selectedToolChange(pathName.toStdString());
 			}

@@ -3,8 +3,9 @@
 #include "util/emptyVector.h"
 #include "blockContainer.h"
 #include "block/block.h"
+#include "block/blockDataManager.h"
 
-bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) {
+bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) const {
 	for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {
 		for (cord_t y = positionSmall.y; y <= positionLarge.y; y++) {
 			if (checkCollision(Position(x, y))) return true;
@@ -13,66 +14,17 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 	return false;
 }
 
-bool BlockContainer::checkCollision(const Position& position, Rotation rotation, BlockType blockType) {
+bool BlockContainer::checkCollision(const Position& position, Rotation rotation, BlockType blockType) const {
 	return checkCollision(position, position + Vector(
-		getBlockWidth(blockType, rotation) - 1,
-		getBlockHeight(blockType, rotation) - 1
+		blockDataManager->getBlockWidth(blockType, rotation) - 1,
+		blockDataManager->getBlockHeight(blockType, rotation) - 1
 	));
 }
 
-bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
-	if (
-		blockType == BlockType::NONE ||
-		blockType == BlockType::BLOCK ||
-		blockType >= BlockType::TYPE_COUNT ||
-		checkCollision(position, rotation, blockType)
-		) return false;
-	block_id_t id = getNewId();
-	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
-	iter->second.setId(id);
-	iter->second.setPosition(position);
-	iter->second.setRotation(rotation);
-	placeBlockCells(&iter->second);
-	return true;
-}
-
-bool BlockContainer::tryRemoveBlock(const Position& position) {
-	Cell* cell = getCell(position);
-	if (cell == nullptr) return false;
-	auto iter = blocks.find(cell->getBlockId());
-	Block& block = iter->second;
-	removeBlockCells(&block);
-	// make sure to remove all connections from this block
-	for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
-		for (auto& connectionEnd : block.getConnectionContainer().getConnections(i)) {
-			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
-			if (otherBlock) otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), i));
-		}
-	}
-	block.destroy();
-	blocks.erase(iter);
-	return true;
-}
-
-bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	if (checkCollision(position, block->getRotation(), block->type())) return false;
-	removeBlockCells(block);
-	block->setPosition(position);
-	placeBlockCells(block);
-	return true;
-}
-
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
-	if (
-		blockType == BlockType::NONE ||
-		blockType == BlockType::BLOCK ||
-		blockType == BlockType::TYPE_COUNT ||
-		checkCollision(position, rotation, blockType)
-		) return false;
+	if (!blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType)) return false;
 	block_id_t id = getNewId();
-	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockType))).first;
+	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
 	iter->second.setId(id);
 	iter->second.setPosition(position);
 	iter->second.setRotation(rotation);
@@ -127,13 +79,6 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 //     return block->getRawData();
 // }
 
-bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	block->setRawData(data);
-	return true;
-}
-
 bool BlockContainer::trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
@@ -184,38 +129,6 @@ const std::optional<ConnectionEnd> BlockContainer::getOutputConnectionEnd(const 
 	return std::make_optional(ConnectionEnd(block->id(), connectionData.first));
 }
 
-bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
-	Block* input = getBlock_(inputPosition);
-	if (!input) return false;
-	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
-	if (!inputSuccess) return false;
-	Block* output = getBlock_(outputPosition);
-	if (!output) return false;
-	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
-	if (!outputSuccess) return false;
-	if (input->getConnectionContainer().tryMakeConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
-		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
-		return true;
-	}
-	return false;
-}
-
-bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const Position& inputPosition) {
-	Block* input = getBlock_(inputPosition);
-	if (!input) return false;
-	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
-	if (!inputSuccess) return false;
-	Block* output = getBlock_(outputPosition);
-	if (!output) return false;
-	auto [outputConnectionId, outputSuccess] = output->getOutputConnectionId(outputPosition);
-	if (!outputSuccess) return false;
-	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
-		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
-		return true;
-	}
-	return false;
-}
-
 bool BlockContainer::tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference) {
 	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
@@ -251,8 +164,8 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 }
 
 void BlockContainer::placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId) {
-	for (cord_t x = 0; x < getBlockWidth(type, rotation); x++) {
-		for (cord_t y = 0; y < getBlockHeight(type, rotation); y++) {
+	for (cord_t x = 0; x < blockDataManager->getBlockWidth(type, rotation); x++) {
+		for (cord_t y = 0; y < blockDataManager->getBlockHeight(type, rotation); y++) {
 			insertCell(position + Vector(x, y), Cell(blockId));
 		}
 	}

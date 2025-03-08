@@ -9,6 +9,7 @@ class QGraphicsScene;
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "circuitView/renderer/qtRenderer.h"
+#include "keybinds/keybindManager.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -23,14 +24,14 @@ public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 	
 	// actions
-	void setBlock(BlockType blockType);
+	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
 	void setMode(std::string tool);
     void updateSaveMenu(bool saveAs);
     void updateLoadIntoMenu();
     void saveCircuit(circuit_id_t id, bool saveAs);
     void loadCircuit();
-    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget);
+    void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
 	void openNewHotbarWindow();
@@ -49,6 +50,7 @@ private:
     QMenu* loadIntoSubMenu;
     QMenu* loadMergedSubMenu;
 	Backend backend;
+	KeybindManager keybindManager;
 	std::vector<CircuitViewWidget*> circuitViews;
     std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;

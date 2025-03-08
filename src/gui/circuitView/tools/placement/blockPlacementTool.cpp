@@ -10,6 +10,7 @@ BlockPlacementTool::BlockPlacementTool() {
 }
 
 void BlockPlacementTool::activate() {
+	CircuitTool::activate();
 	if (activePlacementTool)
 		toolStackInterface->pushTool(activePlacementTool);
 }

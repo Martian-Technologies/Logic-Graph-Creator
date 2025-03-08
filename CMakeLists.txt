@@ -131,21 +131,34 @@ endif()
 
 if (Gatality_BuildTests)
 # ============================================ GTESTING ============================================
-	message("HI")
+	message("Doing Testing")
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
 	enable_testing()
 
 	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 	set(TEST_FILES)
+	# file(GLOB_RECURSE TEST_FILES
+	# 	"${TEST_DIR}/*.cpp"
+	# 	"${TEST_DIR}/*.h"
+	# 	"${SOURCE_DIR}/logging/*"
+	# 	"${SOURCE_DIR}/util/*"
+	# )
 	file(GLOB_RECURSE TEST_FILES
+		# "${UI_DIR}/*.ui"
+		# "${UI_DIR}/*.qrc"
+		"${SOURCE_DIR}/backend/*.cpp"
+		"${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/computerAPI/*.cpp"
+		"${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/keybinds/*.cpp"
+		"${SOURCE_DIR}/logging/*.cpp"
+		"${SOURCE_DIR}/util/*.cpp"
 		"${TEST_DIR}/*.cpp"
-		"${TEST_DIR}/*.h"
-		"${SOURCE_DIR}/backend/*"
-		"${SOURCE_DIR}/logging/*"
-		"${SOURCE_DIR}/util/*"
 	)
 
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+
+	# add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
 	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
 	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")

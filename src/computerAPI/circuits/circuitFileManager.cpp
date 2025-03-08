@@ -18,7 +18,6 @@ CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : c
 
 BlockType stringToBlockType(const std::string& str) {
     if (str == "NONE") return NONE;
-    if (str == "BLOCK") return BLOCK;
     if (str == "AND") return AND;
     if (str == "OR") return OR;
     if (str == "XOR") return XOR;
@@ -30,10 +29,6 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "SWITCH") return SWITCH;
     if (str == "CONSTANT") return CONSTANT;
     if (str == "LIGHT") return LIGHT;
-    if (str == "CUSTOM") return CUSTOM;
-    if (str == "TYPE_COUNT") return TYPE_COUNT;
-
-    // else it is a custom block, return none for now
     return NONE;
 }
 
@@ -48,7 +43,6 @@ Rotation stringToRotation(const std::string& str) {
 std::string blockTypeToString(BlockType type) {
     switch (type) {
         case NONE: return "NONE";
-        case BLOCK: return "BLOCK";
         case AND: return "AND";
         case OR: return "OR";
         case XOR: return "XOR";
@@ -60,8 +54,6 @@ std::string blockTypeToString(BlockType type) {
         case SWITCH: return "SWITCH";
         case CONSTANT: return "CONSTANT";
         case LIGHT: return "LIGHT";
-        case CUSTOM: return "CUSTOM";
-        case TYPE_COUNT: return "TYPE_COUNT";
         default: return "UNKNOWN";
     }
 }
@@ -120,7 +112,7 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
 
     if (token != "version_2") {
         logError("Invalid circuit file version, expecting version_2", "FileManager");
-        return false;
+        //return false;
     }
 
     int blockId, connId;

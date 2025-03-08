@@ -8,7 +8,7 @@ void PreviewPlacementTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	
-	if (!active || !pointerInView) return;
+	if (!active || !pointerInView || !parsedCircuit) return;
 
 
 	// note that getMinPos will return an FVector but will have valid integer coordinates.

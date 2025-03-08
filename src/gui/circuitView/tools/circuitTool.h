@@ -21,7 +21,7 @@ protected:
 	void unregisterFunction(std::string eventName);
 	void unregisterFunctions();
 	
-	virtual void reset() { }
+	virtual void reset() { elementCreator.clear(); }
 	virtual void activate();
 	virtual void deactivate() { unregisterFunctions(); }
 	
@@ -42,7 +42,7 @@ protected:
 
 private:
 	// This will also tell the tool to reset.
-	void setup(ElementCreator elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
+	void setup(Renderer* elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
 	void unsetup();
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
