@@ -85,7 +85,7 @@ LoadFunction CircuitFileManager::getLoadFunction(const std::string& path) {
     }
 }
 
-bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
     LoadFunction loadFunc = getLoadFunction(path);
     if (loadFunc) {
         return loadFunc(path, outParsed);
@@ -93,7 +93,7 @@ bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<P
     return false;
 }
 
-bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedCircuit outParsed) {
     logInfo("Parsing Gatality Circuit File (.cir)", "FileManager");
 
     std::ifstream inputFile(path);
@@ -416,40 +416,13 @@ void resolveOpenCircuitsConnections(bool input, int startId,
     }
 }
 
-bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed){
-    logInfo("Parsing Open Circuits File (.circuit)", "FileManager");
-
-    QFile inputFile(QString::fromStdString(path));
-    if (!inputFile.open(QIODevice::ReadOnly)) {
-        logError("Couldn't open file at path: " + path, "FileManager");
-        return false;
-    }
-
-    QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
-    if (mainDoc.isNull()) {
-        logError("Couldn't open parse json at: " + path, "FileManager");
-        return false;
-    }
-
-    QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
-    if (saveDoc.isNull()) {
-        logError("Couldn't open parse \"content\" of: " + path, "FileManager");
-        return false;
-    }
-
-    std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data
-    std::unordered_map<int,std::pair<FPosition,double>> transforms; // id to block position and angle in radians
-    std::unordered_map<int,int> portParents;                        // ref id to ref id
-    std::unordered_map<int,std::pair<int,int>> wires;               // id to ref id pair
-
-    parseOpenCircuitsJson(saveDoc.object(), transforms, portParents, wires, blocks);
-
+void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo>& blocks, 
+                            std::unordered_map<int,OpenCircuitsBlockInfo>& filteredBlocks){
     std::unordered_set<std::string> validOpenCircuitsTypes =
         {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
         "BUFGate", "Switch", "Button", "Clock", "LED", "NOTGate"};
 
     // filter blocks to only include specified types
-    std::unordered_map<int, OpenCircuitsBlockInfo> filteredBlocks;
     for (const std::pair<const int, OpenCircuitsBlockInfo>& p : blocks) {
         if (validOpenCircuitsTypes.count(p.second.type)) {
             filteredBlocks[p.first] = p.second;
@@ -488,8 +461,10 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
         }
         p.second.outputBlocks.assign(resolvedConnectionBlocks.begin(), resolvedConnectionBlocks.end());
     }
+}
 
-
+void fillParsedCircuit(std::unordered_map<int,OpenCircuitsBlockInfo>& filteredBlocks, 
+                       SharedParsedCircuit outParsed){
     std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
         {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
         {"XNORGate", "XNOR"}, {"BUFGate", "BUFFER"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
@@ -525,5 +500,40 @@ bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::share
                     });
         }
     }
+}
+
+bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, SharedParsedCircuit outParsed){
+    logInfo("Parsing Open Circuits File (.circuit)", "FileManager");
+
+    QFile inputFile(QString::fromStdString(path));
+    if (!inputFile.open(QIODevice::ReadOnly)) {
+        logError("Couldn't open file at path: " + path, "FileManager");
+        return false;
+    }
+
+    QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
+    if (mainDoc.isNull()) {
+        logError("Couldn't open parse json at: " + path, "FileManager");
+        return false;
+    }
+
+    QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
+    if (saveDoc.isNull()) {
+        logError("Couldn't open parse \"content\" of: " + path, "FileManager");
+        return false;
+    }
+
+    std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data
+    std::unordered_map<int,std::pair<FPosition,double>> transforms; // id to block position and angle in radians
+    std::unordered_map<int,int> portParents;                        // ref id to ref id
+    std::unordered_map<int,std::pair<int,int>> wires;               // id to ref id pair
+
+    parseOpenCircuitsJson(saveDoc.object(), transforms, portParents, wires, blocks);
+
+    std::unordered_map<int,OpenCircuitsBlockInfo> filteredBlocks;
+    filterAndResolveBlocks(blocks, filteredBlocks);
+
+    fillParsedCircuit(filteredBlocks, outParsed);
+
     return true;
 }
