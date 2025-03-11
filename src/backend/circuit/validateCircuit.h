@@ -27,6 +27,7 @@ private:
     std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
+    bool validateBlockTypes();
     bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();

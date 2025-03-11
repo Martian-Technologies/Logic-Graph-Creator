@@ -46,7 +46,19 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     QJsonObject circuitData = contents["1"].toObject()["data"].toObject();
     
     // track all of the ICs
-    QJsonArray ics = circuitData["ics"].toObject()["data"].toArray();
+    QJsonArray ics;
+    QJsonObject icsJson = circuitData["ics"].toObject();
+    if(!icsJson.contains("data")) {
+        // ics listed in array that is referenced
+        if (!icsJson.contains("ref")){
+            logError("Unknown DigitalCircuitDesigner format");
+        }
+        // find the object of this array
+        ics = contents[icsJson["ref"].toString()].toObject()["data"].toArray();
+    } else {
+        // the ics are listed inline
+        ics = icsJson["data"].toArray();
+    }
     for (const QJsonValue& ic : ics) {
         QJsonObject icObj = ic.toObject();
         if (icObj.contains("ref")){
@@ -64,7 +76,19 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
         }
     }
 
-    QJsonArray compObjs = circuitData["objects"].toObject()["data"].toArray();
+    QJsonArray compObjs;
+    QJsonObject compsJson = circuitData["objects"].toObject();
+    if(!compsJson.contains("data")) {
+        // components are referenced to json array object
+        if (!compsJson.contains("ref")){
+            logError("Unknown DigitalCircuitDesigner format");
+        }
+        // find the object of this array
+        compObjs = contents[compsJson["ref"].toString()].toObject()["data"].toArray();
+    } else {
+        // the components are listed inline
+        compObjs = compsJson["data"].toArray();
+    }
     for (const QJsonValue& c : compObjs) {
         QJsonObject obj = c.toObject();
         if (obj.contains("ref")){

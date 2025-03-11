@@ -4,14 +4,24 @@
 void CircuitValidator::validate() {
     bool isValid = true;
 
+    isValid = isValid && validateBlockTypes();
     isValid = isValid && validateDependencies();
-
     isValid = isValid && setBlockPositionsInt();
     isValid = isValid && handleInvalidConnections();
     isValid = isValid && setOverlapsUnpositioned();
     isValid = isValid && handleUnpositionedBlocks();
 
     parsedCircuit.valid = isValid;
+}
+
+bool CircuitValidator::validateBlockTypes() {
+    for (std::pair<const block_id_t, ParsedCircuit::BlockData>& p: parsedCircuit.blocks) {
+        if (p.second.type == BlockType::NONE) {
+            p.second.type = BlockType::BUFFER;
+            //return false;
+        }
+    }
+    return true;
 }
 
 bool CircuitValidator::validateDependencies() {
