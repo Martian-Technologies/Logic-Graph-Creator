@@ -1,23 +1,28 @@
-#include "OpenCircuitsParser.h"
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonArray>
+#include <QtCore/QFile>
+
+#include "openCircuitsParser.h"
+#include "circuitFileManager.h"
 
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit){
-    logInfo("Parsing Open Circuits File (.circuit)", "FileManager");
+    logInfo("Parsing Open Circuits File (.circuit)", "OpenCircuitsParser");
 
     QFile inputFile(QString::fromStdString(path));
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        logError("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: " + path, "OpenCircuitsParser");
         return false;
     }
 
     QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
     if (mainDoc.isNull()) {
-        logError("Couldn't open parse json at: " + path, "FileManager");
+        logError("Couldn't open parse json at: " + path, "OpenCircuitsParser");
         return false;
     }
 
     QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
     if (saveDoc.isNull()) {
-        logError("Couldn't open parse \"content\" of: " + path, "FileManager");
+        logError("Couldn't open parse \"content\" of: " + path, "OpenCircuitsParser");
         return false;
     }
 
@@ -178,10 +183,10 @@ void OpenCircuitsParser::processBlockJson(int id, OpenCircuitsBlockInfo& info) {
         parseTransform(objData["transform"].toObject(), info);
 
     if (objData.contains("inputs"))
-        processOpenCircuitsPorts(objData["inputs"].toObject(), false, info);
+        processOpenCircuitsPorts(objData["inputs"].toObject(), false, info, id);
 
     if (objData.contains("outputs"))
-        processOpenCircuitsPorts(objData["outputs"].toObject(), true, info);
+        processOpenCircuitsPorts(objData["outputs"].toObject(), true, info, id);
 }
 
 
@@ -238,7 +243,7 @@ void OpenCircuitsParser::parseTransform(const QJsonObject& transform, OpenCircui
     }
 }
 
-void OpenCircuitsParser::processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info) {
+void OpenCircuitsParser::processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId) {
 
     if (!ports.contains("data")) return;
     QJsonObject portData = ports["data"].toObject();
@@ -251,8 +256,10 @@ void OpenCircuitsParser::processOpenCircuitsPorts(const QJsonObject& ports, bool
     for (const QJsonValue& portVal : portsArray) {
         QJsonObject portObj = portVal.toObject();
         if (!portObj.contains("ref")) {
-            logError("Port object does not have a reference, inline declaration");
-            // I don't think that this should ever occur
+            // inline declaration of port this may need to be preprocessed before ever calling processOpenCircuitsPorts for any block
+            // though the only case I have found where this happens is where the port parent is just [thisId] = [thisId] which has no purpose
+            QJsonObject parent = portObj["data"].toObject()["parent"].toObject();
+            portParents[thisId] = parent["ref"].toString().toInt();
             continue;
         }
         int portId = portObj["ref"].toString().toInt();
@@ -375,7 +382,7 @@ void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
 
         std::unordered_map<int, OpenCircuitsBlockInfo*>::const_iterator it = allBlocks.find(currentId);
         if (it == allBlocks.end()) {
-            logWarning("Block is not found when resolving open circuit connections", "FileManager");
+            logWarning("Block is not found when resolving open circuit connections", "OpenCircuitsParser");
             continue;
         }
 

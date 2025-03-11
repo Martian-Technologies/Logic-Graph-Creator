@@ -1,9 +1,26 @@
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include <QtCore/QFile>
+#ifndef openCircuitsParser_h
+#define openCircuitsParser_h
 
-#include "circuitFileManager.h"
+#include <QtCore/QJsonObject>
+#include <list>
+
+#include "backend/circuit/parsedCircuit.h"
+#include "backend/position/position.h"
+
+struct OpenCircuitsBlockInfo {
+    std::string type;
+    FPosition position;
+    double angle; // in radians
+    std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
+    std::vector<int> outputBlocks;
+    std::string icReference;
+};
+
+struct ICData {
+    std::unordered_map<int, OpenCircuitsBlockInfo> components;
+    std::vector<int> inputPorts;
+    std::vector<int> outputPorts;
+};
 
 class OpenCircuitsParser {
 public:
@@ -19,7 +36,7 @@ public:
     void parseTransform(const QJsonObject& transform, OpenCircuitsBlockInfo& info);
 
     // Finds the connections between blocks that are described via the "wires"
-    void processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info);
+    void processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId);
 
     // Filters and resolves across all blocks, even within the components of ICData's
     void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo*>& outFiltered);
@@ -57,3 +74,5 @@ private:
         {"IC", "BUFFER"}, // IC will be buffer for now, until custom blocks
     };
 };
+
+#endif
