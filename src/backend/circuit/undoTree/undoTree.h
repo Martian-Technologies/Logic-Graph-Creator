@@ -25,9 +25,16 @@ public:
      */
     iterator insert(const iterator& it, DifferenceSharedPtr diff);
 
+    /**
+     * @brief Clears the contents of the UndoTree.
+     */
     void clear();
+
+    /**
+     * @brief Removes all elements and branches after a given element (inclusive).
+     * @param begin An iterator to the first element to remove.
+     */
     void prune(const iterator& begin);
-    void prune(const iterator& begin, const iterator& end);
 
     iterator begin();
     iterator end();
@@ -40,16 +47,18 @@ private:
 
 struct UndoTree::Branch {
     struct Node {
-        UndoTree::Branch::Node(DifferenceSharedPtr diff);
+        Node(DifferenceSharedPtr diff);
+        ~Node();
         DifferenceSharedPtr diff;
         std::vector<Branch*>* branches;
     };
 
     Branch(UndoTree* tree);
-    Branch(UndoTree* tree, Node* parent, DifferenceSharedPtr diff);
+    Branch(UndoTree* tree, Branch* parentBranch, int parentNode, DifferenceSharedPtr diff);
 
     UndoTree* tree;
-    Node* parentNode;
+    Branch* parentBranch;
+    int parentNode;
     std::vector<Node> nodes;
 };
 
@@ -58,20 +67,27 @@ class UndoTree::iterator {
 public:
     /**
      * @brief Goes to the next diff along the specified branch
-     * @param branch The branch to move along
+     * @param whichBranch The branch to move into
      * @returns An iterator to the next diff
      */
-    iterator next(int branch = -1) const;
+    iterator next(int whichBranch = -1) const;
 
     /**
      * @brief Goes to the previous diff
      * @returns An iterator to the previous diff
      */
     iterator prev() const;
+
+    /**
+     * @brief Finds the number of branches that split off from the current diff.
+     */
+    int numBranches() const;
+
+    bool operator==(const iterator& other) const;
 private:
-    iterator(Branch* branch, Branch::Node* node);
+    iterator(Branch* branch, int pos);
     Branch* branch;
-    Branch::Node* pt;
+    int pos;
 };
 
 #endif
