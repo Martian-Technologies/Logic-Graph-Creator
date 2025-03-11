@@ -121,7 +121,7 @@ void CircuitViewWidget::updateLoop() {
 		const Backend* backend = circuitView->getBackend();
 		if (backend) {
 			for (auto pair : backend->getCircuitManager()) {
-				QString name = QString::fromStdString(pair.second->getCircuitName());
+				QString name = QString::fromStdString(pair.second->getCircuitNameNumber());
 				if (circuitSelector->findText(name) == -1) {
 					circuitSelector->insertItem(circuitSelector->count() - 1, name, pair.second->getCircuitId());
 				}
@@ -129,7 +129,7 @@ void CircuitViewWidget::updateLoop() {
 		}
 		const Circuit* circuit = circuitView->getCircuit();
 		if (circuit != nullptr) {
-			QString name = QString::fromStdString(circuit->getCircuitName());
+			QString name = QString::fromStdString(circuit->getCircuitNameNumber());
 			int index = circuitSelector->findText(name);
 			if (index != -1) { // -1 for not found
 				circuitSelector->setCurrentIndex(index);
