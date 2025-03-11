@@ -94,8 +94,11 @@ void Vulkan::createInstance() {
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
-	VkInstanceCreateInfo instanceCreateInfo {};
-	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	VpInstanceCreateInfo instanceCreateInfo {};
+	instanceCreateInfo.pEnabledFullProfiles = &profile;
+	instanceCreateInfo.enabledFullProfileCount = 1;
+	instanceCreateInfo.pCreateInfo = &createInfo;
+	result = vpCreateInstance(&instanceCreateInfo, nullptr, &)
 
 	// // confirm we have validation layers if we need them
 	// if (USE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
