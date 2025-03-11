@@ -1,3 +1,6 @@
+#include <QtCore/QFileInfo>
+#include <QtCore/QDir>
+
 #include "circuitFileManager.h"
 #include "OpenCircuitsParser.h"
 #include "util/uuid.h"

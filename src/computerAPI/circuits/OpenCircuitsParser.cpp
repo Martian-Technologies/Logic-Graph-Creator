@@ -29,7 +29,7 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
     fillParsedCircuit(filteredBlocks);
-    printParsedData();
+    //printParsedData();
     return true;
 }
 
