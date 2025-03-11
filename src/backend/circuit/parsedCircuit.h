@@ -81,6 +81,19 @@ public:
     void setFilePath(const std::string& fpath) { fullFilePath = fpath; }
     const std::string& getFilePath() const { return fullFilePath; }
 
+    void setName(const std::string& name) { importedCircuitName = name; }
+    const std::string& getName() const { return importedCircuitName; }
+
+    void setUUID(const std::string& uuid) { uuidFromLoad = uuid; }
+    const std::string& getUUID() const { return uuidFromLoad; }
+
+    void addCircuitNameUUID(const std::string& name, const std::string& uuid) {
+        circuitNameToUUID[name] = uuid;
+    }
+    const std::unordered_map<std::string, std::string>& getCircuitNameToUUID() const {
+        return circuitNameToUUID;
+    }
+
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
 
@@ -98,9 +111,14 @@ public:
 private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
+
     std::string fullFilePath;
+    std::string uuidFromLoad;
+    std::string importedCircuitName;
+    std::unordered_map<std::string, std::string> circuitNameToUUID;
     bool valid = true;
 
     std::unordered_map<std::string, SharedParsedCircuit> dependencies;

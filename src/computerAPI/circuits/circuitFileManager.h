@@ -1,6 +1,5 @@
 #ifndef circuitFileManager_h
 #define circuitFileManager_h
-#include <QString>
 #include "backend/circuit/circuitManager.h"
 #include "backend/circuit/parsedCircuit.h"
 
@@ -26,6 +25,13 @@ struct OpenCircuitsBlockInfo {
     double angle; // in radians
     std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
     std::vector<int> outputBlocks;
+    std::string icReference;
+};
+
+struct ICData {
+    std::unordered_map<int, OpenCircuitsBlockInfo> components;
+    std::vector<int> inputPorts;
+    std::vector<int> outputPorts;
 };
 
 BlockType stringToBlockType(const std::string& str);
