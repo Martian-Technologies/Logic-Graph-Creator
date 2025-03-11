@@ -84,6 +84,7 @@ public:
     int numBranches() const;
 
     bool operator==(const iterator& other) const;
+    bool operator!=(const iterator& other) const;
 private:
     iterator(Branch* branch, int pos);
     Branch* branch;

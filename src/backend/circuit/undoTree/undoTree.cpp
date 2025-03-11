@@ -117,6 +117,10 @@ bool UndoTree::iterator::operator==(const iterator& other) const {
     } else return this->pos == other.pos && this->branch == other.branch;
 }
 
+bool UndoTree::iterator::operator!=(const iterator& other) const {
+    return !(*this == other);
+}
+
 // ================================================================================================
 // Class UndoTree::Branch implementation
 
