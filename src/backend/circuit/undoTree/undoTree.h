@@ -66,15 +66,15 @@ class UndoTree::iterator {
     friend class UndoTree;
 public:
     /**
-     * @brief Goes to the next diff along the specified branch
-     * @param whichBranch The branch to move into
-     * @returns An iterator to the next diff
+     * @brief Goes to the next diff along the specified branch.
+     * @param whichBranch The branch to move into.
+     * @returns An iterator to the next diff.
      */
     iterator next(int whichBranch = -1) const;
 
     /**
-     * @brief Goes to the previous diff
-     * @returns An iterator to the previous diff
+     * @brief Goes to the previous diff.
+     * @returns An iterator to the previous diff.
      */
     iterator prev() const;
 
