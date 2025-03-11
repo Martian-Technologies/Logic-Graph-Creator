@@ -41,7 +41,7 @@ void VulkanBlockRenderer::render(VkCommandBuffer& commandBuffer, VkExtent2D& ren
 		scissor.offset = {0, 0};
 		scissor.extent = renderExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
+		
 		// bind vertex buffers
 		const CircuitBuffer& circuitBuffer = vertexBufferRing.getAvaiableBuffer();
 		VkBuffer vertexBuffers[] = { circuitBuffer.blockBuffer.buffer };

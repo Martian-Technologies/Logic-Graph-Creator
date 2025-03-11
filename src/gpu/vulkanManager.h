@@ -6,6 +6,9 @@
 
 #include "gpu/vulkanDevice.h"
 
+#define VK_CHECK(x) VulkanConfirmErrorStatus(x)
+void VulkanConfirmErrorStatus(VkResult x);
+
 class Vulkan {
 public:
 	Vulkan() = default;
@@ -80,8 +83,9 @@ private:
 // - [ ] New object management scheme to play nicer with RAII and be more safe
 //       -  Possibly RAII?
 //       -  Possibly deletion queue
+//       -  Vulkan profiles
 //       -  Builder pattern (for pipeline at least)
-// - [ ] Staging bfufer
+// - [ ] Staging buffers
 // - [ ] Use dynamic rendering extension to simplify code
 // - [ ] generate vertices on the gpu
 // - [ ] Don't draw directly to swapchain

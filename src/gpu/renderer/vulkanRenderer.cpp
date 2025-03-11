@@ -265,6 +265,7 @@ void VulkanRenderer::createRenderPass(SwapchainData& swapchain) {
 	renderPassInfo.pSubpasses = &subpass;
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
+	
 	if (vkCreateRenderPass(Vulkan::getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}

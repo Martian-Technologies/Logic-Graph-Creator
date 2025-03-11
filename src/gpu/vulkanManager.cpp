@@ -2,8 +2,18 @@
 
 #include "gpu/vulkanPlatformBridge.h"
 
+#include <vulkan/vk_enum_string_helper.h>
+
 #include <cassert>
 #include <cstring>
+
+void VulkanConfirmErrorStatus(VkResult x) {
+	if (x != VK_SUCCESS) {
+		std::string msg = "Call failed with result: " + std::string(string_VkResult(x));
+		logFatalError(msg, "Vulkan");
+		throw std::runtime_error(msg);
+	}
+}
 
 // Constants ---------------------------------------------------------------------------
 const std::vector<const char*> deviceExtensions = {
