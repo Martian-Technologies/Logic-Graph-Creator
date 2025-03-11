@@ -1,69 +1,65 @@
-#include <QTextStream>
-#include <QFileInfo>
-#include <QString>
-#include <QFile>
-#include <QDir>
-
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include <QtCore/QJsonValue>
-#include <QtCore/QFile>
-
+#include <QtCore/QFileInfo>
+#include <QtCore/QDir>
 
 #include "circuitFileManager.h"
+#include "OpenCircuitsParser.h"
+#include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
 BlockType stringToBlockType(const std::string& str) {
-    if (str == "NONE") return NONE;
-    if (str == "AND") return AND;
-    if (str == "OR") return OR;
-    if (str == "XOR") return XOR;
-    if (str == "NAND") return NAND;
-    if (str == "NOR") return NOR;
-    if (str == "XNOR") return XNOR;
-    if (str == "BUTTON") return BUTTON;
-    if (str == "TICK_BUTTON") return TICK_BUTTON;
-    if (str == "SWITCH") return SWITCH;
-    if (str == "CONSTANT") return CONSTANT;
-    if (str == "LIGHT") return LIGHT;
-    return NONE;
+    if (str == "NONE") return BlockType::NONE;
+    if (str == "AND") return BlockType::AND;
+    if (str == "OR") return BlockType::OR;
+    if (str == "XOR") return BlockType::XOR;
+    if (str == "NAND") return BlockType::NAND;
+    if (str == "NOR") return BlockType::NOR;
+    if (str == "XNOR") return BlockType::XNOR;
+    if (str == "BUFFER") return BlockType::BUFFER;
+    if (str == "TRISTATE_BUFFER") return BlockType::TRISTATE_BUFFER;
+    if (str == "BUTTON") return BlockType::BUTTON;
+    if (str == "TICK_BUTTON") return BlockType::TICK_BUTTON;
+    if (str == "SWITCH") return BlockType::SWITCH;
+    if (str == "CONSTANT") return BlockType::CONSTANT;
+    if (str == "LIGHT") return BlockType::LIGHT;
+    return BlockType::NONE;
 }
 
 Rotation stringToRotation(const std::string& str) {
-    if (str == "ZERO") return ZERO;
-    if (str == "NINETY") return NINETY;
-    if (str == "ONE_EIGHTY") return ONE_EIGHTY;
-    if (str == "TWO_SEVENTY") return TWO_SEVENTY;
-    return ZERO;
+    if (str == "ZERO") return Rotation::ZERO;
+    if (str == "NINETY") return Rotation::NINETY;
+    if (str == "ONE_EIGHTY") return Rotation::ONE_EIGHTY;
+    if (str == "TWO_SEVENTY") return Rotation::TWO_SEVENTY;
+    return Rotation::ZERO;
 }
 
 std::string blockTypeToString(BlockType type) {
     switch (type) {
-        case NONE: return "NONE";
-        case AND: return "AND";
-        case OR: return "OR";
-        case XOR: return "XOR";
-        case NAND: return "NAND";
-        case NOR: return "NOR";
-        case XNOR: return "XNOR";
-        case BUTTON: return "BUTTON";
-        case TICK_BUTTON: return "TICK_BUTTON";
-        case SWITCH: return "SWITCH";
-        case CONSTANT: return "CONSTANT";
-        case LIGHT: return "LIGHT";
-        default: return "UNKNOWN";
+        case BlockType::NONE: return "NONE";
+        case BlockType::AND: return "AND";
+        case BlockType::OR: return "OR";
+        case BlockType::XOR: return "XOR";
+        case BlockType::NAND: return "NAND";
+        case BlockType::NOR: return "NOR";
+        case BlockType::XNOR: return "XNOR";
+        case BlockType::BUFFER: return "BUFFER";
+        case BlockType::TRISTATE_BUFFER: return "TRISTATE_BUFFER";
+        case BlockType::BUTTON: return "BUTTON";
+        case BlockType::TICK_BUTTON: return "TICK_BUTTON";
+        case BlockType::SWITCH: return "SWITCH";
+        case BlockType::CONSTANT: return "CONSTANT";
+        case BlockType::LIGHT: return "LIGHT";
+        default: return "NONE";
     }
 }
 
 std::string rotationToString(Rotation rotation) {
     switch (rotation) {
-        case ZERO: return "ZERO";
-        case NINETY: return "NINETY";
-        case ONE_EIGHTY: return "ONE_EIGHTY";
-        case TWO_SEVENTY: return "TWO_SEVENTY";
-        default: return "UNKNOWN";
+        case Rotation::ZERO: return "ZERO";
+        case Rotation::NINETY: return "NINETY";
+        case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
+        case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
+        default: return "ZERO";
     }
 }
 
@@ -80,7 +76,7 @@ LoadFunction CircuitFileManager::getLoadFunction(const std::string& path) {
     }
 }
 
-bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
     LoadFunction loadFunc = getLoadFunction(path);
     if (loadFunc) {
         return loadFunc(path, outParsed);
@@ -88,7 +84,7 @@ bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<P
     return false;
 }
 
-bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
+bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedCircuit outParsed) {
     logInfo("Parsing Gatality Circuit File (.cir)", "FileManager");
 
     std::ifstream inputFile(path);
@@ -109,9 +105,9 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
     char cToken;
     inputFile >> token;
 
-    if (token != "version_1") {
-        logError("Invalid circuit file version", "FileManager");
-        return false;
+    if (token != "version_2") {
+        logError("Invalid circuit file version, expecting version_2", "FileManager");
+        //return false;
     }
 
     int blockId, connId;
@@ -129,17 +125,50 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, std::shared_p
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fullPath.toStdString(), "FileManager");
             if (loadFromFile(fullPath.toStdString(), dependency)){
-                logInfo("Successfully imported dependency: " + importFileName, "FileManager");
                 outParsed->addDependency(importFileName, dependency);
+                outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
+                logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "FileManager");
             }else{
                 logError("Failed to import dependency: " + importFileName, "FileManager");
             }
+            continue;
+        } else if (token == "Circuit:") {
+            std::string circuitName;
+            inputFile >> std::quoted(circuitName);
+            outParsed->setName(circuitName);
+            logInfo("\tSet circuit: " + circuitName, "FileManager");
+            continue;
+        } else if (token == "UUID:") {
+            std::string uuid;
+            inputFile >> uuid;
+            outParsed->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
+            logInfo("\tSet UUID: " + uuid, "FileManager");
             continue;
         }
 
         inputFile >> blockId;
         inputFile >> token;
         blockType = stringToBlockType(token);
+
+        // Determine if block is a sub-circuit or primitive
+        if (blockType == BlockType::NONE){
+            if (token.front() != '"' || token.back() != '"') {
+                logError("Incorrect formatting of load file sub-circuit", "FileManager");
+                return false;
+            }
+            std::string circuitName = token.substr(1, token.size() - 2); // remove quotes
+            auto it = outParsed->getCircuitNameToUUID().find(circuitName);
+            if (it == outParsed->getCircuitNameToUUID().end()) {
+                logError("Circuit '" + circuitName + "' not imported due to save file formatting", "FileManager");
+                return false;
+            }
+            // Can't implement until custom blocks are added
+            std::getline(inputFile, token); // conn id 0
+            if (!token.starts_with("(connId:0)")){ logError("Invalid parsing with custom block"); return false; }
+            std::getline(inputFile, token); // conn id 1
+            if (!token.starts_with("(connId:1)")){ logError("Invalid parsing with custom block"); return false; }
+            continue;
+        }
 
         inputFile >> token;
         if (token == "null") posX = std::numeric_limits<float>::max();
@@ -185,7 +214,9 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
         return false;
     }
 
-    outputFile << "version_1\n";
+    outputFile  << "version_2\n"
+                << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
+                << "UUID: " << circuitPtr->getUUID() << '\n';;
 
     const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
     std::unordered_map<block_id_t, Block>::const_iterator itr = blockContainer->begin();
@@ -216,274 +247,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
     return true;
 }
 
-/* Open Circuits Parsing Below */
-
-void processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput,
-        const std::unordered_map<int,std::pair<int,int>>& wires,
-        const std::unordered_map<int,int>& portParents,
-        OpenCircuitsBlockInfo& info) {
-
-    if (!ports.contains("data")) return;
-    QJsonObject portData = ports.value("data").toObject();
-
-    if (!portData.contains("currentPorts")) return;
-
-    QJsonObject currentPorts = portData.value("currentPorts").toObject();
-    QJsonArray portsArray = currentPorts.value("data").toArray();
-
-    for (const QJsonValue& portVal : portsArray) {
-        QJsonObject portObj = portVal.toObject();
-        if (!portObj.contains("ref")) continue;
-        int portId = portObj.value("ref").toString().toInt();
-
-        for (const std::pair<int,std::pair<int,int>>& p : wires) {
-            const std::pair<int,int>& wire = p.second;
-
-            if (wire.first == portId || wire.second == portId) {
-                int otherPort = (wire.first == portId) ? wire.second : wire.first;
-
-                if (!portParents.count(otherPort)) continue;
-
-                std::unordered_map<int,int>::const_iterator itr = portParents.find(otherPort);
-                if (itr == portParents.end()) logWarning("Unable to find port parent other connection");
-
-                int otherBlock = itr->second;
-                if (isOutput)
-                    info.outputBlocks.push_back(otherBlock);
-                else
-                    info.inputBlocks.push_back(otherBlock);
-            }
-        }
-    }
-};
-
-void parseOpenCircuitsJson(
-    const QJsonObject& j,
-    std::unordered_map<int, std::pair<FPosition, double>>& transforms,
-    std::unordered_map<int, int>& portParents,
-    std::unordered_map<int, std::pair<int, int>>& wires,
-    std::unordered_map<int, OpenCircuitsBlockInfo>& blocks) {
-
-    // first pass: collect transforms and port relationships
-    for (const QString& id : j.keys()) {
-        QJsonValue dataVal = j.value(id);
-        if (!dataVal.isObject()) continue;
-        QJsonObject dataObj = dataVal.toObject();
-        QString type = dataObj.value("type").toString();
-
-        QJsonObject dataData = dataObj.value("data").toObject();
-        if (type == "Transform") {
-            QJsonObject posData = dataData.value("pos").toObject().value("data").toObject();
-            float x = static_cast<float>(posData.value("x").toDouble());
-            float y = static_cast<float>(posData.value("y").toDouble());
-            double angle = dataData.value("angle").toDouble();
-            transforms[id.toInt()] = {FPosition{x, y}, angle};
-
-        } else if (type == "DigitalInputPort" || type == "DigitalOutputPort") {
-            QJsonObject parent = dataData.value("parent").toObject();
-
-            // QJsonValue is strange and have to go string->int if it isnt an object
-            portParents[id.toInt()] = parent.value("ref").toString().toInt();
-        } else if (type == "DigitalWire") {
-            wires[id.toInt()] = {
-                dataData.value("p1").toObject().value("ref").toString().toInt(),
-                dataData.value("p2").toObject().value("ref").toString().toInt()
-            };
-        }
-    }
-
-    // second pass: process blocks
-    for (const QString& id : j.keys()) {
-        QJsonValue dataVal = j.value(id);
-        if (!dataVal.isObject()) continue;
-        QJsonObject dataObj = dataVal.toObject();
-        QString type = dataObj.value("type").toString();
-        if (type == "Transform") continue;
-
-        OpenCircuitsBlockInfo info;
-        info.type = type.toStdString();
-        info.angle = 0.0;
-        info.position = {0.0, 0.0};
-
-        QJsonObject dataData = dataObj.value("data").toObject();
-        if (dataData.contains("transform")) {
-            QJsonValue transformVal = dataData.value("transform");
-            if (transformVal.isObject()) {
-                QJsonObject transformObj = transformVal.toObject();
-                if (transformObj.contains("ref")) {
-                    int transformId = transformObj.value("ref").toString().toInt();
-                    std::unordered_map<int, std::pair<FPosition, double>>::iterator it = transforms.find(transformId);
-                    if (it != transforms.end()) {
-                        info.position = it->second.first;
-                        info.angle = it->second.second;
-                    }
-                } else {
-                    QJsonObject transformData = transformObj.value("data").toObject();
-                    QJsonObject pos = transformData.value("pos").toObject();
-                    QJsonObject posData = pos.value("data").toObject();
-                    info.position = {
-                        static_cast<float>(posData.value("x").toDouble()),
-                        static_cast<float>(posData.value("y").toDouble())
-                    };
-                    info.angle = transformData.value("angle").toDouble();
-                }
-            }
-        }
-
-        if (dataData.contains("inputs")) 
-            processOpenCircuitsPorts(dataData.value("inputs").toObject(), false, wires, portParents, info);
-        if (dataData.contains("outputs")) 
-            processOpenCircuitsPorts(dataData.value("outputs").toObject(), true, wires, portParents, info);
-
-        blocks[id.toInt()] = info;
-    }
-}
-
-void resolveOpenCircuitsConnections(bool input, int startId, 
-                               const std::unordered_set<std::string>& validOpenCircuitsTypes,
-                               const std::unordered_map<int, OpenCircuitsBlockInfo>& allParsedBlocks,
-                               std::unordered_set<int>& outResolvedConnectionBlocks) {
-    // run a bfs through all references to find all reachable valid block types
-    std::queue<int> q;
-    std::unordered_set<int> visited;
-
-    q.push(startId);
-    visited.insert(startId);
-
-    while (!q.empty()) {
-        int currentId = q.front(); q.pop();
-
-        std::unordered_map<int, OpenCircuitsBlockInfo>::const_iterator it = allParsedBlocks.find(currentId);
-        if (it == allParsedBlocks.end()) {
-            logWarning("Block is not found when resolving open circuit connections", "FileManager");
-            continue;
-        }
-
-        const OpenCircuitsBlockInfo& current = it->second;
-
-        if (validOpenCircuitsTypes.count(current.type)) {
-            outResolvedConnectionBlocks.insert(currentId);
-            continue;
-        }
-
-        const std::vector<int>& connectionBlocks = input ? current.inputBlocks : current.outputBlocks;
-        for (int block : connectionBlocks) {
-            if (!visited.count(block)) {
-                visited.insert(block);
-                q.push(block);
-            }
-        }
-    }
-}
-
-bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed){
-    logInfo("Parsing Open Circuits File (.circuit)", "FileManager");
-
-    QFile inputFile(QString::fromStdString(path));
-    if (!inputFile.open(QIODevice::ReadOnly)) {
-        logError("Couldn't open file at path: " + path, "FileManager");
-        return false;
-    }
-
-    QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
-    if (mainDoc.isNull()) {
-        logError("Couldn't open parse json at: " + path, "FileManager");
-        return false;
-    }
-
-    QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
-    if (saveDoc.isNull()) {
-        logError("Couldn't open parse \"content\" of: " + path, "FileManager");
-        return false;
-    }
-
-    std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data
-    std::unordered_map<int,std::pair<FPosition,double>> transforms; // id to block position and angle in radians
-    std::unordered_map<int,int> portParents;                        // ref id to ref id
-    std::unordered_map<int,std::pair<int,int>> wires;               // id to ref id pair
-
-    parseOpenCircuitsJson(saveDoc.object(), transforms, portParents, wires, blocks);
-
-    std::unordered_set<std::string> validOpenCircuitsTypes =
-        {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
-        "Switch", "Button", "Clock", "LED", "NOTGate", "BUFGate"};
-
-    // filter blocks to only include specified types
-    std::unordered_map<int, OpenCircuitsBlockInfo> filteredBlocks;
-    for (const std::pair<const int, OpenCircuitsBlockInfo>& p : blocks) {
-        if (validOpenCircuitsTypes.count(p.second.type)) {
-            filteredBlocks[p.first] = p.second;
-        }
-    }
-
-    // resolve inputs and outputs for each filtered block
-    for (std::pair<const int,OpenCircuitsBlockInfo>& p : filteredBlocks) {
-        // resolve inputs
-        std::unordered_set<int> resolvedConnectionBlocks;
-        for (int inputBlock : p.second.inputBlocks) {
-            if (blocks.find(inputBlock) == blocks.end()) continue;
-
-            if (validOpenCircuitsTypes.count(blocks.at(inputBlock).type)) {
-                // direct connection from this block to another block
-                resolvedConnectionBlocks.insert(inputBlock);
-            } else {
-                // indirect connection from this block, to some series of DigitalNodes
-                resolveOpenCircuitsConnections(true, inputBlock, validOpenCircuitsTypes, blocks, resolvedConnectionBlocks);
-            }
-        }
-        p.second.inputBlocks.assign(resolvedConnectionBlocks.begin(), resolvedConnectionBlocks.end());
-
-        // resolve outputs
-        resolvedConnectionBlocks.clear();
-        for (int outputBlock : p.second.outputBlocks) {
-            if (blocks.find(outputBlock) == blocks.end()) continue;
-
-            if (validOpenCircuitsTypes.count(blocks.at(outputBlock).type)) {
-                // direct connection from this block to another block
-                resolvedConnectionBlocks.insert(outputBlock);
-            } else {
-                // indirect connection from this block, to some series of DigitalNodes
-                resolveOpenCircuitsConnections(false, outputBlock, validOpenCircuitsTypes, blocks, resolvedConnectionBlocks);
-            }
-        }
-        p.second.outputBlocks.assign(resolvedConnectionBlocks.begin(), resolvedConnectionBlocks.end());
-    }
-
-
-    std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
-        {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
-        {"XNORGate", "XNOR"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
-        {"NOTGate", "NOR"}, // NOR for not
-        {"BUFGate", "OR"}, // OR for buf
-    };
-
-    // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
-    const double posScale = 0.02;
-    for (const std::pair<const int, OpenCircuitsBlockInfo>& p: filteredBlocks) {
-        outParsed->addBlock(p.first, {p.second.position*posScale,
-                                Rotation(std::lrint(p.second.angle * (2 / M_PI)) % 4),
-                                stringToBlockType(openCircuitsTypeToName[p.second.type])});
-
-        for (int b : p.second.inputBlocks){
-            outParsed->addConnection({
-                    static_cast<block_id_t>(p.first),
-                    static_cast<connection_end_id_t>(0), // current connid will always be zero for inputs
-                    static_cast<block_id_t>(b),
-                    static_cast<connection_end_id_t>(filteredBlocks[b].inputBlocks.empty()?0:1)
-                    });
-            // other connection end id will be an output for the other, connection id 0 if it doesn't have any inputs
-        }
-
-        int outputConnId = !p.second.inputBlocks.empty();
-
-        for (int b : p.second.outputBlocks){
-            outParsed->addConnection({
-                    static_cast<block_id_t>(p.first),
-                    static_cast<connection_end_id_t>(outputConnId),
-                    static_cast<block_id_t>(b),
-                    static_cast<connection_end_id_t>(0) // outputs will always go to inputs
-                    });
-        }
-    }
-    return true;
+bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, SharedParsedCircuit outParsed){
+    OpenCircuitsParser parser;
+    return parser.parse(path, outParsed);
 }

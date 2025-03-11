@@ -1,6 +1,6 @@
 #include "backend.h"
 
-circuit_id_t Backend::createCircuit() { return circuitManager.createNewCircuit(); }
+circuit_id_t Backend::createCircuit(const std::string& uuid, const std::string& name) { return circuitManager.createNewCircuit(uuid, name); }
 
 std::optional<evaluator_id_t> Backend::createEvaluator(circuit_id_t circuitId) {
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);

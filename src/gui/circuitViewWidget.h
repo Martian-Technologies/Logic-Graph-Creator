@@ -9,10 +9,12 @@ class QKeyEvent;
 class QComboBox;
 class QTimer;
 
-#include "circuitView/circuitView.h"
+
 #include "gpu/renderer/vulkanRenderer.h"
-#include "computerAPI/circuits/circuitFileManager.h"
 #include "gpu/vulkanQtWindow.h"
+#include "computerAPI/circuits/circuitFileManager.h"
+#include "gui/qtRenderer.h"
+#include "backend/circuitView/circuitView.h"
 #include "keybinds/keybindManager.h"
 #include "ui_circuitViewUi.h"
 #include "util/vec2.h"

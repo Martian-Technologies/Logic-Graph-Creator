@@ -1,8 +1,7 @@
 #ifndef validateCircuit_h
 #define validateCircuit_h
 #include "backend/circuit/parsedCircuit.h"
-#include "backend/circuit/circuit.h"
-#include <vector>
+#include "backend/container/block/blockDataManager.h"
 
 // Will take in a ParsedCircuit and modify its "valid" state to whether or not it is valid.
 // The parsed circuit is only considered to be valid or invalid relative to itself,

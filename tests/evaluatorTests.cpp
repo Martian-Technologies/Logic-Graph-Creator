@@ -2,7 +2,8 @@
 
 // Note that logic simulator is tested separately
 void EvaluatorTest::SetUp() {
-    circuit = std::make_shared<Circuit>(1);
+    circuit_id_t circuitId = circuitManager.createNewCircuit();
+	circuit = circuitManager.getCircuit(circuitId);
     evaluator = std::make_shared<Evaluator>(1, circuit);
     i = 0;
 }

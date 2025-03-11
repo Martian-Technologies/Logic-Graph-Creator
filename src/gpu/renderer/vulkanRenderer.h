@@ -1,7 +1,7 @@
 #ifndef vulkanRenderer_h
 #define vulkanRenderer_h
 
-#include "gui/circuitView/renderer/renderer.h"
+#include "backend/circuitView/renderer/renderer.h"
 
 #include "vulkanBlockRenderer.h"
 #include "vulkanSwapchain.h"

@@ -1,7 +1,8 @@
 #include "circuitTests.h"
 
 void CircuitTest::SetUp() {
-	circuit = std::make_shared<Circuit>(1);
+	circuit_id_t circuitId = circuitManager.createNewCircuit();
+	circuit = circuitManager.getCircuit(circuitId);
     i = 0;
 }
 
@@ -150,10 +151,10 @@ TEST_F(CircuitTest, ConnectionRemoval) {
 TEST_F(CircuitTest, BlockTypePlacement) {
 	Position pos(i, i); ++i;
 	Rotation rot = Rotation::ZERO;
-	BlockType type = (BlockType)i;
+	BlockType type = (BlockType)(i%100);
 	
 	bool success = circuit->tryInsertBlock(pos, rot, type);
-	if (type == BlockType::NONE || type == BlockType::BLOCK || type == BlockType::TYPE_COUNT) {
+	if (!(circuitManager.getBlockDataManager()->blockExists(type))) {
 		ASSERT_FALSE(success);
 		const Block* block = circuit->getBlockContainer()->getBlock(pos);
 		ASSERT_EQ(block, nullptr);

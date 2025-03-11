@@ -189,18 +189,29 @@ endif() # Gatality_BuildApp
 
 if (Gatality_BuildTests)
 # ============================================ GTESTING ============================================
-	message("HI")
+	message("Doing Testing")
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
 	enable_testing()
 
 	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 	set(TEST_FILES)
+	# file(GLOB_RECURSE TEST_FILES
+	# 	"${TEST_DIR}/*.cpp"
+	# 	"${TEST_DIR}/*.h"
+	# 	"${SOURCE_DIR}/logging/*"
+	# 	"${SOURCE_DIR}/util/*"
+	# )
 	file(GLOB_RECURSE TEST_FILES
+		# "${UI_DIR}/*.ui"
+		# "${UI_DIR}/*.qrc"
+		"${SOURCE_DIR}/backend/*.cpp"
+		"${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/computerAPI/*.cpp"
+		"${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/keybinds/*.cpp"
+		"${SOURCE_DIR}/logging/*.cpp"
+		"${SOURCE_DIR}/util/*.cpp"
 		"${TEST_DIR}/*.cpp"
-		"${TEST_DIR}/*.h"
-		"${SOURCE_DIR}/backend/*"
-		"${SOURCE_DIR}/logging/*"
-		"${SOURCE_DIR}/util/*"
 	)
 
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
