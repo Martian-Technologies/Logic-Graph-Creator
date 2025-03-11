@@ -10,7 +10,7 @@
 #include <QEvent>
 #include <QMenu>
 
-#include "gui/circuitView/tools/other/previewPlacementTool.h"
+#include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "selection/selectorWindow.h"
 #include "selection/hotbarWindow.h"

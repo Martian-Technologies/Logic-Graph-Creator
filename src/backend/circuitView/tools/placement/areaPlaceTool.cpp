@@ -1,5 +1,5 @@
 #include "areaPlaceTool.h"
-#include "gui/circuitView/renderer/renderer.h"
+#include "backend/circuitView/renderer/renderer.h"
 
 void AreaPlaceTool::activate() {
 	BaseBlockPlacementTool::activate();

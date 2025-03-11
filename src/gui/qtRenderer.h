@@ -5,9 +5,8 @@
 #include <QPainter>
 #include <QColor>
 
-#include "../viewManager/viewManager.h"
-#include "renderer.h"
-#include "tileSet.h"
+#include "backend/circuitView/renderer/renderer.h"
+#include "backend/circuitView/renderer/tileSet.h"
 
 class QtRenderer : public Renderer {
 public:

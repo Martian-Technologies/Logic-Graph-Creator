@@ -1,6 +1,6 @@
 #include "previewPlacementTool.h"
 #include "backend/backend.h"
-#include "gui/circuitView/renderer/elementCreator.h"
+#include "backend/circuitView/renderer/elementCreator.h"
 #include <QMessageBox>
 
 // Preview is only shown for the primary parsed circuit, not the dependencies that will be created in a different circuit

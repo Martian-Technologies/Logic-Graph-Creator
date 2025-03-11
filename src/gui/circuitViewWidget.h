@@ -10,8 +10,8 @@ class QComboBox;
 class QTimer;
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "circuitView/renderer/qtRenderer.h"
-#include "circuitView/circuitView.h"
+#include "gui/qtRenderer.h"
+#include "backend/circuitView/circuitView.h"
 #include "keybinds/keybindManager.h"
 #include "ui_circuitViewUi.h"
 #include "util/vec2.h"

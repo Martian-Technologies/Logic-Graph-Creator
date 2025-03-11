@@ -1,7 +1,7 @@
 #ifndef backend_h
 #define backend_h
 
-#include "gui/circuitView/circuitView.h"
+#include "circuitView/circuitView.h"
 #include "evaluator/evaluatorManager.h"
 #include "circuit/circuitManager.h"
 #include "tools/toolManagerManager.h"
