@@ -16,6 +16,7 @@
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+#include "computerAPI/resources/resourceManager.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
 	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
@@ -50,8 +51,11 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
 		circuitView->getEventRegister().doEvent(Event("tool rotate block cw"));
 	});
-	connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
+  	connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() {
 		circuitView->toggleInteractive(); 
+	});
+  	connect(keybindManager->createShortcut("MakeCircuitBlock", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); 
 	});
 	
 	// connect buttons and actions

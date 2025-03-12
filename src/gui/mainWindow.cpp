@@ -9,13 +9,14 @@
 #include <QTreeView>
 #include <QCheckBox>
 #include <QMenuBar>
+#include <QTimer>
 #include <QEvent>
 #include <QMenu>
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
+#include "computerAPI/resources/resourceManager.h"
 #include "selection/selectorWindow.h"
-#include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
 
 MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
@@ -24,7 +25,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	// set up window
 	resize(900, 600);
 	setWindowTitle(tr("Gatality"));
-	setWindowIcon(QIcon(":/gateIcon.ico"));
+	setWindowIcon(QIcon((ResourceManager::getResourceDirectory() / "gateIcon.ico").c_str()));
 
 	// set default keybinds
 	keybindManager.setKeybind("Save", "Ctrl+S");
@@ -33,6 +34,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
 	keybindManager.setKeybind("BlockRotateCW", "E");
 	keybindManager.setKeybind("ToggleInteractive", "I");
+	keybindManager.setKeybind("MakeCircuitBlock", "B");
 
 	// create default circuit and evaluator
     logInfo("Creating default circuitViewWidget");
@@ -298,7 +300,7 @@ void MainWindow::exportProject() {
 }
 
 void MainWindow::openNewSelectorWindow() {
-	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager());
+	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager(), backend.getDataUpdateEventManager());
 	selector->updateBlockList();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
@@ -306,13 +308,6 @@ void MainWindow::openNewSelectorWindow() {
 	connect(this, &MainWindow::toolModeOptionsChanged, selector, &SelectorWindow::updateToolModeOptions);
 	addDock(selector, KDDockWidgets::Location_OnLeft);
 }
-
-// void MainWindow::openNewHotbarWindow() {
-// 	HotbarWindow* selector = new HotbarWindow();
-// 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
-// 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
-// 	addDock(selector, KDDockWidgets::Location_OnBottom);
-// }
 
 CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
@@ -363,4 +358,3 @@ void MainWindow::setTool(std::string tool) {
 void MainWindow::setMode(std::string mode) {
 	backend.getToolManagerManager().setMode(mode);
 }
-
