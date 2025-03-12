@@ -5,11 +5,14 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
+#include "computerAPI/resources/resourceManager.h"
 #include "gui/mainWindow.h"
 
 KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
 
 int main(int argc, char* argv[]) {
+	ResourceManager::initializeResourceDirectory();
+	
 	// Create QT application
 	logInfo("Creating QT Application");
 	QApplication app(argc, argv);

@@ -13,6 +13,7 @@
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
+#include "computerAPI/resources/resourceManager.h"
 #include "selection/selectorWindow.h"
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
@@ -23,7 +24,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	// set up window
 	resize(900, 600);
 	setWindowTitle(tr("Gatality"));
-	setWindowIcon(QIcon(":/gateIcon.ico"));
+	setWindowIcon(QIcon((ResourceManager::getResourceDirectory() / "gateIcon.ico").c_str()));
 
 	// set default keybinds
 	keybindManager.setKeybind("Save", "Ctrl+S");
