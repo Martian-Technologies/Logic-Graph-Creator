@@ -187,11 +187,15 @@ void MainWindow::loadCircuit() {
 
 		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
 		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position());
-
 		primaryNewCircuit->setSaved();
 		primaryNewCircuit->setSaveFilePath(filePath);
-		// all dependency circuits should be saved when created by preview tool
-		logInfo("Saved primary circuit: " + primaryNewCircuit->getSaveFilePath(), "FileLoading");
+
+        logInfo("Saved primary circuit: " + primaryNewCircuit->getSaveFilePath(), "FileLoading");
+
+        // create new circuits for the dependencies
+        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+        }
 	} else {
 		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
 	}
@@ -210,8 +214,13 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
         return;
     }
 
-    CircuitValidator validator(*parsed, backend.getBlockDataManager()); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed, backend.getBlockDataManager());
     if (parsed->isValid()){
+        // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
+        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+        }
+
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());

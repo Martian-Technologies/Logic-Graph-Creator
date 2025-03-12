@@ -6,7 +6,7 @@
 
 class GatalityParser {
 public:
-    GatalityParser() {};
+    GatalityParser() = default;
     bool load(const std::string& path, SharedParsedCircuit outParsedCircuit);
     bool save(const std::string& path, Circuit* circuitPtr);
 };

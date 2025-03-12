@@ -34,7 +34,7 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
     fillParsedCircuit(filteredBlocks);
-    //printParsedData();
+    printParsedData();
     return true;
 }
 
@@ -45,7 +45,7 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     // They should all exist within contents["1"]["data"], the DigitalCircuitDesigner
     // They should all be references, if they aren't make a new json object attached to the reference
     if (contents["1"].toObject()["type"] != "DigitalCircuitDesigner"){
-        logError("DigitalCircuitDesigner not found in open circuits save file");
+        logError("DigitalCircuitDesigner not found in open circuits save file", "OpenCircuitsParser");
         return;
     }
     QJsonObject circuitData = contents["1"].toObject()["data"].toObject();
@@ -56,7 +56,7 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     if(!icsJson.contains("data")) {
         // ics listed in array that is referenced
         if (!icsJson.contains("ref")){
-            logError("Unknown DigitalCircuitDesigner format");
+            logError("Unknown DigitalCircuitDesigner format", "OpenCircuitsParser");
         }
         // find the object of this array
         ics = contents[icsJson["ref"].toString()].toObject()["data"].toArray();
@@ -86,7 +86,7 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     if(!compsJson.contains("data")) {
         // components are referenced to json array object
         if (!compsJson.contains("ref")){
-            logError("Unknown DigitalCircuitDesigner format");
+            logError("Unknown DigitalCircuitDesigner format", "OpenCircuitsParser");
         }
         // find the object of this array
         compObjs = contents[compsJson["ref"].toString()].toObject()["data"].toArray();
@@ -97,7 +97,11 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     for (const QJsonValue& c : compObjs) {
         QJsonObject obj = c.toObject();
         if (obj.contains("ref")){
-            int icRef = obj["ref"].toString().toInt();
+            bool ok;
+            int icRef = obj["ref"].toString().toInt(&ok); // stoi
+            if (!ok) {
+                logError("Bad stoi from: " +obj["ref"].toString().toStdString(), "OpenCircuitsParser");
+            }
             componentReferences.push_back(icRef);
         } else{
             // inline definition of a block, save it in a new reference
@@ -165,12 +169,12 @@ void OpenCircuitsParser::processBlockJson(int id, OpenCircuitsBlockInfo& info) {
         QJsonObject icJsonData = objData["data"].toObject();
         if (icJsonData.contains("ref")){
             // link the ICData reference that this IC instance uses
-            info.icReference = icJsonData["ref"].toString().toStdString();
+            info.icReference = icJsonData["ref"].toString().toInt();
         } else {
             // inline definition of a new ICData
             contents[QString::number(newReferenceID)] = icJsonData;
             ICDataReferences.push_back(newReferenceID);
-            info.icReference = std::to_string(newReferenceID);
+            info.icReference = newReferenceID;
 
             ICData icData;
             processICDataJson(newReferenceID, icData);
@@ -187,6 +191,10 @@ void OpenCircuitsParser::processBlockJson(int id, OpenCircuitsBlockInfo& info) {
 
     if (objData.contains("outputs"))
         processOpenCircuitsPorts(objData["outputs"].toObject(), true, info, id);
+
+    if (type == "IC") {
+        usedIcDatas.insert(info.icReference);
+    }
 }
 
 
@@ -229,7 +237,7 @@ void OpenCircuitsParser::parseTransform(const QJsonObject& transform, OpenCircui
             info.position = it->second.first;
             info.angle = it->second.second;
         } else{
-            logError("Could not find Transform Reference Data: " + std::to_string(transformId));
+            logError("Could not find Transform Reference Data: " + std::to_string(transformId), "OpenCircuitsParser");
         }
     } else {
         QJsonObject transformData = transform["data"].toObject();
@@ -313,21 +321,6 @@ void OpenCircuitsParser::filterAndResolveBlocks(std::unordered_map<int, OpenCirc
             resolveInputsAndOutputs(p.second, allBlocks);
         }
     }
-
-    // remove invalid blocks (DigitalNodes) from icData
-    // TODO: fix bc slow, probably do this during another loop, or maybe we don't ever do it.
-    // we can't delete them when adding the components to allBlocks because allBlocks uses
-    // the addresses, bc copying would be slow.
-    for (std::pair<const int, ICData>& p: icDataMap){
-        auto itr = p.second.components.begin();
-        while (itr != p.second.components.end()){
-            if (!validOpenCircuitsTypes.count(itr->second.type)){
-                itr = p.second.components.erase(itr);
-            } else {
-                ++itr;
-            }
-        }
-    }
 }
 
 void OpenCircuitsParser::resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks) {
@@ -406,60 +399,95 @@ void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
 
 void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCircuitsBlockInfo*>& filteredBlocks) {
 
-    // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
-    const double posScale = 0.02;
-    for (const std::pair<int, OpenCircuitsBlockInfo*>& p: filteredBlocks) {
-        outParsed->addBlock(p.first, {p.second->position*posScale,
-                                Rotation(std::lrint(p.second->angle * (2 / M_PI)) % 4),
-                                stringToBlockType(openCircuitsTypeToName[p.second->type])});
+    // if icBlockSpace is nullptr, then use filteredBlocks
+    auto fillParsedBlock = [&](SharedParsedCircuit pc, int id, const OpenCircuitsBlockInfo* block, const std::unordered_map<int, OpenCircuitsBlockInfo>* icBlockSpace) {
+        pc->addBlock(id, {block->position*posScale,
+                Rotation(std::lrint(block->angle * (2 / M_PI)) % 4),
+                stringToBlockType(openCircuitsTypeToName[block->type])});
 
-        for (int b : p.second->inputBlocks){
-            outParsed->addConnection({
-                    static_cast<block_id_t>(p.first),
+        for (int b : block->inputBlocks){
+            const OpenCircuitsBlockInfo& otherBlock = icBlockSpace ? icBlockSpace->at(b) : *filteredBlocks.at(b);
+            int otherConnectionId = otherBlock.inputBlocks.empty() ? 0 : 1;
+
+            pc->addConnection({
+                    static_cast<block_id_t>(id),
                     static_cast<connection_end_id_t>(0), // current connid will always be zero for inputs
                     static_cast<block_id_t>(b),
-                    static_cast<connection_end_id_t>(filteredBlocks.at(b)->inputBlocks.empty()?0:1)
+                    static_cast<connection_end_id_t>(otherConnectionId)
                     });
             // other connection end id will be an output for the other, connection id 0 if it doesn't have any inputs
         }
 
-        int outputConnId = !p.second->inputBlocks.empty();
+        int outputConnId = !block->inputBlocks.empty();
 
-        for (int b : p.second->outputBlocks){
-            outParsed->addConnection({
-                    static_cast<block_id_t>(p.first),
+        for (int b : block->outputBlocks){
+            const OpenCircuitsBlockInfo& otherBlock = icBlockSpace ? icBlockSpace->at(b) : *filteredBlocks.at(b);
+            pc->addConnection({
+                    static_cast<block_id_t>(id),
                     static_cast<connection_end_id_t>(outputConnId),
                     static_cast<block_id_t>(b),
                     static_cast<connection_end_id_t>(0) // outputs will always go to inputs
                     });
         }
+    };
+
+
+    // add all parsed IC instances as dependencies to the primary parsed circuit
+    for (int icD : usedIcDatas){
+        std::unordered_map<int, ICData>::iterator itr = icDataMap.find(icD);
+        if (itr == icDataMap.end()){
+            logError("IC instance of reference data: " + std::to_string(icD) + " was not found in icDataMap", "OpenCircuitsParser");
+            continue;
+        }
+        SharedParsedCircuit pc = std::make_shared<ParsedCircuit>();
+        pc->setName(std::to_string(icD));
+        for (const std::pair<int, OpenCircuitsBlockInfo>& c: itr->second.components){
+            if (validOpenCircuitsTypes.count(c.second.type)){
+                fillParsedBlock(pc, c.first, &c.second, &itr->second.components);
+            }
+        }
+        for (int port: itr->second.inputPorts){
+            // todo
+        }
+        for (int port: itr->second.outputPorts){
+            // todo
+        }
+
+        outParsed->addDependency(std::to_string(icD), pc);
+    }
+
+    // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
+    for (const std::pair<int, OpenCircuitsBlockInfo*>& p: filteredBlocks) {
+        fillParsedBlock(outParsed, p.first, p.second, nullptr);
     }
 }
+
+
 
 void OpenCircuitsParser::printParsedData() {
     std::cout << "Parsed Normal Blocks on Primary Circuit:\n";
     for (const std::pair<int, OpenCircuitsBlockInfo>& p: blocks){
-        if (validOpenCircuitsTypes.count(p.second.type)){
-            std::cout << "   ID: " << p.first  << " type: " << p.second.type << " " << p.second.position.snap().toString();
-            std::cout << " Input Blocks: [ ";
-            for (int inputId : p.second.inputBlocks) {
-                std::cout << inputId << ' ';
-            }
-            std::cout << "]";
+        if (!validOpenCircuitsTypes.count(p.second.type)) continue;
 
-            std::cout << " | Output Blocks: [ ";
-            for (int outputId : p.second.outputBlocks) {
-                std::cout << outputId << ' ';
-            }
-            std::cout << "]\n";
+        std::cout << "   ID: " << p.first  << " type: " << p.second.type << " " << p.second.position.snap().toString();
+        std::cout << " Input Blocks: [ ";
+        for (int inputId : p.second.inputBlocks) {
+            std::cout << inputId << ' ';
+        }
+        std::cout << "]";
 
-            if (p.second.type == "IC"){
-                std::string n = "";
-                if (std::stoi(p.second.icReference) < 0){
-                    n = "*NEW*";
-                }
-                std::cout << "       links to " << n << "ICData ref: " << p.second.icReference << '\n';
+        std::cout << " | Output Blocks: [ ";
+        for (int outputId : p.second.outputBlocks) {
+            std::cout << outputId << ' ';
+        }
+        std::cout << "]\n";
+
+        if (p.second.type == "IC"){
+            std::string n = "";
+            if (p.second.icReference < 0){
+                n = "*NEW*";
             }
+            std::cout << "       links to " << n << "ICData ref: " << p.second.icReference << '\n';
         }
     }
     std::cout << std::endl;
@@ -467,9 +495,8 @@ void OpenCircuitsParser::printParsedData() {
         std::cout << "ICData ID: " << icId << '\n';
 
         std::cout << "   Components:\n";
-        for (const auto& compPair : icData.components) {
-            int compId = compPair.first;
-            const OpenCircuitsBlockInfo& comp = compPair.second;
+        for (const auto& [compId, comp] : icData.components) {
+            if (!validOpenCircuitsTypes.count(comp.type)) continue;
 
             std::cout << "       " << compId << " - " << comp.type;
             std::cout << " - " << comp.position.snap().toString() << " - ";

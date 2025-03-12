@@ -4,7 +4,6 @@
 #include "../circuitTool.h"
 #include "backend/circuit/parsedCircuit.h"
 #include "computerAPI/circuits/circuitFileManager.h"
-class Backend;
 
 class PreviewPlacementTool : public CircuitTool {
 public:

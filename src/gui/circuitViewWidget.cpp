@@ -308,8 +308,15 @@ void CircuitViewWidget::load(const QString& filePath) {
         return;
     }
 
-    CircuitValidator validator(*parsed, circuitView->getBackend()->getBlockDataManager()); // validate and dont merge dependencies
+    Backend* back = circuitView->getBackend();
+    CircuitValidator validator(*parsed, back->getBlockDataManager()); // validate and dont merge dependencies
     if (parsed->isValid()){
+
+        // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
+        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            back->getCircuit(back->createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+        }
+
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());

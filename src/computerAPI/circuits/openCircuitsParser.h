@@ -13,7 +13,7 @@ struct OpenCircuitsBlockInfo {
     double angle; // in radians
     std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
     std::vector<int> outputBlocks;
-    std::string icReference;
+    int icReference; // if it is an IC block
 };
 
 struct ICData {
@@ -24,7 +24,7 @@ struct ICData {
 
 class OpenCircuitsParser {
 public:
-    OpenCircuitsParser() {};
+    OpenCircuitsParser() = default;
     bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
     void parseOpenCircuitsJson();
 
@@ -60,8 +60,11 @@ private:
     std::list<int> componentReferences; // used to gather the ids before inserting into "blocks"
     std::list<int> ICDataReferences; // used before actually processing ICData structures
 
-    std::unordered_map<int, ICData> icDataMap;
+    std::unordered_map<int, ICData> icDataMap; // the components of each icData aren't filtered to valid types
     SharedParsedCircuit outParsed;
+
+    // every time an IC instance is added, the data it references will go here, so we can keep track of the important icDatas
+    std::unordered_set<int> usedIcDatas;
 
     std::unordered_set<std::string> validOpenCircuitsTypes =
         {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
@@ -73,6 +76,7 @@ private:
         {"NOTGate", "NOR"}, // NOR for not
         {"IC", "BUFFER"}, // IC will be buffer for now, until custom blocks
     };
+    const double posScale = 0.02;
 };
 
 #endif

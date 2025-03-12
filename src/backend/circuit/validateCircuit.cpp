@@ -27,9 +27,6 @@ bool CircuitValidator::validateBlockTypes() {
 bool CircuitValidator::validateDependencies() {
     int numImports = 0;
 
-    // Setup offset for possibly merging dependencies
-    Vector offset(parsedCircuit.maxPos.dx + (parsedCircuit.blocks.empty()?0:3), parsedCircuit.minPos.dy);
-
     for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
         // validate the dependency as a circuit itself
         CircuitValidator depValidator(*depCircuit, blockDataManager);
