@@ -115,7 +115,7 @@ void QtRenderer::render(QPainter* painter) {
 		// painter->setRenderHint(QPainter::Antialiasing);
 		for (unsigned int i = 0; i < blocks.size(); i++) {
 			bool state = blockStates[i];
-			for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
+			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
 				// continue if input, we only want outputs
 				if (blocks[i]->isConnectionInput(id)) continue;
 
@@ -175,7 +175,7 @@ void QtRenderer::render(QPainter* painter) {
 		painter->setOpacity(0.9f);
 		painter->setRenderHint(QPainter::Antialiasing);
 		for (unsigned int i = 0; i < blocks.size(); i++) {
-			for (connection_end_id_t id = 0; id <= blocks[i]->getConnectionContainer().getMaxConnectionId(); id++) {
+			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
 				// continue if input, we only want outputs
 				if (blocks[i]->isConnectionInput(id)) continue;
 
@@ -361,6 +361,9 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 	QPointF size = gridToQt(blockSize.free());
 	QPointF rotationPoint = gridToQt((position + blockOriginOffset).free() + FVector(0.5f, 0.5f));
 	// get tile set coordinate
+	if (type > 13) {
+		type = BlockType::LIGHT;
+	}
 	Vec2Int tilePoint = tileSetInfo->getTopLeftPixel(type+1, state);
 	Vec2Int tileSize = tileSetInfo->getCellPixelSize();
 
