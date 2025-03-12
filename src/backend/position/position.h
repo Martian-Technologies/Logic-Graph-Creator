@@ -162,18 +162,18 @@ inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
 inline Vector rotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::ZERO: return vector;
-	case Rotation::NINETY: return Vector(height - vector.dy - 1, vector.dx);
-	case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
-	case Rotation::TWO_SEVENTY: return Vector(vector.dy, width - vector.dx - 1);
+		case Rotation::NINETY: return Vector(height - vector.dy - 1, vector.dx);
+		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+		case Rotation::TWO_SEVENTY: return Vector(vector.dy, width - vector.dx - 1);
+		default: return vector;
 	}
 }
 inline Vector reverseRotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return Vector(vector.dy, height - vector.dx - 1);
-	case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
-	case Rotation::TWO_SEVENTY: return Vector(width - vector.dy - 1, vector.dx);
-	default: return vector;	
+		case Rotation::NINETY: return Vector(vector.dy, height - vector.dx - 1);
+		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+		case Rotation::TWO_SEVENTY: return Vector(width - vector.dy - 1, vector.dx);
+		default: return vector;	
 	}
 }
 #endif /* position_h */
