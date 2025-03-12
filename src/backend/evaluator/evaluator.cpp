@@ -76,45 +76,57 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 		{
 			deletedBlocks = true;
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			const auto address = Address(position);
-			const block_id_t blockId = addressTree.getValue(address);
-			logicSimulator.decomissionGate(blockId);
-			addressTree.removeValue(address);
+			const auto addresses = addressTree.getPositions(containerId, position);
+			for (const auto& address : addresses) {
+				const block_id_t blockId = addressTree.getValue(address);
+				logicSimulator.decomissionGate(blockId);
+				addressTree.removeValue(address);
+			}
 			break;
 		}
 		case Difference::PLACE_BLOCK:
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			const auto address = Address(position);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
-			const block_id_t blockId = logicSimulator.addGate(gateType, true);
-			addressTree.addValue(address, blockId);
+			const auto addresses = addressTree.addValue(position, containerId, 0);
+			for (const auto& address : addresses) {
+				const block_id_t blockId = logicSimulator.addGate(gateType, true);
+				addressTree.setValue(address, blockId);
+			}
 			break;
 		}
 		case Difference::REMOVED_CONNECTION:
 		{
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddress = Address(outputPosition);
-			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
-			logicSimulator.disconnectGates(outputBlockId, inputBlockId);
+			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			for (int i = 0; i < outputAddresses.size(); i++) {
+				const auto outputAddress = outputAddresses[i];
+				const auto inputAddress = inputAddresses[i];
+				const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+				const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+				logicSimulator.disconnectGates(outputBlockId, inputBlockId);
+			}
 			break;
 		}
 		case Difference::CREATED_CONNECTION:
 		{
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddress = Address(outputPosition);
-			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
-			logicSimulator.connectGates(outputBlockId, inputBlockId);
+			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			for (int i = 0; i < outputAddresses.size(); i++) {
+				const auto outputAddress = outputAddresses[i];
+				const auto inputAddress = inputAddresses[i];
+				const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+				const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+				logicSimulator.connectGates(outputBlockId, inputBlockId);
+			}
 			break;
 		}
 		case Difference::MOVE_BLOCK:
 		{
 			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
-			addressTree.moveData(curPosition, newPosition);
+			addressTree.moveData(containerId, curPosition, newPosition);
 			break;
 		}
 		case Difference::SET_DATA: break;
