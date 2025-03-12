@@ -111,26 +111,12 @@ if (Gatality_BuildApp)
 			# Set WIN32_EXECUTABLE (Disables Console)
 			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 		endif ()
-	endif()
-
-# ======================================= RESOURCE EMBEDDING =======================================
-	# find resources
-	file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
-	file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
-
-	# add resources to QT
-	qt_add_resources(${PROJECT_NAME} "mainResources"
-			PREFIX
-			"/"
-			FILES
-			${IMG_SOURCES}
-			${JSON_SOURCES}
-			BASE ${RESOURCES_DIR}
-	)
+	endif()	
 endif()
 
-if (Gatality_BuildTests)
+
 # ============================================ GTESTING ============================================
+if (Gatality_BuildTests)
 	message("Doing Testing")
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
 	enable_testing()
