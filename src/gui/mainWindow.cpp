@@ -14,7 +14,6 @@
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuit/validateCircuit.h"
 #include "selection/selectorWindow.h"
-#include "selection/hotbarWindow.h"
 #include "circuitViewWidget.h"
 #include "mainWindow.h"
 
@@ -49,11 +48,6 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	openNewSelectorWindow();
 
 	setUpMenuBar();
-
-	updateLoopTimer = new QTimer(this);
-	updateLoopTimer->setInterval((int)(updateInterval * 1000.0f));
-	updateLoopTimer->start();
-	connect(updateLoopTimer, &QTimer::timeout, this, &MainWindow::updateLoop);
 }
 
 // Utility methods
@@ -298,22 +292,14 @@ void MainWindow::exportProject() {
 }
 
 void MainWindow::openNewSelectorWindow() {
-	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager());
+	SelectorWindow* selector = new SelectorWindow(backend.getBlockDataManager(), backend.getDataUpdateEventManager());
 	selector->updateBlockList();
 	connect(selector, &SelectorWindow::selectedBlockChange, this, &MainWindow::setBlock);
 	connect(selector, &SelectorWindow::selectedToolChange, this, &MainWindow::setTool);
 	connect(selector, &SelectorWindow::selectedModeChange, this, &MainWindow::setMode);
 	connect(this, &MainWindow::toolModeOptionsChanged, selector, &SelectorWindow::updateToolModeOptions);
-	connect(this, &MainWindow::updateBlockList, selector, &SelectorWindow::updateBlockList);
 	addDock(selector, KDDockWidgets::Location_OnLeft);
 }
-
-// void MainWindow::openNewHotbarWindow() {
-// 	HotbarWindow* selector = new HotbarWindow();
-// 	connect(selector, &HotbarWindow::selectedBlockChange, this, &MainWindow::setBlock);
-// 	connect(selector, &HotbarWindow::selectedToolChange, this, &MainWindow::setTool);
-// 	addDock(selector, KDDockWidgets::Location_OnBottom);
-// }
 
 CircuitViewWidget* MainWindow::openNewCircuitViewWindow() {
 	QWidget* w = new QWidget();
@@ -363,8 +349,4 @@ void MainWindow::setTool(std::string tool) {
 
 void MainWindow::setMode(std::string mode) {
 	backend.getToolManagerManager().setMode(mode);
-}
-
-void MainWindow::updateLoop() {
-	emit updateBlockList();
 }

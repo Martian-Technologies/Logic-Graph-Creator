@@ -1,11 +1,12 @@
 #ifndef blockDataManager_h
 #define blockDataManager_h
 
+#include "../../dataUpdateEventManager.h"
 #include "blockData.h"
 
 class BlockDataManager {
 public:
-	BlockDataManager() {
+	BlockDataManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) {
 		// load default data
 		blockData.resize(13);
 		getBlockData(BlockType::AND)->setName("And");
@@ -43,10 +44,13 @@ public:
 		getBlockData(BlockType::LIGHT)->setName("Light");
 		getBlockData(BlockType::LIGHT)->setDefaultData(false);
 		getBlockData(BlockType::LIGHT)->trySetConnectionInput(Vector(0, 0), 0);
+		
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
 	inline BlockType addBlock() noexcept {
 		blockData.emplace_back();
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
 		return (BlockType) blockData.size();
 	}
 
@@ -130,6 +134,7 @@ public:
 
 private:
 	std::vector<BlockData> blockData;
+	DataUpdateEventManager* dataUpdateEventManager;
 };
 
 #endif /* blockDataManager_h */

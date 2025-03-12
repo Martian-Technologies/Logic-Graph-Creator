@@ -35,7 +35,6 @@ public:
     void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
-	void openNewHotbarWindow();
 
 private:
 	// utility
@@ -48,7 +47,6 @@ private:
 	// update loop
 	QTimer* updateLoopTimer;
 	const float updateInterval = 0.1f;
-	void updateLoop();
 
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
@@ -63,7 +61,6 @@ private:
 
 signals:
 	void toolModeOptionsChanged(const std::vector<std::string>* modes);
-	void updateBlockList();
 };
 
 #endif /* mainWindow_h */

@@ -7,6 +7,8 @@
 
 class CircuitManager {
 public:
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager) {}
+
 	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
 	inline const CircuitBlockDataManager* getCircuitBlockDataManager() const { return &circuitBlockDataManager; }
 
@@ -27,10 +29,13 @@ public:
 		blockData->setWidth(2);
 		blockData->setHeight(2);
 
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
+
 		// blockData->trySetConnectionOutput(Vector(0, 0), 0);
 
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
+
 		return blockType;
 	}
 
@@ -72,6 +77,7 @@ private:
 
 	BlockDataManager blockDataManager;
 	CircuitBlockDataManager circuitBlockDataManager;
+	DataUpdateEventManager* dataUpdateEventManager;
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
