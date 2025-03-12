@@ -68,7 +68,7 @@ protected:
 	inline void setRotation(Rotation rotation) { this->rotation = rotation; }
 	inline void setId(block_id_t id) { blockId = id; }
 
-	inline Block(const BlockDataManager* blockDataManager, BlockType blockType) : blockType(blockType), connections(blockDataManager->getMaxConnectionId(blockType)), blockDataManager(blockDataManager) { }
+	inline Block(const BlockDataManager* blockDataManager, BlockType blockType) : blockType(blockType), connections(blockDataManager->getConnectionCount(blockType)), blockDataManager(blockDataManager) { }
 
 	// const data
 	BlockType blockType;

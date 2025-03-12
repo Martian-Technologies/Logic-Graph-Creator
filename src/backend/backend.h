@@ -1,15 +1,16 @@
 #ifndef backend_h
 #define backend_h
 
-#include "circuitView/circuitView.h"
 #include "evaluator/evaluatorManager.h"
-#include "circuit/circuitManager.h"
 #include "tools/toolManagerManager.h"
+#include "circuitView/circuitView.h"
+#include "dataUpdateEventManager.h"
+#include "circuit/circuitManager.h"
 #include "util/uuid.h"
 
 class Backend {
 public:
-	Backend() : toolManagerManager(&circuitViews) {}
+	Backend() : toolManagerManager(&circuitViews), circuitManager(&dataUpdateEventManager) { }
 
 	// Creates a new Circuit. Returns circuit_id_t.
 	circuit_id_t createCircuit(const std::string& uuid = generate_uuid_v4(), const std::string& name = "Circuit");
@@ -17,11 +18,17 @@ public:
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
 	inline const BlockDataManager* getBlockDataManager() const { return getCircuitManager().getBlockDataManager(); }
+	
+	inline CircuitManager& getCircuitManager() { return circuitManager; }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }
-	inline const EvaluatorManager& getEvaluatorManager() const { return evaluatorManager; }
-	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
-	inline ToolManagerManager& getToolManagerManager() { return toolManagerManager; }
 
+	inline const EvaluatorManager& getEvaluatorManager() const { return evaluatorManager; }
+
+	inline ToolManagerManager& getToolManagerManager() { return toolManagerManager; }
+	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
+
+	inline DataUpdateEventManager* getDataUpdateEventManager() { return &dataUpdateEventManager; }
+	
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
 
@@ -37,6 +44,7 @@ public:
 private:
 	std::set<CircuitView*> circuitViews;
 
+	DataUpdateEventManager dataUpdateEventManager;
 	CircuitManager circuitManager;
 	EvaluatorManager evaluatorManager;
 	ToolManagerManager toolManagerManager;

@@ -2,6 +2,7 @@
 #define mainWindow_h
 
 #include <QWidget>
+class QTimer;
 class QGraphicsScene;
 
 #include <kddockwidgets/MainWindow.h>
@@ -34,7 +35,6 @@ public:
     void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
-	void openNewHotbarWindow();
 
 private:
 	// utility
@@ -44,6 +44,10 @@ private:
     bool eventFilter(QObject* obj, QEvent* event);
 
 private:
+	// update loop
+	QTimer* updateLoopTimer;
+	const float updateInterval = 0.1f;
+
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
     QMenu* saveAsSubMenu;
