@@ -13,6 +13,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <array>
 #include <queue>
 #include <map>
 #include <set>

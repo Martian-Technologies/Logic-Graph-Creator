@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "viewManager.h"
-#include "gui/circuitView/events/customEvents.h"
+#include "backend/circuitView/events/customEvents.h"
 
 void ViewManager::setUpEvents(EventRegister& eventRegister) {
 		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));

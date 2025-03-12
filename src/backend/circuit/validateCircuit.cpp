@@ -123,10 +123,40 @@ bool CircuitValidator::setOverlapsUnpositioned() {
     return true;
 }
 
+
+// iterative dfs
+template <class PreVisit, class PostVisit>
+void depthFirstSearch(const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj, block_id_t start, std::unordered_set<block_id_t>& visited, PreVisit preVisit, PostVisit postVisit) {
+    std::stack<block_id_t> stack;
+    stack.push(start);
+    visited.insert(start);
+    preVisit(start);
+    while (!stack.empty()) {
+        block_id_t node = stack.top();
+        bool hasUnvisited = false;
+        if (adj.count(node)){
+            for (block_id_t neighbor : adj.at(node)) {
+                if (visited.count(neighbor)) continue;
+                visited.insert(neighbor);
+                preVisit(neighbor);
+                stack.push(neighbor);
+                hasUnvisited = true;
+                break;
+            }
+        }
+
+        if (!hasUnvisited) {
+            stack.pop();
+            postVisit(node);
+        }
+    }
+}
+
 // SCC META GRAPH TOPOLOGICAL SORT
 bool CircuitValidator::handleUnpositionedBlocks() {
     // Separate components so that we can place down disconnected components independently
     std::unordered_map<block_id_t, std::vector<block_id_t>> undirectedAdj;
+    undirectedAdj.reserve(parsedCircuit.blocks.size());
     for (const ParsedCircuit::ConnectionData& conn : parsedCircuit.connections) {
         block_id_t u = conn.inputBlockId;
         block_id_t v = conn.outputBlockId;
@@ -136,79 +166,48 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 
     // find cc's by dfs
     std::vector<std::unordered_set<block_id_t>> components;
+    std::unordered_map<block_id_t, int> blockToComponent;
     std::unordered_set<block_id_t> visited;
-    std::function<void(block_id_t)> dfsComponent = [&](block_id_t node) {
-        visited.insert(node);
-        components.back().insert(node);
-        for (block_id_t neighbor : undirectedAdj[node]) {
-            if (!visited.count(neighbor)) {
-                dfsComponent(neighbor);
-            }
-        }
-    };
     for (const auto& [id, block] : parsedCircuit.blocks) {
         if (!visited.count(id)) {
             components.push_back({});
-            dfsComponent(id);
+            depthFirstSearch(undirectedAdj, id, visited, [&](block_id_t node){components.back().insert(node); blockToComponent[node] = components.size()-1;}, [&](block_id_t){});
         }
+    }
+
+    // preprocess connected component connections
+    std::vector<std::unordered_map<block_id_t,std::vector<block_id_t>>> componentAdjs(components.size());
+    for (const ParsedCircuit::ConnectionData& conn : parsedCircuit.connections) {
+        if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type,conn.outputId)){
+            int cc = blockToComponent[conn.inputBlockId];
+            componentAdjs[cc][conn.inputBlockId].push_back(conn.outputBlockId);
+        }
+    }
+
+    // precompute input connections for each block for layer placement
+    std::unordered_map<block_id_t, std::vector<block_id_t>> inputConnections;
+    for (const auto& conn : parsedCircuit.connections) {
+        inputConnections[conn.inputBlockId].push_back(conn.outputBlockId);
     }
 
     const int componentSpacing = 5;
     int currentYOffset = 0;
-    int ccIndex = 0;
-    for (const std::unordered_set<block_id_t>& cc: components){
-        logInfo("Parsing CC " + std::to_string(++ccIndex));
-
-        // adjacency list
-        std::unordered_map<block_id_t, std::vector<block_id_t>> adj;
-        for (const auto& conn : parsedCircuit.connections) {
-            if (cc.count(conn.inputBlockId) && cc.count(conn.outputBlockId)) {
-                block_id_t to = conn.outputBlockId;
-                block_id_t from = conn.inputBlockId;
-                //logInfo("From: " + std::to_string(from) + "("+std::to_string(conn.outputId)+")" + 
-                //        ", To: " + std::to_string(to) + "("+std::to_string(conn.inputId)+")");
-                if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type, conn.outputId)){
-                    adj[from].push_back(to);
-                }
-            }
-        }
+    for (int ccIndex=0; ccIndex<componentAdjs.size(); ++ccIndex){
+        const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj = componentAdjs[ccIndex];
+        logInfo("Parsing CC " + std::to_string(ccIndex));
 
         // find SCC metagraph DAG for topological sort using kosaraju's
-        std::unordered_map<block_id_t, std::vector<block_id_t>> revAdj;
-        std::stack<block_id_t> postNumber; // highest post number node is a part of a source SCC, run on G^R
-        std::vector<std::vector<block_id_t>> sccs;
-
-        std::function<void(block_id_t)> dfs =
-            [&](block_id_t node) -> void {
-                visited.insert(node);
-                for (block_id_t v : adj[node]) {
-                    if (!visited.count(v)) {
-                        dfs(v);
-                    }
-                }
-                postNumber.push(node); // post visit
-            };
-
-        std::function<void(block_id_t, std::vector<block_id_t>&)> dfsRev =
-            [&](block_id_t node, std::vector<block_id_t>& component) -> void {
-                visited.insert(node);
-                component.push_back(node);
-                for (block_id_t v : revAdj[node]) {
-                    if (!visited.count(v)) {
-                        dfsRev(v, component);
-                    }
-                }
-            };
-
         // gather stack that shows decreasing post visit numbers
+        std::stack<block_id_t> postNumber; // highest post number node is a part of a source SCC, run on G^R
         visited.clear();
-        for (block_id_t id : cc) {
+        for (block_id_t id : components[ccIndex]) {
             if (!visited.count(id)) {
-                dfs(id);
+                depthFirstSearch(adj, id, visited, [&](block_id_t){}, [&](block_id_t node){postNumber.push(node);});
             }
         }
 
         // make reverse graph in adjacency list
+        std::unordered_map<block_id_t, std::vector<block_id_t>> revAdj;
         for (const auto& [u, adjs] : adj) {
             for (block_id_t v : adjs) {
                 revAdj[v].push_back(u);
@@ -216,14 +215,15 @@ bool CircuitValidator::handleUnpositionedBlocks() {
         }
 
         // run dfs from source SCC's in reverse graph, sink SCCs of regular
+        std::vector<std::vector<block_id_t>> sccs;
         visited.clear();
         while (!postNumber.empty()) {
             block_id_t node = postNumber.top();
             postNumber.pop();
             if (!visited.count(node)) {
-                std::vector<block_id_t> component;
-                dfsRev(node, component);
-                sccs.push_back(component);
+                std::vector<block_id_t> revCC;
+                depthFirstSearch(adj, node, visited, [&](block_id_t node){revCC.push_back(node);}, [&](block_id_t){});
+                sccs.push_back(revCC);
             }
         }
 
@@ -275,12 +275,13 @@ bool CircuitValidator::handleUnpositionedBlocks() {
         }
 
         std::unordered_map<block_id_t, int> layers;
-        for (int sccIndex : sccOrder) {
-            for (block_id_t id : sccs[sccIndex]) {
+        for (int sccIdx : sccOrder) {
+            for (block_id_t id : sccs[sccIdx]) {
                 int maxLayer = 0;
-                for (const auto& conn : parsedCircuit.connections) {
-                    if (conn.inputBlockId == id) {
-                        maxLayer = std::max(maxLayer, layers[conn.outputBlockId] + 1);
+                auto it = inputConnections.find(id);
+                if (it != inputConnections.end()) {
+                    for (block_id_t outputBlock : it->second) {
+                        maxLayer = std::max(maxLayer, layers[outputBlock] + 1);
                     }
                 }
                 layers[id] = maxLayer;
