@@ -1,7 +1,7 @@
 #ifndef viewManager_h
 #define viewManager_h
 
-#include "gui/circuitView/events/eventRegister.h"
+#include "backend/circuitView/events/eventRegister.h"
 #include "backend/position/position.h"
 #include "util/vec2.h"
 

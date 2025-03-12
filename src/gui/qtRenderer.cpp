@@ -5,7 +5,7 @@
 #include <QString>
 #include <QDebug>
 
-#include "gui/circuitView/renderer/renderer.h"
+#include "backend/circuitView/renderer/renderer.h"
 #include "backend/evaluator/logicState.h"
 #include "backend/address.h"
 #include "qtRenderer.h"

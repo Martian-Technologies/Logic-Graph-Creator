@@ -8,7 +8,7 @@ class QGraphicsScene;
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "circuitView/renderer/qtRenderer.h"
+#include "qtRenderer.h"
 #include "keybinds/keybindManager.h"
 #include "backend/backend.h"
 
