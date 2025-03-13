@@ -27,6 +27,7 @@ public:
 	long long int getRealTickrate() const;
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<block_id_t>& addressTree);
 	logic_state_t getState(const Address& address);
 	void setState(const Address& address, logic_state_t state);
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses);

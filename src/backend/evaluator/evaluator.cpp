@@ -62,6 +62,10 @@ void Evaluator::runNTicks(unsigned long long n) {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
+	makeEditInPlace(difference, containerId, addressTree);
+}
+
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<block_id_t>& addressTree) {
 	logicSimulator.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulator.threadIsWaiting()) {
@@ -88,10 +92,16 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
-			const auto addresses = addressTree.addValue(position, containerId, 0);
-			for (const auto& address : addresses) {
-				const block_id_t blockId = logicSimulator.addGate(gateType, true);
-				addressTree.setValue(address, blockId);
+			if (gateType != GateType::NONE) {
+				const auto addresses = addressTree.addValue(position, containerId, 0);
+				for (const auto& address : addresses) {
+					const block_id_t blockId = logicSimulator.addGate(gateType, true);
+					addressTree.setValue(address, blockId);
+				}
+			}
+			else {
+				// check if it's a custom block
+				
 			}
 			break;
 		}
@@ -153,8 +163,7 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
 	case BlockType::LIGHT: return GateType::OR;
-	default:
-		throw std::invalid_argument("circuitToEvaluatorGatetype: invalid blockType");
+	default: return GateType::NONE;
 	}
 }
 
