@@ -1,7 +1,8 @@
 #include "directoryManager.h"
 
 #ifdef _MSC_VER
-include <libloaderapi.h>
+#include <windows.h>
+#include <libloaderapi.h>
 #endif
 
 std::filesystem::path DirectoryManager::resourceDirectory("");
