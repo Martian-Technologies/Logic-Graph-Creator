@@ -24,7 +24,8 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	// set up window
 	resize(900, 600);
 	setWindowTitle(tr("Gatality"));
-	setWindowIcon(QIcon((DirectoryManager::getResourceDirectory() / "gateIcon.ico").c_str()));
+	QString iconPath = (DirectoryManager::getResourceDirectory() / "gateIcon.ico").string().c_str();
+	setWindowIcon(QIcon(iconPath));
 
 	// set default keybinds
 	keybindManager.setKeybind("Save", "Ctrl+S");

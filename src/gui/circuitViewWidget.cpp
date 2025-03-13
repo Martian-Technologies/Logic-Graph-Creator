@@ -45,7 +45,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 
 	// initialize QTRenderer with width and height + tileset
 	renderer->resize(w, h);
-	renderer->initializeTileSet(DirectoryManager::getResourceDirectory() / "logicTiles.png");
+	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
