@@ -85,9 +85,20 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const auto addresses = addressTree.getPositions(containerId, position);
 			for (const auto& address : addresses) {
-				const block_id_t blockId = addressTree.getValue(address);
-				logicSimulator.decomissionGate(blockId);
-				addressTree.removeValue(address);
+				const bool exists = addressTree.hasValue(address);
+				if (!exists) { // integrated circuit
+					const auto branch = addressTree.getBranch(address);
+					const auto allValues = branch.getAllValues();
+					for (const auto& value : allValues) {
+						logicSimulator.decomissionGate(value);
+					}
+					addressTree.nukeBranch(address);
+				}
+				else{
+					const block_id_t blockId = addressTree.getValue(address);
+					logicSimulator.decomissionGate(blockId);
+					addressTree.removeValue(address);
+				}
 			}
 			break;
 		}
@@ -104,7 +115,18 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			}
 			else {
 				// check if it's a custom block
-				
+				const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
+				if (integratedCircuitId == 0) {
+					throw std::invalid_argument("makeEditInPlace: blockType is not a valid block type");
+				}
+				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId);
+				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
+				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
+				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
+				for (const auto& address : addresses) {
+					AddressTreeNode<block_id_t>& branch = addressTree.getBranch(address);
+					makeEditInPlace(integratedDifference, integratedCircuitId, branch);
+				}
 			}
 			break;
 		}
@@ -192,8 +214,14 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		std::this_thread::yield();
 	}
 	for (const auto& address : addresses) {
-		const block_id_t blockId = addressTree.getValue(address);
-		states.push_back(logicSimulator.getState(blockId));
+		// check if the address is valid
+		const bool exists = addressTree.hasValue(address);
+		if (!exists) {
+			states.push_back(false);
+		} else {
+			const block_id_t blockId = addressTree.getValue(address);
+			states.push_back(logicSimulator.getState(blockId));
+		}
 	}
 	if (!paused) {
 		logicSimulator.signalToProceed();

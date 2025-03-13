@@ -18,7 +18,7 @@ public:
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Evaluator " + std::to_string(evaluatorId) + " (Circuit: " + std::to_string(addressTree.getContainerId()) + ")"; }
 
-	circuit_id_t getCircuitId(const Address& address) const { return addressTree.getBranch(address).getContainerId(); }
+	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address).getContainerId(); }
 
 	// pause/unpause used once the evaluator is "started" 
 	void setPause(bool pause);
