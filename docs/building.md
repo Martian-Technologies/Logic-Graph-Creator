@@ -45,11 +45,11 @@ You also need the MSVC compiler and its CMake build tools. You can download the 
 Even if you are going to have your IDE manage CMake, it's a good idea to try running it from the terminal first.
 > On Windows, Microsoft's build system will not be set as the CMake compiler by default. Either add MSBuild to your system variables, or use the "Developer Command Prompt for VS ..." application (which already has the variable set up) instead of your regular terminal. 
 
-1. Configure - `cmake --preset debug`
-2. Then Build - `cmake --build --preset debug`
+1. Configure - `cmake -B build`
+2. Then Build - `cmake --build build`
 3. Run the executable that was generated somewhere in the `build` directory. On Windows this is probably in the `Debug` subdirectory.
+One command to build and run on UNIX-like `cmake -B build && cmake --build build && ./build/Gatality`
 
-You can also build for release with `release` preset
 > Works for MacOS, Windows (MSVC), and Linux
 
 ## Setting up CMake in an IDE
