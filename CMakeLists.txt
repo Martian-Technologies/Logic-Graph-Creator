@@ -112,7 +112,6 @@ if (Gatality_BuildApp)
 			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 		endif ()
 	endif()	
-endif()
 
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
@@ -121,6 +120,8 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
 	COMMENT "Copying resource directory"
 )
+
+endif()
 
 # ============================================ GTESTING ============================================
 if (Gatality_BuildTests)
