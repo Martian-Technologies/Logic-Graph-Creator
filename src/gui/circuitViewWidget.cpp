@@ -16,7 +16,7 @@
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
-#include "computerAPI/resources/resourceManager.h"
+#include "computerAPI/directoryManager.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
 	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
@@ -45,7 +45,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 
 	// initialize QTRenderer with width and height + tileset
 	renderer->resize(w, h);
-	renderer->initializeTileSet(ResourceManager::getResourceDirectory() / "logicTiles.png");
+	renderer->initializeTileSet(DirectoryManager::getResourceDirectory() / "logicTiles.png");
 
 	// create keybind shortcuts and connect them
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
