@@ -76,8 +76,8 @@ set(EXTERNAL_DEFINES
 	"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 )
 
-if (Gatality_BuildApp)
 # ======================================= CREATE EXECUTABLE ========================================
+if (Gatality_BuildApp)
 	# Platform specific business before add_executable
 	if(APPLE) # MacOS
 		# Icon
@@ -129,40 +129,48 @@ if (Gatality_BuildApp)
 			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 		endif ()
 	endif()
+	
+# ======================================= RESOURCE COPYING =========================================
+# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
+set(COPIED_RESOURCES_DIR $<TARGET_FILE_DIR:${PROJECT_NAME}>"/resources")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
+	COMMENT "Copying resource directory"
+)
 
 # ===================================== SHADER COMPILATION =========================================
-	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-	file(GLOB_RECURSE SHADER_SOURCE_FILES
-		"${SOURCE_DIR}/*.vert"
-		"${SOURCE_DIR}/*.frag"
-	)
+set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+file(GLOB_RECURSE SHADER_SOURCE_FILES
+	"${SOURCE_DIR}/*.vert"
+	"${SOURCE_DIR}/*.frag"
+)
 
-	set(SHADER_PRODUCTS)
-	# list of commands to execute to compile all shaders
-	set(SHADER_COMMANDS)
-	list(APPEND SHADER_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
+# list of commands to execute to compile all shaders
+set(SHADER_COMMANDS)
+set(SHADER_PRODUCTS)
+list(APPEND SHADER_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
 
-	foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
-		cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
+foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
+	cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
 	
-		# Build command
-		list(APPEND SHADER_COMMANDS COMMAND)
-		list(APPEND SHADER_COMMANDS Vulkan::glslc)
-		list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
-		list(APPEND SHADER_COMMANDS "-o")
-		list(APPEND SHADER_COMMANDS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
+	# Build command
+	list(APPEND SHADER_COMMANDS COMMAND)
+	list(APPEND SHADER_COMMANDS Vulkan::glslc)
+	list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
+	list(APPEND SHADER_COMMANDS "-o")
+	list(APPEND SHADER_COMMANDS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
 	
-		# Add product
-		list(APPEND SHADER_PRODUCTS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
-	endforeach()
+	# Add product
+	list(APPEND SHADER_PRODUCTS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
+endforeach()
 
-	add_custom_target("Shaders" ALL
-		${SHADER_COMMANDS}
-		COMMENT "Compiling Shaders"
-		DEPENDS ${SHADER_SOURCE_FILES}
-		BYPRODUCTS ${SHADER_PRODUCTS}
-	)
-	
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	${SHADER_COMMANDS}
+	DEPENDS ${SHADER_SOURCE_FILES}
+	BYPRODUCTS ${SHADER_PRODUCTS}
+	COMMENT "Compiling Shaders"
+)
+
 endif()
 
 # ============================================ GTESTING ============================================
@@ -186,6 +194,7 @@ if (Gatality_BuildTests)
 		"${SOURCE_DIR}/gui/*.cpp"
 		"${SOURCE_DIR}/computerAPI/*.cpp"
 		"${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/gpu/*.cpp"
 		"${SOURCE_DIR}/keybinds/*.cpp"
 		"${SOURCE_DIR}/logging/*.cpp"
 		"${SOURCE_DIR}/util/*.cpp"
