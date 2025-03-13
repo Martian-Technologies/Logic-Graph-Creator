@@ -1,19 +1,22 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
+Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId)
 	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
 	logicSimulator(),
-	addressTree(circuit->getCircuitId()),
-	usingTickrate(false) {
+	addressTree(circuitId),
+	usingTickrate(false),
+	circuitManager(circuitManager) {
+
 	setTickrate(40 * 60); // 1000000000 clocks / min
+	const auto circuit = circuitManager.getCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 
-	makeEdit(std::make_shared<Difference>(difference), circuit->getCircuitId());
+	makeEdit(std::make_shared<Difference>(difference), circuitId);
 
-	// connect makeEdit to circuit
-	circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
+	// // connect makeEdit to circuit
+	// circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Evaluator::setPause(bool pause) {

@@ -2,6 +2,7 @@
 #define evaluator_h
 
 #include "backend/circuit/circuit.h"
+#include "backend/circuit/circuitManager.h"
 #include "backend/container/difference.h"
 #include "logicSimulator.h"
 #include "addressTree.h"
@@ -12,7 +13,7 @@ typedef unsigned int evaluator_id_t;
 
 class Evaluator {
 public:
-	Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit);
+	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Evaluator " + std::to_string(evaluatorId) + " (Circuit: " + std::to_string(addressTree.getContainerId()) + ")"; }
@@ -42,6 +43,7 @@ private:
 	unsigned long long targetTickrate;
 	LogicSimulator logicSimulator;
 	AddressTreeNode<block_id_t> addressTree;
+	CircuitManager& circuitManager;
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);
