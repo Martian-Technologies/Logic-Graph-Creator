@@ -3,9 +3,14 @@
 #include "gpu/vulkanUtil.h"
 #include "computerAPI/fileLoader.h"
 
+#include "computerAPI/directoryManager.h"
+
 void VulkanBlockRenderer::initialize(VkRenderPass& renderPass) {
-	vertShader = createShaderModule(readFileAsBytes(":/shaders/shader.vert.spv"));
-	fragShader = createShaderModule(readFileAsBytes(":/shaders/shader.frag.spv"));
+	// load shaders
+	vertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.vert.spv"));
+	fragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.vert.spv"));
+
+	// create graphic pipeline
 	pipeline = createPipeline(vertShader, fragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), renderPass);
 }
 
