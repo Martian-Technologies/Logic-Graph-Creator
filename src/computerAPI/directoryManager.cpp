@@ -1,12 +1,16 @@
-#include "resourceManager.h"
+#include "directoryManager.h"
 
 const std::vector<std::filesystem::path> possibleResourceDirectories = {
 	"resources"
 };
 
-std::filesystem::path ResourceManager::resourceDirectory;
+std::filesystem::path DirectoryManager::resourceDirectory("");
+std::filesystem::path DirectoryManager::workingDirectory("");
+std::filesystem::path DirectoryManager::configDirectory("");
 
-void ResourceManager::initializeResourceDirectory() {
+void DirectoryManager::findDirectories() {
+	// only logic for finding resource directory right now, other will be set somehow
+	
 	for (const auto& path : possibleResourceDirectories) {
 		if (std::filesystem::exists(path)) {
 			resourceDirectory = path;

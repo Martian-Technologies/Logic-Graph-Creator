@@ -5,7 +5,7 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
-#include "computerAPI/resources/resourceManager.h"
+#include "computerAPI/directoryManager.h"
 #include "gui/mainWindow.h"
 #include "gpu/vulkanQtWindow.h"
 #include "gpu/vulkanPlatformBridge.h"
@@ -15,7 +15,7 @@ void setupVulkan();
 KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
 
 int main(int argc, char* argv[]) {
-	ResourceManager::initializeResourceDirectory();
+	DirectoryManager::findDirectories();
 	
 	// Create QT application
 	logInfo("Creating QT Application");
