@@ -1,39 +1,52 @@
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonArray>
-#include <QtCore/QFile>
 
 #include "openCircuitsParser.h"
 #include "circuitFileManager.h"
 
+
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit){
     logInfo("Parsing Open Circuits File (.circuit)", "OpenCircuitsParser");
 
-    QFile inputFile(QString::fromStdString(path));
-    if (!inputFile.open(QIODevice::ReadOnly)) {
+    std::ifstream inputFile(path/*, std::ios::binary*/);
+    if (!inputFile.is_open()) {
         logError("Couldn't open file at path: " + path, "OpenCircuitsParser");
         return false;
     }
 
-    QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
-    if (mainDoc.isNull()) {
-        logError("Couldn't open parse json at: " + path, "OpenCircuitsParser");
+    std::string fileContents((std::istreambuf_iterator<char>(inputFile)), 
+                            std::istreambuf_iterator<char>());
+
+    json mainDoc;
+    try {
+        mainDoc = json::parse(fileContents);
+    } catch (const json::parse_error& e) {
+        logError("Couldn't parse json at: " + path + " - " + e.what(), "OpenCircuitsParser");
         return false;
     }
 
-    QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
-    if (saveDoc.isNull()) {
-        logError("Couldn't open parse \"content\" of: " + path, "OpenCircuitsParser");
+    if (!mainDoc.contains("contents") || !mainDoc["contents"].is_string()) {
+        logError("Missing or invalid 'contents' field in: " + path, "OpenCircuitsParser");
         return false;
     }
 
-    contents = saveDoc.object();
+    json saveDoc;
+    try {
+        saveDoc = json::parse(mainDoc["contents"].get<std::string>());
+    } catch (const json::parse_error& e) {
+        logError("Couldn't parse 'contents' of: " + path + " - " + e.what(), "OpenCircuitsParser");
+        return false;
+    }
+
+    contents = saveDoc;
     outParsed = outParsedCircuit;
     parseOpenCircuitsJson();
+    logError("parseOpenCircuitsJson() complete");
 
     // Filtered blocks are the blocks of valid type that exist on the primary circuit to be placed
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
+    logError("filterAndResolveBlocks(filteredBlocks); complete");
     fillParsedCircuit(filteredBlocks);
+    logError("fillParsedCircuit(filteredBlocks); complete");
     printParsedData();
     return true;
 }
@@ -44,30 +57,35 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
     // Track all the components that are in the primary circuit
     // They should all exist within contents["1"]["data"], the DigitalCircuitDesigner
     // They should all be references, if they aren't make a new json object attached to the reference
-    if (contents["1"].toObject()["type"] != "DigitalCircuitDesigner"){
+    if (!contents.contains("1") || !contents["1"].is_object() || !contents["1"].contains("type") || 
+        contents["1"]["type"].get<std::string>() != "DigitalCircuitDesigner") {
         logError("DigitalCircuitDesigner not found in open circuits save file", "OpenCircuitsParser");
         return;
     }
-    QJsonObject circuitData = contents["1"].toObject()["data"].toObject();
+
+    json& circuitData = contents["1"]["data"];
     
+    std::cout << "tracking ics now\n";
     // track all of the ICs
-    QJsonArray ics;
-    QJsonObject icsJson = circuitData["ics"].toObject();
-    if(!icsJson.contains("data")) {
+    json& ics = circuitData["ics"];
+    if(!ics.contains("data")) {
         // ics listed in array that is referenced
-        if (!icsJson.contains("ref")){
+        if (!ics.contains("ref")){
             logError("Unknown DigitalCircuitDesigner format", "OpenCircuitsParser");
+            return;
         }
         // find the object of this array
-        ics = contents[icsJson["ref"].toString()].toObject()["data"].toArray();
+        std::string ref = ics["ref"].get<std::string>();
+        ics = contents[ref]["data"];
     } else {
         // the ics are listed inline
-        ics = icsJson["data"].toArray();
+        ics = ics["data"];
     }
-    for (const QJsonValue& ic : ics) {
-        QJsonObject icObj = ic.toObject();
+    std::cout << "Looping through ICS" << std::endl;
+    for (const auto& ic : ics.items()) {
+        json& icObj = ic.value();
         if (icObj.contains("ref")){
-            int icRef = icObj["ref"].toString().toInt();
+            int icRef = std::stoi(icObj["ref"].get<std::string>());
             ICDataReferences.push_back(icRef);
         } else{
             // If it is not listed as a reference (inline definition of ICData)
@@ -75,68 +93,71 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
 
             // Use negative references 
             // TODO: may just delete this because what is the use if we cant identify the ICData
-            contents[QString::number(newReferenceID)] = icObj;
+            contents[std::to_string(newReferenceID)] = icObj;
             ICDataReferences.push_back(newReferenceID);
             --newReferenceID;
         }
     }
 
-    QJsonArray compObjs;
-    QJsonObject compsJson = circuitData["objects"].toObject();
-    if(!compsJson.contains("data")) {
+    std::cout << "tracking objects now\n";
+
+    json& compObjs = circuitData["objects"];
+    if(!compObjs.contains("data")) {
         // components are referenced to json array object
-        if (!compsJson.contains("ref")){
+        if (!compObjs.contains("ref")){
             logError("Unknown DigitalCircuitDesigner format", "OpenCircuitsParser");
         }
         // find the object of this array
-        compObjs = contents[compsJson["ref"].toString()].toObject()["data"].toArray();
+        std::string ref = compObjs["ref"].get<std::string>();
+        compObjs = contents[ref]["data"];
     } else {
         // the components are listed inline
-        compObjs = compsJson["data"].toArray();
+        compObjs = compObjs["data"];
     }
-    for (const QJsonValue& c : compObjs) {
-        QJsonObject obj = c.toObject();
-        if (obj.contains("ref")){
-            bool ok;
-            int icRef = obj["ref"].toString().toInt(&ok); // stoi
-            if (!ok) {
-                logError("Bad stoi from: " +obj["ref"].toString().toStdString(), "OpenCircuitsParser");
-            }
+
+    for (const auto& c : compObjs.items()) {
+        json& cObj = c.value();
+        if (cObj.contains("ref")){
+            int icRef = std::stoi(cObj["ref"].get<std::string>());
             componentReferences.push_back(icRef);
         } else{
             // inline definition of a block, save it in a new reference
             // TODO: may just delete this because what is the use if we cant identify the block?
-            contents[QString::number(newReferenceID)] = obj;
+            contents[std::to_string(newReferenceID)] = cObj;
             ICDataReferences.push_back(newReferenceID);
             --newReferenceID;
         }
     }
 
 
+    std::cout << "tracking transforms now\n";
+
     // first pass: collect transforms and port relationships
-    for (const QString& id : contents.keys()) {
-        QJsonObject dataObj = contents[id].toObject();
-        QString type = dataObj["type"].toString();
-        QJsonObject dataData = dataObj["data"].toObject();
+    for (const auto& item : contents.items()) {
+        int id = std::stoi(item.key());
+        json& data = item.value();
+        std::string type = data["type"].get<std::string>();
+        json& dataData = data["data"];
 
         if (type == "Transform") {
             // Gather the information of a transform and store its reference in the transforms map
-            QJsonObject posData = dataData["pos"].toObject()["data"].toObject();
-            float x = static_cast<float>(posData["x"].toDouble());
-            float y = static_cast<float>(posData["y"].toDouble());
-            double angle = dataData["angle"].toDouble();
-            transforms[id.toInt()] = {FPosition{x, y}, angle};
+            json& posData = dataData["pos"]["data"];
+            float x = static_cast<float>(posData["x"].get<double>());
+            float y = static_cast<float>(posData["y"].get<double>());
+            double angle = dataData["angle"].get<double>();
+            transforms[id] = {FPosition{x, y}, angle};
         } else if (type == "DigitalInputPort" || type == "DigitalOutputPort") {
-            QJsonObject parent = dataData["parent"].toObject();
-            portParents[id.toInt()] = parent["ref"].toString().toInt();
+            portParents[id] = std::stoi(dataData["parent"]["ref"].get<std::string>());
         } else if (type == "DigitalWire") {
-            wires[id.toInt()] = {
-                dataData["p1"].toObject()["ref"].toString().toInt(),
-                dataData["p2"].toObject()["ref"].toString().toInt()
+            wires[id] = {
+                std::stoi(dataData["p1"]["ref"].get<std::string>()),
+                std::stoi(dataData["p2"]["ref"].get<std::string>())
             };
         }
     }
 
+
+    std::cout << "collecting block process now\n";
     // second pass: process blocks
     for (int id: componentReferences) {
         OpenCircuitsBlockInfo info;
@@ -156,23 +177,22 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
 }
 
 void OpenCircuitsParser::processBlockJson(int id, OpenCircuitsBlockInfo& info) {
-    QJsonObject obj = contents[QString::number(id)].toObject();
-    QString type = obj["type"].toString();
+    json& obj = contents[std::to_string(id)];
 
-    info.type = type.toStdString();
+    info.type = obj["type"].get<std::string>();
     info.angle = 0.0;
     info.position = {0.0, 0.0};
 
-    QJsonObject objData = obj["data"].toObject();
+    json& objData = obj["data"];
 
-    if (type == "IC") {
-        QJsonObject icJsonData = objData["data"].toObject();
+    if (info.type == "IC") {
+        json& icJsonData = objData["data"];
         if (icJsonData.contains("ref")){
             // link the ICData reference that this IC instance uses
-            info.icReference = icJsonData["ref"].toString().toInt();
+            info.icReference = std::stoi(icJsonData["ref"].get<std::string>());
         } else {
             // inline definition of a new ICData
-            contents[QString::number(newReferenceID)] = icJsonData;
+            contents[std::to_string(newReferenceID)] = icJsonData;
             ICDataReferences.push_back(newReferenceID);
             info.icReference = newReferenceID;
 
@@ -184,54 +204,50 @@ void OpenCircuitsParser::processBlockJson(int id, OpenCircuitsBlockInfo& info) {
     }
 
     if (objData.contains("transform"))
-        parseTransform(objData["transform"].toObject(), info);
+        parseTransform(objData["transform"], info);
 
     if (objData.contains("inputs"))
-        processOpenCircuitsPorts(objData["inputs"].toObject(), false, info, id);
+        processOpenCircuitsPorts(objData["inputs"], false, info, id);
 
     if (objData.contains("outputs"))
-        processOpenCircuitsPorts(objData["outputs"].toObject(), true, info, id);
+        processOpenCircuitsPorts(objData["outputs"], true, info, id);
 
-    if (type == "IC") {
+    if (info.type == "IC") {
         usedIcDatas.insert(info.icReference);
     }
 }
 
 
 void OpenCircuitsParser::processICDataJson(int id, ICData& icData) {
-    QJsonObject obj = contents[QString::number(id)].toObject();
-    QString type = obj["type"].toString();
-
-    QJsonObject objData = obj["data"].toObject();
+    json& objData = contents[std::to_string(id)]["data"];
 
     // Read all of the blocks (components) that are in this ic
-    QJsonObject collection = objData["collection"].toObject()["data"].toObject();
-    QJsonArray components = collection["components"].toObject()["data"].toArray();
-    for (const QJsonValue& compVal : components) {
-        int componentId = compVal.toObject()["ref"].toString().toInt();
+    json& collection = objData["collection"]["data"];
+    json& components = collection["components"]["data"];
+    for (const auto& comp : components.items()) {
+        int componentId = std::stoi(comp.value()["ref"].get<std::string>());
         OpenCircuitsBlockInfo info;
         processBlockJson(componentId, info);
         icData.components[componentId] = info;
     }
 
     // Parse input and output ports of the ICData (which blocks of the ic are ports for the custom ic block)
-    QJsonArray inputPorts = collection["inputs"].toObject()["data"].toArray();
-    for (const QJsonValue& portVal : inputPorts) {
-        QString portRef = portVal.toObject()["ref"].toString();
-        icData.inputPorts.push_back(portRef.toInt());
+    // json arrays
+    json& inputPorts = collection["inputs"]["data"];
+    for (const auto& port : inputPorts.items()) {
+        icData.inputPorts.push_back(std::stoi(port.value()["ref"].get<std::string>()));
     }
 
-    QJsonArray outputPorts = collection["outputs"].toObject()["data"].toArray();
-    for (const QJsonValue& portVal : outputPorts) {
-        QString portRef = portVal.toObject()["ref"].toString();
-        icData.outputPorts.push_back(portRef.toInt());
+    json& outputPorts = collection["outputs"]["data"];
+    for (const auto& port : outputPorts.items()) {
+        icData.outputPorts.push_back(std::stoi(port.value()["ref"].get<std::string>()));
     }
 }
 
 
-void OpenCircuitsParser::parseTransform(const QJsonObject& transform, OpenCircuitsBlockInfo& info) {
+void OpenCircuitsParser::parseTransform(const json& transform, OpenCircuitsBlockInfo& info) {
     if (transform.contains("ref")) {
-        int transformId = transform["ref"].toString().toInt();
+        int transformId = std::stoi(transform["ref"].get<std::string>());
         std::unordered_map<int, std::pair<FPosition, double>>::iterator it = transforms.find(transformId);
         if (it != transforms.end()) {
             info.position = it->second.first;
@@ -240,37 +256,36 @@ void OpenCircuitsParser::parseTransform(const QJsonObject& transform, OpenCircui
             logError("Could not find Transform Reference Data: " + std::to_string(transformId), "OpenCircuitsParser");
         }
     } else {
-        QJsonObject transformData = transform["data"].toObject();
-        QJsonObject pos = transformData["pos"].toObject();
-        QJsonObject posData = pos["data"].toObject();
+        const json& transformData = transform["data"];
+        const json& posData = transformData["pos"]["data"];
         info.position = {
-            static_cast<float>(posData["x"].toDouble()),
-            static_cast<float>(posData["y"].toDouble())
+            static_cast<float>(posData["x"].get<double>()),
+            static_cast<float>(posData["y"].get<double>())
         };
-        info.angle = transformData["angle"].toDouble();
+        info.angle = transformData["angle"].get<double>();
     }
 }
 
-void OpenCircuitsParser::processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId) {
+void OpenCircuitsParser::processOpenCircuitsPorts(const json& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId) {
 
     if (!ports.contains("data")) return;
-    QJsonObject portData = ports["data"].toObject();
+    const json& portData = ports["data"];
 
     if (!portData.contains("currentPorts")) return;
 
-    QJsonObject currentPorts = portData["currentPorts"].toObject();
-    QJsonArray portsArray = currentPorts["data"].toArray();
+    const json& currentPorts = portData["currentPorts"];
+    const json& portsArray = currentPorts["data"];
 
-    for (const QJsonValue& portVal : portsArray) {
-        QJsonObject portObj = portVal.toObject();
-        if (!portObj.contains("ref")) {
+    for (const auto& port : portsArray.items()) {
+        const json& pObj = port.value();
+        if (!pObj.contains("ref")) {
             // inline declaration of port this may need to be preprocessed before ever calling processOpenCircuitsPorts for any block
             // though the only case I have found where this happens is where the port parent is just [thisId] = [thisId] which has no purpose
-            QJsonObject parent = portObj["data"].toObject()["parent"].toObject();
-            portParents[thisId] = parent["ref"].toString().toInt();
+            const json& parent = pObj["data"]["parent"];
+            portParents[thisId] = std::stoi(parent["ref"].get<std::string>());
             continue;
         }
-        int portId = portObj["ref"].toString().toInt();
+        int portId = std::stoi(pObj["ref"].get<std::string>());
 
         for (const std::pair<int,std::pair<int,int>>& p : wires) {
             const std::pair<int,int>& wire = p.second;

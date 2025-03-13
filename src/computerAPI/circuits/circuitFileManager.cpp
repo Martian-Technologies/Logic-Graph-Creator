@@ -1,6 +1,3 @@
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
-
 #include "circuitFileManager.h"
 #include "gatalityParser.h"
 #include "openCircuitsParser.h"

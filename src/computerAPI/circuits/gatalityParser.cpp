@@ -1,6 +1,4 @@
-#include <QtCore/QString>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
+#include <filesystem>
 
 #include "gatalityParser.h"
 #include "circuitFileManager.h"
@@ -38,10 +36,12 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::string importFileName;
             inputFile >> std::quoted(importFileName);
 
-            QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
+            std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
+            const std::string& fPath = fullPath.string();
+
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
-            logInfo("File to access: " + fullPath.toStdString(), "GatalityParser");
-            if (load(fullPath.toStdString(), dependency)){
+            logInfo("File to access: " + fPath, "GatalityParser");
+            if (load(fPath, dependency)){
                 outParsed->addDependency(importFileName, dependency);
                 outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
                 logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");

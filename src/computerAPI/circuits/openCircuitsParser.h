@@ -1,11 +1,13 @@
 #ifndef openCircuitsParser_h
 #define openCircuitsParser_h
 
-#include <QtCore/QJsonObject>
+#include <nlohmann/json.hpp>
 #include <list>
 
 #include "backend/circuit/parsedCircuit.h"
 #include "backend/position/position.h"
+
+using json = nlohmann::json;
 
 struct OpenCircuitsBlockInfo {
     std::string type;
@@ -33,10 +35,10 @@ public:
     void processICDataJson(int id, ICData& icData);
 
     // Stores the information such as angle, position, etc for blocks
-    void parseTransform(const QJsonObject& transform, OpenCircuitsBlockInfo& info);
+    void parseTransform(const json& transform, OpenCircuitsBlockInfo& info);
 
     // Finds the connections between blocks that are described via the "wires"
-    void processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId);
+    void processOpenCircuitsPorts(const json& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId);
 
     // Filters and resolves across all blocks, even within the components of ICData's
     void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo*>& outFiltered);
@@ -47,7 +49,7 @@ public:
     void printParsedData();
 
 private:
-    QJsonObject contents;
+    json contents;
     int newReferenceID = -1;
     std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data (WITHIN PRIMARY CIRCUIT ONLY)
     std::unordered_map<int,std::pair<FPosition,double>> transforms; // id to block position and angle in radians
