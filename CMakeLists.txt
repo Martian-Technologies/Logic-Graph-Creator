@@ -59,8 +59,8 @@ set(EXTERNAL_LINKS
 	KDAB::kddockwidgets
 )
 
-if (Gatality_BuildApp)
 # ======================================= CREATE EXECUTABLE ========================================
+if (Gatality_BuildApp)
 	# Platform specific business before add_executable
 	if(APPLE) # MacOS
 		# Icon
@@ -114,6 +114,12 @@ if (Gatality_BuildApp)
 	endif()	
 endif()
 
+# ======================================= RESOURCE COPYING =========================================
+# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+	COMMENT "Copying resource directory"
+)
 
 # ============================================ GTESTING ============================================
 if (Gatality_BuildTests)
