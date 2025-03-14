@@ -16,6 +16,7 @@
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+#include "computerAPI/directoryManager.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
 	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
@@ -44,7 +45,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 
 	// initialize QTRenderer with width and height + tileset
 	renderer->resize(w, h);
-	renderer->initializeTileSet(":logicTiles.png");
+	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
@@ -60,8 +61,11 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() { 
 		circuitView->getEventRegister().doEvent(Event("tool rotate block cw"));
 	});
-  connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
+  	connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() { 
 		circuitView->toggleInteractive(); 
+	});
+  	connect(keybindManager->createShortcut("MakeCircuitBlock", this), &QShortcut::activated, this, [this]() { 
+		circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); 
 	});
 	
 	// connect buttons and actions

@@ -59,8 +59,8 @@ set(EXTERNAL_LINKS
 	KDAB::kddockwidgets
 )
 
-if (Gatality_BuildApp)
 # ======================================= CREATE EXECUTABLE ========================================
+if (Gatality_BuildApp)
 	# Platform specific business before add_executable
 	if(APPLE) # MacOS
 		# Icon
@@ -111,26 +111,20 @@ if (Gatality_BuildApp)
 			# Set WIN32_EXECUTABLE (Disables Console)
 			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 		endif ()
-	endif()
+	endif()	
 
-# ======================================= RESOURCE EMBEDDING =======================================
-	# find resources
-	file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
-	file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
+# ======================================= RESOURCE COPYING =========================================
+# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
+set(COPIED_RESOURCES_DIR $<TARGET_FILE_DIR:${PROJECT_NAME}>"/resources")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
+	COMMENT "Copying resource directory"
+)
 
-	# add resources to QT
-	qt_add_resources(${PROJECT_NAME} "mainResources"
-			PREFIX
-			"/"
-			FILES
-			${IMG_SOURCES}
-			${JSON_SOURCES}
-			BASE ${RESOURCES_DIR}
-	)
 endif()
 
-if (Gatality_BuildTests)
 # ============================================ GTESTING ============================================
+if (Gatality_BuildTests)
 	message("Doing Testing")
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
 	enable_testing()

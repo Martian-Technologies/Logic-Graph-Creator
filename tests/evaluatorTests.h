@@ -6,9 +6,13 @@
 #include "backend/evaluator/evaluator.h"
 
 class EvaluatorTest : public ::testing::Test {
+public:
+	EvaluatorTest() : circuitManager(&dataUpdateEventManager) {}
+
 protected:
     void SetUp() override;
     void TearDown() override;
+	DataUpdateEventManager dataUpdateEventManager;
     CircuitManager circuitManager;
     SharedCircuit circuit;
     SharedEvaluator evaluator;

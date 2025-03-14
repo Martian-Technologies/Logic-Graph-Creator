@@ -40,7 +40,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 	Block& block = iter->second;
 	removeBlockCells(&block);
 	// make sure to remove all connections from this block
-	for (unsigned int i = 0; i <= block.getConnectionContainer().getMaxConnectionId(); i++) {
+	for (unsigned int i = 0; i < block.getConnectionContainer().getConnectionCount(); i++) {
 		auto [connectionPosition, success] = block.getConnectionPosition(i);
 		if (!success)
 			continue;
@@ -193,7 +193,7 @@ Difference BlockContainer::getCreationDifference() const {
 		difference.addPlacedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
 	}
 	for (auto iter : blocks) {
-		for (connection_end_id_t id = 0; id <= iter.second.getConnectionContainer().getMaxConnectionId(); id++) {
+		for (connection_end_id_t id = 0; id < iter.second.getConnectionContainer().getConnectionCount(); id++) {
 			if (iter.second.isConnectionInput(id)) continue;
 			for (auto connectionIter : iter.second.getConnectionContainer().getConnections(id)) {
 				difference.addCreatedConnection(iter.second.getConnectionPosition(id).first, getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first);
