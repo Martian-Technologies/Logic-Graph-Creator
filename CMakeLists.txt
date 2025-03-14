@@ -132,7 +132,7 @@ if (Gatality_BuildApp)
 	
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
-set(COPIED_RESOURCES_DIR $<TARGET_FILE_DIR:${PROJECT_NAME}>"/resources")
+set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
 	COMMENT "Copying resource directory"
@@ -144,6 +144,8 @@ file(GLOB_RECURSE SHADER_SOURCE_FILES
 	"${SOURCE_DIR}/*.vert"
 	"${SOURCE_DIR}/*.frag"
 )
+
+
 
 # list of commands to execute to compile all shaders
 set(SHADER_COMMANDS)
@@ -169,6 +171,11 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	DEPENDS ${SHADER_SOURCE_FILES}
 	BYPRODUCTS ${SHADER_PRODUCTS}
 	COMMENT "Compiling Shaders"
+)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_BINARY_DIR} "${COPIED_RESOURCES_DIR}/shaders"
+	COMMENT "Copying shader directory"
 )
 
 endif()
