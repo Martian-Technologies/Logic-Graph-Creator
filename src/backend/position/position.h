@@ -73,7 +73,7 @@ struct Position {
 	inline FPosition free() const;
 
 	inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
-	
+
 	inline bool operator==(const Position& position) const { return x == position.x && y == position.y; }
 	inline bool operator!=(const Position& position) const { return !operator==(position); }
 	inline bool withinArea(const Position& small, const Position& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
@@ -120,12 +120,13 @@ struct FPosition {
 	inline f_cord_t distanceToOriginSquared() const { return FastPower<2>(x) + FastPower<2>(y); }
 	inline f_cord_t distanceTo(const FPosition& other) const { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }
 	inline f_cord_t distanceToOrigin() const { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
-	
+
 	inline FPosition operator+(const FVector& vector) const { return FPosition(x + vector.dx, y + vector.dy); }
 	inline FPosition& operator+=(const FVector& vector) { x += vector.dx; y += vector.dy; return *this; }
 	inline FVector operator-(const FPosition& position) const { return FVector(x - position.x, y - position.y); }
 	inline FPosition operator-(const FVector& vector) const { return FPosition(x - vector.dx, y - vector.dy); }
 	inline FPosition& operator-=(const FVector& vector) { x -= vector.dx; y -= vector.dy; return *this; }
+	inline FPosition operator*(f_cord_t scalar) const { return FPosition(x * scalar, y * scalar); }
 	inline f_cord_t lengthAlongProjectToVec(const FPosition& orginOfVec, const FVector& vector) const { return (*this - orginOfVec).lengthAlongProjectToVec(vector); }
 	inline FPosition projectToVec(const FPosition& orginOfVec, const FVector& vector) const { return orginOfVec + (*this - orginOfVec).projectToVec(vector); }
 
@@ -157,21 +158,22 @@ inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
 	if (rotation == Rotation::ZERO) return Rotation::TWO_SEVENTY;
 	return (Rotation)((int)rotation - 1);
 }
-inline constexpr float getDegrees(Rotation rotation) {
-	switch (rotation) {
-	case Rotation::ZERO:
-		return 0.0f;
-		break;
-	case Rotation::NINETY:
-		return 90.0f;
-		break;
-	case Rotation::ONE_EIGHTY:
-		return 180.0f;
-		break;
-	case Rotation::TWO_SEVENTY:
-		return 270.0f;
-		break;
+inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 - (char)rotation) * (char)rotation); }
+inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
+inline Vector rotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
+	switch (rotationAmount) {
+		case Rotation::NINETY: return Vector(height - vector.dy - 1, vector.dx);
+		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+		case Rotation::TWO_SEVENTY: return Vector(vector.dy, width - vector.dx - 1);
+		default: return vector;
 	}
-	return 0.0f;
+}
+inline Vector reverseRotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
+	switch (rotationAmount) {
+		case Rotation::NINETY: return Vector(vector.dy, height - vector.dx - 1);
+		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+		case Rotation::TWO_SEVENTY: return Vector(width - vector.dy - 1, vector.dx);
+		default: return vector;	
+	}
 }
 #endif /* position_h */

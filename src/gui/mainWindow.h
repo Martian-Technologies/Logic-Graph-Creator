@@ -2,13 +2,15 @@
 #define mainWindow_h
 
 #include <QWidget>
+class QTimer;
 class QGraphicsScene;
 
 #include <kddockwidgets/MainWindow.h>
 #include <kddockwidgets/DockWidget.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "circuitView/renderer/qtRenderer.h"
+#include "qtRenderer.h"
+#include "keybinds/keybindManager.h"
 #include "backend/backend.h"
 
 namespace Ui {
@@ -23,16 +25,16 @@ public:
 	MainWindow(KDDockWidgets::MainWindowOptions options);
 	
 	// actions
-	void setBlock(BlockType blockType);
+	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
+	void setMode(std::string tool);
     void updateSaveMenu(bool saveAs);
-    void updateLoadIntoMenu(bool loadMerged);
+    void updateLoadIntoMenu();
     void saveCircuit(circuit_id_t id, bool saveAs);
-    void loadCircuit(bool loadMerged);
-    void loadCircuitInto(CircuitView<QtRenderer>* circuitWidget, bool loadMerged);
+    void loadCircuit();
+    void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
-	void openNewHotbarWindow();
 
 private:
 	// utility
@@ -42,15 +44,23 @@ private:
     bool eventFilter(QObject* obj, QEvent* event);
 
 private:
+	// update loop
+	QTimer* updateLoopTimer;
+	const float updateInterval = 0.1f;
+
 	QGraphicsScene* scene;
     QMenu* saveSubMenu;
     QMenu* saveAsSubMenu;
     QMenu* loadIntoSubMenu;
     QMenu* loadMergedSubMenu;
 	Backend backend;
+	KeybindManager keybindManager;
 	std::vector<CircuitViewWidget*> circuitViews;
     std::unordered_map<QWidget*, CircuitViewWidget*> activeWidgets;
     CircuitFileManager circuitFileManager;
+
+signals:
+	void toolModeOptionsChanged(const std::vector<std::string>* modes);
 };
 
 #endif /* mainWindow_h */

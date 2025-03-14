@@ -1,4 +1,5 @@
 #include "validateCircuit.h"
+#include <stack>
 
 void CircuitValidator::validate() {
     bool isValid = true;
@@ -21,97 +22,24 @@ bool CircuitValidator::validateDependencies() {
 
     for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
         // validate the dependency as a circuit itself
-        CircuitValidator depValidator(*depCircuit, mergeCircuit);
+        CircuitValidator depValidator(*depCircuit, blockDataManager);
         if (!depCircuit->valid) {
             logError("Dependency circuit validation failed for " + depName);
             parsedCircuit.valid = false;
             return false;
         }
         logInfo("Dependency circuit validation success for " + depName);
-
-        // Merge into one parsed circuit:
-        if (!mergeCircuit){ continue; }
-
-        Vector depSize = depCircuit->maxPos - depCircuit->minPos;
-        Vector currOffset = offset;
-
-        // merge the blocks to the current parsedCircuit with their offsets
-        std::unordered_map<block_id_t, block_id_t> idMap;
-        for (const auto& [id, block] : depCircuit->getBlocks()) {
-            block_id_t newId = generateNewBlockId();
-            idMap[id] = newId;
-
-            ParsedCircuit::BlockData newBlock = block;
-            newBlock.pos.x += currOffset.dx;
-            newBlock.pos.y += currOffset.dy;
-            parsedCircuit.addBlock(newId, newBlock);
-        }
-
-        // merge internal connections, adjusting old ids
-        for (const auto& conn : depCircuit->connections) {
-            ParsedCircuit::ConnectionData newConn = conn;
-            newConn.outputBlockId = idMap[conn.outputBlockId];
-            newConn.inputBlockId = idMap[conn.inputBlockId];
-            parsedCircuit.connections.push_back(newConn);
-        }
-
-        // store ID mapping for this specific dependency
-        dependencyMappings[depName] = idMap;
-
-        // update offset for next dependency
-        offset.dx += depSize.dx + 3;
-        if ((++numImports % 3) == 0) {
-            offset.dx = 0;
-            offset.dy += depSize.dy + 2;
-        }
     }
 
     logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()));
-    if (mergeCircuit){
-        processExternalConnections();
-        parsedCircuit.dependencies.clear(); // We have no more dependencies because they are merged
-    }
 
     return true;
-}
-
-void CircuitValidator::processExternalConnections() {
-    // collect connections from dependencies
-    for (const auto& [depName, depCircuit] : parsedCircuit.dependencies) {
-        const auto& depConns = depCircuit->getExternalConnections();
-        parsedCircuit.externalConnections.insert(parsedCircuit.externalConnections.end(), depConns.begin(), depConns.end());
-    }
-
-    for (const auto& conn : parsedCircuit.externalConnections) {
-        block_id_t resolvedLocalBlock;
-        if (conn.localFile == ".") {
-            resolvedLocalBlock = conn.localBlockId;
-        } else {
-            std::cout << "Trying to access local file at: " << conn.localFile << std::endl;
-            const auto& depMap = dependencyMappings.at(conn.localFile);
-            resolvedLocalBlock = depMap.at(conn.localBlockId);
-        }
-
-        block_id_t resolvedExternalBlock;
-        if (conn.dependencyFile == ".") {
-            resolvedExternalBlock = conn.localBlockId;
-        } else {
-            std::cout << "Trying to access dependency at: " << conn.dependencyFile << std::endl;
-            const auto& extDepMap = dependencyMappings.at(conn.dependencyFile);
-            resolvedExternalBlock = extDepMap.at(conn.externalBlockId);
-        }
-
-        parsedCircuit.addConnection({resolvedLocalBlock, conn.localConnectionId, resolvedExternalBlock, conn.externalConnectionId});
-        // add the reciprocated connection
-        parsedCircuit.addConnection({resolvedExternalBlock, conn.externalConnectionId, resolvedLocalBlock, conn.localConnectionId});
-    }
-    std::cout << "Finished connecting external dependencies\n\n";
 }
 
 bool CircuitValidator::setBlockPositionsInt() {
     for (auto& [id, block] : parsedCircuit.blocks) {
         if (!isIntegerPosition(block.pos)) {
-            std::cout << "Converted block id=" << id << " position from " << block.pos.toString() << " to ";
+            FPosition oldPosition = block.pos;
             block.pos.x = std::floor(block.pos.x);
             block.pos.y = std::floor(block.pos.y);
             if (block.pos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = block.pos.x;
@@ -119,7 +47,9 @@ bool CircuitValidator::setBlockPositionsInt() {
             if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
             if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
 
-            std::cout << block.pos.toString() << '\n';
+            logInfo("Converted block id=" + std::to_string(id) +
+                        " position from " + oldPosition.toString() + " to " + block.pos.toString(),
+                    "CircuitValidator");
         }
     }
     return true;
@@ -147,7 +77,12 @@ bool CircuitValidator::handleInvalidConnections() {
 
         if(--connectionCounts[reversePair] < 0){
             parsedCircuit.connections.push_back(reversePair);
-            std::cout << "Added a reciprocated connection between: (" << conn.inputBlockId << ' ' << conn.outputBlockId << ") and (" << reversePair.inputBlockId << ' ' << reversePair.outputBlockId << ")\n";
+            logInfo("Added reciprocated connection between: (" +
+                        std::to_string(conn.inputBlockId) + ' ' +
+                        std::to_string(conn.outputBlockId) + ") and (" +
+                        std::to_string(reversePair.inputBlockId) + ' ' +
+                        std::to_string(reversePair.outputBlockId) + ")",
+                    "CircuitValidator");
             connectionCounts[reversePair] = 0;
         }
         ++i;
@@ -156,7 +91,11 @@ bool CircuitValidator::handleInvalidConnections() {
     // check all remaining connections were found
     for (const auto& [pair, count] : connectionCounts) {
         if (count != 0){
-            std::cout << "Invalid connection handling, connection frequency: (" << pair.outputBlockId << ' ' << pair.inputBlockId << ") " << count << '\n';
+            logWarning("Invalid connection handling, connection frequency: (" +
+                         std::to_string(pair.outputBlockId) + ' ' +
+                         std::to_string(pair.inputBlockId) + ") " +
+                         std::to_string(count),
+                     "CircuitValidator");
             return false;
         }
     }
@@ -168,10 +107,14 @@ bool CircuitValidator::setOverlapsUnpositioned() {
     std::unordered_set<Position> occupiedPositions;
 
     for (auto& [id, block] : parsedCircuit.blocks) {
+        if (block.pos.x == std::numeric_limits<float>::max() || 
+            block.pos.y == std::numeric_limits<float>::max()) {
+            continue;
+        }
         Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
         if (!occupiedPositions.insert(intPos).second){
             // set the block position as effectively undefined
-            std::cout << "Found overlapped block position at " << block.pos.toString() << " --> " << intPos.toString() << ", setting to undefined position\n";
+            logInfo("Found overlapped block position at " + block.pos.toString() + " --> " + intPos.toString() + ", setting to undefined position", "CircuitValidator");
             block.pos.x = std::numeric_limits<float>::max();
             block.pos.y = std::numeric_limits<float>::max();
         }
@@ -180,43 +123,226 @@ bool CircuitValidator::setOverlapsUnpositioned() {
     return true;
 }
 
-bool CircuitValidator::handleUnpositionedBlocks() {
-    Position startPos(
-        static_cast<int>(std::round(parsedCircuit.minPos.dx)),
-        static_cast<int>(std::round(parsedCircuit.minPos.dy))
-    );
-    
-    Position currentPos = startPos;
-    std::unordered_set<Position> occupiedPositions;
 
-    for (const auto& [id, block] : parsedCircuit.blocks) {
-        Position pos(
-            static_cast<int>(block.pos.x),
-            static_cast<int>(block.pos.y)
-        );
-        occupiedPositions.insert(pos);
-    }
-
-    for (auto& [id, block] : parsedCircuit.blocks) {
-        if (block.pos.x == std::numeric_limits<float>::max() || 
-            block.pos.y == std::numeric_limits<float>::max()) {
-            
-            while (occupiedPositions.count(currentPos)) {
-                ++currentPos.x;
-                if ((currentPos.x - startPos.x) % 10 == 0) {
-                    currentPos.x = startPos.x;
-                    ++currentPos.y;
-                }
+// iterative dfs
+template <class PreVisit, class PostVisit>
+void depthFirstSearch(const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj, block_id_t start, std::unordered_set<block_id_t>& visited, PreVisit preVisit, PostVisit postVisit) {
+    std::stack<block_id_t> stack;
+    stack.push(start);
+    visited.insert(start);
+    preVisit(start);
+    while (!stack.empty()) {
+        block_id_t node = stack.top();
+        bool hasUnvisited = false;
+        if (adj.count(node)){
+            for (block_id_t neighbor : adj.at(node)) {
+                if (visited.count(neighbor)) continue;
+                visited.insert(neighbor);
+                preVisit(neighbor);
+                stack.push(neighbor);
+                hasUnvisited = true;
+                break;
             }
+        }
 
-            block.pos = FPosition(currentPos.x, currentPos.y);
-            if (currentPos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = currentPos.x;
-            if (currentPos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = currentPos.y;
-            if (currentPos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = currentPos.x;
-            if (currentPos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = currentPos.y;
-            std::cout << "Found new empty block position: " << block.pos.toString() << " --> " << block.pos.snap().toString() << '\n';
-            occupiedPositions.insert(currentPos);
+        if (!hasUnvisited) {
+            stack.pop();
+            postVisit(node);
         }
     }
+}
+
+// SCC META GRAPH TOPOLOGICAL SORT
+bool CircuitValidator::handleUnpositionedBlocks() {
+    // Separate components so that we can place down disconnected components independently
+    std::unordered_map<block_id_t, std::vector<block_id_t>> undirectedAdj;
+    undirectedAdj.reserve(parsedCircuit.blocks.size());
+    for (const ParsedCircuit::ConnectionData& conn : parsedCircuit.connections) {
+        block_id_t u = conn.inputBlockId;
+        block_id_t v = conn.outputBlockId;
+        undirectedAdj[u].push_back(v);
+        undirectedAdj[v].push_back(u);
+    }
+
+    // find cc's by dfs
+    std::vector<std::unordered_set<block_id_t>> components;
+    std::unordered_map<block_id_t, int> blockToComponent;
+    std::unordered_set<block_id_t> visited;
+    for (const auto& [id, block] : parsedCircuit.blocks) {
+        if (!visited.count(id)) {
+            components.push_back({});
+            depthFirstSearch(undirectedAdj, id, visited, [&](block_id_t node){components.back().insert(node); blockToComponent[node] = components.size()-1;}, [&](block_id_t){});
+        }
+    }
+
+    // preprocess connected component connections
+    std::vector<std::unordered_map<block_id_t,std::vector<block_id_t>>> componentAdjs(components.size());
+    for (const ParsedCircuit::ConnectionData& conn : parsedCircuit.connections) {
+        if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type,conn.outputId)){
+            int cc = blockToComponent[conn.inputBlockId];
+            componentAdjs[cc][conn.inputBlockId].push_back(conn.outputBlockId);
+        }
+    }
+
+    // precompute input connections for each block for layer placement
+    std::unordered_map<block_id_t, std::vector<block_id_t>> inputConnections;
+    for (const auto& conn : parsedCircuit.connections) {
+        inputConnections[conn.inputBlockId].push_back(conn.outputBlockId);
+    }
+
+    const int componentSpacing = 5;
+    int currentYOffset = 0;
+    for (int ccIndex=0; ccIndex<componentAdjs.size(); ++ccIndex){
+        const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj = componentAdjs[ccIndex];
+        logInfo("Parsing CC " + std::to_string(ccIndex));
+
+        // find SCC metagraph DAG for topological sort using kosaraju's
+        // gather stack that shows decreasing post visit numbers
+        std::stack<block_id_t> postNumber; // highest post number node is a part of a source SCC, run on G^R
+        visited.clear();
+        for (block_id_t id : components[ccIndex]) {
+            if (!visited.count(id)) {
+                depthFirstSearch(adj, id, visited, [&](block_id_t){}, [&](block_id_t node){postNumber.push(node);});
+            }
+        }
+
+        // make reverse graph in adjacency list
+        std::unordered_map<block_id_t, std::vector<block_id_t>> revAdj;
+        for (const auto& [u, adjs] : adj) {
+            for (block_id_t v : adjs) {
+                revAdj[v].push_back(u);
+            }
+        }
+
+        // run dfs from source SCC's in reverse graph, sink SCCs of regular
+        std::vector<std::vector<block_id_t>> sccs;
+        visited.clear();
+        while (!postNumber.empty()) {
+            block_id_t node = postNumber.top();
+            postNumber.pop();
+            if (!visited.count(node)) {
+                std::vector<block_id_t> revCC;
+                depthFirstSearch(adj, node, visited, [&](block_id_t node){revCC.push_back(node);}, [&](block_id_t){});
+                sccs.push_back(revCC);
+            }
+        }
+
+        // Make metagraph and run topo sort
+        std::unordered_map<int, std::vector<int>> metaGraph;
+        std::unordered_map<block_id_t, int> blockToScc;
+        for (int i = 0; i < sccs.size(); ++i) {
+            for (block_id_t block : sccs[i]) {
+                blockToScc[block] = i;
+            }
+        }
+
+        std::unordered_map<int, int> sccInDegree;
+        for (const auto& [u, adjs] : adj) {
+            int sccU = blockToScc[u];
+            for (block_id_t v : adjs) {
+                int sccV = blockToScc[v];
+                if (sccU != sccV) {
+                    // add sccV as a new adjacency to sccU
+                    metaGraph[sccU].push_back(sccV);
+                    ++sccInDegree[sccV]; // SCC gains an incoming edge
+                }
+            }
+        }
+
+        // topological sort via removing source nodes
+        std::queue<int> q;
+        for (int i = 0; i < sccs.size(); ++i) {
+            if (sccInDegree[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        std::vector<int> sccOrder;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            sccOrder.push_back(u);
+            for (int v : metaGraph[u]) {
+                if (--sccInDegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+
+        if (sccOrder.size() != sccs.size()) {
+            logError("Cycle in SCC meta graph. Topological sort failed.", "CircuitValidator");
+            return false;
+        }
+
+        std::unordered_map<block_id_t, int> layers;
+        for (int sccIdx : sccOrder) {
+            for (block_id_t id : sccs[sccIdx]) {
+                int maxLayer = 0;
+                auto it = inputConnections.find(id);
+                if (it != inputConnections.end()) {
+                    for (block_id_t outputBlock : it->second) {
+                        maxLayer = std::max(maxLayer, layers[outputBlock] + 1);
+                    }
+                }
+                layers[id] = maxLayer;
+            }
+        }
+
+        // Get occupied positions to avoid overlaps
+        std::unordered_set<Position> occupiedPositions;
+        for (const auto& [id, block] : parsedCircuit.blocks) {
+            if (block.pos.x != std::numeric_limits<float>::max() && 
+                    block.pos.y != std::numeric_limits<float>::max()) {
+                occupiedPositions.insert(Position(
+                            static_cast<int>(block.pos.x),
+                            static_cast<int>(block.pos.y)
+                            ));
+            }
+        }
+
+        // place blocks in layers
+        const int xSpacing = 2; // x spacing between layers
+        std::unordered_map<int, int> layerYcounter;
+        int maxYPlaced = parsedCircuit.minPos.dy;
+        for (int sccIndex : sccOrder) {
+            for (block_id_t id : sccs[sccIndex]){
+                ParsedCircuit::BlockData& block = parsedCircuit.blocks[id];
+                if (block.pos.x != std::numeric_limits<float>::max() && 
+                        block.pos.y != std::numeric_limits<float>::max()) {
+                    continue;
+                }
+
+                const int layer = layers[id];
+                const int x = static_cast<int>(parsedCircuit.minPos.dx) + (layer-1) * xSpacing;
+
+                // find first available Y position in current layer column
+                int y = static_cast<int>(parsedCircuit.minPos.dy) + currentYOffset;
+
+                if (layerYcounter.find(x) != layerYcounter.end()) {
+                    y = layerYcounter[x];
+                }
+
+                while (occupiedPositions.count(Position(x, y))) {
+                    ++y;
+                }
+
+                maxYPlaced = std::max(maxYPlaced, y);
+                block.pos = FPosition(x, y);
+                occupiedPositions.insert(Position(x, y));
+                layerYcounter[x] = y + 1;
+
+                parsedCircuit.minPos.dx = std::fmin(parsedCircuit.minPos.dx, static_cast<float>(x));
+                parsedCircuit.minPos.dy = std::fmin(parsedCircuit.minPos.dy, static_cast<float>(y));
+                parsedCircuit.maxPos.dx = std::fmax(parsedCircuit.maxPos.dx, static_cast<float>(x));
+                parsedCircuit.maxPos.dy = std::fmax(parsedCircuit.maxPos.dy, static_cast<float>(y));
+
+                //logInfo("Placed block " + std::to_string(id) + " at " + 
+                //        block.pos.toString() + " in layer " + std::to_string(layer), 
+                //        "CircuitValidator");
+            }
+        }
+        currentYOffset = componentSpacing + maxYPlaced;
+    }
+
     return true;
 }

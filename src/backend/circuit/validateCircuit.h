@@ -1,8 +1,7 @@
 #ifndef validateCircuit_h
 #define validateCircuit_h
 #include "backend/circuit/parsedCircuit.h"
-#include "backend/circuit/circuit.h"
-#include <vector>
+#include "backend/container/block/blockDataManager.h"
 
 // Will take in a ParsedCircuit and modify its "valid" state to whether or not it is valid.
 // The parsed circuit is only considered to be valid or invalid relative to itself,
@@ -15,9 +14,7 @@
 // - if we are importing blocks that don't have position (ie they are floatmax or floatmin), they should be given a position and it should be some organized structure.
 class CircuitValidator {
 public:
-    CircuitValidator(ParsedCircuit& parsedCircuit, bool mergeCircuit)
-        : parsedCircuit(parsedCircuit), mergeCircuit(mergeCircuit)
-    { validate(); }
+    CircuitValidator(ParsedCircuit& parsedCircuit, const BlockDataManager* blockDataManager) : parsedCircuit(parsedCircuit), blockDataManager(blockDataManager) { validate(); }
 private:
     struct ConnectionHash {
         size_t operator()(const ParsedCircuit::ConnectionData& p) const {
@@ -30,11 +27,12 @@ private:
     std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
-    void processExternalConnections();
     bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
+
+
     bool handleUnpositionedBlocks();
 
     bool isIntegerPosition(const FPosition& pos) const {
@@ -48,8 +46,8 @@ private:
         return id;
     }
 
+	const BlockDataManager* blockDataManager;
     ParsedCircuit& parsedCircuit;
-    bool mergeCircuit;
 };
 
 #endif /* validateCircuit_h */

@@ -14,14 +14,16 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <array>
 #include <queue>
 #include <map>
 #include <set>
+#include <mutex>
 
 #include <cstdint>
 #include <cmath>
+#include <cstring>
 
-// do we need these?
 #include <iostream>
 #include <sstream>
 #include <ostream>
@@ -30,4 +32,4 @@
 
 #include "logging/logging.h"
 
-#endif
+#endif /* LGC_PCH */

@@ -8,16 +8,18 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer() : lastId(0), grid(), blocks() { }
+	inline BlockContainer(const BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+
+	inline const BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
-	bool checkCollision(const Position& positionSmall, const Position& positionLarge);
-
+	bool checkCollision(const Position& positionSmall, const Position& positionLarge) const;
+	bool checkCollision(const Position& position, Rotation rotation, BlockType blockType) const;
 	/* ----------- blocks ----------- */
 	// -- getters --
 	// Gets the cell at that position. Returns nullptr the cell is empty
-	inline const Cell* getCell(const Position& position) const { return grid.get(position);; }
+	inline const Cell* getCell(const Position& position) const { return grid.get(position); }
 	// Gets the number of cells in the BlockContainer
 	inline unsigned int getCellCount() const { return grid.size(); }
 	// Gets the block that has a cell at that position. Returns nullptr the cell is empty
@@ -29,12 +31,6 @@ public:
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType);
-	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryRemoveBlock(const Position& position);
-	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
-	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveBlock(const Position& position, Difference* difference);
@@ -45,12 +41,6 @@ public:
 	// // Gets the data from a block at position. Returns 0 if no block is found. 
 	// block_data_t getBlockData(const Position& positionOfBlock) const;
 
-
-	// Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
-	bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
-	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
-	template<class T, unsigned int index>
-	bool trySetBlockDataValue(const Position& positionOfBlock, T value);
 	// Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
 	bool trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference);
 	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
@@ -66,10 +56,6 @@ public:
 	const std::optional<ConnectionEnd> getOutputConnectionEnd(const Position& position) const;
 
 	// -- setters --
-	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition);
-        // Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition);
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
@@ -98,6 +84,7 @@ private:
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
 
+	const BlockDataManager* blockDataManager;
 	block_id_t lastId;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;
@@ -121,14 +108,6 @@ inline Block* BlockContainer::getBlock_(block_id_t blockId) {
 inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
 	auto iter = blocks.find(blockId);
 	return (iter == blocks.end()) ? nullptr : &(iter->second);
-}
-
-template<class T, unsigned int index>
-bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	block->setDataValue<T, index>(value);
-	return true;
 }
 
 template<class T, unsigned int index>

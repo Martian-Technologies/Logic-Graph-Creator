@@ -1,94 +1,113 @@
-#include <QFile>
-#include <fstream>
-#include <QTextStream>
-#include <string>
-#include <QFileInfo>
-#include <QDir>
-#include <QString>
-
+#include <QtCore/QFileInfo>
+#include <QtCore/QDir>
 
 #include "circuitFileManager.h"
+#include "OpenCircuitsParser.h"
+#include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
 BlockType stringToBlockType(const std::string& str) {
-    if (str == "NONE") return NONE;
-    if (str == "BLOCK") return BLOCK;
-    if (str == "AND") return AND;
-    if (str == "OR") return OR;
-    if (str == "XOR") return XOR;
-    if (str == "NAND") return NAND;
-    if (str == "NOR") return NOR;
-    if (str == "XNOR") return XNOR;
-    if (str == "BUTTON") return BUTTON;
-    if (str == "TICK_BUTTON") return TICK_BUTTON;
-    if (str == "SWITCH") return SWITCH;
-    if (str == "CONSTANT") return CONSTANT;
-    if (str == "LIGHT") return LIGHT;
-    if (str == "CUSTOM") return CUSTOM;
-    if (str == "TYPE_COUNT") return TYPE_COUNT;
-    return NONE;
+    if (str == "NONE") return BlockType::NONE;
+    if (str == "AND") return BlockType::AND;
+    if (str == "OR") return BlockType::OR;
+    if (str == "XOR") return BlockType::XOR;
+    if (str == "NAND") return BlockType::NAND;
+    if (str == "NOR") return BlockType::NOR;
+    if (str == "XNOR") return BlockType::XNOR;
+    if (str == "BUFFER") return BlockType::BUFFER;
+    if (str == "TRISTATE_BUFFER") return BlockType::TRISTATE_BUFFER;
+    if (str == "BUTTON") return BlockType::BUTTON;
+    if (str == "TICK_BUTTON") return BlockType::TICK_BUTTON;
+    if (str == "SWITCH") return BlockType::SWITCH;
+    if (str == "CONSTANT") return BlockType::CONSTANT;
+    if (str == "LIGHT") return BlockType::LIGHT;
+    return BlockType::NONE;
 }
 
 Rotation stringToRotation(const std::string& str) {
-    if (str == "ZERO") return ZERO;
-    if (str == "NINETY") return NINETY;
-    if (str == "ONE_EIGHTY") return ONE_EIGHTY;
-    if (str == "TWO_SEVENTY") return TWO_SEVENTY;
-    return ZERO;
+    if (str == "ZERO") return Rotation::ZERO;
+    if (str == "NINETY") return Rotation::NINETY;
+    if (str == "ONE_EIGHTY") return Rotation::ONE_EIGHTY;
+    if (str == "TWO_SEVENTY") return Rotation::TWO_SEVENTY;
+    return Rotation::ZERO;
 }
 
 std::string blockTypeToString(BlockType type) {
     switch (type) {
-        case NONE: return "NONE";
-        case BLOCK: return "BLOCK";
-        case AND: return "AND";
-        case OR: return "OR";
-        case XOR: return "XOR";
-        case NAND: return "NAND";
-        case NOR: return "NOR";
-        case XNOR: return "XNOR";
-        case BUTTON: return "BUTTON";
-        case TICK_BUTTON: return "TICK_BUTTON";
-        case SWITCH: return "SWITCH";
-        case CONSTANT: return "CONSTANT";
-        case LIGHT: return "LIGHT";
-        case CUSTOM: return "CUSTOM";
-        case TYPE_COUNT: return "TYPE_COUNT";
-        default: return "UNKNOWN";
+        case BlockType::NONE: return "NONE";
+        case BlockType::AND: return "AND";
+        case BlockType::OR: return "OR";
+        case BlockType::XOR: return "XOR";
+        case BlockType::NAND: return "NAND";
+        case BlockType::NOR: return "NOR";
+        case BlockType::XNOR: return "XNOR";
+        case BlockType::BUFFER: return "BUFFER";
+        case BlockType::TRISTATE_BUFFER: return "TRISTATE_BUFFER";
+        case BlockType::BUTTON: return "BUTTON";
+        case BlockType::TICK_BUTTON: return "TICK_BUTTON";
+        case BlockType::SWITCH: return "SWITCH";
+        case BlockType::CONSTANT: return "CONSTANT";
+        case BlockType::LIGHT: return "LIGHT";
+        default: return "NONE";
     }
 }
 
 std::string rotationToString(Rotation rotation) {
     switch (rotation) {
-        case ZERO: return "ZERO";
-        case NINETY: return "NINETY";
-        case ONE_EIGHTY: return "ONE_EIGHTY";
-        case TWO_SEVENTY: return "TWO_SEVENTY";
-        default: return "UNKNOWN";
+        case Rotation::ZERO: return "ZERO";
+        case Rotation::NINETY: return "NINETY";
+        case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
+        case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
+        default: return "ZERO";
     }
 }
 
-bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed) {
-    if (!loadedFiles.insert(path).second){
-        logInfo(path + " is already added as a dependency", "FileManager");
-        return false;
+LoadFunction CircuitFileManager::getLoadFunction(const std::string& path) {
+    if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
+        // our gatality file parser function
+        return std::bind(&CircuitFileManager::loadGatalityFile, this, std::placeholders::_1, std::placeholders::_2);
+    } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
+        // open circuit file parser function
+        return std::bind(&CircuitFileManager::loadOpenCircuitFile, this, std::placeholders::_1, std::placeholders::_2);
+    }else {
+        logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
+        return nullptr;
     }
-    logInfo("Inserted current file as a dependency: " + path, "FileManager");
+}
+
+bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
+    LoadFunction loadFunc = getLoadFunction(path);
+    if (loadFunc) {
+        return loadFunc(path, outParsed);
+    }
+    return false;
+}
+
+bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedCircuit outParsed) {
+    logInfo("Parsing Gatality Circuit File (.cir)", "FileManager");
 
     std::ifstream inputFile(path);
     if (!inputFile.is_open()) {
-        logWarning("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: " + path, "FileManager");
         return false;
     }
+
+    if (!loadedFiles.insert(path).second){
+        inputFile.close();
+        logWarning(path + " is already added as a dependency", "FileManager");
+        return false;
+    }
+
+    logInfo("Inserted current file as a dependency: " + path, "FileManager");
 
     std::string token;
     char cToken;
     inputFile >> token;
 
-    if (token != "version_1") {
-        logWarning("Invalid circuit file version", "FileManager");
-        return false;
+    if (token != "version_2") {
+        logError("Invalid circuit file version, expecting version_2", "FileManager");
+        //return false;
     }
 
     int blockId, connId;
@@ -103,35 +122,53 @@ bool CircuitFileManager::loadFromFile(const std::string& path, std::shared_ptr<P
             inputFile >> std::quoted(importFileName);
 
             QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
-            std::shared_ptr<ParsedCircuit> dependency = std::make_shared<ParsedCircuit>();
+            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fullPath.toStdString(), "FileManager");
             if (loadFromFile(fullPath.toStdString(), dependency)){
-                logInfo("Successfully imported dependency: " + importFileName, "FileManager");
                 outParsed->addDependency(importFileName, dependency);
+                outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
+                logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "FileManager");
             }else{
-                logWarning("Failed to import dependency: " + importFileName, "FileManager");
+                logError("Failed to import dependency: " + importFileName, "FileManager");
             }
             continue;
-        }else if (token == "external"){
-            ParsedCircuit::ExternalConnection ec;
-            std::string file1, file2;
-
-            inputFile >> std::quoted(file1)
-                      >> ec.localBlockId
-                      >> ec.localConnectionId
-                      >> ec.externalBlockId
-                      >> ec.externalConnectionId
-                      >> std::quoted(file2);
-
-            ec.localFile = file1; // "." for the current file.
-            ec.dependencyFile = file2;
-            outParsed->addExternalConnection(ec);
+        } else if (token == "Circuit:") {
+            std::string circuitName;
+            inputFile >> std::quoted(circuitName);
+            outParsed->setName(circuitName);
+            logInfo("\tSet circuit: " + circuitName, "FileManager");
+            continue;
+        } else if (token == "UUID:") {
+            std::string uuid;
+            inputFile >> uuid;
+            outParsed->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
+            logInfo("\tSet UUID: " + uuid, "FileManager");
             continue;
         }
 
         inputFile >> blockId;
         inputFile >> token;
         blockType = stringToBlockType(token);
+
+        // Determine if block is a sub-circuit or primitive
+        if (blockType == BlockType::NONE){
+            if (token.front() != '"' || token.back() != '"') {
+                logError("Incorrect formatting of load file sub-circuit", "FileManager");
+                return false;
+            }
+            std::string circuitName = token.substr(1, token.size() - 2); // remove quotes
+            auto it = outParsed->getCircuitNameToUUID().find(circuitName);
+            if (it == outParsed->getCircuitNameToUUID().end()) {
+                logError("Circuit '" + circuitName + "' not imported due to save file formatting", "FileManager");
+                return false;
+            }
+            // Can't implement until custom blocks are added
+            std::getline(inputFile, token); // conn id 0
+            if (!token.starts_with("(connId:0)")){ logError("Invalid parsing with custom block"); return false; }
+            std::getline(inputFile, token); // conn id 1
+            if (!token.starts_with("(connId:1)")){ logError("Invalid parsing with custom block"); return false; }
+            continue;
+        }
 
         inputFile >> token;
         if (token == "null") posX = std::numeric_limits<float>::max();
@@ -173,11 +210,13 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
 
     std::ofstream outputFile(path);
     if (!outputFile.is_open()){
-        logWarning("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: " + path, "FileManager");
         return false;
     }
 
-    outputFile << "version_1\n";
+    outputFile  << "version_2\n"
+                << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
+                << "UUID: " << circuitPtr->getUUID() << '\n';;
 
     const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
     std::unordered_map<block_id_t, Block>::const_iterator itr = blockContainer->begin();
@@ -187,7 +226,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
         const Position& pos = block.getPosition();
 
         const ConnectionContainer& blockCC = block.getConnectionContainer();
-        connection_end_id_t connectionNum = blockCC.getMaxConnectionId() + 1;
+        connection_end_id_t connectionNum = blockCC.getConnectionCount();
 
         outputFile << "blockId " << itr->first << ' '
                    << blockTypeToString(block.type()) << ' ' << pos.x << ' '
@@ -206,4 +245,9 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
 
     outputFile.close();
     return true;
+}
+
+bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, SharedParsedCircuit outParsed){
+    OpenCircuitsParser parser;
+    return parser.parse(path, outParsed);
 }

@@ -5,15 +5,34 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
+#include "computerAPI/directoryManager.h"
 #include "gui/mainWindow.h"
 
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
+
 int main(int argc, char* argv[]) {
-	// Create QT Application
+	DirectoryManager::findDirectories();
+	
+	// Create QT application
+	logInfo("Creating QT Application");
 	QApplication app(argc, argv);
 	app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 	app.setStyle(QStyleFactory::create("Fusion"));
+	logInfo("Successfully created QT Application");
 
-	// Initialize KDDockWidgets
+	KDDockWidgets::MainWindowOptions options = setUpKDDockWidgets();
+	
+	// Create main window
+	logInfo("Creating Main Window");
+	MainWindow window(options);
+	window.show();
+	logInfo("Successfully created Main Window");
+
+	return app.exec();
+}
+
+KDDockWidgets::MainWindowOptions setUpKDDockWidgets() {
+	logInfo("Initializing KDDockWidgets and setting flags");
 	KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 	KDDockWidgets::Config::self().setSeparatorThickness(5);
 	// Set flags
@@ -31,10 +50,7 @@ int main(int argc, char* argv[]) {
 	KDDockWidgets::MainWindowOptions options = KDDockWidgets::MainWindowOption_None;
 	// options = KDDockWidgets::MainWindowOption_HasCentralGroup;
 	// options |= KDDockWidgets::MainWindowOption_HasCentralWidget;
-	
-	// Create Main Window
-	MainWindow window(options);
-	window.show();
+	logInfo("Successfully initialized KDDockWidgets and set flags");
 
-	return app.exec();
+	return options;
 }

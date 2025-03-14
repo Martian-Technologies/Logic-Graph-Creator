@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
 #include "logicState.h"
 #include "gateType.h"
@@ -63,6 +64,10 @@ private:
 	std::atomic<unsigned long long int> targetTickrate; // updates per minute
 
 	std::atomic<int64_t> nextTick_us;
+
+	std::mutex killThreadsMux;
+	std::condition_variable killThreadsCv;
+
 
 	void simulationLoop();
 	void tickrateMonitor();

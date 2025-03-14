@@ -1,8 +1,10 @@
 #include "evaluatorTests.h"
+#include "util/uuid.h"
 
 // Note that logic simulator is tested separately
 void EvaluatorTest::SetUp() {
-    circuit = std::make_shared<Circuit>(1);
+    circuit_id_t circuitId = circuitManager.createNewCircuit(generate_uuid_v4(), "Circuit");
+	circuit = circuitManager.getCircuit(circuitId);
     evaluator = std::make_shared<Evaluator>(1, circuit);
     i = 0;
 }
