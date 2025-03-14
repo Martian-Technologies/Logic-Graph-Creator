@@ -18,6 +18,7 @@
 #include <array>
 #include <map>
 #include <set>
+#include <mutex>
 
 #include <cstdint>
 #include <cmath>
