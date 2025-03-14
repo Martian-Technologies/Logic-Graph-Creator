@@ -1,5 +1,10 @@
 #include "directoryManager.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#include <libloaderapi.h>
+#endif
+
 std::filesystem::path DirectoryManager::resourceDirectory("");
 std::filesystem::path DirectoryManager::projectDirectory("");
 std::filesystem::path DirectoryManager::configDirectory("");
@@ -30,7 +35,7 @@ void DirectoryManager::findDirectories() {
 
 // thank you for this snippet Jacob Tate - https://gist.github.com/Jacob-Tate/7b326a086cf3f9d46e32315841101109
 std::filesystem::path DirectoryManager::getExecutablePath() {
-	#if defined(_MSC_VER)
+	#ifdef _MSC_VER
         wchar_t path[FILENAME_MAX] = { 0 };
         GetModuleFileNameW(nullptr, path, FILENAME_MAX);
         return std::filesystem::path(path);
