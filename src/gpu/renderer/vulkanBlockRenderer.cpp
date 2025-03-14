@@ -8,7 +8,7 @@
 void VulkanBlockRenderer::initialize(VkRenderPass& renderPass) {
 	// load shaders
 	vertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.vert.spv"));
-	fragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.vert.spv"));
+	fragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.frag.spv"));
 
 	// create graphic pipeline
 	pipeline = createPipeline(vertShader, fragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), renderPass);
