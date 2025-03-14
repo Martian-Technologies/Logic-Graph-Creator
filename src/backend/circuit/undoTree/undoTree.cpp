@@ -109,6 +109,10 @@ int UndoTree::iterator::numBranches() const {
     } else return branch->nodes[pos].branches->size();
 }
 
+DifferenceSharedPtr& UndoTree::iterator::operator*() {
+    return branch->nodes[pos].diff;
+}
+
 bool UndoTree::iterator::operator==(const iterator& other) const {
     // -1 denotes end iterator
     if (this->pos == other.pos == -1) {

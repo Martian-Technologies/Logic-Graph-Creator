@@ -83,6 +83,7 @@ public:
      */
     int numBranches() const;
 
+    DifferenceSharedPtr& operator*();
     bool operator==(const iterator& other) const;
     bool operator!=(const iterator& other) const;
 private:

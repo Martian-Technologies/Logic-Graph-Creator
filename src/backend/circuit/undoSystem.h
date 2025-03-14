@@ -1,19 +1,29 @@
 #ifndef undoSystem_h
 #define undoSystem_h
 
+#include "undoTree/undoTree.h"
 #include "backend/container/difference.h"
 
 class UndoSystem {
 public:
-	inline UndoSystem() : undoPosition(0) { }
+    inline UndoSystem(): undoPosition(tree.begin()) { }
 
-	inline void addDifference(DifferenceSharedPtr difference) { while (undoPosition < differences.size()) differences.pop_back(); ++undoPosition; differences.push_back(difference); }
-	inline DifferenceSharedPtr undoDifference() { if (undoPosition == 0) return std::make_shared<Difference>(); return differences[--undoPosition]; }
-	inline DifferenceSharedPtr redoDifference() { while (undoPosition == differences.size()) return std::make_shared<Difference>(); return differences[undoPosition++]; }
+    inline void addDifference(DifferenceSharedPtr difference) {
+        tree.insert(undoPosition, difference);
+    }
+    inline DifferenceSharedPtr undoDifference() {
+        UndoTree::iterator temp = undoPosition;
+        undoPosition = undoPosition.prev();
+        return *temp;
+    }
+    inline DifferenceSharedPtr redoDifference() {
+        undoPosition = undoPosition.next();
+        return *undoPosition;
+    }
 
 private:
-	unsigned int undoPosition;
-	std::vector<DifferenceSharedPtr> differences;
+    UndoTree::iterator undoPosition;
+    UndoTree tree;
 
 };
 
