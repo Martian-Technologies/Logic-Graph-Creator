@@ -48,6 +48,12 @@ set(KDDockWidgets_QT6 ON)
 set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
+# CPPLocate (they have extreme cmake goofyness)
+set(BUILD_SHARED_LIBS OFF)
+set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
+add_subdirectory(external/cpplocate)
+
+
 set(EXTERNAL_SOURCES
 	
 )
@@ -55,6 +61,7 @@ set(EXTERNAL_INCLUDES
 	
 )
 set(EXTERNAL_LINKS
+	cpplocate::cpplocate
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
 )
