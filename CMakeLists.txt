@@ -49,6 +49,7 @@ set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
 # CPPLocate (they have extreme cmake goofyness)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate)
