@@ -1,3 +1,9 @@
+[submodule "KDDockWidgets"]
+	path = external/KDDockWidgets
+	url = https://github.com/KDAB/KDDockWidgets
 [submodule "googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest
+[submodule "cpplocate"]
+	path = external/cpplocate
+	url = https://github.com/cginternals/cpplocate.git

@@ -1,33 +1,42 @@
 #ifndef circuitFileManager_h
 #define circuitFileManager_h
-
-#include <QString>
-
 #include "backend/circuit/circuitManager.h"
+#include "backend/circuit/parsedCircuit.h"
 
-// dont change the numbers next to enum values
-// (app name)_(file version)
-enum CircuitFileTypes {
-	GATALITY_1 = 0
-};
-
+typedef std::function<bool(const std::string&, std::shared_ptr<ParsedCircuit>)> LoadFunction;
 class CircuitFileManager {
 public:
-	inline CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
-	
-	std::optional<circuit_id_t> load(const QString& path);
-	bool loadInto(const QString& path, circuit_id_t circuit, const Position& position);
+    CircuitFileManager(const CircuitManager* circuitManager);
 
-	bool save(const QString& path, circuit_id_t circuit);
+    LoadFunction getLoadFunction(const std::string& path);
+    bool loadFromFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed);
+    bool saveToFile(const std::string& path, Circuit* circuitPtr);
 
+    bool loadGatalityFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed);
+    bool loadOpenCircuitFile(const std::string& path, std::shared_ptr<ParsedCircuit> outParsed);
 private:
-	struct saveInfo {
-		circuit_update_count lastUpdateSaved;
-		QString filePath;
-	};
-
-	CircuitManager* circuitManager;
-	std::unordered_map<circuit_id_t, saveInfo> circuitSaveInfo;
+    const CircuitManager* circuitManager;
+    std::unordered_set<std::string> loadedFiles;
 };
 
-#endif /* circuitFileManager_h */
+struct OpenCircuitsBlockInfo {
+    std::string type;
+    FPosition position;
+    double angle; // in radians
+    std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
+    std::vector<int> outputBlocks;
+    std::string icReference;
+};
+
+struct ICData {
+    std::unordered_map<int, OpenCircuitsBlockInfo> components;
+    std::vector<int> inputPorts;
+    std::vector<int> outputPorts;
+};
+
+BlockType stringToBlockType(const std::string& str);
+Rotation stringToRotation(const std::string& str);
+std::string blockTypeToString(BlockType type);
+std::string rotationToString(Rotation rotation);
+
+#endif

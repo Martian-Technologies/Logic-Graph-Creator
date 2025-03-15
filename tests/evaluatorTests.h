@@ -2,15 +2,18 @@
 #define evaulatorTests_h
 
 #include <gtest/gtest.h>
+#include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluator.h"
-#include "backend/circuit/circuit.h"
 
 class EvaluatorTest : public ::testing::Test {
+public:
+	EvaluatorTest() : circuitManager(&dataUpdateEventManager) {}
+
 protected:
     void SetUp() override;
     void TearDown() override;
-    void changeState(const Address& addr);
-    void readState(const Address& addr);
+	DataUpdateEventManager dataUpdateEventManager;
+    CircuitManager circuitManager;
     SharedCircuit circuit;
     SharedEvaluator evaluator;
     int i;

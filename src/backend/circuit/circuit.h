@@ -5,17 +5,27 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
+#include "parsedCircuit.h"
 #include "undoSystem.h"
 
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
 
 class Circuit {
+	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId) : circuitId(circuitId) { }
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, const std::string& uuid, const std::string& name) :
+        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name) { }
 
-	circuit_id_t getCircuitId() const { return circuitId; }
+	inline const std::string& getUUID() const { return circuitUUID; }
+	inline circuit_id_t getCircuitId() const { return circuitId; }
+	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
+	inline const std::string& getCircuitName() const { return circuitName; }
 
+    inline bool isSaved() const { return saved; }
+    inline void setSaved() { saved = true; }
+    inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
+    inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
 	/* ----------- listener ----------- */
 
@@ -29,7 +39,6 @@ public:
 
 	// allows accese to BlockContainer getters
 	inline const BlockContainer* getBlockContainer() const { return &blockContainer; }
-
 
 	/* ----------- blocks ----------- */
 	// Trys to insert a block. Returns if successful.
@@ -45,6 +54,9 @@ public:
 	void tryRemoveOverArea(Position cellA, Position cellB);
 
 	bool checkCollision(const SharedSelection& selection);
+
+	// Trys to place a parsed circuit at a position
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
 
 	/* ----------- block data ----------- */
 
@@ -68,11 +80,10 @@ public:
 	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
 	// Trys to remove a connection. Returns if successful.
 	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd);
-	// Trys to creates connections.
+	// Trys to creates a connection. Returns if successful.
 	bool tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection);
 	// Trys to remove connections.
 	bool tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection);
-
 
 	/* ----------- undo ----------- */
 	void undo();
@@ -89,14 +100,20 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; saved = false; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
+    std::string circuitName;
+    std::string circuitUUID;
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
+
 	std::map<void*, ListenerFunction> listenerFunctions;
+	
 	UndoSystem undoSystem;
 	bool midUndo = false;
-	unsigned int updateCount = 0; // increases anytime the container is changed
+
+    bool saved = false;
+    std::string saveFilePath;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;

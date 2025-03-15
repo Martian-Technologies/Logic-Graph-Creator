@@ -1,8 +1,8 @@
 #ifndef logger_h
 #define logger_h
 
-#include <syncstream>
 #include <filesystem>
+#include <mutex>
 
 enum LogType {
 	Info = 1,
