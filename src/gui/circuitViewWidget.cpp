@@ -309,6 +309,7 @@ void CircuitViewWidget::load(const QString& filePath) {
     SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        logError("Failed to load circuit file.");
         return;
     }
 
