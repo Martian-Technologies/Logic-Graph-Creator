@@ -4,6 +4,9 @@
 [submodule "googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest
+[submodule "cpplocate"]
+	path = external/cpplocate
+	url = https://github.com/cginternals/cpplocate.git
 [submodule "VulkanMemoryAllocator"]
 	path = external/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
