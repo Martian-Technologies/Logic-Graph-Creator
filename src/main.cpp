@@ -54,7 +54,3 @@ KDDockWidgets::MainWindowOptions setUpKDDockWidgets() {
 
 	return options;
 }
-
-// int main(int argc, char* argv[]) {
-// 	return 0;
-// }

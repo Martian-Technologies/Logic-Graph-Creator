@@ -1,8 +1,6 @@
 #ifndef toolManager_h
 #define toolManager_h
 
-#include <array>
-
 #include "toolStack.h"
 
 class ToolManager {
