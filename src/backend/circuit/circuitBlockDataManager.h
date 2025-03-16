@@ -17,6 +17,11 @@ public:
 		if (iter == circuitBlockData.end()) return nullptr;
 		return &(iter->second);
 	}
+	circuit_id_t getCircuitId(BlockType blockType) const {
+		auto iter = blockTypeToCircuitId.find(blockType);
+		if (iter == blockTypeToCircuitId.end()) return 0; // there is never a circuit with id 0
+		return iter->second;
+	}
 
 private:
 	std::map<BlockType, circuit_id_t> blockTypeToCircuitId;

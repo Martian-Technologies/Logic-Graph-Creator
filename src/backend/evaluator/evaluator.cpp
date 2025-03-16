@@ -1,19 +1,22 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(evaluator_id_t evaluatorId, SharedCircuit circuit)
+Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId)
 	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
 	logicSimulator(),
-	addressTree(circuit->getCircuitId()),
-	usingTickrate(false) {
+	addressTree(circuitId),
+	usingTickrate(false),
+	circuitManager(circuitManager) {
+
 	setTickrate(40 * 60); // 1000000000 clocks / min
+	const auto circuit = circuitManager.getCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 
-	makeEdit(std::make_shared<Difference>(difference), circuit->getCircuitId());
+	makeEdit(std::make_shared<Difference>(difference), circuitId);
 
-	// connect makeEdit to circuit
-	circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
+	// // connect makeEdit to circuit
+	// circuit->connectListener(this, std::bind(&Evaluator::makeEdit, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Evaluator::setPause(bool pause) {
@@ -62,6 +65,10 @@ void Evaluator::runNTicks(unsigned long long n) {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
+	makeEditInPlace(difference, containerId, addressTree);
+}
+
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<block_id_t>& addressTree) {
 	logicSimulator.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulator.threadIsWaiting()) {
@@ -76,45 +83,85 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 		{
 			deletedBlocks = true;
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			const auto address = Address(position);
-			const block_id_t blockId = addressTree.getValue(address);
-			logicSimulator.decomissionGate(blockId);
-			addressTree.removeValue(address);
+			const auto addresses = addressTree.getPositions(containerId, position);
+			for (const auto& address : addresses) {
+				const bool exists = addressTree.hasValue(address);
+				if (!exists) { // integrated circuit
+					const auto branch = addressTree.getBranch(address);
+					const auto allValues = branch.getAllValues();
+					for (const auto& value : allValues) {
+						logicSimulator.decomissionGate(value);
+					}
+					addressTree.nukeBranch(address);
+				}
+				else{
+					const block_id_t blockId = addressTree.getValue(address);
+					logicSimulator.decomissionGate(blockId);
+					addressTree.removeValue(address);
+				}
+			}
 			break;
 		}
 		case Difference::PLACE_BLOCK:
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			const auto address = Address(position);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
-			const block_id_t blockId = logicSimulator.addGate(gateType, true);
-			addressTree.addValue(address, blockId);
+			if (gateType != GateType::NONE) {
+				const auto addresses = addressTree.addValue(position, containerId, 0);
+				for (const auto& address : addresses) {
+					const block_id_t blockId = logicSimulator.addGate(gateType, true);
+					addressTree.setValue(address, blockId);
+				}
+			}
+			else {
+				// check if it's a custom block
+				const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
+				if (integratedCircuitId == 0) {
+					throw std::invalid_argument("makeEditInPlace: blockType is not a valid block type");
+				}
+				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId);
+				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
+				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
+				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
+				for (const auto& address : addresses) {
+					AddressTreeNode<block_id_t>& branch = addressTree.getBranch(address);
+					makeEditInPlace(integratedDifference, integratedCircuitId, branch);
+				}
+			}
 			break;
 		}
 		case Difference::REMOVED_CONNECTION:
 		{
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddress = Address(outputPosition);
-			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
-			logicSimulator.disconnectGates(outputBlockId, inputBlockId);
+			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			for (int i = 0; i < outputAddresses.size(); i++) {
+				const auto outputAddress = outputAddresses[i];
+				const auto inputAddress = inputAddresses[i];
+				const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+				const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+				logicSimulator.disconnectGates(outputBlockId, inputBlockId);
+			}
 			break;
 		}
 		case Difference::CREATED_CONNECTION:
 		{
 			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddress = Address(outputPosition);
-			const auto inputAddress = Address(inputPosition);
-			const block_id_t outputBlockId = addressTree.getValue(outputAddress);
-			const block_id_t inputBlockId = addressTree.getValue(inputAddress);
-			logicSimulator.connectGates(outputBlockId, inputBlockId);
+			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			for (int i = 0; i < outputAddresses.size(); i++) {
+				const auto outputAddress = outputAddresses[i];
+				const auto inputAddress = inputAddresses[i];
+				const block_id_t outputBlockId = addressTree.getValue(outputAddress);
+				const block_id_t inputBlockId = addressTree.getValue(inputAddress);
+				logicSimulator.connectGates(outputBlockId, inputBlockId);
+			}
 			break;
 		}
 		case Difference::MOVE_BLOCK:
 		{
 			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
-			addressTree.moveData(curPosition, newPosition);
+			addressTree.moveData(containerId, curPosition, newPosition);
 			break;
 		}
 		case Difference::SET_DATA: break;
@@ -141,8 +188,7 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
 	case BlockType::LIGHT: return GateType::OR;
-	default:
-		throw std::invalid_argument("circuitToEvaluatorGatetype: invalid blockType");
+	default: return GateType::NONE;
 	}
 }
 
@@ -168,8 +214,14 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		std::this_thread::yield();
 	}
 	for (const auto& address : addresses) {
-		const block_id_t blockId = addressTree.getValue(address);
-		states.push_back(logicSimulator.getState(blockId));
+		// check if the address is valid
+		const bool exists = addressTree.hasValue(address);
+		if (!exists) {
+			states.push_back(false);
+		} else {
+			const block_id_t blockId = addressTree.getValue(address);
+			states.push_back(logicSimulator.getState(blockId));
+		}
 	}
 	if (!paused) {
 		logicSimulator.signalToProceed();
