@@ -101,8 +101,10 @@ void VulkanRenderer::renderLoop() {
 	while(running) {
 		FrameData& frame = getCurrentFrame();
 		
-		// wait until current frame is avaiable for rendering
+		// wait until current frame has finished rendering
 		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
+		// update frame time with newest frame completion
+		lastFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - frame.lastStartTime).count();
 
 		// recreate swapchain if needed
 		if (swapchainRecreationNeeded) {
@@ -115,20 +117,19 @@ void VulkanRenderer::renderLoop() {
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
-			// if the swapchain is not ideal, try again but recreate it this time
+			// if the swapchain is not ideal, try again but recreate it this time (this happens in normal operation)
 			swapchainRecreationNeeded = true;
 			continue;
 		} else if (imageGetResult != VK_SUCCESS) {
+			// if the error was even worse (one could say exceptional), we log an error and pray
 			logError("failed to acquire swap chain image!");
 			continue;
 		}
 		
 		// reset render fence (we are actually rendering this frame)
 		vkResetFences(Vulkan::getDevice(), 1, &frame.renderFence);
-		// update frame times
-		auto currentTime = std::chrono::system_clock::now();
-		lastFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - frame.lastStartTime).count();
-		frame.lastStartTime = currentTime;
+		// update frame start time
+		frame.lastStartTime = std::chrono::system_clock::now();
 
 		// get queues
 		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
