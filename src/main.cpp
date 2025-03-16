@@ -5,11 +5,14 @@
 #include <kddockwidgets/core/Platform.h>
 #include <kddockwidgets/Config.h>
 
+#include "computerAPI/directoryManager.h"
 #include "gui/mainWindow.h"
 
 KDDockWidgets::MainWindowOptions setUpKDDockWidgets();
 
 int main(int argc, char* argv[]) {
+	DirectoryManager::findDirectories();
+	
 	// Create QT application
 	logInfo("Creating QT Application");
 	QApplication app(argc, argv);

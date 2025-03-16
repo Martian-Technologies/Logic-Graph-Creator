@@ -16,6 +16,7 @@
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+#include "computerAPI/directoryManager.h"
 
 CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, CircuitFileManager* fileManager, KeybindManager* keybindManager) :
 	QWidget(parent), mouseControls(false), circuitSelector(ui->CircuitSelector), evaluatorSelector(ui->EvaluatorSelector), fileManager(fileManager), keybindManager(keybindManager) {
@@ -44,7 +45,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 
 	// initialize QTRenderer with width and height + tileset
 	renderer->resize(w, h);
-	renderer->initializeTileSet(":logicTiles.png");
+	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
@@ -308,6 +309,7 @@ void CircuitViewWidget::load(const QString& filePath) {
     SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        logError("Failed to load circuit file.");
         return;
     }
 

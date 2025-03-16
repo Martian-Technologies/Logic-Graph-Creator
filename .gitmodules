@@ -4,3 +4,6 @@
 [submodule "googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest
+[submodule "cpplocate"]
+	path = external/cpplocate
+	url = https://github.com/cginternals/cpplocate.git
