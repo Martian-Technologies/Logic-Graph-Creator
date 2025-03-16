@@ -1,6 +1,7 @@
 #ifndef circuitBlockData_h
 #define circuitBlockData_h
 
+#include "backend/position/position.h"
 #include "backend/container/block/connectionEnd.h"
 #include "util/bidirectionalMap.h"
 
@@ -13,7 +14,12 @@ public:
 	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const { return connectionIdNames.get(endId); }
 	inline const connection_end_id_t* getConnectionNameToId(const std::string& name) const { return connectionIdNames.get(name); }
 
+	inline void setConnectionIdPosition(connection_end_id_t endId, const Vector& name) { return connectionIdPosition.set(endId, name); }
+	inline const Vector* getConnectionIdToPosition(connection_end_id_t endId) const { return connectionIdPosition.get(endId); }
+	inline const connection_end_id_t* getConnectionPositionToId(const Vector& name) const { return connectionIdPosition.get(name); }
+	
 private:
+	BidirectionalMap<connection_end_id_t, Vector> connectionIdPosition;
 	BidirectionalMap<connection_end_id_t, std::string> connectionIdNames;
 	BlockType blockType;
 

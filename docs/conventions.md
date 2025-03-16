@@ -26,7 +26,7 @@ The preprocessor define should be the name of the file with an underscore.
 
 ...
 
-#endif
+#endif \* blockContainer_h *\
 ```
 
 ### Naming
