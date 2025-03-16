@@ -117,7 +117,8 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				// check if it's a custom block
 				const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
 				if (integratedCircuitId == 0) {
-					throw std::invalid_argument("makeEditInPlace: blockType is not a valid block type");
+					logError("makeEditInPlace: blockType is not a valid block type");
+					break;
 				}
 				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId);
 				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
