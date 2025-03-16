@@ -86,10 +86,10 @@ private:
 //       -  Vulkan profiles
 //       -  Builder pattern (for pipeline at least)
 // - [ ] Staging buffers
+// - [ ] Vertex buffer chunking
 // - [ ] Use dynamic rendering extension to simplify code
 // - [ ] generate vertices on the gpu
 // - [ ] Don't draw directly to swapchain
-// - [ ] IMGUI for debug
 // - [ ] Switch from singleton to top down design
 
 #endif

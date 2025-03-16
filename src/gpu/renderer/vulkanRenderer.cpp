@@ -57,22 +57,18 @@ void VulkanRenderer::stop() {
 void VulkanRenderer::resize(int w, int h) {
 	if (!initialized) return;
 	
-	// lock rendering mutex (synchronized to start of frame)
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	// lock mutex
+	std::lock_guard<std::mutex> guard(windowSizeMux);
 	
 	windowWidth = w;
 	windowHeight = h;
 
-	finishAllFrames();
-
-	destroySwapchain(swapchain);
-	swapchain = createSwapchain(surface, windowWidth, windowHeight);
-	createSwapchainFramebuffers(swapchain, renderPass);
+	swapchainRecreationNeeded = true;
 }
 
 void VulkanRenderer::updateView(ViewManager* viewManager) {
 	// lock rendering mutex (synchronized to start of frame)
-	std::lock_guard<std::mutex> guard(cpuRenderingMutex);
+	std::lock_guard<std::mutex> guard(orthoMatMux);
 	
 	FPosition topLeft = viewManager->getTopLeft();
 	FPosition bottomRight = viewManager->getBottomRight();
@@ -105,28 +101,29 @@ void VulkanRenderer::renderLoop() {
 	while(running) {
 		FrameData& frame = getCurrentFrame();
 		
-		// wait until current frame is avaiable for rendering (slumber)
+		// wait until current frame is avaiable for rendering
 		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-		// lock rendering mutex (confirm nothing else is fucking with renderer internals)
-		std::lock_guard<std::mutex> guard(cpuRenderingMutex);
 
-		// see what's knew after we awake from slumber
-		// we can exit if we no longer want to render
-		if (!running) break;
+		// recreate swapchain if needed
+		if (swapchainRecreationNeeded) {
+			recreateSwapchain();
+			continue;
+		}
 
 		// try to start rendering the frame
 		// get next swapchain image to render to (or fail and try again)
 		uint32_t imageIndex;
 		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
-		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) {
-			// wait for a resize event by going to the next frame
+		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
+			// if the swapchain is not ideal, try again but recreate it this time
+			swapchainRecreationNeeded = true;
 			continue;
-		} else if (imageGetResult != VK_SUCCESS && imageGetResult != VK_SUBOPTIMAL_KHR) {
-			throw std::runtime_error("failed to acquire swap chain image!");
+		} else if (imageGetResult != VK_SUCCESS) {
+			logError("failed to acquire swap chain image!");
+			continue;
 		}
-
-		// actually start rendering the frame
-		// reset render fence
+		
+		// reset render fence (we are actually rendering this frame)
 		vkResetFences(Vulkan::getDevice(), 1, &frame.renderFence);
 		// update frame times
 		auto currentTime = std::chrono::system_clock::now();
@@ -177,22 +174,19 @@ void VulkanRenderer::renderLoop() {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
 
-		vkQueuePresentKHR(presentQueue, &presentInfo);
+		VkResult imagePresentResult = vkQueuePresentKHR(presentQueue, &presentInfo);
+		if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
+			swapchainRecreationNeeded = true;
+		} else if (imagePresentResult != VK_SUCCESS) {
+			logError("failed to present swap chain image!");
+			break;
+		}
 
 		//increase the number of frames drawn
 		++frameNumber;
 	}
 
-	finishAllFrames();
-}
-
-void VulkanRenderer::finishAllFrames() {
-	for (int i = 0; i < FRAME_OVERLAP; ++i) {
-		FrameData& frame = getCurrentFrame(i);
-
-		// wait for frame to finish
-		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-	}
+	vkDeviceWaitIdle(Vulkan::getDevice());
 }
 
 void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {
@@ -213,7 +207,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain.extent;
 
-	VkClearValue clearColor = {{{0.93f, 0.93f, 0.93f, 1.0f}}};
+	VkClearValue clearColor = {0.93f, 0.93f, 0.93f, 1.0f};
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 	
@@ -269,6 +263,18 @@ void VulkanRenderer::createRenderPass(SwapchainData& swapchain) {
 	if (vkCreateRenderPass(Vulkan::getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
+}
+
+void VulkanRenderer::recreateSwapchain() {
+	vkDeviceWaitIdle(Vulkan::getDevice());
+
+	std::lock_guard<std::mutex> lock(windowSizeMux);
+	
+	destroySwapchain(swapchain);
+	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	createSwapchainFramebuffers(swapchain, renderPass);
+
+	swapchainRecreationNeeded = false;
 }
 
 // elements -----------------------------

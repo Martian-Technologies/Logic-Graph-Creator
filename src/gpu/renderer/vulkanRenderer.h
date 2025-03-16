@@ -14,6 +14,8 @@
 // - initialized
 // - running / not running
 
+// TODO - proper swapchain recreation (old swapchain + recreate and check)
+
 constexpr unsigned int FRAME_OVERLAP = 2;
 
 class VulkanRenderer : public Renderer {
@@ -39,7 +41,7 @@ public:
 	inline float getLastFrameTimeMs() const override { return lastFrameTime; }
 
 private:
-	void finishAllFrames();
+	void recreateSwapchain();
 	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
 	void createRenderPass(SwapchainData& swapchain);
 	
@@ -48,9 +50,13 @@ private:
 	std::atomic<bool> initialized = false;
 	std::atomic<bool> running = false;
 	std::atomic<float> lastFrameTime = 0.0f;
+	
 	int windowWidth, windowHeight;
+	std::mutex windowSizeMux;
 	glm::mat4 orthoMat = glm::mat4(1.0f);
-	std::mutex cpuRenderingMutex;
+	std::mutex orthoMatMux;
+
+	std::atomic<bool> swapchainRecreationNeeded = false;
 
 	// vulkan objects
 	VkSurfaceKHR surface;
