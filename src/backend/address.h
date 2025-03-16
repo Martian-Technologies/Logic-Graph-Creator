@@ -12,6 +12,10 @@ public:
 
 	inline void addBlockId(Position position) { addresses.push_back(position); }
 
+	inline void nestPosition(Position position) {
+		addresses.insert(addresses.begin(), position);
+	}
+
 private:
 	std::vector<Position> addresses;
 

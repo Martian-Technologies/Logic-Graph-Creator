@@ -11,6 +11,8 @@
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
 
+typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListenerFunction;
+
 class Circuit {
 	friend class CircuitManager;
 public:
@@ -29,10 +31,9 @@ public:
 
 	/* ----------- listener ----------- */
 
-	typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> ListenerFunction;
 
 	// subject to change
-	void connectListener(void* object, ListenerFunction func) { listenerFunctions[object] = func; }
+	void connectListener(void* object, CircuitDiffListenerFunction func) { listenerFunctions[object] = func; }
 	// subject to change
 	void disconnectListener(void* object) { auto iter = listenerFunctions.find(object); if (iter != listenerFunctions.end()) listenerFunctions.erase(iter); }
 
@@ -107,7 +108,7 @@ private:
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
 
-	std::map<void*, ListenerFunction> listenerFunctions;
+	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
 	
 	UndoSystem undoSystem;
 	bool midUndo = false;
