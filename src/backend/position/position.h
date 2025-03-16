@@ -38,6 +38,15 @@ struct Vector {
 	cord_t dx, dy;
 };
 
+template<>
+struct std::hash<Vector> {
+	inline std::size_t operator()(const Vector& vec) const noexcept {
+		std::size_t x = std::hash<cord_t> {}(vec.dx);
+		std::size_t y = std::hash<cord_t> {}(vec.dy);
+		return (std::size_t)x ^ ((std::size_t)y << 32);
+	}
+};
+
 struct FVector {
 	inline FVector() : dx(0.0f), dy(0.0f) { }
 	inline FVector(f_cord_t dx, f_cord_t dy) : dx(dx), dy(dy) { }
