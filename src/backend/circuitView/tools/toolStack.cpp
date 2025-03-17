@@ -52,8 +52,10 @@ void ToolStack::setMode(std::string mode) {
 }
 
 void ToolStack::reset() {
-	if (toolStack.size())
-		toolStack.back()->reset();
+	if (!toolStack.size()) return;
+	SharedCircuitTool tool = getCurrentNonHelperTool_();
+	clearTools();
+	pushTool(tool);
 }
 
 void ToolStack::pushTool(SharedCircuitTool newTool) {
@@ -114,7 +116,7 @@ void ToolStack::popAbove(CircuitTool* toolNotToPop) {
 
 void ToolStack::setCircuit(Circuit* circuit) {
 	this->circuit = circuit;
-	clearTools();
+	reset();
 }
 
 void ToolStack::setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
