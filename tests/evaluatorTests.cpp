@@ -5,7 +5,7 @@
 void EvaluatorTest::SetUp() {
     circuit_id_t circuitId = circuitManager.createNewCircuit(generate_uuid_v4(), "Circuit");
 	circuit = circuitManager.getCircuit(circuitId);
-    evaluator = std::make_shared<Evaluator>(1, circuitManager, circuit);
+    evaluator = std::make_shared<Evaluator>(1, circuitManager, circuitId);
     i = 0;
 }
 
