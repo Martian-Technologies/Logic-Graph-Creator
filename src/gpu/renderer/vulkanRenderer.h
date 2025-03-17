@@ -53,8 +53,10 @@ private:
 	
 	int windowWidth, windowHeight;
 	std::mutex windowSizeMux;
-	glm::mat4 orthoMat = glm::mat4(1.0f);
-	std::mutex orthoMatMux;
+	// TODO - possible move this to block renderer
+	glm::mat4 viewMat = glm::mat4(1.0f);
+	std::pair<FPosition, FPosition> viewBounds;
+	std::mutex viewMux;
 
 	std::atomic<bool> swapchainRecreationNeeded = false;
 

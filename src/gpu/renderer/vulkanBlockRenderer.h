@@ -4,7 +4,7 @@
 #include "gpu/vulkanManager.h"
 #include "gpu/renderer/vulkanPipeline.h"
 #include "backend/circuit/circuit.h"
-#include "vulkanCircuitBufferRing.h"
+#include "vulkanChunker.h"
 
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
@@ -44,11 +44,11 @@ public:
 	void initialize(VkRenderPass& renderPass);
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
-	void render(VkCommandBuffer& commandBuffer, VkExtent2D& renderExtent, const glm::mat4& viewMatrix);
+	void render(VkCommandBuffer& commandBuffer, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
 	void destroy();
 
 private:
-	VulkanCircuitBufferRing vertexBufferRing;
+	VulkanChunker chunker;
 	PipelineData pipeline;
 	VkShaderModule vertShader;
 	VkShaderModule fragShader;

@@ -68,12 +68,13 @@ void VulkanRenderer::resize(int w, int h) {
 
 void VulkanRenderer::updateView(ViewManager* viewManager) {
 	// lock rendering mutex (synchronized to start of frame)
-	std::lock_guard<std::mutex> guard(orthoMatMux);
+	std::lock_guard<std::mutex> guard(viewMux);
 	
 	FPosition topLeft = viewManager->getTopLeft();
 	FPosition bottomRight = viewManager->getBottomRight();
 	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
-	orthoMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+	viewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+	viewBounds = { topLeft, bottomRight };
 }
 
 void VulkanRenderer::setCircuit(Circuit* circuit) {
@@ -215,7 +216,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// render all renderers
-	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, orthoMat);
+	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, viewMat, viewBounds);
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);
