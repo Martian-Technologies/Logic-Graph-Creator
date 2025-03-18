@@ -13,7 +13,7 @@ Position getChunk(Position in) {
 void VulkanChunker::setCircuit(Circuit* circuit) {
 	this->circuit = circuit;
 	
-	// clear existing circuit buffers
+	// clear existing chunk buffers
 	for (auto& chunk : chunks) {
 		destroyBuffer(chunk.second.buffer);
 	}
@@ -33,6 +33,8 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 }
 
 void VulkanChunker::buildChunk(Chunk& chunk) {
+	// TODO - should pre-allocate buffers with size and pool them
+	
 	// Generate vertices
 	std::vector<Vertex> vertices;
 	vertices.reserve(chunk.blocks.size() * 3);
@@ -54,13 +56,14 @@ void VulkanChunker::buildChunk(Chunk& chunk) {
 }
 
 void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
-	// very temp (rebuild whole thing (defeats the purpose))
+	// TODO - very temp (rebuild whole thing (defeats the purpose))
 	setCircuit(circuit);
 }
 
 std::vector<Chunk> VulkanChunker::getChunks(Position min, Position max) {
-	min = getChunk(min);
-	max = getChunk(max);
+	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
+	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
+	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
 
 	std::vector<Chunk> seen;
 	for (cord_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
