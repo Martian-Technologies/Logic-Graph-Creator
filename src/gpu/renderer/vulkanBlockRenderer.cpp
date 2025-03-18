@@ -45,7 +45,7 @@ void VulkanBlockRenderer::render(VkCommandBuffer& commandBuffer, VkExtent2D& ren
 	scissor.extent = renderExtent;
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunker.getChunks(viewBounds.first.snap(), viewBounds.second.snap())) {
+	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunker.getAllocations(viewBounds.first.snap(), viewBounds.second.snap())) {
 		// TODO - save chunk to frame data
 		
 		// bind vertex buffers

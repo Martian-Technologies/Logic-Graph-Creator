@@ -14,7 +14,10 @@
 // Chunk objects actually get added to frame data somehow
 // Chunk system should be abstracted
 
-// TODO - not sure if this should be stored, maybe it would be faster to just query from blockContainer
+// TODO - not sure if this should be stored, maybe it would be faster to just
+// query from blockContainer sometimes. We also don't have to store the width
+// and height
+
 struct RenderedBlock {
 	BlockType blockType;
 	Position position;
@@ -25,11 +28,13 @@ struct RenderedBlock {
 
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(const std::vector<RenderedBlock>& blocks, uint32_t numVertices);
+	VulkanChunkAllocation(const std::vector<RenderedBlock>& blocks);
 	~VulkanChunkAllocation();
 
 	inline const AllocatedBuffer& getBuffer() const { return buffer; }
 	inline uint32_t getNumVertices() const { return numVertices; }
+
+	inline bool isAllocationComplete() const { return true; }
 	
 private:
 	AllocatedBuffer buffer;
@@ -38,20 +43,21 @@ private:
 
 class ChunkChain {
 public:
-	std::shared_ptr<VulkanChunkAllocation> getAllocation();
-
-	inline std::vector<RenderedBlock>& getBlocks() { return upToData; }
+	inline std::vector<RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return upToData; }
+	
+	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
 	void updateAllocation();
 	
 private:
-	void clean();
-	void checkForFinished();
+	void annihilateOrphanGBs();
 	
 private:
-	std::vector<RenderedBlock> upToData; // funny joke?
-	
-	std::deque<std::shared_ptr<VulkanChunkAllocation>> allocationChain;
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> uploadingAllocations;
+	std::vector<RenderedBlock> upToData; // up to date (block) data
+	bool allocationDirty = false;
+
+	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;
+	std::optional<std::shared_ptr<VulkanChunkAllocation>> currentlyAllocating;
+	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // gay baby jail
 };
 
 class VulkanChunker {
@@ -59,7 +65,7 @@ public:
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
 	
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> getChunks(Position min, Position max);
+	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 	
 private:
 	Circuit* circuit = nullptr;

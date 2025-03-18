@@ -6,26 +6,72 @@
 // VulkanChunkAllocation
 // =========================================================================================================
 
+VulkanChunkAllocation::VulkanChunkAllocation(const std::vector<RenderedBlock>& blocks) {
+	// TODO - should pre-allocate buffers with size and pool them
+	// TODO - should abstract this function
+	
+	// Generate vertices
+	std::vector<BlockVertex> vertices;
+	vertices.reserve(blocks.size() * 3);
+	for (const auto& block : blocks) {
+		Position blockPosition = block.position;
+		BlockVertex v1 = {{blockPosition.x + block.realWidth, blockPosition.y + block.realHeight}, {0.0f, 0.0f, 1.0f}};
+		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.realHeight}, {0.0f, 1.0f, 0.0f}};
+		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+		vertices.push_back(v1);
+		vertices.push_back(v2);
+		vertices.push_back(v3);
+	}
+
+	// upload vertices to buffer
+	numVertices = vertices.size();
+	size_t vertexBufferSize = sizeof(BlockVertex) * numVertices;
+	buffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), buffer.allocation, 0, vertexBufferSize);
+}
+
+VulkanChunkAllocation::~VulkanChunkAllocation() {
+	destroyBuffer(buffer);
+}
+
 // ChunkChain
 // =========================================================================================================
 
-void ChunkChain::clean() {
-	// iterates from back and finds first that is in used
-	auto itr = allocationChain.rbegin();
-	while (itr != allocationChain.rend() - 1) {
-		if (itr->use_count() > 1) break;
-		itr++;
-	}
-	// converts back to a forward iterator (which increments) and erases all from the end
-	allocationChain.erase(itr.base(), allocationChain.end());
-}
-
-std::shared_ptr<VulkanChunkAllocation> ChunkChain::getAllocation() {
-	return nullptr;
-}
-
 void ChunkChain::updateAllocation() {
+	std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(upToData);
 	
+	// replace currently allocating
+	if (currentlyAllocating.has_value()) {
+		gbJail.push_back(currentlyAllocating.value());
+	}
+	currentlyAllocating = newAllocation;
+	allocationDirty = false;
+}
+
+std::optional<std::shared_ptr<VulkanChunkAllocation>> ChunkChain::getAllocation() {
+	// if the buffer has finished allocating, replace the newest with it
+	if (currentlyAllocating.has_value() && currentlyAllocating.value()->isAllocationComplete()) {
+		if (newestAllocation.has_value()) gbJail.push_back(newestAllocation.value());
+		newestAllocation = currentlyAllocating;
+		currentlyAllocating.reset();
+	}
+
+	annihilateOrphanGBs();
+
+	// get the newest allocation if there is one
+	return newestAllocation;
+}
+
+void ChunkChain::annihilateOrphanGBs() {
+	return;
+	// erase all GBs that are complete and not pointed to
+	auto itr = gbJail.begin();
+	while (itr != gbJail.end()) {
+		if (itr->use_count() <= 1 && (*itr)->isAllocationComplete()) {
+			itr = gbJail.erase(itr);
+		}
+		else itr++;
+	}
 }
 
 // VulkanChunker
@@ -46,47 +92,24 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 
 	if (circuit) {
 		// partition blocks into chunks
-		// TODO - this should be improved to happen deferred
 		for (const auto& block : *(circuit->getBlockContainer())) {
-			chunks[getChunk(block.second.getPosition())].getBlocks().push_back({block.second.type(), block.second.getPosition(), block.second.getRotation()});
+			chunks[getChunk(block.second.getPosition())].getBlocksForUpdating().push_back({block.second.type(), block.second.getPosition(), block.second.getRotation(), block.second.width(), block.second.height()});
 		}
 
+		// allocate vulkan buffer for all chunks
+		// TODO - this should be improved to happen deferred
 		for (auto& chunk : chunks) {
 			chunk.second.updateAllocation();
 		}
 	}
 }
 
-/*void VulkanChunker::buildChunk(Chunk& chunk) {
-	// TODO - should pre-allocate buffers with size and pool them
-	// TODO - should abstract this function
-	
-	// Generate vertices
-	std::vector<BlockVertex> vertices;
-	vertices.reserve(chunk.blocks.size() * 3);
-	for (const auto& block : chunk.blocks) {
-		Position blockPosition = block.position;
-		BlockVertex v1 = {{blockPosition.x + block.realWidth, blockPosition.y + block.realHeight}, {0.0f, 0.0f, 1.0f}};
-		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.realHeight}, {0.0f, 1.0f, 0.0f}};
-		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
-		vertices.push_back(v1);
-		vertices.push_back(v2);
-		vertices.push_back(v3);
-	}
-
-	// upload vertices to buffer
-	size_t vertexBufferSize = sizeof(BlockVertex) * vertices.size();
-	chunk.buffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), chunk.buffer.allocation, 0, vertexBufferSize);
-	chunk.numVertices = vertices.size();
-	}*/
-
 void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	// TODO - very temp (rebuild whole thing (defeats the purpose))
 	setCircuit(circuit);
 }
 
-std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getChunks(Position min, Position max) {
+std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {
 	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
 	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
 	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
@@ -98,7 +121,7 @@ std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getChunks(Pos
 			auto chunk = chunks.find({chunkX, chunkY});
 			if (chunk != chunks.end()) {
 				auto allocation = chunk->second.getAllocation();
-				if (allocation != nullptr) seen.push_back(allocation);
+				if (allocation.has_value()) seen.push_back(allocation.value());
 			}
 		}
 	}
