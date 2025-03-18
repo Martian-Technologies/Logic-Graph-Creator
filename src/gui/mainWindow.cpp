@@ -152,6 +152,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 	}
 
 	// "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
+    logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
 	std::string filePath =
 		QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 	if (filePath.empty()) {
@@ -182,6 +183,14 @@ void MainWindow::loadCircuit() {
 		return;
 	}
 
+    // Check for existing UUID
+    const std::string& uuid = parsed->getUUID();
+    CircuitManager& circuitManager = backend.getCircuitManager();
+    if (circuitManager.UUIDExists(uuid)) {
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        return;
+    }
+
 	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
 		circuit_id_t id = backend.createCircuit();
@@ -197,6 +206,10 @@ void MainWindow::loadCircuit() {
 
         // create new circuits for the dependencies
         for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second->getUUID())){
+                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+                continue;
+            }
             backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
         }
 	} else {
@@ -217,10 +230,21 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
         return;
     }
 
+    const std::string& uuid = parsed->getUUID();
+    CircuitManager& circuitManager = backend.getCircuitManager();
+    if (circuitManager.UUIDExists(uuid)) {
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        return;
+    }
+
     CircuitValidator validator(*parsed, backend.getBlockDataManager());
     if (parsed->isValid()){
         // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
         for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second->getUUID())){
+                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+                continue;
+            }
             backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
         }
 

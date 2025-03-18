@@ -39,14 +39,11 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
     contents = saveDoc;
     outParsed = outParsedCircuit;
     parseOpenCircuitsJson();
-    logError("parseOpenCircuitsJson() complete");
 
     // Filtered blocks are the blocks of valid type that exist on the primary circuit to be placed
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
-    logError("filterAndResolveBlocks(filteredBlocks); complete");
     fillParsedCircuit(filteredBlocks);
-    logError("fillParsedCircuit(filteredBlocks); complete");
     printParsedData();
     return true;
 }

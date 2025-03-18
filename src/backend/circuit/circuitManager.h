@@ -39,6 +39,10 @@ public:
 		return blockType;
 	}
 
+    inline bool UUIDExists(const std::string& uuid) {
+        return existingUUIDs.find(uuid) != existingUUIDs.end();
+    }
+
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter == circuits.end()) return nullptr;
@@ -53,12 +57,14 @@ public:
 	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
 		circuit_id_t id = getNewCircuitId();
 		circuits.emplace(id, std::make_shared<Circuit>(id, &blockDataManager, uuid, name));
+        existingUUIDs.insert(uuid);
 		return id;
 	}
 
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
+            existingUUIDs.erase(iter->second->getUUID());
 			circuits.erase(iter);
 		}
 	}
@@ -81,6 +87,7 @@ private:
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
+    std::unordered_set<std::string> existingUUIDs;
 };
 
 #endif /* circuitManager_h */

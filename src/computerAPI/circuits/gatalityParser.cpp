@@ -4,8 +4,13 @@
 #include "circuitFileManager.h"
 #include "util/uuid.h"
 
-// Does not check for cycles yet
 bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed) {
+    // Check for cyclic import
+    if (importedFiles.find(path) != importedFiles.end()) {
+        logError("Cyclic import detected: " + path, "GatalityParser");
+        return false;
+    }
+    importedFiles.insert(path);
     logInfo("Parsing Gatality Circuit File (.cir)", "GatalityParser");
 
     std::ifstream inputFile(path);
@@ -118,6 +123,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
     outParsed->makePositionsRelative();
     outParsed->setFilePath(path);
     inputFile.close();
+    importedFiles.erase(path);
     return true;
 }
 

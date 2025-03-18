@@ -313,11 +313,23 @@ void CircuitViewWidget::load(const QString& filePath) {
     }
 
     Backend* back = circuitView->getBackend();
+    CircuitManager& circuitManager = back->getCircuitManager();
+
+    // Check for existing UUID
+    const std::string& uuid = parsed->getUUID();
+    if (circuitManager.UUIDExists(uuid)) {
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        return;
+    }
+
     CircuitValidator validator(*parsed, back->getBlockDataManager()); // validate and dont merge dependencies
     if (parsed->isValid()){
-
         // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
         for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second->getUUID())){
+                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+                continue;
+            }
             back->getCircuit(back->createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
         }
 
