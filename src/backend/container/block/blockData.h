@@ -31,6 +31,7 @@ public:
 	inline bool trySetConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		if (connections.size() == connectionEndId) {
 			connections.emplace_back(vector, true);
+			inputConnectionCount++;
 			return true;
 		} else if (connections.size() > connectionEndId) {
 			connections[connectionEndId] = {vector, true};
@@ -116,6 +117,14 @@ public:
 		if (defaultData) return 2;
 		return connections.size();
 	}
+	inline connection_end_id_t getInputConnectionCount() const noexcept {
+		if (defaultData) return 1;
+		return inputConnectionCount;
+	}
+	inline connection_end_id_t getOutputConnectionCount() const noexcept {
+		if (defaultData) return 1;
+		return connections.size() - inputConnectionCount;
+	}
 	inline bool isConnectionInput(connection_end_id_t connectionId) const noexcept {
 		if (defaultData) return connectionId == 0;
 		return connections.size() > connectionId && connections[connectionId].second;
@@ -129,6 +138,7 @@ private:
 	std::string path = "Basic";
 	block_size_t width = 1;
 	block_size_t height = 1;
+	connection_end_id_t inputConnectionCount = 0;
 	std::vector<std::pair<Vector, bool>> connections;
 };
 
