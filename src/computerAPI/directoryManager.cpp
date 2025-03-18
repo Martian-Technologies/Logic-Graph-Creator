@@ -1,10 +1,7 @@
 #include "directoryManager.h"
 #include <unistd.h>
 
-#ifdef _MSC_VER
-#include <windows.h>
-#include <libloaderapi.h>
-#endif
+#include <cpplocate/cpplocate.h>
 
 std::filesystem::path DirectoryManager::resourceDirectory("");
 std::filesystem::path DirectoryManager::projectDirectory("");
@@ -36,13 +33,5 @@ void DirectoryManager::findDirectories() {
 
 // thank you for this snippet Jacob Tate - https://gist.github.com/Jacob-Tate/7b326a086cf3f9d46e32315841101109
 std::filesystem::path DirectoryManager::getExecutablePath() {
-	#ifdef _MSC_VER
-        wchar_t path[FILENAME_MAX] = { 0 };
-        GetModuleFileNameW(nullptr, path, FILENAME_MAX);
-        return std::filesystem::path(path);
-    #else
-        char path[FILENAME_MAX];
-        ssize_t count = readlink("/proc/self/exe", path, FILENAME_MAX);
-        return std::filesystem::path(std::string(path, (count > 0) ? count: 0));
-    #endif
+	return cpplocate::getExecutablePath();
 }

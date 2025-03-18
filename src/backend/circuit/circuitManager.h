@@ -56,8 +56,12 @@ public:
 
 	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
 		circuit_id_t id = getNewCircuitId();
-		circuits.emplace(id, std::make_shared<Circuit>(id, &blockDataManager, uuid, name));
+		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, uuid, name);
         existingUUIDs.insert(uuid);
+		circuits.emplace(id, circuit);
+		for (auto& [object, func] : listenerFunctions) {
+			circuit->connectListener(object, func);
+		}
 		return id;
 	}
 
@@ -77,6 +81,17 @@ public:
 	inline const_iterator begin() const { return circuits.begin(); }
 	inline const_iterator end() const { return circuits.end(); }
 
+	void connectListener(void* object, CircuitDiffListenerFunction func) {
+		for (auto& [id, circuit] : circuits) {
+			circuit->connectListener(object, func);
+		}
+		listenerFunctions[object] = func;
+	}
+	void disconnectListener(void* object) {
+		for (auto& [id, circuit] : circuits) {
+			circuit->disconnectListener(object);
+		}
+	}
 
 private:
 	circuit_id_t getNewCircuitId() { return ++lastId; }
@@ -87,6 +102,7 @@ private:
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
+    std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
     std::unordered_set<std::string> existingUUIDs;
 };
 

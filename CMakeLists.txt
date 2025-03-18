@@ -48,6 +48,13 @@ set(KDDockWidgets_QT6 ON)
 set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
+# CPPLocate (they have extreme cmake goofyness)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(BUILD_SHARED_LIBS OFF)
+set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
+add_subdirectory(external/cpplocate)
+
+
 set(EXTERNAL_SOURCES
 	
 )
@@ -55,6 +62,7 @@ set(EXTERNAL_INCLUDES
 	
 )
 set(EXTERNAL_LINKS
+	cpplocate::cpplocate
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
 )
@@ -115,12 +123,11 @@ if (Gatality_BuildApp)
 
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
-set(COPIED_RESOURCES_DIR $<TARGET_FILE_DIR:${PROJECT_NAME}>"/resources")
+set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
 	COMMENT "Copying resource directory"
 )
-
 endif()
 
 # ============================================ GTESTING ============================================

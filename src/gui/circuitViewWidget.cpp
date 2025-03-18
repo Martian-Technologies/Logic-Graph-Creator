@@ -280,13 +280,14 @@ void CircuitViewWidget::mouseMoveEvent(QMouseEvent* event) {
 void CircuitViewWidget::enterEvent(QEnterEvent* event) {
 	// grab focus so key inputs work without clicking
 	setFocus(Qt::MouseFocusReason);
-
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+	if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
 	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void CircuitViewWidget::leaveEvent(QEvent* event) {
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+	if (viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x <= 1 && viewPos.y <= 1) return;
 	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
@@ -309,6 +310,7 @@ void CircuitViewWidget::load(const QString& filePath) {
     SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        logError("Failed to load circuit file.");
         return;
     }
 
