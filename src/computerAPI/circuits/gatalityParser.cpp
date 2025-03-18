@@ -108,9 +108,16 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
         block_id_t currentBlockId = blockId;
         inputFile >> numConns;
         for (int i = 0; i < numConns; ++i) {
-            inputFile >> token;
-            while (inputFile.peek() != '\n') {
-                inputFile >> cToken >> blockId >> connId >> cToken;
+            inputFile >> token; // (connId:x)
+            std::string line;
+            std::getline(inputFile, line);
+            std::istringstream lineStream(line);
+
+            while (lineStream >> cToken) { // open paren
+                if (!(lineStream >> blockId >> connId >> cToken)) {
+                    logError("Failed to parse (blockid, connection_id) token", "GatalityParser");
+                    break;
+                }
                 outParsed->addConnection({
                     static_cast<block_id_t>(currentBlockId),
                     static_cast<connection_end_id_t>(i),
