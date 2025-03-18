@@ -1,5 +1,6 @@
 #include "vulkanChunker.h"
 
+#include "gpu/renderer/vulkanBlockRenderer.h"
 #include "gpu/vulkanManager.h"
 
 const unsigned int CHUNK_SIZE = 25;
@@ -34,22 +35,23 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 
 void VulkanChunker::buildChunk(Chunk& chunk) {
 	// TODO - should pre-allocate buffers with size and pool them
+	// TODO - should abstract this function
 	
 	// Generate vertices
-	std::vector<Vertex> vertices;
+	std::vector<BlockVertex> vertices;
 	vertices.reserve(chunk.blocks.size() * 3);
 	for (const auto& block : chunk.blocks) {
 		Position blockPosition = block.position;
-		Vertex v1 = {{blockPosition.x + block.realWidth, blockPosition.y + block.realHeight}, {0.0f, 0.0f, 1.0f}};
-		Vertex v2 = {{blockPosition.x, blockPosition.y + block.realHeight}, {0.0f, 1.0f, 0.0f}};
-		Vertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+		BlockVertex v1 = {{blockPosition.x + block.realWidth, blockPosition.y + block.realHeight}, {0.0f, 0.0f, 1.0f}};
+		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.realHeight}, {0.0f, 1.0f, 0.0f}};
+		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
 		vertices.push_back(v1);
 		vertices.push_back(v2);
 		vertices.push_back(v3);
 	}
 
 	// upload vertices to buffer
-	size_t vertexBufferSize = sizeof(Vertex) * vertices.size();
+	size_t vertexBufferSize = sizeof(BlockVertex) * vertices.size();
 	chunk.buffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
 	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), chunk.buffer.allocation, 0, vertexBufferSize);
 	chunk.numVertices = vertices.size();
