@@ -99,6 +99,7 @@ UndoTree::iterator UndoTree::iterator::prev() const {
     if (pos == -1) {
         return iterator(this->branch, this->branch->nodes.size() - 1);
     } else if (pos == 0) {
+
         return iterator(this->branch->parentBranch, this->branch->parentNode);
     } else return iterator(this->branch, pos - 1);
 }
@@ -109,13 +110,29 @@ int UndoTree::iterator::numBranches() const {
     } else return branch->nodes[pos].branches->size();
 }
 
+int UndoTree::iterator::whichBranch() const {
+    if (branch->parentBranch == nullptr) {
+        return -1;
+    } else {
+        UndoTree::Branch::Node& parentNode = branch->parentBranch->nodes[branch->parentNode];
+        for (size_t i = 0; i < parentNode.branches->size(); i++) {
+            if (branch == (*parentNode.branches)[i]) {
+                return i;
+            }
+        }
+        // Control should never reach here
+        assert(false);
+        return INT_MAX;
+    }
+}
+
 DifferenceSharedPtr& UndoTree::iterator::operator*() {
     return branch->nodes[pos].diff;
 }
 
 bool UndoTree::iterator::operator==(const iterator& other) const {
     // -1 denotes end iterator
-    if (this->pos == other.pos == -1) {
+    if (this->pos == other.pos && other.pos == -1) {
         return true;
     // Otherwise check if they are at same place on same branch
     } else return this->pos == other.pos && this->branch == other.branch;
@@ -143,4 +160,8 @@ UndoTree::Branch::Node::Node(DifferenceSharedPtr diff):
 
 UndoTree::Branch::Node::~Node() {
     delete branches;
+}
+
+bool onSameBranch(const UndoTree::iterator& a, const UndoTree::iterator& b) {
+    return a.branch == b.branch;
 }

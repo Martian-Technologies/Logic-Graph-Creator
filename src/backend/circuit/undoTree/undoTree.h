@@ -64,6 +64,7 @@ struct UndoTree::Branch {
 
 class UndoTree::iterator {
     friend class UndoTree;
+    friend bool onSameBranch(const UndoTree::iterator& a, const UndoTree::iterator& b);
 public:
     /**
      * @brief Goes to the next diff along the specified branch.
@@ -82,6 +83,11 @@ public:
      * @brief Finds the number of branches that split off from the current diff.
      */
     int numBranches() const;
+
+    /**
+     * @brief Returns which child of the parent node this branch is, or -1 if this branch is main.
+     */
+    int whichBranch() const;
 
     DifferenceSharedPtr& operator*();
     bool operator==(const iterator& other) const;
