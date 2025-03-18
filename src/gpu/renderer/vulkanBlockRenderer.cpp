@@ -45,19 +45,20 @@ void VulkanBlockRenderer::render(VkCommandBuffer& commandBuffer, VkExtent2D& ren
 	scissor.extent = renderExtent;
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	for (Chunk& chunk : chunker.getChunks(viewBounds.first.snap(), viewBounds.second.snap())) {
+	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunker.getChunks(viewBounds.first.snap(), viewBounds.second.snap())) {
+		// TODO - save chunk to frame data
+		
 		// bind vertex buffers
-		VkBuffer vertexBuffers[] = { chunk.buffer.buffer };
+		VkBuffer vertexBuffers[] = { chunk->getBuffer().buffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
 		// draw
-		vkCmdDraw(commandBuffer, static_cast<uint32_t>(chunk.numVertices), 1, 0, 0);
+		vkCmdDraw(commandBuffer, static_cast<uint32_t>(chunk->getNumVertices()), 1, 0, 0);
 	}
 }
 
 void VulkanBlockRenderer::destroy() {
-	chunker.destroy();
 	destroyShaderModule(vertShader);
 	destroyShaderModule(fragShader);
 	destroyPipeline(pipeline);
