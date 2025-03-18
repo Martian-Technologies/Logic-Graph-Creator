@@ -8,8 +8,8 @@
 #include <glm/ext/vector_float3.hpp>
 
 // TODO -
-// Chunkchain should work
-// Thread safety for chunker
+// Chunkchain should work (v^)
+// Thread safety for chunker (v^)
 // Chunk should handle differences elegantly
 // Chunk objects actually get added to frame data somehow
 // Chunk system should be abstracted
@@ -71,6 +71,7 @@ private:
 	Circuit* circuit = nullptr;
 
 	std::unordered_map<Position, ChunkChain> chunks;
+	std::mutex mux; // sync can be relaxed in the future
 };
 
 #endif

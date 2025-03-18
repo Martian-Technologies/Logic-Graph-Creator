@@ -85,6 +85,8 @@ Position getChunk(Position in) {
 }
 
 void VulkanChunker::setCircuit(Circuit* circuit) {
+	std::lock_guard<std::mutex> lock(mux);
+	
 	this->circuit = circuit;
 	
 	// remove all existing chunking data
@@ -105,11 +107,62 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 }
 
 void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
-	// TODO - very temp (rebuild whole thing (defeats the purpose))
-	setCircuit(circuit);
+	std::lock_guard<std::mutex> lock(mux);
+	
+	std::vector<Position> chunksToUpdate;
+	
+	for (const auto& modification : diff->getModifications()) {
+		const auto& [modificationType, modificationData] = modification;
+		const BlockDataManager* blockDataManager = circuit->getBlockContainer()->getBlockDataManager();
+		
+		switch (modificationType) {
+		case Difference::ModificationType::REMOVED_BLOCK:
+		{
+			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+			
+			break;
+		}
+		case Difference::ModificationType::PLACE_BLOCK:
+		{
+			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+
+			Position chunk = getChunk(position);
+			chunks[chunk].getBlocksForUpdating().push_back(RenderedBlock(blockType, position, rotation, blockDataManager->getBlockWidth(blockType, rotation), blockDataManager->getBlockHeight(blockType, rotation)));
+			chunksToUpdate.push_back(chunk);
+			
+			break;
+		}
+		case Difference::ModificationType::REMOVED_CONNECTION:
+		{
+			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			
+			break;
+		}
+		case Difference::ModificationType::CREATED_CONNECTION:
+		{
+			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			
+			break;
+		}
+		case Difference::ModificationType::MOVE_BLOCK:
+		{
+			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
+			
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
+	for (const Position& chunk : chunksToUpdate) {
+		chunks[chunk].updateAllocation();
+	}
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {
+	std::lock_guard<std::mutex> lock(mux);
+	
 	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
 	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
 	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
