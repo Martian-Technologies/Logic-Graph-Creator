@@ -12,14 +12,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
-	# hack to avoid DNDEBUG which removes wires for some reason
-	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
-else()
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-	# hack to avoid DNDEBUG which removes wires for some reason
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-endif()
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
+    # hack to avoid DNDEBUG which removes wires for some reason
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+else ()
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+    # hack to avoid DNDEBUG which removes wires for some reason
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif ()
 
 # ======================================== PROJECT SETUP ========================================
 project(Gatality)
@@ -31,9 +31,9 @@ set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Find source files
 file(GLOB_RECURSE PROJECT_SOURCES
-		"${SOURCE_DIR}/*.cpp"
-		"${SOURCE_DIR}/*.ui"
-		"${SOURCE_DIR}/*.qrc"
+        "${SOURCE_DIR}/*.cpp"
+        "${SOURCE_DIR}/*.ui"
+        "${SOURCE_DIR}/*.qrc"
 )
 
 # ============================================ OPTIONS =============================================
@@ -49,6 +49,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # Initialize Vulkan
 find_package(Vulkan REQUIRED COMPONENTS glslc)
+
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM) # and vma
 # GLM
 add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM)
@@ -59,155 +60,186 @@ set(KDDockWidgets_STATIC ON)
 add_subdirectory(external/KDDockWidgets)
 
 set(EXTERNAL_SOURCES
-	
+
 )
 set(EXTERNAL_INCLUDES
-	${Vulkan_INCLUDE_DIRS}
+        ${Vulkan_INCLUDE_DIRS}
 )
 set(EXTERNAL_LINKS
-	Qt6::Core Qt6::Gui Qt6::Widgets
-	KDAB::kddockwidgets
-	${Vulkan_LIBRARIES}
-	VulkanMemoryAllocator
-	glm
+        Qt6::Core Qt6::Gui Qt6::Widgets
+        KDAB::kddockwidgets
+        ${Vulkan_LIBRARIES}
+        VulkanMemoryAllocator
+        glm
 )
 set(EXTERNAL_DEFINES
-	"GLM_FORCE_RADIANS"
-	"GLM_FORCE_DEPTH_ZERO_TO_ONE"
+        "GLM_FORCE_RADIANS"
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE"
 )
 
 if (Gatality_BuildApp)
-# ======================================= CREATE EXECUTABLE ========================================
-	# Platform specific business before add_executable
-	if(APPLE) # MacOS
-		# Icon
-		set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
-		set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
-		set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+    # ======================================= CREATE EXECUTABLE ========================================
+    # Platform specific business before add_executable
+    if (APPLE) # MacOS
+        # Icon
+        set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
+        set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+        set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+        list(APPEND PROJECT_SOURCES ${ICON_PATH})
 
-	elseif (WIN32) # Windows
-		# Icon
-		set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
-		list(APPEND PROJECT_SOURCES ${ICON_PATH})
-	endif()
+    elseif (WIN32) # Windows
+        # Icon
+        set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
+        list(APPEND PROJECT_SOURCES ${ICON_PATH})
+    endif ()
 
-	# Add executable
-	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
-	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES} )
-	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
-	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+    # Add executable
+    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
 
-	# Platform specific business after add_executable
-	if(APPLE) # MacOS
-		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+    # Properly handle MoltenVK on MacOS
+    if (APPLE)
+        find_library(MOLTENVK_LIBRARY MoltenVK
+                PATHS
+                "/usr/local/lib"
+                "/opt/homebrew/lib"
+                "$ENV{VULKAN_SDK}/lib"
+                "$ENV{VULKAN_SDK}/macOS/lib"
+                "$ENV{VULKAN_SDK}/MoltenVK/dylib"
+        )
 
-		# Bundle Properties 
-		set_target_properties(${PROJECT_NAME} PROPERTIES
-			MACOSX_BUNDLE TRUE
-			# indentification
-			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
-			MACOSX_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
-			# version info
-			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_INFO_VERSION "6.0"
-			# Dev Region
-			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
-			# Doc Types that macos can handle
-			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
-			# Application category
-			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
-			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
-		)
-		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
-	elseif (WIN32) # Windows
-		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
-			# Set WIN32_EXECUTABLE (Disables Console)
-			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-		endif ()
-	endif()
+        if (MOLTENVK_LIBRARY)
+            message(STATUS "Found MoltenVK: ${MOLTENVK_LIBRARY}")
+            target_link_libraries(${PROJECT_NAME} PRIVATE ${MOLTENVK_LIBRARY})
+        else ()
+            message(WARNING "MoltenVK library not found. Will continue without explicitly linking to MoltenVK.")
+        endif ()
 
-# ===================================== SHADER COMPILATION =========================================
-	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-	file(GLOB_RECURSE SHADER_SOURCE_FILES
-		"${SOURCE_DIR}/*.vert"
-		"${SOURCE_DIR}/*.frag"
-	)
+        # Link required macOS frameworks
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+                "-framework Metal"
+                "-framework MetalKit"
+                "-framework Cocoa"
+                "-framework IOKit"
+                "-framework IOSurface"
+                "-framework QuartzCore"
+        )
+    endif ()
 
-	set(SHADER_COMMANDS)
-	set(SHADER_PRODUCTS)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
+    target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-	foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
-		cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
-	
-		# Build command
-		list(APPEND SHADER_COMMANDS COMMAND)
-		list(APPEND SHADER_COMMANDS Vulkan::glslc)
-		list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
-		list(APPEND SHADER_COMMANDS "-o")
-		list(APPEND SHADER_COMMANDS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
-	
-		# Add product
-		list(APPEND SHADER_PRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
-	endforeach()
+    # Platform specific business after add_executable
+    if (APPLE) # MacOS
+        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 
-	add_custom_target("Shaders" ALL
-		${SHADER_COMMANDS}
-		COMMENT "Compiling Shaders"
-		SOURCES ${SHADER_SOURCE_FILES}
-		BYPRODUCTS ${SHADER_PRODUCTS}
-	)
-	
-# ======================================= RESOURCE EMBEDDING =======================================
-	# find resources
-	file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
-	file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
+        # Bundle Properties
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+                MACOSX_BUNDLE TRUE
+                # indentification
+                MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
+                MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
+                MACOSX_BUNDLE_NAME "Gatality"
+                MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
+                # version info
+                MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+                MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
+                MACOSX_BUNDLE_INFO_VERSION "6.0"
+                # Dev Region
+                MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
+                # Doc Types that macos can handle
+                MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
+                # Application category
+                MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
+                MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+        )
+        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
+    elseif (WIN32) # Windows
+        if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
+            # Set WIN32_EXECUTABLE (Disables Console)
+            set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+        endif ()
+    endif ()
 
-	# add resources to QT
-	qt_add_resources(${PROJECT_NAME} "mainResources"
-			PREFIX
-			"/"
-			FILES
-			${IMG_SOURCES}
-			${JSON_SOURCES}
-			BASE ${RESOURCES_DIR}
-	)
 
-	# Add compiled shader to qt
-	qt_add_resources(${PROJECT_NAME} "shaders"
-			PREFIX
-			"/shaders"
-			FILES
-			${SHADER_PRODUCTS}
-			BASE ${CMAKE_CURRENT_BINARY_DIR}
-	)
+    # ===================================== SHADER COMPILATION =========================================
+    set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+    file(GLOB_RECURSE SHADER_SOURCE_FILES
+            "${SOURCE_DIR}/*.vert"
+            "${SOURCE_DIR}/*.frag"
+    )
 
-endif() # Gatality_BuildApp
+    set(SHADER_COMMANDS)
+    set(SHADER_PRODUCTS)
+
+    foreach (SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
+        cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
+
+        # Build command
+        list(APPEND SHADER_COMMANDS COMMAND)
+        list(APPEND SHADER_COMMANDS Vulkan::glslc)
+        list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
+        list(APPEND SHADER_COMMANDS "-o")
+        list(APPEND SHADER_COMMANDS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
+
+        # Add product
+        list(APPEND SHADER_PRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.spv")
+    endforeach ()
+
+    add_custom_target("Shaders" ALL
+            ${SHADER_COMMANDS}
+            COMMENT "Compiling Shaders"
+            SOURCES ${SHADER_SOURCE_FILES}
+            BYPRODUCTS ${SHADER_PRODUCTS}
+    )
+
+    # ======================================= RESOURCE EMBEDDING =======================================
+    # find resources
+    file(GLOB_RECURSE IMG_SOURCES "${RESOURCES_DIR}/*.png" "${RESOURCES_DIR}/*.ico")
+    file(GLOB_RECURSE JSON_SOURCES "${RESOURCES_DIR}/*.json")
+
+    # add resources to QT
+    qt_add_resources(${PROJECT_NAME} "mainResources"
+            PREFIX
+            "/"
+            FILES
+            ${IMG_SOURCES}
+            ${JSON_SOURCES}
+            BASE ${RESOURCES_DIR}
+    )
+
+    # Add compiled shader to qt
+    qt_add_resources(${PROJECT_NAME} "shaders"
+            PREFIX
+            "/shaders"
+            FILES
+            ${SHADER_PRODUCTS}
+            BASE ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+endif () # Gatality_BuildApp
 
 if (Gatality_BuildTests)
-# ============================================ GTESTING ============================================
-	message("HI")
-	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
-	enable_testing()
+    # ============================================ GTESTING ============================================
+    message("HI")
+    add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
+    enable_testing()
 
-	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
-	set(TEST_FILES)
-	file(GLOB_RECURSE TEST_FILES
-		"${TEST_DIR}/*.cpp"
-		"${TEST_DIR}/*.h"
-		"${SOURCE_DIR}/backend/*"
-		"${SOURCE_DIR}/logging/*"
-		"${SOURCE_DIR}/util/*"
-	)
+    set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
+    set(TEST_FILES)
+    file(GLOB_RECURSE TEST_FILES
+            "${TEST_DIR}/*.cpp"
+            "${TEST_DIR}/*.h"
+            "${SOURCE_DIR}/backend/*"
+            "${SOURCE_DIR}/logging/*"
+            "${SOURCE_DIR}/util/*"
+    )
 
-	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
-	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
-	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
-	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
-	
-	add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
-	
-endif() # Gatality_BuildTests
+    add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+    target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
+    target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
+    target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+
+    add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
+
+endif () # Gatality_BuildTests
