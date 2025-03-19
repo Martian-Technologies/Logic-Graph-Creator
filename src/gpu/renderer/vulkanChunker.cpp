@@ -6,7 +6,7 @@
 // VulkanChunkAllocation
 // =========================================================================================================
 
-VulkanChunkAllocation::VulkanChunkAllocation(const std::vector<RenderedBlock>& blocks) {
+VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - should abstract this function
 	
@@ -14,9 +14,9 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::vector<RenderedBlock>& b
 	std::vector<BlockVertex> vertices;
 	vertices.reserve(blocks.size() * 3);
 	for (const auto& block : blocks) {
-		Position blockPosition = block.position;
-		BlockVertex v1 = {{blockPosition.x + block.realWidth, blockPosition.y + block.realHeight}, {0.0f, 0.0f, 1.0f}};
-		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.realHeight}, {0.0f, 1.0f, 0.0f}};
+		Position blockPosition = block.first;
+		BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {0.0f, 0.0f, 1.0f}};
+		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, {0.0f, 1.0f, 0.0f}};
 		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
 		vertices.push_back(v1);
 		vertices.push_back(v2);
@@ -38,13 +38,30 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // =========================================================================================================
 
 void ChunkChain::updateAllocation() {
-	std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(upToData);
-	
-	// replace currently allocating
-	if (currentlyAllocating.has_value()) {
-		gbJail.push_back(currentlyAllocating.value());
+	if (!upToData.empty()) { // if we have data to upload
+		// allocate new date
+		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(upToData);
+		// replace currently allocating data
+		if (currentlyAllocating.has_value()) {
+			gbJail.push_back(currentlyAllocating.value());
+		}
+		currentlyAllocating = newAllocation;
+
 	}
-	currentlyAllocating = newAllocation;
+	else { // we have no data to upload
+		// drop currently allocating, sent to gay baby jail
+		if (currentlyAllocating.has_value()) {
+			gbJail.push_back(currentlyAllocating.value());
+		}
+		currentlyAllocating.reset();
+
+		// drop newest allocation, send to gay baby jail
+		if (newestAllocation.has_value()) {
+			gbJail.push_back(newestAllocation.value());
+		}
+		newestAllocation.reset();
+	}
+	
 	allocationDirty = false;
 }
 
@@ -95,7 +112,8 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 	if (circuit) {
 		// partition blocks into chunks
 		for (const auto& block : *(circuit->getBlockContainer())) {
-			chunks[getChunk(block.second.getPosition())].getBlocksForUpdating().push_back({block.second.type(), block.second.getPosition(), block.second.getRotation(), block.second.width(), block.second.height()});
+			Position position = block.second.getPosition();
+			chunks[getChunk(position)].getBlocksForUpdating()[position] = RenderedBlock(block.second.type(), block.second.getRotation(), block.second.width(), block.second.height());
 		}
 
 		// allocate vulkan buffer for all chunks
@@ -108,8 +126,8 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 
 void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	std::lock_guard<std::mutex> lock(mux);
-	
-	std::vector<Position> chunksToUpdate;
+
+	std::unordered_set<Position> chunksToUpdate;
 	
 	for (const auto& modification : diff->getModifications()) {
 		const auto& [modificationType, modificationData] = modification;
@@ -119,6 +137,11 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		case Difference::ModificationType::REMOVED_BLOCK:
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+
+			// Remove block
+			Position chunk = getChunk(position);
+			chunks[chunk].getBlocksForUpdating().erase(position);
+			chunksToUpdate.insert(chunk);
 			
 			break;
 		}
@@ -126,9 +149,10 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		{
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 
+			// Add block
 			Position chunk = getChunk(position);
-			chunks[chunk].getBlocksForUpdating().push_back(RenderedBlock(blockType, position, rotation, blockDataManager->getBlockWidth(blockType, rotation), blockDataManager->getBlockHeight(blockType, rotation)));
-			chunksToUpdate.push_back(chunk);
+			chunks[chunk].getBlocksForUpdating()[position] = RenderedBlock(blockType, rotation, blockDataManager->getBlockWidth(blockType, rotation), blockDataManager->getBlockHeight(blockType, rotation));
+			chunksToUpdate.insert(chunk);
 			
 			break;
 		}
@@ -147,6 +171,28 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		case Difference::ModificationType::MOVE_BLOCK:
 		{
 			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
+			if (curPosition == newPosition) continue;
+
+			// get chunk
+			Position curChunk = getChunk(curPosition);
+			Position newChunk = getChunk(newPosition);
+			chunksToUpdate.insert(curChunk);
+			chunksToUpdate.insert(newChunk);
+
+			// find original block
+			auto& curBlocksForUpdating = chunks[curChunk].getBlocksForUpdating();
+			auto itr = curBlocksForUpdating.find(curPosition);
+			if (itr == curBlocksForUpdating.end()) {
+				logError("Renderer could not find block to move.", "Vulkan");
+				continue;
+			}
+
+			// add block to new position
+			auto& newBlocksForUpdating = chunks[newChunk].getBlocksForUpdating();
+			newBlocksForUpdating[newPosition] = itr->second;
+
+			// remove block from original chunk
+			curBlocksForUpdating.erase(itr);
 			
 			break;
 		}
@@ -155,6 +201,7 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		}
 	}
 
+	// reallocate all modified chunks
 	for (const Position& chunk : chunksToUpdate) {
 		chunks[chunk].updateAllocation();
 	}

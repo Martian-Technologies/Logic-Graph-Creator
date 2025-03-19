@@ -13,6 +13,7 @@
 // Chunk should handle differences elegantly
 // Chunk objects actually get added to frame data somehow
 // Chunk system should be abstracted
+// Ease up on sync
 
 // TODO - not sure if this should be stored, maybe it would be faster to just
 // query from blockContainer sometimes. We also don't have to store the width
@@ -20,7 +21,6 @@
 
 struct RenderedBlock {
 	BlockType blockType;
-	Position position;
 	Rotation rotation;
 	int realWidth;
 	int realHeight;
@@ -28,7 +28,7 @@ struct RenderedBlock {
 
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(const std::vector<RenderedBlock>& blocks);
+	VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks);
 	~VulkanChunkAllocation();
 
 	inline const AllocatedBuffer& getBuffer() const { return buffer; }
@@ -43,16 +43,16 @@ private:
 
 class ChunkChain {
 public:
-	inline std::vector<RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return upToData; }
+	inline std::unordered_map<Position, RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return upToData; }
+	void updateAllocation();
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
-	void updateAllocation();
 	
 private:
 	void annihilateOrphanGBs();
 	
 private:
-	std::vector<RenderedBlock> upToData; // up to date (block) data
+	std::unordered_map<Position, RenderedBlock> upToData; // up to date (block) data
 	bool allocationDirty = false;
 
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;
