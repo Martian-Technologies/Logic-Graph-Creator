@@ -6,11 +6,11 @@
 void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 {
 	this->surface = surface;
-	windowWidth = w;
-	windowHeight = h;
+	dynamicData.windowWidth = w;
+	dynamicData.windowHeight = h;
 
 	// set up swapchain
-	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	swapchain = createSwapchain(surface, dynamicData.windowWidth, dynamicData.windowHeight);
 	createFrameDatas(frames, FRAME_OVERLAP);
 	
 	// create render pass and framebuffers
@@ -60,8 +60,8 @@ void VulkanRenderer::resize(int w, int h) {
 	// lock mutex
 	std::lock_guard<std::mutex> guard(windowSizeMux);
 	
-	windowWidth = w;
-	windowHeight = h;
+	dynamicData.windowWidth = w;
+	dynamicData.windowHeight = h;
 
 	swapchainRecreationNeeded = true;
 }
@@ -73,8 +73,8 @@ void VulkanRenderer::updateView(ViewManager* viewManager) {
 	FPosition topLeft = viewManager->getTopLeft();
 	FPosition bottomRight = viewManager->getBottomRight();
 	// this function was designed for a slightly different coordinate system so it's a little wonky, but it works
-	viewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
-	viewBounds = { topLeft, bottomRight };
+	dynamicData.viewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+	dynamicData.viewBounds = { topLeft, bottomRight };
 }
 
 void VulkanRenderer::setCircuit(Circuit* circuit) {
@@ -216,7 +216,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// render all renderers
-	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, viewMat, viewBounds);
+	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, dynamicData.viewMat, dynamicData.viewBounds);
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);
@@ -273,7 +273,7 @@ void VulkanRenderer::recreateSwapchain() {
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 	
 	destroySwapchain(swapchain);
-	swapchain = createSwapchain(surface, windowWidth, windowHeight);
+	swapchain = createSwapchain(surface, dynamicData.windowWidth, dynamicData.windowHeight);
 	createSwapchainFramebuffers(swapchain, renderPass);
 
 	swapchainRecreationNeeded = false;

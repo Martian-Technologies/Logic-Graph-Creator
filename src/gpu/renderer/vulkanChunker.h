@@ -10,10 +10,14 @@
 // TODO -
 // Chunkchain should work (v^)
 // Thread safety for chunker (v^)
-// Chunk should handle differences elegantly
+// Chunk should handle differences elegantly (v^)
 // Chunk objects actually get added to frame data somehow
+// Better GBJ management
+// Chunks are allocated on separate threads, buffer pooling
 // Chunk system should be abstracted
 // Ease up on sync
+// Profile which part of upload is taking longest
+// Staging buffer upload
 
 // TODO - not sure if this should be stored, maybe it would be faster to just
 // query from blockContainer sometimes. We also don't have to store the width

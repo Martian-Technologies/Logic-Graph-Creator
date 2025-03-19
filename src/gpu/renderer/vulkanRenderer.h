@@ -46,16 +46,21 @@ private:
 	void createRenderPass(SwapchainData& swapchain);
 	
 private:
+	struct DynamicData {
+		int windowWidth, windowHeight;
+	
+		glm::mat4 viewMat = glm::mat4(1.0f);
+		std::pair<FPosition, FPosition> viewBounds;
+	};
+	
 	// state
 	std::atomic<bool> initialized = false;
 	std::atomic<bool> running = false;
 	std::atomic<float> lastFrameTime = 0.0f;
-	
-	int windowWidth, windowHeight;
+
+	// dynamic data
+	DynamicData dynamicData;
 	std::mutex windowSizeMux;
-	// TODO - possible move this to block renderer
-	glm::mat4 viewMat = glm::mat4(1.0f);
-	std::pair<FPosition, FPosition> viewBounds;
 	std::mutex viewMux;
 
 	std::atomic<bool> swapchainRecreationNeeded = false;

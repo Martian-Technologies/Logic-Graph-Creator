@@ -1,13 +1,14 @@
 #ifndef vulkanBlockRenderer_h
 #define vulkanBlockRenderer_h
 
+#include "gpu/renderer/vulkanFrame.h"
 #include "gpu/vulkanManager.h"
 #include "gpu/renderer/vulkanPipeline.h"
 #include "backend/circuit/circuit.h"
 #include "vulkanChunker.h"
 
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 struct BlockVertex {
 	glm::vec2 pos;
