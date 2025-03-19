@@ -19,6 +19,7 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "SWITCH") return BlockType::SWITCH;
     if (str == "CONSTANT") return BlockType::CONSTANT;
     if (str == "LIGHT") return BlockType::LIGHT;
+    if (str == "CUSTOM") return BlockType::CUSTOM;
     return BlockType::NONE;
 }
 
@@ -46,6 +47,7 @@ std::string blockTypeToString(BlockType type) {
         case BlockType::SWITCH: return "SWITCH";
         case BlockType::CONSTANT: return "CONSTANT";
         case BlockType::LIGHT: return "LIGHT";
+        case BlockType::CUSTOM: return "CUSTOM";
         default: return "NONE";
     }
 }

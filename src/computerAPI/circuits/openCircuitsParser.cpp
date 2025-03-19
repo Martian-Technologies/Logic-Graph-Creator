@@ -1,6 +1,7 @@
 
 #include "openCircuitsParser.h"
 #include "circuitFileManager.h"
+#include <string>
 
 
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit){
@@ -62,7 +63,6 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
 
     json& circuitData = contents["1"]["data"];
     
-    std::cout << "tracking ics now\n";
     // track all of the ICs
     json& ics = circuitData["ics"];
     if(!ics.contains("data")) {
@@ -78,7 +78,6 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
         // the ics are listed inline
         ics = ics["data"];
     }
-    std::cout << "Looping through ICS" << std::endl;
     for (const auto& ic : ics.items()) {
         json& icObj = ic.value();
         if (icObj.contains("ref")){
@@ -95,8 +94,6 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
             --newReferenceID;
         }
     }
-
-    std::cout << "tracking objects now\n";
 
     json& compObjs = circuitData["objects"];
     if(!compObjs.contains("data")) {
@@ -126,9 +123,6 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
         }
     }
 
-
-    std::cout << "tracking transforms now\n";
-
     // first pass: collect transforms and port relationships
     for (const auto& item : contents.items()) {
         int id = std::stoi(item.key());
@@ -153,8 +147,6 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
         }
     }
 
-
-    std::cout << "collecting block process now\n";
     // second pass: process blocks
     for (int id: componentReferences) {
         OpenCircuitsBlockInfo info;
@@ -337,36 +329,44 @@ void OpenCircuitsParser::filterAndResolveBlocks(std::unordered_map<int, OpenCirc
 
 void OpenCircuitsParser::resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks) {
     // resolve inputs
-    std::unordered_set<int> resolvedConnectionBlocks;
+    std::unordered_set<int> resolvedSet;
+    std::vector<int> orderedConnectionBlocks;
+    // the idea is to preserve the order that we have our input and output blocks are.
+    // When we have IC blocks, the order matters so that we can map to specific ports
     for (int inputBlock : b->inputBlocks) {
         if (allBlocks.find(inputBlock) == allBlocks.end()) continue;
 
         std::string type = allBlocks.at(inputBlock)->type;
         if (validOpenCircuitsTypes.count(type)) {
             // direct connection from this block to another block
-            resolvedConnectionBlocks.insert(inputBlock);
+            if (resolvedSet.insert(inputBlock).second) {
+                orderedConnectionBlocks.push_back(inputBlock);
+            }
         } else {
             // indirect connection from this block, to some series of DigitalNodes
-            resolveOpenCircuitsConnections(true, inputBlock, allBlocks, resolvedConnectionBlocks);
+            resolveOpenCircuitsConnections(true, inputBlock, allBlocks, resolvedSet, orderedConnectionBlocks);
         }
     }
-    b->inputBlocks.assign(resolvedConnectionBlocks.begin(), resolvedConnectionBlocks.end());
+    b->inputBlocks = std::move(orderedConnectionBlocks);
 
     // resolve outputs
-    resolvedConnectionBlocks.clear();
+    resolvedSet.clear();
+    orderedConnectionBlocks.clear();
     for (int outputBlock : b->outputBlocks) {
         if (allBlocks.find(outputBlock) == allBlocks.end()) continue;
 
         std::string type = allBlocks.at(outputBlock)->type;
         if (validOpenCircuitsTypes.count(type)) {
             // direct connection from this block to another block
-            resolvedConnectionBlocks.insert(outputBlock);
+            if (resolvedSet.insert(outputBlock).second){
+                orderedConnectionBlocks.push_back(outputBlock);
+            }
         } else {
             // indirect connection from this block, to some series of DigitalNodes
-            resolveOpenCircuitsConnections(false, outputBlock, allBlocks, resolvedConnectionBlocks);
+            resolveOpenCircuitsConnections(false, outputBlock, allBlocks, resolvedSet, orderedConnectionBlocks);
         }
     }
-    b->outputBlocks.assign(resolvedConnectionBlocks.begin(), resolvedConnectionBlocks.end());
+    b->outputBlocks = std::move(orderedConnectionBlocks);
 }
 
 
@@ -374,7 +374,8 @@ void OpenCircuitsParser::resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::
 // resolves digital node connections (indirect wiring)
 void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
                                                         std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks,
-                                                        std::unordered_set<int> &outResolvedConnectionBlocks) {
+                                                        std::unordered_set<int>& outResolvedSet,
+                                                        std::vector<int>& orderedConnectionBlocks) {
     // run a bfs through all references to find all reachable valid block types
     std::queue<int> q;
     std::unordered_set<int> visited;
@@ -394,7 +395,9 @@ void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
         const OpenCircuitsBlockInfo* current = it->second;
 
         if (validOpenCircuitsTypes.count(current->type)) {
-            outResolvedConnectionBlocks.insert(currentId);
+            if (outResolvedSet.insert(currentId).second){
+                orderedConnectionBlocks.push_back(currentId);
+            }
             continue;
         }
 
@@ -413,32 +416,43 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 
     // if icBlockSpace is nullptr, then use filteredBlocks
     auto fillParsedBlock = [&](SharedParsedCircuit pc, int id, const OpenCircuitsBlockInfo* block, const std::unordered_map<int, OpenCircuitsBlockInfo>* icBlockSpace) {
+        BlockType t = stringToBlockType(openCircuitsTypeToName[block->type]);
         pc->addBlock(id, {block->position*posScale,
-                Rotation(std::lrint(block->angle * (2 / M_PI)) % 4),
-                stringToBlockType(openCircuitsTypeToName[block->type])});
+                Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), t});
 
-        for (int b : block->inputBlocks){
+        if (t == BlockType::CUSTOM) {
+            pc->markCustomBlock(id, std::to_string(block->icReference), block->inputBlocks.size(), block->outputBlocks.size());
+        }
+
+        int i=0;
+        for (; i<block->inputBlocks.size(); ++i){
+            int b = block->inputBlocks[i];
             const OpenCircuitsBlockInfo& otherBlock = icBlockSpace ? icBlockSpace->at(b) : *filteredBlocks.at(b);
             int otherConnectionId = otherBlock.inputBlocks.empty() ? 0 : 1;
 
             pc->addConnection({
                     static_cast<block_id_t>(id),
-                    static_cast<connection_end_id_t>(0), // current connid will always be zero for inputs
+                    static_cast<connection_end_id_t>(t==BlockType::CUSTOM ? block->inputBlocks.size()-1 - i : 0), // current connid will always be zero for primative inputs
                     static_cast<block_id_t>(b),
-                    static_cast<connection_end_id_t>(otherConnectionId)
+                    static_cast<connection_end_id_t>(otherBlock.type == "IC"
+                         ? otherBlock.inputBlocks.size()+otherBlock.outputBlocks.size()-1 - std::distance(otherBlock.outputBlocks.begin(), std::find(otherBlock.outputBlocks.begin(),otherBlock.outputBlocks.end(), id)) // index that it appears is the port it goes to
+                         : otherConnectionId)
                     });
             // other connection end id will be an output for the other, connection id 0 if it doesn't have any inputs
         }
 
-        int outputConnId = !block->inputBlocks.empty();
+        int primativeOutputConnId = !block->inputBlocks.empty();
 
-        for (int b : block->outputBlocks){
+        for (i=0; i<block->outputBlocks.size(); ++i){
+            int b = block->outputBlocks[i];
             const OpenCircuitsBlockInfo& otherBlock = icBlockSpace ? icBlockSpace->at(b) : *filteredBlocks.at(b);
             pc->addConnection({
                     static_cast<block_id_t>(id),
-                    static_cast<connection_end_id_t>(outputConnId),
+                    static_cast<connection_end_id_t>(t==BlockType::CUSTOM ? block->inputBlocks.size()+block->outputBlocks.size()-1 - i : primativeOutputConnId),
                     static_cast<block_id_t>(b),
-                    static_cast<connection_end_id_t>(0) // outputs will always go to inputs
+                    static_cast<connection_end_id_t>(otherBlock.type == "IC"
+                         ? otherBlock.inputBlocks.size()-1 - std::distance(otherBlock.inputBlocks.begin(), std::find(otherBlock.inputBlocks.begin(),otherBlock.inputBlocks.end(), id)) // index that it appears is the port it goes to
+                         : 0) // 0 is always the input id for primatives
                     });
         }
     };
@@ -464,8 +478,8 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
         for (int port: itr->second.outputPorts){
             // todo
         }
-
-        outParsed->addDependency(std::to_string(icD), pc);
+        pc->setName("IC " + std::to_string(icD));
+        outParsed->addDependency(std::to_string(icD), pc, itr->second.inputPorts, itr->second.outputPorts, std::to_string(icD));
     }
 
     // use the filtered blocks and add them to parsed circuit. add connections between blocks to parsed circuit
@@ -490,7 +504,7 @@ void OpenCircuitsParser::printParsedData() {
 
         std::cout << " | Output Blocks: [ ";
         for (int outputId : p.second.outputBlocks) {
-            std::cout << outputId << ' ';
+            std::cout << outputId <<  ' ';
         }
         std::cout << "]\n";
 

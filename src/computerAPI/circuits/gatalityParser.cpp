@@ -47,7 +47,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fPath, "GatalityParser");
             if (load(fPath, dependency)){
-                outParsed->addDependency(importFileName, dependency);
+                outParsed->addDependency(importFileName, dependency, std::vector<int>(), std::vector<int>(), "");
                 outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
                 logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");
             }else{

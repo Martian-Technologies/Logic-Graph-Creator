@@ -205,12 +205,12 @@ void MainWindow::loadCircuit() {
         logInfo("Saved primary circuit: " + primaryNewCircuit->getSaveFilePath(), "FileLoading");
 
         // create new circuits for the dependencies
-        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second->getUUID())){
+        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
                 logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
                 continue;
             }
-            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second.first, Position());
         }
 	} else {
 		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
@@ -240,12 +240,12 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
     CircuitValidator validator(*parsed, backend.getBlockDataManager());
     if (parsed->isValid()){
         // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
-        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second->getUUID())){
+        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
                 logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
                 continue;
             }
-            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second.first, Position());
         }
 
 		circuitView->getToolManager().selectTool("preview placement tool");

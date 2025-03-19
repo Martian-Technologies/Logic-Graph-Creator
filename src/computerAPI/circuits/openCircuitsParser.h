@@ -43,7 +43,7 @@ public:
     // Filters and resolves across all blocks, even within the components of ICData's
     void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo*>& outFiltered);
     void resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::unordered_map<int,OpenCircuitsBlockInfo*>& allBlocks);
-    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::unordered_set<int>& outResolvedConnectionBlocks);
+    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::unordered_set<int>& outResolvedSet, std::vector<int>& orderedConnectionBlocks);
 
     void fillParsedCircuit(const std::unordered_map<int,OpenCircuitsBlockInfo*>& filteredBlocks);
     void printParsedData();
@@ -76,7 +76,7 @@ private:
         {"XNORGate", "XNOR"}, {"BUFGate", "BUFFER"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
         {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
         {"NOTGate", "NOR"}, // NOR for not
-        {"IC", "BUFFER"}, // IC will be buffer for now, until custom blocks
+        {"IC", "CUSTOM"},
     };
     const double posScale = 0.02;
 };

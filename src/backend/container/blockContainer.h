@@ -8,9 +8,9 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer(const BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+	inline BlockContainer(BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
 
-	inline const BlockDataManager* getBlockDataManager() const { return blockDataManager; }
+	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
@@ -84,7 +84,7 @@ private:
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
 
-	const BlockDataManager* blockDataManager;
+	BlockDataManager* blockDataManager;
 	block_id_t lastId;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;

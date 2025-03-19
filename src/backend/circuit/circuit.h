@@ -16,7 +16,7 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, const std::string& uuid, const std::string& name) :
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, const std::string& name, const std::string& uuid) :
         circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name) { }
 
 	inline const std::string& getUUID() const { return circuitUUID; }

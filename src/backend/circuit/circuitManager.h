@@ -9,8 +9,10 @@ class CircuitManager {
 public:
 	CircuitManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager) {}
 
-	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
+	inline BlockDataManager* getBlockDataManager() { return &blockDataManager; }
 	inline const CircuitBlockDataManager* getCircuitBlockDataManager() const { return &circuitBlockDataManager; }
+
+    inline void addBlockDataToCircuit(circuit_id_t id, BlockType blockType) { circuitBlockDataManager.newCircuitBlockData(id, blockType); }
 
 	inline BlockType setupBlockData(circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
@@ -54,9 +56,9 @@ public:
 		return iter->second;
 	}
 
-	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
+	inline circuit_id_t createNewCircuit(const std::string& name, const std::string& uuid) {
 		circuit_id_t id = getNewCircuitId();
-		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, uuid, name);
+		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, name, uuid);
         existingUUIDs.insert(uuid);
 		circuits.emplace(id, circuit);
 		for (auto& [object, func] : listenerFunctions) {

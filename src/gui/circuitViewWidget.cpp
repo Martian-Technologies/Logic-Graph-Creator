@@ -324,15 +324,29 @@ void CircuitViewWidget::load(const QString& filePath) {
         return;
     }
 
-    CircuitValidator validator(*parsed, back->getBlockDataManager()); // validate and dont merge dependencies
+    CircuitValidator validator(*parsed, back->getBlockDataManager());
     if (parsed->isValid()){
         // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
-        for (const std::pair<std::string, SharedParsedCircuit>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second->getUUID())){
+
+        CircuitManager& cirManager = back->getCircuitManager();
+        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
+            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
                 logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
                 continue;
             }
-            back->getCircuit(back->createCircuit())->tryInsertParsedCircuit(*dep.second, Position());
+            circuit_id_t custom = back->createCircuit(dep.second.first->getName());
+            for (BlockType blockType: dep.second.first->getCustomBlockTypes()){
+                // mark them within the circuit and link
+                cirManager.addBlockDataToCircuit(custom, blockType);
+            }
+
+            // place it as its own custom block
+            back->getCircuit(custom)->tryInsertParsedCircuit(*dep.second.first, Position());
+        }
+
+        circuit_id_t thisCircuit = circuitView->getCircuit()->getCircuitId();
+        for (BlockType blockType: parsed->getCustomBlockTypes()){
+            cirManager.addBlockDataToCircuit(thisCircuit, blockType);
         }
 
 		circuitView->getToolManager().selectTool("preview placement tool");
