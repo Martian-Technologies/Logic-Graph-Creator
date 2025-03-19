@@ -14,7 +14,7 @@ void ToolManager::selectBlock(BlockType blockType) {
 		if (blockPlacementTool) {
 			blockPlacementTool->selectBlock(blockType);
 		} else {
-			logError("BlockPlacementTool cast failed. Tool type should \"placement/placement\". Tool type is \"" + selectedTools[activeToolStack].first + "\"");
+			logError("BlockPlacementTool cast failed. Tool type should \"placement/placement\". Tool type is \"{}\"", "", selectedTools[activeToolStack].first);
 		}
 	}
 }
@@ -52,7 +52,7 @@ void ToolManager::selectTool(std::string toolName) {
 		else if (toolName == "connection/connection") instanceNewtool<ConnectionTool>(toolName, 0);
 		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>(toolName, 0);
 		else if (toolName == "interactive/state changer") instanceNewtool<LogicToucher>(toolName, 1);
-		else logError("Unknown tool name \"" + toolName + "\"");
+		else logError("Unknown tool name \"{}\"", "", toolName);
 	}
 }
 
