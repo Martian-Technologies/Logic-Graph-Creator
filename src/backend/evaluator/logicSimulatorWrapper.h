@@ -31,12 +31,23 @@ private:
 		std::vector<wrapper_gate_id_t> bufferOutputs;
 		std::vector<std::pair<simulator_gate_id_t, size_t>> externalInputs;
 		std::vector<std::pair<simulator_gate_id_t, size_t>> externalOutputs;
+		simulator_gate_id_t bufferGateId;
 	};
 	LogicSimulator logicSimulator;
 	std::vector<std::optional<simulator_gate_id_t>> wrapperToSimulatorGateIdMap;
 	std::vector<BufferGate> bufferGates;
 	std::unordered_set<wrapper_gate_id_t> allBufferGateIds;
-	bool decomissinedGatesExist;
+
+	BufferGate& getBufferGate(wrapper_gate_id_t gateId) {
+		auto it = std::find_if(bufferGates.begin(), bufferGates.end(), [gateId](const BufferGate& bg) {
+			return bg.gateId == gateId;
+			});
+		if (it != bufferGates.end()) {
+			return *it;
+		}
+		throw std::runtime_error("Buffer gate not found");
+	};
+	std::vector<wrapper_gate_id_t> findConnectedBufferGates(BufferGate& bufferGate);
 };
 
 #endif // logicSimulatorWrapper_h
