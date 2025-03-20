@@ -2,6 +2,7 @@
 #define difference_h
 
 #include "block/blockDefs.h"
+#include "../position/position.h"
 
 class Difference {
 	friend class BlockContainer;
