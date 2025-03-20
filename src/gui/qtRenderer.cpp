@@ -229,6 +229,13 @@ void QtRenderer::render(QPainter* painter) {
 		renderSelection(painter, selection.second.selection, selection.second.renderMode);
 	}
 	painter->restore();
+	painter->save();
+	for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
+		for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
+			drawText(painter, gridToQt(FPosition(x, y)+FVector(0.3f, 0.16f)), QString::fromStdString(Position(x, y).toString()), 15, QColor("#97A9E1"));
+		}
+	}
+	painter->restore();
 
 	lastFrameTime = timer.nsecsElapsed() / 1e6f;
 }
