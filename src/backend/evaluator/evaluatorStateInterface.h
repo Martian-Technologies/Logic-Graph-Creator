@@ -13,9 +13,15 @@ public:
 	}
 
 	inline logic_state_t getState(const Address& address) {
-		return evaluator ? evaluator->getState(address) : false;
+		return evaluator ? evaluator->getState(address) : logic_state_t::UNDEFINED;
+	}
+	inline bool getBoolState(const Address& address) {
+		return evaluator ? evaluator->getBoolState(address) : false;
 	}
 	inline void setState(const Address& address, logic_state_t state) {
+		if (evaluator) evaluator->setState(address, state);
+	}
+	inline void setState(const Address& address, bool state) {
 		if (evaluator) evaluator->setState(address, state);
 	}
 	inline std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) {

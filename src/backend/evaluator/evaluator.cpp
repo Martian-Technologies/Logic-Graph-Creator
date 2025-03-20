@@ -8,7 +8,7 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	usingTickrate(false),
 	circuitManager(circuitManager) {
 
-	setTickrate(40 * 60); // 1000000000 clocks / min
+	setTickrate(40 * 60);
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
@@ -56,12 +56,6 @@ void Evaluator::setUseTickrate(bool useTickrate) {
 
 long long int Evaluator::getRealTickrate() const {
 	return paused ? 0 : logicSimulator.getRealTickrate();
-}
-
-
-void Evaluator::runNTicks(unsigned long long n) {
-	// TODO: make this happen in the thread via leaky bucket
-	logicSimulator.simulateNTicks(n);
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
@@ -207,6 +201,10 @@ logic_state_t Evaluator::getState(const Address& address) {
 	return state;
 }
 
+bool Evaluator::getBoolState(const Address& address) {
+	return isHigh(getState(address));
+}
+
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses) {
 	std::vector<logic_state_t> states;
 	states.reserve(addresses.size());
@@ -218,7 +216,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		// check if the address is valid
 		const bool exists = addressTree.hasValue(address);
 		if (!exists) {
-			states.push_back(false);
+			states.push_back(logic_state_t::UNDEFINED);
 		} else {
 			const block_id_t blockId = addressTree.getValue(address);
 			states.push_back(logicSimulator.getState(blockId));

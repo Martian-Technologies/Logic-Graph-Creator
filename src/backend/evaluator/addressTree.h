@@ -54,7 +54,6 @@ public:
 
 	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position);
 
-	// Added const overload for getParentBranch
 	AddressTreeNode<T>& getParentBranch(const Address& address);
 	const AddressTreeNode<T>& getParentBranch(const Address& address) const;
 
