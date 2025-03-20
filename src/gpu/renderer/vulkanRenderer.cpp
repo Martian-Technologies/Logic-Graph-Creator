@@ -30,7 +30,7 @@ void VulkanRenderer::destroy() {
 	stop();
 	initialized = false;
 
-	frames.clear();
+	frames.clear(); // temp
 	destroySwapchain(swapchain);
 	chunkRenderer.destroy();
 	vkDestroyRenderPass(Vulkan::getDevice(), renderPass, nullptr);

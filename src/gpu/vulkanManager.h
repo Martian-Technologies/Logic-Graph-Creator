@@ -53,7 +53,7 @@ private:
 	std::mutex queueMutex;
 	std::vector<VkQueue> graphicsQueues;
 	std::vector<VkQueue> presentQueues;
-	// TODO - temporary round robin queue distributions
+	// queue distributions
 	int graphicsRoundRobin = 0;
 	int presentRoundRobin = 0;
 };
@@ -67,28 +67,21 @@ private:
 // resources (like queues). Each vulkan renderer will be in charge of managing
 // its own stuff.
 
-
 // VULKAN TODO -
-// - [x] New surface creation
-// - [x] Global vulkan state that handles instance/device
-//       - [x] Queue requests
-//       - [x] Memory allocation
-// - [x] Drawing with vertex buffers
-// - [x] Better buffer management
-// - [ ] Prototype block renderer with
-//       - [x] Push constant view matrix
-//       - [ ] Blocks and textures
+// - [ ] Vulkan chunker with wires - Chunk system should be abstracted somewaht (just also supports wires, move a few functions out)
+// - [ ] Block textures
+// - [ ] Basic effects
 
+// - [ ] Chunks are allocated on separate threads, buffer pooling that replaces GBJ
+// - [ ] Vertex generation
+// - [ ] More gradual chunking sync to allow more parallelism
+// - [ ] Staging Buffers
+// - [ ] 
+
+//
 // VULKAN IMPROVEMENTS -
-// - [ ] New object management scheme to play nicer with RAII and be more safe
-//       -  Possibly RAII?
-//       -  Possibly deletion queue
-//       -  Vulkan profiles
-//       -  Builder pattern (for pipeline at least)
-// - [ ] Staging buffers
-// - [ ] Vertex buffer chunking
+// - [ ] VkBootstrap, Vulkan HPP, Vulkan Profiles (RAII)
 // - [ ] Use dynamic rendering extension to simplify code
-// - [ ] generate vertices on the gpu
 // - [ ] Don't draw directly to swapchain
 // - [ ] Switch from singleton to top down design
 

@@ -7,17 +7,6 @@
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 
-// TODO -
-// Chunkchain should work (v^)
-// Thread safety for chunker (v^)
-// Chunk should handle differences elegantly (v^)
-// Chunk objects actually get added to frame data somehow (frame data RAII)
-// Chunk system should be abstracted somewaht/
-// Chunks are allocated on separate threads, buffer pooling that replaces GBJ
-// Ease up on sync
-// Profile which part of upload is taking longest
-// Staging buffer upload
-
 // TODO - not sure if this should be stored, maybe it would be faster to just
 // query from blockContainer sometimes. We also don't have to store the width
 // and height
