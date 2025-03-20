@@ -14,22 +14,24 @@
 #include "gate.h"
 #include "backend/container/block/blockDefs.h"
 
+typedef unsigned int simulator_gate_id_t;
+
 class LogicSimulator {
 public:
 	LogicSimulator();
 	~LogicSimulator();
 	void initialize();
 
-	block_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
+	simulator_gate_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
 
-	void connectGates(block_id_t sourceGate, size_t outputGroup, block_id_t targetGate, size_t inputGroup);
-	void connectGates(block_id_t sourceGate, block_id_t targetGate, size_t inputGroup = 0);
+	void connectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
+	void connectGates(simulator_gate_id_t sourceGate, simulator_gate_id_t targetGate, size_t inputGroup = 0);
 
-	void disconnectGates(block_id_t sourceGate, size_t outputGroup, block_id_t targetGate, size_t inputGroup);
-	void disconnectGates(block_id_t sourceGate, block_id_t targetGate, size_t inputGroup = 0);
+	void disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
+	void disconnectGates(simulator_gate_id_t sourceGate, simulator_gate_id_t targetGate, size_t inputGroup = 0);
 
-	void decomissionGate(block_id_t gate);
-	std::unordered_map<block_id_t, block_id_t> compressGates();
+	void decomissionGate(simulator_gate_id_t gate);
+	std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> compressGates();
 
 	void computeNextState();
 	void swapStates();
@@ -38,11 +40,11 @@ public:
 	void clearGates();
 	void reserveGates(unsigned int numGates);
 
-	void setState(block_id_t gate, size_t outputGroup, logic_state_t state);
-	void setState(block_id_t gate, logic_state_t state);
+	void setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state);
+	void setState(simulator_gate_id_t gate, logic_state_t state);
 
-	logic_state_t getState(block_id_t gate, size_t outputGroup) const;
-	logic_state_t getState(block_id_t gate) const;
+	logic_state_t getState(simulator_gate_id_t gate, size_t outputGroup) const;
+	logic_state_t getState(simulator_gate_id_t gate) const;
 
 	void debugPrint();
 	void signalToPause();

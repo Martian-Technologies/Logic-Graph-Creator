@@ -1,8 +1,5 @@
 #include <stdexcept>
 #include <chrono>
-#include <iostream>
-#include <algorithm>
-#include <functional>
 
 #include "logicSimulator.h"
 
