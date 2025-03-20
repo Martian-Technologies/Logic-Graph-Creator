@@ -25,10 +25,8 @@ public:
 	simulator_gate_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
 
 	void connectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
-	void connectGates(simulator_gate_id_t sourceGate, simulator_gate_id_t targetGate, size_t inputGroup = 0);
 
 	void disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
-	void disconnectGates(simulator_gate_id_t sourceGate, simulator_gate_id_t targetGate, size_t inputGroup = 0);
 
 	void decomissionGate(simulator_gate_id_t gate);
 	std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> compressGates();
@@ -41,10 +39,8 @@ public:
 	void reserveGates(unsigned int numGates);
 
 	void setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state);
-	void setState(simulator_gate_id_t gate, logic_state_t state);
 
 	logic_state_t getState(simulator_gate_id_t gate, size_t outputGroup) const;
-	logic_state_t getState(simulator_gate_id_t gate) const;
 
 	void debugPrint();
 	void signalToPause();

@@ -134,7 +134,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const auto inputAddress = inputAddresses[i];
 				const wrapper_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
 				const wrapper_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
-				logicSimulatorWrapper.disconnectGates(outputBlockId, inputBlockId);
+				logicSimulatorWrapper.disconnectGates(outputBlockId, 0, inputBlockId, 0); // TODO: 0 temp
 			}
 			break;
 		}
@@ -148,7 +148,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const auto inputAddress = inputAddresses[i];
 				const wrapper_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
 				const wrapper_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
-				logicSimulatorWrapper.connectGates(outputBlockId, inputBlockId);
+				logicSimulatorWrapper.connectGates(outputBlockId, 0, inputBlockId, 0); // TODO: 0 temp
 			}
 			break;
 		}
@@ -190,7 +190,7 @@ logic_state_t Evaluator::getState(const Address& address) {
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
 	}
-	const logic_state_t state = logicSimulatorWrapper.getState(blockId);
+	const logic_state_t state = logicSimulatorWrapper.getState(blockId, 0); // TODO: 0 temp
 	if (!paused) {
 		logicSimulatorWrapper.signalToProceed();
 	}
@@ -215,7 +215,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 			states.push_back(logic_state_t::UNDEFINED);
 		} else {
 			const wrapper_gate_id_t blockId = addressTree.getValue(address);
-			states.push_back(logicSimulatorWrapper.getState(blockId));
+			states.push_back(logicSimulatorWrapper.getState(blockId, 0)); // TODO: 0 temp
 		}
 	}
 	if (!paused) {
@@ -230,7 +230,7 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
 	}
-	logicSimulatorWrapper.setState(blockId, state);
+	logicSimulatorWrapper.setState(blockId, 0, state); // TODO: 0 temp
 	if (!paused) {
 		logicSimulatorWrapper.signalToProceed();
 	}

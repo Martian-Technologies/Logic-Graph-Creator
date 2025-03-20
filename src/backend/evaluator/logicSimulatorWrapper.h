@@ -25,7 +25,18 @@ public:
 	void setTargetTickrate(unsigned long long tickrate) { logicSimulator.setTargetTickrate(tickrate); }
 	void triggerNextTickReset() {logicSimulator.triggerNextTickReset();}
 private:
+	struct BufferGate {
+		wrapper_gate_id_t gateId;
+		std::vector<wrapper_gate_id_t> bufferInputs;
+		std::vector<wrapper_gate_id_t> bufferOutputs;
+		std::vector<std::pair<simulator_gate_id_t, size_t>> externalInputs;
+		std::vector<std::pair<simulator_gate_id_t, size_t>> externalOutputs;
+	};
 	LogicSimulator logicSimulator;
+	std::vector<std::optional<simulator_gate_id_t>> wrapperToSimulatorGateIdMap;
+	std::vector<BufferGate> bufferGates;
+	std::unordered_set<wrapper_gate_id_t> allBufferGateIds;
+	bool decomissinedGatesExist;
 };
 
 #endif // logicSimulatorWrapper_h

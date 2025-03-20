@@ -43,7 +43,7 @@ void LogicSimulator::initialize() {
 	}
 }
 
-block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
+simulator_gate_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
 	if (allowSubstituteDecomissioned && numDecomissioned > 0) {
@@ -60,8 +60,8 @@ block_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstitut
 	return gates.size() - 1;
 }
 
-void LogicSimulator::connectGates(block_id_t sourceGate, size_t outputGroup,
-								 block_id_t targetGate, size_t inputGroup) {
+void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
+								 simulator_gate_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
 	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid())
@@ -89,12 +89,8 @@ void LogicSimulator::connectGates(block_id_t sourceGate, size_t outputGroup,
 	gates[sourceGate].outputGroups[outputGroup].emplace_back(targetGate, inputGroup);
 }
 
-void LogicSimulator::connectGates(block_id_t sourceGate, block_id_t targetGate, size_t inputGroup) {
-	connectGates(sourceGate, 0, targetGate, inputGroup);
-}
-
-void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
-	block_id_t targetGate, size_t inputGroup) {
+void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
+	simulator_gate_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
 	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid())
@@ -117,7 +113,7 @@ void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
 	// auto& outputs = gates[sourceGate].outputGroups[outputGroup];
 	// outputs.erase(
 	// 	std::remove_if(outputs.begin(), outputs.end(),
-	// 		[targetGate, inputGroup](const std::pair<block_id_t, size_t>& conn) {
+	// 		[targetGate, inputGroup](const std::pair<simulator_gate_id_t, size_t>& conn) {
 	// 			return conn.first == targetGate && conn.second == inputGroup;
 	// 		}),
 	// 	outputs.end()
@@ -134,7 +130,7 @@ void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
 	}
 	auto& outputs = gates[sourceGate].outputGroups[outputGroup];
 	auto it2 = std::find_if(outputs.begin(), outputs.end(),
-		[targetGate, inputGroup](const std::pair<block_id_t, size_t>& conn) {
+		[targetGate, inputGroup](const std::pair<simulator_gate_id_t, size_t>& conn) {
 			return conn.first == targetGate && conn.second == inputGroup;
 		});
 	if (it2 != outputs.end()) {
@@ -142,11 +138,7 @@ void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
 	}
 }
 
-void LogicSimulator::disconnectGates(block_id_t sourceGate, block_id_t targetGate, size_t inputGroup) {
-	disconnectGates(sourceGate, 0, targetGate, inputGroup);
-}
-
-void LogicSimulator::decomissionGate(block_id_t gate) {
+void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
 		throw std::out_of_range("decomissionGate: gate index out of range or already decommissioned");
@@ -155,7 +147,7 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
 		auto& inputGroup = gates[gate].inputGroups[groupIdx];
 
 		for (auto& inputConn : inputGroup) {
-			block_id_t inputGate = inputConn.gateId;
+			simulator_gate_id_t inputGate = inputConn.gateId;
 			size_t outputGroup = inputConn.outputGroup;
 
 			if (inputGate < 0 || inputGate >= gates.size() || !gates[inputGate].isValid())
@@ -166,7 +158,7 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
 
 				outputList.erase(
 					std::remove_if(outputList.begin(), outputList.end(),
-						[gate, groupIdx](const std::pair<block_id_t, size_t>& conn) {
+						[gate, groupIdx](const std::pair<simulator_gate_id_t, size_t>& conn) {
 							return conn.first == gate && conn.second == groupIdx;
 						}),
 					outputList.end()
@@ -180,7 +172,7 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
 		auto& outputGroup = gates[gate].outputGroups[outGroupIdx];
 
 		for (const auto& connection : outputGroup) {
-			block_id_t outputGate = connection.first;
+			simulator_gate_id_t outputGate = connection.first;
 			size_t inputGroupIdx = connection.second;
 
 			if (outputGate < 0 || outputGate >= gates.size() || !gates[outputGate].isValid())
@@ -209,9 +201,9 @@ void LogicSimulator::decomissionGate(block_id_t gate) {
 	++numDecomissioned;
 }
 
-std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
+std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::compressGates() {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-	std::unordered_map<block_id_t, block_id_t> gateMap;
+	std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> gateMap;
 	int newGateIndex = 0;
 
 	for (size_t i = 0; i < gates.size(); ++i) {
@@ -487,7 +479,7 @@ void LogicSimulator::swapStates() {
 	}
 }
 
-void LogicSimulator::setState(block_id_t gate, size_t outputGroup, logic_state_t state) {
+void LogicSimulator::setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
 		throw std::out_of_range("setState: gate index out of range or invalid");
@@ -497,10 +489,6 @@ void LogicSimulator::setState(block_id_t gate, size_t outputGroup, logic_state_t
 
 	gates[gate].statesA[outputGroup] = state;
 	gates[gate].statesB[outputGroup] = state;
-}
-
-void LogicSimulator::setState(block_id_t gate, logic_state_t state) {
-	setState(gate, 0, state);
 }
 
 void LogicSimulator::clearGates() {
@@ -514,7 +502,7 @@ void LogicSimulator::reserveGates(unsigned int numGates) {
 	gates.reserve(numGates);
 }
 
-logic_state_t LogicSimulator::getState(block_id_t gate, size_t outputGroup) const {
+logic_state_t LogicSimulator::getState(simulator_gate_id_t gate, size_t outputGroup) const {
 	std::shared_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
 		throw std::out_of_range("getState: gate index out of range or invalid");
@@ -523,10 +511,6 @@ logic_state_t LogicSimulator::getState(block_id_t gate, size_t outputGroup) cons
 		throw std::out_of_range("getState: outputGroup index out of range");
 
 	return gates[gate].statesA[outputGroup];
-}
-
-logic_state_t LogicSimulator::getState(block_id_t gate) const {
-	return getState(gate, 0);
 }
 
 std::vector<std::vector<logic_state_t>> LogicSimulator::getCurrentState() const {
