@@ -51,6 +51,10 @@ public:
 	void setTargetTickrate(unsigned long long tickrate);
 	void triggerNextTickReset();
 
+	int getDecomissionedCount() const {
+		return numDecomissioned;
+	}
+
 private:
 	std::vector<Gate> gates;
 	int numDecomissioned;

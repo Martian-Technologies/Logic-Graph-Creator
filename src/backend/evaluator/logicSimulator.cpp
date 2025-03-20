@@ -268,6 +268,10 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	switch (gate.type) {
 	case GateType::AND:
 	{
+		if (gate.inputGroups[0].size() == 0) {
+			gate.statesB[0] = logic_state_t::LOW;
+			return;
+		}
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
 			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
@@ -361,6 +365,10 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	}
 	case GateType::NOR:
 	{
+		if (gate.inputGroups[0].size() == 0) {
+			gate.statesB[0] = logic_state_t::LOW;
+			return;
+		}
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
 			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
@@ -385,6 +393,10 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	}
 	case GateType::XNOR:
 	{
+		if (gate.inputGroups[0].size() == 0) {
+			gate.statesB[0] = logic_state_t::LOW;
+			return;
+		}
 		bool hasHighInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
 			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];

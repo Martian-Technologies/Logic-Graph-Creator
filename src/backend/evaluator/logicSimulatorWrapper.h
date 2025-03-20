@@ -18,7 +18,7 @@ public:
 	void setState(wrapper_gate_id_t gateId, size_t outputGroup, logic_state_t state);
 
 	void signalToPause() { logicSimulator.signalToPause(); }
-	void signalToProceed() { logicSimulator.signalToProceed(); }
+	void signalToProceed();
 	bool threadIsWaiting() const { return logicSimulator.threadIsWaiting(); }
 
 	long long int getRealTickrate() const { return logicSimulator.getRealTickrate(); }
@@ -48,6 +48,9 @@ private:
 		throw std::runtime_error("Buffer gate not found");
 	};
 	std::vector<wrapper_gate_id_t> findConnectedBufferGates(BufferGate& bufferGate);
+	void recreateBuffers(std::vector<wrapper_gate_id_t>& allBufferGateIdsToRemake);
+
+	void debugPrintBufferGates();
 };
 
 #endif // logicSimulatorWrapper_h
