@@ -54,17 +54,14 @@ void ChunkChain::updateAllocation() {
 		currentlyAllocating = newAllocation;
 
 	}
-	else { // we have no data to upload
-		// drop currently allocating, sent to gay baby jail
+	else { // if we have no data to upload
+		// drop currently allocating, send to gay baby jail
 		if (currentlyAllocating.has_value()) {
 			gbJail.push_back(currentlyAllocating.value());
 		}
 		currentlyAllocating.reset();
 
-		// drop newest allocation, send to gay baby jail
-		if (newestAllocation.has_value()) {
-			gbJail.push_back(newestAllocation.value());
-		}
+		// drop newest allocation
 		newestAllocation.reset();
 	}
 	
@@ -74,7 +71,6 @@ void ChunkChain::updateAllocation() {
 std::optional<std::shared_ptr<VulkanChunkAllocation>> ChunkChain::getAllocation() {
 	// if the buffer has finished allocating, replace the newest with it
 	if (currentlyAllocating.has_value() && currentlyAllocating.value()->isAllocationComplete()) {
-		if (newestAllocation.has_value()) gbJail.push_back(newestAllocation.value());
 		newestAllocation = currentlyAllocating;
 		currentlyAllocating.reset();
 	}
@@ -89,7 +85,7 @@ void ChunkChain::annihilateOrphanGBs() {
 	// erase all GBs that are complete and not pointed to
 	auto itr = gbJail.begin();
 	while (itr != gbJail.end()) {
-		if (itr->use_count() <= 1 && (*itr)->isAllocationComplete()) {
+		if ((*itr)->isAllocationComplete()) {
 			itr = gbJail.erase(itr);
 		}
 		else itr++;

@@ -31,14 +31,14 @@ void VulkanChunkRenderer::updateCircuit(DifferenceSharedPtr diff) {
 	chunker.updateCircuit(diff);
 }
 
-void VulkanChunkRenderer::render(FrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
+void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
 	// bind render pipeline
-	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+	vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 		
 	// bind push constants
 	ViewPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
-	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+	vkCmdPushConstants(frame.getMainCommandBuffer(), pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
 
 	// set dynamic state
 	VkViewport viewport{};
@@ -48,22 +48,22 @@ void VulkanChunkRenderer::render(FrameData& frame, VkExtent2D& renderExtent, con
 	viewport.height = static_cast<float>(renderExtent.height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewport);
+	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
 	scissor.extent = renderExtent;
-	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
+	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
 
 	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunker.getAllocations(viewBounds.first.snap(), viewBounds.second.snap())) {
 		// save chunk data to frame
-		frame.usingChunkAllocations.push_back(chunk);
+		frame.getChunkAllocations().push_back(chunk);
 		
 		// bind vertex buffers
 		VkBuffer vertexBuffers[] = { chunk->getBuffer().buffer };
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
 
 		// draw
-		vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumVertices()), 1, 0, 0);
+		vkCmdDraw(frame.getMainCommandBuffer(), static_cast<uint32_t>(chunk->getNumVertices()), 1, 0, 0);
 	}
 }

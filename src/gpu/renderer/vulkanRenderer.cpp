@@ -11,7 +11,9 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 
 	// set up swapchain
 	swapchain = createSwapchain(surface, dynamicData.windowWidth, dynamicData.windowHeight);
-	createFrameDatas(frames, FRAME_OVERLAP);
+
+	// set up frames
+	frames.resize(2);
 	
 	// create render pass and framebuffers
 	createRenderPass(swapchain);
@@ -26,11 +28,10 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 
 void VulkanRenderer::destroy() {
 	stop();
-
 	initialized = false;
 
+	frames.clear();
 	destroySwapchain(swapchain);
-	destroyFrameDatas(frames, FRAME_OVERLAP);
 	chunkRenderer.destroy();
 	vkDestroyRenderPass(Vulkan::getDevice(), renderPass, nullptr);
 }
@@ -100,12 +101,10 @@ void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
 
 void VulkanRenderer::renderLoop() {
 	while(running) {
-		FrameData& frame = getCurrentFrame();
-		
-		// wait until current frame has finished rendering
-		vkWaitForFences(Vulkan::getDevice(), 1, &frame.renderFence, VK_TRUE, UINT64_MAX);
-		// update frame time with newest frame completion
-		lastFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - frame.lastStartTime).count();
+		VulkanFrameData& frame = getCurrentFrame();
+
+		// wait for frame completion
+		lastFrameTime = frame.waitAndComplete();
 
 		// recreate swapchain if needed
 		if (swapchainRecreationNeeded) {
@@ -116,7 +115,7 @@ void VulkanRenderer::renderLoop() {
 		// try to start rendering the frame
 		// get next swapchain image to render to (or fail and try again)
 		uint32_t imageIndex;
-		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(Vulkan::getDevice(), swapchain.handle, UINT64_MAX, frame.getSwapchainSemaphore(), VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
 			// if the swapchain is not ideal, try again but recreate it this time (this happens in normal operation)
 			swapchainRecreationNeeded = true;
@@ -127,17 +126,15 @@ void VulkanRenderer::renderLoop() {
 			continue;
 		}
 		
-		// reset render fence (we are actually rendering this frame)
-		vkResetFences(Vulkan::getDevice(), 1, &frame.renderFence);
-		// update frame start time
-		frame.lastStartTime = std::chrono::system_clock::now();
+		// tell frame that it is started
+		frame.start();
 
 		// get queues
 		VkQueue& graphicsQueue = Vulkan::getSingleton().requestGraphicsQueue();
 		VkQueue& presentQueue = Vulkan::getSingleton().requestPresentQueue();
 
 		// record command buffer
-		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
+		vkResetCommandBuffer(frame.getMainCommandBuffer(), 0);
 		recordCommandBuffer(frame, imageIndex);
 
 		// start setting up submission
@@ -145,7 +142,7 @@ void VulkanRenderer::renderLoop() {
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 		// wait semaphore
-		VkSemaphore waitSemaphores[] = { frame.swapchainSemaphore };
+		VkSemaphore waitSemaphores[] = { frame.getSwapchainSemaphore() };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
@@ -153,15 +150,15 @@ void VulkanRenderer::renderLoop() {
 		
 		// command buffers
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &frame.mainCommandBuffer;
+		submitInfo.pCommandBuffers = &frame.getMainCommandBuffer();
 
 		// signal semaphores
-		VkSemaphore signalSemaphores[] = { frame.renderSemaphore };
+		VkSemaphore signalSemaphores[] = { frame.getRenderSemaphore() };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
-		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
+		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.getRenderFence()) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 		
@@ -191,13 +188,13 @@ void VulkanRenderer::renderLoop() {
 	vkDeviceWaitIdle(Vulkan::getDevice());
 }
 
-void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) {
+void VulkanRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
 	// start recording
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
-	if (vkBeginCommandBuffer(frame.mainCommandBuffer, &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(frame.getMainCommandBuffer(), &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 
@@ -213,14 +210,14 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 	
-	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// render all renderers
 	chunkRenderer.render(frame, swapchain.extent, dynamicData.viewMat, dynamicData.viewBounds);
 
 	// end
-	vkCmdEndRenderPass(frame.mainCommandBuffer);
-	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
+	vkCmdEndRenderPass(frame.getMainCommandBuffer());
+	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }

@@ -45,7 +45,7 @@ public:
 	void initialize(VkRenderPass& renderPass);
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
-	void render(FrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
+	void render(VulkanFrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
 	void destroy();
 
 private:

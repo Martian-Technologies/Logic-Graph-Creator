@@ -40,7 +40,7 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 		break;
 	}
 
-	//and output to the log file
+	// and output to the log file
 	outputFileStream << "[" << categoryText << "] " << message << "\n";
 	outputFileStream.flush();
 }

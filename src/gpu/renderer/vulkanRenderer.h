@@ -16,7 +16,7 @@
 
 // TODO - proper swapchain recreation (old swapchain + recreate and check)
 
-constexpr unsigned int FRAME_OVERLAP = 2;
+constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 
 class VulkanRenderer : public Renderer {
 public:
@@ -42,7 +42,7 @@ public:
 
 private:
 	void recreateSwapchain();
-	void recordCommandBuffer(FrameData& frame, uint32_t imageIndex);
+	void recordCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);
 	void createRenderPass(SwapchainData& swapchain);
 	
 private:
@@ -68,7 +68,7 @@ private:
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
 	SwapchainData swapchain;
-	FrameData frames[FRAME_OVERLAP];
+	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)
 
 	// sub renderers
 	VulkanChunkRenderer chunkRenderer;
@@ -79,7 +79,7 @@ private:
 
 	// frame counting
 	int frameNumber = 0;
-	inline FrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAME_OVERLAP]; };
+	inline VulkanFrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAMES_IN_FLIGHT]; };
 
 private:
 	// elements
