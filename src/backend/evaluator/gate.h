@@ -43,7 +43,7 @@ inline const GateTypeConfig& getGateTypeConfig(GateType type) {
 		{GateType::DEFAULT_RETURN_CURRENTSTATE, GateTypeConfig(1, 1)},
 		{GateType::TICK_INPUT, GateTypeConfig(0, 1)},
 		{GateType::CONSTANT_ON, GateTypeConfig(0, 1)},
-		{GateType::POOL, GateTypeConfig(1, 1)},
+		{GateType::BUFFER, GateTypeConfig(1, 1)},
 		{GateType::TRISTATE_BUFFER, GateTypeConfig(2, 1)},
 		{GateType::TRISTATE_BUFFER_INVERTED, GateTypeConfig(2, 1)}
 	};

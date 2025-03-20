@@ -77,7 +77,7 @@ private:
 	void tickrateMonitor();
 
 	void computeGateStates(Gate& gate);
-	void computePoolStates(Gate& gate);
+	void computeBufferStates(Gate& gate);
 };
 
 #endif // logicSimulator_h

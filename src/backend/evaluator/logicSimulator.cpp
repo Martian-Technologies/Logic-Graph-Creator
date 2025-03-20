@@ -79,11 +79,14 @@ void LogicSimulator::connectGates(block_id_t sourceGate, size_t outputGroup,
 
 	GateConnection connection(sourceGate, outputGroup);
 
-	for (const auto& existingConn : gates[targetGate].inputGroups[inputGroup]) {
-		if (existingConn == connection) {
-			return;
-		}
-	}
+	// for (const auto& existingConn : gates[targetGate].inputGroups[inputGroup]) {
+	// 	if (existingConn == connection) {
+	// 		return;
+	// 	}
+	// }
+
+	// allowing multiple copies of the same connection for buffer purposes
+	// ex. in eval, if two buffers part of the same pool are connected to the same gate
 
 	gates[targetGate].inputGroups[inputGroup].push_back(connection);
 	gates[sourceGate].outputGroups[outputGroup].emplace_back(targetGate, inputGroup);
@@ -94,7 +97,7 @@ void LogicSimulator::connectGates(block_id_t sourceGate, block_id_t targetGate, 
 }
 
 void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
-									block_id_t targetGate, size_t inputGroup) {
+	block_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
 	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid())
@@ -108,20 +111,38 @@ void LogicSimulator::disconnectGates(block_id_t sourceGate, size_t outputGroup,
 
 	GateConnection connection(sourceGate, outputGroup);
 
-	auto& inputs = gates[targetGate].inputGroups[inputGroup];
-	inputs.erase(
-		std::remove(inputs.begin(), inputs.end(), connection),
-		inputs.end()
-	);
+	// auto& inputs = gates[targetGate].inputGroups[inputGroup];
+	// inputs.erase(
+	// 	std::remove(inputs.begin(), inputs.end(), connection),
+	// 	inputs.end()
+	// );
 
+	// auto& outputs = gates[sourceGate].outputGroups[outputGroup];
+	// outputs.erase(
+	// 	std::remove_if(outputs.begin(), outputs.end(),
+	// 		[targetGate, inputGroup](const std::pair<block_id_t, size_t>& conn) {
+	// 			return conn.first == targetGate && conn.second == inputGroup;
+	// 		}),
+	// 	outputs.end()
+	// );
+
+	// only delete the first instance of the connection if it exists
+	auto& inputs = gates[targetGate].inputGroups[inputGroup];
+	auto it = std::find_if(inputs.begin(), inputs.end(),
+		[&connection](const GateConnection& conn) {
+			return conn.gateId == connection.gateId && conn.outputGroup == connection.outputGroup;
+		});
+	if (it != inputs.end()) {
+		inputs.erase(it);
+	}
 	auto& outputs = gates[sourceGate].outputGroups[outputGroup];
-	outputs.erase(
-		std::remove_if(outputs.begin(), outputs.end(),
-			[targetGate, inputGroup](const std::pair<block_id_t, size_t>& conn) {
-				return conn.first == targetGate && conn.second == inputGroup;
-			}),
-		outputs.end()
-	);
+	auto it2 = std::find_if(outputs.begin(), outputs.end(),
+		[targetGate, inputGroup](const std::pair<block_id_t, size_t>& conn) {
+			return conn.first == targetGate && conn.second == inputGroup;
+		});
+	if (it2 != outputs.end()) {
+		outputs.erase(it2);
+	}
 }
 
 void LogicSimulator::disconnectGates(block_id_t sourceGate, block_id_t targetGate, size_t inputGroup) {
@@ -231,7 +252,7 @@ std::unordered_map<block_id_t, block_id_t> LogicSimulator::compressGates() {
 	return gateMap;
 }
 
-void LogicSimulator::computePoolStates(Gate& gate) {
+void LogicSimulator::computeBufferStates(Gate& gate) {
 	logic_state_t state = logic_state_t::FLOATING;
 	for (const auto& conn : gate.inputGroups[0]) {
 		logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
@@ -448,12 +469,12 @@ void LogicSimulator::computeNextState() {
 	std::shared_lock<std::shared_mutex> lock(simulationMutex);
 
 	for (auto& gate : gates) {
-		if (gate.type == GateType::POOL) {
-			computePoolStates(gate);
+		if (gate.type == GateType::BUFFER) {
+			computeBufferStates(gate);
 		}
 	}
 	for (auto& gate : gates) {
-		if (gate.isValid() && gate.type != GateType::POOL) {
+		if (gate.isValid() && gate.type != GateType::BUFFER) {
 			computeGateStates(gate);
 		}
 	}
