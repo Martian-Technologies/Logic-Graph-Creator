@@ -1,5 +1,5 @@
-#ifndef vulkanBlockRenderer_h
-#define vulkanBlockRenderer_h
+#ifndef vulkanChunkRenderer_h
+#define vulkanChunkRenderer_h
 
 #include "gpu/renderer/vulkanFrame.h"
 #include "gpu/vulkanManager.h"
@@ -40,12 +40,12 @@ struct BlockVertex {
 	}
 };
 
-class VulkanBlockRenderer {
+class VulkanChunkRenderer {
 public:
 	void initialize(VkRenderPass& renderPass);
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
-	void render(VkCommandBuffer& commandBuffer, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
+	void render(FrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
 	void destroy();
 
 private:

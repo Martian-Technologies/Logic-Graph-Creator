@@ -11,10 +11,9 @@
 // Chunkchain should work (v^)
 // Thread safety for chunker (v^)
 // Chunk should handle differences elegantly (v^)
-// Chunk objects actually get added to frame data somehow
-// Better GBJ management
-// Chunks are allocated on separate threads, buffer pooling
-// Chunk system should be abstracted
+// Chunk objects actually get added to frame data somehow (frame data RAII)
+// Chunk system should be abstracted somewaht/
+// Chunks are allocated on separate threads, buffer pooling that replaces GBJ
 // Ease up on sync
 // Profile which part of upload is taking longest
 // Staging buffer upload

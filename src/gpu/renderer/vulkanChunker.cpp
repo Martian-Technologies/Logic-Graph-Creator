@@ -1,6 +1,6 @@
 #include "vulkanChunker.h"
 
-#include "gpu/renderer/vulkanBlockRenderer.h"
+#include "gpu/renderer/vulkanChunkRenderer.h"
 #include "gpu/vulkanManager.h"
 
 // VulkanChunkAllocation
@@ -12,15 +12,21 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 	
 	// Generate vertices
 	std::vector<BlockVertex> vertices;
-	vertices.reserve(blocks.size() * 3);
+	vertices.reserve(blocks.size() * 6);
 	for (const auto& block : blocks) {
 		Position blockPosition = block.first;
 		BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {0.0f, 0.0f, 1.0f}};
 		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, {0.0f, 1.0f, 0.0f}};
 		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+		BlockVertex v4 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+		BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+		BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {1.0f, 0.0f, 0.0f}};
 		vertices.push_back(v1);
 		vertices.push_back(v2);
 		vertices.push_back(v3);
+		vertices.push_back(v4);
+		vertices.push_back(v5);
+		vertices.push_back(v6);
 	}
 
 	// upload vertices to buffer
@@ -80,7 +86,6 @@ std::optional<std::shared_ptr<VulkanChunkAllocation>> ChunkChain::getAllocation(
 }
 
 void ChunkChain::annihilateOrphanGBs() {
-	return;
 	// erase all GBs that are complete and not pointed to
 	auto itr = gbJail.begin();
 	while (itr != gbJail.end()) {

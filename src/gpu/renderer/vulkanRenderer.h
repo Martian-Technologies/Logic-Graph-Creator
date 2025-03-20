@@ -3,7 +3,7 @@
 
 #include "backend/circuitView/renderer/renderer.h"
 
-#include "vulkanBlockRenderer.h"
+#include "vulkanChunkRenderer.h"
 #include "vulkanSwapchain.h"
 #include "vulkanFrame.h"
 
@@ -48,7 +48,6 @@ private:
 private:
 	struct DynamicData {
 		int windowWidth, windowHeight;
-	
 		glm::mat4 viewMat = glm::mat4(1.0f);
 		std::pair<FPosition, FPosition> viewBounds;
 	};
@@ -72,7 +71,7 @@ private:
 	FrameData frames[FRAME_OVERLAP];
 
 	// sub renderers
-	VulkanBlockRenderer blockRenderer;
+	VulkanChunkRenderer chunkRenderer;
 
 	// render loop
 	std::thread renderThread;

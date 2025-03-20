@@ -18,7 +18,7 @@ void VulkanRenderer::initialize(VkSurfaceKHR surface, int w, int h)
 	createSwapchainFramebuffers(swapchain, renderPass);
 
 	// create pipeline
-	blockRenderer.initialize(renderPass);
+	chunkRenderer.initialize(renderPass);
 	
 	initialized = true;
 	logInfo("Renderer initialized", "Vulkan");
@@ -31,7 +31,7 @@ void VulkanRenderer::destroy() {
 
 	destroySwapchain(swapchain);
 	destroyFrameDatas(frames, FRAME_OVERLAP);
-	blockRenderer.destroy();
+	chunkRenderer.destroy();
 	vkDestroyRenderPass(Vulkan::getDevice(), renderPass, nullptr);
 }
 
@@ -79,7 +79,7 @@ void VulkanRenderer::updateView(ViewManager* viewManager) {
 
 void VulkanRenderer::setCircuit(Circuit* circuit) {
 	// no fancy synchronization needed, that's what the buffer ring is for
-	blockRenderer.setCircuit(circuit);
+	chunkRenderer.setCircuit(circuit);
 		
 	if (circuit) {
 		logInfo("Renderer circuit assigned and setup", "Vulkan");
@@ -91,7 +91,7 @@ void VulkanRenderer::setCircuit(Circuit* circuit) {
 
 void VulkanRenderer::updateCircuit(DifferenceSharedPtr diff) {
 	// no fancy synchronization needed, that's what the buffer ring is for	
-	blockRenderer.updateCircuit(diff);
+	chunkRenderer.updateCircuit(diff);
 }
 
 void VulkanRenderer::setEvaluator(Evaluator* evaluator) {
@@ -216,7 +216,7 @@ void VulkanRenderer::recordCommandBuffer(FrameData& frame, uint32_t imageIndex) 
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// render all renderers
-	blockRenderer.render(frame.mainCommandBuffer, swapchain.extent, dynamicData.viewMat, dynamicData.viewBounds);
+	chunkRenderer.render(frame, swapchain.extent, dynamicData.viewMat, dynamicData.viewBounds);
 
 	// end
 	vkCmdEndRenderPass(frame.mainCommandBuffer);
