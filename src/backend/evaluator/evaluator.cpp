@@ -183,6 +183,7 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
 	case BlockType::LIGHT: return GateType::OR;
+	case BlockType::BUFFER: return GateType::BUFFER;
 	default: return GateType::NONE;
 	}
 }
