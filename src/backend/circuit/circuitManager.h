@@ -19,7 +19,7 @@ public:
 		BlockType blockType = blockDataManager.addBlock();
 		auto blockData = blockDataManager.getBlockData(blockType);
 		if (!blockData) {
-			logError("Did not find newly created block data with block type: " + std::to_string(blockType), "CircuitManager");
+			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
 			return BlockType::NONE;
 		}
 		blockData->setDefaultData(false);

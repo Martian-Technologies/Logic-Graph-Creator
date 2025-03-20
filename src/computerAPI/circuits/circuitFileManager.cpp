@@ -89,17 +89,17 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedC
 
     std::ifstream inputFile(path);
     if (!inputFile.is_open()) {
-        logError("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: {}", "FileManager", path);
         return false;
     }
 
     if (!loadedFiles.insert(path).second){
         inputFile.close();
-        logWarning(path + " is already added as a dependency", "FileManager");
+        logWarning("{} is already added as a dependency", "FileManager", path);
         return false;
     }
 
-    logInfo("Inserted current file as a dependency: " + path, "FileManager");
+    logInfo("Inserted current file as a dependency: {}", "FileManager", path);
 
     std::string token;
     char cToken;
@@ -123,26 +123,26 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedC
 
             QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
-            logInfo("File to access: " + fullPath.toStdString(), "FileManager");
+            logInfo("File to access: {}", "FileManager", fullPath.toStdString());
             if (loadFromFile(fullPath.toStdString(), dependency)){
                 outParsed->addDependency(importFileName, dependency);
                 outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
-                logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "FileManager");
+                logInfo("Loaded dependency circuit: {} ({})", "FileManager", dependency->getName(), dependency->getUUID());
             }else{
-                logError("Failed to import dependency: " + importFileName, "FileManager");
+                logError("Failed to import dependency: {}", "FileManager", importFileName);
             }
             continue;
         } else if (token == "Circuit:") {
             std::string circuitName;
             inputFile >> std::quoted(circuitName);
             outParsed->setName(circuitName);
-            logInfo("\tSet circuit: " + circuitName, "FileManager");
+            logInfo("\tSet circuit: {}", "FileManager", circuitName);
             continue;
         } else if (token == "UUID:") {
             std::string uuid;
             inputFile >> uuid;
             outParsed->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
-            logInfo("\tSet UUID: " + uuid, "FileManager");
+            logInfo("\tSet UUID: {}", "FileManager", uuid);
             continue;
         }
 
@@ -159,7 +159,7 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedC
             std::string circuitName = token.substr(1, token.size() - 2); // remove quotes
             auto it = outParsed->getCircuitNameToUUID().find(circuitName);
             if (it == outParsed->getCircuitNameToUUID().end()) {
-                logError("Circuit '" + circuitName + "' not imported due to save file formatting", "FileManager");
+                logError("Circuit '{}' not imported due to save file formatting", "FileManager", circuitName);
                 return false;
             }
             // Can't implement until custom blocks are added
@@ -210,7 +210,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
 
     std::ofstream outputFile(path);
     if (!outputFile.is_open()){
-        logError("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: {}", "FileManager", path);
         return false;
     }
 

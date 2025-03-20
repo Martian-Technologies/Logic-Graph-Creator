@@ -5,19 +5,19 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
 
     QFile inputFile(QString::fromStdString(path));
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        logError("Couldn't open file at path: " + path, "FileManager");
+        logError("Couldn't open file at path: {}", "FileManager", path);
         return false;
     }
 
     QJsonDocument mainDoc = QJsonDocument::fromJson(inputFile.readAll());
     if (mainDoc.isNull()) {
-        logError("Couldn't open parse json at: " + path, "FileManager");
+        logError("Couldn't open parse json at path: {}", "FileManager", path);
         return false;
     }
 
     QJsonDocument saveDoc = QJsonDocument::fromJson(mainDoc.object().value("contents").toString().toUtf8());
     if (saveDoc.isNull()) {
-        logError("Couldn't open parse \"content\" of: " + path, "FileManager");
+		logError("Couldn't open parse \"content\" of: {}", "FileManager", path);
         return false;
     }
 
@@ -200,7 +200,7 @@ void OpenCircuitsParser::parseTransform(const QJsonObject& transform, OpenCircui
             info.position = it->second.first;
             info.angle = it->second.second;
         } else{
-            logError("Could not find Transform Reference Data: " + std::to_string(transformId));
+            logError("Could not find Transform Reference Data: {}", "", transformId);
         }
     } else {
         QJsonObject transformData = transform["data"].toObject();

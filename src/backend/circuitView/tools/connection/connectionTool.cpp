@@ -28,7 +28,7 @@ void ConnectionTool::setMode(std::string toolMode) {
 			} else if (toolMode == "Tensor") {
 				activeConnectionTool = std::make_shared<TensorConnectTool>();
 			} else {
-				logError("Tool mode \"" + toolMode + "\" could not be found");
+				logError("Tool mode \"{}\" could not be found", "", toolMode);
 			}
 			toolStackInterface->pushTool(activeConnectionTool);
 		}
