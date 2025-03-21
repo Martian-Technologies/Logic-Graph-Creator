@@ -286,11 +286,11 @@ void Circuit::undo() {
 			break;
 		case Difference::CREATED_CONNECTION:
 			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryRemoveConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+			blockContainer.tryRemoveConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
 			break;
 		case Difference::REMOVED_CONNECTION:
 			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+			blockContainer.tryCreateConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
 			break;
 		case Difference::MOVE_BLOCK:
 			moveModification = std::get<Difference::move_modification_t>(modification.second);
@@ -325,11 +325,11 @@ void Circuit::redo() {
 			break;
 		case Difference::REMOVED_CONNECTION:
 			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryRemoveConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+			blockContainer.tryRemoveConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
 			break;
 		case Difference::CREATED_CONNECTION:
 			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryCreateConnection(std::get<0>(connectionModification), std::get<1>(connectionModification), newDifference.get());
+			blockContainer.tryCreateConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
 			break;
 		case Difference::MOVE_BLOCK:
 		moveModification = std::get<Difference::move_modification_t>(modification.second);
