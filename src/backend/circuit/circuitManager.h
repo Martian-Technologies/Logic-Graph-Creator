@@ -15,6 +15,7 @@ public:
 	inline BlockType setupBlockData(circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
 		if (iter == circuits.end()) return BlockType::NONE;
+		SharedCircuit circuit = iter->second;
 		// Block Data
 		BlockType blockType = blockDataManager.addBlock();
 		auto blockData = blockDataManager.getBlockData(blockType);
@@ -24,10 +25,10 @@ public:
 		}
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
-		blockData->setName(iter->second->getCircuitName());
+		blockData->setName(circuit->getCircuitName());
 		blockData->setPath("Custom");
 		blockData->setWidth(2);
-		blockData->setHeight(2);
+		blockData->setHeight(1);
 
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 
@@ -36,7 +37,68 @@ public:
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
 
+		circuit->connectListener(this, std::bind(&CircuitManager::updateBlockPorts, this, std::placeholders::_1, std::placeholders::_2));
+		
+		updateBlockPorts(circuit->getBlockContainer()->getCreationDifferenceShared(), circuitId);
+
 		return blockType;
+	}
+
+	inline void updateBlockPorts(DifferenceSharedPtr dif, circuit_id_t circuitId) {
+		auto iter = circuits.find(circuitId);
+		if (iter == circuits.end()) return;
+		SharedCircuit circuit = iter->second;
+
+		CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(circuitId);
+		if (!circuitBlockData) return;
+
+		std::vector<const Block*> inputs;
+		std::vector<const Block*> outputs;
+		for (auto& pair : *(circuit->getBlockContainer())) {
+			const Block* block = &(pair.second);
+			if (block->type() == BlockType::SWITCH || block->type() == BlockType::BUTTON || block->type() == BlockType::TICK_BUTTON) {
+				inputs.push_back(block);
+			} else if (block->type() == BlockType::LIGHT) {
+				outputs.push_back(block);
+			}
+		}
+
+		BlockType blockType = circuitBlockData->getBlockType();
+		BlockData* blockData = blockDataManager.getBlockData(blockType);
+
+		for (const Block* block : inputs) {
+			const connection_end_id_t* idPtr = circuitBlockData->getConnectionPositionToId(block->getPosition());
+			if (!idPtr) {
+				connection_end_id_t inputCount = blockData->getInputConnectionCount();
+				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
+				if (inputCount >= outputCount) {
+					blockData->setHeight(inputCount+1);
+				}
+				if (blockData->trySetConnectionInput(Vector(0, inputCount), inputCount + outputCount)) {
+					circuitBlockData->setConnectionIdName(inputCount + outputCount, "INPUT: " + std::to_string(inputCount));
+					circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
+				} else {
+					logError("was not able to add block input at " + block->getPosition().toString());
+				}
+			}
+		}
+		for (const Block* block : outputs) {
+			const connection_end_id_t* idPtr = circuitBlockData->getConnectionPositionToId(block->getPosition());
+			if (!idPtr) {
+				connection_end_id_t inputCount = blockData->getInputConnectionCount();
+				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
+				if (outputCount >= inputCount) {
+					blockData->setHeight(outputCount+1);
+				}
+				if (blockData->trySetConnectionOutput(Vector(1, outputCount), inputCount + outputCount)) {
+					circuitBlockData->setConnectionIdName(inputCount + outputCount, "OUTPUT: " + std::to_string(outputCount));
+					circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
+				} else {
+					logError("Was not able to add block output at " + block->getPosition().toString());
+				}
+			}
+		}
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
 	inline SharedCircuit getCircuit(circuit_id_t id) {

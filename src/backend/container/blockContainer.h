@@ -72,6 +72,7 @@ public:
 
 	/* Difference Getter */
 	Difference getCreationDifference() const;
+	DifferenceSharedPtr getCreationDifferenceShared() const;
 
 private:
 	inline Block* getBlock_(const Position& position);
