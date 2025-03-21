@@ -10,7 +10,6 @@
 // TODO - not sure if this should be stored, maybe it would be faster to just
 // query from blockContainer sometimes. We also don't have to store the width
 // and height
-
 struct RenderedBlock {
 	BlockType blockType;
 	Rotation rotation;
@@ -18,24 +17,32 @@ struct RenderedBlock {
 	int realHeight;
 };
 
+typedef std::pair<Position, Position> RenderedWire;
+
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks);
+	VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks, std::set<RenderedWire>& wires);
 	~VulkanChunkAllocation();
 
-	inline const AllocatedBuffer& getBuffer() const { return buffer; }
-	inline uint32_t getNumVertices() const { return numVertices; }
+	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
+	inline uint32_t getNumBlockVertices() const { return numBlockVertices; }
+
+	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
+	inline uint32_t getNumWireVertices() const { return numWireVertices; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
 private:
-	AllocatedBuffer buffer;
-	uint32_t numVertices;
+	std::optional<AllocatedBuffer> blockBuffer;
+	uint32_t numBlockVertices;
+
+	std::optional<AllocatedBuffer> wireBuffer;
+	uint32_t numWireVertices;
 };
 
 class ChunkChain {
 public:
-	inline std::unordered_map<Position, RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return upToData; }
+	inline std::unordered_map<Position, RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return blocks; }
 	void updateAllocation();
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
@@ -44,7 +51,8 @@ private:
 	void annihilateOrphanGBs();
 	
 private:
-	std::unordered_map<Position, RenderedBlock> upToData; // up to date (block) data
+	std::unordered_map<Position, RenderedBlock> blocks;
+	std::set<RenderedWire> wires;
 	bool allocationDirty = false;
 
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;

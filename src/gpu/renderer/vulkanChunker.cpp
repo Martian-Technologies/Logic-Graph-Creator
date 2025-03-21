@@ -6,47 +6,62 @@
 // VulkanChunkAllocation
 // =========================================================================================================
 
-VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks) {
+VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks, std::set<RenderedWire>& wires) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - should abstract this function
 	
-	// Generate vertices
-	std::vector<BlockVertex> vertices;
-	vertices.reserve(blocks.size() * 6);
-	for (const auto& block : blocks) {
-		Position blockPosition = block.first;
-		BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {0.0f, 0.0f, 1.0f}};
-		BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, {0.0f, 1.0f, 0.0f}};
-		BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
-		BlockVertex v4 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
-		BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
-		BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {1.0f, 0.0f, 0.0f}};
-		vertices.push_back(v1);
-		vertices.push_back(v2);
-		vertices.push_back(v3);
-		vertices.push_back(v4);
-		vertices.push_back(v5);
-		vertices.push_back(v6);
+	// Generate block vertices
+	if (blocks.size() > 0) {
+		std::vector<BlockVertex> blockVertices;
+		blockVertices.reserve(blocks.size() * 6);
+		for (const auto& block : blocks) {
+			Position blockPosition = block.first;
+			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {0.0f, 0.0f, 1.0f}};
+			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, {0.0f, 1.0f, 0.0f}};
+			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, {1.0f, 0.0f, 0.0f}};
+			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {1.0f, 0.0f, 0.0f}};
+			blockVertices.push_back(v1);
+			blockVertices.push_back(v2);
+			blockVertices.push_back(v3);
+			blockVertices.push_back(v4);
+			blockVertices.push_back(v5);
+			blockVertices.push_back(v6);
+		}
+		// upload block vertices
+		numBlockVertices = blockVertices.size();
+		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
+		blockBuffer = createBuffer(blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
-	// upload vertices to buffer
-	numVertices = vertices.size();
-	size_t vertexBufferSize = sizeof(BlockVertex) * numVertices;
-	buffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-	vmaCopyMemoryToAllocation(Vulkan::getAllocator(), vertices.data(), buffer.allocation, 0, vertexBufferSize);
+	if (wires.size() > 0) {
+		// Generate wire vertices
+		std::vector<WireVertex> wireVertices;
+		wireVertices.reserve(wires.size() * 6);
+		for (const auto& wire : wires) {
+		}
+		// upload wire vertices
+		numWireVertices = wireVertices.size();
+		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
+		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
+	}
 }
 
 VulkanChunkAllocation::~VulkanChunkAllocation() {
-	destroyBuffer(buffer);
+	if (blockBuffer.has_value()) destroyBuffer(blockBuffer.value());
+	if (wireBuffer.has_value()) destroyBuffer(wireBuffer.value());
 }
 
 // ChunkChain
 // =========================================================================================================
 
 void ChunkChain::updateAllocation() {
-	if (!upToData.empty()) { // if we have data to upload
+	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
-		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(upToData);
+		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(blocks, wires);
 		// replace currently allocating data
 		if (currentlyAllocating.has_value()) {
 			gbJail.push_back(currentlyAllocating.value());

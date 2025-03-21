@@ -6,20 +6,20 @@
 
 void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
 	// load shaders
-	vertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.vert.spv"));
-	fragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/shader.frag.spv"));
+	blockVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.vert.spv"));
+	blockFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.frag.spv"));
 
 	// create graphic pipeline
-	pipeline = createPipeline(vertShader, fragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), renderPass);
+	blockPipeline = createPipeline(blockVertShader, blockFragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), renderPass);
 }
 
 void VulkanChunkRenderer::destroy() {
 	// temp way to delete all the buffers
 	chunker.setCircuit(nullptr);
 	
-	destroyShaderModule(vertShader);
-	destroyShaderModule(fragShader);
-	destroyPipeline(pipeline);
+	destroyShaderModule(blockVertShader);
+	destroyShaderModule(blockFragShader);
+	destroyPipeline(blockPipeline);
 }
 
 
@@ -33,12 +33,12 @@ void VulkanChunkRenderer::updateCircuit(DifferenceSharedPtr diff) {
 
 void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
 	// bind render pipeline
-	vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+	vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.handle);
 		
 	// bind push constants
 	ViewPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
-	vkCmdPushConstants(frame.getMainCommandBuffer(), pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+	vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
 
 	// set dynamic state
 	VkViewport viewport{};
@@ -57,13 +57,15 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExten
 	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunker.getAllocations(viewBounds.first.snap(), viewBounds.second.snap())) {
 		// save chunk data to frame
 		frame.getChunkAllocations().push_back(chunk);
-		
-		// bind vertex buffers
-		VkBuffer vertexBuffers[] = { chunk->getBuffer().buffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
 
-		// draw
-		vkCmdDraw(frame.getMainCommandBuffer(), static_cast<uint32_t>(chunk->getNumVertices()), 1, 0, 0);
+		if (chunk->getBlockBuffer().has_value()) {
+			// bind vertex buffers
+			VkBuffer vertexBuffers[] = { chunk->getBlockBuffer()->buffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
+
+			// draw
+			vkCmdDraw(frame.getMainCommandBuffer(), static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
+		}
 	}
 }

@@ -40,6 +40,30 @@ struct BlockVertex {
 	}
 };
 
+struct WireVertex {
+	glm::vec2 pos;
+
+	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = sizeof(BlockVertex);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescriptions;
+    }
+
+	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(BlockVertex, pos);
+
+		return attributeDescriptions;
+	}
+};
+
 class VulkanChunkRenderer {
 public:
 	void initialize(VkRenderPass& renderPass);
@@ -50,9 +74,10 @@ public:
 
 private:
 	VulkanChunker chunker;
-	PipelineData pipeline;
-	VkShaderModule vertShader;
-	VkShaderModule fragShader;
+	
+	PipelineData blockPipeline;
+	VkShaderModule blockVertShader;
+	VkShaderModule blockFragShader;
 };
 
 #endif
