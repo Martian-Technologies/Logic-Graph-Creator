@@ -82,8 +82,8 @@ void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputG
 	// 	}
 	// }
 
-	// allowing multiple copies of the same connection for buffer purposes
-	// ex. in eval, if two buffers part of the same pool are connected to the same gate
+	// allowing multiple copies of the same connection for junction purposes
+	// ex. in eval, if two junctions part of the same pool are connected to the same gate
 
 	gates[targetGate].inputGroups[inputGroup].push_back(connection);
 	gates[sourceGate].outputGroups[outputGroup].emplace_back(targetGate, inputGroup);
@@ -241,7 +241,7 @@ std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::com
 	return gateMap;
 }
 
-void LogicSimulator::computeBufferStates(Gate& gate) {
+void LogicSimulator::computeJunctionStates(Gate& gate) {
 	logic_state_t state = logic_state_t::FLOATING;
 	for (const auto& conn : gate.inputGroups[0]) {
 		logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
@@ -470,12 +470,12 @@ void LogicSimulator::computeNextState() {
 	std::shared_lock<std::shared_mutex> lock(simulationMutex);
 
 	for (auto& gate : gates) {
-		if (gate.type == GateType::BUFFER) {
-			computeBufferStates(gate);
+		if (gate.type == GateType::JUNCTION) {
+			computeJunctionStates(gate);
 		}
 	}
 	for (auto& gate : gates) {
-		if (gate.isValid() && gate.type != GateType::BUFFER) {
+		if (gate.isValid() && gate.type != GateType::JUNCTION) {
 			computeGateStates(gate);
 		}
 	}

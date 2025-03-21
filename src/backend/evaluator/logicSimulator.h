@@ -79,7 +79,7 @@ private:
 	void tickrateMonitor();
 
 	void computeGateStates(Gate& gate);
-	void computeBufferStates(Gate& gate);
+	void computeJunctionStates(Gate& gate);
 };
 
 #endif // logicSimulator_h

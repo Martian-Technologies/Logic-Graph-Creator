@@ -25,32 +25,32 @@ public:
 	void setTargetTickrate(unsigned long long tickrate) { logicSimulator.setTargetTickrate(tickrate); }
 	void triggerNextTickReset() {logicSimulator.triggerNextTickReset();}
 private:
-	struct BufferGate {
+	struct JunctionGate {
 		wrapper_gate_id_t gateId;
-		std::vector<wrapper_gate_id_t> bufferInputs;
-		std::vector<wrapper_gate_id_t> bufferOutputs;
+		std::vector<wrapper_gate_id_t> junctionInputs;
+		std::vector<wrapper_gate_id_t> junctionOutputs;
 		std::vector<std::pair<simulator_gate_id_t, size_t>> externalInputs;
 		std::vector<std::pair<simulator_gate_id_t, size_t>> externalOutputs;
-		simulator_gate_id_t bufferGateId;
+		simulator_gate_id_t junctionGateId;
 	};
 	LogicSimulator logicSimulator;
 	std::vector<std::optional<simulator_gate_id_t>> wrapperToSimulatorGateIdMap;
-	std::vector<BufferGate> bufferGates;
-	std::unordered_set<wrapper_gate_id_t> allBufferGateIds;
+	std::vector<JunctionGate> junctionGates;
+	std::unordered_set<wrapper_gate_id_t> allJunctionGateIds;
 
-	BufferGate& getBufferGate(wrapper_gate_id_t gateId) {
-		auto it = std::find_if(bufferGates.begin(), bufferGates.end(), [gateId](const BufferGate& bg) {
+	JunctionGate& getJunctionGate(wrapper_gate_id_t gateId) {
+		auto it = std::find_if(junctionGates.begin(), junctionGates.end(), [gateId](const JunctionGate& bg) {
 			return bg.gateId == gateId;
 			});
-		if (it != bufferGates.end()) {
+		if (it != junctionGates.end()) {
 			return *it;
 		}
-		throw std::runtime_error("Buffer gate not found");
+		throw std::runtime_error("Junction gate not found");
 	};
-	std::vector<wrapper_gate_id_t> findConnectedBufferGates(BufferGate& bufferGate);
-	void recreateBuffers(std::vector<wrapper_gate_id_t>& allBufferGateIdsToRemake);
+	std::vector<wrapper_gate_id_t> findConnectedJunctionGates(JunctionGate& junctionGate);
+	void recreateJunctions(std::vector<wrapper_gate_id_t>& allJunctionGateIdsToRemake);
 
-	void debugPrintBufferGates();
+	void debugPrintJunctionGates();
 };
 
 #endif // logicSimulatorWrapper_h
