@@ -213,7 +213,12 @@ DifferenceSharedPtr BlockContainer::getCreationDifferenceShared() const {
 		for (connection_end_id_t id = 0; id < iter.second.getConnectionContainer().getConnectionCount(); id++) {
 			if (iter.second.isConnectionInput(id)) continue;
 			for (auto connectionIter : iter.second.getConnectionContainer().getConnections(id)) {
-				difference->addCreatedConnection(iter.second.getConnectionPosition(id).first, getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first);
+				difference->addCreatedConnection(
+					iter.second.getPosition(),
+					iter.second.getConnectionPosition(id).first,
+					getBlock(connectionIter.getBlockId())->getPosition(),
+					getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first
+				);
 			}
 		}
 	}
