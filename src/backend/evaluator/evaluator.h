@@ -40,6 +40,7 @@ private:
 	struct EvaluatorGate {
 		wrapper_gate_id_t gateId;
 		BlockType blockType;
+		Rotation rotation;
 	};
 
 	evaluator_id_t evaluatorId;
@@ -51,7 +52,7 @@ private:
 	CircuitManager& circuitManager;
 
 	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree);
-	int getGroupIndex(EvaluatorGate gate, const Vector& offset, bool trackInput);
+	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);

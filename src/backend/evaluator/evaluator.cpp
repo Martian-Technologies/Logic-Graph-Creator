@@ -97,13 +97,13 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::PLACE_BLOCK:
 		{
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+			const auto [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
 			if (gateType != GateType::NONE) {
-				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate{ 0, blockType });
+				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate{ 0, blockType, rotation });
 				for (const auto& address : addresses) {
 					const wrapper_gate_id_t blockId = logicSimulatorWrapper.createGate(gateType, true);
-					addressTree.setValue(address, EvaluatorGate{ blockId, blockType });
+					addressTree.setValue(address, EvaluatorGate{ blockId, blockType, rotation });
 				}
 			}
 			else {
@@ -174,7 +174,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 	}
 }
 
-int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector& offset, bool trackInput) {
+int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput) {
 	int groupIndex = 0;
 	const wrapper_gate_id_t blockId = gate.gateId;
 	const BlockType blockType = gate.blockType;
@@ -183,10 +183,11 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector& offset, bool trac
 		logError("getGroupIndex: blockData is null");
 		return 0;
 	}
+	const Vector rotatedOffset = reverseRotateVectorWithArea(offset, blockData->getWidth(), blockData->getHeight(), gate.rotation);
 
 	const auto connections = blockData->getConnections();
 	for (int j = 0; j < connections.size(); j++) {
-		if (connections[j].first == offset) {
+		if (connections[j].first == rotatedOffset) {
 			break;
 		}
 		if (connections[j].second == trackInput) {
