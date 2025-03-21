@@ -174,13 +174,13 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		}
 		case Difference::ModificationType::REMOVED_CONNECTION:
 		{
-			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			
 			break;
 		}
 		case Difference::ModificationType::CREATED_CONNECTION:
 		{
-			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			
 			break;
 		}

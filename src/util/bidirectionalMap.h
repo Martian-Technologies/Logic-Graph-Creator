@@ -30,7 +30,7 @@ template<class T2>
 class BidirectionalMap<unsigned int, T2> {
 public:
 	void set(const unsigned int& a, const T2& b) {
-		if (T2Vals.size() <= a)  T2Vals.resize(a);
+		if (T2Vals.size() <= a)  T2Vals.resize(a+1);
 		T2Vals[a] = b;
 		T1Vals[b] = a;
 	}

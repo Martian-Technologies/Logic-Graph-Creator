@@ -67,7 +67,7 @@ void QtRenderer::render(QPainter* painter) {
 
 	// --- end of render lambdas
 
-	Vec2Int emptyTilePoint = tileSetInfo->getTopLeftPixel(0, false);
+	Vec2Int emptyTilePoint = tileSetInfo->getTopLeftPixel(0, logic_state_t::LOW);
 	Vec2Int emptyTileSize = tileSetInfo->getCellPixelSize();
 	QRectF emptyTileSetRect(QPointF(emptyTilePoint.x, emptyTilePoint.y), QSizeF(emptyTileSize.x, emptyTileSize.y));
 
@@ -104,7 +104,7 @@ void QtRenderer::render(QPainter* painter) {
 		// render block previews
 		painter->setOpacity(0.4f);
 		for (const auto& preview : blockPreviews) {
-			renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
+			renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation, logic_state_t::LOW);
 		}
 		painter->setOpacity(1.0f);
 		painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
@@ -114,7 +114,7 @@ void QtRenderer::render(QPainter* painter) {
 		painter->setOpacity(0.9f);
 		// painter->setRenderHint(QPainter::Antialiasing);
 		for (unsigned int i = 0; i < blocks.size(); i++) {
-			bool state = blockStates[i];
+			logic_state_t state = blockStates[i];
 			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
 				// continue if input, we only want outputs
 				if (blocks[i]->isConnectionInput(id)) continue;
@@ -136,11 +136,11 @@ void QtRenderer::render(QPainter* painter) {
 		}
 		// render connection previews
 		for (const auto& preview : connectionPreviews) {
-			renderConnection(painter, preview.second.input, preview.second.output, false);
+			renderConnection(painter, preview.second.input, preview.second.output, logic_state_t::LOW);
 		}
 		// render half connection previews
 		for (const auto& preview : halfConnectionPreviews) {
-			renderConnection(painter, preview.second.input, preview.second.output, false);
+			renderConnection(painter, preview.second.input, preview.second.output, logic_state_t::LOW);
 		}
 		painter->restore();
 	} else {
@@ -157,7 +157,7 @@ void QtRenderer::render(QPainter* painter) {
 		std::vector<const Block*> blocks;
 		for (const auto& block : *(circuit->getBlockContainer())) {
 			if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
-				renderBlock(painter, block.second.type(), block.second.getPosition(), block.second.getRotation());
+				renderBlock(painter, block.second.type(), block.second.getPosition(), block.second.getRotation(), logic_state_t::UNDEFINED);
 			}
 			blocks.push_back(&(block.second));
 		}
@@ -165,7 +165,7 @@ void QtRenderer::render(QPainter* painter) {
 		// render block previews
 		painter->setOpacity(0.4f);
 		for (const auto& preview : blockPreviews) {
-			renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation);
+			renderBlock(painter, preview.second.type, preview.second.position, preview.second.rotation, logic_state_t::UNDEFINED);
 		}
 		painter->setOpacity(1.0f);
 		painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
@@ -189,18 +189,18 @@ void QtRenderer::render(QPainter* painter) {
 						(pos.x - 2 < bottomRightBound.x || otherPos.x - 2 < bottomRightBound.x) &&
 						(pos.y - 2 < bottomRightBound.y || otherPos.y - 2 < bottomRightBound.y)
 					) {
-						renderConnection(painter, pos, blocks[i], otherPos, other, false);
+						renderConnection(painter, pos, blocks[i], otherPos, other, logic_state_t::UNDEFINED);
 					}
 				}
 			}
 		}
 		// render connection previews
 		for (const auto& preview : connectionPreviews) {
-			renderConnection(painter, preview.second.input, preview.second.output, false);
+			renderConnection(painter, preview.second.input, preview.second.output, logic_state_t::UNDEFINED);
 		}
 		// render half connection previews
 		for (const auto& preview : halfConnectionPreviews) {
-			renderConnection(painter, preview.second.input, preview.second.output, false);
+			renderConnection(painter, preview.second.input, preview.second.output, logic_state_t::UNDEFINED);
 		}
 		painter->restore();
 	}
@@ -229,6 +229,13 @@ void QtRenderer::render(QPainter* painter) {
 		renderSelection(painter, selection.second.selection, selection.second.renderMode);
 	}
 	painter->restore();
+	// painter->save();
+	// for (int x = topLeftBound.x; x <= bottomRightBound.x; ++x) {
+	// 	for (int y = topLeftBound.y; y <= bottomRightBound.y; ++y) {
+	// 		drawText(painter, gridToQt(FPosition(x, y)+FVector(0.3f, 0.16f)), QString::fromStdString(Position(x, y).toString()), 15, QColor("#97A9E1"));
+	// 	}
+	// }
+	// painter->restore();
 
 	lastFrameTime = timer.nsecsElapsed() / 1e6f;
 }
@@ -344,7 +351,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 	}
 }
 
-void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state) {
+void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, logic_state_t state) {
 	// block
 	Vector blockSize(
 		circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type),
@@ -384,13 +391,26 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 
 const char* connectionOFF = "#97A9E1";
 const char* connectionON = "#8FE97F";
+const char* connectionFLOATING = "#B0A4FF";
+const char* connectionUNDEFINED = "#FFA7A4";
 
-void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FVector aControlOffset, FVector bControlOffset, bool state) {
-	if (state) {
-		painter->setPen(QPen(QColor(connectionON), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
-	} else {
-		painter->setPen(QPen(QColor(connectionOFF), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
+QColor QtRenderer::getStateColor(logic_state_t state) {
+	switch (state) {
+	case logic_state_t::LOW:
+		return QColor(connectionOFF);
+	case logic_state_t::HIGH:
+		return QColor(connectionON);
+	case logic_state_t::FLOATING:
+		return QColor(connectionFLOATING);
+	default:
+		return QColor(connectionUNDEFINED);
 	}
+}
+
+void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FVector aControlOffset, FVector bControlOffset, logic_state_t state) {
+
+	painter->setPen(QPen(getStateColor(state), scalePixelCount(30.0f), Qt::SolidLine, Qt::RoundCap));
+
 	QPointF start = gridToQt(aPos);
 	QPointF end = gridToQt(bPos);
 
@@ -409,15 +429,11 @@ void QtRenderer::renderConnection(QPainter* painter, FPosition aPos, FPosition b
 const float edgeDis = 0.48f;
 const float sideShift = 0.25f;
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state) {
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, logic_state_t state) {
 	FVector centerOffset(0.5f, 0.5f);
 
 	if (a == b) {
-		if (state) {
-			drawText(painter, gridToQt(aPos.free() + centerOffset), "S", 30, QColor(connectionON));
-		} else {
-			drawText(painter, gridToQt(aPos.free() + centerOffset), "S", 30, QColor(connectionOFF));
-		}
+		drawText(painter, gridToQt(aPos.free() + centerOffset), "S", 30, getStateColor(state));
 		return;
 	}
 
@@ -445,7 +461,7 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, const Block*
 	renderConnection(painter, aPos.free() + centerOffset + aSocketOffset, bPos.free() + centerOffset + bSocketOffset, aSocketOffset, bSocketOffset, state);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPos, bool state) {
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPos, logic_state_t state) {
 	// Socket offsets will be retrieved data later, this code will go
 	const Block* a = circuit->getBlockContainer()->getBlock(aPos);
 	const Block* b = circuit->getBlockContainer()->getBlock(bPos);
@@ -453,7 +469,7 @@ void QtRenderer::renderConnection(QPainter* painter, Position aPos, Position bPo
 	renderConnection(painter, aPos, a, bPos, b, state);
 }
 
-void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state) {
+void QtRenderer::renderConnection(QPainter* painter, Position aPos, FPosition bPos, logic_state_t state) {
 	FVector centerOffset(0.5f, 0.5f);
 	FVector aSocketOffset(0.0f, 0.0f);
 

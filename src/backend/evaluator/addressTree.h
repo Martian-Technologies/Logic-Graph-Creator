@@ -8,14 +8,14 @@
 template <class T>
 class AddressTreeNode {
 public:
-	AddressTreeNode(circuit_id_t contId) : containerId(contId) {}
+	AddressTreeNode(circuit_id_t contId, Rotation rotation) : containerId(contId), rotation(rotation) {}
 
 	void addValue(Position position, T value);
 	void addValue(const Address& address, T value);
 	std::vector<Address> addValue(Position position, circuit_id_t targetParentContainerId, T Value);
-	void makeBranch(Position position, circuit_id_t newContainerId);
-	void makeBranch(const Address& address, circuit_id_t newContainerId);
-	std::vector<Address> makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId);
+	void makeBranch(Position position, circuit_id_t newContainerId, Rotation rotation);
+	void makeBranch(const Address& address, circuit_id_t newContainerId, Rotation rotation);
+	std::vector<Address> makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId, Rotation rotation);
 
 	void removeValue(Position position) { values.erase(position); }
 	void removeValue(const Address& address) {
@@ -54,7 +54,6 @@ public:
 
 	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position);
 
-	// Added const overload for getParentBranch
 	AddressTreeNode<T>& getParentBranch(const Address& address);
 	const AddressTreeNode<T>& getParentBranch(const Address& address) const;
 
@@ -64,10 +63,13 @@ public:
 	inline bool hasValue(const Position position) const { return values.find(position) != values.end(); }
 	inline bool hasValue(const Address& address) const { return getParentBranch(address).hasValue(address.getPosition(address.size() - 1)); }
 	inline bool hasBranch(const Position position) const { return branches.find(position) != branches.end(); }
+	inline bool hasBranch(const Address& address) const { return getParentBranch(address).hasBranch(address.getPosition(address.size() - 1)); }
 
 	void moveData(Position curPosition, Position newPosition);
 	void moveData(circuit_id_t, Position curPosition, Position newPosition);
 	void remap(const std::unordered_map<T, T>& mapping);
+
+	Rotation getRotation() const { return rotation; }
 
 	circuit_id_t getContainerId() const { return containerId; }
 
@@ -75,12 +77,14 @@ private:
 	std::unordered_map<Position, T> values;
 	std::unordered_map<Position, AddressTreeNode<T>> branches;
 	circuit_id_t containerId;
+	Rotation rotation;
 };
 
 template<class T>
 void AddressTreeNode<T>::addValue(Position position, T value) {
 	if (hasValue(position) || hasBranch(position)) {
-		throw std::invalid_argument("AddressTree::addValue: position already exists");
+		logError("AddressTree::addValue: position already exists");
+		return;
 	}
 	values[position] = value;
 }
@@ -88,7 +92,8 @@ void AddressTreeNode<T>::addValue(Position position, T value) {
 template<class T>
 void AddressTreeNode<T>::addValue(const Address& address, T value) {
 	if (address.size() == 0) {
-		throw std::invalid_argument("AddressTree::addValue: address size is 0");
+		logError("AddressTree::addValue: address size is 0");
+		return;
 	}
 	AddressTreeNode<T>& parentBranch = getParentBranch(address);
 	const Position finalPosition = address.getPosition(address.size() - 1);
@@ -115,31 +120,33 @@ std::vector<Address> AddressTreeNode<T>::addValue(Position position, circuit_id_
 }
 
 template<class T>
-void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainerId) {
+void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainerId, Rotation rotation) {
 	if (hasValue(position) || hasBranch(position)) {
-		throw std::invalid_argument("AddressTree::makeBranch: position already exists");
+		logError("AddressTree::makeBranch: position already exists");
+		return;
 	}
-	branches.emplace(position, AddressTreeNode<T>(newContainerId));
+	branches.emplace(position, AddressTreeNode<T>(newContainerId, rotation));
 }
 
 template<class T>
-void AddressTreeNode<T>::makeBranch(const Address& address, circuit_id_t newContainerId) {
+void AddressTreeNode<T>::makeBranch(const Address& address, circuit_id_t newContainerId, Rotation rotation) {
 	if (address.size() == 0) {
-		throw std::invalid_argument("AddressTree::makeBranch: address size is 0");
+		logError("AddressTree::makeBranch: address size is 0");
+		return;
 	}
-	getParentBranch(address).makeBranch(address.getPosition(address.size() - 1), newContainerId);
+	getParentBranch(address).makeBranch(address.getPosition(address.size() - 1), newContainerId, rotation);
 }
 
 template<class T>
-std::vector<Address> AddressTreeNode<T>::makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId) {
+std::vector<Address> AddressTreeNode<T>::makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId, Rotation rotation) {
 	std::vector<Address> addresses;
 	if (containerId == targetParentContainerId) {
-		makeBranch(position, newContainerId);
+		makeBranch(position, newContainerId, rotation);
 		addresses.push_back(Address(position));
 	}
 	else {
 		for (auto& [pos, branch] : branches) {
-			std::vector<Address> newAddresses = branch.makeBranch(position, targetParentContainerId, newContainerId);
+			std::vector<Address> newAddresses = branch.makeBranch(position, targetParentContainerId, newContainerId, rotation);
 			for (Address& address : newAddresses) {
 				address.nestPosition(pos);
 			}
@@ -153,7 +160,7 @@ template<class T>
 AddressTreeNode<T>& AddressTreeNode<T>::getBranch(Position position) {
 	auto it = branches.find(position);
 	if (it == branches.end()) {
-		throw std::out_of_range("AddressTree::getBranch: address not found");
+		logError("AddressTree::getBranch: address not found");
 	}
 	return it->second;
 }
@@ -249,7 +256,7 @@ AddressTreeNode<T>& AddressTreeNode<T>::getParentBranch(const Address& address) 
 	for (size_t i = 0; i < address.size() - 1; i++) {
 		auto it = currentBranch->branches.find(address.getPosition(i));
 		if (it == currentBranch->branches.end()) {
-			throw std::out_of_range("AddressTree::getParentBranch: address not found");
+			logError("AddressTree::getParentBranch: address not found");
 		}
 		currentBranch = &(it->second);
 	}
@@ -262,7 +269,7 @@ const AddressTreeNode<T>& AddressTreeNode<T>::getParentBranch(const Address& add
 	for (size_t i = 0; i < address.size() - 1; i++) {
 		auto it = currentBranch->branches.find(address.getPosition(i));
 		if (it == currentBranch->branches.end()) {
-			throw std::out_of_range("AddressTree::getParentBranch: address not found");
+			logError("AddressTree::getParentBranch: address not found");
 		}
 		currentBranch = &(it->second);
 	}
