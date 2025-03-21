@@ -46,7 +46,7 @@ option(Gatality_BuildTests "Build tests" OFF)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 # SDL
-add_subdirectory("${EXTERNAL_DIR}/SDL")
+add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM)
 
 # VMA
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM)
