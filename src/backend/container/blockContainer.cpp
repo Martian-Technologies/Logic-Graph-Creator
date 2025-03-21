@@ -203,3 +203,19 @@ Difference BlockContainer::getCreationDifference() const {
 	}
 	return difference;
 }
+
+DifferenceSharedPtr BlockContainer::getCreationDifferenceShared() const {
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	for (auto iter : blocks) {
+		difference->addPlacedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+	}
+	for (auto iter : blocks) {
+		for (connection_end_id_t id = 0; id < iter.second.getConnectionContainer().getConnectionCount(); id++) {
+			if (iter.second.isConnectionInput(id)) continue;
+			for (auto connectionIter : iter.second.getConnectionContainer().getConnections(id)) {
+				difference->addCreatedConnection(iter.second.getConnectionPosition(id).first, getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first);
+			}
+		}
+	}
+	return difference;
+}
