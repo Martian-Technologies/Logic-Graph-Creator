@@ -49,9 +49,8 @@ struct std::hash<Vector> {
 
 template <>
 struct std::formatter<Vector> : std::formatter<std::string> {
-  auto format(Vector p, format_context& ctx) const {
-    return formatter<string>::format(
-      std::format("({}, {})", p.dx, p.dy), ctx);
+  auto format(Vector v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
   }
 };
 
@@ -86,9 +85,8 @@ struct FVector {
 
 template <>
 struct std::formatter<FVector> : std::formatter<std::string> {
-  auto format(FVector p, format_context& ctx) const {
-    return formatter<string>::format(
-      std::format("({}, {})", p.dx, p.dy), ctx);
+  auto format(FVector v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
   }
 };
 
@@ -130,9 +128,8 @@ struct std::hash<Position> {
 
 template <>
 struct std::formatter<Position> : std::formatter<std::string> {
-  auto format(Position p, format_context& ctx) const {
-    return formatter<string>::format(
-      std::format("({}, {})", p.x, p.x), ctx);
+  auto format(Position v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
   }
 };
 
@@ -168,9 +165,8 @@ struct FPosition {
 
 template <>
 struct std::formatter<FPosition> : std::formatter<std::string> {
-  auto format(FPosition p, format_context& ctx) const {
-    return formatter<string>::format(
-      std::format("({}, {})", p.x, p.x), ctx);
+  auto format(FPosition v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
   }
 };
 
