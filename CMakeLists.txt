@@ -42,8 +42,12 @@ option(Gatality_BuildTests "Build tests" OFF)
 
 # ======================================== DEPENDENCY SETUP ========================================
 
-# Initialize Vulkan
+# Vulkan
 find_package(Vulkan REQUIRED COMPONENTS glslc)
+
+# SDL
+add_subdirectory("${EXTERNAL_DIR}/SDL")
+
 # VMA
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM)
 # GLM
@@ -63,6 +67,7 @@ set(EXTERNAL_INCLUDES
 )
 set(EXTERNAL_LINKS
 	${Vulkan_LIBRARIES}
+	SDL3::SDL3
 	cpplocate::cpplocate
 	VulkanMemoryAllocator
 	glm
