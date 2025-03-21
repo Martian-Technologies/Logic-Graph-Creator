@@ -50,8 +50,8 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 				auto [otherPosition, otherSuccess] = otherBlock->getConnectionPosition(connectionEnd.getConnectionId());
 				if (!otherSuccess)
 					continue;
-				if (block.isConnectionInput(i)) difference->addRemovedConnection(otherPosition, connectionPosition);
-				else difference->addRemovedConnection(connectionPosition, otherPosition);
+				if (block.isConnectionInput(i)) difference->addRemovedConnection(otherBlock->getPosition(), otherPosition, block.getPosition(), connectionPosition);
+				else difference->addRemovedConnection(block.getPosition(), connectionPosition, otherBlock->getPosition(), otherPosition);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ bool BlockContainer::tryCreateConnection(const Position& outputPosition, const P
 	if (!outputSuccess) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
 		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
-		difference->addCreatedConnection(outputPosition, inputPosition);
+		difference->addCreatedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}
 	return false;
@@ -157,7 +157,7 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 	if (!outputSuccess) return false;
 	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId))) {
 		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionId, ConnectionEnd(input->id(), inputConnectionId)));
-		difference->addRemovedConnection(outputPosition, inputPosition);
+		difference->addRemovedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}
 	return false;
@@ -196,7 +196,8 @@ Difference BlockContainer::getCreationDifference() const {
 		for (connection_end_id_t id = 0; id < iter.second.getConnectionContainer().getConnectionCount(); id++) {
 			if (iter.second.isConnectionInput(id)) continue;
 			for (auto connectionIter : iter.second.getConnectionContainer().getConnections(id)) {
-				difference.addCreatedConnection(iter.second.getConnectionPosition(id).first, getBlock(connectionIter.getBlockId())->getConnectionPosition(connectionIter.getConnectionId()).first);
+				const Block* otherBlock = getBlock(connectionIter.getBlockId());
+				difference.addCreatedConnection(iter.second.getPosition(), iter.second.getConnectionPosition(id).first, otherBlock->getPosition(), otherBlock->getConnectionPosition(connectionIter.getConnectionId()).first);
 			}
 		}
 	}

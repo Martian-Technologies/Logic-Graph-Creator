@@ -132,7 +132,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::REMOVED_CONNECTION:
 		{
-			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto& [a, outputPosition, b, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
 			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
 			for (int i = 0; i < outputAddresses.size(); i++) {
@@ -146,7 +146,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::CREATED_CONNECTION:
 		{
-			const auto& [outputPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto& [a, outputPosition, b, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
 			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
 			for (int i = 0; i < outputAddresses.size(); i++) {
