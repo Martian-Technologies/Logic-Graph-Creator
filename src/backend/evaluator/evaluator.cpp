@@ -289,6 +289,12 @@ GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
+	if (addressTree.hasBranch(address)) {
+		return logic_state_t::LOW;
+	}
+	if (!addressTree.hasValue(address)) {
+		return logic_state_t::UNDEFINED;
+	}
 	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 
 	logicSimulatorWrapper.signalToPause();
@@ -315,6 +321,10 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	}
 	for (const auto& address : addresses) {
 		// check if the address is valid
+		if (addressTree.hasBranch(address)) {
+			states.push_back(logic_state_t::LOW);
+			continue;
+		}
 		const bool exists = addressTree.hasValue(address);
 		if (!exists) {
 			states.push_back(logic_state_t::UNDEFINED);

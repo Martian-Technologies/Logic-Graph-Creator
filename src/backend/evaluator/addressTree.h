@@ -63,6 +63,7 @@ public:
 	inline bool hasValue(const Position position) const { return values.find(position) != values.end(); }
 	inline bool hasValue(const Address& address) const { return getParentBranch(address).hasValue(address.getPosition(address.size() - 1)); }
 	inline bool hasBranch(const Position position) const { return branches.find(position) != branches.end(); }
+	inline bool hasBranch(const Address& address) const { return getParentBranch(address).hasBranch(address.getPosition(address.size() - 1)); }
 
 	void moveData(Position curPosition, Position newPosition);
 	void moveData(circuit_id_t, Position curPosition, Position newPosition);
