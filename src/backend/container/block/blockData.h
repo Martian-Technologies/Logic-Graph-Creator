@@ -120,6 +120,9 @@ public:
 		if (defaultData) return connectionId == 0;
 		return connections.size() > connectionId && connections[connectionId].second;
 	}
+	std::vector<std::pair<Vector, bool>> getConnections() const noexcept {
+		return connections;
+	}
 
 private:
 	bool defaultData = true;
