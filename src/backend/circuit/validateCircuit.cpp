@@ -19,7 +19,7 @@ bool CircuitValidator::validateBlockTypes() {
     for (std::pair<const block_id_t, ParsedCircuit::BlockData>& p: parsedCircuit.blocks) {
         if (p.second.type == BlockType::NONE) {
             logWarning("Found a NONE type block, converting to buffer", "CircuitValidator");
-            p.second.type = BlockType::BUFFER;
+            p.second.type = BlockType::JUNCTION;
             //return false;
         }
     }
@@ -39,11 +39,11 @@ bool CircuitValidator::validateDependencies() {
         // validate the dependency as a circuit itself
         CircuitValidator depValidator(*depCircuit, blockDataManager);
         if (!depCircuit->valid) {
-            logError("Dependency circuit validation failed for " + depName);
+            logError("Dependency circuit validation failed for {}", "", depName);
             parsedCircuit.valid = false;
             return false;
         }
-        logInfo("Dependency circuit validation success for " + depName);
+        logInfo("Dependency circuit validation success for {}", "", depName);
     }
 
     // dependencies instead
@@ -88,7 +88,7 @@ bool CircuitValidator::validateDependencies() {
         parsedCircuit.blocks[p.id].type = newCustomCircuitBlockTypes[p.icDataRef]; // update the parsed circuit with the new type so it will be placed
     }
 
-    logInfo("File dependency size: " + std::to_string(parsedCircuit.dependencies.size()));
+    logInfo("File dependency size: {}", "", parsedCircuit.dependencies.size());
 
     return true;
 }
@@ -104,9 +104,7 @@ bool CircuitValidator::setBlockPositionsInt() {
             if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
             if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
 
-            logInfo("Converted block id=" + std::to_string(id) +
-                        " position from " + oldPosition.toString() + " to " + block.pos.toString(),
-                    "CircuitValidator");
+            logInfo("Converted block id={} position from {} to {}", "CircuitValidator", id, oldPosition.toString(), block.pos.toString());
         }
     }
     return true;
@@ -134,12 +132,7 @@ bool CircuitValidator::handleInvalidConnections() {
 
         if(--connectionCounts[reversePair] < 0){
             parsedCircuit.connections.push_back(reversePair);
-            logInfo("Added reciprocated connection between: (" +
-                        std::to_string(conn.inputBlockId) + ' ' +
-                        std::to_string(conn.outputBlockId) + ") and (" +
-                        std::to_string(reversePair.inputBlockId) + ' ' +
-                        std::to_string(reversePair.outputBlockId) + ")",
-                    "CircuitValidator");
+            logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "CircuitValidator", conn.inputBlockId, conn.outputBlockId, reversePair.inputBlockId, reversePair.outputBlockId);
             connectionCounts[reversePair] = 0;
         }
         ++i;
@@ -148,11 +141,7 @@ bool CircuitValidator::handleInvalidConnections() {
     // check all remaining connections were found
     for (const auto& [pair, count] : connectionCounts) {
         if (count != 0){
-            logWarning("Invalid connection handling, connection frequency: (" +
-                         std::to_string(pair.outputBlockId) + ' ' +
-                         std::to_string(pair.inputBlockId) + ") " +
-                         std::to_string(count),
-                     "CircuitValidator");
+            logWarning("Invalid connection handling, connection frequency: ({} {}) {}", "CircuitValidator", pair.outputBlockId, pair.inputBlockId, count);
             return false;
         }
     }
@@ -171,7 +160,7 @@ bool CircuitValidator::setOverlapsUnpositioned() {
         Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
         if (!occupiedPositions.insert(intPos).second){
             // set the block position as effectively undefined
-            logInfo("Found overlapped block position at " + block.pos.toString() + " --> " + intPos.toString() + ", setting to undefined position", "CircuitValidator");
+            logInfo("Found overlapped block position at {} --> {}, setting to undefined position", "CircuitValidator", block.pos.toString(), intPos.toString());
             block.pos.x = std::numeric_limits<float>::max();
             block.pos.y = std::numeric_limits<float>::max();
         }
@@ -251,7 +240,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
     int currentYOffset = 0;
     for (int ccIndex=0; ccIndex<componentAdjs.size(); ++ccIndex){
         const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj = componentAdjs[ccIndex];
-        logInfo("Parsing CC " + std::to_string(ccIndex));
+        logInfo("Parsing CC {}", "", ccIndex);
 
         // find SCC metagraph DAG for topological sort using kosaraju's
         // gather stack that shows decreasing post visit numbers

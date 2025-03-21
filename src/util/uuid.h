@@ -1,6 +1,8 @@
 #ifndef uuid_h
 #define uuid_h
+
 #include <random>
+
 static std::string generate_uuid_v4() {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -21,4 +23,5 @@ static std::string generate_uuid_v4() {
     }
     return ss.str();
 }
-#endif
+
+#endif /* uuid_h */

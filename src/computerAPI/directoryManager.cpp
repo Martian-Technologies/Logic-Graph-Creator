@@ -14,16 +14,15 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToExecutable = getExecutablePath().parent_path() / "resources";
 	if (std::filesystem::exists(relativeToExecutable)) {
 		resourceDirectory = relativeToExecutable;
-		logInfo("Found resource directory at (" + resourceDirectory.string() + ")");
+		logInfo("Found resource directory at ({})", "", resourceDirectory.string());
 		return;
 	}
 
 	// check for resources directory relative to working directory
 	std::filesystem::path relativeToWorkingDirectory = "resources";
-	logInfo(getExecutablePath().string());
 	if (std::filesystem::exists(relativeToWorkingDirectory)) {
 		resourceDirectory = relativeToWorkingDirectory;
-		logInfo("Found resource directory at (" + resourceDirectory.string() + ")");
+		logInfo("Found resource directory at ({})", "", resourceDirectory.string());
 		return;
 	}
 	

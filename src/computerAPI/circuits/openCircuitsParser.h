@@ -73,7 +73,7 @@ private:
         "BUFGate", "Switch", "Button", "Clock", "LED", "NOTGate", "IC"};
     std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
         {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
-        {"XNORGate", "XNOR"}, {"BUFGate", "BUFFER"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
+        {"XNORGate", "XNOR"}, {"BUFGate", "JUNCTION"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
         {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
         {"NOTGate", "NOR"}, // NOR for not
         {"IC", "CUSTOM"},

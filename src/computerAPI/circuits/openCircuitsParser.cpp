@@ -1,4 +1,3 @@
-
 #include "openCircuitsParser.h"
 #include "circuitFileManager.h"
 #include <string>

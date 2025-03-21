@@ -7,6 +7,7 @@
 #include <optional>
 #include <utility>
 #include <memory>
+#include <cassert>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -14,6 +15,7 @@
 #include <variant>
 #include <vector>
 #include <array>
+#include <stack>
 #include <queue>
 #include <map>
 #include <set>
