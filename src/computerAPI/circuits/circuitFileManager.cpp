@@ -1,8 +1,7 @@
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
-
 #include "circuitFileManager.h"
-#include "OpenCircuitsParser.h"
+
+#include <filesystem>
+
 #include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
@@ -67,9 +66,6 @@ LoadFunction CircuitFileManager::getLoadFunction(const std::string& path) {
     if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
         // our gatality file parser function
         return std::bind(&CircuitFileManager::loadGatalityFile, this, std::placeholders::_1, std::placeholders::_2);
-    } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
-        // open circuit file parser function
-        return std::bind(&CircuitFileManager::loadOpenCircuitFile, this, std::placeholders::_1, std::placeholders::_2);
     }else {
         logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
         return nullptr;
@@ -121,10 +117,11 @@ bool CircuitFileManager::loadGatalityFile(const std::string& path, SharedParsedC
             std::string importFileName;
             inputFile >> std::quoted(importFileName);
 
-            QString fullPath = QFileInfo(QString::fromStdString(path)).absoluteDir().filePath(QString::fromStdString(importFileName));
+			std::filesystem::path dependencyPath = std::filesystem::path(path) / importFileName;
+			
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
-            logInfo("File to access: {}", "FileManager", fullPath.toStdString());
-            if (loadFromFile(fullPath.toStdString(), dependency)){
+            logInfo("File to access: {}", "FileManager", dependencyPath.string());
+            if (loadFromFile(dependencyPath.string(), dependency)){
                 outParsed->addDependency(importFileName, dependency);
                 outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
                 logInfo("Loaded dependency circuit: {} ({})", "FileManager", dependency->getName(), dependency->getUUID());
@@ -245,9 +242,4 @@ bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr
 
     outputFile.close();
     return true;
-}
-
-bool CircuitFileManager::loadOpenCircuitFile(const std::string& path, SharedParsedCircuit outParsed){
-    OpenCircuitsParser parser;
-    return parser.parse(path, outParsed);
 }

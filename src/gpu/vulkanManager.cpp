@@ -1,7 +1,5 @@
 #include "vulkanManager.h"
 
-#include "gpu/vulkanPlatformBridge.h"
-
 #include <vulkan/vk_enum_string_helper.h>
 
 #include <cassert>
@@ -86,7 +84,7 @@ void Vulkan::createInstance() {
 	createInfo.pApplicationInfo = &appInfo;
 
 	// add extensions
-	std::vector<std::string> requiredExtensionsStr = getRequiredInstanceExtensions();
+	std::vector<std::string> requiredExtensionsStr = {};//getRequiredInstanceExtensions();
 	std::vector<const char*> requiredExtensions;
 	for (const std::string& extension : requiredExtensionsStr) requiredExtensions.push_back(extension.c_str());
 	if (USE_VALIDATION_LAYERS) { requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }

@@ -41,29 +41,19 @@ option(Gatality_BuildApp "Build main app" ON)
 option(Gatality_BuildTests "Build tests" OFF)
 
 # ======================================== DEPENDENCY SETUP ========================================
-# Initialize QT
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${SOURCE_DIR})
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # Initialize Vulkan
 find_package(Vulkan REQUIRED COMPONENTS glslc)
-add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM) # and vma
+# VMA
+add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM)
 # GLM
 add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM)
-
-# KDDockWidgets
-set(KDDockWidgets_QT6 ON)
-set(KDDockWidgets_STATIC ON)
-add_subdirectory(external/KDDockWidgets)
 
 # CPPLocate (they have extreme cmake goofyness)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate)
-
 
 set(EXTERNAL_SOURCES
 	
@@ -72,10 +62,8 @@ set(EXTERNAL_INCLUDES
 	${Vulkan_INCLUDE_DIRS}
 )
 set(EXTERNAL_LINKS
-	cpplocate::cpplocate
-	Qt6::Core Qt6::Gui Qt6::Widgets
-	KDAB::kddockwidgets
 	${Vulkan_LIBRARIES}
+	cpplocate::cpplocate
 	VulkanMemoryAllocator
 	glm
 )

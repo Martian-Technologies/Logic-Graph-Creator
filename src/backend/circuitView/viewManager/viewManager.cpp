@@ -1,6 +1,3 @@
-#include <QApplication>
-
-#include "logging/logging.h"
 #include "viewManager.h"
 #include "backend/circuitView/events/customEvents.h"
 

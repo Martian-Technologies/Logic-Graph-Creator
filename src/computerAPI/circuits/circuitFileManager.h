@@ -1,5 +1,6 @@
 #ifndef circuitFileManager_h
 #define circuitFileManager_h
+
 #include "backend/circuit/circuitManager.h"
 #include "backend/circuit/parsedCircuit.h"
 
@@ -17,21 +18,6 @@ public:
 private:
     const CircuitManager* circuitManager;
     std::unordered_set<std::string> loadedFiles;
-};
-
-struct OpenCircuitsBlockInfo {
-    std::string type;
-    FPosition position;
-    double angle; // in radians
-    std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
-    std::vector<int> outputBlocks;
-    std::string icReference;
-};
-
-struct ICData {
-    std::unordered_map<int, OpenCircuitsBlockInfo> components;
-    std::vector<int> inputPorts;
-    std::vector<int> outputPorts;
 };
 
 BlockType stringToBlockType(const std::string& str);

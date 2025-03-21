@@ -1,6 +1,3 @@
-[submodule "KDDockWidgets"]
-	path = external/KDDockWidgets
-	url = https://github.com/KDAB/KDDockWidgets
 [submodule "googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest
