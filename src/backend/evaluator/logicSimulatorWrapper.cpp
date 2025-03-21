@@ -178,11 +178,12 @@ void LogicSimulatorWrapper::setState(wrapper_gate_id_t gateId, size_t outputGrou
 
 std::vector<wrapper_gate_id_t> LogicSimulatorWrapper::findConnectedJunctionGates(JunctionGate& junctionGate) {
 	std::unordered_set<wrapper_gate_id_t> visited;
-	std::vector<wrapper_gate_id_t> toVisit;
-	toVisit.push_back(junctionGate.gateId);
+	std::unordered_set<wrapper_gate_id_t> toVisit;
+	toVisit.insert(junctionGate.gateId);
 	while (!toVisit.empty()) {
-		wrapper_gate_id_t currentGateId = toVisit.back();
-		toVisit.pop_back();
+		auto it = toVisit.begin();
+		wrapper_gate_id_t currentGateId = *it;
+		toVisit.erase(it);
 		if (visited.contains(currentGateId)) {
 			continue;
 		}
@@ -190,14 +191,31 @@ std::vector<wrapper_gate_id_t> LogicSimulatorWrapper::findConnectedJunctionGates
 		JunctionGate& currentJunctionGate = getJunctionGate(currentGateId);
 		for (const wrapper_gate_id_t input : currentJunctionGate.junctionInputs) {
 			if (!visited.contains(input)) {
-				toVisit.push_back(input);
+				toVisit.insert(input);
 			}
 		}
 		for (const wrapper_gate_id_t output : currentJunctionGate.junctionOutputs) {
 			if (!visited.contains(output)) {
-				toVisit.push_back(output);
+				toVisit.insert(output);
 			}
 		}
+
+		// for (const auto& input : currentJunctionGate.externalInputs) {
+		// 	wrapper_gate_id_t inputGateId = input.first;
+		// 	size_t inputGroup = input.second;
+		// 	// go through every buffer gate in junctionGates vec
+		// 	for (const auto& junctionGate : junctionGates) {
+		// 		for (const auto& input2 : junctionGate.externalInputs) {
+		// 			if (input2.first == inputGateId && input2.second == inputGroup) {
+		// 				wrapper_gate_id_t junctionGateId = junctionGate.gateId;
+		// 				// Don't need to check if it's in toVisit - sets handle duplicates automatically
+		// 				if (!visited.contains(junctionGateId) && junctionGateId != currentGateId) {
+		// 					toVisit.insert(junctionGateId);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 	std::vector<wrapper_gate_id_t> connectedJunctionGates;
 	connectedJunctionGates.reserve(visited.size());

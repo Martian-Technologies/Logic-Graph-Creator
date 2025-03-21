@@ -430,12 +430,29 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 		gate.statesB[0] = logic_state_t::HIGH;
 		return;
 	}
+	case GateType::COPYINPUT:
+	{
+		if (gate.inputGroups[0].size() == 0) {
+			gate.statesB[0] = logic_state_t::UNDEFINED;
+			return;
+		}
+		gate.statesB[0] = gates[gate.inputGroups[0][0].gateId].statesA[gate.inputGroups[0][0].outputGroup];
+		return;
+	}
 	case GateType::TRISTATE_BUFFER:
 	{
 		const auto& dataGroup = gate.inputGroups[0];
 		const auto& controlGroup = gate.inputGroups[1];
+		if (controlGroup.size() == 0) {
+			gate.statesB[0] = logic_state_t::UNDEFINED;
+			return;
+		}
 		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].outputGroup];
 		if (controlState == logic_state_t::HIGH) {
+			if (dataGroup.size() == 0) {
+				gate.statesB[0] = logic_state_t::UNDEFINED;
+				return;
+			}
 			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].outputGroup];
 		}
 		else if (controlState == logic_state_t::LOW) {
@@ -450,8 +467,16 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	{
 		const auto& dataGroup = gate.inputGroups[0];
 		const auto& controlGroup = gate.inputGroups[1];
+		if (controlGroup.size() == 0) {
+			gate.statesB[0] = logic_state_t::UNDEFINED;
+			return;
+		}
 		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].outputGroup];
 		if (controlState == logic_state_t::LOW) {
+			if (dataGroup.size() == 0) {
+				gate.statesB[0] = logic_state_t::UNDEFINED;
+				return;
+			}
 			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].outputGroup];
 		}
 		else if (controlState == logic_state_t::HIGH) {

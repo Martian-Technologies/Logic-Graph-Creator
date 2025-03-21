@@ -27,7 +27,6 @@ public:
 	long long int getRealTickrate() const;
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<wrapper_gate_id_t>& addressTree);
 	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address);
 	void setState(const Address& address, logic_state_t state);
@@ -38,13 +37,21 @@ public:
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
 private:
+	struct EvaluatorGate {
+		wrapper_gate_id_t gateId;
+		BlockType blockType;
+	};
+
 	evaluator_id_t evaluatorId;
 	bool paused;
 	bool usingTickrate;
 	unsigned long long targetTickrate;
 	LogicSimulatorWrapper logicSimulatorWrapper;
-	AddressTreeNode<wrapper_gate_id_t> addressTree;
+	AddressTreeNode<EvaluatorGate> addressTree;
 	CircuitManager& circuitManager;
+
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree);
+	int getGroupIndex(EvaluatorGate gate, const Vector& offset, bool trackInput);
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);

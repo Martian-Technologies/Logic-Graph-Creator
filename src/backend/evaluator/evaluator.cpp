@@ -61,7 +61,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 	makeEditInPlace(difference, containerId, addressTree);
 }
 
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<wrapper_gate_id_t>& addressTree) {
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree) {
 	logicSimulatorWrapper.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
@@ -82,13 +82,13 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				if (!exists) { // integrated circuit
 					const auto branch = addressTree.getBranch(address);
 					const auto allValues = branch.getAllValues();
-					for (const auto& value : allValues) {
-						logicSimulatorWrapper.deleteGate(value);
+					for (const auto value : allValues) {
+						logicSimulatorWrapper.deleteGate(value.gateId);
 					}
 					addressTree.nukeBranch(address);
 				}
 				else{
-					const wrapper_gate_id_t blockId = addressTree.getValue(address);
+					const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 					logicSimulatorWrapper.deleteGate(blockId);
 					addressTree.removeValue(address);
 				}
@@ -100,10 +100,10 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType);
 			if (gateType != GateType::NONE) {
-				const auto addresses = addressTree.addValue(position, containerId, 0);
+				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate{ 0, blockType });
 				for (const auto& address : addresses) {
 					const wrapper_gate_id_t blockId = logicSimulatorWrapper.createGate(gateType, true);
-					addressTree.setValue(address, blockId);
+					addressTree.setValue(address, EvaluatorGate{ blockId, blockType });
 				}
 			}
 			else {
@@ -118,7 +118,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
 				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
 				for (const auto& address : addresses) {
-					AddressTreeNode<wrapper_gate_id_t>& branch = addressTree.getBranch(address);
+					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
 					makeEditInPlace(integratedDifference, integratedCircuitId, branch);
 				}
 			}
@@ -126,29 +126,37 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::REMOVED_CONNECTION:
 		{
-			const auto& [a, outputPosition, b, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
-			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto outputOffset = outputPosition - outputBlockPosition;
+			const auto inputOffset = inputPosition - inputBlockPosition;
+			const auto outputAddresses = addressTree.getPositions(containerId, outputBlockPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputBlockPosition);
 			for (int i = 0; i < outputAddresses.size(); i++) {
 				const auto outputAddress = outputAddresses[i];
 				const auto inputAddress = inputAddresses[i];
-				const wrapper_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
-				const wrapper_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
-				logicSimulatorWrapper.disconnectGates(outputBlockId, 0, inputBlockId, 0); // TODO: 0 temp
+				const EvaluatorGate outputBlock = addressTree.getValue(outputAddress);
+				const EvaluatorGate inputBlock = addressTree.getValue(inputAddress);
+				int outputGroupIndex = getGroupIndex(outputBlock, outputOffset, false);
+				int inputGroupIndex = getGroupIndex(inputBlock, inputOffset, true);
+				logicSimulatorWrapper.disconnectGates(outputBlock.gateId, outputGroupIndex, inputBlock.gateId, inputGroupIndex);
 			}
 			break;
 		}
 		case Difference::CREATED_CONNECTION:
 		{
-			const auto& [a, outputPosition, b, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			const auto outputAddresses = addressTree.getPositions(containerId, outputPosition);
-			const auto inputAddresses = addressTree.getPositions(containerId, inputPosition);
+			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+			const auto outputOffset = outputPosition - outputBlockPosition;
+			const auto inputOffset = inputPosition - inputBlockPosition;
+			const auto outputAddresses = addressTree.getPositions(containerId, outputBlockPosition);
+			const auto inputAddresses = addressTree.getPositions(containerId, inputBlockPosition);
 			for (int i = 0; i < outputAddresses.size(); i++) {
 				const auto outputAddress = outputAddresses[i];
 				const auto inputAddress = inputAddresses[i];
-				const wrapper_gate_id_t outputBlockId = addressTree.getValue(outputAddress);
-				const wrapper_gate_id_t inputBlockId = addressTree.getValue(inputAddress);
-				logicSimulatorWrapper.connectGates(outputBlockId, 0, inputBlockId, 0); // TODO: 0 temp
+				const EvaluatorGate outputBlock = addressTree.getValue(outputAddress);
+				const EvaluatorGate inputBlock = addressTree.getValue(inputAddress);
+				int outputGroupIndex = getGroupIndex(outputBlock, outputOffset, false);
+				int inputGroupIndex = getGroupIndex(inputBlock, inputOffset, true);
+				logicSimulatorWrapper.connectGates(outputBlock.gateId, outputGroupIndex, inputBlock.gateId, inputGroupIndex);
 			}
 			break;
 		}
@@ -166,6 +174,28 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 	}
 }
 
+int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector& offset, bool trackInput) {
+	int groupIndex = 0;
+	const wrapper_gate_id_t blockId = gate.gateId;
+	const BlockType blockType = gate.blockType;
+	const BlockData* blockData = circuitManager.getBlockDataManager()->getBlockData(blockType);
+	if (blockData == nullptr) {
+		logError("getGroupIndex: blockData is null");
+		return 0;
+	}
+
+	const auto connections = blockData->getConnections();
+	for (int j = 0; j < connections.size(); j++) {
+		if (connections[j].first == offset) {
+			break;
+		}
+		if (connections[j].second == trackInput) {
+			groupIndex++;
+		}
+	}
+	return groupIndex;
+}
+
 GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	switch (blockType) {
 	case BlockType::AND: return GateType::AND;
@@ -177,14 +207,15 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::SWITCH: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
 	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
-	case BlockType::LIGHT: return GateType::OR;
+	case BlockType::LIGHT: return GateType::COPYINPUT;
 	case BlockType::JUNCTION: return GateType::JUNCTION;
+	case BlockType::TRISTATE_BUFFER: return GateType::TRISTATE_BUFFER;
 	default: return GateType::NONE;
 	}
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
-	const wrapper_gate_id_t blockId = addressTree.getValue(address);
+	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 
 	logicSimulatorWrapper.signalToPause();
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
@@ -214,7 +245,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		if (!exists) {
 			states.push_back(logic_state_t::UNDEFINED);
 		} else {
-			const wrapper_gate_id_t blockId = addressTree.getValue(address);
+			const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 			states.push_back(logicSimulatorWrapper.getState(blockId, 0)); // TODO: 0 temp
 		}
 	}
@@ -225,7 +256,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
-	const wrapper_gate_id_t blockId = addressTree.getValue(address);
+	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 	logicSimulatorWrapper.signalToPause();
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
