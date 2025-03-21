@@ -15,7 +15,7 @@ public:
 		getBlockData(BlockType::NAND)->setName("Nand");
 		getBlockData(BlockType::NOR)->setName("Nor");
 		getBlockData(BlockType::XNOR)->setName("Xnor");
-		getBlockData(BlockType::BUFFER)->setName("Buffer");
+		getBlockData(BlockType::JUNCTION)->setName("Junction");
 		// TRISTATE_BUFFER
 		getBlockData(BlockType::TRISTATE_BUFFER)->setName("Tristate Buffer");
 		getBlockData(BlockType::TRISTATE_BUFFER)->setDefaultData(false);
