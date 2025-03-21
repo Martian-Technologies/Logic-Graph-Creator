@@ -19,6 +19,7 @@ struct RenderedBlock {
 
 typedef std::pair<Position, Position> RenderedWire;
 
+// TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
 	VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks, std::set<RenderedWire>& wires);

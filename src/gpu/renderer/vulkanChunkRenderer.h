@@ -76,8 +76,7 @@ private:
 	VulkanChunker chunker;
 	
 	PipelineData blockPipeline;
-	VkShaderModule blockVertShader;
-	VkShaderModule blockFragShader;
+	PipelineData wirePipeline;
 };
 
 #endif
