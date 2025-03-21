@@ -3,7 +3,7 @@
 Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId)
 	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
-	addressTree(circuitId),
+	addressTree(circuitId, Rotation::ZERO),
 	usingTickrate(false),
 	circuitManager(circuitManager) {
 
@@ -58,10 +58,10 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	makeEditInPlace(difference, containerId, addressTree);
+	makeEditInPlace(difference, containerId, addressTree, false);
 }
 
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree) {
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC) {
 	logicSimulatorWrapper.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
@@ -98,7 +98,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		case Difference::PLACE_BLOCK:
 		{
 			const auto [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			const GateType gateType = circuitToEvaluatorGatetype(blockType);
+			const GateType gateType = circuitToEvaluatorGatetype(blockType, insideIC);
 			if (gateType != GateType::NONE) {
 				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate{ 0, blockType, rotation });
 				for (const auto& address : addresses) {
@@ -113,13 +113,13 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 					logError("makeEditInPlace: blockType is not a valid block type");
 					break;
 				}
-				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId);
+				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId, rotation);
 				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
 				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
 				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
 				for (const auto& address : addresses) {
 					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
-					makeEditInPlace(integratedDifference, integratedCircuitId, branch);
+					makeEditInPlace(integratedDifference, integratedCircuitId, branch, true);
 				}
 			}
 			break;
@@ -134,11 +134,9 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			for (int i = 0; i < outputAddresses.size(); i++) {
 				const auto outputAddress = outputAddresses[i];
 				const auto inputAddress = inputAddresses[i];
-				const EvaluatorGate outputBlock = addressTree.getValue(outputAddress);
-				const EvaluatorGate inputBlock = addressTree.getValue(inputAddress);
-				int outputGroupIndex = getGroupIndex(outputBlock, outputOffset, false);
-				int inputGroupIndex = getGroupIndex(inputBlock, inputOffset, true);
-				logicSimulatorWrapper.disconnectGates(outputBlock.gateId, outputGroupIndex, inputBlock.gateId, inputGroupIndex);
+				auto outputPoint = getConnectionPoint(addressTree, outputAddress, outputOffset, false);
+				auto inputPoint = getConnectionPoint(addressTree, inputAddress, inputOffset, true);
+				logicSimulatorWrapper.disconnectGates(outputPoint.first, outputPoint.second, inputPoint.first, inputPoint.second);
 			}
 			break;
 		}
@@ -152,11 +150,9 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			for (int i = 0; i < outputAddresses.size(); i++) {
 				const auto outputAddress = outputAddresses[i];
 				const auto inputAddress = inputAddresses[i];
-				const EvaluatorGate outputBlock = addressTree.getValue(outputAddress);
-				const EvaluatorGate inputBlock = addressTree.getValue(inputAddress);
-				int outputGroupIndex = getGroupIndex(outputBlock, outputOffset, false);
-				int inputGroupIndex = getGroupIndex(inputBlock, inputOffset, true);
-				logicSimulatorWrapper.connectGates(outputBlock.gateId, outputGroupIndex, inputBlock.gateId, inputGroupIndex);
+				auto outputPoint = getConnectionPoint(addressTree, outputAddress, outputOffset, false);
+				auto inputPoint = getConnectionPoint(addressTree, inputAddress, inputOffset, true);
+				logicSimulatorWrapper.connectGates(outputPoint.first, outputPoint.second, inputPoint.first, inputPoint.second);
 			}
 			break;
 		}
@@ -197,7 +193,56 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool track
 	return groupIndex;
 }
 
-GateType circuitToEvaluatorGatetype(BlockType blockType) {
+std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput) {
+	if (addressTree.hasValue(address)) {
+		const EvaluatorGate gate = addressTree.getValue(address);
+		const int groupIndex = getGroupIndex(gate, offset, trackInput);
+		return { gate.gateId, groupIndex };
+	}
+	// custom circuits here
+	const auto branch = addressTree.getBranch(address);
+	const circuit_id_t integratedCircuitId = branch.getContainerId();
+	const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
+	const BlockDataManager* blockDataManager = circuitManager.getBlockDataManager();
+	const CircuitBlockDataManager* circuitBlockDataManager = circuitManager.getCircuitBlockDataManager();
+	const CircuitBlockData* integratedCircuitBlockData = circuitBlockDataManager->getCircuitBlockData(integratedCircuitId);
+	if (integratedCircuitBlockData == nullptr) {
+		logError("getConnectionPoint: integratedCircuitBlockData is null");
+		return { 0, 0 };
+	}
+	const BlockData* blockData = blockDataManager->getBlockData(integratedCircuitBlockData->getBlockType());
+	if (blockData == nullptr) {
+		logError("getConnectionPoint: blockData is null");
+		return { 0, 0 };
+	}
+	connection_end_id_t connectionId = 0;
+	if (trackInput) {
+		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch.getRotation());
+		if (inputConnectionIdData.second) {
+			connectionId = inputConnectionIdData.first;
+		}
+		else {
+			logError("getConnectionPoint: input connection id not found");
+		}
+	}
+	else {
+		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch.getRotation());
+		if (outputConnectionIdData.second) {
+			connectionId = outputConnectionIdData.first;
+		}
+		else {
+			logError("getConnectionPoint: output connection id not found");
+		}
+	}
+	const Position* connectionPosition = integratedCircuitBlockData->getConnectionIdToPosition(connectionId);
+	if (connectionPosition == nullptr) {
+		logError("getConnectionPoint: connection position is null");
+		return { 0, 0 };
+	}
+	return { branch.getValue(*connectionPosition).gateId, 0 };
+}
+
+GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
 	switch (blockType) {
 	case BlockType::AND: return GateType::AND;
 	case BlockType::OR: return GateType::OR;
@@ -205,9 +250,30 @@ GateType circuitToEvaluatorGatetype(BlockType blockType) {
 	case BlockType::NAND: return GateType::NAND;
 	case BlockType::NOR: return GateType::NOR;
 	case BlockType::XNOR: return GateType::XNOR;
-	case BlockType::SWITCH: return GateType::DEFAULT_RETURN_CURRENTSTATE;
-	case BlockType::BUTTON: return GateType::DEFAULT_RETURN_CURRENTSTATE;
-	case BlockType::TICK_BUTTON: return GateType::TICK_INPUT;
+	case BlockType::SWITCH: {
+		if (insideIC) {
+			return GateType::JUNCTION;
+		}
+		else {
+			return GateType::DEFAULT_RETURN_CURRENTSTATE;
+		}
+	};
+	case BlockType::BUTTON: {
+		if (insideIC) {
+			return GateType::JUNCTION;
+		}
+		else {
+			return GateType::DEFAULT_RETURN_CURRENTSTATE;
+		}
+	};
+	case BlockType::TICK_BUTTON: {
+		if (insideIC) {
+			return GateType::JUNCTION;
+		}
+		else {
+			return GateType::TICK_INPUT;
+		}
+	};
 	case BlockType::LIGHT: return GateType::COPYINPUT;
 	case BlockType::JUNCTION: return GateType::JUNCTION;
 	case BlockType::TRISTATE_BUFFER: return GateType::TRISTATE_BUFFER;

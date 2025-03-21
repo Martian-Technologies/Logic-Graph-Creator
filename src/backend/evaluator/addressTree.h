@@ -8,14 +8,14 @@
 template <class T>
 class AddressTreeNode {
 public:
-	AddressTreeNode(circuit_id_t contId) : containerId(contId) {}
+	AddressTreeNode(circuit_id_t contId, Rotation rotation) : containerId(contId), rotation(rotation) {}
 
 	void addValue(Position position, T value);
 	void addValue(const Address& address, T value);
 	std::vector<Address> addValue(Position position, circuit_id_t targetParentContainerId, T Value);
-	void makeBranch(Position position, circuit_id_t newContainerId);
-	void makeBranch(const Address& address, circuit_id_t newContainerId);
-	std::vector<Address> makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId);
+	void makeBranch(Position position, circuit_id_t newContainerId, Rotation rotation);
+	void makeBranch(const Address& address, circuit_id_t newContainerId, Rotation rotation);
+	std::vector<Address> makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId, Rotation rotation);
 
 	void removeValue(Position position) { values.erase(position); }
 	void removeValue(const Address& address) {
@@ -68,12 +68,15 @@ public:
 	void moveData(circuit_id_t, Position curPosition, Position newPosition);
 	void remap(const std::unordered_map<T, T>& mapping);
 
+	Rotation getRotation() const { return rotation; }
+
 	circuit_id_t getContainerId() const { return containerId; }
 
 private:
 	std::unordered_map<Position, T> values;
 	std::unordered_map<Position, AddressTreeNode<T>> branches;
 	circuit_id_t containerId;
+	Rotation rotation;
 };
 
 template<class T>
@@ -116,33 +119,33 @@ std::vector<Address> AddressTreeNode<T>::addValue(Position position, circuit_id_
 }
 
 template<class T>
-void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainerId) {
+void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainerId, Rotation rotation) {
 	if (hasValue(position) || hasBranch(position)) {
 		logError("AddressTree::makeBranch: position already exists");
 		return;
 	}
-	branches.emplace(position, AddressTreeNode<T>(newContainerId));
+	branches.emplace(position, AddressTreeNode<T>(newContainerId, rotation));
 }
 
 template<class T>
-void AddressTreeNode<T>::makeBranch(const Address& address, circuit_id_t newContainerId) {
+void AddressTreeNode<T>::makeBranch(const Address& address, circuit_id_t newContainerId, Rotation rotation) {
 	if (address.size() == 0) {
 		logError("AddressTree::makeBranch: address size is 0");
 		return;
 	}
-	getParentBranch(address).makeBranch(address.getPosition(address.size() - 1), newContainerId);
+	getParentBranch(address).makeBranch(address.getPosition(address.size() - 1), newContainerId, rotation);
 }
 
 template<class T>
-std::vector<Address> AddressTreeNode<T>::makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId) {
+std::vector<Address> AddressTreeNode<T>::makeBranch(Position position, circuit_id_t targetParentContainerId, circuit_id_t newContainerId, Rotation rotation) {
 	std::vector<Address> addresses;
 	if (containerId == targetParentContainerId) {
-		makeBranch(position, newContainerId);
+		makeBranch(position, newContainerId, rotation);
 		addresses.push_back(Address(position));
 	}
 	else {
 		for (auto& [pos, branch] : branches) {
-			std::vector<Address> newAddresses = branch.makeBranch(position, targetParentContainerId, newContainerId);
+			std::vector<Address> newAddresses = branch.makeBranch(position, targetParentContainerId, newContainerId, rotation);
 			for (Address& address : newAddresses) {
 				address.nestPosition(pos);
 			}
