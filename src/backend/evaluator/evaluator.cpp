@@ -274,7 +274,14 @@ GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
 			return GateType::TICK_INPUT;
 		}
 	};
-	case BlockType::LIGHT: return GateType::COPYINPUT;
+	case BlockType::LIGHT: {
+		if (insideIC) {
+			return GateType::JUNCTION;
+		}
+		else {
+			return GateType::COPYINPUT;
+		}
+	};
 	case BlockType::JUNCTION: return GateType::JUNCTION;
 	case BlockType::TRISTATE_BUFFER: return GateType::TRISTATE_BUFFER;
 	default: return GateType::NONE;
