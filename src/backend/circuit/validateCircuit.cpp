@@ -47,7 +47,7 @@ bool CircuitValidator::setBlockPositionsInt() {
             if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
             if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
 
-            logInfo("Converted block id={} position from {} to {}", "CircuitValidator", id, oldPosition.toString(), block.pos.toString());
+            logInfo("Converted block id={} position from {} to {}", "CircuitValidator", id, oldPosition, block.pos);
         }
     }
     return true;
