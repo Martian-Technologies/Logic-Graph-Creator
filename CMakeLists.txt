@@ -48,6 +48,10 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 # SDL
 add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM)
 
+# RmlUi
+set(RMLUI_BACKEND native)
+add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM)
+
 # VMA
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM)
 # GLM
@@ -67,6 +71,7 @@ set(EXTERNAL_INCLUDES
 )
 set(EXTERNAL_LINKS
 	${Vulkan_LIBRARIES}
+	RmlUi::RmlUi
 	SDL3::SDL3
 	cpplocate::cpplocate
 	VulkanMemoryAllocator

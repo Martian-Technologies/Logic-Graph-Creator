@@ -1,8 +1,8 @@
-#include "SDLInstance.h"
+#include "sdlInstance.h"
 
 #include <SDL3/SDL.h>
 
-SDLInstance::SDLInstance() {
+SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
 	if(!SDL_Init(SDL_INIT_VIDEO))
 	{
@@ -10,7 +10,7 @@ SDLInstance::SDLInstance() {
 	}
 }
 
-SDLInstance::~SDLInstance() {
+SdlInstance::~SdlInstance() {
 	logInfo("Shutting down SDL...");
 	SDL_Quit();
 }

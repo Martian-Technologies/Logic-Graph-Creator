@@ -13,3 +13,6 @@
 [submodule "SDL"]
 	path = external/SDL
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "RmlUi"]
+	path = external/RmlUi
+	url = https://github.com/mikke89/RmlUi.git

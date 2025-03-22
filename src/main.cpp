@@ -1,7 +1,8 @@
 #include "computerAPI/directoryManager.h"
 
 #include "gpu/vulkanManager.h"
-#include "platform/SDLInstance.h"
+#include "platform/sdlInstance.h"
+#include "platform/sdlWindow.h"
 
 void setupVulkan();
 
@@ -9,7 +10,9 @@ int main(int argc, char* argv[]) {
 	DirectoryManager::findDirectories();
 
 	// Create SDL Instance 
-	SDLInstance sdl;
+	SdlInstance sdl;
+	// Create SDL window
+	SdlWindow window;
 	
 	// set up vulkan
 	setupVulkan();
