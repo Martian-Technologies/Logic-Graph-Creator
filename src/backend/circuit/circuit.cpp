@@ -344,3 +344,20 @@ void Circuit::redo() {
 	sendDifference(newDifference);
 	endUndo();
 }
+
+void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData) {
+	if (!eventData) {
+		logError("eventData passed was null", "Circuit");
+		return;
+	}
+	auto data = dynamic_cast<const DataUpdateEventManager::EventDataUnsignedInt*>(eventData);
+	if (!data) {
+		logError("Could not get EventDataUnsignedInt from eventData", "Circuit");
+		return;
+	}
+	BlockType type = (BlockType)(data->getValue());
+	const BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(type);
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.resizeBlockType(type, blockData->getWidth(), blockData->getHeight(), difference.get());
+	sendDifference(difference);
+}

@@ -16,8 +16,10 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, const std::string& uuid, const std::string& name) :
-        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name) { }
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& uuid, const std::string& name) :
+        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
+	}
 
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
@@ -30,7 +32,6 @@ public:
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
 	/* ----------- listener ----------- */
-
 
 	// subject to change
 	void connectListener(void* object, CircuitDiffListenerFunction func) { listenerFunctions[object] = func; }
@@ -91,6 +92,8 @@ public:
 	void redo();
 
 private:
+	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
+
 	// helpers
 	bool checkMoveCollision(const SharedSelection& selection, const Vector& movement);
 	void moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference);
@@ -107,6 +110,8 @@ private:
     std::string circuitUUID;
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
+	DataUpdateEventManager* dataUpdateEventManager;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
 	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
 	

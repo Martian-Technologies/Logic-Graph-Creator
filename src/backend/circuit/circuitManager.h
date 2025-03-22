@@ -114,7 +114,7 @@ public:
 
 	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
 		circuit_id_t id = getNewCircuitId();
-		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, uuid, name);
+		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, uuid, name);
 		circuits.emplace(id, circuit);
 		for (auto& [object, func] : listenerFunctions) {
 			circuit->connectListener(object, func);

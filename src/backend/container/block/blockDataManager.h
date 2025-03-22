@@ -8,7 +8,7 @@ class BlockDataManager {
 public:
 	BlockDataManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) {
 		// load default data
-		blockData.resize(13);
+		for (unsigned int i = 0; i < 13; i++) addBlock();
 		getBlockData(BlockType::AND)->setName("And");
 		getBlockData(BlockType::OR)->setName("Or");
 		getBlockData(BlockType::XOR)->setName("Xor");
@@ -44,12 +44,10 @@ public:
 		getBlockData(BlockType::LIGHT)->setName("Light");
 		getBlockData(BlockType::LIGHT)->setDefaultData(false);
 		getBlockData(BlockType::LIGHT)->trySetConnectionInput(Vector(0, 0), 0);
-		
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
 	inline BlockType addBlock() noexcept {
-		blockData.emplace_back();
+		blockData.emplace_back((BlockType)(blockData.size()+1), dataUpdateEventManager);
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 		return (BlockType) blockData.size();
 	}

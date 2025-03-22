@@ -27,7 +27,7 @@ private:
 
 	const BlockDataManager* blockDataManager;
 	Ui::Selector* ui;
-	DataUpdateEventReceiver dataUpdateEventReceiver;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
 signals:
 	void selectedBlockChange(std::string blockPath);
