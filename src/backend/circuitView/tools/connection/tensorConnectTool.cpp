@@ -18,7 +18,7 @@ bool TensorConnectTool::click(const Event* event) {
 				outputStage++;
 			}
 		} else { // count
-			int dis = step.length();
+			float dis = step.length();
 			float length = lastPointerFPosition.lengthAlongProjectToVec(outputPosition.free() + FVector(0.5f, 0.5f), step.free());
 			int count = Abs(round(length / dis)) + 1;
 			outputSelection = std::make_shared<ProjectionSelection>(outputSelection, (length > 0) ? step : step * -1, count);

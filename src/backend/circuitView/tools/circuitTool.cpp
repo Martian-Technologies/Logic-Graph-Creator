@@ -34,6 +34,7 @@ void CircuitTool::setup(Renderer* renderer, EventRegister* eventRegister, ToolSt
 	this->elementCreator.setup(renderer);
 	this->eventRegister = eventRegister;
 	this->circuit = circuit;
+	reset();
 }
 
 void CircuitTool::unsetup() {

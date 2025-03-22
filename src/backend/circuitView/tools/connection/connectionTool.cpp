@@ -19,16 +19,19 @@ void ConnectionTool::setMode(std::string toolMode) {
 		if (toolMode == "None") {
 			activeConnectionTool = nullptr;
 			toolStackInterface->popTool();
+			mode = "None";
 		} else {
-			if (mode == "None") {
+			if (mode != "None") {
 				toolStackInterface->popTool();
 			}
+			mode = toolMode;
 			if (toolMode == "Single") {
 				activeConnectionTool = std::make_shared<SingleConnectTool>();
 			} else if (toolMode == "Tensor") {
 				activeConnectionTool = std::make_shared<TensorConnectTool>();
 			} else {
 				logError("Tool mode \"{}\" could not be found", "", toolMode);
+				mode = "None";
 			}
 			toolStackInterface->pushTool(activeConnectionTool);
 		}

@@ -7,11 +7,39 @@
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager) {}
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager) { }
 
+	// Circuit
+	inline SharedCircuit getCircuit(circuit_id_t id) {
+		auto iter = circuits.find(id);
+		if (iter == circuits.end()) return nullptr;
+		return iter->second;
+	}
+	inline const SharedCircuit getCircuit(circuit_id_t id) const {
+		auto iter = circuits.find(id);
+		if (iter == circuits.end()) return nullptr;
+		return iter->second;
+	}
+
+	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
+		circuit_id_t id = getNewCircuitId();
+		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, uuid, name);
+		circuits.emplace(id, circuit);
+		for (auto& [object, func] : listenerFunctions) {
+			circuit->connectListener(object, func);
+		}
+		return id;
+	}
+	inline void destroyCircuit(circuit_id_t id) {
+		auto iter = circuits.find(id);
+		if (iter != circuits.end()) {
+			circuits.erase(iter);
+		}
+	}
+
+	// Block Data
 	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
 	inline const CircuitBlockDataManager* getCircuitBlockDataManager() const { return &circuitBlockDataManager; }
-
 	inline BlockType setupBlockData(circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
 		if (iter == circuits.end()) return BlockType::NONE;
@@ -25,7 +53,7 @@ public:
 		}
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
-		blockData->setName(circuit->getCircuitName());
+		blockData->setName(circuit->getCircuitNameNumber());
 		blockData->setPath("Custom");
 		blockData->setWidth(2);
 		blockData->setHeight(1);
@@ -38,12 +66,11 @@ public:
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
 
 		circuit->connectListener(this, std::bind(&CircuitManager::updateBlockPorts, this, std::placeholders::_1, std::placeholders::_2));
-		
+
 		updateBlockPorts(circuit->getBlockContainer()->getCreationDifferenceShared(), circuitId);
 
 		return blockType;
 	}
-
 	inline void updateBlockPorts(DifferenceSharedPtr dif, circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
 		if (iter == circuits.end()) return;
@@ -72,7 +99,7 @@ public:
 				connection_end_id_t inputCount = blockData->getInputConnectionCount();
 				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
 				if (inputCount >= outputCount) {
-					blockData->setHeight(inputCount+1);
+					blockData->setHeight(inputCount + 1);
 				}
 				if (blockData->trySetConnectionInput(Vector(0, inputCount), inputCount + outputCount)) {
 					circuitBlockData->setConnectionIdName(inputCount + outputCount, "INPUT: " + std::to_string(inputCount));
@@ -88,7 +115,7 @@ public:
 				connection_end_id_t inputCount = blockData->getInputConnectionCount();
 				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
 				if (outputCount >= inputCount) {
-					blockData->setHeight(outputCount+1);
+					blockData->setHeight(outputCount + 1);
 				}
 				if (blockData->trySetConnectionOutput(Vector(1, outputCount), inputCount + outputCount)) {
 					circuitBlockData->setConnectionIdName(inputCount + outputCount, "OUTPUT: " + std::to_string(outputCount));
@@ -101,34 +128,7 @@ public:
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
-	inline SharedCircuit getCircuit(circuit_id_t id) {
-		auto iter = circuits.find(id);
-		if (iter == circuits.end()) return nullptr;
-		return iter->second;
-	}
-	inline const SharedCircuit getCircuit(circuit_id_t id) const {
-		auto iter = circuits.find(id);
-		if (iter == circuits.end()) return nullptr;
-		return iter->second;
-	}
-
-	inline circuit_id_t createNewCircuit(const std::string& uuid, const std::string& name) {
-		circuit_id_t id = getNewCircuitId();
-		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, uuid, name);
-		circuits.emplace(id, circuit);
-		for (auto& [object, func] : listenerFunctions) {
-			circuit->connectListener(object, func);
-		}
-		return id;
-	}
-
-	inline void destroyCircuit(circuit_id_t id) {
-		auto iter = circuits.find(id);
-		if (iter != circuits.end()) {
-			circuits.erase(iter);
-		}
-	}
-
+	// Iterator
 	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;
 	typedef std::map<circuit_id_t, SharedCircuit>::const_iterator const_iterator;
 
