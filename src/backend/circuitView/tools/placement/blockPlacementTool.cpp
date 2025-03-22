@@ -29,7 +29,7 @@ void BlockPlacementTool::setMode(std::string toolMode) {
 			} else if (toolMode == "Area") {
 				activePlacementTool = std::make_shared<AreaPlaceTool>();
 			} else {
-				logError("Tool mode \"" + toolMode + "\" could not be found");
+				logError("Tool mode \"{}\" could not be found", "", toolMode);
 			}
 			activePlacementTool->selectBlock(selectedBlock);
 			activePlacementTool->setRotation(rotation);

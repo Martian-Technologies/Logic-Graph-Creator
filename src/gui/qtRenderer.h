@@ -48,12 +48,14 @@ private:
 	QPointF gridToQt(FVector vector);
 	inline float scalePixelCount(float pixelCount) { return pixelCount / viewManager->getViewHeight() * ((float)h) / 500.f; }
 
+	QColor getStateColor(logic_state_t state);
+
 	void renderSelection(QPainter* painter, const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth = 0);
-	void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, bool state = false);
-	void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FVector aControlOffset, FVector bControlOffset, bool state);
-	void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, bool state);
-	void renderConnection(QPainter* painter, Position aPos, Position bPos, bool state);
-	void renderConnection(QPainter* painter, Position aPos, FPosition bPos, bool state);
+	void renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, logic_state_t state = logic_state_t::UNDEFINED);
+	void renderConnection(QPainter* painter, FPosition aPos, FPosition bPos, FVector aControlOffset, FVector bControlOffset, logic_state_t state);
+	void renderConnection(QPainter* painter, Position aPos, const Block* a, Position bPos, const Block* b, logic_state_t state);
+	void renderConnection(QPainter* painter, Position aPos, Position bPos, logic_state_t state);
+	void renderConnection(QPainter* painter, Position aPos, FPosition bPos, logic_state_t state);
 
 	void drawArrow(QPainter* painter, const QPointF& start, const QPointF& end, float size, const QColor& color);
 	void drawText(QPainter* painter, const QPointF& center, const QString& text, float size, const QColor& color);

@@ -41,7 +41,7 @@ void MoveTool::setMode(std::string toolMode) {
 			activeSelectionHelper = std::make_shared<TensorCreationTool>();
 			mode = toolMode;
 		} else {
-			logError("Tool mode \"" + toolMode + "\" could not be found");
+			logError("Tool mode \"{}\" could not be found", "", toolMode);
 		}
 		toolStackInterface->popAbove(this);
 		// toolStackInterface->pushTool(activeSelectionHelper);

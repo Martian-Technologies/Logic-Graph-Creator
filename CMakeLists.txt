@@ -43,10 +43,20 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${UI_DIR})
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-# KDDockWidgets
-set(KDDockWidgets_QT6 ON)
-set(KDDockWidgets_STATIC ON)
-add_subdirectory(external/KDDockWidgets)
+
+if (Gatality_BuildApp)
+	# KDDockWidgets
+	set(KDDockWidgets_QT6 ON)
+	set(KDDockWidgets_STATIC ON)
+	add_subdirectory(external/KDDockWidgets)
+endif()
+
+# CPPLocate (they have extreme cmake goofyness)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(BUILD_SHARED_LIBS OFF)
+set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
+add_subdirectory(external/cpplocate)
+
 
 set(EXTERNAL_SOURCES
 	
@@ -54,10 +64,18 @@ set(EXTERNAL_SOURCES
 set(EXTERNAL_INCLUDES
 	
 )
-set(EXTERNAL_LINKS
-	Qt6::Core Qt6::Gui Qt6::Widgets
-	KDAB::kddockwidgets
-)
+if (Gatality_BuildApp)
+	set(EXTERNAL_LINKS
+		cpplocate::cpplocate
+		Qt6::Core Qt6::Gui Qt6::Widgets
+		KDAB::kddockwidgets
+	)
+else()
+	set(EXTERNAL_LINKS
+		cpplocate::cpplocate
+		Qt6::Core Qt6::Gui Qt6::Widgets
+	)
+endif()
 
 # ======================================= CREATE EXECUTABLE ========================================
 if (Gatality_BuildApp)
@@ -115,12 +133,11 @@ if (Gatality_BuildApp)
 
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
-set(COPIED_RESOURCES_DIR $<TARGET_FILE_DIR:${PROJECT_NAME}>"/resources")
+set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCES_DIR} ${COPIED_RESOURCES_DIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
 	COMMENT "Copying resource directory"
 )
-
 endif()
 
 # ============================================ GTESTING ============================================
@@ -141,9 +158,8 @@ if (Gatality_BuildTests)
 		# "${UI_DIR}/*.ui"
 		# "${UI_DIR}/*.qrc"
 		"${SOURCE_DIR}/backend/*.cpp"
-		"${SOURCE_DIR}/gui/*.cpp"
 		"${SOURCE_DIR}/computerAPI/*.cpp"
-		"${SOURCE_DIR}/gui/*.cpp"
+		# "${SOURCE_DIR}/gui/*.cpp"
 		"${SOURCE_DIR}/keybinds/*.cpp"
 		"${SOURCE_DIR}/logging/*.cpp"
 		"${SOURCE_DIR}/util/*.cpp"
