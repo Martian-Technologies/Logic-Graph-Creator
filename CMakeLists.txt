@@ -36,39 +36,49 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.qrc"
 )
 
-# ============================================ OPTIONS =============================================
-option(Gatality_BuildApp "Build main app" ON)
-option(Gatality_BuildTests "Build tests" OFF)
-
 # ======================================== DEPENDENCY SETUP ========================================
 
 # Vulkan
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 # SDL
-add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM)
+add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
 
 # RmlUi
 set(RMLUI_BACKEND native)
-add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM)
+add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM EXCLUDE_FROM_ALL)
 
 # VMA
-add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM)
+add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM EXCLUDE_FROM_ALL)
+
 # GLM
-add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM)
+add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
 
 # CPPLocate (they have extreme cmake goofyness)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
-add_subdirectory(external/cpplocate)
+add_subdirectory(external/cpplocate EXCLUDE_FROM_ALL)
 
-set(EXTERNAL_SOURCES
-	
-)
-set(EXTERNAL_INCLUDES
-	${Vulkan_INCLUDE_DIRS}
-)
+# Google Testing
+add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
+
+# ===================================== CREATE APP EXECUTABLE ========================================
+# Platform specific business before add_executable
+if(APPLE) # MacOS
+	# Icon
+	set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
+	set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+	set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	list(APPEND PROJECT_SOURCES ${ICON_PATH})
+
+elseif (WIN32) # Windows
+	# Icon
+	set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
+	list(APPEND PROJECT_SOURCES ${ICON_PATH})
+endif()
+
+# Add executable
 set(EXTERNAL_LINKS
 	${Vulkan_LIBRARIES}
 	RmlUi::RmlUi
@@ -77,65 +87,64 @@ set(EXTERNAL_LINKS
 	VulkanMemoryAllocator
 	glm
 )
-set(EXTERNAL_DEFINES
-	"GLM_FORCE_RADIANS"
-	"GLM_FORCE_DEPTH_ZERO_TO_ONE"
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+
+# Platform specific business after add_executable
+if(APPLE) # MacOS
+	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+
+	# Bundle Properties 
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		MACOSX_BUNDLE TRUE
+		# indentification
+		MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
+		MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
+		MACOSX_BUNDLE_NAME "Gatality"
+		MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
+		# version info
+		MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+		MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
+		MACOSX_BUNDLE_INFO_VERSION "6.0"
+		# Dev Region
+		MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
+		# Doc Types that macos can handle
+		MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
+		# Application category
+		MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
+		MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+	)
+	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
+elseif (WIN32) # Windows
+	if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
+		# Set WIN32_EXECUTABLE (Disables Console)
+		set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+	endif ()
+endif()	
+
+# ==================================== CREATE TESTING EXECUTABLE ============================================
+set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
+set(TEST_FILES)
+file(GLOB_RECURSE TEST_FILES
+	"${SOURCE_DIR}/backend/*.cpp"
+	"${SOURCE_DIR}/computerAPI/*.cpp"
+	"${SOURCE_DIR}/keybinds/*.cpp"
+	"${SOURCE_DIR}/logging/*.cpp"
+	"${SOURCE_DIR}/util/*.cpp"
+	"${TEST_DIR}/*.cpp"
 )
 
-# ======================================= CREATE EXECUTABLE ========================================
-if (Gatality_BuildApp)
-	# Platform specific business before add_executable
-	if(APPLE) # MacOS
-		# Icon
-		set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
-		set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
-		set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+set(EXTERNAL_LINKS_TESTS
+    cpplocate::cpplocate
+    gtest gtest_main
+)
+add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL ${TEST_FILES})
+target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
+target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-	elseif (WIN32) # Windows
-		# Icon
-		set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
-		list(APPEND PROJECT_SOURCES ${ICON_PATH})
-	endif()
-
-	# Add executable
-	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${EXTERNAL_SOURCES})
-	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES} )
-	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
-	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
-
-	# Platform specific business after add_executable
-	if(APPLE) # MacOS
-		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
-
-		# Bundle Properties 
-		set_target_properties(${PROJECT_NAME} PROPERTIES
-			MACOSX_BUNDLE TRUE
-			# indentification
-			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
-			MACOSX_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
-			# version info
-			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_INFO_VERSION "6.0"
-			# Dev Region
-			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
-			# Doc Types that macos can handle
-			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
-			# Application category
-			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
-			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
-		)
-		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
-	elseif (WIN32) # Windows
-		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
-			# Set WIN32_EXECUTABLE (Disables Console)
-			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-		endif ()
-	endif()
-	
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
 set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
@@ -181,42 +190,3 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_BINARY_DIR} "${COPIED_RESOURCES_DIR}/shaders"
 	COMMENT "Copying shader directory"
 )
-
-endif()
-
-# ============================================ GTESTING ============================================
-if (Gatality_BuildTests)
-	message("Doing Testing")
-	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM)
-	enable_testing()
-
-	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
-	set(TEST_FILES)
-	# file(GLOB_RECURSE TEST_FILES
-	# 	"${TEST_DIR}/*.cpp"
-	# 	"${TEST_DIR}/*.h"
-	# 	"${SOURCE_DIR}/logging/*"
-	# 	"${SOURCE_DIR}/util/*"
-	# )
-	file(GLOB_RECURSE TEST_FILES
-		# "${UI_DIR}/*.ui"
-		# "${UI_DIR}/*.qrc"
-		"${SOURCE_DIR}/backend/*.cpp"
-		"${SOURCE_DIR}/gui/*.cpp"
-		"${SOURCE_DIR}/computerAPI/*.cpp"
-		"${SOURCE_DIR}/gui/*.cpp"
-		"${SOURCE_DIR}/gpu/*.cpp"
-		"${SOURCE_DIR}/keybinds/*.cpp"
-		"${SOURCE_DIR}/logging/*.cpp"
-		"${SOURCE_DIR}/util/*.cpp"
-		"${TEST_DIR}/*.cpp"
-	)
-
-	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
-	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
-	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS} gtest gtest_main)
-	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
-	
-	add_test(NAME RunAllTests COMMAND ${PROJECT_NAME}_tests)
-	
-endif() # Gatality_BuildTests
