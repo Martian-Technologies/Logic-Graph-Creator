@@ -16,3 +16,6 @@
 [submodule "RmlUi"]
 	path = external/RmlUi
 	url = https://github.com/mikke89/RmlUi.git
+[submodule "freetype"]
+	path = external/freetype
+	url = https://github.com/libsdl-org/freetype.git

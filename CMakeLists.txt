@@ -22,6 +22,7 @@ else()
 endif()
 
 # ======================================== PROJECT SETUP ========================================
+set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
 project(Gatality)
 
 # Set directories
@@ -44,6 +45,9 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 # SDL
 add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
 
+# Freetype
+add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
+
 # RmlUi
 set(RMLUI_BACKEND native)
 add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM EXCLUDE_FROM_ALL)
@@ -56,7 +60,6 @@ add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
 
 # CPPLocate (they have extreme cmake goofyness)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate EXCLUDE_FROM_ALL)
 
@@ -81,6 +84,7 @@ endif()
 # Add executable
 set(EXTERNAL_LINKS
 	${Vulkan_LIBRARIES}
+	freetype
 	RmlUi::RmlUi
 	SDL3::SDL3
 	cpplocate::cpplocate
