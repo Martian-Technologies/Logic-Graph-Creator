@@ -1,8 +1,8 @@
 #include "computerAPI/directoryManager.h"
 
-#include "gpu/vulkanManager.h"
 #include "platform/sdlInstance.h"
-#include "platform/sdlWindow.h"
+#include "gpu/vulkanManager.h"
+#include "gui/window.h"
 
 void setupVulkan();
 
@@ -11,11 +11,14 @@ int main(int argc, char* argv[]) {
 
 	// Create SDL Instance 
 	SdlInstance sdl;
-	// Create SDL window
-	SdlWindow window;
-	
+
 	// set up vulkan
 	setupVulkan();
+	
+	// Create window
+	Window window;
+
+	window.runLoop();
 
 	
 	// shutdown vulkan

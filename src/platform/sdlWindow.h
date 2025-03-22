@@ -5,8 +5,10 @@
 
 class SdlWindow {
 public:
-	SdlWindow();
+	SdlWindow(const std::string& name);
 	~SdlWindow();
+
+	std::vector<SDL_Event> pollEvents();
 
 private:
 	// TODO - smart pointer with custom deleter?
