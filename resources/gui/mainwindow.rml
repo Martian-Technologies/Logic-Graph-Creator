@@ -1,0 +1,16 @@
+<rml>
+
+  <head>
+    <title>Gatality</title>
+    <link type="text/template" href="templates/CircuitViewWindow.rml">
+  </head>
+
+  <body>
+    <div>
+      <template src="circuit-view-window">
+        content passed into template
+      </template>
+    </div>
+  </body>
+
+</rml>
