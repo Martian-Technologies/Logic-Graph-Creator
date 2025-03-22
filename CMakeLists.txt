@@ -139,7 +139,7 @@ target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompil
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
 set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
-add_custom_command(TARGET ${PROJECT_NAME} ${PROJECT_NAME}_tests POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
 	COMMENT "Copying resource directory"
 )
