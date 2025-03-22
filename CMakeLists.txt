@@ -47,6 +47,7 @@ add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
 
 # Freetype
 add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
+add_library(Freetype::Freetype ALIAS freetype)
 
 # RmlUi
 set(RMLUI_BACKEND native)
@@ -92,7 +93,7 @@ set(EXTERNAL_LINKS
 	glm
 )
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
