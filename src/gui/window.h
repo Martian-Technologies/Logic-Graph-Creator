@@ -1,7 +1,7 @@
 #ifndef window_h
 #define window_h
 
-#include "platform/sdlWindow.h"
+#include "sdl/sdlWindow.h"
 
 class Window {
 public:
