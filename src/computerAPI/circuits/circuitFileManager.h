@@ -5,12 +5,12 @@
 
 class CircuitFileManager {
 public:
-    CircuitFileManager(const CircuitManager* circuitManager);
+    CircuitFileManager(CircuitManager* circuitManager);
 
     bool loadFromFile(const std::string& path, SharedParsedCircuit outParsed);
     bool saveToFile(const std::string& path, Circuit* circuitPtr);
 private:
-    const CircuitManager* circuitManager;
+    CircuitManager* circuitManager;
     //std::unordered_set<std::string> loadedFiles; // TODO: add check for cyclic dependencies
 };
 

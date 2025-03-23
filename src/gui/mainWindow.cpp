@@ -12,7 +12,6 @@
 #include <QMenu>
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
-#include "backend/circuit/validateCircuit.h"
 #include "computerAPI/directoryManager.h"
 #include "selection/selectorWindow.h"
 #include "circuitViewWidget.h"
@@ -177,7 +176,7 @@ void MainWindow::loadCircuit() {
 	std::string filePath =
 		QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>(&backend.getCircuitManager());
 	if (!circuitFileManager.loadFromFile(filePath, parsed)) {
 		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 		return;
@@ -198,20 +197,11 @@ void MainWindow::loadCircuit() {
 		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 
 		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
-		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position());
+		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position(), false);
 		primaryNewCircuit->setSaved();
 		primaryNewCircuit->setSaveFilePath(filePath);
 
-        // create new circuits for the dependencies
-        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
-                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
-                continue;
-            }
-            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second.first, Position());
-        }
-
-		// all dependency circuits should be saved when created by preview tool
+		// all dependency circuits should be already saved
 		logInfo("Saved primary circuit: {}", "FileLoading", primaryNewCircuit->getSaveFilePath());
 	} else {
 		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
@@ -224,7 +214,7 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
 	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 	if (filePath.isEmpty()) return;
 
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>(&backend.getCircuitManager());
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logError("Failed to load Circuit file");
@@ -240,15 +230,6 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
 
     CircuitValidator validator(*parsed, backend.getBlockDataManager());
     if (parsed->isValid()){
-        // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
-        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
-                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
-                continue;
-            }
-            backend.getCircuit(backend.createCircuit())->tryInsertParsedCircuit(*dep.second.first, Position());
-        }
-
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());

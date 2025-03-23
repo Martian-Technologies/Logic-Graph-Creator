@@ -26,7 +26,7 @@ struct ICData {
 
 class OpenCircuitsParser {
 public:
-    OpenCircuitsParser() = default;
+    OpenCircuitsParser(CircuitManager* cm): circuitManager(cm) {}
     bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
     void parseOpenCircuitsJson();
 
@@ -43,12 +43,13 @@ public:
     // Filters and resolves across all blocks, even within the components of ICData's
     void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo*>& outFiltered);
     void resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::unordered_map<int,OpenCircuitsBlockInfo*>& allBlocks);
-    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::unordered_set<int>& outResolvedSet, std::vector<int>& orderedConnectionBlocks);
+    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::vector<int>& orderedConnectionBlocks);
 
     void fillParsedCircuit(const std::unordered_map<int,OpenCircuitsBlockInfo*>& filteredBlocks);
     void printParsedData();
 
 private:
+    CircuitManager* circuitManager;
     json contents;
     int newReferenceID = -1;
     std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data (WITHIN PRIMARY CIRCUIT ONLY)

@@ -2,7 +2,7 @@
 #include "gatalityParser.h"
 #include "openCircuitsParser.h"
 
-CircuitFileManager::CircuitFileManager(const CircuitManager* circuitManager) : circuitManager(circuitManager) {}
+CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
 BlockType stringToBlockType(const std::string& str) {
     if (str == "NONE") return BlockType::NONE;
@@ -65,11 +65,11 @@ std::string rotationToString(Rotation rotation) {
 bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
     if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
         // our gatality file parser function
-        GatalityParser parser;
+        GatalityParser parser(circuitManager);
         return parser.load(path, outParsed);
     } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
         // open circuit file parser function
-        OpenCircuitsParser parser;
+        OpenCircuitsParser parser(circuitManager);
         return parser.parse(path, outParsed);
     }else {
         logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
@@ -78,6 +78,6 @@ bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircu
 }
 
 bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr) {
-    GatalityParser saver;
+    GatalityParser saver(circuitManager);
     return saver.save(path, circuitPtr);
 }

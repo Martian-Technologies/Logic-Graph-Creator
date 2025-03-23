@@ -1,9 +1,14 @@
-#include "validateCircuit.h"
+#include "parsedCircuit.h"
 #include "util/uuid.h"
 #include <stack>
 
 void CircuitValidator::validate() {
     bool isValid = true;
+
+    if (parsedCircuit.getUUID().empty()){
+        logInfo("Setting a uuid for parsed circuit", "CircuitValidator");
+        parsedCircuit.setUUID(generate_uuid_v4());
+    }
 
     isValid = isValid && validateBlockTypes();
     isValid = isValid && validateDependencies();
@@ -29,10 +34,8 @@ bool CircuitValidator::validateBlockTypes() {
 bool CircuitValidator::validateDependencies() {
     int numImports = 0;
 
-    for (auto& [depName, depPair] : parsedCircuit.dependencies) {
-        SharedParsedCircuit depCircuit = depPair.first;
-        ParsedCircuit::CustomCircuitPorts depCustomData = depPair.second;
-        if (depCustomData.inputPorts.empty() || depCustomData.outputPorts.empty()){
+    for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
+        if (depCircuit->inputPorts.empty() || depCircuit->outputPorts.empty()){
             logError("Custom block circuit has either empty inputs or outputs");
             return false;
         }
@@ -46,54 +49,14 @@ bool CircuitValidator::validateDependencies() {
         logInfo("Dependency circuit validation success for {}", "", depName);
     }
 
-    // dependencies instead
-    std::unordered_map<std::string, BlockType> newCustomCircuitBlockTypes;
-    for (auto& [depName, depPair] : parsedCircuit.dependencies) {
-        int inputSize = depPair.second.inputPorts.size();
-        int outputSize = depPair.second.outputPorts.size();
-
-        // create a custom circuit and block type for this
-        // easy to do it here because we start by using leaf dependencies
-		BlockType blockType = blockDataManager->addBlock();
-		BlockData* blockData = blockDataManager->getBlockData(blockType);
-		if (!blockData) {
-			logError("Did not find newly created block data with block type: " + std::to_string(blockType), "CircuitManager");
-            return false;
-		}
-		blockData->setDefaultData(false);
-		blockData->setPrimitive(false);
-        // i am just using uuid because they need to be unique. this will be changed
-		blockData->setName(generate_uuid_v4().substr(5) + depPair.first->getName());
-		blockData->setPath("Custom");
-		blockData->setWidth(2);
-		blockData->setHeight(std::max(inputSize, outputSize));
-
-        logInfo("Adding custom block (in validator) of: " + depPair.first->getName());
-        int i = 0;
-        for (; i<inputSize; ++i){
-            blockData->trySetConnectionInput(Vector(0, i), i);
-        }
-        int connEnd = i;
-        for (i=0; i<outputSize; ++i){
-            blockData->trySetConnectionOutput(Vector(1, i), connEnd + i);
-        }
-
-		blockDataManager->sendBlockDataUpdate();
-
-        newCustomCircuitBlockTypes[depPair.second.icData] = blockType;
-        parsedCircuit.customBlockTypes.push_back(blockType);
-    }
-    for (const ParsedCircuit::CustomBlockData& p: parsedCircuit.customBlocks){
-        // then loop through the custom blocks that it has, and link them to a blocktype that was just created
-        parsedCircuit.blocks[p.id].type = newCustomCircuitBlockTypes[p.icDataRef]; // update the parsed circuit with the new type so it will be placed
-    }
-
     logInfo("File dependency size: {}", "", parsedCircuit.dependencies.size());
 
     return true;
 }
 
 bool CircuitValidator::setBlockPositionsInt() {
+    parsedCircuit.makePositionsRelative();
+
     for (auto& [id, block] : parsedCircuit.blocks) {
         if (!isIntegerPosition(block.pos)) {
             FPosition oldPosition = block.pos;

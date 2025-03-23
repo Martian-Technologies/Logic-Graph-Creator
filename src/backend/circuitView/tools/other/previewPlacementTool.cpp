@@ -43,7 +43,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
 		QMessageBox::warning(nullptr, "Collision Detected", "Cannot place circuit in occupied positions");
 		return true;
 	}
-	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition);
+	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition, false);
 
 	clearPreview();
 	active = false;

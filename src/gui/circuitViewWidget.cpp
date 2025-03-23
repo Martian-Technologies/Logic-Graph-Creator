@@ -12,7 +12,6 @@
 #include <QTimer>
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
-#include "backend/circuit/validateCircuit.h"
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
@@ -307,7 +306,7 @@ void CircuitViewWidget::save() {
 void CircuitViewWidget::load(const QString& filePath) {
 	if (!fileManager) return;
 
-    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>(&circuitView->getBackend()->getCircuitManager());
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logError("Failed to load circuit file.");
@@ -324,31 +323,9 @@ void CircuitViewWidget::load(const QString& filePath) {
         return;
     }
 
+    logInfo("Validating primary from circuitviewwidget");
     CircuitValidator validator(*parsed, back->getBlockDataManager());
     if (parsed->isValid()){
-        // TODO: for now just automatically place all dependencies even if the user cancels the preview placement tool
-
-        CircuitManager& cirManager = back->getCircuitManager();
-        for (const std::pair<std::string, std::pair<SharedParsedCircuit, ParsedCircuit::CustomCircuitPorts>>& dep: parsed->getDependencies()){
-            if (circuitManager.UUIDExists(dep.second.first->getUUID())){
-                logInfo("Dependency Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
-                continue;
-            }
-            circuit_id_t custom = back->createCircuit(dep.second.first->getName());
-            for (BlockType blockType: dep.second.first->getCustomBlockTypes()){
-                // mark them within the circuit and link
-                cirManager.addBlockDataToCircuit(custom, blockType);
-            }
-
-            // place it as its own custom block
-            back->getCircuit(custom)->tryInsertParsedCircuit(*dep.second.first, Position());
-        }
-
-        circuit_id_t thisCircuit = circuitView->getCircuit()->getCircuitId();
-        for (BlockType blockType: parsed->getCustomBlockTypes()){
-            cirManager.addBlockDataToCircuit(thisCircuit, blockType);
-        }
-
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
         PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());

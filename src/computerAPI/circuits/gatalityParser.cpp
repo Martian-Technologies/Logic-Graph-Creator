@@ -44,10 +44,10 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
             const std::string& fPath = fullPath.string();
 
-            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
+            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>(circuitManager);
             logInfo("File to access: " + fPath, "GatalityParser");
             if (load(fPath, dependency)){
-                outParsed->addDependency(importFileName, dependency, std::vector<int>(), std::vector<int>(), "");
+                outParsed->addDependency(importFileName, dependency, std::vector<int>(), std::vector<int>());
                 outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
                 logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");
             }else{
@@ -118,6 +118,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
                     logError("Failed to parse (blockid, connection_id) token", "GatalityParser");
                     break;
                 }
+                // TODO? maybe have to flip this for oututs/ins
                 outParsed->addConnection({
                     static_cast<block_id_t>(currentBlockId),
                     static_cast<connection_end_id_t>(i),
@@ -127,7 +128,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             }
         }
     }
-    outParsed->makePositionsRelative();
     outParsed->setFilePath(path);
     inputFile.close();
     importedFiles.erase(path);

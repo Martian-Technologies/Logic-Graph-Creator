@@ -5,8 +5,9 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
-#include "parsedCircuit.h"
 #include "undoSystem.h"
+
+class ParsedCircuit;
 
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
@@ -57,7 +58,7 @@ public:
 	bool checkCollision(const SharedSelection& selection);
 
 	// Trys to place a parsed circuit at a position
-	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit);
 
 	/* ----------- block data ----------- */
 
