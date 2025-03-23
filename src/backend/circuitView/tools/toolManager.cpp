@@ -6,6 +6,7 @@
 #include "other/previewPlacementTool.h"
 #include "other/logicToucher.h"
 #include "movement/moveTool.h"
+#include "selection/selectionMakerTool.h"
 
 void ToolManager::selectBlock(BlockType blockType) {
 	if (blockType != BlockType::NONE) {
@@ -52,6 +53,7 @@ void ToolManager::selectTool(std::string toolName) {
 		else if (toolName == "connection/connection") instanceNewtool<ConnectionTool>(toolName, 0);
 		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>(toolName, 0);
 		else if (toolName == "interactive/state changer") instanceNewtool<LogicToucher>(toolName, 1);
+		else if (toolName == "selection/selection maker") instanceNewtool<SelectionMakerTool>(toolName, 0);
 		else logError("Unknown tool name \"{}\"", "", toolName);
 	}
 }

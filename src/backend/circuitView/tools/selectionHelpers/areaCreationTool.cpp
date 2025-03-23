@@ -8,8 +8,8 @@ void AreaCreationTool::reset() {
 
 void AreaCreationTool::activate() {
 	SelectionHelperTool::activate();
-	registerFunction("tool primary activate", std::bind(&AreaCreationTool::click, this, std::placeholders::_1));
-	registerFunction("tool secondary activate", std::bind(&AreaCreationTool::unclick, this, std::placeholders::_1));
+	registerFunction("Tool Primary Activate", std::bind(&AreaCreationTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&AreaCreationTool::unclick, this, std::placeholders::_1));
 }
 
 // void AreaCreationTool::undoFinished() {

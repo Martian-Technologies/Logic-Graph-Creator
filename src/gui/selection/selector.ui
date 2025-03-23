@@ -99,6 +99,11 @@
        <property name="text">
         <string>Selection</string>
        </property>
+       <item>
+        <property name="text">
+         <string>Selection Maker</string>
+        </property>
+       </item>
       </item>
       <item>
        <property name="text">

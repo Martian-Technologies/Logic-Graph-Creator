@@ -29,10 +29,13 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 
 	// set default keybinds
 	keybindManager.setKeybind("Save", "Ctrl+S");
-	keybindManager.setKeybind("Undo", "Z");
-	keybindManager.setKeybind("Redo", "Y");
+	keybindManager.setKeybind("Undo", "Ctrl+Z");
+	keybindManager.setKeybind("Redo", "Ctrl+Y");
+	keybindManager.setKeybind("Copy", "Ctrl+C");
+	keybindManager.setKeybind("Paste", "Ctrl+V");
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
 	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("Confirm", "E");
 	keybindManager.setKeybind("ToggleInteractive", "I");
 	keybindManager.setKeybind("MakeCircuitBlock", "B");
 

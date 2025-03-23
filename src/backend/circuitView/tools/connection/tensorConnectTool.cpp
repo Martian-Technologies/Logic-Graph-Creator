@@ -14,9 +14,9 @@ void TensorConnectTool::reset() {
 
 void TensorConnectTool::activate() {
 	CircuitTool::activate();
-	// registerFunction("tool primary activate", std::bind(&TensorConnectTool::click, this, std::placeholders::_1));
-	registerFunction("tool secondary activate", std::bind(&TensorConnectTool::unclick, this, std::placeholders::_1));
-	registerFunction("tool rotate block cw", std::bind(&TensorConnectTool::confirm, this, std::placeholders::_1));
+	// registerFunction("Tool Primary Activate", std::bind(&TensorConnectTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&TensorConnectTool::unclick, this, std::placeholders::_1));
+	registerFunction("Confirm", std::bind(&TensorConnectTool::confirm, this, std::placeholders::_1));
 	if (placingOutout && activeOutputSelectionHelper->isFinished()) {
 		placingOutout = false;
 		updateElements();

@@ -23,7 +23,7 @@ bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& posi
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, const Vector& movement) {
 	if (checkMoveCollision(selection, movement)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	moveBlocks(selection, movement, difference.get());
@@ -31,7 +31,7 @@ bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& move
 	return true;
 }
 
-void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference) {
+void Circuit::moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -47,7 +47,7 @@ void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movemen
 	}
 }
 
-bool Circuit::checkMoveCollision(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::checkMoveCollision(SharedSelection selection, const Vector& movement) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {

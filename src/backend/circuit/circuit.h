@@ -50,7 +50,7 @@ public:
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
 	// Trys to move a blocks. Wont move any if one cant move. Returns if successful.
-	bool tryMoveBlocks(const SharedSelection& selection, const Vector& movement);
+	bool tryMoveBlocks(SharedSelection selection, const Vector& movement);
 
 	void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
 	void tryRemoveOverArea(Position cellA, Position cellB);
@@ -95,8 +95,8 @@ private:
 	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers
-	bool checkMoveCollision(const SharedSelection& selection, const Vector& movement);
-	void moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference);
+	bool checkMoveCollision(SharedSelection selection, const Vector& movement);
+	void moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference);
 
 	void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
 	void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);

@@ -12,8 +12,8 @@ public:
 
     void activate() override final {
         CircuitTool::activate();
-        registerFunction("tool primary activate", std::bind(&PreviewPlacementTool::commitPlacement, this, std::placeholders::_1));
-        registerFunction("tool secondary activate", std::bind(&PreviewPlacementTool::cancelPlacement, this, std::placeholders::_1));
+        registerFunction("Tool Primary Activate", std::bind(&PreviewPlacementTool::commitPlacement, this, std::placeholders::_1));
+        registerFunction("Tool Secondary Activate", std::bind(&PreviewPlacementTool::cancelPlacement, this, std::placeholders::_1));
     }
 	void updateElements() override final;
 

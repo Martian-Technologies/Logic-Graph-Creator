@@ -7,13 +7,14 @@
 #include "../renderer/renderer.h"
 #include "circuitTool.h"
 
+class CircuitView;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, Renderer* renderer) : eventRegister(eventRegister), renderer(renderer), toolStackInterface(this) {
+	inline ToolStack(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView) : eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
-		eventRegister->registerFunction("pointer move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
+		eventRegister->registerFunction("Pointer Move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
 	}
 	inline ToolStack(const ToolStack& other) = delete;
 	inline ToolStack& operator=(const ToolStack& other) = delete;
@@ -50,6 +51,7 @@ private:
 
 	// current block container
 	Circuit* circuit;
+	CircuitView* circuitView;
 
 	// tool function event linking
 	ToolStackInterface toolStackInterface;

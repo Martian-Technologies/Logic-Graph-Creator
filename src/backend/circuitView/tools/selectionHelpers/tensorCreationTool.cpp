@@ -11,9 +11,9 @@ void TensorCreationTool::reset() {
 
 void TensorCreationTool::activate() {
 	SelectionHelperTool::activate();
-	registerFunction("tool primary activate", std::bind(&TensorCreationTool::click, this, std::placeholders::_1));
-	registerFunction("tool secondary activate", std::bind(&TensorCreationTool::unclick, this, std::placeholders::_1));
-	registerFunction("tool rotate block cw", std::bind(&TensorCreationTool::confirm, this, std::placeholders::_1));
+	registerFunction("Tool Primary Activate", std::bind(&TensorCreationTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&TensorCreationTool::unclick, this, std::placeholders::_1));
+	registerFunction("Confirm", std::bind(&TensorCreationTool::confirm, this, std::placeholders::_1));
 }
 
 void TensorCreationTool::undoFinished() {

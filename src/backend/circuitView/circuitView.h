@@ -25,7 +25,6 @@ public:
 			toolManager.selectStack(0);
 		}
 	}
-
 	inline void toggleInteractive() {
 		if (toolManager.getStack() != 1) {
 			toolManager.selectTool("interactive/state changer");
@@ -37,13 +36,15 @@ public:
 	inline void setSelectedTool(std::string tool) {
 		toolManager.selectTool(tool);
 	}
-
 	inline void setSelectedToolMode(std::string mode) {
 		toolManager.setMode(mode);
 	}
-
 	inline void setSelectedBlock(BlockType blockType) {
 		toolManager.selectBlock(blockType);
+	}
+
+	inline void paste() {
+		
 	}
 
 	// --------------- Gettters ---------------

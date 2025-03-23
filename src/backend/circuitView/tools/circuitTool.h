@@ -7,6 +7,7 @@
 #include "../events/customEvents.h"
 #include "toolStackInterface.h"
 
+class CircuitView;
 class ToolStack;
 
 class CircuitTool {
@@ -36,13 +37,14 @@ protected:
 	Circuit* circuit = nullptr;
 	bool helper = false;
 
+	CircuitView* circuitView;
 	ElementCreator elementCreator;
 	ToolStackInterface* toolStackInterface;
 	EvaluatorStateInterface* evaluatorStateInterface = nullptr;
 
 private:
 	// This will also tell the tool to reset.
-	void setup(Renderer* elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit);
+	void setup(Renderer* elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit);
 	void unsetup();
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
