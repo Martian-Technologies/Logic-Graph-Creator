@@ -11,29 +11,25 @@ BlockPlacementTool::BlockPlacementTool() {
 
 void BlockPlacementTool::activate() {
 	CircuitTool::activate();
-	if (activePlacementTool)
+	if (activePlacementTool) {
 		toolStackInterface->pushTool(activePlacementTool);
+		activePlacementTool->selectBlock(selectedBlock);
+		activePlacementTool->setRotation(rotation);
+	}
 }
 
 void BlockPlacementTool::setMode(std::string toolMode) {
 	if (mode != toolMode) {
-		if (toolMode == "None") {
-			activePlacementTool = nullptr;
-			toolStackInterface->popTool();
+		SharedBaseBlockPlacementTool newActivePlacementTool;
+		if (toolMode == "Single") {
+			newActivePlacementTool = std::make_shared<SinglePlaceTool>();
+		} else if (toolMode == "Area") {
+			newActivePlacementTool = std::make_shared<AreaPlaceTool>();
 		} else {
-			if (mode == "None") {
-				toolStackInterface->popTool();
-			}
-			if (toolMode == "Single") {
-				activePlacementTool = std::make_shared<SinglePlaceTool>();
-			} else if (toolMode == "Area") {
-				activePlacementTool = std::make_shared<AreaPlaceTool>();
-			} else {
-				logError("Tool mode \"{}\" could not be found", "", toolMode);
-			}
-			activePlacementTool->selectBlock(selectedBlock);
-			activePlacementTool->setRotation(rotation);
-			toolStackInterface->pushTool(activePlacementTool);
+			logError("Tool mode \"{}\" could not be found", "", toolMode);
+			return;
 		}
+		activePlacementTool = newActivePlacementTool;
+		toolStackInterface->popAbove(this);	
 	}
 }

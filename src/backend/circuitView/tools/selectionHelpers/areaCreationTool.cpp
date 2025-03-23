@@ -1,5 +1,22 @@
 #include "areaCreationTool.h"
 
+void AreaCreationTool::reset() {
+	SelectionHelperTool::reset();
+	hasOrigin = false;
+	updateElements();
+}
+
+void AreaCreationTool::activate() {
+	SelectionHelperTool::activate();
+	registerFunction("tool primary activate", std::bind(&AreaCreationTool::click, this, std::placeholders::_1));
+	registerFunction("tool secondary activate", std::bind(&AreaCreationTool::unclick, this, std::placeholders::_1));
+}
+
+// void AreaCreationTool::undoFinished() {
+// 	SelectionHelperTool::undoFinished();
+// 	unclick();
+// }
+
 bool AreaCreationTool::click(const Event* event) {
 	if (!circuit) return false;
 	if (hasOrigin) {

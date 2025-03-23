@@ -125,16 +125,20 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 }
 
 void SinglePlaceTool::updateElements() {
-	if (!circuit) return;
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
-
+	
 	if (!pointerInView) return;
-	Vector size = Vector(
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(selectedBlock, rotation)-1,
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(selectedBlock, rotation)-1
-	);
-	bool canPlace = circuit->getBlockContainer()->checkCollision(lastPointerPosition, rotation, selectedBlock);
-	elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, lastPointerPosition + size, canPlace));
-	elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
+	if (selectedBlock != BlockType::NONE) {
+		if (!circuit) return;
+		Vector size = Vector(
+			circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(selectedBlock, rotation)-1,
+			circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(selectedBlock, rotation)-1
+		);
+		bool cantPlace = circuit->getBlockContainer()->checkCollision(lastPointerPosition, rotation, selectedBlock);
+		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, lastPointerPosition + size, cantPlace));
+		elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
+	} else {
+		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, true));
+	}
 }

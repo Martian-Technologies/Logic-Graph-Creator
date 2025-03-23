@@ -22,7 +22,7 @@ public:
 	void deactivate() { if (!toolStack.empty()) { toolStack.back()->deactivate(); toolStack.back()->elementCreator.clear(); } }
 
 	void reset();
-	void pushTool(SharedCircuitTool newTool);
+	void pushTool(SharedCircuitTool newTool, bool resetTool = true);
 	void popTool();
 	void clearTools();
 	void popAbove(CircuitTool* toolNotToPop);
