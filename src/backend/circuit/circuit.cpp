@@ -152,6 +152,28 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 	return true;
 }
 
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position) {
+	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (blockContainer.checkCollision(block.position + totalOffset, block.rotation, block.blockType)) {
+			return false;
+		}
+	}
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (!blockContainer.tryInsertBlock(block.position + totalOffset, block.rotation, block.blockType, difference.get())) {
+			logError("Failed to insert block while inserting block.");
+		}
+	}
+	for (const std::pair<Position, Position>& conn : copiedBlocks->getCopiedConnections()) {
+		if (!blockContainer.tryCreateConnection(conn.second + totalOffset, conn.first + totalOffset, difference.get())) {
+			logError("Failed to create connection while inserting block.");
+		}
+	}
+	sendDifference(difference);
+	return true;
+}
+
 bool Circuit::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.trySetBlockData(positionOfBlock, data, difference.get());

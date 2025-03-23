@@ -1,6 +1,4 @@
 #include "previewPlacementTool.h"
-#include "backend/backend.h"
-#include "backend/circuitView/renderer/elementCreator.h"
 #include <QMessageBox>
 
 // Preview is only shown for the primary parsed circuit, not the dependencies that will be created in a different circuit
@@ -41,6 +39,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
 
 	if (!validatePlacement()) {
 		QMessageBox::warning(nullptr, "Collision Detected", "Cannot place circuit in occupied positions");
+		logWarning("Collision Detected, Cannot place circuit in occupied positions", "PreviewPlacementTool");
 		return true;
 	}
 	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition);

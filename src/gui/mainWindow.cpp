@@ -34,7 +34,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	keybindManager.setKeybind("Copy", "Ctrl+C");
 	keybindManager.setKeybind("Paste", "Ctrl+V");
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
-	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("BlockRotateCW", "R");
 	keybindManager.setKeybind("Confirm", "E");
 	keybindManager.setKeybind("ToggleInteractive", "I");
 	keybindManager.setKeybind("MakeCircuitBlock", "B");

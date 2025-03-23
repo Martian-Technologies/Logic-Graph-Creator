@@ -4,6 +4,7 @@
 #include "placement/blockPlacementTool.h"
 #include "connection/connectionTool.h"
 #include "other/previewPlacementTool.h"
+#include "other/pasteTool.h"
 #include "other/logicToucher.h"
 #include "movement/moveTool.h"
 #include "selection/selectionMakerTool.h"
@@ -52,6 +53,7 @@ void ToolManager::selectTool(std::string toolName) {
 		else if (toolName == "placement/move") instanceNewtool<MoveTool>(toolName, 0);
 		else if (toolName == "connection/connection") instanceNewtool<ConnectionTool>(toolName, 0);
 		else if (toolName == "preview placement tool") instanceNewtool<PreviewPlacementTool>(toolName, 0);
+		else if (toolName == "paste tool") instanceNewtool<PasteTool>(toolName, 0);
 		else if (toolName == "interactive/state changer") instanceNewtool<LogicToucher>(toolName, 1);
 		else if (toolName == "selection/selection maker") instanceNewtool<SelectionMakerTool>(toolName, 0);
 		else logError("Unknown tool name \"{}\"", "", toolName);

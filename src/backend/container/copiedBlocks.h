@@ -9,7 +9,6 @@ class CopiedBlocks {
 public:
 	CopiedBlocks(const BlockContainer* blockContainer, SharedSelection selection);
 
-private:
 	struct CopiedBlockData {
 		BlockType blockType;
 		Position position;
@@ -17,6 +16,15 @@ private:
 		block_data_t data;
 	};
 
+	const std::vector<CopiedBlockData> getCopiedBlocks() const { return blocks; }
+	const std::vector<std::pair<Position, Position>> getCopiedConnections() const { return connections; }
+	const Position& getMinPosition() { return minPosition; }
+	const Position& getMaxPosition() { return maxPosition; }
+
+private:
+	
+	Position minPosition;
+	Position maxPosition;
 	std::vector<CopiedBlockData> blocks;
 	std::vector<std::pair<Position, Position>> connections;
 };

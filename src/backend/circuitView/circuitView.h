@@ -44,7 +44,7 @@ public:
 	}
 
 	inline void paste() {
-		
+		toolManager.selectTool("paste tool");
 	}
 
 	// --------------- Gettters ---------------

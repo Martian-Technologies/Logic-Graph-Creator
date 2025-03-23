@@ -7,6 +7,7 @@
 #include "backend/selection.h"
 #include "parsedCircuit.h"
 #include "undoSystem.h"
+#include "backend/container/copiedBlocks.h"
 
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
@@ -59,6 +60,7 @@ public:
 
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
+	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position);
 
 	/* ----------- block data ----------- */
 

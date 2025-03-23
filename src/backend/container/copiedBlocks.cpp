@@ -5,10 +5,19 @@
 CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection selection) {
 	std::unordered_set<Position> positions;
 	std::unordered_set<const Block*> blocksSet;
+	bool foundPos = false;
 	flattenSelection(selection, positions);
 	for (Position position : positions) {
 		const Block* block = blockContainer->getBlock(position);
 		if (!block) continue;
+		if (foundPos) {
+			if (minPosition.x > position.x) minPosition.x = position.x;
+			else if (maxPosition.x > position.x) maxPosition.x = position.x;
+			if (minPosition.y > position.y) minPosition.y = position.y;
+			else if (maxPosition.y > position.y) maxPosition.y = position.y;
+		} else {
+			minPosition = maxPosition = position;
+		}
 		if (blocksSet.contains(block)) continue;
 		blocksSet.insert(block);
 		blocks.emplace_back(

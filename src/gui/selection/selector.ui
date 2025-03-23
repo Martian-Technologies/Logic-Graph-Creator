@@ -47,8 +47,17 @@
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
      <property name="dragDropMode">
-      <enum>QAbstractItemView::DragDropMode::DragOnly</enum>
+      <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
      </property>
      <attribute name="headerVisible">
       <bool>false</bool>
@@ -129,7 +138,20 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="ToolModes"/>
+    <widget class="QListWidget" name="ToolModes">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="defaultDropAction">
+      <enum>Qt::DropAction::IgnoreAction</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
