@@ -2,15 +2,12 @@
 
   <head>
     <title>Gatality</title>
-    <link type="text/template" href="templates/CircuitViewWindow.rml">
+    <link type="text/template" href="templates/CircuitViewWindow.rml"></link>
   </head>
 
   <body>
     <div>
-      <template src="circuit-view-window">
-        content passed into template
-      </template>
+      <h1>test</h1>
     </div>
   </body>
-
 </rml>

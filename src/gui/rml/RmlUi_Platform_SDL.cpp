@@ -34,6 +34,7 @@
 
 SystemInterface_SDL::SystemInterface_SDL()
 {
+#if SDL_MAJOR_VERSION >= 3
 	cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 	cursor_move = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
 	cursor_pointer = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER);
@@ -41,11 +42,24 @@ SystemInterface_SDL::SystemInterface_SDL()
 	cursor_cross = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
 	cursor_text = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 	cursor_unavailable = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NOT_ALLOWED);
+#else
+	cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+	cursor_move = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+	cursor_pointer = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+	cursor_resize = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+	cursor_cross = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+	cursor_text = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	cursor_unavailable = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
+#endif
 }
 
 SystemInterface_SDL::~SystemInterface_SDL()
 {
+#if SDL_MAJOR_VERSION >= 3
 	auto DestroyCursor = [](SDL_Cursor* cursor) { SDL_DestroyCursor(cursor); };
+#else
+	auto DestroyCursor = [](SDL_Cursor* cursor) { SDL_FreeCursor(cursor); };
+#endif
 
 	DestroyCursor(cursor_default);
 	DestroyCursor(cursor_move);
@@ -109,9 +123,15 @@ void SystemInterface_SDL::ActivateKeyboard(Rml::Vector2f caret_position, float l
 {
 	if (window)
 	{
+#if SDL_MAJOR_VERSION >= 3
 		const SDL_Rect rect = {int(caret_position.x), int(caret_position.y), 1, int(line_height)};
 		SDL_SetTextInputArea(window, &rect, 0);
 		SDL_StartTextInput(window);
+#else
+		(void)caret_position;
+		(void)line_height;
+		SDL_StartTextInput();
+#endif
 	}
 }
 
@@ -119,12 +139,17 @@ void SystemInterface_SDL::DeactivateKeyboard()
 {
 	if (window)
 	{
+#if SDL_MAJOR_VERSION >= 3
 		SDL_StopTextInput(window);
+#else
+		SDL_StopTextInput();
+#endif
 	}
 }
 
 bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev)
 {
+#if SDL_MAJOR_VERSION >= 3
 	#define RMLSDL_WINDOW_EVENTS_BEGIN
 	#define RMLSDL_WINDOW_EVENTS_END
 	auto GetKey = [](const SDL_Event& event) { return event.key.key; };
@@ -139,6 +164,30 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	constexpr auto event_window_leave = SDL_EVENT_WINDOW_MOUSE_LEAVE;
 	constexpr auto rmlsdl_true = true;
 	constexpr auto rmlsdl_false = false;
+#else
+	(void)window;
+	#define RMLSDL_WINDOW_EVENTS_BEGIN \
+	case SDL_WINDOWEVENT:              \
+	{                                  \
+		switch (ev.window.event)       \
+		{
+	#define RMLSDL_WINDOW_EVENTS_END \
+		}                            \
+		}                            \
+		break;
+	auto GetKey = [](const SDL_Event& event) { return event.key.keysym.sym; };
+	constexpr auto event_mouse_motion = SDL_MOUSEMOTION;
+	constexpr auto event_mouse_down = SDL_MOUSEBUTTONDOWN;
+	constexpr auto event_mouse_up = SDL_MOUSEBUTTONUP;
+	constexpr auto event_mouse_wheel = SDL_MOUSEWHEEL;
+	constexpr auto event_key_down = SDL_KEYDOWN;
+	constexpr auto event_key_up = SDL_KEYUP;
+	constexpr auto event_text_input = SDL_TEXTINPUT;
+	constexpr auto event_window_size_changed = SDL_WINDOWEVENT_SIZE_CHANGED;
+	constexpr auto event_window_leave = SDL_WINDOWEVENT_LEAVE;
+	constexpr auto rmlsdl_true = SDL_TRUE;
+	constexpr auto rmlsdl_false = SDL_FALSE;
+#endif
 
 	bool result = true;
 
@@ -198,12 +247,14 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	}
 	break;
 
+#if SDL_MAJOR_VERSION >= 3
 	case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 	{
 		const float display_scale = SDL_GetWindowDisplayScale(window);
 		context->SetDensityIndependentPixelRatio(display_scale);
 	}
 	break;
+#endif
 
 		RMLSDL_WINDOW_EVENTS_END
 
@@ -215,6 +266,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 
 Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
 {
+#if SDL_MAJOR_VERSION >= 3
 	constexpr auto key_a = SDLK_A;
 	constexpr auto key_b = SDLK_B;
 	constexpr auto key_c = SDLK_C;
@@ -243,6 +295,36 @@ Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
 	constexpr auto key_z = SDLK_Z;
 	constexpr auto key_grave = SDLK_GRAVE;
 	constexpr auto key_dblapostrophe = SDLK_DBLAPOSTROPHE;
+#else
+	constexpr auto key_a = SDLK_a;
+	constexpr auto key_b = SDLK_b;
+	constexpr auto key_c = SDLK_c;
+	constexpr auto key_d = SDLK_d;
+	constexpr auto key_e = SDLK_e;
+	constexpr auto key_f = SDLK_f;
+	constexpr auto key_g = SDLK_g;
+	constexpr auto key_h = SDLK_h;
+	constexpr auto key_i = SDLK_i;
+	constexpr auto key_j = SDLK_j;
+	constexpr auto key_k = SDLK_k;
+	constexpr auto key_l = SDLK_l;
+	constexpr auto key_m = SDLK_m;
+	constexpr auto key_n = SDLK_n;
+	constexpr auto key_o = SDLK_o;
+	constexpr auto key_p = SDLK_p;
+	constexpr auto key_q = SDLK_q;
+	constexpr auto key_r = SDLK_r;
+	constexpr auto key_s = SDLK_s;
+	constexpr auto key_t = SDLK_t;
+	constexpr auto key_u = SDLK_u;
+	constexpr auto key_v = SDLK_v;
+	constexpr auto key_w = SDLK_w;
+	constexpr auto key_x = SDLK_x;
+	constexpr auto key_y = SDLK_y;
+	constexpr auto key_z = SDLK_z;
+	constexpr auto key_grave = SDLK_BACKQUOTE;
+	constexpr auto key_dblapostrophe = SDLK_QUOTEDBL;
+#endif
 
 	// clang-format off
 	switch (sdlkey)
@@ -382,11 +464,19 @@ int RmlSDL::GetKeyModifierState()
 {
 	SDL_Keymod sdl_mods = SDL_GetModState();
 
+#if SDL_MAJOR_VERSION >= 3
 	constexpr auto mod_ctrl = SDL_KMOD_CTRL;
 	constexpr auto mod_shift = SDL_KMOD_SHIFT;
 	constexpr auto mod_alt = SDL_KMOD_ALT;
 	constexpr auto mod_num = SDL_KMOD_NUM;
 	constexpr auto mod_caps = SDL_KMOD_CAPS;
+#else
+	constexpr auto mod_ctrl = KMOD_CTRL;
+	constexpr auto mod_shift = KMOD_SHIFT;
+	constexpr auto mod_alt = KMOD_ALT;
+	constexpr auto mod_num = KMOD_NUM;
+	constexpr auto mod_caps = KMOD_CAPS;
+#endif
 
 	int retval = 0;
 

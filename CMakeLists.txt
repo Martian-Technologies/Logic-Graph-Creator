@@ -44,6 +44,7 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 # SDL
 add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
+add_subdirectory("${EXTERNAL_DIR}/SDL_image" SYSTEM EXCLUDE_FROM_ALL)
 
 # Freetype
 add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
@@ -88,6 +89,7 @@ set(EXTERNAL_LINKS
 	freetype
 	RmlUi::RmlUi
 	SDL3::SDL3
+	SDL3_image-static
 	cpplocate::cpplocate
 	VulkanMemoryAllocator
 	glm
