@@ -78,7 +78,7 @@ public:
 	RenderInterface_VK();
 	~RenderInterface_VK();
 
-	using CreateSurfaceCallback = bool (*)(VkInstance instance, VkSurfaceKHR* out_surface);
+	using CreateSurfaceCallback = std::function<bool(VkInstance, VkSurfaceKHR*)>;
 
 	bool Initialize(Rml::Vector<const char*> required_extensions, CreateSurfaceCallback create_surface_callback);
 	void Shutdown();

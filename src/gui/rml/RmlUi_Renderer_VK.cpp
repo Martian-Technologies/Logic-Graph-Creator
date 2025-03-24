@@ -863,9 +863,12 @@ void RenderInterface_VK::Initialize_Instance(Rml::Vector<const char*> required_e
 	Rml::Vector<const char*> instance_extension_names = std::move(required_extensions);
 	CreatePropertiesFor_Instance(instance_layer_names, instance_extension_names);
 
+	instance_extension_names.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	instance_layer_names.push_back("VK_LAYER_KHRONOS_validation");
+
 	VkInstanceCreateInfo info_instance = {};
 	info_instance.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	info_instance.pNext = &debug_validation_features_ext;
+	// info_instance.pNext = &debug_validation_features_ext;
 	info_instance.flags = 0;
 	info_instance.pApplicationInfo = &info;
 	info_instance.enabledExtensionCount = static_cast<uint32_t>(instance_extension_names.size());

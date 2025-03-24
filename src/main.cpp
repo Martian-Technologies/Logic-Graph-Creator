@@ -1,32 +1,13 @@
 #include "computerAPI/directoryManager.h"
-
-#include <thread>
-
-#include "gui/rml/rmlInstance.h"
-#include "gui/sdl/sdlInstance.h"
-#include "gui/window.h"
-#include "gpu/vulkanManager.h"
-
-void setupVulkan();
+#include "app.h"
 
 int main(int argc, char* argv[]) {
 	try {
 		// Set up directory manager
 		DirectoryManager::findDirectories();
 
-		// Create SDL Instance 
-		SdlInstance sdl;
-
-		// Create RML Instance
-		RmlInstance rml;
-	
-		// set up vulkan
-
-		// Set up backend
-	
-		// Create window and run
-		Window window;
-		window.runLoop(); // will be threaded later
+		App app;
+		app.runLoop();
 		
 	} catch (const std::exception& e) {
 		// Top level fatal error catcher, logs issue

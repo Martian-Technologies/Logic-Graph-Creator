@@ -5,7 +5,7 @@
 
 class RmlInstance {
 public:
-	RmlInstance();
+	RmlInstance(Rml::SystemInterface* systemInterface, Rml::RenderInterface* renderInterface);
 	~RmlInstance();
 };
 

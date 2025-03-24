@@ -5,15 +5,10 @@ Window::Window()
 	
 }
 
-void Window::runLoop() {
-	running = true;
-	while (running) {
-		// process events
-		std::vector<SDL_Event> events = sdlWindow.pollEvents();
-		for (const SDL_Event& event : events) {
-			if (event.type == SDL_EVENT_QUIT) {
-				running = false;
-			}
-		}
+
+bool Window::recieveEvent(const SDL_Event& event) {
+	if (sdlWindow.isThisMyEvent(event)) {
+		return true;
 	}
+	return false;
 }
