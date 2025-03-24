@@ -7,3 +7,6 @@
 [submodule "cpplocate"]
 	path = external/cpplocate
 	url = https://github.com/cginternals/cpplocate.git
+[submodule "external/JSON"]
+	path = external/JSON
+	url = https://github.com/nlohmann/json

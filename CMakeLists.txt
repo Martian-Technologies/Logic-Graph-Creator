@@ -54,6 +54,8 @@ set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate)
 
+# JSON
+add_subdirectory(external/JSON)
 
 set(EXTERNAL_SOURCES
 	
@@ -65,6 +67,7 @@ set(EXTERNAL_LINKS
 	cpplocate::cpplocate
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
+	nlohmann_json::nlohmann_json
 )
 
 # ======================================= CREATE EXECUTABLE ========================================
