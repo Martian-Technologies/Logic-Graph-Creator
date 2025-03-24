@@ -2,7 +2,7 @@
 
   <head>
     <title>Gatality</title>
-    <link type="text/template" href="templates/CircuitViewWindow.rml"></link>
+    <link type="text/rcss" href="styles/style.rcss"/>
   </head>
 
   <body>
