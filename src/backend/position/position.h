@@ -137,14 +137,12 @@ private:
 	inline void next() {
 		notDone = cur != end;
 		bool endOfLine = notDone && cur.x == end.x;
-		cur.x += (!endOfLine) * signum(end.x - cur.x);
-		cur.x = endOfLine * start.x;
+		cur.x = endOfLine * start.x + (!endOfLine) * (signum(end.x - cur.x) + cur.x);
 		cur.y += endOfLine * signum(end.y - cur.y);
 	}
 	inline void prev() {
 		bool startOfLine = cur.x == start.x;
-		cur.x += (notDone && !startOfLine) * signum(start.x - cur.x);
-		cur.x = (notDone && startOfLine) * end.x;
+		cur.x = (notDone && startOfLine) * end.x + (notDone && !startOfLine) * signum(start.x - cur.x);;
 		cur.y += (notDone && startOfLine) * signum(start.y - cur.y);
 		notDone = true;
 	}
