@@ -16,22 +16,31 @@
       </div>
     -->
     <div id="main-container">
-      main container
       <div id="menubar-container">
-        menubar
+
+        <div id="menubar">
+          <div class="menu">1</div>
+          <div class="menu">2</div>
+          <div class="menu">3</div>
+        </div>
+
       </div>
+
       <div id="middle-container">
         middle container
-        <div id="dashboard-container">
+        <div id="sidebar-container">
           dashboard
         </div>
         <div id="circuit-view-container">
           circuit view
         </div>
       </div>
+
       <div id="hotbar-container">
         hotbar
       </div>
+
     </div>
+
   </body>
 </rml>

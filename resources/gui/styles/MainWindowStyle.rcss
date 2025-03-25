@@ -6,6 +6,8 @@
   font-size: 50px;
 }
 
+/* Main Container Styles */
+
 #main-container {
   width: 100vw;
   height: 100vh;
@@ -15,24 +17,49 @@
   padding: 10px;
 }
 
+/* Mainbar Styles */
+
 #menubar-container {
+  flex-shrink: 0;
+  flex-basis: 100px;
+  display: flex;
   background-color: green;
 }
 
-#middle-container {
+#menubar {
   display: flex;
-  background-color: blue;
-  padding: 10px;
 }
 
-#dashboard-container {
+.menu {
+  flex-basis: 200px;
+  margin: 20px;
+  text-align: center;
+  background-color: orange;
+}
+
+/* Middle Container Styles */
+
+#middle-container {
+  flex: 1;
+  display: flex;
+  background-color: blue;
+}
+
+#sidebar-container {
+  flex-shrink: 0;
+  flex-basis: 200px;
   background-color: aqua;
 }
 
 #circuit-view-container {
-  background-color: white;
+  flex: 1;
+  background-color: grey;
 }
 
+/* Hotbar Styles */
+
 #hotbar-container {
+  flex-shrink: 0;
+  flex-basis: 100px;
   background-color: black;
 }
