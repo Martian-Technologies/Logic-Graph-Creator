@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Monaspace Argon;
+  font-size: 50px;
+}
+
+#main-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: pink;
+  padding: 10px;
+}
+
+#menubar-container {
+  background-color: green;
+}
+
+#middle-container {
+  display: flex;
+  background-color: blue;
+  padding: 10px;
+}
+
+#dashboard-container {
+  background-color: aqua;
+}
+
+#circuit-view-container {
+  background-color: white;
+}
+
+#hotbar-container {
+  background-color: black;
+}
