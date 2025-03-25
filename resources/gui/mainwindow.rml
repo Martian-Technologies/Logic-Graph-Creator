@@ -3,11 +3,31 @@
   <head>
     <title>Gatality</title>
     <link type="text/rcss" href="styles/style.rcss"/>
+    <link type="text/template" href="templates/CircuitViewWindow.rml"/>
   </head>
+
+  <!--dont forget to replace windows with their own templates-->
 
   <body>
     <div>
       <h1>test</h1>
+      <template src="circuit-view-widget">template input</template>
+    </div>
+    <div id="main-container">
+      <div id="menubar-container">
+
+      </div>
+      <div id="middle-container">
+        <div id="dashboard-container">
+
+        </div>
+        <div id="circuit-view-container">
+
+        </div>
+      </div>
+      <div id="hotbar-container">
+
+      </div>
     </div>
   </body>
 </rml>
