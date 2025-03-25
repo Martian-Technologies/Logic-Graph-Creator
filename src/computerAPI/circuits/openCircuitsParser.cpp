@@ -44,7 +44,7 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
     fillParsedCircuit(filteredBlocks);
-    printParsedData();
+    //printParsedData();
     outParsedCircuit->resolveCustomBlockTypes();
     return true;
 }
@@ -143,6 +143,9 @@ void OpenCircuitsParser::parseOpenCircuitsJson() {
                 std::stoi(dataData["p1"]["ref"].get<std::string>()),
                 std::stoi(dataData["p2"]["ref"].get<std::string>())
             };
+        } else if (type == "ICData" && std::find(ICDataReferences.begin(), ICDataReferences.end(), id) == ICDataReferences.end()){
+            // block was not tracked, but it should be, this occasionally comes up
+            ICDataReferences.push_back(id);
         }
     }
 

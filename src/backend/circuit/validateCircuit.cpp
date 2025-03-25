@@ -113,19 +113,51 @@ bool CircuitValidator::handleInvalidConnections() {
 }
 
 bool CircuitValidator::setOverlapsUnpositioned() {
-    std::unordered_set<Position> occupiedPositions;
-
     for (auto& [id, block] : parsedCircuit.blocks) {
         if (block.pos.x == std::numeric_limits<float>::max() || 
             block.pos.y == std::numeric_limits<float>::max()) {
             continue;
         }
+
         Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
-        if (!occupiedPositions.insert(intPos).second){
-            // set the block position as effectively undefined
-            logInfo("Found overlapped block position at {} --> {}, setting to undefined position", "CircuitValidator", block.pos.toString(), intPos.toString());
+
+        int width = 1;
+        int height = 1;
+        if (!blockDataManager->getBlockData(block.type)->isPrimitive()) {
+            auto depIt = parsedCircuit.dependencies.find(block.dependencyName);
+            if (depIt == parsedCircuit.dependencies.end()) {
+                logError("Block links to an unknown dependency: {}", "CircuitValidator", block.dependencyName);
+                continue;
+            }
+            auto depCircuit = depIt->second;
+            height = std::max(depCircuit->inputPorts.size(), depCircuit->outputPorts.size());
+            width = 2;
+        }
+
+        std::vector<Position> takenPositions;
+        bool hasOverlap = false;
+        for (int dx = 0; dx < width && !hasOverlap; dx++) {
+            for (int dy = 0; dy < height && !hasOverlap; dy++) {
+                Position checkPos(intPos.x + dx, intPos.y + dy);
+                if (occupiedPositions.count(checkPos)) {
+                    hasOverlap = true;
+                } else {
+                    takenPositions.push_back(checkPos);
+                }
+            }
+        }
+
+        if (hasOverlap) {
+            // set the block position as undefined
+            logInfo("Found overlapped block position at {} --> {}, setting to undefined position", 
+                   "CircuitValidator", 
+                   block.pos.toString(), 
+                   intPos.toString());
             block.pos.x = std::numeric_limits<float>::max();
             block.pos.y = std::numeric_limits<float>::max();
+        } else {
+            // mark all positions as occupied
+            occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
         }
     }
 
@@ -297,18 +329,6 @@ bool CircuitValidator::handleUnpositionedBlocks() {
             }
         }
 
-        // Get occupied positions to avoid overlaps
-        std::unordered_set<Position> occupiedPositions;
-        for (const auto& [id, block] : parsedCircuit.blocks) {
-            if (block.pos.x != std::numeric_limits<float>::max() && 
-                    block.pos.y != std::numeric_limits<float>::max()) {
-                occupiedPositions.insert(Position(
-                            static_cast<int>(block.pos.x),
-                            static_cast<int>(block.pos.y)
-                            ));
-            }
-        }
-
         // place blocks in layers
         const int xSpacing = 2; // x spacing between layers
         std::unordered_map<int, int> layerYcounter;
@@ -317,37 +337,73 @@ bool CircuitValidator::handleUnpositionedBlocks() {
             for (block_id_t id : sccs[sccIndex]){
                 ParsedCircuit::BlockData& block = parsedCircuit.blocks[id];
                 if (block.pos.x != std::numeric_limits<float>::max() && 
-                        block.pos.y != std::numeric_limits<float>::max()) {
+                    block.pos.y != std::numeric_limits<float>::max()) {
                     continue;
+                }
+
+                // check block dimensions in case of custom block
+                int width = 1;
+                int height = 1;
+                if (!blockDataManager->getBlockData(block.type)->isPrimitive()) {
+                    auto depIt = parsedCircuit.dependencies.find(block.dependencyName);
+                    if (depIt == parsedCircuit.dependencies.end()) {
+                        logError("Custom block {} references missing dependency {}", "CircuitValidator", id, block.dependencyName);
+                        return false;
+                    }
+                    auto depCircuit = depIt->second;
+                    height = std::max(depCircuit->inputPorts.size(), depCircuit->outputPorts.size());
+                    width = 2;
+                    if (height == 0) {
+                        logError("Custom block {} has dependency with zero inputs/outputs", "CircuitValidator", id);
+                        return false;
+                    }
                 }
 
                 const int layer = layers[id];
                 const int x = static_cast<int>(parsedCircuit.minPos.dx) + (layer-1) * xSpacing;
 
                 // find first available Y position in current layer column
-                int y = static_cast<int>(parsedCircuit.minPos.dy) + currentYOffset;
-
+                int y;
                 if (layerYcounter.find(x) != layerYcounter.end()) {
                     y = layerYcounter[x];
+                } else {
+                    y = static_cast<int>(parsedCircuit.minPos.dy) + currentYOffset;
                 }
 
-                while (occupiedPositions.count(Position(x, y))) {
-                    ++y;
-                }
+                std::vector<Position> takenPositions;
+                bool canPlace;
+                do {
+                    canPlace = true;
+                    takenPositions.clear();
+                    std::vector<Position> takenPositions;
+                    canPlace = true;
+                    for (int dx = 0; dx < width && canPlace; dx++) {
+                        for (int dy = 0; dy < height && canPlace; dy++) {
+                            Position checkPos(x + dx, y + dy);
+                            if (occupiedPositions.count(checkPos)) {
+                                canPlace = false;
+                            } else {
+                                takenPositions.push_back(checkPos);
+                            }
+                        }
+                    }
+                    if (!canPlace) ++y;
+                } while (!canPlace);
 
-                maxYPlaced = std::max(maxYPlaced, y);
-                block.pos = FPosition(x, y);
-                occupiedPositions.insert(Position(x, y));
-                layerYcounter[x] = y + 1;
+                // mark the found positions
+                occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
 
+                block.pos = FPosition(static_cast<float>(x), static_cast<float>(y));
+                layerYcounter[x] = y + height;
+
+                float blockMaxX = x + width - 1;
+                float blockMaxY = y + height - 1;
                 parsedCircuit.minPos.dx = std::fmin(parsedCircuit.minPos.dx, static_cast<float>(x));
                 parsedCircuit.minPos.dy = std::fmin(parsedCircuit.minPos.dy, static_cast<float>(y));
-                parsedCircuit.maxPos.dx = std::fmax(parsedCircuit.maxPos.dx, static_cast<float>(x));
-                parsedCircuit.maxPos.dy = std::fmax(parsedCircuit.maxPos.dy, static_cast<float>(y));
+                parsedCircuit.maxPos.dx = std::fmax(parsedCircuit.maxPos.dx, blockMaxX);
+                parsedCircuit.maxPos.dy = std::fmax(parsedCircuit.maxPos.dy, blockMaxY);
 
-                //logInfo("Placed block " + std::to_string(id) + " at " + 
-                //        block.pos.toString() + " in layer " + std::to_string(layer), 
-                //        "CircuitValidator");
+                maxYPlaced = std::max(maxYPlaced, static_cast<int>(blockMaxY));
             }
         }
         currentYOffset = componentSpacing + maxYPlaced;

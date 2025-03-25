@@ -134,6 +134,7 @@ private:
 
 	BlockDataManager* blockDataManager;
     ParsedCircuit& parsedCircuit;
+    std::unordered_set<Position> occupiedPositions;
 };
 
 #endif /* parsedCircuit_h */
