@@ -99,12 +99,7 @@ if (Gatality_BuildApp)
     # Properly handle MoltenVK on MacOS
     if (APPLE)
         find_library(MOLTENVK_LIBRARY MoltenVK
-                PATHS
-                "/usr/local/lib"
-                "/opt/homebrew/lib"
-                "$ENV{VULKAN_SDK}/lib"
-                "$ENV{VULKAN_SDK}/macOS/lib"
-                "$ENV{VULKAN_SDK}/MoltenVK/dylib"
+                PATHS "$ENV{VULKAN_SDK}/macOS/lib"
         )
 
         if (MOLTENVK_LIBRARY)
@@ -122,7 +117,10 @@ if (Gatality_BuildApp)
                 "-framework IOKit"
                 "-framework IOSurface"
                 "-framework QuartzCore"
+                Vulkan::Vulkan
         )
+
+        add_definitions(-DVK_LAYER_PATH="${VK_LAYER_PATH}")
     endif ()
 
     target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR} ${EXTERNAL_INCLUDES})

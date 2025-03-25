@@ -66,47 +66,47 @@ void Vulkan::createInstance() {
 	#endif
 
 	// confirm we have validation layers if we need them
-	if (USE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
+	/*if (USE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
-	}
+	}*/
 
-	// set applicaiton information
+	// set application information
 	VkApplicationInfo appInfo {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = "Gatality";
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.pEngineName = "No Engine";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_0;
+	appInfo.apiVersion = VK_API_VERSION_1_2;
+
+	// Define required extensions for macOS
+	std::vector<const char*> extensions = {
+		VK_KHR_SURFACE_EXTENSION_NAME,
+		"VK_MVK_macos_surface"  // MoltenVK specific
+	};
 
 	// start instance creation
 	VkInstanceCreateInfo createInfo {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR; // this seems like a good thing to have in general, but I did only add it for macOS. In the future should check if this is actually available before enabling.
 	createInfo.pApplicationInfo = &appInfo;
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+	createInfo.ppEnabledExtensionNames = extensions.data();
 
-	// add extensions
-	std::vector<std::string> requiredExtensionsStr = getRequiredInstanceExtensions();
-	std::vector<const char*> requiredExtensions;
-	for (const std::string& extension : requiredExtensionsStr) requiredExtensions.push_back(extension.c_str());
-	if (USE_VALIDATION_LAYERS) { requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
-	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-
-	// enable validation layers
-	if (USE_VALIDATION_LAYERS) {
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-		createInfo.ppEnabledLayerNames = validationLayers.data();
-
-		// instance creation debug messenger
-		VkDebugUtilsMessengerCreateInfoEXT createInfo {};
-		populateDebugMessengerCreateInfo(createInfo);
-		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &createInfo;
-
-	} else {
-		createInfo.enabledLayerCount = 0;
-		createInfo.pNext = nullptr;
-	}
+	// // enable validation layers
+	// if (USE_VALIDATION_LAYERS) {
+	// 	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+	// 	createInfo.ppEnabledLayerNames = validationLayers.data();
+	//
+	// 	// instance creation debug messenger
+	// 	VkDebugUtilsMessengerCreateInfoEXT createInfo {};
+	// 	populateDebugMessengerCreateInfo(createInfo);
+	// 	createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &createInfo;
+	//
+	// } else {
+	// 	createInfo.enabledLayerCount = 0;
+	// 	createInfo.pNext = nullptr;
+	// }
 
 	// create the instance
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
@@ -114,19 +114,19 @@ void Vulkan::createInstance() {
 	}
 
 	// create debug messenger
-	if (USE_VALIDATION_LAYERS) {
-		VkDebugUtilsMessengerCreateInfoEXT createInfo {};
-		populateDebugMessengerCreateInfo(createInfo);
-
-		// get function pointer
-		auto createDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (!createDebugUtilsMessengerEXT) {
-			throw std::runtime_error("validation layer requested, but couldn't get debug messenger create function pointer");
-		}
-		if (createDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
-			throw std::runtime_error("failed to set up debug messenger!");
-		}
-	}
+	// if (USE_VALIDATION_LAYERS) {
+	// 	VkDebugUtilsMessengerCreateInfoEXT createInfo {};
+	// 	populateDebugMessengerCreateInfo(createInfo);
+	//
+	// 	// get function pointer
+	// 	auto createDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+	// 	if (!createDebugUtilsMessengerEXT) {
+	// 		throw std::runtime_error("validation layer requested, but couldn't get debug messenger create function pointer");
+	// 	}
+	// 	if (createDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+	// 		throw std::runtime_error("failed to set up debug messenger!");
+	// 	}
+	// }
 }
 
 void Vulkan::setupDevice(VkSurfaceKHR surface) {
@@ -178,7 +178,7 @@ bool Vulkan::checkValidationLayerSupport() {
 
 void Vulkan::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr); 
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
 	logInfo("Found " + std::to_string(deviceCount) + " GPUs with Vulkan support", "Vulkan");
 
@@ -192,11 +192,12 @@ void Vulkan::pickPhysicalDevice(VkSurfaceKHR idealSurface) {
 
 	// find first suitable device
 	for (const auto& device : devices) {
-		if (isDeviceSuitable(device, idealSurface)) {
-			physicalDevice = device;
-			queueFamilies = findQueueFamilies(physicalDevice, idealSurface);
-			return;
-		}
+		// if (isDeviceSuitable(device, idealSurface)) {
+		// 	physicalDevice = device;
+		// 	queueFamilies = findQueueFamilies(physicalDevice, idealSurface);
+		// 	return;
+		// }
+
 	}
 
 	throw std::runtime_error("failed to find suitable GPU");
