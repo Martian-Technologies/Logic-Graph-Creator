@@ -1,5 +1,6 @@
 #include "formManager.h"
 #include "util/config/config.h"
+#include "gui/circuitView/renderer/color.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -11,7 +12,7 @@
 
 FormManager::FormManager(QWidget* parent)
     : QWidget(parent), form(new QVBoxLayout(this)) {
-    setLayout(form);
+	
 }
 
 void FormManager::setForm(const std::string& formType) {
@@ -77,7 +78,7 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 		editor->setFixedWidth(parentWidget()->width() * .2);
 
 		// settings color of the text box
-		Color clr = Settings::get<Color>(itemization[0]);
+		Color clr = Settings::get<Color>(itemization[0]).value();
 		QColor color(clr.r * 255, clr.g*255, clr.b * 255);
 
 		if (color.isValid()) {
@@ -118,7 +119,7 @@ QWidget* FormManager::generateFormWidget(const std::string& preferenceType, cons
 			}
 		});
 
-		QHBoxLayout* layout = new QHBoxLayout(this);
+		QHBoxLayout* layout = new QHBoxLayout();
         layout->addWidget(colorButton);
         layout->addWidget(editor);
         layout->setContentsMargins(0, 0, 0, 0); 
@@ -190,7 +191,7 @@ QHBoxLayout* FormManager::generateKeybindForm(const std::string& itemization) {
 	editor->installEventFilter(this);
 	editor->setReadOnly(true);
 
-	std::string editorDefaultText = Settings::get<std::string>(itemization);
+	std::string editorDefaultText = Settings::get<std::string>(itemization).value();
 	editor->setText(QString::fromStdString(editorDefaultText));
 	
 	return contentLayout;

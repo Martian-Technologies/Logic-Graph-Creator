@@ -1,5 +1,6 @@
 #include "settingsWindow.h"
 #include "util/config/config.h"
+#include "gui/circuitView/renderer/color.h"
 
 #include <QPushButton>
 #include <QFormLayout>
@@ -43,8 +44,6 @@ void SettingsWindow::setupUI() {
     QWidget* scrollContent = new QWidget();
 	formManager = new FormManager(scrollContent);
 	formManager->setForm("General"); // default for form
-
-	// Set the layout inside the scrollContent widget
 	scrollContent->setLayout(formManager->layout());
 
     scrollArea->setWidget(scrollContent);

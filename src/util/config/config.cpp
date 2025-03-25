@@ -1,11 +1,11 @@
 #include <cctype>
 #include <fstream>
 #include <assert.h>
-#include <bitset>
 #include <iomanip>
 
 #include "config.h"
 #include "multiTypeMap.h"
+#include "gui/circuitView/renderer/color.h"
 
 #define CONFIG_PATH "../resources/config.toml"
 #define CONFIG_DEFAULT_PATH "config.toml"
@@ -181,10 +181,10 @@ void Settings::createConfig() {
         std::string value = line.substr(pos);
 		value = value.substr(0, value.rfind("\""));
 
-		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set(fullKey, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
-		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set(fullKey, 1);
-		else if (value == "false" || value == "False") CONFIG_SETTINGS.set(fullKey, 0);
-		else										   CONFIG_SETTINGS.set(fullKey, value.substr(1, value.size())); 
+		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set<Color>(fullKey, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
+		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set<bool>(fullKey, 1);
+		else if (value == "false" || value == "False") CONFIG_SETTINGS.set<bool>(fullKey, 0);
+		else										   CONFIG_SETTINGS.set<std::string>(fullKey, value.substr(1, value.size())); 
 
 		//logInfo(fullKey + "|" + value);
     }
@@ -235,7 +235,7 @@ void Settings::saveSettings() {
 					continue;
 				}
 
-				value = getKey(general[j][0]) + " = \"" + Settings::get<std::string>(general[j][0]) + "\"";
+				value = getKey(general[j][0]) + " = \"" + Settings::get<std::string>(general[j][0]).value() + "\"";
 			} else if (i == 1) {
 				if (appearance[j].empty()) break;
 
@@ -246,10 +246,10 @@ void Settings::saveSettings() {
 
 				value += getKey(appearance[j][0]) + " = \"";
 				if (appearance[j][1] == "COLOR") {
-					Color clr = Settings::get<Color>(appearance[j][0]);
+					Color clr = Settings::get<Color>(appearance[j][0]).value();
 					value += "0x" + toHex(clr.r) + toHex(clr.g) + toHex(clr.b);
 				} else if (appearance[j][1] == "USERINPUT") {
-					value += Settings::get<std::string>(appearance[j][0]);
+					value += Settings::get<std::string>(appearance[j][0]).value();
 				}	
 				value += "\"";
 			} else if (i == 2) {
@@ -260,7 +260,7 @@ void Settings::saveSettings() {
 					continue;
 				}
 
-				value = getKey(keybind[j]) + " = \"" + Settings::get<std::string>(keybind[j]) + "\"";
+				value = getKey(keybind[j]) + " = \"" + Settings::get<std::string>(keybind[j]).value() + "\"";
 			}
 			file << value << '\n';
 		}
@@ -272,8 +272,5 @@ void Settings::saveSettings() {
 
 MultiTypeMap& Settings::getConfig() { return CONFIG_SETTINGS; }
 
-void Settings::set(const std::string& key, const VariantType& value) {
-	CONFIG_SETTINGS.set(key, value);
-}
 
 

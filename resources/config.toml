@@ -23,7 +23,7 @@ light = "0xff7949"
 general = "0x488dff"
 crossing = "0x1efff7"
 generic = "0xff4eec"
-testing = "0xff3757"
+testing = "0x6affdb"
 
 [appearance.text]
 font_size = "12px"

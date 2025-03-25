@@ -1,44 +1,41 @@
 #ifndef multiTypeMap_h
 #define multiTypeMap_h
 
+#include <any>
 #include <unordered_map>
-#include <variant>
 #include <string>
-#include <stdexcept>
-
-#include "gui/circuitView/renderer/color.h"
-
-typedef std::variant<std::string, bool, int, float, Color> VariantType; 
+#include <optional>
 
 class MultiTypeMap {
 public:
 
-    MultiTypeMap() : edited(false) {}
+    MultiTypeMap() {}
 
     // -- Getters --
-    VariantType get(const std::string& key) const {
-		auto itr = mappings.find(key);
-		if (itr == mappings.end()) return VariantType{}; 
+	template<typename T>
+    std::optional<T> get(const std::string& key) const {
+		std::unordered_map<std::string, std::any>::const_iterator itr = mappings.find(key);
+		if (itr == mappings.cend()) return std::nullopt;
 
-		return itr->second;
+		try {
+			return std::any_cast<T>(itr->second);
+		} catch (const std::bad_any_cast&) {
+			return std::nullopt;
+		}
 	}
-
     bool hasKey(const std::string& key) const { return mappings.find(key) != mappings.end(); }
-    bool isEdited() const { return edited; }
 
     // -- Setters --
-    void set(const std::string& key, const VariantType& value) {
-        edited = true;
+	template<typename T>
+    bool set(const std::string& key, const T& value) {
+		std::unordered_map<std::string, std::any>::iterator itr = mappings.find(key);
+		if (itr != mappings.end() && itr->second.type() != typeid(T)) return false;
         mappings[key] = value;
+		return true;
     }
 
 private:
-    bool edited;
-    std::unordered_map<std::string, VariantType> mappings;
-
-	std::string firstValue;
-
-
+    std::unordered_map<std::string, std::any> mappings;
 };
 
 
