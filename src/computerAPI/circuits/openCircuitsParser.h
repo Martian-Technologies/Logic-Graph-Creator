@@ -20,8 +20,8 @@ struct OpenCircuitsBlockInfo {
 
 struct ICData {
     std::unordered_map<int, OpenCircuitsBlockInfo> components;
-    std::vector<int> inputPorts;
-    std::vector<int> outputPorts;
+    std::vector<block_id_t> inputPorts;
+    std::vector<block_id_t> outputPorts;
 };
 
 class OpenCircuitsParser {

@@ -141,7 +141,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 		return;
 	} else if (!saveAs && !circuit->getSaveFilePath().empty()) {
 		const std::string& currentPath = circuit->getSaveFilePath();
-		if (circuitFileManager.saveToFile(currentPath, circuit)) {
+		if (circuitFileManager.saveToFile(currentPath, circuit, circuit->getUUID())) {
 			circuit->setSaved();
 			logInfo("Resaved at: {}", "FileSaving", currentPath);
 		} else {
@@ -158,7 +158,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 		logWarning("Filepath not provided for save", "FileSaving");
 		return;
 	}
-	if (!circuitFileManager.saveToFile(filePath, circuit)) {
+	if (!circuitFileManager.saveToFile(filePath, circuit, generate_uuid_v4())) {
 		logWarning("Failed to save file at: {}", "FileSaving", filePath);
 		return;
 	}
@@ -192,7 +192,7 @@ void MainWindow::loadCircuit() {
 
 	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
-		circuit_id_t id = backend.createCircuit();
+		circuit_id_t id = backend.createCircuit(parsed->getName());
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 
@@ -293,7 +293,7 @@ void MainWindow::exportProject() {
 		std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();
 
 		// save the circuit
-		if (!circuitFileManager.saveToFile(projectFilePath, circuit)) {
+		if (!circuitFileManager.saveToFile(projectFilePath, circuit, generate_uuid_v4())) {
 			errorsOccurred = true;
 			logWarning("Failed to save circuit within project export: {}", "FileSaving", projectFilePath);
 		}

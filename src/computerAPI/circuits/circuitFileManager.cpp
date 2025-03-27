@@ -79,7 +79,7 @@ bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircu
     return false;
 }
 
-bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr) {
+bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr, const std::string& uuidToSaveAs) {
     GatalityParser saver(circuitManager);
-    return saver.save(path, circuitPtr);
+    return saver.save(path, circuitPtr, uuidToSaveAs);
 }

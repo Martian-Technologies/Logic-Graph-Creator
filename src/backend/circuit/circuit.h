@@ -30,6 +30,11 @@ public:
     inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
+    inline bool isNonPrimitive() const { return nonPrimitive; }
+    inline void setNonPrimitive(const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) { nonPrimitive = true; this->inputPorts = inputPorts; this->outputPorts = outputPorts; }
+    inline const std::vector<block_id_t>& getInputPorts() { return inputPorts; }
+    inline const std::vector<block_id_t>& getOutputPorts() { return outputPorts; }
+
 	/* ----------- listener ----------- */
 
 
@@ -116,6 +121,9 @@ private:
 
     bool saved = false;
     std::string saveFilePath;
+
+    bool nonPrimitive = false;
+    std::vector<block_id_t> inputPorts, outputPorts;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;

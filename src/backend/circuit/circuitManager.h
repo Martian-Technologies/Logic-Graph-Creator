@@ -158,9 +158,10 @@ public:
         data->setName(parsedCircuit->getName());
         data->setPath("Custom");
         data->setWidth(2);
+        data->setFileName(parsedCircuit->getRelativeFilePath());
 
-        const std::vector<int>& inPorts = parsedCircuit->getInputPorts();
-        const std::vector<int>& outPorts = parsedCircuit->getOutputPorts();
+        const std::vector<block_id_t>& inPorts = parsedCircuit->getInputPorts();
+        const std::vector<block_id_t>& outPorts = parsedCircuit->getOutputPorts();
         data->setHeight(std::max(inPorts.size(), outPorts.size()));
 
         int i = 0;
@@ -195,6 +196,9 @@ public:
         }
         dataUpdateEventManager->sendEvent("blockDataUpdate");
         circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
+		circuit->setSaved();
+		circuit->setSaveFilePath(parsedCircuit->getAbsoluteFilePath());
+        circuit->setNonPrimitive(parsedCircuit->getInputPorts(), parsedCircuit->getOutputPorts());
         return id;
     }
 

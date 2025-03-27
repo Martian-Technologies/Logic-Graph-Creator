@@ -8,7 +8,7 @@ public:
     CircuitFileManager(CircuitManager* circuitManager);
 
     bool loadFromFile(const std::string& path, SharedParsedCircuit outParsed);
-    bool saveToFile(const std::string& path, Circuit* circuitPtr);
+    bool saveToFile(const std::string& path, Circuit* circuitPtr, const std::string& uuidToSaveAs);
 private:
     CircuitManager* circuitManager;
     //std::unordered_set<std::string> loadedFiles; // TODO: add check for cyclic dependencies

@@ -48,6 +48,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>(circuitManager);
             logInfo("File to access: " + fPath, "GatalityParser");
             if (load(fPath, dependency)){
+                dependency->setRelativeFilePath(importFileName);
                 outParsed->addDependency(importFileName, dependency);
                 logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");
             }else{
@@ -58,7 +59,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::string circuitName;
             inputFile >> std::quoted(circuitName);
             outParsed->setName(circuitName);
-            logInfo("\tSet circuit: " + circuitName, "GatalityParser");
+            logInfo("\tFound primary circuit: " + circuitName, "GatalityParser");
             continue;
         } else if (token == "SubCircuit:") {
             std::string circuitName, line;
@@ -151,13 +152,13 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             }
         }
     }
-    outParsed->setFilePath(path);
+    outParsed->setAbsoluteFilePath(path);
     inputFile.close();
     importedFiles.erase(path);
     return true;
 }
 
-bool GatalityParser::save(const std::string& path, Circuit* circuitPtr) {
+bool GatalityParser::save(const std::string& path, Circuit* circuitPtr, const std::string& uuidToSaveAs) {
     if (!circuitPtr) return false;
 
     std::ofstream outputFile(path);
@@ -166,25 +167,51 @@ bool GatalityParser::save(const std::string& path, Circuit* circuitPtr) {
         return false;
     }
 
-    outputFile  << "version_3\n"
-                << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
-                << "UUID: " << circuitPtr->getUUID() << '\n';;
-
     const BlockContainer* blockContainer = circuitPtr->getBlockContainer();
-    std::unordered_map<block_id_t, Block>::const_iterator itr = blockContainer->begin();
-    for (; itr!=blockContainer->end(); ++itr) {
+    std::unordered_map<block_id_t, Block>::const_iterator itr;
 
+    outputFile << "version_3\n";
+
+    // find all required imports
+    // not ideal but if we loop through from maxBlockId down then we will find all dependencies across every circuit, not just this one
+    std::unordered_set<std::string> imports;
+    for (itr=blockContainer->begin(); itr!=blockContainer->end(); ++itr){
+        BlockData* bd = circuitManager->getBlockDataManager()->getBlockData(itr->second.type());
+        if (!bd) break;
+        if (bd->isPrimitive() || !imports.insert(bd->getFileName()).second) continue;
+        outputFile << "import \"" << bd->getFileName() << "\"\n";
+    }
+
+    if (circuitPtr->isNonPrimitive()){
+        outputFile << "SubCircuit: \"" << circuitPtr->getCircuitName() << "\"\nInPorts:";
+        for (block_id_t id: circuitPtr->getInputPorts()) {
+            outputFile << ' ' << id;
+        }
+        outputFile << "OutPorts:";
+        for (block_id_t id: circuitPtr->getOutputPorts()) {
+            outputFile << ' ' << id;
+        }
+        outputFile << "UUID: " << uuidToSaveAs << '\n';;
+    } else {
+        outputFile << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
+            << "UUID: " << uuidToSaveAs << '\n';;
+    }
+
+    for (itr=blockContainer->begin(); itr!=blockContainer->end(); ++itr) {
         const Block& block = itr->second;
         const Position& pos = block.getPosition();
 
         const ConnectionContainer& blockCC = block.getConnectionContainer();
-        connection_end_id_t connectionNum = blockCC.getConnectionCount() + 1;
+        connection_end_id_t connectionNum = blockCC.getConnectionCount();
+
+        const BlockData* bd = circuitManager->getBlockDataManager()->getBlockData(block.type());
+        bool isPrim = !bd->isPrimitive();
+        const std::string& blockTypeStr = isPrim ? '"'+bd->getFileName()+'"' : blockTypeToString(block.type());
 
         outputFile << "blockId " << itr->first << ' '
-                   << blockTypeToString(block.type()) << ' ' << pos.x << ' '
-                   << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
-                   << connectionNum << '\n';
-
+            <<  blockTypeStr << ' ' << pos.x << ' '
+            << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
+            << connectionNum << '\n';
         for (int j=0; j<connectionNum; ++j){
             outputFile << '\t' << "(connId:" << j << ')';
             const std::vector<ConnectionEnd>& connections = blockCC.getConnections(j);

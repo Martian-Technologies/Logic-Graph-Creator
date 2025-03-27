@@ -22,10 +22,12 @@ public:
 	inline void setIsPlaceable(bool placeable) noexcept { this->placeable = placeable; }
 	inline bool isPlaceable() const noexcept { return placeable; }
 
+	inline void setFileName(const std::string& fname) noexcept { this->fileName = fname; }
 	inline void setName(const std::string& name) noexcept { this->name = name; }
 	inline void setPath(const std::string& path) noexcept { this->path = path; }
 	inline const std::string& getName() const noexcept { return name; }
 	inline const std::string& getPath() const noexcept { return path; }
+	inline const std::string& getFileName() const noexcept { return fileName; }
 
 	// trys to set a connection input in the block. Returns success.
 	inline bool trySetConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
@@ -139,6 +141,7 @@ private:
 	bool placeable = true;
 	std::string name = "Unnamed Block";
 	std::string path = "Basic";
+	std::string fileName = "";
 	block_size_t width = 1;
 	block_size_t height = 1;
 	connection_end_id_t inputConnectionCount = 0;

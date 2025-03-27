@@ -35,10 +35,10 @@ public:
         }
     };
 
-    void addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<int>& inputPorts, const std::vector<int>& outputPorts);
+    void addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts);
     void addDependency(const std::string& filename, SharedParsedCircuit dependency); // for when input and output ports are already set
-    void addInputPort(int p);
-    void addOutputPort(int p);
+    void addInputPort(block_id_t p);
+    void addOutputPort(block_id_t p);
 
     void addBlock(block_id_t id, const BlockData& block);
 
@@ -48,17 +48,19 @@ public:
 
     void resolveCustomBlockTypes();
 
-    void setFilePath(const std::string& fpath) { fullFilePath = fpath; }
-    const std::string& getFilePath() const { return fullFilePath; }
+    void setAbsoluteFilePath(const std::string& fpath) { absoluteFilePath = fpath; }
+    const std::string& getAbsoluteFilePath() const { return absoluteFilePath; }
+    void setRelativeFilePath(const std::string& fpath) { relativeFilePath = fpath; }
+    const std::string& getRelativeFilePath() const { return relativeFilePath; }
 
-    void setName(const std::string& name) { importedCircuitName = name; }
-    const std::string& getName() const { return importedCircuitName; }
+    void setName(const std::string& name) { customBlockName = name; }
+    const std::string& getName() const { return customBlockName; }
 
     void setUUID(const std::string& uuid) { uuidFromLoad = uuid; }
     const std::string& getUUID() const { return uuidFromLoad; }
 
-    const std::vector<int>& getInputPorts() const { return inputPorts; }
-    const std::vector<int>& getOutputPorts() const { return outputPorts; }
+    const std::vector<block_id_t>& getInputPorts() const { return inputPorts; }
+    const std::vector<block_id_t>& getOutputPorts() const { return outputPorts; }
     bool isCustom() const { return customBlock; }
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
@@ -78,15 +80,15 @@ private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()); // TODO: delete this because I think it is unused
 
-    std::string fullFilePath;
+    std::string absoluteFilePath, relativeFilePath;
     std::string uuidFromLoad;
-    std::string importedCircuitName;
-    bool valid = true;
+    std::string customBlockName;
     bool customBlock;
-    std::vector<int> inputPorts;
-    std::vector<int> outputPorts;
+    std::vector<block_id_t> inputPorts;
+    std::vector<block_id_t> outputPorts;
     BlockType customBlockType = BlockType::NONE;
 
+    bool valid = true;
     std::unordered_map<std::string, SharedParsedCircuit> dependencies;
     std::list<block_id_t> customBlockIds;
     std::unordered_map<block_id_t, BlockData> blocks;

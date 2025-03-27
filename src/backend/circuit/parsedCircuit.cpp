@@ -2,7 +2,7 @@
 #include "circuitManager.h"
 #include "circuit.h"
 
-void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<int>& inputPorts, const std::vector<int>& outputPorts) {
+void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) {
     dependency->customBlock = true;
     dependency->inputPorts = inputPorts;
     dependency->outputPorts = outputPorts;
@@ -14,10 +14,10 @@ void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircu
     dependencies[filename] = dependency;
 }
 
-void ParsedCircuit::addInputPort(int p) {
+void ParsedCircuit::addInputPort(block_id_t p) {
     inputPorts.push_back(p);
 }
-void ParsedCircuit::addOutputPort(int p) {
+void ParsedCircuit::addOutputPort(block_id_t p) {
     outputPorts.push_back(p);
 }
 

@@ -291,12 +291,14 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 }
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
+// Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
 	logInfo("Trying to save Circuit");
 	if (fileManager) {
 		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 		if (!filePath.isEmpty()) {
-			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
+            logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
+			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit(), generate_uuid_v4());
 			logInfo("Successfully saved Circuit to: {}", "", filePath.toStdString());
 		}
 	}
@@ -319,7 +321,7 @@ void CircuitViewWidget::load(const QString& filePath) {
     // Check for existing UUID
     const std::string& uuid = parsed->getUUID();
     if (circuitManager.UUIDExists(uuid)) {
-        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        logWarning("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
         return;
     }
 
