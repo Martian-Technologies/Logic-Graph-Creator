@@ -45,8 +45,13 @@ public:
 		return blockType;
 	}
 
-    inline bool UUIDExists(const std::string& uuid) {
-        return existingUUIDs.find(uuid) != existingUUIDs.end();
+    inline circuit_id_t UUIDExists(const std::string& uuid) {
+        std::unordered_map<std::string,circuit_id_t>::iterator itr = existingUUIDs.find(uuid);
+        if (itr != existingUUIDs.end()){
+            return itr->second;
+        } else {
+            return 0;
+        }
     }
 
 	inline void updateBlockPorts(DifferenceSharedPtr dif, circuit_id_t circuitId) {
@@ -123,14 +128,17 @@ public:
             logError("parsedCircuit could not be validated");
             return 0;
         }
-        if (UUIDExists(parsedCircuit->getUUID())){
+        circuit_id_t possibleExistingId = UUIDExists(parsedCircuit->getUUID());
+        if (possibleExistingId > 0){
             // this duplicates check won't really work with open circuits ics because we have no way of knowing
             // unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
             // the parsed circuit which seems annoying
-            logError("Dependency Circuit with UUID {} already exists; not creating custom block.", "", parsedCircuit->getUUID());
-            return 0;
+            logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "", parsedCircuit->getUUID());
+            return possibleExistingId;
         }
+
         if (!parsedCircuit->isCustom()) {
+            logError("Parsed circuit is being inserted though is not marked as custom", "", parsedCircuit->getUUID());
             return 0;
         }
 
@@ -169,11 +177,21 @@ public:
 
         for (i=0; i<inPorts.size(); ++i){
             // snapping the position should be okay, because this circuit should be validated to integer positions
-            circuitBlockData->setConnectionIdPosition(i, parsedCircuit->getBlock(inPorts[i])->pos.snap());
+            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(inPorts[i]);
+            if (!b){
+                logError("Block id not found from custom block output ports: {}", "", inPorts[i]);
+                continue;
+            }
+            circuitBlockData->setConnectionIdPosition(i, b->pos.snap());
         }
         for (i=0; i<outPorts.size(); ++i){
             // snapping the position should be okay, because this circuit should be validated to integer positions
-            circuitBlockData->setConnectionIdPosition(connEnd + i, parsedCircuit->getBlock(outPorts[i])->pos.snap());
+            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(outPorts[i]);
+            if (!b){
+                logError("Block id not found from custom block output ports: {}", "", outPorts[i]);
+                continue;
+            }
+            circuitBlockData->setConnectionIdPosition(connEnd + i, b->pos.snap());
         }
         dataUpdateEventManager->sendEvent("blockDataUpdate");
         circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
@@ -183,7 +201,7 @@ public:
 	inline circuit_id_t createNewCircuit(const std::string& name, const std::string& uuid) {
 		circuit_id_t id = getNewCircuitId();
 		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, name, uuid);
-        existingUUIDs.insert(uuid);
+        existingUUIDs.insert(std::make_pair(uuid, id));
 		circuits.emplace(id, circuit);
 		for (auto& [object, func] : listenerFunctions) {
 			circuit->connectListener(object, func);
@@ -229,7 +247,7 @@ private:
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
     std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
-    std::unordered_set<std::string> existingUUIDs;
+    std::unordered_map<std::string, circuit_id_t> existingUUIDs;
 };
 
 #endif /* circuitManager_h */

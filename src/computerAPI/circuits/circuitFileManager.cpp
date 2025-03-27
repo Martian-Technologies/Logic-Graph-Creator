@@ -19,7 +19,7 @@ BlockType stringToBlockType(const std::string& str) {
     if (str == "SWITCH") return BlockType::SWITCH;
     if (str == "CONSTANT") return BlockType::CONSTANT;
     if (str == "LIGHT") return BlockType::LIGHT;
-    if (str == "CUSTOM") return BlockType::CUSTOM;
+    if (str == "CUSTOM" || (str.front() == '"' && str.back() == '"')) return BlockType::CUSTOM;
     return BlockType::NONE;
 }
 
@@ -66,7 +66,9 @@ bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircu
     if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
         // our gatality file parser function
         GatalityParser parser(circuitManager);
-        return parser.load(path, outParsed);
+        bool out = parser.load(path, outParsed);
+        outParsed->resolveCustomBlockTypes();
+        return out;
     } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
         // open circuit file parser function
         OpenCircuitsParser parser(circuitManager);

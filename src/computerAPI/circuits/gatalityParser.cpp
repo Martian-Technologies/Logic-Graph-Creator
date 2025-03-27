@@ -25,13 +25,14 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
     char cToken;
     inputFile >> token;
 
-    if (token != "version_2") {
-        logError("Invalid circuit file version, expecting version_2", "GatalityParser");
+    if (token != "version_3") {
+        logError("Invalid circuit file version, expecting version_3", "GatalityParser");
         //return false;
     }
 
     int blockId, connId;
     float posX, posY;
+    std::string blockTypeStr;
     BlockType blockType;
     Rotation rotation; // loaded from Rotation type and stored as degrees in ParsedCircuit
     int numConns;
@@ -47,8 +48,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>(circuitManager);
             logInfo("File to access: " + fPath, "GatalityParser");
             if (load(fPath, dependency)){
-                outParsed->addDependency(importFileName, dependency, std::vector<int>(), std::vector<int>());
-                outParsed->addCircuitNameUUID(dependency->getName(), dependency->getUUID());
+                outParsed->addDependency(importFileName, dependency);
                 logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");
             }else{
                 logError("Failed to import dependency: " + importFileName, "GatalityParser");
@@ -60,6 +60,35 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             outParsed->setName(circuitName);
             logInfo("\tSet circuit: " + circuitName, "GatalityParser");
             continue;
+        } else if (token == "SubCircuit:") {
+            std::string circuitName, line;
+
+            std::getline(inputFile, line);
+            std::istringstream lineStream(line);
+
+            lineStream >> std::quoted(circuitName);
+            outParsed->setName(circuitName);
+            logInfo("\tFound SubCircuit: " + circuitName, "GatalityParser");
+
+
+            std::getline(inputFile, line);
+            std::istringstream portStream(line);
+            portStream >> token; // consume "InPorts:"
+            while (portStream >> token) {
+                outParsed->addInputPort(std::stoi(token));
+            }
+
+            std::getline(inputFile, line);
+            std::istringstream portStream2(line);
+            portStream2 >> token; // consume "OutPorts:"
+            if (token != "OutPorts:") {
+                logError("Invalid subcircuit formatting with OutPorts");
+                break;
+            }
+            while (portStream2 >> token) {
+                outParsed->addOutputPort(std::stoi(token));
+            }
+            continue;
         } else if (token == "UUID:") {
             std::string uuid;
             inputFile >> uuid;
@@ -69,28 +98,8 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
         }
 
         inputFile >> blockId;
-        inputFile >> token;
-        blockType = stringToBlockType(token);
-
-        // Determine if block is a sub-circuit or primitive
-        if (blockType == BlockType::NONE){
-            if (token.front() != '"' || token.back() != '"') {
-                logError("Incorrect formatting of load file sub-circuit", "GatalityParser");
-                return false;
-            }
-            std::string circuitName = token.substr(1, token.size() - 2); // remove quotes
-            auto it = outParsed->getCircuitNameToUUID().find(circuitName);
-            if (it == outParsed->getCircuitNameToUUID().end()) {
-                logError("Circuit '" + circuitName + "' not imported due to save file formatting", "GatalityParser");
-                return false;
-            }
-            // Can't implement until custom blocks are added
-            std::getline(inputFile, token); // conn id 0
-            if (!token.starts_with("(connId:0)")){ logError("Invalid parsing with custom block"); return false; }
-            std::getline(inputFile, token); // conn id 1
-            if (!token.starts_with("(connId:1)")){ logError("Invalid parsing with custom block"); return false; }
-            continue;
-        }
+        inputFile >> blockTypeStr;
+        blockType = stringToBlockType(blockTypeStr);
 
         inputFile >> token;
         if (token == "null") posX = std::numeric_limits<float>::max();
@@ -103,10 +112,25 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
         inputFile >> token;
         rotation = stringToRotation(token);
 
-        outParsed->addBlock(blockId, {FPosition(posX, posY), rotation, blockType});
-
         block_id_t currentBlockId = blockId;
         inputFile >> numConns;
+
+        // Determine if block is a sub-circuit or primitive
+        if (blockType == BlockType::CUSTOM){
+            if (blockTypeStr.front() != '"' || blockTypeStr.back() != '"') {
+                logError("Incorrect formatting of load file sub-circuit", "GatalityParser");
+                return false;
+            }
+            const std::string& circuitName = blockTypeStr.substr(1, blockTypeStr.size() - 2); // remove quotes
+            SharedParsedCircuit custom = outParsed->getDependencies().at(circuitName);
+            if (numConns != (custom->getInputPorts().size() + custom->getOutputPorts().size())){
+                logError("Invalid conn id count for custom block", "GatalityParser");
+            }
+            outParsed->addBlock(blockId, {.pos=FPosition(posX, posY), .rotation=rotation, .type=blockType, .dependencyName=circuitName});
+        } else {
+            outParsed->addBlock(blockId, {.pos=FPosition(posX, posY), .rotation=rotation, .type=blockType});
+        }
+
         for (int i = 0; i < numConns; ++i) {
             inputFile >> token; // (connId:x)
             std::string line;
@@ -118,7 +142,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
                     logError("Failed to parse (blockid, connection_id) token", "GatalityParser");
                     break;
                 }
-                // TODO? maybe have to flip this for oututs/ins
                 outParsed->addConnection({
                     static_cast<block_id_t>(currentBlockId),
                     static_cast<connection_end_id_t>(i),
@@ -143,7 +166,7 @@ bool GatalityParser::save(const std::string& path, Circuit* circuitPtr) {
         return false;
     }
 
-    outputFile  << "version_2\n"
+    outputFile  << "version_3\n"
                 << "Circuit: \"" << circuitPtr->getCircuitName() << "\"\n"
                 << "UUID: " << circuitPtr->getUUID() << '\n';;
 

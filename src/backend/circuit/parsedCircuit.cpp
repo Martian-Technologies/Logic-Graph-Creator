@@ -9,6 +9,18 @@ void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircu
     dependencies[filename] = dependency;
 }
 
+void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircuit dependency) {
+    dependency->customBlock = true;
+    dependencies[filename] = dependency;
+}
+
+void ParsedCircuit::addInputPort(int p) {
+    inputPorts.push_back(p);
+}
+void ParsedCircuit::addOutputPort(int p) {
+    outputPorts.push_back(p);
+}
+
 void ParsedCircuit::addBlock(block_id_t id, const BlockData& block) {
     int x = std::floor(block.pos.x);
     int y = std::floor(block.pos.y);

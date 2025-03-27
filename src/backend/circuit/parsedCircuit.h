@@ -36,6 +36,9 @@ public:
     };
 
     void addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<int>& inputPorts, const std::vector<int>& outputPorts);
+    void addDependency(const std::string& filename, SharedParsedCircuit dependency); // for when input and output ports are already set
+    void addInputPort(int p);
+    void addOutputPort(int p);
 
     void addBlock(block_id_t id, const BlockData& block);
 
@@ -53,9 +56,6 @@ public:
 
     void setUUID(const std::string& uuid) { uuidFromLoad = uuid; }
     const std::string& getUUID() const { return uuidFromLoad; }
-
-    void addCircuitNameUUID(const std::string& name, const std::string& uuid) { circuitNameToUUID[name] = uuid; }
-    const std::unordered_map<std::string, std::string>& getCircuitNameToUUID() const { return circuitNameToUUID; }
 
     const std::vector<int>& getInputPorts() const { return inputPorts; }
     const std::vector<int>& getOutputPorts() const { return outputPorts; }
@@ -87,7 +87,6 @@ private:
     std::vector<int> outputPorts;
     BlockType customBlockType = BlockType::NONE;
 
-    std::unordered_map<std::string, std::string> circuitNameToUUID;
     std::unordered_map<std::string, SharedParsedCircuit> dependencies;
     std::list<block_id_t> customBlockIds;
     std::unordered_map<block_id_t, BlockData> blocks;
