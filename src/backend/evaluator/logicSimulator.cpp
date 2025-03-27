@@ -487,9 +487,16 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 		}
 		return;
 	}
-    case GateType::JUNCTION:
-    case GateType::NONE:
-        break;
+	case GateType::JUNCTION:
+	{
+		logError("Gate type \"Junction\" exists in simulator, cannot be simulated.", "Simulator");
+		return;
+	}
+	case GateType::NONE:
+	{
+		logError("Gate type \"None\" exists in simulator, cannot be simulated.", "Simulator");
+		return;
+	}
 	}
 	logError("computeGateStates: Unknown gate type {}", "", static_cast<int>(gate.type));
 }

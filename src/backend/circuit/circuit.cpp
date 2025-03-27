@@ -24,7 +24,7 @@ bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& posi
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, const Vector& movement) {
 	if (checkMoveCollision(selection, movement)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	moveBlocks(selection, movement, difference.get());
@@ -32,7 +32,7 @@ bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& move
 	return true;
 }
 
-void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference) {
+void Circuit::moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -48,7 +48,7 @@ void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movemen
 	}
 }
 
-bool Circuit::checkMoveCollision(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::checkMoveCollision(SharedSelection selection, const Vector& movement) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -155,6 +155,28 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]","", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
+	return true;
+}
+
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position) {
+	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (blockContainer.checkCollision(block.position + totalOffset, block.rotation, block.blockType)) {
+			return false;
+		}
+	}
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (!blockContainer.tryInsertBlock(block.position + totalOffset, block.rotation, block.blockType, difference.get())) {
+			logError("Failed to insert block while inserting block.");
+		}
+	}
+	for (const std::pair<Position, Position>& conn : copiedBlocks->getCopiedConnections()) {
+		if (!blockContainer.tryCreateConnection(conn.second + totalOffset, conn.first + totalOffset, difference.get())) {
+			logError("Failed to create connection while inserting block.");
+		}
+	}
+	sendDifference(difference);
 	return true;
 }
 
@@ -349,4 +371,21 @@ void Circuit::redo() {
 	}
 	sendDifference(newDifference);
 	endUndo();
+}
+
+void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData) {
+	if (!eventData) {
+		logError("eventData passed was null", "Circuit");
+		return;
+	}
+	auto data = dynamic_cast<const DataUpdateEventManager::EventDataUnsignedInt*>(eventData);
+	if (!data) {
+		logError("Could not get EventDataUnsignedInt from eventData", "Circuit");
+		return;
+	}
+	BlockType type = (BlockType)(data->getValue());
+	const BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(type);
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.resizeBlockType(type, blockData->getWidth(), blockData->getHeight(), difference.get());
+	sendDifference(difference);
 }

@@ -1,14 +1,16 @@
-#include "moveTool.h"
+#include "selectionMakerTool.h"
 
 #include "../selectionHelpers/tensorCreationTool.h"
 #include "../selectionHelpers/areaCreationTool.h"
+#include "backend/container/copiedBlocks.h"
 #include "backend/tools/toolManagerManager.h"
+#include "backend/backend.h"
 
-MoveTool::MoveTool() {
-	ToolManagerManager::registerToolModes("placement/move", getModes());
+SelectionMakerTool::SelectionMakerTool() {
+	ToolManagerManager::registerToolModes("selection/selection maker", getModes());
 }
 
-void MoveTool::reset() {
+void SelectionMakerTool::reset() {
 	CircuitTool::reset();
 	if (!activeSelectionHelper) {
 		mode = "Area";
@@ -18,10 +20,11 @@ void MoveTool::reset() {
 	updateElements();
 }
 
-void MoveTool::activate() {
+void SelectionMakerTool::activate() {
 	CircuitTool::activate();
-	registerFunction("Tool Primary Activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
-	registerFunction("Tool Secondary Activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
+	registerFunction("Tool Primary Activate", std::bind(&SelectionMakerTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&SelectionMakerTool::unclick, this, std::placeholders::_1));
+	registerFunction("Copy", std::bind(&SelectionMakerTool::copy, this, std::placeholders::_1));
 	if (!activeSelectionHelper->isFinished()) {
 		toolStackInterface->pushTool(activeSelectionHelper);
 	} else {
@@ -29,7 +32,7 @@ void MoveTool::activate() {
 	}
 }
 
-void MoveTool::setMode(std::string toolMode) {
+void SelectionMakerTool::setMode(std::string toolMode) {
 	if (mode != toolMode) {
 		if (toolMode == "Area") {
 			activeSelectionHelper = std::make_shared<AreaCreationTool>();
@@ -44,34 +47,35 @@ void MoveTool::setMode(std::string toolMode) {
 	}
 }
 
-bool MoveTool::click(const Event* event) {
+bool SelectionMakerTool::click(const Event* event) {
 	if (!activeSelectionHelper->isFinished() || !circuit) return false;
-	if (circuit->tryMoveBlocks(
-		activeSelectionHelper->getSelection(),
-		lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()))
-	) {
-		reset();
-		toolStackInterface->pushTool(activeSelectionHelper);
-	}
+	// if (circuit->tryMoveBlocks(
+	// 	activeSelectionHelper->getSelection(),
+	// 	lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()))
+	// ) {
+	// 	reset();
+	// 	toolStackInterface->pushTool(activeSelectionHelper);
+	// }
 	return true;
 }
 
-bool MoveTool::unclick(const Event* event) {
+bool SelectionMakerTool::copy(const Event* event) {
+	if (!activeSelectionHelper->isFinished() || !circuit) return false;
+	circuitView->getBackend()->setClipboard(std::make_shared<CopiedBlocks>(circuit->getBlockContainer(), activeSelectionHelper->getSelection()));
+	return true;
+}
+
+
+bool SelectionMakerTool::unclick(const Event* event) {
 	if (!activeSelectionHelper->isFinished()) return false;
 	elementCreator.clear();
 	toolStackInterface->pushTool(activeSelectionHelper, false);
 	return true;
 }
 
-void MoveTool::updateElements() {
+void SelectionMakerTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	if (!activeSelectionHelper->isFinished()) return;
 	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
-	if (pointerInView) {
-		elementCreator.addSelectionElement(SelectionObjectElement(
-			shiftSelection(activeSelectionHelper->getSelection(), lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection())),
-			SelectionObjectElement::RenderMode::SELECTION
-		));
-	}
 }

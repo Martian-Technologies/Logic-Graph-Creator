@@ -6,23 +6,16 @@
 
 class TensorCreationTool : public SelectionHelperTool {
 public:
-	void reset() override final {
-		SelectionHelperTool::reset();
-		selection = nullptr;
-		tensorStage = -1;
-		updateElements();
-	}
-
-	void activate() override final {
-		SelectionHelperTool::activate();
-		registerFunction("tool primary activate", std::bind(&TensorCreationTool::click, this, std::placeholders::_1));
-		registerFunction("tool secondary activate", std::bind(&TensorCreationTool::unclick, this, std::placeholders::_1));
-		registerFunction("tool rotate block cw", std::bind(&TensorCreationTool::confirm, this, std::placeholders::_1));
-	}
+	void reset() override final;
+	void activate() override final;
 	void updateElements() override final;
 
+	void undoFinished() override final;
+
+	void setSelectionToFollow(SharedSelection selectionToFollow) override final;
+
 	bool click(const Event* event);
-	bool unclick(const Event* event);
+	bool unclick(const Event* event = nullptr);
 	bool confirm(const Event* event);
 	
 private:
@@ -30,6 +23,8 @@ private:
 	Position originPosition;
 	Vector step;
 	int tensorStage = -1;
+	bool followingSelection = false;
+	std::vector<dimensional_selection_size_t> selectionToFollow;
 };
 
 #endif /* tensorMoveTool_h */

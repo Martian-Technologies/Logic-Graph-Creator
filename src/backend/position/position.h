@@ -49,9 +49,9 @@ struct std::hash<Vector> {
 
 template <>
 struct std::formatter<Vector> : std::formatter<std::string> {
-  auto format(Vector v, format_context& ctx) const {
-    return formatter<string>::format(v.toString(), ctx);
-  }
+	auto format(Vector v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
 };
 
 struct FVector {
@@ -85,12 +85,15 @@ struct FVector {
 
 template <>
 struct std::formatter<FVector> : std::formatter<std::string> {
-  auto format(FVector v, format_context& ctx) const {
-    return formatter<string>::format(v.toString(), ctx);
-  }
+	auto format(FVector v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
 };
 
+
 struct Position {
+	class Iterator;
+
 	inline Position() : x(0), y(0) { }
 	inline Position(cord_t x, cord_t y) : x(x), y(y) { }
 	inline FPosition free() const;
@@ -114,8 +117,43 @@ struct Position {
 	inline Position operator-(const Vector& vector) const { return Position(x - vector.dx, y - vector.dy); }
 	inline Position& operator-=(const Vector& vector) { x -= vector.dx; y -= vector.dy; return *this; }
 
+	inline Iterator iterTo(const Position& other) const;
+
 	cord_t x, y;
 };
+
+class Position::Iterator {
+public:
+	inline Iterator(const Position& start, const Position& end) : cur(start), start(start), end(end) { }
+	inline Iterator& operator++() { next(); return *this; }
+	inline Iterator& operator--() { prev(); return *this; }
+	inline Iterator operator++(int) { Iterator tmp = *this; next(); return tmp; }
+	inline Iterator operator--(int) { Iterator tmp = *this; prev(); return tmp; }
+	inline explicit operator bool() const { return notDone; }
+	inline const Position& operator*() const { return cur; }
+	inline const Position* operator->() const { return &cur; }
+
+private:
+	inline void next() {
+		notDone = cur != end;
+		bool endOfLine = notDone && cur.x == end.x;
+		cur.x = endOfLine * start.x + (!endOfLine) * (signum(end.x - cur.x) + cur.x);
+		cur.y += endOfLine * signum(end.y - cur.y);
+	}
+	inline void prev() {
+		bool startOfLine = cur.x == start.x;
+		cur.x = (notDone && startOfLine) * end.x + (notDone && !startOfLine) * signum(start.x - cur.x);;
+		cur.y += (notDone && startOfLine) * signum(start.y - cur.y);
+		notDone = true;
+	}
+	Position cur;
+	Position start;
+	Position end;
+	bool notDone = true;
+};
+
+Position::Iterator Position::iterTo(const Position& other) const { return Iterator(*this, other); }
+
 
 template<>
 struct std::hash<Position> {
@@ -128,9 +166,9 @@ struct std::hash<Position> {
 
 template <>
 struct std::formatter<Position> : std::formatter<std::string> {
-  auto format(Position v, format_context& ctx) const {
-    return formatter<string>::format(v.toString(), ctx);
-  }
+	auto format(Position v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
 };
 
 struct FPosition {
@@ -165,9 +203,9 @@ struct FPosition {
 
 template <>
 struct std::formatter<FPosition> : std::formatter<std::string> {
-  auto format(FPosition v, format_context& ctx) const {
-    return formatter<string>::format(v.toString(), ctx);
-  }
+	auto format(FPosition v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
 };
 
 // conversion
@@ -199,18 +237,18 @@ inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
 inline Vector rotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
 	switch (rotationAmount) {
-		case Rotation::NINETY: return Vector(height - vector.dy - 1, vector.dx);
-		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
-		case Rotation::TWO_SEVENTY: return Vector(vector.dy, width - vector.dx - 1);
-		default: return vector;
+	case Rotation::NINETY: return Vector(height - vector.dy - 1, vector.dx);
+	case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+	case Rotation::TWO_SEVENTY: return Vector(vector.dy, width - vector.dx - 1);
+	default: return vector;
 	}
 }
 inline Vector reverseRotateVectorWithArea(const Vector& vector, unsigned int width, unsigned int height, Rotation rotationAmount) {
 	switch (rotationAmount) {
-		case Rotation::NINETY: return Vector(vector.dy, height - vector.dx - 1);
-		case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
-		case Rotation::TWO_SEVENTY: return Vector(width - vector.dy - 1, vector.dx);
-		default: return vector;	
+	case Rotation::NINETY: return Vector(vector.dy, height - vector.dx - 1);
+	case Rotation::ONE_EIGHTY: return Vector(width - vector.dx - 1, height - vector.dy - 1);
+	case Rotation::TWO_SEVENTY: return Vector(width - vector.dy - 1, vector.dx);
+	default: return vector;
 	}
 }
 #endif /* position_h */

@@ -6,6 +6,7 @@
 #include "circuitView/circuitView.h"
 #include "dataUpdateEventManager.h"
 #include "circuit/circuitManager.h"
+#include "container/copiedBlocks.h"
 #include "util/uuid.h"
 
 class Backend {
@@ -41,8 +42,13 @@ public:
 	// Attempts to link a CircuitView and a Evaluator. Returns success bool.
 	bool linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_id_t evalId, const Address& address);
 
+	const SharedCopiedBlocks getClipboard() const { return clipboard; }
+	void setClipboard(SharedCopiedBlocks copiedBlocks) { clipboard = copiedBlocks; }
+
 private:
 	std::set<CircuitView*> circuitViews;
+	
+	SharedCopiedBlocks clipboard = nullptr;
 
 	DataUpdateEventManager dataUpdateEventManager;
 	CircuitManager circuitManager;

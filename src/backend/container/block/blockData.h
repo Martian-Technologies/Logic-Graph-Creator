@@ -8,14 +8,24 @@
 class BlockData {
 	friend class BlockDataManager;
 public:
+	BlockData(BlockType blockType, DataUpdateEventManager* dataUpdateEventManager) : blockType(blockType), dataUpdateEventManager(dataUpdateEventManager) {}
+
 	inline void setDefaultData(bool defaultData) noexcept { this->defaultData = defaultData; }
 	inline bool isDefaultData() const noexcept { return defaultData; }
 
-	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; }
+	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType)); }
 	inline bool isPrimitive() const noexcept { return primitive; }
 
-	inline void setWidth(block_size_t width) noexcept { this->width = width; }
-	inline void setHeight(block_size_t height) noexcept { this->height = height; }
+	inline void setWidth(block_size_t width) noexcept {
+		this->width = width;
+		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
+	}
+	inline void setHeight(block_size_t height) noexcept {
+		this->height = height;
+		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
+		dataUpdateEventManager->sendEvent("blockDataUpdate");
+	}
 	inline block_size_t getWidth() const noexcept { return width; }
 	inline block_size_t getHeight() const noexcept { return height; }
 
@@ -136,6 +146,7 @@ public:
 	}
 
 private:
+	BlockType blockType;
 	bool defaultData = true;
 	bool primitive = true; // true if defined by default (And, Or, Xor...)
 	bool placeable = true;
@@ -146,6 +157,7 @@ private:
 	block_size_t height = 1;
 	connection_end_id_t inputConnectionCount = 0;
 	std::vector<std::pair<Vector, bool>> connections;
+	DataUpdateEventManager* dataUpdateEventManager;
 };
 
 #endif /* blockData_h */

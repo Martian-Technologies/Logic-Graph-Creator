@@ -5,7 +5,7 @@
 
 class SinglePlaceTool : public BaseBlockPlacementTool {
 public:
-	inline void reset() override final { memset(clicks, 'n', 2); }
+	inline void reset() override final { memset(clicks, 'n', 2); updateElements(); }
 
 	void activate() override final;
 	void updateElements()  override final;
@@ -15,8 +15,6 @@ public:
 	bool startDeleteBlocks(const Event* event);
 	bool stopDeleteBlocks(const Event* event);
 	bool pointerMove(const Event* event);
-	bool enterBlockView(const Event* event);
-	bool exitBlockView(const Event* event);
 
 private:
 	char clicks[2] = { 'n', 'n' };

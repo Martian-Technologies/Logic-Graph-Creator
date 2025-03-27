@@ -6,6 +6,7 @@
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
 #include "undoSystem.h"
+#include "backend/container/copiedBlocks.h"
 
 class ParsedCircuit;
 
@@ -17,8 +18,10 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, const std::string& name, const std::string& uuid) :
-        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name) { }
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
+        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
+	}
 
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
@@ -37,7 +40,6 @@ public:
 
 	/* ----------- listener ----------- */
 
-
 	// subject to change
 	void connectListener(void* object, CircuitDiffListenerFunction func) { listenerFunctions[object] = func; }
 	// subject to change
@@ -55,7 +57,7 @@ public:
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(const Position& positionOfBlock, const Position& position);
 	// Trys to move a blocks. Wont move any if one cant move. Returns if successful.
-	bool tryMoveBlocks(const SharedSelection& selection, const Vector& movement);
+	bool tryMoveBlocks(SharedSelection selection, const Vector& movement);
 
 	void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
 	void tryRemoveOverArea(Position cellA, Position cellB);
@@ -64,6 +66,7 @@ public:
 
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit);
+	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position);
 
 	/* ----------- block data ----------- */
 
@@ -97,9 +100,11 @@ public:
 	void redo();
 
 private:
+	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
+
 	// helpers
-	bool checkMoveCollision(const SharedSelection& selection, const Vector& movement);
-	void moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference);
+	bool checkMoveCollision(SharedSelection selection, const Vector& movement);
+	void moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference);
 
 	void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
 	void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
@@ -113,6 +118,8 @@ private:
     std::string circuitUUID;
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
+	DataUpdateEventManager* dataUpdateEventManager;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
 	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
 	

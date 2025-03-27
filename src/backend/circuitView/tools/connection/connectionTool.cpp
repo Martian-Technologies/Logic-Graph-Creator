@@ -10,27 +10,23 @@ ConnectionTool::ConnectionTool() {
 }
 
 void ConnectionTool::activate() {
-	if (activeConnectionTool)
+	if (activeConnectionTool) {
 		toolStackInterface->pushTool(activeConnectionTool);
+	}
 }
 
 void ConnectionTool::setMode(std::string toolMode) {
 	if (mode != toolMode) {
-		if (toolMode == "None") {
-			activeConnectionTool = nullptr;
-			toolStackInterface->popTool();
+		SharedCircuitTool newActiveConnectionTool;
+		if (toolMode == "Single") {
+			newActiveConnectionTool = std::make_shared<SingleConnectTool>();
+		} else if (toolMode == "Tensor") {
+			newActiveConnectionTool = std::make_shared<TensorConnectTool>();
 		} else {
-			if (mode == "None") {
-				toolStackInterface->popTool();
-			}
-			if (toolMode == "Single") {
-				activeConnectionTool = std::make_shared<SingleConnectTool>();
-			} else if (toolMode == "Tensor") {
-				activeConnectionTool = std::make_shared<TensorConnectTool>();
-			} else {
-				logError("Tool mode \"{}\" could not be found", "", toolMode);
-			}
-			toolStackInterface->pushTool(activeConnectionTool);
+			logError("Tool mode \"{}\" could not be found", "", toolMode);
+			return;
 		}
+		activeConnectionTool = newActiveConnectionTool;
+		toolStackInterface->popAbove(this);	
 	}
 }

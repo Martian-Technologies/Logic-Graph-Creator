@@ -6,17 +6,8 @@
 
 class AreaCreationTool : public SelectionHelperTool {
 public:
-	void reset() override final {
-		SelectionHelperTool::reset();
-		hasOrigin = false;
-		updateElements();
-	}
-
-	void activate() override final {
-		SelectionHelperTool::activate();
-		registerFunction("tool primary activate", std::bind(&AreaCreationTool::click, this, std::placeholders::_1));
-		registerFunction("tool secondary activate", std::bind(&AreaCreationTool::unclick, this, std::placeholders::_1));
-	}
+	void reset() override final;
+	void activate() override final;
 	void updateElements() override final;
 
 	bool click(const Event* event);

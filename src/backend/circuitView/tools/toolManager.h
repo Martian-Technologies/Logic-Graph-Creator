@@ -3,10 +3,12 @@
 
 #include "toolStack.h"
 
+class CircuitView;
+
 class ToolManager {
 public:
-	inline ToolManager(EventRegister* eventRegister, Renderer* renderer) :
-		toolStacks { ToolStack(eventRegister, renderer), ToolStack(eventRegister, renderer), ToolStack(eventRegister, renderer) } {
+	inline ToolManager(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView) :
+		toolStacks { ToolStack(eventRegister, renderer, circuitView), ToolStack(eventRegister, renderer, circuitView), ToolStack(eventRegister, renderer, circuitView) } {
 		selectedTools[0] = { "none", nullptr };
 		selectedTools[1] = { "none", nullptr };
 		selectedTools[2] = { "none", nullptr };
