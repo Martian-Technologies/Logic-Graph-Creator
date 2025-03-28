@@ -1,11 +1,21 @@
 #include "MenuTreeListener.h"
 
 #include <RmlUi/Core/Element.h>
+#include <iostream>
+
+MenuTreeListener::MenuTreeListener() {
+    std::cout << "Event Listener Created" << std::endl;
+}
+
+MenuTreeListener::~MenuTreeListener() {
+    std::cout << "Event Listener Destroyed" << std::endl;
+}
 
 void MenuTreeListener::ProcessEvent(Rml::Event& event) {
   Rml::Element* target = event.GetTargetElement();
   
   //logInfo(target);
+  std::cout << target << std::endl;
 
   //collapsing submenus
 
@@ -19,4 +29,8 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
       }
     }
   }
+}
+
+void MenuTreeListener::OnDetach(Rml::Element* element) {
+    delete this;
 }

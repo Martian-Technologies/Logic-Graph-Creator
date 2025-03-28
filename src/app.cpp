@@ -23,7 +23,7 @@ App::App() {
 	for (Rml::Element* element : menuTreeItems) {
     if (element->GetClassNames().find("parent") != std::string::npos) {
       //this line causes compilation error lol!
-			//element->AddEventListener("click", new MenuTreeListener());
+			element->AddEventListener("click", new MenuTreeListener());
     }
 	}
 
