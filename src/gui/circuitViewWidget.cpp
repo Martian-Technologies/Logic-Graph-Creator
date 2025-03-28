@@ -77,7 +77,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView->getBackend();
 			if (backend && this->circuitSelector) {
 				backend->linkCircuitViewWithCircuit(this->circuitView.get(), this->circuitSelector->itemData(index).value<int>());
-        logInfo("CircuitViewWidget linked to new circuit view: " + std::to_string(this->circuitSelector->itemData(index).value<int>()));
+				logInfo("CircuitViewWidget linked to new circuit view: {}", "", this->circuitSelector->itemData(index).value<int>());
 			}
 		}
 	);
@@ -92,7 +92,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 			Backend* backend = this->circuitView->getBackend();
 			if (backend && this->evaluatorSelector) {
 				backend->linkCircuitViewWithEvaluator(this->circuitView.get(), this->evaluatorSelector->itemData(index).value<int>(), Address());
-        logInfo("CircuitViewWidget linked to evalutor: " + std::to_string(this->evaluatorSelector->itemData(index).value<int>()));
+				logInfo("CircuitViewWidget linked to evalutor: {}", "", this->evaluatorSelector->itemData(index).value<int>());
 			}
 		}
 	);	
@@ -280,13 +280,14 @@ void CircuitViewWidget::mouseMoveEvent(QMouseEvent* event) {
 void CircuitViewWidget::enterEvent(QEnterEvent* event) {
 	// grab focus so key inputs work without clicking
 	setFocus(Qt::MouseFocusReason);
-
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+	if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
 	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
 void CircuitViewWidget::leaveEvent(QEvent* event) {
 	Vec2 viewPos = pixelsToView(mapFromGlobal(QCursor::pos()));
+	if (viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x <= 1 && viewPos.y <= 1) return;
 	if (circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)))) event->accept();
 }
 
@@ -297,7 +298,7 @@ void CircuitViewWidget::save() {
 		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 		if (!filePath.isEmpty()) {
 			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit());
-			logInfo("Successfully saved Circuit to: " + filePath.toStdString());
+			logInfo("Successfully saved Circuit to: {}", "", filePath.toStdString());
 		}
 	}
 }
@@ -309,6 +310,7 @@ void CircuitViewWidget::load(const QString& filePath) {
     SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+        logError("Failed to load circuit file.");
         return;
     }
 

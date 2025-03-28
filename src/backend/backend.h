@@ -10,7 +10,7 @@
 
 class Backend {
 public:
-	Backend() : toolManagerManager(&circuitViews), circuitManager(&dataUpdateEventManager) { }
+	Backend();
 
 	// Creates a new Circuit. Returns circuit_id_t.
 	circuit_id_t createCircuit(const std::string& uuid = generate_uuid_v4(), const std::string& name = "Circuit");

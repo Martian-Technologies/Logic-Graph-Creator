@@ -38,6 +38,22 @@ struct Vector {
 	cord_t dx, dy;
 };
 
+template<>
+struct std::hash<Vector> {
+	inline std::size_t operator()(const Vector& vec) const noexcept {
+		std::size_t x = std::hash<cord_t> {}(vec.dx);
+		std::size_t y = std::hash<cord_t> {}(vec.dy);
+		return (std::size_t)x ^ ((std::size_t)y << 32);
+	}
+};
+
+template <>
+struct std::formatter<Vector> : std::formatter<std::string> {
+  auto format(Vector v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
+  }
+};
+
 struct FVector {
 	inline FVector() : dx(0.0f), dy(0.0f) { }
 	inline FVector(f_cord_t dx, f_cord_t dy) : dx(dx), dy(dy) { }
@@ -65,6 +81,13 @@ struct FVector {
 	inline FVector projectToVec(const FVector& vector) const { return vector * (*this * vector) / vector.lengthSquared(); }
 
 	f_cord_t dx, dy;
+};
+
+template <>
+struct std::formatter<FVector> : std::formatter<std::string> {
+  auto format(FVector v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
+  }
 };
 
 struct Position {
@@ -103,6 +126,13 @@ struct std::hash<Position> {
 	}
 };
 
+template <>
+struct std::formatter<Position> : std::formatter<std::string> {
+  auto format(Position v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
+  }
+};
+
 struct FPosition {
 	inline FPosition() : x(0.0f), y(0.0f) { }
 	inline FPosition(f_cord_t x, f_cord_t y) : x(x), y(y) { }
@@ -131,6 +161,13 @@ struct FPosition {
 	inline FPosition projectToVec(const FPosition& orginOfVec, const FVector& vector) const { return orginOfVec + (*this - orginOfVec).projectToVec(vector); }
 
 	f_cord_t x, y;
+};
+
+template <>
+struct std::formatter<FPosition> : std::formatter<std::string> {
+  auto format(FPosition v, format_context& ctx) const {
+    return formatter<string>::format(v.toString(), ctx);
+  }
 };
 
 // conversion

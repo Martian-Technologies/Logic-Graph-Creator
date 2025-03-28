@@ -1,11 +1,11 @@
 #include "evaluatorTests.h"
-#include "util/uuid.h"
 
 // Note that logic simulator is tested separately
 void EvaluatorTest::SetUp() {
-    circuit_id_t circuitId = circuitManager.createNewCircuit(generate_uuid_v4(), "Circuit");
-	circuit = circuitManager.getCircuit(circuitId);
-    evaluator = std::make_shared<Evaluator>(1, circuit);
+    circuit_id_t circuitId = backend.createCircuit();
+	circuit = backend.getCircuit(circuitId);
+	auto id = backend.createEvaluator(circuitId);
+    evaluator = backend.getEvaluator(id.value());
     i = 0;
 }
 
@@ -14,7 +14,7 @@ void EvaluatorTest::TearDown() {
     circuit.reset();
     evaluator.reset();
 }
-/*
+
 TEST_F(EvaluatorTest, InitTest) {
     ASSERT_EQ(evaluator->getEvaluatorId(), 1);
 
@@ -27,7 +27,7 @@ TEST_F(EvaluatorTest, PauseUnpauseTest) {
     evaluator->setUseTickrate(false);
     // set to 1000000000 tick/min
     // tickrate should be ~16666666.7 ?
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::seconds(2));
     ASSERT_GT(evaluator->getRealTickrate(), 0);
 	
 	evaluator->setPause(true);
@@ -41,13 +41,13 @@ TEST_F(EvaluatorTest, TickrateTest) {
 	evaluator->setUseTickrate(true);
 	evaluator->setPause(false);
 	
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::seconds(2));
 	
 	ASSERT_GT(evaluator->getRealTickrate(), 0);
 	//ASSERT_EQ(evaluator->getRealTickrate(), new_tickrate/60); // have to sleep for a couple seconds
 
     evaluator->setUseTickrate(false);
-	//std::this_thread::sleep_for(std::chrono::seconds(1));
+	//std::this_thread::sleep_for(std::chrono::seconds(2));
     // tickrate should grow
     //ASSERT_GT(evaluator->getRealTickrate(), new_tickrate);
 
@@ -63,11 +63,11 @@ TEST_F(EvaluatorTest, BasicStateManagement) {
 	circuit->tryInsertBlock(pos, rot, BlockType::SWITCH);
 	
 	Address addr(pos);
-	ASSERT_EQ(evaluator->getState(addr), false);
+	ASSERT_EQ(evaluator->getState(addr), logic_state_t::LOW);
 	
 	// set state
-	evaluator->setState(addr, true);
-	ASSERT_EQ(evaluator->getState(addr), true);
+	evaluator->setState(addr, logic_state_t::HIGH);
+	ASSERT_EQ(evaluator->getState(addr), logic_state_t::HIGH);
 }
 
 TEST_F(EvaluatorTest, BulkStateOperations) {
@@ -91,7 +91,7 @@ TEST_F(EvaluatorTest, BulkStateOperations) {
     std::vector<logic_state_t> states = evaluator->getBulkStates(addresses);
 	ASSERT_EQ(states.size(), addresses.size());
 	for (logic_state_t state : states) {
-		ASSERT_EQ(state, false);
+		ASSERT_EQ(state, logic_state_t::LOW);
 	}
 }
 
@@ -109,20 +109,20 @@ TEST_F(EvaluatorTest, LogicGateEvaluation) {
 	circuit->tryCreateConnection(in2, andPos);
 	
 	// set input states
-	evaluator->setState(Address(in1), true);
-	evaluator->setState(Address(in2), true);
+	evaluator->setState(Address(in1), logic_state_t::HIGH);
+	evaluator->setState(Address(in2), logic_state_t::HIGH);
 	
 	// run simulation
 	evaluator->setPause(false);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::seconds(2));
 	
 	// check AND gate output
-	ASSERT_EQ(evaluator->getState(Address(andPos)), true);
+	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::HIGH);
 
 	// change one input
-	evaluator->setState(Address(in1), false);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	ASSERT_EQ(evaluator->getState(Address(andPos)), false);
+	evaluator->setState(Address(in1), logic_state_t::LOW);
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::LOW);
 
     evaluator->setPause(true);
 }
@@ -150,34 +150,7 @@ TEST_F(EvaluatorTest, EvaluatingCircuitModifications) {
 
 	// reaccess addresses
 	//ASSERT_EQ(evaluator->getState(Address(pos2)), false); // This old address will cause an error as it is not found in address tree
-	ASSERT_EQ(evaluator->getState(Address(newPos)), true);
-}
-
-TEST_F(EvaluatorTest, GateTypeConversion) {
-    // test block type conversions
-	struct TestCase {
-		BlockType blockType;
-		GateType expectedGateType;
-	};
-	
-	std::vector<TestCase> testCases = {
-		{BlockType::AND, GateType::AND},
-		{BlockType::OR, GateType::OR},
-		{BlockType::XOR, GateType::XOR},
-		{BlockType::NAND, GateType::NAND},
-		{BlockType::NOR, GateType::NOR},
-		{BlockType::XNOR, GateType::XNOR},
-		{BlockType::SWITCH, GateType::DEFAULT_RETURN_CURRENTSTATE},
-		{BlockType::BUTTON, GateType::DEFAULT_RETURN_CURRENTSTATE},
-		{BlockType::TICK_BUTTON, GateType::TICK_INPUT},
-		{BlockType::LIGHT, GateType::OR}
-	};
-	
-	for (const TestCase& testCase : testCases) {
-		ASSERT_EQ(circuitToEvaluatorGatetype(testCase.blockType), testCase.expectedGateType);
-	}
-	
-	ASSERT_THROW(circuitToEvaluatorGatetype(static_cast<BlockType>(-1)), std::invalid_argument);
+	ASSERT_EQ(evaluator->getState(Address(newPos)), logic_state_t::HIGH);
 }
 
 TEST_F(EvaluatorTest, ThreadSafetyAndPausing) {
@@ -194,24 +167,24 @@ TEST_F(EvaluatorTest, ThreadSafetyAndPausing) {
 	stateChanger.join();
 	stateReader.join();
 	
-    bool finalState = evaluator->getState(addr);
+	logic_state_t finalState = evaluator->getState(addr);
     // the change state is ran 100 times, ending on 99%2==0
-    ASSERT_TRUE(finalState==false) << "Not synced threads";
+    ASSERT_TRUE(finalState==logic_state_t::LOW) << "Not synced threads";
 
     evaluator->setPause(true);
 }
 
 void EvaluatorTest::changeState(const Address& addr) {
     for (int j = 0; j < 100; j++) {
-        //evaluator->setState(addr, j % 2 == 0);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        evaluator->setState(addr, j % 2 == 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
 }
 
-void EvaluatorTest::readState(const Address& addr) {
+void EvaluatorTest::readState(const Address& addr) const {
     for (int j=0; j<100; ++j) {
-        //evaluator->getState(addr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        evaluator->getState(addr);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
 }
 
@@ -236,4 +209,3 @@ TEST_F(EvaluatorTest, FastCircuitModifications) {
 		ASSERT_NO_THROW(evaluator->getState(addr));
 	}
 }
-*/
