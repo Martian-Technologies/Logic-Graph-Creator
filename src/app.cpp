@@ -1,9 +1,9 @@
 #include "app.h"
 #include "gui/rml/RmlUi_Backend.h"
 #include "computerAPI/directoryManager.h"
-//
+
 App::App() {
-	Backend::Initialize("Gatality", 800, 600,  true);
+	Backend::Initialize("Gatality", 800, 600, true);
 	
 	Rml::SetRenderInterface(Backend::GetRenderInterface());
 	Rml::SetSystemInterface(Backend::GetSystemInterface());
