@@ -1,5 +1,6 @@
 #include "app.h"
 #include "gui/rml/RmlUi_Backend.h"
+#include "gui/interaction/MenuTreeListener.h"
 #include "computerAPI/directoryManager.h"
 
 App::App() {
@@ -15,6 +16,16 @@ App::App() {
 	Rml::LoadFontFace((DirectoryManager::getResourceDirectory() / "gui/fonts/monaspace.otf").string());
 	
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainwindow.rml").string());
+
+	Rml::ElementList menuTreeItems;
+	document->GetElementsByTagName(menuTreeItems, "li");
+
+	for (Rml::Element* element : menuTreeItems) {
+    if (element->GetClassNames().find("parent") != std::string::npos) {
+      //this line causes compilation error lol!
+			//element->AddEventListener("click", new MenuTreeListener());
+    }
+	}
 
 	document->Show();
 }
