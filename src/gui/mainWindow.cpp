@@ -179,7 +179,7 @@ void MainWindow::loadCircuit() {
 	std::string filePath =
 		QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>(&backend.getCircuitManager());
+	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
 	if (!circuitFileManager.loadFromFile(filePath, parsed)) {
 		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 		return;
@@ -217,7 +217,7 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
 	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
 	if (filePath.isEmpty()) return;
 
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>(&backend.getCircuitManager());
+	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
     if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logError("Failed to load Circuit file");

@@ -45,21 +45,25 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
             const std::string& fPath = fullPath.string();
 
-            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>(circuitManager);
+            SharedParsedCircuit dependency = std::make_shared<ParsedCircuit>();
             logInfo("File to access: " + fPath, "GatalityParser");
             if (load(fPath, dependency)){
                 dependency->setRelativeFilePath(importFileName);
-                outParsed->addDependency(importFileName, dependency);
-                logInfo("Loaded dependency circuit: " + dependency->getName() + " (" + dependency->getUUID() + ")", "GatalityParser");
+                dependency->markAsCustom();
+
+                // Since this dependency and all of its own subcircuits must have been loaded, we can safely load this parsed circuit
+                BlockType newBlockType = loadIntoCircuit(dependency);
+                customBlockMap[importFileName] = newBlockType;
+                logInfo("Loaded dependency circuit: {} ({})", "GatalityParser", dependency->getName(), dependency->getUUID());
             }else{
-                logError("Failed to import dependency: " + importFileName, "GatalityParser");
+                logError("Failed to import dependency: {}", "GatalityParser", importFileName);
             }
             continue;
         } else if (token == "Circuit:") {
             std::string circuitName;
             inputFile >> std::quoted(circuitName);
             outParsed->setName(circuitName);
-            logInfo("\tFound primary circuit: " + circuitName, "GatalityParser");
+            logInfo("\tFound primary circuit: {}", "GatalityParser", circuitName);
             continue;
         } else if (token == "SubCircuit:") {
             std::string circuitName, line;
@@ -69,7 +73,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 
             lineStream >> std::quoted(circuitName);
             outParsed->setName(circuitName);
-            logInfo("\tFound SubCircuit: " + circuitName, "GatalityParser");
+            logInfo("\tFound SubCircuit: {}", "GatalityParser", circuitName);
 
 
             std::getline(inputFile, line);
@@ -94,7 +98,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::string uuid;
             inputFile >> uuid;
             outParsed->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
-            logInfo("\tSet UUID: " + uuid, "GatalityParser");
+            logInfo("\tSet UUID: {}", "GatalityParser", uuid);
             continue;
         }
 
@@ -116,21 +120,18 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
         block_id_t currentBlockId = blockId;
         inputFile >> numConns;
 
-        // Determine if block is a sub-circuit or primitive
+        // Determine if block is a sub-circuit and make sure the conn id count is valid
+        // blockType is set as custom from the stringToBlockType by checking for quotes, this should be improved later
         if (blockType == BlockType::CUSTOM){
-            if (blockTypeStr.front() != '"' || blockTypeStr.back() != '"') {
-                logError("Incorrect formatting of load file sub-circuit", "GatalityParser");
-                return false;
-            }
             const std::string& circuitName = blockTypeStr.substr(1, blockTypeStr.size() - 2); // remove quotes
-            SharedParsedCircuit custom = outParsed->getDependencies().at(circuitName);
-            if (numConns != (custom->getInputPorts().size() + custom->getOutputPorts().size())){
+            blockType = customBlockMap.at(circuitName); // update blocktype with custom block
+            BlockData* bd = circuitManager->getBlockDataManager()->getBlockData(blockType);
+            if (numConns != bd->getConnectionCount()){
                 logError("Invalid conn id count for custom block", "GatalityParser");
             }
-            outParsed->addBlock(blockId, {.pos=FPosition(posX, posY), .rotation=rotation, .type=blockType, .dependencyName=circuitName});
-        } else {
-            outParsed->addBlock(blockId, {.pos=FPosition(posX, posY), .rotation=rotation, .type=blockType});
         }
+
+        outParsed->addBlock(blockId, {.pos=FPosition(posX, posY), .rotation=rotation, .type=blockType});
 
         for (int i = 0; i < numConns; ++i) {
             inputFile >> token; // (connId:x)
@@ -163,7 +164,7 @@ bool GatalityParser::save(const std::string& path, Circuit* circuitPtr, const st
 
     std::ofstream outputFile(path);
     if (!outputFile.is_open()){
-        logError("Couldn't open file at path: " + path, "GatalityParser");
+        logError("Couldn't open file at path: {}", "GatalityParser", path);
         return false;
     }
 

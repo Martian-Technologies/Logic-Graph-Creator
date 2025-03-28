@@ -67,7 +67,6 @@ bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircu
         // our gatality file parser function
         GatalityParser parser(circuitManager);
         bool out = parser.load(path, outParsed);
-        outParsed->resolveCustomBlockTypes();
         return out;
     } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
         // open circuit file parser function

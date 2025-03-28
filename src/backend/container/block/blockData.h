@@ -1,7 +1,7 @@
 #ifndef blockData_h
 #define blockData_h
 
-#include "backend/circuit/circuitBlockData.h"
+#include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
 #include "connectionEnd.h"
 

@@ -6,6 +6,7 @@
 
 #include "backend/circuit/parsedCircuit.h"
 #include "backend/position/position.h"
+#include "computerAPI/circuits/parsedCircuitLoader.h"
 
 using json = nlohmann::json;
 
@@ -24,9 +25,9 @@ struct ICData {
     std::vector<block_id_t> outputPorts;
 };
 
-class OpenCircuitsParser {
+class OpenCircuitsParser: public ParsedCircuitLoader {
 public:
-    OpenCircuitsParser(CircuitManager* cm): circuitManager(cm) {}
+    OpenCircuitsParser(CircuitManager* cm): circuitManager(cm), ParsedCircuitLoader(cm) {}
     bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
     void parseOpenCircuitsJson();
 

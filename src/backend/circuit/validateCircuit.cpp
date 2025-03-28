@@ -11,7 +11,6 @@ void CircuitValidator::validate() {
     }
 
     isValid = isValid && validateBlockTypes();
-    isValid = isValid && validateDependencies();
     isValid = isValid && setBlockPositionsInt();
     isValid = isValid && handleInvalidConnections();
     isValid = isValid && setOverlapsUnpositioned();
@@ -28,29 +27,6 @@ bool CircuitValidator::validateBlockTypes() {
             //return false;
         }
     }
-    return true;
-}
-
-bool CircuitValidator::validateDependencies() {
-    int numImports = 0;
-
-    for (auto& [depName, depCircuit] : parsedCircuit.dependencies) {
-        if (depCircuit->inputPorts.empty() || depCircuit->outputPorts.empty()){
-            logError("Custom block circuit has either empty inputs or outputs");
-            return false;
-        }
-        // validate the dependency as a circuit itself
-        CircuitValidator depValidator(*depCircuit, blockDataManager);
-        if (!depCircuit->valid) {
-            logError("Dependency circuit validation failed for {}", "", depName);
-            parsedCircuit.valid = false;
-            return false;
-        }
-        logInfo("Dependency circuit validation success for {}", "", depName);
-    }
-
-    logInfo("File dependency size: {}", "", parsedCircuit.dependencies.size());
-
     return true;
 }
 
@@ -121,17 +97,12 @@ bool CircuitValidator::setOverlapsUnpositioned() {
 
         Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
 
-        int width = 1;
-        int height = 1;
-        if (!blockDataManager->getBlockData(block.type)->isPrimitive()) {
-            auto depIt = parsedCircuit.dependencies.find(block.dependencyName);
-            if (depIt == parsedCircuit.dependencies.end()) {
-                logError("Block links to an unknown dependency: {}", "CircuitValidator", block.dependencyName);
-                continue;
-            }
-            auto depCircuit = depIt->second;
-            height = std::max(depCircuit->inputPorts.size(), depCircuit->outputPorts.size());
-            width = 2;
+        BlockData* bd = blockDataManager->getBlockData(block.type);
+        int width = bd->getWidth();
+        int height = bd->getHeight();
+        if (width == 0 || height == 0) {
+            logError("Custom block {} has dependency with zero inputs/outputs", "CircuitValidator", id);
+            return false;
         }
 
         std::vector<Position> takenPositions;
@@ -342,21 +313,12 @@ bool CircuitValidator::handleUnpositionedBlocks() {
                 }
 
                 // check block dimensions in case of custom block
-                int width = 1;
-                int height = 1;
-                if (!blockDataManager->getBlockData(block.type)->isPrimitive()) {
-                    auto depIt = parsedCircuit.dependencies.find(block.dependencyName);
-                    if (depIt == parsedCircuit.dependencies.end()) {
-                        logError("Custom block {} references missing dependency {}", "CircuitValidator", id, block.dependencyName);
-                        return false;
-                    }
-                    auto depCircuit = depIt->second;
-                    height = std::max(depCircuit->inputPorts.size(), depCircuit->outputPorts.size());
-                    width = 2;
-                    if (height == 0) {
-                        logError("Custom block {} has dependency with zero inputs/outputs", "CircuitValidator", id);
-                        return false;
-                    }
+                BlockData* bd = blockDataManager->getBlockData(block.type);
+                int width = bd->getWidth();
+                int height = bd->getHeight();
+                if (width == 0 || height == 0) {
+                    logError("Custom block {} has dependency with zero inputs/outputs", "CircuitValidator", id);
+                    return false;
                 }
 
                 const int layer = layers[id];

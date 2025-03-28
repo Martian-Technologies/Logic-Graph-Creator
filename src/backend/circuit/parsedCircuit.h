@@ -4,7 +4,6 @@
 #include "backend/container/block/blockDataManager.h"
 #include "backend/container/block/connectionEnd.h"
 #include "backend/position/position.h"
-#include <list>
 
 class CircuitManager;
 
@@ -14,13 +13,12 @@ typedef std::shared_ptr<ParsedCircuit> SharedParsedCircuit;
 class ParsedCircuit {
     friend class CircuitValidator;
 public:
-    ParsedCircuit(CircuitManager* cm): circuitManager(cm) {}
+    ParsedCircuit() = default;
 
     struct BlockData {
         FPosition pos; // will be validated into integer values
         Rotation rotation; // todo: make into integer value to generalize the rotation
         BlockType type;
-        std::string dependencyName; // empty if this block is a primitive
     };
 
     struct ConnectionData {
@@ -35,8 +33,6 @@ public:
         }
     };
 
-    void addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts);
-    void addDependency(const std::string& filename, SharedParsedCircuit dependency); // for when input and output ports are already set
     void addInputPort(block_id_t p);
     void addOutputPort(block_id_t p);
 
@@ -45,8 +41,6 @@ public:
     void addConnection(const ConnectionData& conn);
 
     void makePositionsRelative();
-
-    void resolveCustomBlockTypes();
 
     void setAbsoluteFilePath(const std::string& fpath) { absoluteFilePath = fpath; }
     const std::string& getAbsoluteFilePath() const { return absoluteFilePath; }
@@ -61,6 +55,7 @@ public:
 
     const std::vector<block_id_t>& getInputPorts() const { return inputPorts; }
     const std::vector<block_id_t>& getOutputPorts() const { return outputPorts; }
+    bool markAsCustom() { return customBlock = true; }
     bool isCustom() const { return customBlock; }
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
@@ -75,26 +70,23 @@ public:
     const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
     const std::vector<ConnectionData>& getConns() const { return connections; }
 
-    const std::unordered_map<std::string, SharedParsedCircuit>& getDependencies() const { return dependencies; }
 private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()); // TODO: delete this because I think it is unused
 
     std::string absoluteFilePath, relativeFilePath;
     std::string uuidFromLoad;
+
+    // If this represents a custom block:
     std::string customBlockName;
     bool customBlock;
-    std::vector<block_id_t> inputPorts;
+    std::vector<block_id_t> inputPorts; // connection id is the index in the vector
     std::vector<block_id_t> outputPorts;
     BlockType customBlockType = BlockType::NONE;
 
     bool valid = true;
-    std::unordered_map<std::string, SharedParsedCircuit> dependencies;
-    std::list<block_id_t> customBlockIds;
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
-
-    CircuitManager* circuitManager;
 };
 
 
@@ -104,13 +96,10 @@ public:
 private:
     struct ConnectionHash {
         size_t operator()(const ParsedCircuit::ConnectionData& p) const {
-            return std::hash<block_id_t>()(p.outputId) ^ 
-                   std::hash<block_id_t>()(p.inputId) ^
-                   std::hash<connection_end_id_t>()(p.outputBlockId) ^
-                   std::hash<connection_end_id_t>()(p.inputBlockId);
+            return std::hash<block_id_t>()(p.outputId) ^ std::hash<block_id_t>()(p.inputId) ^
+                   std::hash<connection_end_id_t>()(p.outputBlockId) ^ std::hash<connection_end_id_t>()(p.inputBlockId);
         }
     };
-    std::unordered_map<std::string, std::unordered_map<block_id_t, block_id_t>> dependencyMappings;
 
     void validate();
     bool validateBlockTypes();
@@ -119,7 +108,6 @@ private:
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();
 
-
     bool handleUnpositionedBlocks();
 
     bool isIntegerPosition(const FPosition& pos) const {
@@ -127,6 +115,7 @@ private:
     }
     block_id_t generateNewBlockId() const {
         block_id_t id = 0;
+        // slow
         while (parsedCircuit.blocks.find(id) != parsedCircuit.blocks.end()){
             ++id;
         }

@@ -1,18 +1,5 @@
 #include "parsedCircuit.h"
-#include "circuitManager.h"
 #include "circuit.h"
-
-void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircuit dependency, const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) {
-    dependency->customBlock = true;
-    dependency->inputPorts = inputPorts;
-    dependency->outputPorts = outputPorts;
-    dependencies[filename] = dependency;
-}
-
-void ParsedCircuit::addDependency(const std::string& filename, SharedParsedCircuit dependency) {
-    dependency->customBlock = true;
-    dependencies[filename] = dependency;
-}
 
 void ParsedCircuit::addInputPort(block_id_t p) {
     inputPorts.push_back(p);
@@ -33,9 +20,6 @@ void ParsedCircuit::addBlock(block_id_t id, const BlockData& block) {
         if (y > maxPos.dy) maxPos.dy = y;
     }
     blocks[id] = block;
-    if (!block.dependencyName.empty()){
-        customBlockIds.push_back(id);
-    }
     valid = false;
 }
 
@@ -67,29 +51,5 @@ void ParsedCircuit::makePositionsRelative() {
         maxPos.dy -= offsetY;
     } else {
         maxPos.dy = 0;
-    }
-}
-
-void ParsedCircuit::resolveCustomBlockTypes() {
-    for(const std::pair<std::string, SharedParsedCircuit>& p: dependencies){
-        p.second->resolveCustomBlockTypes();
-    }
-
-    // Update CUSTOM blocks to use resolved types
-    for (block_id_t id: customBlockIds) {
-        BlockData& blockData = blocks.at(id);
-
-        auto depIt = dependencies.find(blockData.dependencyName);
-        if (depIt != dependencies.end()) {
-            blockData.type = depIt->second->customBlockType;
-        } else {
-            logError("Missing IC dependency: " + blockData.dependencyName + " for block id: " + std::to_string(id));
-        }
-    }
-
-    if (customBlock){
-        CircuitValidator validator(*this, circuitManager->getBlockDataManager());
-        circuit_id_t id = circuitManager->createNewCircuit(this);
-        customBlockType = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
     }
 }

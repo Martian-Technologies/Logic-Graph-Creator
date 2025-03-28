@@ -44,8 +44,7 @@ bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outP
     std::unordered_map<int,OpenCircuitsBlockInfo*> filteredBlocks;
     filterAndResolveBlocks(filteredBlocks);
     fillParsedCircuit(filteredBlocks);
-    //printParsedData();
-    outParsedCircuit->resolveCustomBlockTypes();
+    printParsedData();
     return true;
 }
 
@@ -406,40 +405,25 @@ void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
     }
 }
 
-
 void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCircuitsBlockInfo*>& filteredBlocks) {
-    std::unordered_map<int, SharedParsedCircuit> icD_to_pc;
-
-    // First pass: Create all ParsedCircuits for ICs
-    for (int icD : usedIcDatas) {
-        auto itr = icDataMap.find(icD);
-        if (itr == icDataMap.end()) {
-            logError("IC instance of reference data: " + std::to_string(icD) + " was not found in icDataMap", "OpenCircuitsParser");
-            continue;
-        }
-        SharedParsedCircuit pc = std::make_shared<ParsedCircuit>(circuitManager);
-        pc->setName("IC " + std::to_string(icD));
-        icD_to_pc[icD] = pc;
-    }
+    std::unordered_map<int, BlockType> icD_to_blockType;
 
     // if icBlockSpace is nullptr, then use filteredBlocks
     auto fillParsedBlock = [&](SharedParsedCircuit pc, int id, const OpenCircuitsBlockInfo* block, const std::unordered_map<int, OpenCircuitsBlockInfo>* icBlockSpace) {
         BlockType t = stringToBlockType(openCircuitsTypeToName[block->type]);
-        pc->addBlock(id, {block->position*posScale,
-                Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), t, t==BlockType::CUSTOM ? "IC " + std::to_string(block->icReference) : ""});
-        // if the block is custom, attach the dependency name that it points to to the block
-        // the dependency name must be equivalent to what the name of the dependency is when it is added to the parsed circuit, in this case formatted as: "IC 123", as seen below
-
+        BlockType newType = t;
         if (t == BlockType::CUSTOM) {
             int refIcD = block->icReference;
-            auto depIt = icD_to_pc.find(refIcD);
-            if (depIt != icD_to_pc.end()) {
-                const ICData& depData = icDataMap.at(refIcD);
-                pc->addDependency(depIt->second->getName(), depIt->second, depData.inputPorts, depData.outputPorts);
-            } else {
-                logError("Dependency IC " + std::to_string(refIcD) + " not found for block " + std::to_string(id), "OpenCircuitsParser");
+            auto it = icD_to_blockType.find(refIcD);
+            if (it == icD_to_blockType.end()) {
+                logError("IC reference {} not found for block {}", "OpenCircuitsParser", refIcD, id);
+                return;
             }
+            newType = it->second;
+            logError("FOUND NEW BLOCK TYPE");
         }
+
+        pc->addBlock(id, {block->position*posScale, Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), newType});
 
         std::unordered_map<int, int> inputOccurrenceTracker;
         int i=0;
@@ -516,18 +500,34 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 
 
     // add all parsed IC instances as dependencies to the primary parsed circuit
-    for (int icD : usedIcDatas){
-        std::unordered_map<int, ICData>::iterator itr = icDataMap.find(icD);
-        if (itr == icDataMap.end()){
-            logError("IC instance of reference data: " + std::to_string(icD) + " was not found in icDataMap", "OpenCircuitsParser");
-            continue;
-        }
-        SharedParsedCircuit pc = icD_to_pc[icD];
+    std::function<void(int)> fillInCustoms;
+    fillInCustoms = [&](int icRef) {
+        SharedParsedCircuit pc = std::make_shared<ParsedCircuit>();
+        pc->setName("IC " + std::to_string(icRef));
+        pc->markAsCustom();
+
+        std::unordered_map<int,ICData>::iterator itr = icDataMap.find(icRef);
+        for (int p: itr->second.inputPorts){ pc->addInputPort(p); }
+        for (int p: itr->second.outputPorts){ pc->addOutputPort(p); }
+
         for (const auto& comp : itr->second.components) {
             const OpenCircuitsBlockInfo* block = &comp.second;
+            if (block->type == "IC" && icD_to_blockType.find(block->icReference) == icD_to_blockType.end()) {
+                // Make sure there are no unresolved dependencies before continuing
+                fillInCustoms(block->icReference);
+            }
             if (validOpenCircuitsTypes.count(block->type)) {
                 fillParsedBlock(pc, comp.first, block, &itr->second.components);
             }
+        }
+        icD_to_blockType[icRef] = loadIntoCircuit(pc);
+    };
+
+    for (const std::pair<int, OpenCircuitsBlockInfo*>& p: filteredBlocks) {
+        OpenCircuitsBlockInfo* block = p.second;
+        int refIcD = block->icReference;
+        if (block->type == "IC" && icD_to_blockType.find(refIcD) == icD_to_blockType.end()) {
+            fillInCustoms(refIcD);
         }
     }
 
