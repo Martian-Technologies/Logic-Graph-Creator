@@ -1,5 +1,5 @@
 version_2
-Circuit: "Circuit"
+Circuit: "SixteenToOneMUX"
 UUID: aaed00b2-d838-4b5a-b2f8-c25ffdea9b31
 blockId 101 SWITCH -8 14 ZERO 1
 	(connId:0) (85 0)

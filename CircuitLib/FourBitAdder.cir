@@ -1,5 +1,5 @@
 version_2
-Circuit: "Circuit"
+Circuit: "FourBitAdder"
 UUID: 664e0e6a-0092-4219-8089-a8b56f6a082a
 blockId 1 SWITCH -2 -2 ZERO 1
 	(connId:0) (13 0) (17 0)

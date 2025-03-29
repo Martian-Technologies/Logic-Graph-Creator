@@ -7,7 +7,7 @@
 #include "backend/backend.h"
 
 SelectionMakerTool::SelectionMakerTool() {
-	ToolManagerManager::registerToolModes("selection/selection maker", getModes());
+	ToolManagerManager::registerTool<SelectionMakerTool>();
 }
 
 void SelectionMakerTool::reset() {

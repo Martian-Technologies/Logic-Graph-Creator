@@ -5,7 +5,7 @@
 #include "singleConnectTool.h"
 
 ConnectionTool::ConnectionTool() {
-	ToolManagerManager::registerToolModes("connection/connection", getModes());
+	ToolManagerManager::registerTool<ConnectionTool>();
 	activeConnectionTool = std::make_shared<SingleConnectTool>();
 }
 

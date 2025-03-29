@@ -1,24 +1,25 @@
 version_2
 Circuit: "Circuit"
-UUID: 188d5b10-51ff-4f79-8942-dc51475d41cb
-blockId 2 SWITCH 0 2 ZERO 1
-	(connId:0) (6 0)
-blockId 3 SWITCH 0 1 ZERO 1
-	(connId:0) (5 0)
-blockId 4 SWITCH 3 -2 NINETY 1
-	(connId:0) (7 0) (6 1)
-blockId 5 TRISTATE_BUFFER 3 1 ZERO 3
-	(connId:0) (3 0)
-	(connId:1) (7 1)
-	(connId:2) (9 0)
-blockId 6 TRISTATE_BUFFER 3 4 ZERO 3
-	(connId:0) (2 0)
-	(connId:1) (4 0)
-	(connId:2) (8 0)
-blockId 7 NAND 3 -1 NINETY 2
+UUID: 14d65f93-bc0d-4601-90de-7ad6009df241
+blockId 10 LIGHT 7 3 ZERO 1
+	(connId:0) (9 1)
+blockId 9 JUNCTION 5 3 ZERO 2
+	(connId:0) (4 2) (5 2)
+	(connId:1) (10 0)
+blockId 8 SWITCH 0 4 ZERO 1
 	(connId:0) (4 0)
+blockId 7 SWITCH 0 3 ZERO 1
+	(connId:0) (5 0)
+blockId 6 SWITCH 2 0 NINETY 1
+	(connId:0) (3 0) (4 1)
+blockId 5 TRISTATE_BUFFER 3 3 ZERO 3
+	(connId:0) (7 0)
+	(connId:1) (3 1)
+	(connId:2) (9 0)
+blockId 4 TRISTATE_BUFFER 3 5 ZERO 3
+	(connId:0) (8 0)
+	(connId:1) (6 0)
+	(connId:2) (9 0)
+blockId 3 NAND 2 2 NINETY 2
+	(connId:0) (6 0)
 	(connId:1) (5 1)
-blockId 8 LIGHT 5 4 ZERO 1
-	(connId:0) (6 2)
-blockId 9 LIGHT 5 1 ZERO 1
-	(connId:0) (5 2)

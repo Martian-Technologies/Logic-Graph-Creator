@@ -5,7 +5,7 @@
 #include "areaPlaceTool.h"
 
 BlockPlacementTool::BlockPlacementTool() {
-	ToolManagerManager::registerToolModes("placement/placement", getModes());
+	ToolManagerManager::registerTool<BlockPlacementTool>();
 	activePlacementTool = std::make_shared<SinglePlaceTool>();
 }
 

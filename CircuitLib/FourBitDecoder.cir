@@ -1,5 +1,5 @@
 version_2
-Circuit: "Circuit"
+Circuit: "FourBitDecoder"
 UUID: c5ea9727-1e28-4082-ba17-e2f44dffe631
 blockId 61 SWITCH -9 -2 ZERO 1
 	(connId:0) (66 0) (101 0) (99 0) (97 0) (95 0) (77 0) (75 0) (73 0) (71 0)

@@ -1,5 +1,5 @@
 version_2
-Circuit: "Circuit"
+Circuit: "EightBitAdder"
 UUID: e58dcb50-e495-4348-991e-b035f973d1b8
 blockId 65 XOR 9 2 ZERO 2
 	(connId:0) (9 0) (1 0)

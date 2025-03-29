@@ -176,8 +176,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit() {
-	std::string filePath =
-		QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
+	std::string filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 
 	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
 	if (!circuitFileManager.loadFromFile(filePath, parsed)) {

@@ -5,7 +5,7 @@
 #include "backend/tools/toolManagerManager.h"
 
 MoveTool::MoveTool() {
-	ToolManagerManager::registerToolModes("placement/move", getModes());
+	ToolManagerManager::registerTool<MoveTool>();
 }
 
 void MoveTool::reset() {

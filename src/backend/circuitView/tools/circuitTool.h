@@ -15,7 +15,8 @@ class CircuitTool {
 public:
 	virtual ~CircuitTool() { unregisterFunctions(); }
 	bool isHelper() { return helper; }
-	static inline std::vector<std::string> getModes() { return {}; }
+	inline virtual std::vector<std::string> getModes() const { return {}; }
+	inline virtual std::string getPath() const { return "NONE"; }
 
 protected:
 	void registerFunction(std::string eventName, EventFunction function);

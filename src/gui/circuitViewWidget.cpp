@@ -342,8 +342,30 @@ void CircuitViewWidget::load(const QString& filePath) {
 			logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
 		}
 	} else {
-		qWarning("Parsed circuit is not valid to be placed");
+		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
 	}
+	// if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
+	// if (!fileManager) return;
+
+	// SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+	// 	QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+	// 	logError("Failed to load circuit file.");
+	// 	return;
+	// }
+
+	// CircuitValidator validator(*parsed, circuitView->getBackend()->getBlockDataManager()); // validate and dont merge dependencies
+	// if (parsed->isValid()) {
+	// 	circuitView->getToolManager().selectTool("preview placement tool");
+	// 	// circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+	// 	PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
+	// 	if (previewTool) {
+	// 		previewTool->setParsedCircuit(parsed);
+	// 	} else {
+	// 		logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
+	// 	}
+	// } else {
+	// 	qWarning("Parsed circuit is not valid to be placed");
+	// }
 }
 
 void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {
