@@ -14,6 +14,8 @@ public:
 		Position position;
 		Rotation rotation;
 		block_data_t data;
+        CopiedBlockData(BlockType type, Position pos, Rotation rot, block_data_t d)
+            : blockType(type), position(pos), rotation(rot), data(d) {}
 	};
 
 	const std::vector<CopiedBlockData> getCopiedBlocks() const { return blocks; }

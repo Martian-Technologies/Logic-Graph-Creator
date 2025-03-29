@@ -12,7 +12,6 @@
 #include <QMenu>
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
-#include "backend/circuit/validateCircuit.h"
 #include "computerAPI/directoryManager.h"
 #include "selection/selectorWindow.h"
 #include "circuitViewWidget.h"
@@ -145,7 +144,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 		return;
 	} else if (!saveAs && !circuit->getSaveFilePath().empty()) {
 		const std::string& currentPath = circuit->getSaveFilePath();
-		if (circuitFileManager.saveToFile(currentPath, circuit)) {
+		if (circuitFileManager.saveToFile(currentPath, circuit, circuit->getUUID())) {
 			circuit->setSaved();
 			logInfo("Resaved at: {}", "FileSaving", currentPath);
 		} else {
@@ -155,13 +154,14 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 	}
 
 	// "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
+    logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
 	std::string filePath =
 		QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 	if (filePath.empty()) {
 		logWarning("Filepath not provided for save", "FileSaving");
 		return;
 	}
-	if (!circuitFileManager.saveToFile(filePath, circuit)) {
+	if (!circuitFileManager.saveToFile(filePath, circuit, generate_uuid_v4())) {
 		logWarning("Failed to save file at: {}", "FileSaving", filePath);
 		return;
 	}
@@ -185,18 +185,26 @@ void MainWindow::loadCircuit() {
 		return;
 	}
 
+    // Check for existing UUID
+    const std::string& uuid = parsed->getUUID();
+    CircuitManager& circuitManager = backend.getCircuitManager();
+    if (circuitManager.UUIDExists(uuid)) {
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        return;
+    }
+
 	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
-		circuit_id_t id = backend.createCircuit();
+		circuit_id_t id = backend.createCircuit(parsed->getName());
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 
 		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
-		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position());
-
+		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position(), false);
 		primaryNewCircuit->setSaved();
 		primaryNewCircuit->setSaveFilePath(filePath);
-		// all dependency circuits should be saved when created by preview tool
+
+		// all dependency circuits should be already saved
 		logInfo("Saved primary circuit: {}", "FileLoading", primaryNewCircuit->getSaveFilePath());
 	} else {
 		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
@@ -216,7 +224,14 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
         return;
     }
 
-    CircuitValidator validator(*parsed, backend.getBlockDataManager()); // validate and dont merge dependencies
+    const std::string& uuid = parsed->getUUID();
+    CircuitManager& circuitManager = backend.getCircuitManager();
+    if (circuitManager.UUIDExists(uuid)) {
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        return;
+    }
+
+    CircuitValidator validator(*parsed, backend.getBlockDataManager());
     if (parsed->isValid()){
 		circuitView->getToolManager().selectTool("preview placement tool");
         // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
@@ -281,7 +296,7 @@ void MainWindow::exportProject() {
 		std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();
 
 		// save the circuit
-		if (!circuitFileManager.saveToFile(projectFilePath, circuit)) {
+		if (!circuitFileManager.saveToFile(projectFilePath, circuit, generate_uuid_v4())) {
 			errorsOccurred = true;
 			logWarning("Failed to save circuit within project export: {}", "FileSaving", projectFilePath);
 		}

@@ -50,6 +50,8 @@ set(BUILD_SHARED_LIBS OFF)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate EXCLUDE_FROM_ALL)
 
+# JSON
+add_subdirectory(external/JSON)
 # Google Testing
 add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 
@@ -73,6 +75,7 @@ set(EXTERNAL_LINKS
 	cpplocate::cpplocate
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
+	nlohmann_json::nlohmann_json
 )
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})

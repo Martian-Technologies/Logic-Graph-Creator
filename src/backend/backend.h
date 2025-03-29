@@ -14,11 +14,11 @@ public:
 	Backend();
 
 	// Creates a new Circuit. Returns circuit_id_t.
-	circuit_id_t createCircuit(const std::string& uuid = generate_uuid_v4(), const std::string& name = "Circuit");
+	circuit_id_t createCircuit(const std::string& name = "Circuit", const std::string& uuid = generate_uuid_v4());
 	// Attempts to create a Evaluator for a Circuit. Returns evaluator_id_t if successful.
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
-	inline const BlockDataManager* getBlockDataManager() const { return getCircuitManager().getBlockDataManager(); }
+	inline BlockDataManager* getBlockDataManager() { return getCircuitManager().getBlockDataManager(); }
 	
 	inline CircuitManager& getCircuitManager() { return circuitManager; }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }

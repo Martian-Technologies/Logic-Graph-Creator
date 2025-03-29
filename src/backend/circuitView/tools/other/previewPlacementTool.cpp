@@ -42,7 +42,7 @@ bool PreviewPlacementTool::commitPlacement(const Event* event) {
 		logWarning("Collision Detected, Cannot place circuit in occupied positions", "PreviewPlacementTool");
 		return true;
 	}
-	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition);
+	circuit->tryInsertParsedCircuit(*parsedCircuit, lastPointerPosition, false);
 
 	clearPreview();
 	active = false;

@@ -1,13 +1,33 @@
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include <QtCore/QFile>
+#ifndef openCircuitsParser_h
+#define openCircuitsParser_h
 
-#include "circuitFileManager.h"
+#include <nlohmann/json.hpp>
+#include <list>
 
-class OpenCircuitsParser {
+#include "backend/circuit/parsedCircuit.h"
+#include "backend/position/position.h"
+#include "computerAPI/circuits/parsedCircuitLoader.h"
+
+using json = nlohmann::json;
+
+struct OpenCircuitsBlockInfo {
+    std::string type;
+    FPosition position;
+    double angle; // in radians
+    std::vector<int> inputBlocks; // reference ids to other blocks/circuit nodes
+    std::vector<int> outputBlocks;
+    int icReference; // if it is an IC block
+};
+
+struct ICData {
+    std::unordered_map<int, OpenCircuitsBlockInfo> components;
+    std::vector<block_id_t> inputPorts;
+    std::vector<block_id_t> outputPorts;
+};
+
+class OpenCircuitsParser: public ParsedCircuitLoader {
 public:
-    OpenCircuitsParser() {};
+    OpenCircuitsParser(CircuitManager* cm): circuitManager(cm), ParsedCircuitLoader(cm) {}
     bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
     void parseOpenCircuitsJson();
 
@@ -16,21 +36,22 @@ public:
     void processICDataJson(int id, ICData& icData);
 
     // Stores the information such as angle, position, etc for blocks
-    void parseTransform(const QJsonObject& transform, OpenCircuitsBlockInfo& info);
+    void parseTransform(const json& transform, OpenCircuitsBlockInfo& info);
 
     // Finds the connections between blocks that are described via the "wires"
-    void processOpenCircuitsPorts(const QJsonObject& ports, bool isOutput, OpenCircuitsBlockInfo& info);
+    void processOpenCircuitsPorts(const json& ports, bool isOutput, OpenCircuitsBlockInfo& info, int thisId);
 
     // Filters and resolves across all blocks, even within the components of ICData's
     void filterAndResolveBlocks(std::unordered_map<int,OpenCircuitsBlockInfo*>& outFiltered);
     void resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::unordered_map<int,OpenCircuitsBlockInfo*>& allBlocks);
-    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::unordered_set<int>& outResolvedConnectionBlocks);
+    void resolveOpenCircuitsConnections(bool input, int startId, std::unordered_map<int, OpenCircuitsBlockInfo*>& allBlocks, std::vector<int>& orderedConnectionBlocks);
 
     void fillParsedCircuit(const std::unordered_map<int,OpenCircuitsBlockInfo*>& filteredBlocks);
     void printParsedData();
 
 private:
-    QJsonObject contents;
+    CircuitManager* circuitManager;
+    json contents;
     int newReferenceID = -1;
     std::unordered_map<int,OpenCircuitsBlockInfo> blocks;           // id to block data (WITHIN PRIMARY CIRCUIT ONLY)
     std::unordered_map<int,std::pair<FPosition,double>> transforms; // id to block position and angle in radians
@@ -43,17 +64,23 @@ private:
     std::list<int> componentReferences; // used to gather the ids before inserting into "blocks"
     std::list<int> ICDataReferences; // used before actually processing ICData structures
 
-    std::unordered_map<int, ICData> icDataMap;
+    std::unordered_map<int, ICData> icDataMap; // the components of each icData aren't filtered to valid types
     SharedParsedCircuit outParsed;
+
+    // every time an IC instance is added, the data it references will go here, so we can keep track of the important icDatas
+    std::unordered_set<int> usedIcDatas;
 
     std::unordered_set<std::string> validOpenCircuitsTypes =
         {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
         "BUFGate", "Switch", "Button", "Clock", "LED", "NOTGate", "IC"};
     std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
         {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
-        {"XNORGate", "XNOR"}, {"BUFGate", "BUFFER"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
+        {"XNORGate", "XNOR"}, {"BUFGate", "JUNCTION"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
         {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
         {"NOTGate", "NOR"}, // NOR for not
-        {"IC", "BUFFER"}, // IC will be buffer for now, until custom blocks
+        {"IC", "CUSTOM"},
     };
+    const double posScale = 0.02;
 };
+
+#endif

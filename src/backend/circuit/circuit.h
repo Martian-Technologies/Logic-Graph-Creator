@@ -5,9 +5,10 @@
 
 #include "backend/container/blockContainer.h"
 #include "backend/selection.h"
-#include "parsedCircuit.h"
 #include "undoSystem.h"
 #include "backend/container/copiedBlocks.h"
+
+class ParsedCircuit;
 
 typedef unsigned int circuit_id_t;
 typedef unsigned int circuit_update_count;
@@ -17,7 +18,7 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& uuid, const std::string& name) :
+	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
         circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
 	}
@@ -31,6 +32,11 @@ public:
     inline void setSaved() { saved = true; }
     inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
+
+    inline bool isNonPrimitive() const { return nonPrimitive; }
+    inline void setNonPrimitive(const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) { nonPrimitive = true; this->inputPorts = inputPorts; this->outputPorts = outputPorts; }
+    inline const std::vector<block_id_t>& getInputPorts() { return inputPorts; }
+    inline const std::vector<block_id_t>& getOutputPorts() { return outputPorts; }
 
 	/* ----------- listener ----------- */
 
@@ -59,7 +65,7 @@ public:
 	bool checkCollision(const SharedSelection& selection);
 
 	// Trys to place a parsed circuit at a position
-	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position);
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit);
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position);
 
 	/* ----------- block data ----------- */
@@ -122,6 +128,9 @@ private:
 
     bool saved = false;
     std::string saveFilePath;
+
+    bool nonPrimitive = false;
+    std::vector<block_id_t> inputPorts, outputPorts;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;
