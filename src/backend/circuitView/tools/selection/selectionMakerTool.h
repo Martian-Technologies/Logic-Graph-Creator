@@ -6,8 +6,6 @@
 
 class SelectionMakerTool : public CircuitTool {
 public:
-SelectionMakerTool();
-
 	void reset() override final;
 	void activate() override final;
 

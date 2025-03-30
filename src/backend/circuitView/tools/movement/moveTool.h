@@ -6,8 +6,6 @@
 
 class MoveTool : public CircuitTool {
 public:
-	MoveTool();
-
 	void reset() override final;
 	void activate() override final;
 

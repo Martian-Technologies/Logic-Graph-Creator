@@ -6,10 +6,6 @@
 #include "backend/tools/toolManagerManager.h"
 #include "backend/backend.h"
 
-SelectionMakerTool::SelectionMakerTool() {
-	ToolManagerManager::registerTool<SelectionMakerTool>();
-}
-
 void SelectionMakerTool::reset() {
 	CircuitTool::reset();
 	if (!activeSelectionHelper) {

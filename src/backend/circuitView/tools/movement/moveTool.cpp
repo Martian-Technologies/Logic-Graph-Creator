@@ -4,10 +4,6 @@
 #include "../selectionHelpers/areaCreationTool.h"
 #include "backend/tools/toolManagerManager.h"
 
-MoveTool::MoveTool() {
-	ToolManagerManager::registerTool<MoveTool>();
-}
-
 void MoveTool::reset() {
 	CircuitTool::reset();
 	if (!activeSelectionHelper) {

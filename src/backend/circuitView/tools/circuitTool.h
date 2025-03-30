@@ -17,6 +17,7 @@ public:
 	bool isHelper() { return helper; }
 	inline virtual std::vector<std::string> getModes() const { return {}; }
 	inline virtual std::string getPath() const { return "NONE"; }
+	inline virtual unsigned int getStackId() const { return 0; }
 
 protected:
 	void registerFunction(std::string eventName, EventFunction function);

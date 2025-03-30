@@ -5,7 +5,7 @@
 
 class ToolManagerManager {
 public:
-	ToolManagerManager(std::set<CircuitView*>* circuitViews) : circuitViews(circuitViews) { }
+	ToolManagerManager(std::set<CircuitView*>* circuitViews);
 
 	inline void setBlock(BlockType blockType) {
 		setTool("placement/placement");
@@ -20,7 +20,7 @@ public:
 		if (iter == tools.end()) return;
 		activeTool = toolName;
 		for (auto view : *circuitViews) {
-			view->getToolManager().selectTool(iter->second.getInstance());
+			view->getToolManager().selectTool(iter->second->getInstance());
 		}
 		sendChangedSignal();
 	}
@@ -34,17 +34,17 @@ public:
 	const std::optional<std::vector<std::string>> getActiveToolModes() const {
 		auto iter = tools.find(activeTool);
 		if (iter == tools.end()) { return std::nullopt; }
-		return iter->second.getModes();
+		return iter->second->getModes();
 	}
 
 	SharedCircuitTool getToolInstance() const {
 		auto iter = tools.find(activeTool);
 		if (iter == tools.end()) { return nullptr; }
-		return iter->second.getInstance();
+		return iter->second->getInstance();
 	}
 
 	template<class T>
-	static void registerTool() { tools[T::getPath_()] = ToolTypeMaker<T>(); }
+	static void registerTool() { tools[T::getPath_()] = std::make_unique<ToolTypeMaker<T>>(); }
 
 	/* ----------- listener ----------- */
 
@@ -57,8 +57,9 @@ public:
 
 private:
 	struct BaseToolTypeMaker {
-		virtual SharedCircuitTool getInstance() const;
-		virtual std::vector<std::string> getModes() const;
+		virtual ~BaseToolTypeMaker() {}
+		virtual SharedCircuitTool getInstance() const = 0;
+		virtual std::vector<std::string> getModes() const = 0;
 	};
 	template <class T> struct ToolTypeMaker : public BaseToolTypeMaker {
 		SharedCircuitTool getInstance() const override final { return std::make_shared<T>(); }
@@ -74,7 +75,7 @@ private:
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
 
-	static std::map<std::string, BaseToolTypeMaker> tools;
+	static std::map<std::string, std::unique_ptr<BaseToolTypeMaker>> tools;
 };
 
 #endif /* toolManagerManager_h */

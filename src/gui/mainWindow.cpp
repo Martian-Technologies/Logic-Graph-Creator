@@ -46,7 +46,14 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
     logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
+	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) {
+		auto modesOpt = toolMM.getActiveToolModes();
+		if (!modesOpt) {
+			emit toolModeOptionsChanged(nullptr);
+			return;
+		}
+		emit toolModeOptionsChanged(&(modesOpt.value()));
+	});
 	
 	// create default hotbar and selector
 	openNewSelectorWindow();
@@ -194,11 +201,9 @@ void MainWindow::loadCircuit() {
 
 	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
-		circuit_id_t id = backend.createCircuit(parsed->getName());
-		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
-		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+		circuit_id_t id = backend.getCircuitManager().createNewCircuit(parsed.get());
 
-		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
+		SharedCircuit primaryNewCircuit = backend.getCircuit(id);
 		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position(), false);
 		primaryNewCircuit->setSaved();
 		primaryNewCircuit->setSaveFilePath(filePath);
@@ -213,36 +218,36 @@ void MainWindow::loadCircuit() {
 // Loads the primary circuit onto an existing circuit, where the user places down the primary.
 // All dependencies are still loaded into their own circuits, upon the placement of the primary.
 void MainWindow::loadCircuitInto(CircuitView* circuitView) {
-	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-	if (filePath.isEmpty()) return;
+	// QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+	// if (filePath.isEmpty()) return;
 
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-    if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
-        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
-        logError("Failed to load Circuit file");
-        return;
-    }
+	// SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
+    // if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
+    //     QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+    //     logError("Failed to load Circuit file");
+    //     return;
+    // }
 
-    const std::string& uuid = parsed->getUUID();
-    CircuitManager& circuitManager = backend.getCircuitManager();
-    if (circuitManager.UUIDExists(uuid)) {
-        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
-        return;
-    }
+    // const std::string& uuid = parsed->getUUID();
+    // CircuitManager& circuitManager = backend.getCircuitManager();
+    // if (circuitManager.UUIDExists(uuid)) {
+    //     logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+    //     return;
+    // }
 
-    CircuitValidator validator(*parsed, backend.getBlockDataManager());
-    if (parsed->isValid()){
-		circuitView->getToolManager().selectTool("preview placement tool");
-        // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
-        if (previewTool) {
-            previewTool->setParsedCircuit(parsed);
-        }else{
-	        logError("Preview tool in mainWindow failed to cast", "FileLoading");
-        }
-    } else {
-        logWarning("Parsed circuit is not valid to be placed", "FileLoading");
-    }
+    // CircuitValidator validator(*parsed, backend.getBlockDataManager());
+    // if (parsed->isValid()){
+	// 	circuitView->getToolManager().selectTool("preview placement tool");
+    //     // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
+    //     PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
+    //     if (previewTool) {
+    //         previewTool->setParsedCircuit(parsed);
+    //     }else{
+	//         logError("Preview tool in mainWindow failed to cast", "FileLoading");
+    //     }
+    // } else {
+    //     logWarning("Parsed circuit is not valid to be placed", "FileLoading");
+    // }
 }
 
 void MainWindow::exportProject() {
