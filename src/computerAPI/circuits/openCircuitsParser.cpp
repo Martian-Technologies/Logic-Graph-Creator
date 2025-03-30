@@ -420,7 +420,6 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
                 return;
             }
             newType = it->second;
-            logError("FOUND NEW BLOCK TYPE");
         }
 
         pc->addBlock(id, {block->position*posScale, Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), newType});
@@ -507,8 +506,9 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
         pc->markAsCustom();
 
         std::unordered_map<int,ICData>::iterator itr = icDataMap.find(icRef);
-        for (int p: itr->second.inputPorts){ pc->addInputPort(p); }
-        for (int p: itr->second.outputPorts){ pc->addOutputPort(p); }
+        int i=0;
+        for (int p: itr->second.inputPorts){ pc->addInputPort(i++, p); }
+        for (int p: itr->second.outputPorts){ pc->addOutputPort(i++, p); }
 
         for (const auto& comp : itr->second.components) {
             const OpenCircuitsBlockInfo* block = &comp.second;

@@ -179,39 +179,39 @@ public:
         data->setWidth(2);
         data->setFileName(parsedCircuit->getRelativeFilePath());
 
-        const std::vector<block_id_t>& inPorts = parsedCircuit->getInputPorts();
-        const std::vector<block_id_t>& outPorts = parsedCircuit->getOutputPorts();
+        const std::map<connection_end_id_t, block_id_t>& inPorts = parsedCircuit->getInputPorts();
+        const std::map<connection_end_id_t, block_id_t>& outPorts = parsedCircuit->getOutputPorts();
         data->setHeight(std::max(inPorts.size(), outPorts.size()));
 
-        int i = 0;
-        for (; i<inPorts.size(); ++i){
-            data->trySetConnectionInput(Vector(0, i), i);
+        int i=0;
+        for (const std::pair<connection_end_id_t, block_id_t>& p: inPorts) {
+            data->trySetConnectionInput(Vector(0, i++), p.first);
         }
-        int connEnd = i;
-        for (i=0; i<outPorts.size(); ++i){
-            data->trySetConnectionOutput(Vector(1, i), connEnd + i);
+        i = 0;
+        for (const std::pair<connection_end_id_t, block_id_t>& p: outPorts) {
+            data->trySetConnectionOutput(Vector(1, i++), p.first);
         }
 
         circuitBlockDataManager.newCircuitBlockData(id, type);
         CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
 
-        for (i=0; i<inPorts.size(); ++i){
+        for (const std::pair<connection_end_id_t, block_id_t>& p: inPorts){
             // snapping the position should be okay, because this circuit should be validated to integer positions
-            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(inPorts[i]);
+            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(p.second);
             if (!b){
-                logError("Block id not found from custom block output ports: {}", "", inPorts[i]);
+                logError("Block id not found from custom block output ports: {}", "", p.second);
                 continue;
             }
-            circuitBlockData->setConnectionIdPosition(i, b->pos.snap());
+            circuitBlockData->setConnectionIdPosition(p.first, b->pos.snap());
         }
-        for (i=0; i<outPorts.size(); ++i){
+        for (const std::pair<connection_end_id_t, block_id_t>& p: outPorts){
             // snapping the position should be okay, because this circuit should be validated to integer positions
-            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(outPorts[i]);
+            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(p.second);
             if (!b){
-                logError("Block id not found from custom block output ports: {}", "", outPorts[i]);
+                logError("Block id not found from custom block output ports: {}", "", p.second);
                 continue;
             }
-            circuitBlockData->setConnectionIdPosition(connEnd + i, b->pos.snap());
+            circuitBlockData->setConnectionIdPosition(p.first, b->pos.snap());
         }
         dataUpdateEventManager->sendEvent("blockDataUpdate");
         circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);

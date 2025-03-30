@@ -33,8 +33,8 @@ public:
         }
     };
 
-    void addInputPort(block_id_t p);
-    void addOutputPort(block_id_t p);
+    void addInputPort(connection_end_id_t connId, block_id_t p);
+    void addOutputPort(connection_end_id_t connId, block_id_t p);
 
     void addBlock(block_id_t id, const BlockData& block);
 
@@ -53,8 +53,8 @@ public:
     void setUUID(const std::string& uuid) { uuidFromLoad = uuid; }
     const std::string& getUUID() const { return uuidFromLoad; }
 
-    const std::vector<block_id_t>& getInputPorts() const { return inputPorts; }
-    const std::vector<block_id_t>& getOutputPorts() const { return outputPorts; }
+    const std::map<connection_end_id_t, block_id_t>& getInputPorts() const { return inputPorts; }
+    const std::map<connection_end_id_t, block_id_t>& getOutputPorts() const { return outputPorts; }
     bool markAsCustom() { return customBlock = true; }
     bool isCustom() const { return customBlock; }
     bool isValid() const { return valid; }
@@ -80,8 +80,8 @@ private:
     // If this represents a custom block:
     std::string customBlockName;
     bool customBlock;
-    std::vector<block_id_t> inputPorts; // connection id is the index in the vector
-    std::vector<block_id_t> outputPorts;
+    std::map<connection_end_id_t, block_id_t> inputPorts; // ordering of connid on insertion matters right now
+    std::map<connection_end_id_t, block_id_t> outputPorts;
     BlockType customBlockType = BlockType::NONE;
 
     bool valid = true;

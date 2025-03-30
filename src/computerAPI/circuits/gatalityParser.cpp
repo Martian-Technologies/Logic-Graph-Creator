@@ -79,19 +79,17 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             std::getline(inputFile, line);
             std::istringstream portStream(line);
             portStream >> token; // consume "InPorts:"
-            while (portStream >> token) {
-                outParsed->addInputPort(std::stoi(token));
+            while (portStream >> cToken >> blockId >> connId >> cToken) {
+                outParsed->addInputPort(connId, blockId);
+                std::cout << "Adding input port: " << cToken << blockId << ' ' << connId << cToken << std::endl;
             }
 
             std::getline(inputFile, line);
             std::istringstream portStream2(line);
             portStream2 >> token; // consume "OutPorts:"
-            if (token != "OutPorts:") {
-                logError("Invalid subcircuit formatting with OutPorts");
-                break;
-            }
-            while (portStream2 >> token) {
-                outParsed->addOutputPort(std::stoi(token));
+            while (portStream2 >> cToken >> blockId >> connId >> cToken) {
+                outParsed->addOutputPort(connId, blockId);
+                std::cout << "Adding output port: " << cToken << blockId << ' ' << connId << cToken << std::endl;
             }
             continue;
         } else if (token == "UUID:") {
@@ -127,7 +125,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
             blockType = customBlockMap.at(circuitName); // update blocktype with custom block
             BlockData* bd = circuitManager->getBlockDataManager()->getBlockData(blockType);
             if (numConns != bd->getConnectionCount()){
-                logError("Invalid conn id count for custom block", "GatalityParser");
+                logError("Invalid conn id count for custom block, {} expecting {} for circuit {}", "GatalityParser", numConns, bd->getConnectionCount(), circuitName);
             }
         }
 
@@ -185,12 +183,12 @@ bool GatalityParser::save(const std::string& path, Circuit* circuitPtr, const st
 
     if (circuitPtr->isNonPrimitive()){
         outputFile << "SubCircuit: \"" << circuitPtr->getCircuitName() << "\"\nInPorts:";
-        for (block_id_t id: circuitPtr->getInputPorts()) {
-            outputFile << ' ' << id;
+        for (const std::pair<connection_end_id_t, block_id_t>& p: circuitPtr->getInputPorts()) {
+            outputFile << " (" << p.second << ' ' << p.first << ')';
         }
         outputFile << "OutPorts:";
-        for (block_id_t id: circuitPtr->getOutputPorts()) {
-            outputFile << ' ' << id;
+        for (const std::pair<connection_end_id_t, block_id_t>& p: circuitPtr->getOutputPorts()) {
+            outputFile << " (" << p.second << ' ' << p.first << ')';
         }
         outputFile << "UUID: " << uuidToSaveAs << '\n';;
     } else {

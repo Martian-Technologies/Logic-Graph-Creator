@@ -34,9 +34,13 @@ public:
     inline const std::string& getSaveFilePath() const { return saveFilePath; }
 
     inline bool isNonPrimitive() const { return nonPrimitive; }
-    inline void setNonPrimitive(const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) { nonPrimitive = true; this->inputPorts = inputPorts; this->outputPorts = outputPorts; }
-    inline const std::vector<block_id_t>& getInputPorts() { return inputPorts; }
-    inline const std::vector<block_id_t>& getOutputPorts() { return outputPorts; }
+    inline void setNonPrimitive(const std::map<connection_end_id_t, block_id_t>& inputPorts, const std::map<connection_end_id_t, block_id_t>& outputPorts) {
+        nonPrimitive = true;
+        this->inputPorts = inputPorts;
+        this->outputPorts = outputPorts;
+    }
+    inline const std::map<connection_end_id_t, block_id_t>& getInputPorts() { return inputPorts; }
+    inline const std::map<connection_end_id_t, block_id_t>& getOutputPorts() { return outputPorts; }
 
 	/* ----------- listener ----------- */
 
@@ -130,7 +134,7 @@ private:
     std::string saveFilePath;
 
     bool nonPrimitive = false;
-    std::vector<block_id_t> inputPorts, outputPorts;
+    std::map<connection_end_id_t, block_id_t> inputPorts, outputPorts;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;
