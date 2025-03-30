@@ -1,14 +1,8 @@
 #include "parsedCircuit.h"
-#include "util/uuid.h"
 #include <stack>
 
 void CircuitValidator::validate() {
     bool isValid = true;
-
-    if (parsedCircuit.getUUID().empty()){
-        logInfo("Setting a uuid for parsed circuit", "CircuitValidator");
-        parsedCircuit.setUUID(generate_uuid_v4());
-    }
 
     isValid = isValid && validateBlockTypes();
     isValid = isValid && setBlockPositionsInt();

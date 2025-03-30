@@ -70,15 +70,11 @@ private:
     // every time an IC instance is added, the data it references will go here, so we can keep track of the important icDatas
     std::unordered_set<int> usedIcDatas;
 
-    std::unordered_set<std::string> validOpenCircuitsTypes =
-        {"ANDGate", "ORGate", "XORGate", "NANDGate", "NORGate", "XNORGate",
-        "BUFGate", "Switch", "Button", "Clock", "LED", "NOTGate", "IC"};
-    std::unordered_map<std::string, std::string> openCircuitsTypeToName = {
-        {"ANDGate", "AND"}, {"ORGate", "OR"}, {"XORGate", "XOR"}, {"NANDGate", "NAND"}, {"NORGate", "NOR"},
-        {"XNORGate", "XNOR"}, {"BUFGate", "JUNCTION"}, {"Switch", "SWITCH"}, {"Button", "BUTTON"}, 
-        {"Clock", "TICK_BUTTON"}, {"LED", "LIGHT"},
-        {"NOTGate", "NOR"}, // NOR for not
-        {"IC", "CUSTOM"},
+    std::unordered_map<std::string, BlockType> openCircuitsTypeToName = {
+        {"ANDGate", BlockType::AND}, {"ORGate", BlockType::OR}, {"XORGate", BlockType::XOR}, {"NANDGate", BlockType::NAND}, {"NORGate", BlockType::NOR},
+        {"XNORGate", BlockType::XNOR}, {"BUFGate", BlockType::JUNCTION}, {"Switch", BlockType::SWITCH}, {"Button", BlockType::BUTTON}, 
+        {"Clock", BlockType::TICK_BUTTON}, {"LED", BlockType::LIGHT},
+        {"NOTGate", BlockType::NOR}, {"IC", BlockType::CUSTOM},
     };
     const double posScale = 0.02;
 };

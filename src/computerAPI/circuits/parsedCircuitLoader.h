@@ -9,7 +9,7 @@ public:
     ParsedCircuitLoader(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
 
     // Requires the parsedCircuit to have all primitive or defined custom types in the circuit manager
-    BlockType loadIntoCircuit(SharedParsedCircuit parsedCircuit) {
+    BlockType loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
         CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
         circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
         if (id == 0) return BlockType::NONE;

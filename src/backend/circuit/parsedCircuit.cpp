@@ -1,15 +1,8 @@
 #include "parsedCircuit.h"
 #include "circuit.h"
 
-void ParsedCircuit::addInputPort(connection_end_id_t connId, block_id_t p) {
-    if (!inputPorts.insert(std::make_pair(connId, p)).second){
-        logWarning("Duplicate connId added for custom block input ports");
-    }
-}
-void ParsedCircuit::addOutputPort(connection_end_id_t connId, block_id_t p) {
-    if (!outputPorts.insert(std::make_pair(connId, p)).second){
-        logWarning("Duplicate connId added for custom block output ports");
-    }
+void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id) {
+    ports.emplace_back(isInput, connectionEndId, positionOnBlock, id);
 }
 
 void ParsedCircuit::addBlock(block_id_t id, const BlockData& block) {

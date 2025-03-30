@@ -7,14 +7,9 @@
 
 class CircuitManager;
 
-class ParsedCircuit;
-typedef std::shared_ptr<ParsedCircuit> SharedParsedCircuit;
-
 class ParsedCircuit {
     friend class CircuitValidator;
 public:
-    ParsedCircuit() = default;
-
     struct BlockData {
         FPosition pos; // will be validated into integer values
         Rotation rotation; // todo: make into integer value to generalize the rotation
@@ -33,12 +28,29 @@ public:
         }
     };
 
-    void addInputPort(connection_end_id_t connId, block_id_t p);
-    void addOutputPort(connection_end_id_t connId, block_id_t p);
+	struct ConnectionPort {
+		ConnectionPort(bool isInput, Vector positionOnBlock, connection_end_id_t connectionEndId, block_id_t block) :
+			isInput(isInput), positionOnBlock(positionOnBlock), connectionEndId(connectionEndId), block(block) {}
+		bool isInput;
+		Vector positionOnBlock;
+		connection_end_id_t connectionEndId;
+		block_id_t block;
+	};
+
+	void addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id);
+	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
+
 
     void addBlock(block_id_t id, const BlockData& block);
-
     void addConnection(const ConnectionData& conn);
+
+	const BlockData* getBlock(block_id_t id) const {
+        auto itr = blocks.find(id);
+        if (itr != blocks.end()) return &itr->second;
+        return nullptr;
+    }
+    const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
+    const std::vector<ConnectionData>& getConns() const { return connections; }
 
     void makePositionsRelative();
 
@@ -47,48 +59,44 @@ public:
     void setRelativeFilePath(const std::string& fpath) { relativeFilePath = fpath; }
     const std::string& getRelativeFilePath() const { return relativeFilePath; }
 
-    void setName(const std::string& name) { customBlockName = name; }
-    const std::string& getName() const { return customBlockName; }
+    void setName(const std::string& name) { this->name = name; }
+    const std::string& getName() const { return name; }
 
-    void setUUID(const std::string& uuid) { uuidFromLoad = uuid; }
-    const std::string& getUUID() const { return uuidFromLoad; }
+    void setUUID(const std::string& uuid) { this->uuid = uuid; }
+    const std::string& getUUID() const { return uuid; }
 
-    const std::map<connection_end_id_t, block_id_t>& getInputPorts() const { return inputPorts; }
-    const std::map<connection_end_id_t, block_id_t>& getOutputPorts() const { return outputPorts; }
-    bool markAsCustom() { return customBlock = true; }
-    bool isCustom() const { return customBlock; }
+	block_size_t getWidth() const { return width; }
+	block_size_t getHeight() const { return height; }
+	void setWidth(block_size_t width) { this->width = width; }
+	void setHeight(block_size_t height) { this->height = height; }
+
+    void markAsCustom() { isCustomBlock = true; }
+    bool isCustom() const { return isCustomBlock; }
     bool isValid() const { return valid; }
     const Vector& getMinPos() const { return minPos; }
-
-    void clear() { blocks.clear(); connections.clear(); }
-
-    const BlockData* getBlock(block_id_t id) const {
-        auto itr = blocks.find(id);
-        if (itr != blocks.end()) return &itr->second;
-        return nullptr;
-    }
-    const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
-    const std::vector<ConnectionData>& getConns() const { return connections; }
 
 private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()); // TODO: delete this because I think it is unused
 
     std::string absoluteFilePath, relativeFilePath;
-    std::string uuidFromLoad;
+    std::string uuid;
+    std::string name;
 
     // If this represents a custom block:
-    std::string customBlockName;
-    bool customBlock;
-    std::map<connection_end_id_t, block_id_t> inputPorts; // ordering of connid on insertion matters right now
-    std::map<connection_end_id_t, block_id_t> outputPorts;
-    BlockType customBlockType = BlockType::NONE;
+    bool isCustomBlock;
+	block_size_t width = 0;
+	block_size_t height = 0;
 
-    bool valid = true;
+    std::vector<ConnectionPort> ports; // connection id is the index in the vector
+
     std::unordered_map<block_id_t, BlockData> blocks;
     std::vector<ConnectionData> connections;
+	
+    bool valid = true;
 };
 
+typedef std::shared_ptr<ParsedCircuit> SharedParsedCircuit;
 
 class CircuitValidator {
 public:
@@ -103,7 +111,6 @@ private:
 
     void validate();
     bool validateBlockTypes();
-    bool validateDependencies();
     bool setBlockPositionsInt();
     bool handleInvalidConnections();
     bool setOverlapsUnpositioned();

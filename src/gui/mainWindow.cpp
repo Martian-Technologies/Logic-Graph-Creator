@@ -184,34 +184,10 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit() {
 	std::string filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
-
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-	if (!circuitFileManager.loadFromFile(filePath, parsed)) {
+	circuit_id_t id = ircuitFileManager.loadFromFile(filePath);
+	if (id == 0) {
 		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 		return;
-	}
-
-    // Check for existing UUID
-    const std::string& uuid = parsed->getUUID();
-    CircuitManager& circuitManager = backend.getCircuitManager();
-    if (circuitManager.UUIDExists(uuid)) {
-        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "mainWindow");
-        return;
-    }
-
-	CircuitValidator validator(*parsed, backend.getBlockDataManager());
-	if (parsed->isValid()) {
-		circuit_id_t id = backend.getCircuitManager().createNewCircuit(parsed.get());
-
-		SharedCircuit primaryNewCircuit = backend.getCircuit(id);
-		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position(), false);
-		primaryNewCircuit->setSaved();
-		primaryNewCircuit->setSaveFilePath(filePath);
-
-		// all dependency circuits should be already saved
-		logInfo("Saved primary circuit: {}", "FileLoading", primaryNewCircuit->getSaveFilePath());
-	} else {
-		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
 	}
 }
 

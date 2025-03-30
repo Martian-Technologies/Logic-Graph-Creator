@@ -309,7 +309,7 @@ void OpenCircuitsParser::filterAndResolveBlocks(std::unordered_map<int, OpenCirc
 
     for (std::pair<const int, OpenCircuitsBlockInfo>& p: blocks){
         allBlocks[p.first] = &p.second;
-        if (validOpenCircuitsTypes.count(p.second.type)){
+        if (openCircuitsTypeToName.contains(p.second.type)){
             filteredBlocks[p.first] = &p.second;
         }
     }
@@ -322,7 +322,7 @@ void OpenCircuitsParser::filterAndResolveBlocks(std::unordered_map<int, OpenCirc
 
     // resolve inputs and outputs for each block
     for (std::pair<const int,OpenCircuitsBlockInfo*>& p : allBlocks) {
-        if (validOpenCircuitsTypes.count(p.second->type)){
+        if (openCircuitsTypeToName.contains(p.second->type)){
             resolveInputsAndOutputs(p.second, allBlocks);
         }
     }
@@ -338,7 +338,7 @@ void OpenCircuitsParser::resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::
         if (it == allBlocks.end()) continue;
 
         const std::string& type = it->second->type;
-        if (validOpenCircuitsTypes.count(type)) {
+        if (openCircuitsTypeToName.contains(type)) {
             // direct connection from this block to another block
             orderedConnectionBlocks.push_back(inputBlock);
         } else {
@@ -355,7 +355,7 @@ void OpenCircuitsParser::resolveInputsAndOutputs(OpenCircuitsBlockInfo* b, std::
         if (it == allBlocks.end()) continue;
 
         const std::string& type = it->second->type;
-        if (validOpenCircuitsTypes.count(type)) {
+        if (openCircuitsTypeToName.contains(type)) {
             // direct connection from this block to another block
             orderedConnectionBlocks.push_back(outputBlock);
         } else {
@@ -390,7 +390,7 @@ void OpenCircuitsParser::resolveOpenCircuitsConnections(bool input, int startId,
 
         const OpenCircuitsBlockInfo* current = it->second;
 
-        if (validOpenCircuitsTypes.count(current->type)) {
+        if (openCircuitsTypeToName.contains(current->type)) {
             orderedConnectionBlocks.push_back(currentId);
             continue;
         }
@@ -410,7 +410,7 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 
     // if icBlockSpace is nullptr, then use filteredBlocks
     auto fillParsedBlock = [&](SharedParsedCircuit pc, int id, const OpenCircuitsBlockInfo* block, const std::unordered_map<int, OpenCircuitsBlockInfo>* icBlockSpace) {
-        BlockType t = stringToBlockType(openCircuitsTypeToName[block->type]);
+        BlockType t = openCircuitsTypeToName[block->type];
         BlockType newType = t;
         if (t == BlockType::CUSTOM) {
             int refIcD = block->icReference;
@@ -516,11 +516,11 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
                 // Make sure there are no unresolved dependencies before continuing
                 fillInCustoms(block->icReference);
             }
-            if (validOpenCircuitsTypes.count(block->type)) {
+            if (openCircuitsTypeToName.contains(block->type)) {
                 fillParsedBlock(pc, comp.first, block, &itr->second.components);
             }
         }
-        icD_to_blockType[icRef] = loadIntoCircuit(pc);
+        icD_to_blockType[icRef] = loadParsedCircuit(pc);
     };
 
     for (const std::pair<int, OpenCircuitsBlockInfo*>& p: filteredBlocks) {
@@ -542,7 +542,7 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 void OpenCircuitsParser::printParsedData() {
     std::cout << "Parsed Normal Blocks on Primary Circuit:\n";
     for (const std::pair<int, OpenCircuitsBlockInfo>& p: blocks){
-        if (!validOpenCircuitsTypes.count(p.second.type)) continue;
+        if (!openCircuitsTypeToName.contains(p.second.type)) continue;
 
         std::cout << "   ID: " << p.first  << " type: " << p.second.type << " " << p.second.position.snap().toString();
         std::cout << " Input Blocks: [ ";
@@ -571,7 +571,7 @@ void OpenCircuitsParser::printParsedData() {
 
         std::cout << "   Components:\n";
         for (const auto& [compId, comp] : icData.components) {
-            if (!validOpenCircuitsTypes.count(comp.type)) continue;
+            if (!openCircuitsTypeToName.contains(comp.type)) continue;
 
             std::cout << "       " << compId << " - " << comp.type;
             std::cout << " - " << comp.position.snap().toString() << " - ";

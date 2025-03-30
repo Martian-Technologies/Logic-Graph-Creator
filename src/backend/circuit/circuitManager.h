@@ -1,10 +1,11 @@
 #ifndef circuitManager_h
 #define circuitManager_h
 
-#include "circuit.h"
-#include "parsedCircuit.h"
 #include "backend/container/block/blockDataManager.h"
 #include "circuitBlockDataManager.h"
+#include "parsedCircuit.h"
+#include "util/uuid.h"
+#include "circuit.h"
 
 class CircuitManager {
 public:
@@ -147,74 +148,63 @@ public:
             logError("parsedCircuit is not validated", "CircuitManager");
             return 0;
         }
-        circuit_id_t possibleExistingId = UUIDExists(parsedCircuit->getUUID());
-        if (possibleExistingId > 0){
-            // this duplicates check won't really work with open circuits ics because we have no way of knowing
-            // unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
-            // the parsed circuit which seems annoying
-            logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", parsedCircuit->getUUID());
-            return possibleExistingId;
-        }
 
-        circuit_id_t id = createNewCircuit(parsedCircuit->getName(), parsedCircuit->getUUID());
+		std::string uuid = parsedCircuit->getUUID();
+		if (uuid.empty()){
+			logInfo("Setting a uuid for parsed circuit", "CircuitManager");
+			uuid = generate_uuid_v4();
+		} else {
+			circuit_id_t possibleExistingId = UUIDExists(uuid);
+			if (possibleExistingId > 0){
+				// this duplicates check won't really work with open circuits ics because we have no way of knowing
+				// unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
+				// the parsed circuit which seems annoying
+				logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", uuid);
+				return possibleExistingId;
+			}
+		}
+
+        circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
         SharedCircuit circuit = getCircuit(id);
 		
 		if (!parsedCircuit->isCustom()) return id;
 
         BlockType type = blockDataManager.addBlock();
-        logInfo("new block type for custom block: "+ std::to_string(type));
         BlockData* data = blockDataManager.getBlockData(type);
         if (!data) {
 			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(type));
-            return 0;
+            return id;
         }
 
-        data->setDefaultData(false);
-        data->setPrimitive(false);
-        data->setName(parsedCircuit->getName());
-        data->setPath("Custom");
-        data->setWidth(2);
-        data->setFileName(parsedCircuit->getRelativeFilePath());
-
-        const std::map<connection_end_id_t, block_id_t>& inPorts = parsedCircuit->getInputPorts();
-        const std::map<connection_end_id_t, block_id_t>& outPorts = parsedCircuit->getOutputPorts();
-        data->setHeight(std::max(inPorts.size(), outPorts.size()));
-
-        int i=0;
-        for (const std::pair<connection_end_id_t, block_id_t>& p: inPorts) {
-            data->trySetConnectionInput(Vector(0, i++), p.first);
-        }
-        i = 0;
-        for (const std::pair<connection_end_id_t, block_id_t>& p: outPorts) {
-            data->trySetConnectionOutput(Vector(1, i++), p.first);
-        }
-
-        circuitBlockDataManager.newCircuitBlockData(id, type);
+		circuitBlockDataManager.newCircuitBlockData(id, type);
         CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
+		if (!circuitBlockData) {
+			logError("Did not find newly created circuit block data with circuit id: {}", "CircuitManager", (unsigned int)id);
+            return id;
+        }
+		
+        data->setPrimitive(false);
+        data->setDefaultData(false);
+		
+        data->setPath("Custom");
+        data->setName(parsedCircuit->getName());
 
-        for (const std::pair<connection_end_id_t, block_id_t>& p: inPorts){
-            // snapping the position should be okay, because this circuit should be validated to integer positions
-            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(p.second);
-            if (!b){
-                logError("Block id not found from custom block output ports: {}", "", p.second);
-                continue;
-            }
-            circuitBlockData->setConnectionIdPosition(p.first, b->pos.snap());
+        data->setHeight(parsedCircuit->getHeight());
+        data->setWidth(parsedCircuit->getWidth());
+
+        const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
+
+		for (const ParsedCircuit::ConnectionPort& port : ports) {
+			if (port.isInput) data->trySetConnectionInput(port.positionOnBlock, port.connectionEndId);
+			else data->trySetConnectionOutput(port.positionOnBlock, port.connectionEndId);
+            circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
         }
-        for (const std::pair<connection_end_id_t, block_id_t>& p: outPorts){
-            // snapping the position should be okay, because this circuit should be validated to integer positions
-            const ParsedCircuit::BlockData* b = parsedCircuit->getBlock(p.second);
-            if (!b){
-                logError("Block id not found from custom block output ports: {}", "", p.second);
-                continue;
-            }
-            circuitBlockData->setConnectionIdPosition(p.first, b->pos.snap());
-        }
+
         dataUpdateEventManager->sendEvent("blockDataUpdate");
+
         circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
 		circuit->setSaved();
 		circuit->setSaveFilePath(parsedCircuit->getAbsoluteFilePath());
-        circuit->setNonPrimitive(parsedCircuit->getInputPorts(), parsedCircuit->getOutputPorts());
         return id;
     }
 
