@@ -189,13 +189,13 @@ void MainWindow::loadCircuit() {
     const std::string& uuid = parsed->getUUID();
     CircuitManager& circuitManager = backend.getCircuitManager();
     if (circuitManager.UUIDExists(uuid)) {
-        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "mainWindow");
         return;
     }
 
 	CircuitValidator validator(*parsed, backend.getBlockDataManager());
 	if (parsed->isValid()) {
-		circuit_id_t id = backend.createCircuit(parsed->getName());
+		circuit_id_t id = backend.createCircuit(parsed->getName(), parsed->getUUID());
 		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
 		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 
@@ -227,7 +227,7 @@ void MainWindow::loadCircuitInto(CircuitView* circuitView) {
     const std::string& uuid = parsed->getUUID();
     CircuitManager& circuitManager = backend.getCircuitManager();
     if (circuitManager.UUIDExists(uuid)) {
-        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
+        logInfo("Circuit with UUID " + uuid + " already exists; not inserting.", "mainWindow");
         return;
     }
 
