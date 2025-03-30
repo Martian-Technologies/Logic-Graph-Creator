@@ -51,7 +51,10 @@ set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory(external/cpplocate EXCLUDE_FROM_ALL)
 
 # JSON
-add_subdirectory(external/JSON)
+set(GATALITY_JSON_LIB_NAME "json")
+add_library(${GATALITY_JSON_LIB_NAME} INTERFACE)
+target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
+
 # Google Testing
 add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 
@@ -75,7 +78,7 @@ set(EXTERNAL_LINKS
 	cpplocate::cpplocate
 	Qt6::Core Qt6::Gui Qt6::Widgets
 	KDAB::kddockwidgets
-	nlohmann_json::nlohmann_json
+	${GATALITY_JSON_LIB_NAME}
 )
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})
@@ -133,6 +136,7 @@ set(EXTERNAL_LINKS_TESTS
     cpplocate::cpplocate
     Qt6::Core Qt6::Gui Qt6::Widgets
     gtest gtest_main
+    ${GATALITY_JSON_LIB_NAME}
 )
 add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL ${TEST_FILES})
 target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
