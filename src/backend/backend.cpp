@@ -4,7 +4,9 @@ Backend::Backend() : toolManagerManager(&circuitViews), circuitManager(&dataUpda
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
 }
 
-circuit_id_t Backend::createCircuit(const std::string& name, const std::string& uuid) { return circuitManager.createNewCircuit(name, uuid); }
+circuit_id_t Backend::createCircuit(const std::string& name, const std::string& uuid) {
+	return circuitManager.createNewCircuit(name, uuid);
+}
 
 std::optional<evaluator_id_t> Backend::createEvaluator(circuit_id_t circuitId) {
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);

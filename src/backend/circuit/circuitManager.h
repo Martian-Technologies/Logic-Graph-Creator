@@ -144,7 +144,7 @@ public:
     // Create a custom new block from a parsed circuit
     inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
         if (!parsedCircuit->isValid()){
-            logError("parsedCircuit could not be validated");
+            logError("parsedCircuit is not validated", "CircuitManager");
             return 0;
         }
         circuit_id_t possibleExistingId = UUIDExists(parsedCircuit->getUUID());
@@ -152,23 +152,20 @@ public:
             // this duplicates check won't really work with open circuits ics because we have no way of knowing
             // unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
             // the parsed circuit which seems annoying
-            logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "", parsedCircuit->getUUID());
+            logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", parsedCircuit->getUUID());
             return possibleExistingId;
-        }
-
-        if (!parsedCircuit->isCustom()) {
-            logError("Parsed circuit is being inserted though is not marked as custom", "", parsedCircuit->getUUID());
-            return 0;
         }
 
         circuit_id_t id = createNewCircuit(parsedCircuit->getName(), parsedCircuit->getUUID());
         SharedCircuit circuit = getCircuit(id);
+		
+		if (!parsedCircuit->isCustom()) return id;
 
         BlockType type = blockDataManager.addBlock();
         logInfo("new block type for custom block: "+ std::to_string(type));
         BlockData* data = blockDataManager.getBlockData(type);
         if (!data) {
-            logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(type));
+			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(type));
             return 0;
         }
 

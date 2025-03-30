@@ -27,6 +27,7 @@ public:
 	void popTool();
 	void clearTools();
 	void popAbove(CircuitTool* toolNotToPop);
+	bool empty() const { return toolStack.empty(); }
 
 	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;

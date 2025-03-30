@@ -5,7 +5,6 @@
 #include "areaPlaceTool.h"
 
 BlockPlacementTool::BlockPlacementTool() {
-	ToolManagerManager::registerToolModes("placement/placement", getModes());
 	activePlacementTool = std::make_shared<SinglePlaceTool>();
 }
 
@@ -14,7 +13,7 @@ void BlockPlacementTool::activate() {
 	if (activePlacementTool) {
 		toolStackInterface->pushTool(activePlacementTool);
 		activePlacementTool->selectBlock(selectedBlock);
-		activePlacementTool->setRotation(rotation);
+		// activePlacementTool->setRotation(rotation);
 	}
 }
 
