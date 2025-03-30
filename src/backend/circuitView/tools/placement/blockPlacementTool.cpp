@@ -13,7 +13,7 @@ void BlockPlacementTool::activate() {
 	if (activePlacementTool) {
 		toolStackInterface->pushTool(activePlacementTool);
 		activePlacementTool->selectBlock(selectedBlock);
-		activePlacementTool->setRotation(rotation);
+		// activePlacementTool->setRotation(rotation);
 	}
 }
 

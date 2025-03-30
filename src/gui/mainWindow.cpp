@@ -353,7 +353,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (widget && event->type() == QEvent::Close) {
 		auto itr = activeWidgets.find(widget);
 		if (itr != activeWidgets.end()) {
-			logInfo("Widget (was showing {}) closed", "", itr->second->getCircuitView()->getCircuit()->getCircuitName());
+			logInfo("Circuit view closed");
 			widget->removeEventFilter(this);
 			itr->second->close();
 			activeWidgets.erase(itr);

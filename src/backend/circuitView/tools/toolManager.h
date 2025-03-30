@@ -16,8 +16,6 @@ public:
 	int getStack() const { return activeToolStack; }
 	void selectBlock(BlockType blockType);
 	void selectTool(SharedCircuitTool tool);
-	// inline CircuitTool* getSelectedTool() { return selectedTools[activeToolStack].second.get(); }
-	// inline std::string getSelectedToolName() { return selectedTools[activeToolStack].first; }
 
 	void setMode(std::string mode);
 
@@ -31,6 +29,7 @@ public:
 private:
 	int activeToolStack = 0;
 	std::array<ToolStack, 3> toolStacks;
+	std::map<std::string, SharedCircuitTool> toolInstances;
 };
 
 #endif /* toolManager_h */

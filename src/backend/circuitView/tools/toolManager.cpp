@@ -32,7 +32,13 @@ void ToolManager::selectTool(SharedCircuitTool tool) {
 	}
 	if (!toolStacks[activeToolStack].empty() && toolStacks[activeToolStack].getCurrentNonHelperTool()->getPath() == tool->getPath()) return;
 	toolStacks[activeToolStack].clearTools();
-	toolStacks[activeToolStack].pushTool(tool);
+	auto iter = toolInstances.find(tool->getPath());
+	if (iter == toolInstances.end()) {
+		toolInstances[tool->getPath()] = tool;
+		toolStacks[activeToolStack].pushTool(tool);
+	} else {
+		toolStacks[activeToolStack].pushTool(iter->second);
+	}
 }
 
 void ToolManager::setMode(std::string mode) {
