@@ -74,8 +74,6 @@ public:
 
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 
-		// blockData->trySetConnectionOutput(Vector(0, 0), 0);
-
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
 
@@ -116,12 +114,9 @@ public:
 				if (inputCount >= outputCount) {
 					blockData->setHeight(inputCount + 1);
 				}
-				if (blockData->trySetConnectionInput(Vector(0, inputCount), inputCount + outputCount)) {
-					circuitBlockData->setConnectionIdName(inputCount + outputCount, "INPUT: " + std::to_string(inputCount));
-					circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
-				} else {
-					logError("was not able to add block input at " + block->getPosition().toString());
-				}
+				blockData->trySetConnectionInput(Vector(0, inputCount), inputCount + outputCount);
+				circuitBlockData->setConnectionIdName(inputCount + outputCount, "INPUT: " + std::to_string(inputCount));
+				circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
 			}
 		}
 		for (const Block* block : outputs) {
@@ -132,12 +127,9 @@ public:
 				if (outputCount >= inputCount) {
 					blockData->setHeight(outputCount + 1);
 				}
-				if (blockData->trySetConnectionOutput(Vector(1, outputCount), inputCount + outputCount)) {
-					circuitBlockData->setConnectionIdName(inputCount + outputCount, "OUTPUT: " + std::to_string(outputCount));
-					circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
-				} else {
-					logError("Was not able to add block output at " + block->getPosition().toString());
-				}
+				blockData->trySetConnectionOutput(Vector(1, outputCount), inputCount + outputCount);
+				circuitBlockData->setConnectionIdName(inputCount + outputCount, "OUTPUT: " + std::to_string(outputCount));
+				circuitBlockData->setConnectionIdPosition(inputCount + outputCount, block->getPosition());
 			}
 		}
 		dataUpdateEventManager->sendEvent("blockDataUpdate");

@@ -296,16 +296,14 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
 		outputFile << "size: (" << (unsigned int)(blockData->getWidth()) << ", " << (unsigned int)(blockData->getHeight()) << ")\n";
 		outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
-		connection_end_id_t endId = 0; // TODO remove once block data is updated
 		for (auto pair : blockData->getConnections()) {
-			const Position* position = circuitBlockData->getConnectionIdToPosition(endId);
+			const Position* position = circuitBlockData->getConnectionIdToPosition(pair.first);
 			const Block* block = blockContainer->getBlock(*position);
 			if (!block) {
-				logError("Could not find block for connection: {}", "GatalityParser", endId);
+				logError("Could not find block for connection: {}", "GatalityParser", pair.first);
 				continue;
 			}
-			outputFile << "\t(" << (pair.second ? "IN, " : "OUT, ") << endId << ", " << block->id() << ", " << pair.first.toString() << ")\n";
-			endId ++;
+			outputFile << "\t(" << (pair.second.second ? "IN, " : "OUT, ") << pair.first << ", " << block->id() << ", " << pair.second.first.toString() << ")\n";
 		}
 		
 	}
