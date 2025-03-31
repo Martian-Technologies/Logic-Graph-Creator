@@ -8,7 +8,7 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 	SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
 		// our gatality file parser function
-		GatalityParser parser(circuitManager);
+		GatalityParser parser(this, circuitManager);
 		if (!parser.load(path, parsedCircuit)) {
 			logError("Failed to parse file", "CircuitFileManager");
 			return 0;
@@ -19,7 +19,7 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 		return id;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
 		// open circuit file parser function
-		OpenCircuitsParser parser(circuitManager);
+		OpenCircuitsParser parser(this, circuitManager);
 		if (!parser.parse(path, parsedCircuit)) {
 			logError("Failed to parse file", "CircuitFileManager");
 			return 0;
@@ -34,6 +34,6 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 
 bool CircuitFileManager::saveToFile(const std::string& path, circuit_id_t circuitId) {
 	setCircuitFilePath(circuitId, path);
-	GatalityParser saver(circuitManager);
+	GatalityParser saver(this, circuitManager);
 	return saver.save(filePathToFile.at(path));
 }

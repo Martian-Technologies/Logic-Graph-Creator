@@ -22,12 +22,22 @@ public:
 		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}
+	inline SharedCircuit getCircuit(std::string uuid) {
+		auto iter = UUIDToCircuits.find(uuid);
+		if (iter == UUIDToCircuits.end()) return nullptr;
+		return iter->second;
+	}
+	inline const SharedCircuit getCircuit(std::string uuid) const {
+		auto iter = UUIDToCircuits.find(uuid);
+		if (iter == UUIDToCircuits.end()) return nullptr;
+		return iter->second;
+	}
 
 	inline circuit_id_t createNewCircuit(const std::string& name, const std::string& uuid) {
 		circuit_id_t id = getNewCircuitId();
 		const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, name, uuid);
 		circuits.emplace(id, circuit);
-        existingUUIDs.insert(std::make_pair(uuid, id));
+		UUIDToCircuits.emplace(uuid, circuit);
 		for (auto& [object, func] : listenerFunctions) {
 			circuit->connectListener(object, func);
 		}
@@ -36,7 +46,7 @@ public:
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
-            existingUUIDs.erase(iter->second->getUUID());
+            UUIDToCircuits.erase(iter->second->getUUID());
 			circuits.erase(iter);
 		}
 	}
@@ -75,15 +85,6 @@ public:
 
 		return blockType;
 	}
-
-    inline circuit_id_t UUIDExists(const std::string& uuid) {
-        std::unordered_map<std::string,circuit_id_t>::iterator itr = existingUUIDs.find(uuid);
-        if (itr != existingUUIDs.end()){
-            return itr->second;
-        } else {
-            return 0;
-        }
-    }
 
 	inline void updateBlockPorts(DifferenceSharedPtr dif, circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
@@ -154,13 +155,13 @@ public:
 			logInfo("Setting a uuid for parsed circuit", "CircuitManager");
 			uuid = generate_uuid_v4();
 		} else {
-			circuit_id_t possibleExistingId = UUIDExists(uuid);
-			if (possibleExistingId > 0){
+			SharedCircuit possibleExistingCircuit = getCircuit(uuid);
+			if (possibleExistingCircuit){
 				// this duplicates check won't really work with open circuits ics because we have no way of knowing
 				// unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
 				// the parsed circuit which seems annoying
 				logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", uuid);
-				return possibleExistingId;
+				return possibleExistingCircuit->getCircuitId();
 			}
 		}
 
@@ -238,8 +239,8 @@ private:
 
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
+	std::map<std::string, SharedCircuit> UUIDToCircuits;
     std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
-    std::unordered_map<std::string, circuit_id_t> existingUUIDs;
 };
 
 #endif /* circuitManager_h */

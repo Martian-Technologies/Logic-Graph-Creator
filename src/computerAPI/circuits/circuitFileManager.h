@@ -33,6 +33,12 @@ public:
 			filePathToFile.at(iter2->second).circuitIds.erase(circuitId);
 		}
 	}
+	
+	const std::string* getCircuitSavePath(circuit_id_t circuitId) const {
+		auto iter = circuitIdToFilePath.find(circuitId);
+		if (iter == circuitIdToFilePath.end()) return nullptr;
+		return &(iter->second);
+	}
 
 private:
     CircuitManager* circuitManager;

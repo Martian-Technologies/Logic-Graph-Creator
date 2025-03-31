@@ -4,9 +4,11 @@
 #include "backend/circuit/circuitManager.h"
 #include "backend/circuit/parsedCircuit.h"
 
+class CircuitFileManager;
+
 class ParsedCircuitLoader {
 public:
-    ParsedCircuitLoader(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
+    ParsedCircuitLoader(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : circuitFileManager(circuitFileManager), circuitManager(circuitManager) {}
 
     // Requires the parsedCircuit to have all primitive or defined custom types in the circuit manager
     BlockType loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
@@ -16,8 +18,9 @@ public:
         return circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
     }
     
-private:
-    CircuitManager* circuitManager;
+protected:
+	CircuitManager* circuitManager;
+	CircuitFileManager* circuitFileManager;
 };
 
 #endif /* parsedCircuitLoader_h */

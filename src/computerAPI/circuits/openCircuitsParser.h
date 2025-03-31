@@ -25,9 +25,11 @@ struct ICData {
 	std::vector<block_id_t> outputPorts;
 };
 
+class CircuitFileManager;
+
 class OpenCircuitsParser : public ParsedCircuitLoader {
 public:
-	OpenCircuitsParser(CircuitManager* cm) : ParsedCircuitLoader(cm) { }
+	OpenCircuitsParser(CircuitFileManager* circuitFileManager, CircuitManager* cm) : ParsedCircuitLoader(circuitFileManager, cm) { }
 	bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
 	void parseOpenCircuitsJson();
 
