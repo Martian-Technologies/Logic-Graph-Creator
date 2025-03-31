@@ -4,7 +4,7 @@
 
 CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) { }
 
-bool CircuitFileManager::loadFromFile(const std::string& path) {
+circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 	SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
 		// our gatality file parser function

@@ -393,6 +393,11 @@ void CircuitViewWidget::dropEvent(QDropEvent* event) {
 			return;
 		}
 
-		load(filePath);
+		circuit_id_t id = fileManager->loadFromFile(filePath.toStdString());
+		if (id == 0) {
+			QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+			return;
+		}
+		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
 	}
 }

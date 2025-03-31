@@ -16,7 +16,7 @@ public:
 
     CircuitFileManager(CircuitManager* circuitManager);
 
-    bool loadFromFile(const std::string& path);
+    circuit_id_t loadFromFile(const std::string& path);
     bool saveToFile(const std::string& path, circuit_id_t circuitId);
 
 	void setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation) {

@@ -31,7 +31,6 @@ public:
     void updateSaveMenu(bool saveAs);
     void saveCircuit(circuit_id_t id, bool saveAs);
     void loadCircuit();
-    void loadCircuitInto(CircuitView* circuitWidget);
     void exportProject();
 	void openNewSelectorWindow();
 

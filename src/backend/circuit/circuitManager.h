@@ -143,7 +143,7 @@ public:
 	}
 
     // Create a custom new block from a parsed circuit
-    inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
+	inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
         if (!parsedCircuit->isValid()){
             logError("parsedCircuit is not validated", "CircuitManager");
             return 0;
@@ -169,7 +169,6 @@ public:
         SharedCircuit circuit = getCircuit(id);
 		
         circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
-		circuit->setSaved();
 
 		if (!parsedCircuit->isCustom()) return id;
 

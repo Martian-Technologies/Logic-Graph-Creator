@@ -242,20 +242,20 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		outputFile << "import \"" << bd->getFileName() << "\"\n";
 	}
 
-	if (circuit->isNonPrimitive()) {
-		outputFile << "SubCircuit: \"" << circuit->getCircuitName() << "\"\nInPorts:";
-		for (const std::pair<connection_end_id_t, block_id_t>& p : circuit->getInputPorts()) {
-			outputFile << " (" << p.second << ' ' << p.first << ')';
-		}
-		outputFile << "OutPorts:";
-		for (const std::pair<connection_end_id_t, block_id_t>& p : circuit->getOutputPorts()) {
-			outputFile << " (" << p.second << ' ' << p.first << ')';
-		}
-		outputFile << "UUID: " << circuit->getUUID() << '\n';;
-	} else {
-		outputFile << "Circuit: \"" << circuit->getCircuitName() << "\"\n"
-			<< "UUID: " << circuit->getUUID() << '\n';;
-	}
+	// if (circuit->isNonPrimitive()) {
+	// 	outputFile << "SubCircuit: \"" << circuit->getCircuitName() << "\"\nInPorts:";
+	// 	for (const std::pair<connection_end_id_t, block_id_t>& p : circuit->getInputPorts()) {
+	// 		outputFile << " (" << p.second << ' ' << p.first << ')';
+	// 	}
+	// 	outputFile << "OutPorts:";
+	// 	for (const std::pair<connection_end_id_t, block_id_t>& p : circuit->getOutputPorts()) {
+	// 		outputFile << " (" << p.second << ' ' << p.first << ')';
+	// 	}
+	// 	outputFile << "UUID: " << circuit->getUUID() << '\n';;
+	// } else {
+	// 	outputFile << "Circuit: \"" << circuit->getCircuitName() << "\"\n"
+	// 		<< "UUID: " << circuit->getUUID() << '\n';;
+	// }
 
 	for (itr = blockContainer->begin(); itr != blockContainer->end(); ++itr) {
 		const Block& block = itr->second;
