@@ -29,11 +29,11 @@ public:
     };
 
 	struct ConnectionPort {
-		ConnectionPort(bool isInput, Vector positionOnBlock, connection_end_id_t connectionEndId, block_id_t block) :
-			isInput(isInput), positionOnBlock(positionOnBlock), connectionEndId(connectionEndId), block(block) {}
+		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block) :
+			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block) {}
 		bool isInput;
-		Vector positionOnBlock;
 		connection_end_id_t connectionEndId;
+		Vector positionOnBlock;
 		block_id_t block;
 	};
 

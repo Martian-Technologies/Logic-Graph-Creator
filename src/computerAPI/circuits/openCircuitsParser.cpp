@@ -506,9 +506,9 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
         pc->markAsCustom();
 
         std::unordered_map<int,ICData>::iterator itr = icDataMap.find(icRef);
-        int i=0;
-        for (int p: itr->second.inputPorts){ pc->addInputPort(i++, p); }
-        for (int p: itr->second.outputPorts){ pc->addOutputPort(i++, p); }
+        // int i=0;
+        // for (int p: itr->second.inputPorts){ pc->addInputPort(i++, p); }
+        // for (int p: itr->second.outputPorts){ pc->addOutputPort(i++, p); }
 
         for (const auto& comp : itr->second.components) {
             const OpenCircuitsBlockInfo* block = &comp.second;

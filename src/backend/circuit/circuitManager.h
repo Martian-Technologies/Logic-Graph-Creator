@@ -164,9 +164,13 @@ public:
 			}
 		}
 
+		
         circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
         SharedCircuit circuit = getCircuit(id);
 		
+        circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
+		circuit->setSaved();
+
 		if (!parsedCircuit->isCustom()) return id;
 
         BlockType type = blockDataManager.addBlock();
@@ -202,9 +206,6 @@ public:
 
         dataUpdateEventManager->sendEvent("blockDataUpdate");
 
-        circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
-		circuit->setSaved();
-		circuit->setSaveFilePath(parsedCircuit->getAbsoluteFilePath());
         return id;
     }
 
