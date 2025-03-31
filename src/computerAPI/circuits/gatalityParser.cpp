@@ -18,7 +18,8 @@ BlockType stringToBlockType(const std::string& str) {
 	if (str == "SWITCH") return BlockType::SWITCH;
 	if (str == "CONSTANT") return BlockType::CONSTANT;
 	if (str == "LIGHT") return BlockType::LIGHT;
-	if (str == "CUSTOM" || (str.front() == '"' && str.back() == '"')) return BlockType::CUSTOM;
+	if (str == "CUSTOM" || (str.front() == '\"' && str.back() == '\"')) return BlockType::CUSTOM;
+	std::cout << str.front() << ", " << str.back() << "\n";
 	return BlockType::NONE;
 }
 
@@ -251,7 +252,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 }
 
 bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
-	
 	const std::string& path = fileData.fileLocation;
 	
 	std::ofstream outputFile(path);
@@ -280,20 +280,21 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		if (blockData->isPrimitive() || !imports.insert(blockData->getBlockType()).second) continue;
 		circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockData->getBlockType());
 		SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
-		const std::string* path = circuitFileManager->getCircuitSavePath(subCircuitId);
-		if (!path) {
+		const std::string* subCircuitPath = circuitFileManager->getCircuitSavePath(subCircuitId);
+		if (!subCircuitPath) {
 			logError("Count not find save path for depedecy {}", "GatalityParser", circuitManager->getCircuit(subCircuitId)->getCircuitNameNumber());
 			continue;
 		}
-		outputFile << "import \"" << path << "\"\n"; // TODO make relative path from this file
+		std::string relPath = std::filesystem::relative(std::filesystem::path(*subCircuitPath), std::filesystem::path(path)/"..").string();
+		outputFile << "import \"" << relPath << "\"\n"; // TODO make relative path from this file
 	}
 
 	const CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuitId);
 	outputFile << "Circuit: \"" << circuit->getCircuitName() << "\"\n";
-	outputFile << "UUID: \"" << circuit->getUUID() << "\"\n";
+	outputFile << "UUID: " << circuit->getUUID() << "\n";
 	if (circuitBlockData) {
 		BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
-		outputFile << "size: (" << blockData->getWidth() << ", " << blockData->getHeight() << ")\n";
+		outputFile << "size: (" << (unsigned int)(blockData->getWidth()) << ", " << (unsigned int)(blockData->getHeight()) << ")\n";
 		outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
 		connection_end_id_t endId = 0; // TODO remove once block data is updated
 		for (auto pair : blockData->getConnections()) {
@@ -321,7 +322,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		if (!blockData->isPrimitive()) {
 			circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(block.type());
 			const SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
-			blockTypeStr = circuit->getUUID();
+			blockTypeStr = '"' + circuit->getUUID() + '"';
 		} else {
 			blockTypeStr = blockTypeToString(block.type());
 		}

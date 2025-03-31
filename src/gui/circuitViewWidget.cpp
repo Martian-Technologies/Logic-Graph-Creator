@@ -299,12 +299,15 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
 	logInfo("Trying to save Circuit");
-	if (fileManager) {
-		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-		if (!filePath.isEmpty()) {
-            logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
-			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit()->getCircuitId());
-			logInfo("Successfully saved Circuit to: {}", "", filePath.toStdString());
+	if (fileManager && circuitView->getCircuit()) {
+		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
+		if (!fileManager->saveCircuit(circuitId)) {
+			// if failed to save the circuit with out a path
+			QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+			if (!filePath.isEmpty()) {
+				logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
+				fileManager->saveToFile(filePath.toStdString(), circuitId);
+			}
 		}
 	}
 }

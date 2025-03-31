@@ -56,8 +56,6 @@ public:
 
     void setAbsoluteFilePath(const std::string& fpath) { absoluteFilePath = fpath; }
     const std::string& getAbsoluteFilePath() const { return absoluteFilePath; }
-    void setRelativeFilePath(const std::string& fpath) { relativeFilePath = fpath; }
-    const std::string& getRelativeFilePath() const { return relativeFilePath; }
 
     void setName(const std::string& name) { this->name = name; }
     const std::string& getName() const { return name; }

@@ -35,5 +35,36 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 bool CircuitFileManager::saveToFile(const std::string& path, circuit_id_t circuitId) {
 	setCircuitFilePath(circuitId, path);
 	GatalityParser saver(this, circuitManager);
-	return saver.save(filePathToFile.at(path));
+	if (saver.save(filePathToFile.at(path))) {
+		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", path);
+		return true;
+	} 
+	return false;
+}
+
+bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
+	auto iter = circuitIdToFilePath.find(circuitId);
+	if (iter == circuitIdToFilePath.end()) return false;
+	GatalityParser saver(this, circuitManager);
+	if (saver.save(filePathToFile.at(iter->second))) {
+		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager");
+		return true;
+	}
+	return false;
+}
+
+void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation) {
+	auto iter = filePathToFile.find(fileLocation);
+	if (iter == filePathToFile.end()) {
+		iter = filePathToFile.emplace(fileLocation, fileLocation).first;
+	} else {
+		if (iter->second.circuitIds.contains(circuitId)) return;
+	}
+	iter->second.circuitIds.emplace(circuitId);
+	
+	auto iter2 = circuitIdToFilePath.find(circuitId);
+	if (iter2 != circuitIdToFilePath.end()) {
+		filePathToFile.at(iter2->second).circuitIds.erase(circuitId);
+	}
+	circuitIdToFilePath[circuitId] = fileLocation;
 }
