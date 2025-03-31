@@ -5,10 +5,10 @@ Window::Window()
 	
 }
 
-
 bool Window::recieveEvent(const SDL_Event& event) {
 	if (sdlWindow.isThisMyEvent(event)) {
 		return true;
 	}
+	
 	return false;
 }

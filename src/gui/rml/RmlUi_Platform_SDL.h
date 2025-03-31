@@ -33,7 +33,14 @@
 #include <RmlUi/Core/SystemInterface.h>
 #include <RmlUi/Core/Types.h>
 
-#include <SDL3/SDL.h>
+#define RMLUI_SDL_VERSION_MAJOR 3
+#if RMLUI_SDL_VERSION_MAJOR == 3
+	#include <SDL3/SDL.h>
+#elif RMLUI_SDL_VERSION_MAJOR == 2
+	#include <SDL.h>
+#else
+	#error "Unspecified RMLUI_SDL_VERSION_MAJOR. Please set this definition to the major version of the SDL library being linked to."
+#endif
 
 class SystemInterface_SDL : public Rml::SystemInterface {
 public:
