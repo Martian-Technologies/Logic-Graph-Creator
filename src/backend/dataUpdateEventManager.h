@@ -29,8 +29,8 @@ public:
 	};
 
 	void sendEvent(const std::string& eventName) {
-		for (DataUpdateEventReceiver* DataUpdateeventReceiver : dataUpdateEventReceivers) {
-			for (auto pair : DataUpdateeventReceiver->functions) {
+		for (DataUpdateEventReceiver* dataUpdateEventReceiver : dataUpdateEventReceivers) {
+			for (auto pair : dataUpdateEventReceiver->functions) {
 				if (pair.first == eventName) pair.second(nullptr);
 			}
 		}

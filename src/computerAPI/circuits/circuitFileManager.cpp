@@ -2,83 +2,69 @@
 #include "gatalityParser.h"
 #include "openCircuitsParser.h"
 
-CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) {}
+CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) { }
 
-BlockType stringToBlockType(const std::string& str) {
-    if (str == "NONE") return BlockType::NONE;
-    if (str == "AND") return BlockType::AND;
-    if (str == "OR") return BlockType::OR;
-    if (str == "XOR") return BlockType::XOR;
-    if (str == "NAND") return BlockType::NAND;
-    if (str == "NOR") return BlockType::NOR;
-    if (str == "XNOR") return BlockType::XNOR;
-    if (str == "JUNCTION") return BlockType::JUNCTION;
-    if (str == "TRISTATE_BUFFER") return BlockType::TRISTATE_BUFFER;
-    if (str == "BUTTON") return BlockType::BUTTON;
-    if (str == "TICK_BUTTON") return BlockType::TICK_BUTTON;
-    if (str == "SWITCH") return BlockType::SWITCH;
-    if (str == "CONSTANT") return BlockType::CONSTANT;
-    if (str == "LIGHT") return BlockType::LIGHT;
-    if (str == "CUSTOM" || (str.front() == '"' && str.back() == '"')) return BlockType::CUSTOM;
-    return BlockType::NONE;
+circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
+	SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
+	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
+		// our gatality file parser function
+		GatalityParser parser(this, circuitManager);
+		if (!parser.load(path, parsedCircuit)) {
+			logError("Failed to parse file", "CircuitFileManager");
+			return 0;
+		}
+		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
+        circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
+		setCircuitFilePath(id, path);
+		return id;
+	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
+		// open circuit file parser function
+		OpenCircuitsParser parser(this, circuitManager);
+		if (!parser.parse(path, parsedCircuit)) {
+			logError("Failed to parse file", "CircuitFileManager");
+			return 0;
+		}
+		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
+        return circuitManager->createNewCircuit(parsedCircuit.get());
+	} else {
+		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
+	}
+	return 0;
 }
 
-Rotation stringToRotation(const std::string& str) {
-    if (str == "ZERO") return Rotation::ZERO;
-    if (str == "NINETY") return Rotation::NINETY;
-    if (str == "ONE_EIGHTY") return Rotation::ONE_EIGHTY;
-    if (str == "TWO_SEVENTY") return Rotation::TWO_SEVENTY;
-    return Rotation::ZERO;
+bool CircuitFileManager::saveToFile(const std::string& path, circuit_id_t circuitId) {
+	setCircuitFilePath(circuitId, path);
+	GatalityParser saver(this, circuitManager);
+	if (saver.save(filePathToFile.at(path))) {
+		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", path);
+		return true;
+	} 
+	return false;
 }
 
-std::string blockTypeToString(BlockType type) {
-    switch (type) {
-        case BlockType::NONE: return "NONE";
-        case BlockType::AND: return "AND";
-        case BlockType::OR: return "OR";
-        case BlockType::XOR: return "XOR";
-        case BlockType::NAND: return "NAND";
-        case BlockType::NOR: return "NOR";
-        case BlockType::XNOR: return "XNOR";
-        case BlockType::JUNCTION: return "JUNCTION";
-        case BlockType::TRISTATE_BUFFER: return "TRISTATE_BUFFER";
-        case BlockType::BUTTON: return "BUTTON";
-        case BlockType::TICK_BUTTON: return "TICK_BUTTON";
-        case BlockType::SWITCH: return "SWITCH";
-        case BlockType::CONSTANT: return "CONSTANT";
-        case BlockType::LIGHT: return "LIGHT";
-        case BlockType::CUSTOM: return "CUSTOM";
-        default: return "NONE";
-    }
+bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
+	auto iter = circuitIdToFilePath.find(circuitId);
+	if (iter == circuitIdToFilePath.end()) return false;
+	GatalityParser saver(this, circuitManager);
+	if (saver.save(filePathToFile.at(iter->second))) {
+		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager");
+		return true;
+	}
+	return false;
 }
 
-std::string rotationToString(Rotation rotation) {
-    switch (rotation) {
-        case Rotation::ZERO: return "ZERO";
-        case Rotation::NINETY: return "NINETY";
-        case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
-        case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
-        default: return "ZERO";
-    }
-}
-
-bool CircuitFileManager::loadFromFile(const std::string& path, SharedParsedCircuit outParsed) {
-    if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
-        // our gatality file parser function
-        GatalityParser parser(circuitManager);
-        bool out = parser.load(path, outParsed);
-        return out;
-    } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
-        // open circuit file parser function
-        OpenCircuitsParser parser(circuitManager);
-        return parser.parse(path, outParsed);
-    }else {
-        logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
-    }
-    return false;
-}
-
-bool CircuitFileManager::saveToFile(const std::string& path, Circuit* circuitPtr, const std::string& uuidToSaveAs) {
-    GatalityParser saver(circuitManager);
-    return saver.save(path, circuitPtr, uuidToSaveAs);
+void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation) {
+	auto iter = filePathToFile.find(fileLocation);
+	if (iter == filePathToFile.end()) {
+		iter = filePathToFile.emplace(fileLocation, fileLocation).first;
+	} else {
+		if (iter->second.circuitIds.contains(circuitId)) return;
+	}
+	iter->second.circuitIds.emplace(circuitId);
+	
+	auto iter2 = circuitIdToFilePath.find(circuitId);
+	if (iter2 != circuitIdToFilePath.end()) {
+		filePathToFile.at(iter2->second).circuitIds.erase(circuitId);
+	}
+	circuitIdToFilePath[circuitId] = fileLocation;
 }

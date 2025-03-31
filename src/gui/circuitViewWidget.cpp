@@ -299,12 +299,15 @@ void CircuitViewWidget::leaveEvent(QEvent* event) {
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
 	logInfo("Trying to save Circuit");
-	if (fileManager) {
-		QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-		if (!filePath.isEmpty()) {
-            logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
-			fileManager->saveToFile(filePath.toStdString(), circuitView->getCircuit(), generate_uuid_v4());
-			logInfo("Successfully saved Circuit to: {}", "", filePath.toStdString());
+	if (fileManager && circuitView->getCircuit()) {
+		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
+		if (!fileManager->saveCircuit(circuitId)) {
+			// if failed to save the circuit with out a path
+			QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
+			if (!filePath.isEmpty()) {
+				logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
+				fileManager->saveToFile(filePath.toStdString(), circuitId);
+			}
 		}
 	}
 }
@@ -313,59 +316,11 @@ void CircuitViewWidget::save() {
 void CircuitViewWidget::load(const QString& filePath) {
 	if (!fileManager) return;
 
-    SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-    if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
+    if (!fileManager->loadFromFile(filePath.toStdString())) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logError("Failed to load circuit file.");
         return;
     }
-
-    Backend* back = circuitView->getBackend();
-    CircuitManager& circuitManager = back->getCircuitManager();
-
-    // Check for existing UUID
-    const std::string& uuid = parsed->getUUID();
-    if (circuitManager.UUIDExists(uuid)) {
-        logWarning("Circuit with UUID " + uuid + " already exists; not inserting.", "CircuitViewWidget");
-        return;
-    }
-
-    logInfo("Validating primary from circuitviewwidget");
-    CircuitValidator validator(*parsed, back->getBlockDataManager());
-    if (parsed->isValid()){
-		// circuitView->getToolManager().selectTool("preview placement tool");
-		// circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
-		// PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
-		// if (previewTool) {
-			// previewTool->setParsedCircuit(parsed);
-		// } else {
-			// logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
-		// }
-	} else {
-		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
-	}
-	// if (!fileManager->loadFromFile(filePath.toStdString(), parsed)) {
-	// if (!fileManager) return;
-
-	// SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-	// 	QMessageBox::warning(this, "Error", "Failed to load circuit file.");
-	// 	logError("Failed to load circuit file.");
-	// 	return;
-	// }
-
-	// CircuitValidator validator(*parsed, circuitView->getBackend()->getBlockDataManager()); // validate and dont merge dependencies
-	// if (parsed->isValid()) {
-	// 	circuitView->getToolManager().selectTool("preview placement tool");
-	// 	// circuitView->getToolManager().getSelectedTool().setPendingPreviewData(parsed);
-	// 	PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
-	// 	if (previewTool) {
-	// 		previewTool->setParsedCircuit(parsed);
-	// 	} else {
-	// 		logWarning("Preview tool in mainWindow failed to cast", "FileLoading");
-	// 	}
-	// } else {
-	// 	qWarning("Parsed circuit is not valid to be placed");
-	// }
 }
 
 void CircuitViewWidget::dragEnterEvent(QDragEnterEvent* event) {
@@ -394,6 +349,11 @@ void CircuitViewWidget::dropEvent(QDropEvent* event) {
 			return;
 		}
 
-		load(filePath);
+		circuit_id_t id = fileManager->loadFromFile(filePath.toStdString());
+		if (id == 0) {
+			QMessageBox::warning(this, "Error", "Failed to load circuit file.");
+			return;
+		}
+		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
 	}
 }

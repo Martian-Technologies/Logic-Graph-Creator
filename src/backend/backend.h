@@ -50,7 +50,7 @@ private:
 	
 	SharedCopiedBlocks clipboard = nullptr;
 
-	DataUpdateEventManager dataUpdateEventManager;
+	DataUpdateEventManager dataUpdateEventManager; // this needs to be constructed first
 	CircuitManager circuitManager;
 	EvaluatorManager evaluatorManager;
 	ToolManagerManager toolManagerManager;

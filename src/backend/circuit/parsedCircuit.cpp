@@ -1,11 +1,8 @@
 #include "parsedCircuit.h"
 #include "circuit.h"
 
-void ParsedCircuit::addInputPort(block_id_t p) {
-    inputPorts.push_back(p);
-}
-void ParsedCircuit::addOutputPort(block_id_t p) {
-    outputPorts.push_back(p);
+void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id) {
+    ports.emplace_back(isInput, connectionEndId, positionOnBlock, id);
 }
 
 void ParsedCircuit::addBlock(block_id_t id, const BlockData& block) {

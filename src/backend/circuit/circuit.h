@@ -28,23 +28,13 @@ public:
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
 
-    inline bool isSaved() const { return saved; }
-    inline void setSaved() { saved = true; }
-    inline void setSaveFilePath(const std::string& fname) { saveFilePath = fname; }
-    inline const std::string& getSaveFilePath() const { return saveFilePath; }
-
-    inline bool isNonPrimitive() const { return nonPrimitive; }
-    inline void setNonPrimitive(const std::vector<block_id_t>& inputPorts, const std::vector<block_id_t>& outputPorts) { nonPrimitive = true; this->inputPorts = inputPorts; this->outputPorts = outputPorts; }
-    inline const std::vector<block_id_t>& getInputPorts() { return inputPorts; }
-    inline const std::vector<block_id_t>& getOutputPorts() { return outputPorts; }
+	inline unsigned long long getEditCount() const { return editCount; }
 
 	/* ----------- listener ----------- */
-
 	// subject to change
 	void connectListener(void* object, CircuitDiffListenerFunction func) { listenerFunctions[object] = func; }
 	// subject to change
 	void disconnectListener(void* object) { auto iter = listenerFunctions.find(object); if (iter != listenerFunctions.end()) listenerFunctions.erase(iter); }
-
 
 	// allows accese to BlockContainer getters
 	inline const BlockContainer* getBlockContainer() const { return &blockContainer; }
@@ -69,7 +59,6 @@ public:
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position);
 
 	/* ----------- block data ----------- */
-
 	// Sets the data value to a block at position. Returns if block found.
 	bool trySetBlockData(const Position& positionOfBlock, block_data_t data);
 	// Sets the data value to a block at position. Returns if block found.
@@ -112,7 +101,7 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; saved = false; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; editCount++; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
     std::string circuitName;
     std::string circuitUUID;
@@ -126,11 +115,7 @@ private:
 	UndoSystem undoSystem;
 	bool midUndo = false;
 
-    bool saved = false;
-    std::string saveFilePath;
-
-    bool nonPrimitive = false;
-    std::vector<block_id_t> inputPorts, outputPorts;
+	unsigned long long editCount = 0;
 };
 
 typedef std::shared_ptr<Circuit> SharedCircuit;
