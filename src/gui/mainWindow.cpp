@@ -69,8 +69,8 @@ void MainWindow::setUpMenuBar() {
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
 	QMenu* fileMenu = new QMenu(QStringLiteral("File"), this);
-	saveSubMenu = new QMenu("Save Circuit", this);
-	saveAsSubMenu = new QMenu("Save Circuit As", this);
+	// saveSubMenu = new QMenu("Save Circuit", this);
+	// saveAsSubMenu = new QMenu("Save Circuit As", this);
 
 	menubar->addMenu(windowMenu);
 	menubar->addMenu(fileMenu);
@@ -88,13 +88,13 @@ void MainWindow::setUpMenuBar() {
 
 	// submenu setup
     logInfo("Setting up MenuBar submenus");
-	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
-	saveAction->setText("Save Circuit");
-	QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
-	saveAsAction->setText("Save Circuit As");
+	// QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
+	// saveAction->setText("Save Circuit");
+	// QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
+	// saveAsAction->setText("Save Circuit As");
 	
-	connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
-	connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
+	// connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
+	// connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
 
 	QAction* openCircuit = fileMenu->addAction(QStringLiteral("Open Circuit"));
 	connect(openCircuit, &QAction::triggered, this, [this]() { loadCircuit(); });
