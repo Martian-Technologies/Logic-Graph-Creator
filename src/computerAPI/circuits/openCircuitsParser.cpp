@@ -1,7 +1,9 @@
 #include "openCircuitsParser.h"
-#include "circuitFileManager.h"
-#include <string>
 
+#include <string>
+#include <math.h>
+
+#include "circuitFileManager.h"
 
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit) {
 	logInfo("Parsing Open Circuits File (.circuit)", "OpenCircuitsParser");

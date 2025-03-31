@@ -1,5 +1,4 @@
 #include "directoryManager.h"
-#include <unistd.h>
 
 #include <cpplocate/cpplocate.h>
 
