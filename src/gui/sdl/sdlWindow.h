@@ -13,7 +13,6 @@ public:
 	bool isThisMyEvent(const SDL_Event& event);
 	
 	// temp
-	bool createSurface(VkInstance& instance, VkSurfaceKHR* out_surface);
 	inline SDL_Window* getHandle() { return handle; }
 
 private:
