@@ -28,19 +28,19 @@
         <div id="left-sidebar-container">
           <div class="menutree" id="left-sidebar-menutree">
             <ul>
-              <li class="parent">Blocks
+              <li class="parent">>Blocks
                 <ul class="collapsed">
                   <li>AND</li>
                   <li>OR</li>
                   <li>(etc.)</li>
                 </ul>
               </li>
-              <li class="parent">Tools
+              <li class="parent">>Tools
                 <ul class="collapsed">
                   <li>Place</li>
-                  <li class="parent">Move
+                  <li class="parent">>Move
                     <ul class="collapsed">
-                      <li>Regolar</li>
+                      <li>Regular</li>
                       <li>Tensor</li>
                     </ul>
                   </li>

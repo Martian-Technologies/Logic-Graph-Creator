@@ -75,11 +75,10 @@ body {
 .menutree li {
   cursor: pointer;
 }
-/* 
-.menutree .collapsed {
+
+.collapsed {
   display: none;
 }
- */
  
 #circuitview-container {
   flex: 1;

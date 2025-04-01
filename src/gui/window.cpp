@@ -21,10 +21,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	document->GetElementsByTagName(menuTreeItems, "li");
 	for (Rml::Element* element : menuTreeItems) {
 		if (element->GetClassNames().find("parent") != std::string::npos) {
-			
-			//this line causes compilation error lol!
-			// response: lol!    from: jack (I'm a chill guy)
-			// berman --->    >:(3     (very angry)
 			element->AddEventListener("click", new MenuTreeListener());
 		}
 	}

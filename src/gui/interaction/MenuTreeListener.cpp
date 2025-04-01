@@ -11,13 +11,10 @@ MenuTreeListener::~MenuTreeListener() {
 }
 
 void MenuTreeListener::ProcessEvent(Rml::Event& event) {
+  event.StopPropagation();
   Rml::Element* target = event.GetTargetElement();
   
-  //logInfo(target);
-  std::cout << target << std::endl;
-
   //collapsing submenus
-
   if (target->GetClassNames().find("parent") != std::string::npos) {
     Rml::Element* sublist = target->GetFirstChild();
     if (sublist) {
@@ -27,6 +24,8 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
         sublist->SetClass("collapsed", true);
       }
     }
+  } else {
+    std::cout << target->GetInnerRML() << std::endl;
   }
 }
 
