@@ -14,10 +14,27 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
-	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainwindow.rml").string());
+	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
+
+	// dynamically generate menutree
+	Rml::ElementPtr toolTree = document->CreateElement("div");
+	toolTree->SetClass("menutree", true);
+	toolTree->SetId("left-sidebar-menutree1");
+	
+	Rml::ElementPtr treeList = document->CreateElement("ul");
+	
+	Rml::ElementPtr blockParent = document->CreateElement("li");
+	blockParent->SetClass("parent", true);
+	blockParent->SetInnerRML(">Blocks");
+	
+	//once you append a child to a parent, you can't use that child's variable anymore (authority moved)
+	treeList->AppendChild(std::move(blockParent));
+	toolTree->AppendChild(std::move(treeList));
+	document->GetElementById("left-sidebar-container")->AppendChild(std::move(toolTree));
 
 	// set up event listeners
 	Rml::ElementList menuTreeItems;
+	
 	document->GetElementsByTagName(menuTreeItems, "li");
 	for (Rml::Element* element : menuTreeItems) {
 		if (element->GetClassNames().find("parent") != std::string::npos) {
