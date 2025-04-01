@@ -7,6 +7,9 @@
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/window.h"
 
+#include "backend/backend.h"
+#include "computerAPI/circuits/circuitFileManager.h"
+
 class App {
 public:
 	App();
@@ -14,6 +17,10 @@ public:
 	void runLoop();
 	
 private:
+	// 
+	Backend backend;
+    CircuitFileManager circuitFileManager;
+
 	RenderInterface_SDL rmlRenderInterface;
 	SystemInterface_SDL rmlSystemInterface;
 	

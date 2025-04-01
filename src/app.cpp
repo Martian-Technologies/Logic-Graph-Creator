@@ -1,7 +1,7 @@
 #include "app.h"
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface) {
-	windows.emplace_back();
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
+	windows.emplace_back(&backend, &circuitFileManager);
 }
 
 void App::runLoop() {

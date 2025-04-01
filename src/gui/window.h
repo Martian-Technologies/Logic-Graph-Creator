@@ -8,9 +8,12 @@
 #include "gui/rml/RmlUi_Renderer_SDL.h"
 #include "sdl/sdlWindow.h"
 
+#include "backend/backend.h"
+#include "computerAPI/circuits/circuitFileManager.h"
+
 class Window {
 public:
-	Window();
+	Window(Backend* backend, CircuitFileManager* circuitFileManager);
 	~Window();
 
 	bool recieveEvent(SDL_Event& event);
@@ -19,7 +22,17 @@ public:
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 
+    void saveCircuit(circuit_id_t id, bool saveAs);
+    void loadCircuit();
+    void exportProject();
+	void setBlock(std::string blockPath);
+	void setTool(std::string tool);
+	void setMode(std::string tool);
+
 private:
+	Backend* backend;
+	CircuitFileManager* circuitFileManager;
+
 	SdlWindow sdlWindow;
 	SDL_Renderer* sdlRenderer;
 	 
