@@ -35,10 +35,10 @@
 
 class RenderInterface_SDL : public Rml::RenderInterface {
 public:
-	RenderInterface_SDL(SDL_Renderer* renderer);
+	RenderInterface_SDL();
 
 	// Sets up OpenGL states for taking rendering commands from RmlUi.
-	void BeginFrame();
+	void BeginFrame(SDL_Renderer* renderer);
 	void EndFrame();
 
 	// -- Inherited from Rml::RenderInterface --
@@ -60,7 +60,7 @@ private:
 		Rml::Span<const int> indices;
 	};
 
-	SDL_Renderer* renderer;
+	SDL_Renderer* renderer = nullptr;
 	SDL_BlendMode blend_mode = {};
 	SDL_Rect rect_scissor = {};
 	bool scissor_region_enabled = false;

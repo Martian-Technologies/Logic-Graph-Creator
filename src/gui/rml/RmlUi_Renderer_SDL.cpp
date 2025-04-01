@@ -42,7 +42,7 @@ static void SetRenderViewport(SDL_Renderer* renderer, const SDL_Rect* rect)
 	SDL_SetRenderViewport(renderer, rect);
 }
 
-RenderInterface_SDL::RenderInterface_SDL(SDL_Renderer* renderer) : renderer(renderer)
+RenderInterface_SDL::RenderInterface_SDL()
 {
 	// RmlUi serves vertex colors and textures with premultiplied alpha, set the blend mode accordingly.
 	// Equivalent to glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA).
@@ -50,8 +50,10 @@ RenderInterface_SDL::RenderInterface_SDL(SDL_Renderer* renderer) : renderer(rend
 		SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
 }
 
-void RenderInterface_SDL::BeginFrame()
+void RenderInterface_SDL::BeginFrame(SDL_Renderer* renderer)
 {
+	this->renderer = renderer;
+	
 	SetRenderViewport(renderer, nullptr);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);

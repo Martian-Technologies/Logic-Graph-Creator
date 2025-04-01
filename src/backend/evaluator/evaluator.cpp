@@ -181,12 +181,11 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool track
 	}
 	const Vector rotatedOffset = reverseRotateVectorWithArea(offset, blockData->getWidth(), blockData->getHeight(), gate.rotation);
 
-	const auto connections = blockData->getConnections();
-	for (int j = 0; j < connections.size(); j++) {
-		if (connections[j].first == rotatedOffset) {
+	for (auto pair : blockData->getConnections()) {
+		if (pair.second.first == rotatedOffset) {
 			break;
 		}
-		if (connections[j].second == trackInput) {
+		if (pair.second.second == trackInput) {
 			groupIndex++;
 		}
 	}
