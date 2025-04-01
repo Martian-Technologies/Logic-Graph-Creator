@@ -4,10 +4,6 @@
 #include "../selectionHelpers/areaCreationTool.h"
 #include "backend/tools/toolManagerManager.h"
 
-MoveTool::MoveTool() {
-	ToolManagerManager::registerToolModes("placement/move", getModes());
-}
-
 void MoveTool::reset() {
 	CircuitTool::reset();
 	if (!activeSelectionHelper) {
@@ -15,17 +11,14 @@ void MoveTool::reset() {
 		activeSelectionHelper = std::make_shared<AreaCreationTool>();
 	}
 	activeSelectionHelper->restart();
-	toolStackInterface->pushTool(activeSelectionHelper);
 	updateElements();
 }
 
 void MoveTool::activate() {
 	CircuitTool::activate();
-	registerFunction("tool primary activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
-	registerFunction("tool secondary activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
-	if (!activeSelectionHelper) {
-		reset();
-	} else if (!activeSelectionHelper->isFinished()) {
+	registerFunction("Tool Primary Activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
+	if (!activeSelectionHelper->isFinished()) {
 		toolStackInterface->pushTool(activeSelectionHelper);
 	} else {
 		updateElements();
@@ -44,32 +37,32 @@ void MoveTool::setMode(std::string toolMode) {
 			logError("Tool mode \"{}\" could not be found", "", toolMode);
 		}
 		toolStackInterface->popAbove(this);
-		// toolStackInterface->pushTool(activeSelectionHelper);
 	}
 }
 
 bool MoveTool::click(const Event* event) {
-	if (!activeSelectionHelper || !activeSelectionHelper->isFinished() || !circuit) return false;
+	if (!activeSelectionHelper->isFinished() || !circuit) return false;
 	if (circuit->tryMoveBlocks(
 		activeSelectionHelper->getSelection(),
 		lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()))
 	) {
 		reset();
+		toolStackInterface->pushTool(activeSelectionHelper);
 	}
 	return true;
 }
 
 bool MoveTool::unclick(const Event* event) {
-	if (!activeSelectionHelper || !activeSelectionHelper->isFinished()) return false;
+	if (!activeSelectionHelper->isFinished()) return false;
 	elementCreator.clear();
-	toolStackInterface->pushTool(activeSelectionHelper);
+	toolStackInterface->pushTool(activeSelectionHelper, false);
 	return true;
 }
 
 void MoveTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
-	if (!activeSelectionHelper || !activeSelectionHelper->isFinished()) return;
+	if (!activeSelectionHelper->isFinished()) return;
 	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 	if (pointerInView) {
 		elementCreator.addSelectionElement(SelectionObjectElement(

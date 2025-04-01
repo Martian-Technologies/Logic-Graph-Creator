@@ -7,13 +7,14 @@
 #include "../renderer/renderer.h"
 #include "circuitTool.h"
 
+class CircuitView;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, Renderer* renderer) : eventRegister(eventRegister), renderer(renderer), toolStackInterface(this) {
+	inline ToolStack(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView) : eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
-		eventRegister->registerFunction("pointer move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
+		eventRegister->registerFunction("Pointer Move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
 	}
 	inline ToolStack(const ToolStack& other) = delete;
 	inline ToolStack& operator=(const ToolStack& other) = delete;
@@ -22,10 +23,11 @@ public:
 	void deactivate() { if (!toolStack.empty()) { toolStack.back()->deactivate(); toolStack.back()->elementCreator.clear(); } }
 
 	void reset();
-	void pushTool(SharedCircuitTool newTool);
+	void pushTool(SharedCircuitTool newTool, bool resetTool = true);
 	void popTool();
 	void clearTools();
 	void popAbove(CircuitTool* toolNotToPop);
+	bool empty() const { return toolStack.empty(); }
 
 	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;
@@ -50,6 +52,7 @@ private:
 
 	// current block container
 	Circuit* circuit;
+	CircuitView* circuitView;
 
 	// tool function event linking
 	ToolStackInterface toolStackInterface;

@@ -8,14 +8,15 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer(const BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+	inline BlockContainer(BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
 
-	inline const BlockDataManager* getBlockDataManager() const { return blockDataManager; }
+	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge) const;
 	bool checkCollision(const Position& position, Rotation rotation, BlockType blockType) const;
+
 	/* ----------- blocks ----------- */
 	// -- getters --
 	// Gets the cell at that position. Returns nullptr the cell is empty
@@ -28,6 +29,8 @@ public:
 	inline const Block* getBlock(block_id_t blockId) const;
 	// Gets the number of blocks in the BlockContainer
 	inline unsigned int getBlockCount() const { return blocks.size(); }
+	// gets the number of times a block with a certain type appears
+	inline unsigned int getBlockTypeCount(BlockType blockType) const { if (blockTypeCounts.size() <= blockType) return 0; return blockTypeCounts[blockType]; }
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
@@ -36,6 +39,8 @@ public:
 	bool tryRemoveBlock(const Position& position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference);
+	// moves blocks until they 
+	void resizeBlockType(BlockType blockType, block_size_t newWidth, block_size_t newHeight, Difference* difference);
 
 	/* ----------- block data ----------- */
 	// // Gets the data from a block at position. Returns 0 if no block is found. 
@@ -85,10 +90,11 @@ private:
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
 
-	const BlockDataManager* blockDataManager;
+	BlockDataManager* blockDataManager;
 	block_id_t lastId;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;
+	std::vector<unsigned int> blockTypeCounts;
 };
 
 inline Block* BlockContainer::getBlock_(const Position& position) {

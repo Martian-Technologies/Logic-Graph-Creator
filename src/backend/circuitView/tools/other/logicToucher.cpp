@@ -1,5 +1,6 @@
 #include "logicToucher.h"
 
+
 bool LogicToucher::press(const Event* event) {
 	if (!circuit || !evaluatorStateInterface) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();

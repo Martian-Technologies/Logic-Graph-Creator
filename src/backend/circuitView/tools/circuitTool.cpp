@@ -24,16 +24,17 @@ void CircuitTool::unregisterFunctions() {
 void CircuitTool::activate() {
 	registerFunction("pointer enter view", std::bind(&CircuitTool::enterBlockView, this, std::placeholders::_1));
 	registerFunction("pointer exit view", std::bind(&CircuitTool::exitBlockView, this, std::placeholders::_1));
-	registerFunction("pointer move", std::bind(&CircuitTool::pointerMove, this, std::placeholders::_1));
+	registerFunction("Pointer Move", std::bind(&CircuitTool::pointerMove, this, std::placeholders::_1));
 	updateElements();
 }
 
-void CircuitTool::setup(Renderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, Circuit* circuit) {
+void CircuitTool::setup(Renderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit) {
 	setEvaluatorStateInterface(evaluatorStateInterface);
 	this->toolStackInterface = toolStackInterface;
 	this->elementCreator.setup(renderer);
 	this->eventRegister = eventRegister;
 	this->circuit = circuit;
+	this->circuitView = circuitView;
 }
 
 void CircuitTool::unsetup() {

@@ -4,9 +4,9 @@
 void ViewManager::setUpEvents(EventRegister& eventRegister) {
 		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
 		eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
-		eventRegister.registerFunction("view attach anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("view dettach anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
+		eventRegister.registerFunction("View Attach Anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
+		eventRegister.registerFunction("View Dettach Anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
+		eventRegister.registerFunction("Pointer Move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
 		eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
 		eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
 	}

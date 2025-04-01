@@ -28,6 +28,8 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
 	iter->second.setId(id);
 	iter->second.setPosition(position);
 	iter->second.setRotation(rotation);
+	if (blockTypeCounts.size() <= blockType) blockTypeCounts.resize(blockType+1);
+	blockTypeCounts[blockType]++;
 	placeBlockCells(&iter->second);
 	difference->addPlacedBlock(position, rotation, blockType);
 	return true;
@@ -55,6 +57,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 			}
 		}
 	}
+	blockTypeCounts[block.type()]--;
 	difference->addRemovedBlock(block.getPosition(), block.getRotation(), block.type());
 	block.destroy();
 	blocks.erase(iter);
@@ -72,6 +75,26 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 	placeBlockCells(block);
 	return true;
 }
+
+void BlockContainer::resizeBlockType(BlockType blockType, block_size_t newWidth, block_size_t newHeight, Difference* difference) {
+	if (blockTypeCounts.size() <= blockType || blockTypeCounts[blockType] == 0) return;
+	for (auto pair : blocks) {
+		Block* block = &(pair.second);
+		Position position = block->getPosition();
+		Position otherPosition = position + (isRotated(block->getRotation()) ? Vector(newHeight, newWidth) : Vector(newWidth, newHeight));
+		
+		for (cord_t x = position.x; x <= otherPosition.x; x++) {
+			for (cord_t y = position.y; y <= otherPosition.y; y++) {
+				Cell* cell = getCell(Position(x, y));
+				if (cell && cell->getBlockId() != block->id()) {
+					logError("found overlap at {}", "", Position(x, y).toString());
+				}
+			}
+		}
+		placeBlockCells(block);
+	}
+}
+
 
 // block_data_t BlockContainer::getBlockData(const Position& positionOfBlock) const {
 //     Block* block = getBlock(positionOfBlock);

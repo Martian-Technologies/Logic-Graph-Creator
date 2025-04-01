@@ -1,6 +1,7 @@
 # Gatality
 
 [Gatality](https://gatality.com) is a desktop application for designing and simulating logic graph systems.
+A build of the app for Windows exists in the [releases tab](https://github.com/Martian-Technologies/Logic-Graph-Creator/releases).
 
 ## Developer Documentation
 - [HOW TO BUILD <----- CLICK HERE](docs/building.md)

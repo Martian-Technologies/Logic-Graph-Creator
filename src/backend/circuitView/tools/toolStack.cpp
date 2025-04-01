@@ -58,12 +58,12 @@ void ToolStack::reset() {
 	pushTool(tool);
 }
 
-void ToolStack::pushTool(SharedCircuitTool newTool) {
+void ToolStack::pushTool(SharedCircuitTool newTool, bool resetTool) {
 	if (!toolStack.empty())
 		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
-	toolStack.back()->setup(renderer, eventRegister, &toolStackInterface, evaluatorStateInterface, circuit);
-	toolStack.back()->activate();
+	toolStack.back()->setup(renderer, eventRegister, &toolStackInterface, evaluatorStateInterface, circuitView, circuit);
+	if (resetTool) toolStack.back()->reset();
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->enterBlockView(&event);
@@ -71,6 +71,7 @@ void ToolStack::pushTool(SharedCircuitTool newTool) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->exitBlockView(&event);
 	}
+	toolStack.back()->activate();
 }
 
 void ToolStack::popTool() {
@@ -80,7 +81,6 @@ void ToolStack::popTool() {
 
 	if (toolStack.empty()) return;
 	toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
-	toolStack.back()->activate();
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->enterBlockView(&event);
@@ -88,6 +88,7 @@ void ToolStack::popTool() {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->exitBlockView(&event);
 	}
+	toolStack.back()->activate();
 }
 
 void ToolStack::clearTools() {

@@ -132,5 +132,21 @@ inline Position getSelectionOrigin(SharedSelection selection) {
 	logError("Could not find origin of selection. Selection not Cell or Dimensional Selection.", "Selection");
 	return Position();
 }
+inline void flattenSelection(SharedSelection selection, std::unordered_set<Position>& positions) {
+	// Cell Selection
+	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+	if (cellSelection) {
+		positions.insert(cellSelection->getPosition());
+		return;
+	}
+
+	// Dimensional Selection
+	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+	if (dimensionalSelection) {
+		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
+			flattenSelection(dimensionalSelection->getSelection(i - 1), positions);
+		}
+	}
+}
 
 #endif /* selection_h */

@@ -25,6 +25,7 @@ enum BlockType : std::uint16_t {
 	SWITCH,
 	CONSTANT,
 	LIGHT,
+    CUSTOM, // placeholder for custom blocks in parsed circuit
 };
 
 #endif /* blockDefs_h */
