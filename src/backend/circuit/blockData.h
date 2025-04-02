@@ -3,7 +3,7 @@
 
 #include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
-#include "connectionEnd.h"
+#include "backend/container/block/connectionEnd.h"
 
 class BlockData {
 	friend class BlockDataManager;
@@ -28,6 +28,13 @@ public:
 	}
 	inline block_size_t getWidth() const noexcept { return width; }
 	inline block_size_t getHeight() const noexcept { return height; }
+
+	inline block_size_t getWidth(Rotation rotation) const noexcept {
+		return isRotated(rotation) ? getHeight() : getWidth();
+	}
+	inline block_size_t getHeight(Rotation rotation) const noexcept {
+		return isRotated(rotation) ? getWidth() : getHeight();
+	}
 
 	inline BlockType getBlockType() const { return blockType; }
 
@@ -135,7 +142,7 @@ public:
 	}
 
 private:
-	BlockType blockType;
+	BlockType blockType = BlockType::NONE;
 	bool defaultData = true;
 	bool primitive = true; // true if defined by default (And, Or, Xor...)
 	bool placeable = true;

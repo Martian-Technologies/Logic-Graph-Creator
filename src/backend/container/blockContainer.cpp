@@ -3,7 +3,7 @@
 #include "util/emptyVector.h"
 #include "blockContainer.h"
 #include "block/block.h"
-#include "block/blockDataManager.h"
+#include "block/blockContainerBlockData.h"
 
 bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) const {
 	for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {
@@ -15,16 +15,16 @@ bool BlockContainer::checkCollision(const Position& positionSmall, const Positio
 }
 
 bool BlockContainer::checkCollision(const Position& position, Rotation rotation, BlockType blockType) const {
-	return checkCollision(position, position + Vector(
-		blockDataManager->getBlockWidth(blockType, rotation) - 1,
-		blockDataManager->getBlockHeight(blockType, rotation) - 1
+	return (blockData.size() <= blockType) ? false : checkCollision(position, position + Vector(
+		blockData[blockType].getWidth(rotation) - 1,
+		blockData[blockType].getHeight(rotation) - 1
 	));
 }
 
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
-	if (!blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType)) return false;
+	if (!blockTypeExists(blockType) || checkCollision(position, rotation, blockType)) return false;
 	block_id_t id = getNewId();
-	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
+	auto iter = blocks.insert(std::make_pair(id, getBlockClass(&blockData[blockType], blockType))).first;
 	iter->second.setId(id);
 	iter->second.setPosition(position);
 	iter->second.setRotation(rotation);
@@ -187,8 +187,8 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 }
 
 void BlockContainer::placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId) {
-	for (cord_t x = 0; x < blockDataManager->getBlockWidth(type, rotation); x++) {
-		for (cord_t y = 0; y < blockDataManager->getBlockHeight(type, rotation); y++) {
+	for (cord_t x = 0; x < blockData[type].getWidth(rotation); x++) {
+		for (cord_t y = 0; y < blockData[type].getHeight(rotation); y++) {
 			insertCell(position + Vector(x, y), Cell(blockId));
 		}
 	}

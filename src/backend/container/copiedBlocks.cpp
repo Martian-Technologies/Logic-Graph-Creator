@@ -26,7 +26,7 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 			block->getRotation(),
 			block->getRawData()
 		);
-		const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
+		const BlockContainerBlockData* blockData = blockContainer->getBlockContainerBlockData(block->type());
 		for (connection_end_id_t i = 0; i < block->getConnectionContainer().getConnectionCount(); i++) {
 			auto pair = blockData->getConnectionVector(i, block->getRotation());
 			if (!pair.second) continue;
@@ -40,7 +40,7 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 					if (positions.contains(*iter)) { skipConnection = false; break; }
 				}
 				if (skipConnection) continue;
-				auto otherPair = blockContainer->getBlockDataManager()->getBlockData(otherBlock->type())->getConnectionVector(
+				auto otherPair = blockContainer->getBlockContainerBlockData(otherBlock->type())->getConnectionVector(
 					connectionEnd.getConnectionId(), otherBlock->getRotation()
 				);
 				if (!otherPair.second) continue;

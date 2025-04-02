@@ -1,7 +1,6 @@
 #ifndef blockDataManager_h
 #define blockDataManager_h
 
-#include "../../dataUpdateEventManager.h"
 #include "blockData.h"
 
 class BlockDataManager {
@@ -124,8 +123,9 @@ public:
 	}
 
 	inline connection_end_id_t getConnectionCount(BlockType type) const noexcept {
-		if (!blockExists(type)) return 0;
-		return blockData[type-1].getConnectionCount();
+		auto iter = blockData.find(type);
+		if (iter == blockData.end()) return 0;
+		return iter->second.getConnectionCount();
 	}
 	inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
@@ -133,7 +133,7 @@ public:
 	}
 
 private:
-	std::vector<BlockData> blockData;
+	std::unordered_map<BlockData> blockData;
 	DataUpdateEventManager* dataUpdateEventManager;
 };
 

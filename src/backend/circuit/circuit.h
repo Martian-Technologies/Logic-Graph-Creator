@@ -7,6 +7,8 @@
 #include "backend/selection.h"
 #include "undoSystem.h"
 #include "backend/container/copiedBlocks.h"
+#include "backend/dataUpdateEventManager.h"
+#include "blockDataManager.h"
 
 class ParsedCircuit;
 
@@ -19,9 +21,16 @@ class Circuit {
 	friend class CircuitManager;
 public:
 	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
-        circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+        circuitId(circuitId), blockContainer(), blockDataManager(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
+		for (unsigned int i = 0; i <= blockDataManager.maxBlockId(); i++) {
+			const BlockData* blockData = blockDataManager.getBlockData(i);
+			if (blockData->getBlockType() == BlockType::NONE) break;
+
+		}
 	}
+
+	inline const BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
@@ -107,6 +116,7 @@ private:
     std::string circuitUUID;
 	circuit_id_t circuitId;
 	BlockContainer blockContainer;
+	BlockDataManager* blockDataManager;
 	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 

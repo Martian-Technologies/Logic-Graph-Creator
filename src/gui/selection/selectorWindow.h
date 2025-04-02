@@ -5,7 +5,7 @@
 #include <QListWidgetItem>
 #include <QTreeWidgetItem>
 
-#include "backend/container/block/blockDataManager.h"
+#include "backend/circuit/blockDataManager.h"
 
 namespace Ui {
 	class Selector;

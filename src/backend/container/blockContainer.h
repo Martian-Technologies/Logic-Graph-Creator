@@ -8,15 +8,38 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer(BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+	inline BlockContainer() : lastId(0) { }
 
-	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
+	/* ----------- block data ----------- */
+	inline const BlockContainerBlockData* getBlockContainerBlockData(BlockType blockType) const { return (blockType >= blockData.size()) ? nullptr : &blockData[blockType]; }
+	inline bool blockTypeExists(BlockType blockType) const { return blockType != BlockType::NONE && blockType < blockData.size() && blockData[blockType].exists(); }
+	inline void addBlockContainerBlockData(BlockType blockType) {
+		if (blockType >= blockData.size()) blockData.resize((unsigned int)blockType);
+		blockData[blockType].exists_ = true;
+	}
+	inline void setBlockWidth(BlockType blockType, block_size_t width) {
+		if (!blockTypeExists(blockType)) return;
+		blockData[blockType].width = width;
+	}
+	inline void setBlockHeight(BlockType blockType, block_size_t height) {
+		if (!blockTypeExists(blockType)) return;
+		blockData[blockType].height = height;
+	}
+	inline void addConnection(BlockType blockType, Vector positionOnBlock, bool isInput) {
+		if (!blockTypeExists(blockType)) return;
+		blockData[blockType].connections.emplace_back(positionOnBlock, isInput);
+	}
+	inline void setConnection(BlockType blockType, connection_end_id_t endId, Vector positionOnBlock, bool isInput) {
+		if (!blockTypeExists(blockType)) return;
+		blockData[blockType].connections[endId] = {positionOnBlock, isInput};
+	}
 
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge) const;
 	bool checkCollision(const Position& position, Rotation rotation, BlockType blockType) const;
 
+	
 	/* ----------- blocks ----------- */
 	// -- getters --
 	// Gets the cell at that position. Returns nullptr the cell is empty
@@ -30,7 +53,7 @@ public:
 	// Gets the number of blocks in the BlockContainer
 	inline unsigned int getBlockCount() const { return blocks.size(); }
 	// gets the number of times a block with a certain type appears
-	inline unsigned int getBlockTypeCount(BlockType blockType) const { if (blockTypeCounts.size() <= blockType) return 0; return blockTypeCounts[blockType]; }
+	inline unsigned int getBlockTypeCount(BlockType blockType) const { return (blockTypeCounts.size() <= blockType) ? 0 : blockTypeCounts[blockType]; }
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
@@ -90,11 +113,11 @@ private:
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
 
-	BlockDataManager* blockDataManager;
 	block_id_t lastId;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;
 	std::vector<unsigned int> blockTypeCounts;
+	std::vector<BlockContainerBlockData> blockData;
 };
 
 inline Block* BlockContainer::getBlock_(const Position& position) {

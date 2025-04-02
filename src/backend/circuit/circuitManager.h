@@ -1,7 +1,7 @@
 #ifndef circuitManager_h
 #define circuitManager_h
 
-#include "backend/container/block/blockDataManager.h"
+#include "blockDataManager.h"
 #include "circuitBlockDataManager.h"
 #include "parsedCircuit.h"
 #include "util/uuid.h"

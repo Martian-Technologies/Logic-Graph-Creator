@@ -1,15 +1,15 @@
 #ifndef block_h
 #define block_h
 
-#include "connectionContainer.h"
-#include "blockDataManager.h"
 #include "blockHelpers.h"
+#include "connectionContainer.h"
+#include "blockContainerBlockData.h"
 
 class Block {
 	friend class BlockContainer;
-	friend Block getBlockClass(const BlockDataManager* blockDataManager, BlockType type);
+	friend Block getBlockClass(const BlockContainerBlockData* blockData, BlockType type);
 public:
-	inline Block(const BlockDataManager* blockDataManager) : Block(blockDataManager, BlockType::NONE) { }
+	inline Block(const BlockContainerBlockData* blockData) : Block(blockData, BlockType::NONE) { }
 
 	// getters
 	block_id_t id() const { return blockId; }
@@ -19,10 +19,10 @@ public:
 	inline Position getLargestPosition() const { return position + Vector(width(), height()); }
 	inline Rotation getRotation() const { return rotation; }
 
-	inline block_size_t width() const { return blockDataManager->getBlockWidth(type(), getRotation()); }
-	inline block_size_t height() const { return blockDataManager->getBlockHeight(type(), getRotation()); }
-	inline block_size_t widthNoRotation() const { return blockDataManager->getBlockWidth(type()); }
-	inline block_size_t heightNoRotation() const { return blockDataManager->getBlockHeight(type()); }
+	inline block_size_t width() const { return blockData->getWidth(getRotation()); }
+	inline block_size_t height() const { return blockData->getHeight(getRotation()); }
+	inline block_size_t widthNoRotation() const { return blockData->getWidth(); }
+	inline block_size_t heightNoRotation() const { return blockData->getHeight(); }
 
 	inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 
@@ -36,17 +36,17 @@ public:
 		return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
 	}
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Position& position) const {
-		return withinBlock(position) ? blockDataManager->getInputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+		return withinBlock(position) ? blockData->getInputConnectionId(position - getPosition(), getRotation()) : std::make_pair<connection_end_id_t, bool>(0, false);
 	}
 	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Position& position) const {
-		return withinBlock(position) ? blockDataManager->getOutputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+		return withinBlock(position) ? blockData->getOutputConnectionId(position - getPosition(), getRotation()) : std::make_pair<connection_end_id_t, bool>(0, false);
 	}
 	inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) const {
-		auto output = blockDataManager->getConnectionVector(type(), getRotation(), connectionId);
+		auto output = blockData->getConnectionVector(connectionId, getRotation());
 		if (output.second) return { getPosition() + output.first, true };
 		return { Position(), false };
 	}
-	inline bool isConnectionInput(connection_end_id_t connectionId) const { return blockDataManager->isConnectionInput(type(), connectionId); }
+	inline bool isConnectionInput(connection_end_id_t connectionId) const { return blockData->isConnectionInput(connectionId); }
 
 	// saved data
 	inline block_data_t getRawData() const { return data; }
@@ -67,8 +67,7 @@ protected:
 	inline void setPosition(const Position& position) { this->position = position; }
 	inline void setRotation(Rotation rotation) { this->rotation = rotation; }
 	inline void setId(block_id_t id) { blockId = id; }
-
-	inline Block(const BlockDataManager* blockDataManager, BlockType blockType) : blockType(blockType), connections(blockDataManager->getConnectionCount(blockType)), blockDataManager(blockDataManager) { }
+	inline Block(const BlockContainerBlockData* blockData, BlockType blockType) : blockType(blockType), connections(blockData->getConnectionCount()), blockData(blockData) { }
 
 	// const data
 	BlockType blockType;
@@ -76,7 +75,7 @@ protected:
 
 	// helpers
 	ConnectionContainer connections;
-	const BlockDataManager* blockDataManager;
+	const BlockContainerBlockData* blockData;
 
 	// changing data
 	Position position;
@@ -84,6 +83,6 @@ protected:
 	block_data_t data;
 };
 
-inline Block getBlockClass(const BlockDataManager* blockDataManager, BlockType type) { return Block(blockDataManager, type); }
+inline Block getBlockClass(const BlockContainerBlockData* blockData, BlockType type) { return Block(blockData, type); }
 
 #endif /* block_h */

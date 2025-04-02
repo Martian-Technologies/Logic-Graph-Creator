@@ -144,7 +144,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 			logError("Could not get block from parsed circuit while inserting block.");
 			break;
 		}
-		if (blockContainer.getBlockDataManager()->isConnectionInput(b->type, conn.outputId)) {
+		if (blockDataManager->isConnectionInput(b->type, conn.outputId)) {
 			// skip inputs
 			continue;
 		}
@@ -384,7 +384,7 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		return;
 	}
 	BlockType type = (BlockType)(data->getValue());
-	const BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(type);
+	const BlockData* blockData = blockDataManager->getBlockData(type);
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.resizeBlockType(type, blockData->getWidth(), blockData->getHeight(), difference.get());
 	sendDifference(difference);
