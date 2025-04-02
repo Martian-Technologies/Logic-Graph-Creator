@@ -57,9 +57,6 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	connect(keybindManager->createShortcut("Copy", this), &QShortcut::activated, this, [this]() {
 		circuitView->getEventRegister().doEvent(Event("Copy"));
 	});
-	connect(keybindManager->createShortcut("Paste", this), &QShortcut::activated, this, [this]() {
-		// circuitView->paste();
-	});
 	connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() {
 		circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW"));
 	});
@@ -68,9 +65,6 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	});
 	connect(keybindManager->createShortcut("Confirm", this), &QShortcut::activated, this, [this]() {
 		circuitView->getEventRegister().doEvent(Event("Confirm"));
-	});
-	connect(keybindManager->createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() {
-		// circuitView->toggleInteractive();
 	});
 	connect(keybindManager->createShortcut("MakeCircuitBlock", this), &QShortcut::activated, this, [this]() {
 		circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId());
