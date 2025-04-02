@@ -3,6 +3,7 @@
 #include <RmlUi/Core.h>
 
 #include "computerAPI/directoryManager.h"
+#include "gui/interaction/MenuTree.h"
 #include "gui/interaction/MenuTreeListener.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 
@@ -16,30 +17,34 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
+	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
+		//big compilation errors when this happens, I fix later!!!!
+	//MenuTree* toolTree = new MenuTree(document, toolTreeParent);
+
+		//manual DOM manipulation before I moved to MenuTree.cpp
 	// dynamically generate menutree
-	Rml::ElementPtr toolTree = document->CreateElement("div");
-	toolTree->SetClass("menutree", true);
-	toolTree->SetId("left-sidebar-menutree1");
+	// Rml::ElementPtr toolTree = document->CreateElement("div");
+	// toolTree->SetClass("menutree", true);
+	// toolTree->SetId("left-sidebar-menutree1");
 	
-	Rml::ElementPtr treeList = document->CreateElement("ul");
+	// Rml::ElementPtr treeList = document->CreateElement("ul");
 	
-	Rml::ElementPtr blockParent = document->CreateElement("li");
-	blockParent->SetClass("parent", true);
-	blockParent->SetInnerRML(">Blocks");
+	// Rml::ElementPtr blockParent = document->CreateElement("li");
+	// blockParent->SetClass("parent", true);
+	// blockParent->SetId("blocks-menu");
+	// blockParent->SetInnerRML(">Blocks");
 	
-	//once you append a child to a parent, you can't use that child's variable anymore (authority moved)
-	treeList->AppendChild(std::move(blockParent));
-	toolTree->AppendChild(std::move(treeList));
-	document->GetElementById("left-sidebar-container")->AppendChild(std::move(toolTree));
+	// //once you append a child to a parent, you can't use that child's variable anymore (authority moved)
+	// treeList->AppendChild(std::move(blockParent));
+	// toolTree->AppendChild(std::move(treeList));
+	// document->GetElementById("left-sidebar-container")->AppendChild(std::move(toolTree));
 
 	// set up event listeners
 	Rml::ElementList menuTreeItems;
 	
 	document->GetElementsByTagName(menuTreeItems, "li");
 	for (Rml::Element* element : menuTreeItems) {
-		if (element->GetClassNames().find("parent") != std::string::npos) {
-			element->AddEventListener("click", new MenuTreeListener());
-		}
+		element->AddEventListener("click", new MenuTreeListener());
 	}
 
 	// show rmlUi document

@@ -1,6 +1,6 @@
 #include "MenuTreeListener.h"
 
-#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core.h>
 
 MenuTreeListener::MenuTreeListener() {
     logInfo("Event Listener Created");
@@ -25,7 +25,7 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
       }
     }
   } else {
-    std::cout << target->GetInnerRML() << std::endl;
+    logInfo(target->GetInnerRML() + " Menu Clicked");
   }
 }
 
