@@ -4,7 +4,7 @@
 #include "gpu/vulkanInstance.h"
 #include "gui/sdl/sdlInstance.h"
 #include "gui/rml/rmlInstance.h"
-#include "gui/rml/RmlUi_Renderer_SDL.h"
+#include "gui/rml/rmlRenderInterface.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/window.h"
 
@@ -18,11 +18,10 @@ public:
 	void runLoop();
 	
 private:
-	// 
 	Backend backend;
     CircuitFileManager circuitFileManager;
 
-	RenderInterface_SDL rmlRenderInterface;
+	RmlRenderInterface rmlRenderInterface;
 	SystemInterface_SDL rmlSystemInterface;
 
 	VulkanInstance vulkan;

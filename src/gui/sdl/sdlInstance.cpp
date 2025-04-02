@@ -6,7 +6,7 @@ SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
 	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
 	{
-		throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
+		throwFatalError("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
 	}
 
 	// Submit click events when focusing the window.

@@ -11,8 +11,8 @@ public:
 	~SdlWindow();
 
 	bool isThisMyEvent(const SDL_Event& event);
+	VkSurfaceKHR createSurface(VkInstance instance);
 	
-	// temp
 	inline SDL_Window* getHandle() { return handle; }
 
 private:

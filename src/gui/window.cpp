@@ -7,12 +7,8 @@
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gpu/vulkanInstance.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
-	// create SDL renderer
-	sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
-	if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
-	SDL_SetRenderVSync(sdlRenderer, 1);
-
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
+	
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi, calm down janny
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainwindow.rml").string());
@@ -34,10 +30,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	document->Show();
 }
 
-Window::~Window() {
-	SDL_DestroyRenderer(sdlRenderer);
-}
-
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
@@ -52,12 +44,9 @@ void Window::update() {
 	rmlContext->Update();
 }
 
-void Window::render(RenderInterface_SDL& renderInterface) {	
-	renderInterface.BeginFrame(sdlRenderer);
+void Window::render(RmlRenderInterface& renderInterface) {	
+	renderInterface.pointToWindow(&renderer);
 	rmlContext->Render();
-	renderInterface.EndFrame();
-	
-	SDL_RenderPresent(sdlRenderer);
 }
 
 void Window::saveCircuit(circuit_id_t id, bool saveAs) {

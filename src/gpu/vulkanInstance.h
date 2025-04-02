@@ -14,6 +14,9 @@ public:
 	~VulkanInstance();
 
 	void ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting);
+
+public:
+	inline VkInstance& getInstance() { return instance.instance; }
 	
 private:
 	vkb::Instance instance;

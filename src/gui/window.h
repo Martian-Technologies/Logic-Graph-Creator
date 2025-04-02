@@ -3,10 +3,10 @@
 
 #include <RmlUi/Core.h>
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_render.h>
 
-#include "gui/rml/RmlUi_Renderer_SDL.h"
+#include "windowRenderer.h"
 #include "sdl/sdlWindow.h"
+#include "rml/rmlRenderInterface.h"
 
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
@@ -14,11 +14,10 @@
 class Window {
 public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
-	~Window();
 
 	bool recieveEvent(SDL_Event& event);
 	void update();
-	void render(RenderInterface_SDL& renderInterface);
+	void render(RmlRenderInterface& renderInterface);
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 
@@ -34,7 +33,7 @@ private:
 	CircuitFileManager* circuitFileManager;
 
 	SdlWindow sdlWindow;
-	SDL_Renderer* sdlRenderer;
+	WindowRenderer renderer;
 	 
 	Rml::Context* rmlContext;
 };
