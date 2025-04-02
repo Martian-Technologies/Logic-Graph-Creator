@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 
+#include "backend/circuit/circuit.h"
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuitView/circuitView.h"
 #include "circuitViewWidget.h"
@@ -47,6 +48,7 @@ CircuitViewWidget::CircuitViewWidget(QWidget* parent, Ui::CircuitViewUi* ui, Cir
 	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
+	connect(keybindManager->createShortcut("SaveAll", this), &QShortcut::activated, this, &CircuitViewWidget::saveAll);
 	connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
 	connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() {
 		circuitView->getCircuit()->undo();
@@ -312,11 +314,64 @@ void CircuitViewWidget::save() {
 	}
 }
 
+void CircuitViewWidget::saveAll() {
+    // Triggered by cmd+shift+s
+    // Currently holds all the different save options
+    if (!fileManager) return;
+    CircuitManager& cm = circuitView->getBackend()->getCircuitManager();
+    std::map<circuit_id_t, SharedCircuit>::iterator itr;
+
+    /*
+    logInfo("Saving all dependencies");
+    if (circuitView->getCircuit()) {
+        circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
+        fileManager->saveAllDependencies(circuitId);
+    }
+    */
+
+    /*
+    logInfo("Saving all circuits that have a save path");
+    for (itr=cm.begin(); itr != cm.end(); ++itr) {
+        fileManager->saveCircuit(itr->first);
+        // if we want, we can run fileManager->saveToFile just like in ::save()
+        // if this fails because the circuit has never been saved before, but for now this will only save
+        // circuits that have a declared path already and have been saved alone first, to avoid a ton of save popups
+    }
+    */
+
+    std::unordered_set<circuit_id_t> allCircuits;
+    allCircuits.reserve(cm.getCircuitCount());
+    for (itr=cm.begin(); itr != cm.end(); ++itr) {
+        allCircuits.insert(itr->first);
+    }
+    
+    /*
+    logInfo("Saving as new project");
+    // for now just add all circuits to the project
+    QString projectDir = QFileDialog::getSaveFileName(nullptr, "Create Project Directory", QDir::homePath(), "", nullptr, QFileDialog::ShowDirsOnly);
+    if (!projectDir.isEmpty()) {
+        QDir dir;
+        if (!dir.exists(projectDir)) {
+            dir.mkpath(projectDir);
+            logInfo("Project directory already exists at: {}", "", projectDir.toStdString());
+        }
+        fileManager->saveAsNewProject(allCircuits, projectDir.toStdString());
+    }
+    */
+
+    ///*
+    logInfo("Saving as single multi-circuit file");
+    // for now just add all circuits available to the multi-circuit
+    QString circuitFile = QFileDialog::getSaveFileName(nullptr, "Save Multi-Circuit File", QDir::homePath(), "Circuit Files (*.cir)");
+    fileManager->saveAsMultiCircuitFile(allCircuits, circuitFile.toStdString());
+    //*/
+}
+
 // for drag and drop load directly onto this circuit view widget
 void CircuitViewWidget::load(const QString& filePath) {
 	if (!fileManager) return;
 
-    if (!fileManager->loadFromFile(filePath.toStdString())) {
+    if (fileManager->loadFromFile(filePath.toStdString()).empty()) {
         QMessageBox::warning(this, "Error", "Failed to load circuit file.");
         logError("Failed to load circuit file.");
         return;
@@ -349,11 +404,11 @@ void CircuitViewWidget::dropEvent(QDropEvent* event) {
 			return;
 		}
 
-		circuit_id_t id = fileManager->loadFromFile(filePath.toStdString());
-		if (id == 0) {
+        const std::vector<circuit_id_t>& ids = fileManager->loadFromFile(filePath.toStdString());
+		if (ids.empty()) {
 			QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 			return;
 		}
-		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
+		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), ids[0]);
 	}
 }

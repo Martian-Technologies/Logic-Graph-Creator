@@ -77,9 +77,9 @@ private:
     Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()); // TODO: delete this because I think it is unused
 
-    std::string absoluteFilePath, relativeFilePath;
-    std::string uuid;
-    std::string name;
+    std::string absoluteFilePath = "";
+    std::string uuid = "";
+    std::string name = "";
 
     // If this represents a custom block:
     bool isCustomBlock;

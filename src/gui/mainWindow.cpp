@@ -27,6 +27,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	setWindowIcon(QIcon(iconPath));
 
 	// set default keybinds
+	keybindManager.setKeybind("SaveAll", "Ctrl+Shift+S");
 	keybindManager.setKeybind("Save", "Ctrl+S");
 	keybindManager.setKeybind("Undo", "Ctrl+Z");
 	keybindManager.setKeybind("Redo", "Ctrl+Y");
@@ -163,9 +164,8 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit() {
-	std::string filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
-	circuit_id_t id = circuitFileManager.loadFromFile(filePath);
-	if (id == 0) {
+	const std::string& filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
+	if (circuitFileManager.loadFromFile(filePath).empty()) {
 		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 		return;
 	}

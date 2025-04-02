@@ -29,6 +29,7 @@ public:
 	
 	void load(const QString& filePath);
 	void save();
+	void saveAll();
 
 protected:
 	// important events
