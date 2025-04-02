@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
 		
 	} catch (const std::exception& e) {
 		// Top level fatal error catcher, logs issue
-		logFatalError("{}", "", e.what());
+		logFatalError("Exiting Gatality because of fatal error: '{}'", "", e.what());
 		return EXIT_FAILURE;
 	}
 

@@ -35,5 +35,6 @@
 #include <iomanip>
 
 #include "logging/logging.h"
+#include "util/fatal.h"
 
 #endif /* LGC_PCH */

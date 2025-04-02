@@ -1,6 +1,7 @@
 #ifndef app_h
 #define app_h
 
+#include "gpu/vulkanInstance.h"
 #include "gui/sdl/sdlInstance.h"
 #include "gui/rml/rmlInstance.h"
 #include "gui/rml/RmlUi_Renderer_SDL.h"
@@ -23,7 +24,8 @@ private:
 
 	RenderInterface_SDL rmlRenderInterface;
 	SystemInterface_SDL rmlSystemInterface;
-	
+
+	VulkanInstance vulkan;
 	SdlInstance sdl;
 	RmlInstance rml;
 

@@ -57,6 +57,9 @@ add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM EXCLUDE_FROM_ALL)
 # VMA
 add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM EXCLUDE_FROM_ALL)
 
+# Vk Bootstrap
+add_subdirectory("${EXTERNAL_DIR}/vk-bootstrap" SYSTEM EXCLUDE_FROM_ALL)
+
 # GLM
 add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
 
@@ -91,6 +94,7 @@ endif()
 # Add executable
 set(EXTERNAL_LINKS
 	${Vulkan_LIBRARIES}
+	vk-bootstrap::vk-bootstrap
 	freetype
 	RmlUi::RmlUi
 	SDL3::SDL3

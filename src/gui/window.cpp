@@ -5,6 +5,7 @@
 #include "computerAPI/directoryManager.h"
 #include "gui/interaction/MenuTreeListener.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
+#include "gpu/vulkanInstance.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
 	// create SDL renderer
@@ -13,7 +14,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	SDL_SetRenderVSync(sdlRenderer, 1);
 
 	// create rmlUi context
-	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
+	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi, calm down janny
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainwindow.rml").string());
 
 	// set up event listeners
