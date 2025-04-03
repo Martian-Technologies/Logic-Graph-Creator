@@ -2,9 +2,9 @@
 #define windowRenderer_h
 
 #include <RmlUi/Core/RenderInterface.h>
-#include "gpu/vulkanInstance.h"
 
 #include "gui/sdl/sdlWindow.h"
+#include "gpu/renderer/vulkanSwapchain.h"
 
 class WindowRenderer {
 public:
@@ -25,15 +25,15 @@ public:
 	void SetScissorRegion(Rml::Rectanglei region);
 
 private:
-	void createSwapchain();
+	void createRenderPass();
 	
 private:
 	SdlWindow* sdlWindow;
 	VkDevice device;
 	
-	VkSurfaceKHR vkSurface;
-	vkb::Swapchain swapchain;
-	
+	VkSurfaceKHR surface;
+	VkRenderPass renderPass;
+	Swapchain* swapchain = nullptr; // this should be a smart pointer, but I don't want to write a move constructor right now
 };
 
 #endif

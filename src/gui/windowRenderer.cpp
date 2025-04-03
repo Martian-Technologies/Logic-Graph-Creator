@@ -4,24 +4,62 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
 
-	vkSurface = sdlWindow->createVkSurface(VulkanInstance::get().getInstance());
-	VulkanInstance::get().ensureDeviceCreation(vkSurface);
+	surface = sdlWindow->createVkSurface(VulkanInstance::get().getInstance());
+	VulkanInstance::get().ensureDeviceCreation(surface);
 	device = VulkanInstance::get().getDevice();
 
-	createSwapchain();
+	// set up swapchain
+	swapchain = new Swapchain(surface);
+	createRenderPass();
+	swapchain->createFramebuffers(renderPass);
 }
 
 WindowRenderer::~WindowRenderer() {
-	vkb::destroy_swapchain(swapchain);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+	delete swapchain;
 }
 
-void WindowRenderer::createSwapchain() {
-	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), vkSurface);
-	auto swapchainRet = swapchainBuilder.build();
-	if (!swapchainRet) { throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message()); }
-	swapchain = swapchainRet.value();
+void WindowRenderer::createRenderPass() {
+	// render pass
+	VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	// subpass
+	VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+	// subpass dependency
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	// create pass
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+	
+	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
+	}
 }
-
 
 // -- Rml::RenderInterface --
 
