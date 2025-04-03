@@ -1,13 +1,25 @@
 #include "windowRenderer.h"
 
-#include "gpu/vulkanInstance.h"
-
-WindowRenderer::WindowRenderer(SdlWindow* sdlWindow) {
+WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
+	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
 
-	this->sdlWindow = sdlWindow;
-	vkSurface = sdlWindow->createSurface(VulkanInstance::get().getInstance());
+	vkSurface = sdlWindow->createVkSurface(VulkanInstance::get().getInstance());
 	VulkanInstance::get().ensureDeviceCreation(vkSurface);
+	device = VulkanInstance::get().getDevice();
+
+	createSwapchain();
+}
+
+WindowRenderer::~WindowRenderer() {
+	vkb::destroy_swapchain(swapchain);
+}
+
+void WindowRenderer::createSwapchain() {
+	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), vkSurface);
+	auto swapchainRet = swapchainBuilder.build();
+	if (!swapchainRet) { throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message()); }
+	swapchain = swapchainRet.value();
 }
 
 

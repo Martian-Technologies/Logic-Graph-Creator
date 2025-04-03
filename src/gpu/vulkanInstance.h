@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 #include <VkBootstrap.h>
+#include <vk_mem_alloc.h>
 
 class VulkanInstance {
 private:
@@ -17,10 +18,17 @@ public:
 
 public:
 	inline VkInstance& getInstance() { return instance.instance; }
+	inline vkb::Device& getVkbDevice() { return device.value(); }
+	inline VkDevice& getDevice() { return device.value().device; }
+
+private:
+	void createAllocator();
 	
 private:
 	vkb::Instance instance;
+	std::optional<VkPhysicalDevice> physicalDevice;
 	std::optional<vkb::Device> device;
+	std::optional<VmaAllocator> allocator;
 };
 
 #endif

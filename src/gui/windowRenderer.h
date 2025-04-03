@@ -2,12 +2,14 @@
 #define windowRenderer_h
 
 #include <RmlUi/Core/RenderInterface.h>
+#include "gpu/vulkanInstance.h"
 
 #include "gui/sdl/sdlWindow.h"
 
 class WindowRenderer {
 public:
 	WindowRenderer(SdlWindow* sdlWindow);
+	~WindowRenderer();
 	
 public:
 	// -- Rml::RenderInterface --
@@ -23,8 +25,15 @@ public:
 	void SetScissorRegion(Rml::Rectanglei region);
 
 private:
+	void createSwapchain();
+	
+private:
 	SdlWindow* sdlWindow;
+	VkDevice device;
+	
 	VkSurfaceKHR vkSurface;
+	vkb::Swapchain swapchain;
+	
 };
 
 #endif

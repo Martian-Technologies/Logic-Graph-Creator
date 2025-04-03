@@ -11,13 +11,17 @@ public:
 	~SdlWindow();
 
 	bool isThisMyEvent(const SDL_Event& event);
-	VkSurfaceKHR createSurface(VkInstance instance);
+	VkSurfaceKHR createVkSurface(VkInstance instance);
 	
 	inline SDL_Window* getHandle() { return handle; }
 
 private:
 	// TODO - smart pointer with custom deleter?
 	SDL_Window* handle;
+
+	// Vulkan stuff
+	VkInstance vkInstance;
+	std::optional<VkSurfaceKHR> vkSurface;
 };
 
 #endif

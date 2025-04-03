@@ -19,9 +19,6 @@
 [submodule "freetype"]
 	path = external/freetype
 	url = https://github.com/libsdl-org/freetype.git
-[submodule "SDL_image"]
-	path = external/SDL_image
-	url = https://github.com/libsdl-org/SDL_image.git
 [submodule "vk-bootstrap"]
 	path = external/vk-bootstrap
 	url = https://github.com/charles-lunarg/vk-bootstrap.git

@@ -41,6 +41,7 @@ VulkanInstance::VulkanInstance() {
 VulkanInstance::~VulkanInstance() {
 	logInfo("Shutting down Vulkan..", "Vulkan");
 
+	if (allocator.has_value()) vmaDestroyAllocator(allocator.value());
 	if (device.has_value()) vkb::destroy_device(device.value());
 	vkb::destroy_instance(instance);
 }
@@ -54,13 +55,28 @@ void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
 		physicalDeviceSelector.set_surface(surfaceForPresenting);
 		auto physicalDeviceRet = physicalDeviceSelector.select();
 		if (!physicalDeviceRet) { throwFatalError("Could not select Vulkan physical device. Error: " + physicalDeviceRet.error().message()); }
+		physicalDevice = physicalDeviceRet.value().physical_device;
 
 		// Build device
 		vkb::DeviceBuilder deviceBuilder(physicalDeviceRet.value());
 		auto deviceRet = deviceBuilder.build();
 		if (!deviceRet) { throwFatalError("Could not create Vulkan device. Error: " + deviceRet.error().message()); }
 		device = deviceRet.value();
+
+		// Create vma allocator
+		createAllocator();
 	}
+}
+
+void VulkanInstance::createAllocator() {
+	VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = physicalDevice.value();
+    allocatorInfo.device = device.value().device;
+    allocatorInfo.instance = instance;
+	
+	VmaAllocator alloc;
+    if (vmaCreateAllocator(&allocatorInfo, &alloc) != VK_SUCCESS) { throwFatalError("Could not create Vulkan VMA allocator.");}
+	allocator = alloc;
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
