@@ -66,7 +66,9 @@ void UndoTree::prune(const iterator& begin) {
 }
 
 UndoTree::iterator UndoTree::begin() {
-    return iterator(mainBranch, mainBranch->nodes.size() - 1);
+    if (mainBranch->nodes.empty()) {
+        return end();
+    } else return iterator(mainBranch, 0);
 }
 
 UndoTree::iterator UndoTree::end() {
