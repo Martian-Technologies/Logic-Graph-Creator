@@ -6,7 +6,7 @@
 
 #include "gpu/renderer/vulkanFrame.h"
 #include "gui/sdl/sdlWindow.h"
-#include "gpu/renderer/vulkanSwapchain.h"
+#include "gpu/renderer/OLDvulkanSwapchain.h"
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 

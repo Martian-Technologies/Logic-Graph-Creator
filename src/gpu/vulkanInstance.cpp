@@ -15,18 +15,20 @@ VulkanInstance::VulkanInstance() {
 	singleton = this;
 
 	// Start creating vulkan instance
-	vkb::InstanceBuilder instanceBuilder;
+	vkb::InstanceBuilder instanceBuilder(vkGetInstanceProcAddr);
 	
 	// Get Vulkan system information
-	auto systemInfoRet = vkb::SystemInfo::get_system_info();
+	auto systemInfoRet = vkb::SystemInfo::get_system_info(vkGetInstanceProcAddr);
 	if (!systemInfoRet) { throwFatalError("Could not fetch Vulkan system info. Error: " + systemInfoRet.error().message()); }
 	auto systemInfo = systemInfoRet.value();
 
 #ifdef DEBUG
-	// Enable validation layers
-	if (systemInfo.validation_layers_available){
-		instanceBuilder.enable_validation_layers().set_debug_callback(&vulkanDebugCallback);
-	}
+	#if not __APPLE__
+		// Enable validation layers
+		if (systemInfo.validation_layers_available){
+			instanceBuilder.enable_validation_layers().set_debug_callback(&vulkanDebugCallback);
+		}
+	#endif
 #endif
 	
 	// Create Vulkan Instance
