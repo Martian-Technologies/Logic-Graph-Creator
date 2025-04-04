@@ -26,8 +26,10 @@
  *
  */
 
-#ifndef RMLUI_BACKENDS_PLATFORM_SDL_H
-#define RMLUI_BACKENDS_PLATFORM_SDL_H
+// ^^^^^^^^^^^^^^ <----- It's ours now
+
+#ifndef rmlSystemInterface_h
+#define rmlSystemInterface_h
 
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/SystemInterface.h>
@@ -35,10 +37,10 @@
 
 #include <SDL3/SDL.h>
 
-class SystemInterface_SDL : public Rml::SystemInterface {
+class RmlSystemInterface : public Rml::SystemInterface {
 public:
-	SystemInterface_SDL();
-	~SystemInterface_SDL();
+	RmlSystemInterface();
+	~RmlSystemInterface();
 
 	// Optionally, provide or change the window to be used for setting the mouse cursors.
 	void SetWindow(SDL_Window* window);
@@ -48,6 +50,8 @@ public:
 	double GetElapsedTime() override;
 
 	void SetMouseCursor(const Rml::String& cursor_name) override;
+
+	bool LogMessage(Rml::Log::Type type, const Rml::String& message) override;
 
 	void SetClipboardText(const Rml::String& text) override;
 	void GetClipboardText(Rml::String& text) override;

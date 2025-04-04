@@ -4,7 +4,7 @@
 
 #include "computerAPI/directoryManager.h"
 #include "gui/interaction/MenuTreeListener.h"
-#include "gui/rml/RmlUi_Platform_SDL.h"
+#include "gui/rml/rmlSystemInterface.h"
 #include "gpu/vulkanInstance.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {

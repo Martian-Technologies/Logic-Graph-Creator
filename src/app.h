@@ -5,7 +5,7 @@
 #include "gui/sdl/sdlInstance.h"
 #include "gui/rml/rmlInstance.h"
 #include "gui/rml/rmlRenderInterface.h"
-#include "gui/rml/RmlUi_Platform_SDL.h"
+#include "gui/rml/rmlSystemInterface.h"
 #include "gui/window.h"
 
 #include "backend/backend.h"
@@ -22,7 +22,7 @@ private:
     CircuitFileManager circuitFileManager;
 
 	RmlRenderInterface rmlRenderInterface;
-	SystemInterface_SDL rmlSystemInterface;
+	RmlSystemInterface rmlSystemInterface;
 
 	VulkanInstance vulkan;
 	SdlInstance sdl;

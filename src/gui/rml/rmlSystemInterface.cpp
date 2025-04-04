@@ -26,13 +26,13 @@
  *
  */
 
-#include "RmlUi_Platform_SDL.h"
+#include "rmlSystemInterface.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
 #include <RmlUi/Core/SystemInterface.h>
 
-SystemInterface_SDL::SystemInterface_SDL()
+RmlSystemInterface::RmlSystemInterface()
 {
 #if SDL_MAJOR_VERSION >= 3
 	cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
@@ -53,7 +53,7 @@ SystemInterface_SDL::SystemInterface_SDL()
 #endif
 }
 
-SystemInterface_SDL::~SystemInterface_SDL()
+RmlSystemInterface::~RmlSystemInterface()
 {
 #if SDL_MAJOR_VERSION >= 3
 	auto DestroyCursor = [](SDL_Cursor* cursor) { SDL_DestroyCursor(cursor); };
@@ -70,19 +70,19 @@ SystemInterface_SDL::~SystemInterface_SDL()
 	DestroyCursor(cursor_unavailable);
 }
 
-void SystemInterface_SDL::SetWindow(SDL_Window* in_window)
+void RmlSystemInterface::SetWindow(SDL_Window* in_window)
 {
 	window = in_window;
 }
 
-double SystemInterface_SDL::GetElapsedTime()
+double RmlSystemInterface::GetElapsedTime()
 {
 	static const Uint64 start = SDL_GetPerformanceCounter();
 	static const double frequency = double(SDL_GetPerformanceFrequency());
 	return double(SDL_GetPerformanceCounter() - start) / frequency;
 }
 
-void SystemInterface_SDL::SetMouseCursor(const Rml::String& cursor_name)
+void RmlSystemInterface::SetMouseCursor(const Rml::String& cursor_name)
 {
 	SDL_Cursor* cursor = nullptr;
 
@@ -107,19 +107,41 @@ void SystemInterface_SDL::SetMouseCursor(const Rml::String& cursor_name)
 		SDL_SetCursor(cursor);
 }
 
-void SystemInterface_SDL::SetClipboardText(const Rml::String& text)
+bool RmlSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& message) {
+	switch (type) {
+	case Rml::Log::Type::LT_INFO: {
+		logInfo(message, "RmlUi");
+		break;
+	}
+	case Rml::Log::Type::LT_ERROR: {
+		logError(message, "RmlUi");
+		break;
+	}
+	case Rml::Log::Type::LT_WARNING: {
+		logWarning(message, "RmlUi");
+		break;
+	}
+	default: {
+		logInfo(message, "RmlUi - MISC");
+	}
+	}
+	
+	return true;
+}
+
+void RmlSystemInterface::SetClipboardText(const Rml::String& text)
 {
 	SDL_SetClipboardText(text.c_str());
 }
 
-void SystemInterface_SDL::GetClipboardText(Rml::String& text)
+void RmlSystemInterface::GetClipboardText(Rml::String& text)
 {
 	char* raw_text = SDL_GetClipboardText();
 	text = Rml::String(raw_text);
 	SDL_free(raw_text);
 }
 
-void SystemInterface_SDL::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
+void RmlSystemInterface::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
 {
 	if (window)
 	{
@@ -135,7 +157,7 @@ void SystemInterface_SDL::ActivateKeyboard(Rml::Vector2f caret_position, float l
 	}
 }
 
-void SystemInterface_SDL::DeactivateKeyboard()
+void RmlSystemInterface::DeactivateKeyboard()
 {
 	if (window)
 	{
