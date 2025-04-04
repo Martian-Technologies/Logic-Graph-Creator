@@ -9,9 +9,13 @@ public:
 	~Swapchain();
 
 	void createFramebuffers(VkRenderPass renderPass);
-	void recreate(std::pair<uint32_t, uint32_t> size);
+	void recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size);
 
 	inline vkb::Swapchain& getVkbSwapchain() { return swapchain; }
+
+private:
+	void createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld);
+	void destroyExtraShit();
 	
 private:
 	vkb::Swapchain swapchain;

@@ -15,6 +15,8 @@ public:
 	WindowRenderer(SdlWindow* sdlWindow);
 	~WindowRenderer();
 
+	void resize(std::pair<uint32_t, uint32_t> windowSize);
+	
 	void prepareForRml();
 	void endRml();
 	
@@ -33,15 +35,17 @@ public:
 
 private:
 	void createRenderPass();
+	void recreateSwapchain();
 	
 private:
 	SdlWindow* sdlWindow;
 	VkDevice device;
-	bool running = false;
+	std::atomic<bool> running = false;
 	
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
-	Swapchain* swapchain = nullptr; // this should be a smart pointer, but I don't want to write a move constructor right nown
+	Swapchain* swapchain = nullptr; // this should be a smart pointer, but I don't want to write a move constructor right now
+	std::atomic<bool> swapchainRecreationNeeded = false;
 
 	// size
 	std::pair<uint32_t, uint32_t> windowSize;

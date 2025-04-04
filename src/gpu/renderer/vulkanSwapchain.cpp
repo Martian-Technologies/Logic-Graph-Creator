@@ -1,25 +1,42 @@
 #include "vulkanSwapchain.h"
 
 Swapchain::Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
+	createSwapchain(surface, size, false);
+}
+
+Swapchain::~Swapchain() {
+	destroyExtraShit();
+	vkb::destroy_swapchain(swapchain);
+}
+
+void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld) {
 	// Create swapchain
 	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), surface);
 	swapchainBuilder.set_desired_extent(size.first, size.second);
+	if (useOld) swapchainBuilder.set_old_swapchain(swapchain);
+	
 	auto swapchainRet = swapchainBuilder.build();
 	if (!swapchainRet) { throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message()); }
+	if (useOld) vkb::destroy_swapchain(swapchain);
 	swapchain = swapchainRet.value();
 
 	// Get image views
-	auto imageViewRet =  swapchain.get_image_views();
+	auto imageViewRet = swapchain.get_image_views();
 	if (!imageViewRet) { throwFatalError("Could not get vulkan swapchain image views. Error: " + imageViewRet.error().message()); }
 	imageViews = imageViewRet.value();
 }
 
-Swapchain::~Swapchain() {
+void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
+	destroyExtraShit();
+	createSwapchain(surface, size, true);
+}
+
+void Swapchain::destroyExtraShit() {
 	for (VkFramebuffer framebuffer : framebuffers) {
         vkDestroyFramebuffer(VulkanInstance::get().getDevice(), framebuffer, nullptr);
     }
+	framebuffers.clear();
 	swapchain.destroy_image_views(imageViews);
-	vkb::destroy_swapchain(swapchain);
 }
 
 void Swapchain::createFramebuffers(VkRenderPass renderPass) {
@@ -43,9 +60,5 @@ void Swapchain::createFramebuffers(VkRenderPass renderPass) {
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
-}
-
-void Swapchain::recreate(std::pair<uint32_t, uint32_t> size) {
-	
 }
 

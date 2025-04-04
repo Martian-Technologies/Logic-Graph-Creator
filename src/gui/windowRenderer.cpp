@@ -34,6 +34,14 @@ WindowRenderer::~WindowRenderer() {
 	delete swapchain;
 }
 
+void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
+	std::lock_guard<std::mutex> lock(windowSizeMux);
+
+	this->windowSize = windowSize;
+
+	swapchainRecreationNeeded = true;
+}
+
 void WindowRenderer::prepareForRml() {
 	
 }
@@ -173,6 +181,17 @@ void WindowRenderer::createRenderPass() {
 	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
+}
+
+void WindowRenderer::recreateSwapchain() {
+	vkDeviceWaitIdle(device);
+	
+	std::lock_guard<std::mutex> lock(windowSizeMux);
+
+	swapchain->recreate(surface, windowSize);
+	swapchain->createFramebuffers(renderPass);
+	
+	swapchainRecreationNeeded = false;
 }
 
 // -- Rml::RenderInterface --
