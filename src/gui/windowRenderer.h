@@ -36,6 +36,7 @@ public:
 private:
 	void createRenderPass();
 	void recreateSwapchain();
+	void recordCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);
 	
 private:
 	SdlWindow* sdlWindow;

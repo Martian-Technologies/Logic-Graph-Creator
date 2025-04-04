@@ -51,15 +51,14 @@ void WindowRenderer::endRml() {
 
 void WindowRenderer::renderLoop() {
 	while(running) {
-		/*
 		VulkanFrameData& frame = getCurrentFrame();
 
 		// wait for frame completion
 		frame.waitAndComplete();
-
+		
 		// recreate swapchain if needed
 		if (swapchainRecreationNeeded) {
-			swapchain->recreate();
+			recreateSwapchain();
 			continue;
 		}
 
@@ -77,7 +76,7 @@ void WindowRenderer::renderLoop() {
 			continue;
 		}
 		
-		// tell frame that it is started
+		// tell frame that it has started
 		frame.start();
 
 		// get queues
@@ -110,7 +109,7 @@ void WindowRenderer::renderLoop() {
 
 		// submit to queue
 		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.getRenderFence()) != VK_SUCCESS) {
-			throw std::runtime_error("failed to submit draw command buffer!");
+			throwFatalError("failed to submit draw command buffer!");
 		}
 		
 		// present
@@ -125,21 +124,52 @@ void WindowRenderer::renderLoop() {
 		presentInfo.pResults = nullptr; // unused
 
 		VkResult imagePresentResult = vkQueuePresentKHR(presentQueue, &presentInfo);
-		if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
+		if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imagePresentResult == VK_SUBOPTIMAL_KHR) {
 			swapchainRecreationNeeded = true;
 		} else if (imagePresentResult != VK_SUCCESS) {
 			logError("failed to present swap chain image!");
-			break;
 		}
 
 		//increase the number of frames drawn
 		++frameNumber;
-		*/
 	}
 
 	vkDeviceWaitIdle(device);
 }
 
+void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
+	// start recording
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0; // Optional
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+	if (vkBeginCommandBuffer(frame.getMainCommandBuffer(), &beginInfo) != VK_SUCCESS) {
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	// begin render pass
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
+
+	VkClearValue clearColor = {0.93f, 0.93f, 0.93f, 1.0f};
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+	
+	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// do actual rendering...
+	
+
+	// end render pass
+	vkCmdEndRenderPass(frame.getMainCommandBuffer());
+	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
+}
 
 void WindowRenderer::createRenderPass() {
 	// render pass

@@ -215,7 +215,7 @@ void VulkanRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 	// render all renderers
 	chunkRenderer.render(frame, swapchain.extent, dynamicData.viewMat, dynamicData.viewBounds);
 
-	// end
+	// end render pass
 	vkCmdEndRenderPass(frame.getMainCommandBuffer());
 	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");

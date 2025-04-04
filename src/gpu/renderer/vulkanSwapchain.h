@@ -12,6 +12,7 @@ public:
 	void recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size);
 
 	inline vkb::Swapchain& getVkbSwapchain() { return swapchain; }
+	inline std::vector<VkFramebuffer>& getFramebuffers() { return framebuffers; }
 
 private:
 	void createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld);

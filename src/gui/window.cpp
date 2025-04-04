@@ -33,6 +33,13 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
+
+		// let renderer know we if resized the window
+		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+			renderer.resize({event.window.data1, event.window.data2});
+		}
+		
+		// send event to RML
 		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);
 		
 		return true;
