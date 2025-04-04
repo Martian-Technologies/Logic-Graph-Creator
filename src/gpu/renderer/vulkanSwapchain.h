@@ -16,7 +16,7 @@ public:
 
 private:
 	void createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld);
-	void destroyExtraShit();
+	void destroyFramebuffers();
 	
 private:
 	vkb::Swapchain swapchain;

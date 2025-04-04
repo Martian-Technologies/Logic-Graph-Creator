@@ -5,7 +5,7 @@ Swapchain::Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
 }
 
 Swapchain::~Swapchain() {
-	destroyExtraShit();
+	destroyFramebuffers();
 	vkb::destroy_swapchain(swapchain);
 }
 
@@ -27,11 +27,12 @@ void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32
 }
 
 void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
-	destroyExtraShit();
+	destroyFramebuffers();
 	createSwapchain(surface, size, true);
 }
 
-void Swapchain::destroyExtraShit() {
+// Destroy Frame buffers and image views
+void Swapchain::destroyFramebuffers() {
 	for (VkFramebuffer framebuffer : framebuffers) {
         vkDestroyFramebuffer(VulkanInstance::get().getDevice(), framebuffer, nullptr);
     }
@@ -39,11 +40,12 @@ void Swapchain::destroyExtraShit() {
 	swapchain.destroy_image_views(imageViews);
 }
 
-void Swapchain::createFramebuffers(VkRenderPass renderPass) {
+// Create and initialize framebuffers for use with the swapchain
+void Swapchain::createFramebuffers(const VkRenderPass renderPass) {
 	framebuffers.resize(swapchain.image_count);
 
 	for (size_t i = 0; i < swapchain.image_count; i++) {
-		VkImageView attachments[] = {
+		const VkImageView attachments[] = {
 			imageViews[i]
 		};
 
