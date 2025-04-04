@@ -14,6 +14,7 @@
 class Window {
 public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
+	~Window();
 
 	bool recieveEvent(SDL_Event& event);
 	void updateRml(RmlRenderInterface& renderInterface);

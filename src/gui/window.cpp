@@ -30,6 +30,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	document->Show();
 }
 
+Window::~Window() {
+	Rml::RemoveContext(rmlContext->GetName());
+	rmlContext = nullptr;
+}
+
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
