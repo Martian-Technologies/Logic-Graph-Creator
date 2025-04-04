@@ -11,8 +11,8 @@ public:
 		FileData(const std::string& fileLocation) : fileLocation(fileLocation) {}
 		FileData(const FileData&) = delete;
 		FileData& operator==(const FileData&) = delete;
-		unsigned long long lastSaved = 0;
 		std::string fileLocation;
+        std::unordered_map<circuit_id_t, unsigned long long> circuitLastSaved;
 		std::unordered_set<circuit_id_t> circuitIds;
 	};
 

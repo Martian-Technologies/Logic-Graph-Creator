@@ -47,12 +47,13 @@ bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
 
     FileData& fd = filePathToFile.at(iter->second);
     unsigned long long currentEditCount = circuitManager->getCircuit(circuitId)->getEditCount();
-    if (fd.lastSaved >= currentEditCount) {
+    unsigned long long lastSaved = fd.circuitLastSaved.at(circuitId);
+    if (lastSaved >= currentEditCount) {
 		logInfo("No changes to save ({})", "CircuitFileManager", iter->second);
         return true;
     }
 
-    fd.lastSaved = currentEditCount;
+    fd.circuitLastSaved[circuitId] = currentEditCount;
 
 	GatalityParser saver(this, circuitManager);
 	if (saver.save(fd)) {
@@ -127,7 +128,7 @@ void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::s
 		if (iter->second.circuitIds.contains(circuitId)) return;
 	}
 	iter->second.circuitIds.emplace(circuitId);
-    iter->second.lastSaved = circuitManager->getCircuit(circuitId)->getEditCount();
+    iter->second.circuitLastSaved[circuitId] = circuitManager->getCircuit(circuitId)->getEditCount();
 	
     std::map<circuit_id_t, std::string>::iterator iter2 = circuitIdToFilePath.find(circuitId);
 	if (iter2 != circuitIdToFilePath.end()) {
