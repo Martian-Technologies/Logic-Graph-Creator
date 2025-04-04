@@ -4,7 +4,7 @@
 #include "backend/circuitView/renderer/renderer.h"
 
 #include "vulkanChunkRenderer.h"
-#include "vulkanSwapChain.h"
+#include "oldVulkanSwapchain.h"
 #include "vulkanFrame.h"
 
 #include <glm/mat4x4.hpp>

@@ -1,23 +1,27 @@
-#ifndef vulkanSwapChain_h
-#define vulkanSwapChain_h
+#ifndef vulkanSwapchain_h
+#define vulkanSwapchain_h
 
-#include <vulkan/vulkan.h>
+#include "gpu/vulkanInstance.h"
 
-struct SwapchainData {
-	VkSwapchainKHR handle;
-	VkFormat imageFormat;
-	VkExtent2D extent;
-	std::vector<VkImage> images;
-	std::vector<VkImageView> imageViews;
+class Swapchain {
+public:
+	Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size);
+	~Swapchain();
+
+	void createFramebuffers(VkRenderPass renderPass);
+	void recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size);
+
+	inline vkb::Swapchain& getVkbSwapchain() { return swapchain; }
+	inline std::vector<VkFramebuffer>& getFramebuffers() { return framebuffers; }
+
+private:
+	void createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld);
+	void destroyExtraShit();
+	
+private:
+	vkb::Swapchain swapchain;
 	std::vector<VkFramebuffer> framebuffers;
+	std::vector<VkImageView> imageViews;
 };
-
-SwapchainData createSwapchain(VkSurfaceKHR surface, int windowWidth, int windowHeight);
-void createSwapchainFramebuffers(SwapchainData& swapchain, VkRenderPass renderPass);
-void destroySwapchain(SwapchainData& swapchain);
-
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, int realWidth, int realHeight);
 
 #endif
