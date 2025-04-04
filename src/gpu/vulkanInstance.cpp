@@ -63,6 +63,12 @@ void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
 		if (!deviceRet) { throwFatalError("Could not create Vulkan device. Error: " + deviceRet.error().message()); }
 		device = deviceRet.value();
 
+		// Get queues
+		graphicsQueue = { device->get_queue(vkb::QueueType::graphics).value(),
+			device->get_queue_index(vkb::QueueType::graphics).value() };
+		presentQueue = { device->get_queue(vkb::QueueType::present).value(),
+			device->get_queue_index(vkb::QueueType::present).value() };
+
 		// Create vma allocator
 		createAllocator();
 	}

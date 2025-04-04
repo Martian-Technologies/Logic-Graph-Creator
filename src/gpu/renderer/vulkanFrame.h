@@ -33,7 +33,4 @@ private:
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunkAllocations;
 };
 
-void createFrameDatas(VulkanFrameData *frameDatas, unsigned int numFrames);
-void destroyFrameDatas(VulkanFrameData* frameDatas, unsigned int numFrames);
-
 #endif

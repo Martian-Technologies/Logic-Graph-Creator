@@ -3,6 +3,7 @@
 
 #include <RmlUi/Core/RenderInterface.h>
 
+#include "gpu/renderer/vulkanFrame.h"
 #include "gui/sdl/sdlWindow.h"
 #include "gpu/renderer/vulkanSwapchain.h"
 
@@ -34,6 +35,7 @@ private:
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
 	Swapchain* swapchain = nullptr; // this should be a smart pointer, but I don't want to write a move constructor right now
+	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)
 };
 
 #endif

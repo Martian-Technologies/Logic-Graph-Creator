@@ -12,6 +12,9 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	swapchain = new Swapchain(surface);
 	createRenderPass();
 	swapchain->createFramebuffers(renderPass);
+
+	// set up frames
+	frames.resize(2);
 }
 
 WindowRenderer::~WindowRenderer() {
