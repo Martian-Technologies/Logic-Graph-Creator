@@ -1,12 +1,15 @@
 #include "app.h"
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
-	windows.emplace_back(&backend, &circuitFileManager);
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), windows{Window(&backend, &circuitFileManager)} {
+	
 }
 
 void App::runLoop() {
 	running = true;
 	while (running) {
+		// Wait for the next event (so we don't overload the cpu)
+		SDL_WaitEvent(nullptr);
+		
 		// process events (TODO - should probably just have a map of window ids to windows)
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -21,7 +24,7 @@ void App::runLoop() {
 				auto itr = windows.begin();
 				while (itr != windows.end()) {	
 					if (itr->recieveEvent(event)) {
-						windows.erase(itr);
+						// windows.erase(itr); TEMP while windows is immutable
 						break;
 					}
 					++itr;
@@ -48,10 +51,9 @@ void App::runLoop() {
 			}
 		}
 
-		// tell all windows to render
+		// tell all windows to update rml
 		for (Window& window : windows) {
-			window.update();
-			window.render(rmlRenderInterface);
+			window.updateRml(rmlRenderInterface);
 		}
 	}
 }

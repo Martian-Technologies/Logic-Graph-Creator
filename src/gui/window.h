@@ -16,8 +16,7 @@ public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
 
 	bool recieveEvent(SDL_Event& event);
-	void update();
-	void render(RmlRenderInterface& renderInterface);
+	void updateRml(RmlRenderInterface& renderInterface);
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 

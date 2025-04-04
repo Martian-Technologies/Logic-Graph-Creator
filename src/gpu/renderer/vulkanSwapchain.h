@@ -5,11 +5,11 @@
 
 class Swapchain {
 public:
-	Swapchain(VkSurfaceKHR surface);
+	Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size);
 	~Swapchain();
 
 	void createFramebuffers(VkRenderPass renderPass);
-	void recreate();
+	void recreate(std::pair<uint32_t, uint32_t> size);
 
 	inline vkb::Swapchain& getVkbSwapchain() { return swapchain; }
 	

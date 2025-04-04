@@ -20,6 +20,12 @@ bool SdlWindow::isThisMyEvent(const SDL_Event& event) {
 	return SDL_GetWindowFromEvent(&event) == handle;
 }
 
+std::pair<uint32_t, uint32_t> SdlWindow::getSize() {
+	int w, h;
+	SDL_GetWindowSize(handle, &w, &h);
+	return { w, h };
+}
+
 VkSurfaceKHR SdlWindow::createVkSurface(VkInstance instance) {
 	if (vkSurface.has_value()) return vkSurface.value();
 	

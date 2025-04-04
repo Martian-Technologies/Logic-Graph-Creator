@@ -1,8 +1,9 @@
 #include "vulkanSwapchain.h"
 
-Swapchain::Swapchain(VkSurfaceKHR surface) {
+Swapchain::Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
 	// Create swapchain
 	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), surface);
+	swapchainBuilder.set_desired_extent(size.first, size.second);
 	auto swapchainRet = swapchainBuilder.build();
 	if (!swapchainRet) { throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message()); }
 	swapchain = swapchainRet.value();
@@ -44,7 +45,7 @@ void Swapchain::createFramebuffers(VkRenderPass renderPass) {
 	}
 }
 
-void Swapchain::recreate() {
+void Swapchain::recreate(std::pair<uint32_t, uint32_t> size) {
 	
 }
 

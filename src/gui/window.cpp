@@ -40,13 +40,13 @@ bool Window::recieveEvent(SDL_Event& event) {
 	return false;
 }
 
-void Window::update() {
+void Window::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
-}
-
-void Window::render(RmlRenderInterface& renderInterface) {	
+	
+	renderer.prepareForRml();
 	renderInterface.pointToWindow(&renderer);
 	rmlContext->Render();
+	renderer.endRml();
 }
 
 void Window::saveCircuit(circuit_id_t id, bool saveAs) {
