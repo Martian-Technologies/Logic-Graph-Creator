@@ -123,9 +123,8 @@ public:
 	}
 
 	inline connection_end_id_t getConnectionCount(BlockType type) const noexcept {
-		auto iter = blockData.find(type);
-		if (iter == blockData.end()) return 0;
-		return iter->second.getConnectionCount();
+		if (!blockExists(type)) return 0;
+		return blockData[type-1].getConnectionCount();
 	}
 	inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
