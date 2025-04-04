@@ -17,27 +17,19 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
-	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
-		//big compilation errors when this happens, I fix later!!!!
-	//MenuTree* toolTree = new MenuTree(document, toolTreeParent);
+	// show rmlUi document
+	document->Show();
 
-		//manual DOM manipulation before I moved to MenuTree.cpp
-	// dynamically generate menutree
-	// Rml::ElementPtr toolTree = document->CreateElement("div");
-	// toolTree->SetClass("menutree", true);
-	// toolTree->SetId("left-sidebar-menutree1");
-	
-	// Rml::ElementPtr treeList = document->CreateElement("ul");
-	
-	// Rml::ElementPtr blockParent = document->CreateElement("li");
-	// blockParent->SetClass("parent", true);
-	// blockParent->SetId("blocks-menu");
-	// blockParent->SetInnerRML(">Blocks");
-	
-	// //once you append a child to a parent, you can't use that child's variable anymore (authority moved)
-	// treeList->AppendChild(std::move(blockParent));
-	// toolTree->AppendChild(std::move(treeList));
-	// document->GetElementById("left-sidebar-container")->AppendChild(std::move(toolTree));
+	//dynamically generating blocks/tools menutree
+	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
+	MenuTree* toolTree = new MenuTree(document, toolTreeParent);
+	toolTree->addPath({"Blocks", "AND"});
+	toolTree->addPath({"Blocks", "OR"});
+	toolTree->addPath({"Blocks", "NOT"});
+	toolTree->addPath({"Tools", "Place", "Single"});
+	toolTree->addPath({"Tools", "Place", "Area"});
+	toolTree->addPath({"Tools", "Move", "Single"});
+	toolTree->addPath({"Tools", "Move", "Tensor"});
 
 	// set up event listeners
 	Rml::ElementList menuTreeItems;
@@ -46,9 +38,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	for (Rml::Element* element : menuTreeItems) {
 		element->AddEventListener("click", new MenuTreeListener());
 	}
-
-	// show rmlUi document
-	document->Show();
 }
 
 Window::~Window() {

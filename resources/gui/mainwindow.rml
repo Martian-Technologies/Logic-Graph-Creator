@@ -8,53 +8,27 @@
 
   <body>
     <div id="main-container">
-      <div id="menubar-container">
 
+      <div id="menubar-container">
         <div id="menubar">
           <div class="menu">1</div>
           <div class="menu">2</div>
           <div class="menu">3</div>
         </div>
-
       </div>
 
       <div id="middle-container">
-
-        <div id="left-sidebar-container">
-          <div class="menutree" id="left-sidebar-menutree">
-            <ul>
-              <li class="parent">>Blocks
-                <ul class="collapsed">
-                  <li>AND</li>
-                  <li>OR</li>
-                  <li>(etc.)</li>
-                </ul>
-              </li>
-              <li class="parent">>Tools
-                <ul class="collapsed">
-                  <li>Place</li>
-                  <li class="parent">>Move
-                    <ul class="collapsed">
-                      <li>Regular</li>
-                      <li>Tensor</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-
+        <div id="left-sidebar-container"></div>
+          
         <div id="circuitview-container">
           circuit view
         </div>
-
+        
         <div id="right-sidebar-container">
           dashboard
         </div>
-
       </div>
-    </div>
 
+    </div>
   </body>
 </rml>

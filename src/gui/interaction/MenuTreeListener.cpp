@@ -23,6 +23,7 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
       } else {
         sublist->SetClass("collapsed", true);
       }
+      logInfo(target->GetInnerRML() + " Parent Menu Clicked, Toggling Submenu");
     }
   } else {
     logInfo(target->GetInnerRML() + " Menu Clicked");

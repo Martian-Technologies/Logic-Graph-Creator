@@ -4,6 +4,7 @@
 
 MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent): document(document), parent(parent) {
   Rml::ElementPtr rootList = document->CreateElement("ul");
+  rootList->SetClass("menutree", true);
   parent->AppendChild(std::move(rootList));
 }
 
@@ -13,18 +14,13 @@ Rml::Element* MenuTree::addPath(std::vector<std::string> path) {
   for(int i = 0; i < path.size(); i++) {
     //identify the next list to search through, or if it's not there, make one
     if(!current->HasChildNodes()) {
-      //all parents besides the root parent are labeled for sublist collapse capability
-      // if(i > 0) {
-      //   current->SetClass("parent", true);
-      // }
       Rml::ElementPtr newList = document->CreateElement("ul");
+      //all ul's besides the root one are labeled for sublist collapse capability
+      newList->SetClass("collapsed", true);
+      logInfo("labeled sublist of node as collapseable: " + path[i]);
       current->AppendChild(std::move(newList));
     }
     current = current->GetFirstChild();
-    //all ul's besides the first one under the root are labeled for sublist collapse capability
-    // if(i > 0) {
-    //   current->SetClass("collapsed", true);
-    // }
 
     //try to find the next element in the path
     bool foundPath = false;
@@ -41,14 +37,17 @@ Rml::Element* MenuTree::addPath(std::vector<std::string> path) {
     if(!foundPath) {
       Rml::ElementPtr newItem = document->CreateElement("li");
       newItem->SetId(path[i] + "-menu");
-      std::string name = path[i];
-      if(path[i].size() > 0) {
-        name[0] += std::toupper(name[0]);
+      newItem->SetInnerRML(path[i]);
+      //classes must be assigned to elements before they are appended to the DOM
+      //all parents besides the root are labeled for sublist collapse capability
+      if(i < path.size() - 1) { 
+        newItem->SetClass("parent", true);
+        logInfo("labeled node as parent: " + path[i]);
       }
-      newItem->SetInnerRML(name);
       current->AppendChild(std::move(newItem));
       current = current->GetElementById(path[i] + "-menu");
     }
   }
+  logInfo("added menu path " + path[path.size() - 1]);
   return current;
 }
