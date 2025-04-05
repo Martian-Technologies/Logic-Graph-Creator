@@ -4,20 +4,12 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
 
+#include "gpu/renderer/rmlRenderer.h"
 #include "gpu/renderer/vulkanFrame.h"
 #include "gui/sdl/sdlWindow.h"
 #include "gpu/renderer/vulkanSwapchain.h"
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
-
-struct RmlVertexBuffer {
-	
-};
-
-struct RmlRenderingState {
-	VkCommandBuffer commandBuffer;
-	std::vector<std::shared_ptr<RmlVertexBuffer>> buffers;
-};
 
 class WindowRenderer {
 public:
@@ -73,9 +65,8 @@ private:
 	inline VulkanFrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAMES_IN_FLIGHT]; };
 
 	// rml
-	VkCommandPool rmlCommandPool;
-	std::shared_ptr<RmlRenderingState> currentRmlState;
-	std::unordered_map<Rml::CompiledGeometryHandle, RmlVertexBuffer> rmlVertexBuffers;
+	Rml::CompiledGeometryHandle currentHandle = 1;
+	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlVertexBuffer>> rmlVertexBuffers;
 
 	// render loop
 	std::thread renderThread;

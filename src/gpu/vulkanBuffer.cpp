@@ -1,6 +1,6 @@
 #include "vulkanBuffer.h"
 
-#include "vulkanManager.h"
+#include "vulkanInstance.h"
 
 AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
 	// allocate buffer
@@ -17,10 +17,10 @@ AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemo
 	AllocatedBuffer newBuffer;
 
 	// allocate the buffer
-	vmaCreateBuffer(Vulkan::getAllocator(), &bufferInfo, &vmaallocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info);
+	vmaCreateBuffer(VulkanInstance::get().getAllocator(), &bufferInfo, &vmaallocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info);
 	return newBuffer;
 }
 
 void destroyBuffer(AllocatedBuffer& buffer) {
-	vmaDestroyBuffer(Vulkan::getAllocator(), buffer.buffer, buffer.allocation);
+	vmaDestroyBuffer(VulkanInstance::get().getAllocator(), buffer.buffer, buffer.allocation);
 }

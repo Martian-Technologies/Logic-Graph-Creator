@@ -226,13 +226,16 @@ void WindowRenderer::recreateSwapchain() {
 // -- Rml::RenderInterface --
 
 Rml::CompiledGeometryHandle WindowRenderer::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
-	return 1;
+	Rml::CompiledGeometryHandle newHandle = currentHandle++; // get and increment handle
+	rmlVertexBuffers[newHandle] = std::make_shared<RmlVertexBuffer>(vertices, indices);
+	
+	return newHandle;
 }
 void WindowRenderer::ReleaseGeometry(Rml::CompiledGeometryHandle geometry) {
-	
+	rmlVertexBuffers.erase(geometry);
 }
 void WindowRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture) {
-	
+	logInfo("render");
 }
 
 // Textures
@@ -248,8 +251,8 @@ void WindowRenderer::ReleaseTexture(Rml::TextureHandle texture_handle) {
 
 // Scissor
 void WindowRenderer::EnableScissorRegion(bool enable) {
-	
+	logInfo("enable scissor");
 }
 void WindowRenderer::SetScissorRegion(Rml::Rectanglei region) {
-	
+	logInfo("set scissor");
 }

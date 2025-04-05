@@ -23,6 +23,7 @@ public:
 
 public:
 	inline VkInstance& getInstance() { return instance.instance; }
+	inline VmaAllocator& getAllocator() { return allocator.value(); }
 	inline vkb::Device& getVkbDevice() { return device.value(); }
 	inline VkDevice& getDevice() { return device.value().device; }
 	inline QueueInfo& getGraphicsQueue() { return graphicsQueue.value(); }
