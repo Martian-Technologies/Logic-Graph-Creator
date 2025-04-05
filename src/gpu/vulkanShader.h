@@ -1,5 +1,5 @@
-#ifndef vulkanUtil_h
-#define vulkanUtil_h
+#ifndef vulkanShader_h
+#define vulkanShader_h
 
 #include <vulkan/vulkan.h>
 

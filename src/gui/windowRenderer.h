@@ -64,10 +64,13 @@ private:
 	int frameNumber = 0;
 	inline VulkanFrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAMES_IN_FLIGHT]; };
 
-	// rml
-	Rml::CompiledGeometryHandle currentHandle = 1;
+	// rml geometry
+	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
 	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> rmlGeometryAllocations;
-	std::mutex rmlGeometryMux;
+	// rml instructions
+	std::vector<RmlInstruction> rmlInstructions;
+	std::vector<RmlInstruction> tempRmlInstructions;
+	std::mutex rmlInstructionMux;
 
 	// render loop
 	std::thread renderThread;

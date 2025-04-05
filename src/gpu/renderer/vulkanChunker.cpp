@@ -1,7 +1,7 @@
 #include "vulkanChunker.h"
 
 #include "gpu/renderer/vulkanChunkRenderer.h"
-#include "gpu/vulkanManager.h"
+#include "gpu/vulkanInstance.h"
 
 // VulkanChunkAllocation
 // =========================================================================================================
@@ -33,7 +33,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 		numBlockVertices = blockVertices.size();
 		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
 		blockBuffer = createBuffer(blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
+		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
 	if (wires.size() > 0) {
@@ -46,7 +46,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 		numWireVertices = wireVertices.size();
 		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
 		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
-		vmaCopyMemoryToAllocation(Vulkan::getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
+		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 }
 

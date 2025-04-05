@@ -10,10 +10,14 @@ struct PipelineData {
 };
 
 struct ViewPushConstants {
-	alignas(16) glm::mat4 mvp;
+	glm::mat4 mvp;
 };
 
-PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std::vector<VkVertexInputBindingDescription>& bindingDescriptions, const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, VkRenderPass renderPass);
+struct RmlPushConstants {
+	glm::vec2 translation;
+};
+
+PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std::vector<VkVertexInputBindingDescription>& bindingDescriptions, const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, size_t pushConstantsSize, VkRenderPass renderPass);
 void destroyPipeline(PipelineData& pipeline);
 
 #endif

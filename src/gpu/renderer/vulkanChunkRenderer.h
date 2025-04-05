@@ -2,7 +2,6 @@
 #define vulkanChunkRenderer_h
 
 #include "gpu/renderer/vulkanFrame.h"
-#include "gpu/vulkanManager.h"
 #include "gpu/renderer/vulkanPipeline.h"
 #include "backend/circuit/circuit.h"
 #include "vulkanChunker.h"

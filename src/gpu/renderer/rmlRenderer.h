@@ -49,4 +49,14 @@ private:
 	unsigned int numIndices;
 };
 
+struct RmlRenderInstruction {
+	inline RmlRenderInstruction(std::shared_ptr<RmlGeometryAllocation> geometry, glm::vec2 translation)
+		: geometry(geometry), translation(translation) {}
+	
+	std::shared_ptr<RmlGeometryAllocation> geometry;
+	glm::vec2 translation;
+};
+
+typedef std::variant<RmlRenderInstruction> RmlInstruction;
+
 #endif

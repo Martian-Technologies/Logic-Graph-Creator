@@ -1,6 +1,6 @@
-#include "vulkanUtil.h"
+#include "vulkanShader.h"
 
-#include "gpu/vulkanManager.h"
+#include "gpu/vulkanInstance.h"
 
 VkShaderModule createShaderModule(std::vector<char> byteCode) {
 	VkShaderModuleCreateInfo createInfo{};
@@ -9,7 +9,7 @@ VkShaderModule createShaderModule(std::vector<char> byteCode) {
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(byteCode.data());
 
 	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(Vulkan::getDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+	if (vkCreateShaderModule(VulkanInstance::get().getDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create shader module!");
 	}
 
@@ -17,5 +17,5 @@ VkShaderModule createShaderModule(std::vector<char> byteCode) {
 }
 
 void destroyShaderModule(VkShaderModule shader) {
-	vkDestroyShaderModule(Vulkan::getDevice(), shader, nullptr);
+	vkDestroyShaderModule(VulkanInstance::get().getDevice(), shader, nullptr);
 }

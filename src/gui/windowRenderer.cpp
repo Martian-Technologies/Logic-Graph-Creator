@@ -41,13 +41,6 @@ void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
 	swapchainRecreationNeeded = true;
 }
 
-void WindowRenderer::prepareForRml() {
-	
-}
-void WindowRenderer::endRml() {
-	
-}
-
 void WindowRenderer::renderLoop() {
 	while(running) {
 		VulkanFrameData& frame = getCurrentFrame();
@@ -161,7 +154,10 @@ void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// do actual rendering...
-	
+	{
+		std::lock_guard<std::mutex> lock(rmlInstructionMux);
+		
+	}
 
 	// end render pass
 	vkCmdEndRenderPass(frame.getMainCommandBuffer());
@@ -223,29 +219,38 @@ void WindowRenderer::recreateSwapchain() {
 	swapchainRecreationNeeded = false;
 }
 
+void WindowRenderer::prepareForRml() {
+	// clear list of temp RML instructions so we can start adding
+	tempRmlInstructions.clear();
+}
+void WindowRenderer::endRml() {
+	// swap the real instructions out for the new ones
+	std::lock_guard<std::mutex> lock(rmlInstructionMux);
+	rmlInstructions = std::move(tempRmlInstructions);
+}
+
 // -- Rml::RenderInterface --
 
 Rml::CompiledGeometryHandle WindowRenderer::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
-	Rml::CompiledGeometryHandle newHandle = currentHandle++; // get and increment handle
-	auto newGeometry = std::make_shared<RmlGeometryAllocation>(vertices, indices);
-	
-	std::lock_guard<std::mutex> lock(rmlGeometryMux);
-	rmlGeometryAllocations[newHandle] = newGeometry;
+	// get and increment handle
+	Rml::CompiledGeometryHandle newHandle = currentGeometryHandle++;
+	// alocate new geometry
+	rmlGeometryAllocations[newHandle] = std::make_shared<RmlGeometryAllocation>(vertices, indices);
 	
 	return newHandle;
 }
 void WindowRenderer::ReleaseGeometry(Rml::CompiledGeometryHandle geometry) {
-	auto itr = rmlGeometryAllocations.find(geometry);
-	std::shared_ptr<RmlGeometryAllocation> ptr = itr->second;
-
-	// erase from allocations
-	{
-		std::lock_guard<std::mutex> lock(rmlGeometryMux);
-		rmlGeometryAllocations.erase(itr);
-	}
+	rmlGeometryAllocations.erase(geometry);
 }
 void WindowRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture) {
-	logInfo("render");
+	// find geometry
+	auto geometryItr = rmlGeometryAllocations.find(handle);
+	if (geometryItr == rmlGeometryAllocations.end()) {
+		logError("tried to render non existent RML geometry", "Vulkan");
+		return;
+	}
+	
+	tempRmlInstructions.push_back(RmlRenderInstruction(geometryItr->second, {translation.x, translation.y}));
 }
 
 // Textures

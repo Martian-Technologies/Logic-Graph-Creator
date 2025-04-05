@@ -1,6 +1,6 @@
 #include "vulkanChunkRenderer.h"
 
-#include "gpu/vulkanUtil.h"
+#include "gpu/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
 
@@ -12,8 +12,8 @@ void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
 	VkShaderModule wireFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/wire.frag.spv"));
 
 	// create graphic pipelines
-	blockPipeline = createPipeline(blockVertShader, blockFragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), renderPass);
-	wirePipeline = createPipeline(wireVertShader, wireFragShader, WireVertex::getBindingDescriptions(), WireVertex::getAttributeDescriptions(), renderPass);
+	blockPipeline = createPipeline(blockVertShader, blockFragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), sizeof(ViewPushConstants), renderPass);
+	wirePipeline = createPipeline(wireVertShader, wireFragShader, WireVertex::getBindingDescriptions(), WireVertex::getAttributeDescriptions(), sizeof(ViewPushConstants), renderPass);
 
 	// destroy shader modules since we won't be recreating pipelines
 	destroyShaderModule(blockVertShader);
