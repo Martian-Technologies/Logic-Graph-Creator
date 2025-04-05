@@ -6,6 +6,7 @@
 #include "gui/interaction/MenuTree.h"
 #include "gui/interaction/MenuTreeListener.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
+#include "gui/menuBar/menuManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
 	// create SDL renderer
@@ -38,6 +39,9 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	for (Rml::Element* element : menuTreeItems) {
 		element->AddEventListener("click", new MenuTreeListener());
 	}
+
+	MenuManager* menuManager = new MenuManager(document);
+
 }
 
 Window::~Window() {

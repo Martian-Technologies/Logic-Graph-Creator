@@ -1,34 +1,32 @@
 <rml>
 
-  <head>
-    <title>Gatality</title>
-    <link type="text/rcss" href="styles/MainWindowStyle.rcss"/>
-    <link type="text/template" href="templates/CircuitViewWindow.rml"/>
-  </head>
+	<head>
+		<title>Gatality</title>
+		<link type="text/rcss" href="styles/MainWindowStyle.rcss"/>
+		<link type="text/template" href="templates/CircuitViewWindow.rml"/>
+		<link type="text/template" href="templates/menuBar.rml"/>
+	</head>
 
-  <body>
-    <div id="main-container">
+	<body>
+		<div id="main-container">
 
-      <div id="menubar-container">
-        <div id="menubar">
-          <div class="menu">1</div>
-          <div class="menu">2</div>
-          <div class="menu">3</div>
-        </div>
-      </div>
+			<div id="top-container">
+				<template src="menuBar">
+				</template>
+			</div>
 
-      <div id="middle-container">
-        <div id="left-sidebar-container"></div>
-          
-        <div id="circuitview-container">
-          circuit view
-        </div>
-        
-        <div id="right-sidebar-container">
-          dashboard
-        </div>
-      </div>
+			<div id="middle-container">
+				<div id="left-sidebar-container"></div>
 
-    </div>
-  </body>
+				<div id="circuitview-container">
+					circuit view
+				</div>
+
+				<div id="right-sidebar-container">
+					dashboard
+				</div>
+			</div>
+
+		</div>
+	</body>
 </rml>
