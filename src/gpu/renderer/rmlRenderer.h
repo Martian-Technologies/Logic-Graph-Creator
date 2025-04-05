@@ -39,10 +39,10 @@ struct RmlVertex : Rml::Vertex {
 	}
 };
 
-class RmlVertexBuffer {
+class RmlGeometryAllocation {
 public:
-	RmlVertexBuffer(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
-	~RmlVertexBuffer();
+	RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
+	~RmlGeometryAllocation();
 	
 private:
 	AllocatedBuffer vertexBuffer, indexBuffer;

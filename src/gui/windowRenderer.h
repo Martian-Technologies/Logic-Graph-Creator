@@ -66,7 +66,8 @@ private:
 
 	// rml
 	Rml::CompiledGeometryHandle currentHandle = 1;
-	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlVertexBuffer>> rmlVertexBuffers;
+	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> rmlGeometryAllocations;
+	std::mutex rmlGeometryMux;
 
 	// render loop
 	std::thread renderThread;

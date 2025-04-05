@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 #include <chrono>
 
+#include "gpu/renderer/rmlRenderer.h"
 #include "gpu/renderer/vulkanChunker.h"
 
 class VulkanFrameData {
@@ -31,6 +32,7 @@ private:
 	// dynamically changing data
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunkAllocations;
+	std::vector<std::shared_ptr<RmlGeometryAllocation>> rmlAllocations;
 };
 
 #endif

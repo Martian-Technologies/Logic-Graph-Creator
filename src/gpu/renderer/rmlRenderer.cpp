@@ -1,6 +1,6 @@
 #include "rmlRenderer.h"
 
-RmlVertexBuffer::RmlVertexBuffer(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
+RmlGeometryAllocation::RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
 	size_t vertexBufferSize = vertices.size() * sizeof(RmlVertex);
 	size_t indexBufferSize = indices.size() * sizeof(int);
 	numIndices = indices.size();
@@ -12,7 +12,7 @@ RmlVertexBuffer::RmlVertexBuffer(Rml::Span<const Rml::Vertex> vertices, Rml::Spa
 	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), indices.data(), indexBuffer.allocation, 0, indexBufferSize);
 }
 
-RmlVertexBuffer::~RmlVertexBuffer() {
+RmlGeometryAllocation::~RmlGeometryAllocation() {
 	destroyBuffer(indexBuffer);
 	destroyBuffer(vertexBuffer);
 }

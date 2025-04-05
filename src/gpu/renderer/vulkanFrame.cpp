@@ -57,8 +57,9 @@ float VulkanFrameData::waitAndComplete() {
 	// update frame time with newest frame completion
 	float time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastStartTime).count();
 		
-	// clear used chunks
+	// clear used allocations
 	chunkAllocations.clear();
+	rmlAllocations.clear();
 
 	return time;
 }

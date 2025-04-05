@@ -227,12 +227,22 @@ void WindowRenderer::recreateSwapchain() {
 
 Rml::CompiledGeometryHandle WindowRenderer::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
 	Rml::CompiledGeometryHandle newHandle = currentHandle++; // get and increment handle
-	rmlVertexBuffers[newHandle] = std::make_shared<RmlVertexBuffer>(vertices, indices);
+	auto newGeometry = std::make_shared<RmlGeometryAllocation>(vertices, indices);
+	
+	std::lock_guard<std::mutex> lock(rmlGeometryMux);
+	rmlGeometryAllocations[newHandle] = newGeometry;
 	
 	return newHandle;
 }
 void WindowRenderer::ReleaseGeometry(Rml::CompiledGeometryHandle geometry) {
-	rmlVertexBuffers.erase(geometry);
+	auto itr = rmlGeometryAllocations.find(geometry);
+	std::shared_ptr<RmlGeometryAllocation> ptr = itr->second;
+
+	// erase from allocations
+	{
+		std::lock_guard<std::mutex> lock(rmlGeometryMux);
+		rmlGeometryAllocations.erase(itr);
+	}
 }
 void WindowRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture) {
 	logInfo("render");

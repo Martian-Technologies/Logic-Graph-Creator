@@ -7,7 +7,7 @@ const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_SCISSOR
 };
 
-PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, std::vector<VkVertexInputBindingDescription> bindingDescriptions, std::vector<VkVertexInputAttributeDescription> attributeDescriptions, VkRenderPass renderPass) {
+PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std::vector<VkVertexInputBindingDescription>& bindingDescriptions, const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, VkRenderPass renderPass) {
 	PipelineData pipeline;
 
 	// shader stages
