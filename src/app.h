@@ -28,7 +28,7 @@ private:
 	SdlInstance sdl;
 	RmlInstance rml;
 
-	std::array<Window, 1> windows; // temp because I'm too lazy to set up proper move constructor
+	std::vector<std::unique_ptr<Window>> windows; // we could make this just a vector later, I don't want to deal with moving + threads
 	bool running = false;
 };
 

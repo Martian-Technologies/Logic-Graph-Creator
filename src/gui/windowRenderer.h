@@ -10,10 +10,25 @@
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 
+struct RmlVertexBuffer {
+	
+};
+
+struct RmlRenderingState {
+	VkCommandBuffer commandBuffer;
+	std::vector<std::shared_ptr<RmlVertexBuffer>> buffers;
+};
+
 class WindowRenderer {
 public:
 	WindowRenderer(SdlWindow* sdlWindow);
 	~WindowRenderer();
+
+	// no copy
+	WindowRenderer(const WindowRenderer&) = delete;
+	WindowRenderer& operator=(const WindowRenderer&) = delete;
+
+public:
 
 	void resize(std::pair<uint32_t, uint32_t> windowSize);
 	
@@ -45,7 +60,7 @@ private:
 	
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
-	Swapchain* swapchain = nullptr; // this should be a smart pointer, but I don't want to write a move constructor right now
+	std::unique_ptr<Swapchain> swapchain;
 	std::atomic<bool> swapchainRecreationNeeded = false;
 
 	// size
@@ -56,6 +71,11 @@ private:
 	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)
 	int frameNumber = 0;
 	inline VulkanFrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAMES_IN_FLIGHT]; };
+
+	// rml
+	VkCommandPool rmlCommandPool;
+	std::shared_ptr<RmlRenderingState> currentRmlState;
+	std::unordered_map<Rml::CompiledGeometryHandle, RmlVertexBuffer> rmlVertexBuffers;
 
 	// render loop
 	std::thread renderThread;

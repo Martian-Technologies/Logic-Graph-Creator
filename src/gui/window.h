@@ -16,6 +16,11 @@ public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
 	~Window();
 
+	// no copy
+	Window(const Window&) = delete;
+	Window& operator=(const Window&) = delete;
+	
+public:
 	bool recieveEvent(SDL_Event& event);
 	void updateRml(RmlRenderInterface& renderInterface);
 

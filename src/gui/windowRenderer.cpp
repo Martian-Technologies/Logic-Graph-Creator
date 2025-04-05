@@ -13,7 +13,7 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	windowSize = sdlWindow->getSize();
 	
 	// set up swapchain
-	swapchain = new Swapchain(surface, windowSize);
+	swapchain = std::make_unique<Swapchain>(surface, windowSize);
 	createRenderPass();
 	swapchain->createFramebuffers(renderPass);
 
@@ -31,7 +31,6 @@ WindowRenderer::~WindowRenderer() {
 	if (renderThread.joinable()) renderThread.join();
 	
 	vkDestroyRenderPass(device, renderPass, nullptr);
-	delete swapchain;
 }
 
 void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {

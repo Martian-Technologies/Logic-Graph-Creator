@@ -1,7 +1,7 @@
 #include "app.h"
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), windows{Window(&backend, &circuitFileManager)} {
-	
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
+	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager));
 }
 
 void App::runLoop() {
@@ -23,8 +23,8 @@ void App::runLoop() {
 				// Single window was closed, check which window was closed and remove it
 				auto itr = windows.begin();
 				while (itr != windows.end()) {	
-					if (itr->recieveEvent(event)) {
-						// windows.erase(itr); TEMP while windows is immutable
+					if ((*itr)->recieveEvent(event)) {
+						windows.erase(itr);
 						break;
 					}
 					++itr;
@@ -33,10 +33,10 @@ void App::runLoop() {
 			}
 			case SDL_EVENT_WINDOW_FOCUS_GAINED: {
 				// Window focus switched, check which window gained focus
-				for (Window& window : windows) {
-					if (window.recieveEvent(event)) {
+				for (auto& window : windows) {
+					if (window->recieveEvent(event)) {
 						// tell system interface about focus change
-						rmlSystemInterface.SetWindow(window.getSdlWindow());
+						rmlSystemInterface.SetWindow(window->getSdlWindow());
 						break;
 					}
 				}
@@ -44,16 +44,16 @@ void App::runLoop() {
 			}
 			default: {
 				// Send event to all windows
-				for (Window& window : windows) {
-					window.recieveEvent(event);
+				for (auto& window : windows) {
+					window->recieveEvent(event);
 				}
 			}
 			}
 		}
 
 		// tell all windows to update rml
-		for (Window& window : windows) {
-			window.updateRml(rmlRenderInterface);
+		for (auto& window : windows) {
+			window->updateRml(rmlRenderInterface);
 		}
 	}
 }
