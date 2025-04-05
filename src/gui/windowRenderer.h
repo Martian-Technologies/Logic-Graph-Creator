@@ -11,6 +11,10 @@
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 
+struct RmlPushConstants {
+	glm::vec2 translation;
+};
+
 class WindowRenderer {
 public:
 	WindowRenderer(SdlWindow* sdlWindow);

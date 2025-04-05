@@ -54,6 +54,7 @@ private:
 
 // VULKAN TODO -
 // - [ ] Vulkan chunker with wires - Chunk system should be abstracted somewaht (just also supports wires, move a few functions out)
+// - [ ] Better naming convention for classes
 // - [ ] Block textures
 // - [ ] Basic effects
 

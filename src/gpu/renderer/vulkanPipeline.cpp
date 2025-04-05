@@ -7,19 +7,17 @@ const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_SCISSOR
 };
 
-PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std::vector<VkVertexInputBindingDescription>& bindingDescriptions, const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, size_t pushConstantsSize, VkRenderPass renderPass) {
-	PipelineData pipeline;
-
+Pipeline::Pipeline(const PipelineInformation& info) {
 	// shader stages
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = vert;
+	vertShaderStageInfo.module = info.vertShader;
 	vertShaderStageInfo.pName = "main";
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = frag;
+	fragShaderStageInfo.module = info.fragShader;
 	fragShaderStageInfo.pName = "main";
 	VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
@@ -32,10 +30,10 @@ PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std:
 	// vertex input state (vertex buffers)
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
-	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-	vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
-	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+	vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(info.vertexBindingDescriptions.size());
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(info.vertexAttributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = info.vertexBindingDescriptions.data();
+	vertexInputInfo.pVertexAttributeDescriptions = info.vertexAttributeDescriptions.data();
 
 	// input assembly state
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -96,19 +94,26 @@ PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std:
 	colorBlending.blendConstants[1] = 0.0f; // unused
 	colorBlending.blendConstants[2] = 0.0f; // unused
 	colorBlending.blendConstants[3] = 0.0f; // unused
-
+	
 	// pipeline layout
-	VkPushConstantRange pushConstant{};
-	pushConstant.offset = 0;
-	pushConstant.size = pushConstantsSize;
-	pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.pushConstantRangeCount = 1;
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
 	pipelineLayoutInfo.setLayoutCount = 0; // unused
 	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
-	if (vkCreatePipelineLayout(VulkanInstance::get().getDevice(), &pipelineLayoutInfo, nullptr, &pipeline.layout) != VK_SUCCESS) {
+
+	// push constant
+	if (info.pushConstantSize.has_value()) {
+		VkPushConstantRange pushConstant{};
+		pushConstant.offset = 0;
+		pushConstant.size = info.pushConstantSize.value();
+		pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+	}
+	
+	// create pipeline layout
+	if (vkCreatePipelineLayout(VulkanInstance::get().getDevice(), &pipelineLayoutInfo, nullptr, &layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -125,20 +130,18 @@ PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std:
 	pipelineInfo.pDepthStencilState = nullptr; // unused
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
-	pipelineInfo.layout = pipeline.layout;
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.layout = layout;
+	pipelineInfo.renderPass = info.renderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // unused
 	pipelineInfo.basePipelineIndex = -1; // unused
 
-	if (vkCreateGraphicsPipelines(VulkanInstance::get().getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.handle) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(VulkanInstance::get().getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
-	
-	return pipeline;
-}
+};
 
-void destroyPipeline(PipelineData& pipeline) {
-	vkDestroyPipeline(VulkanInstance::get().getDevice(), pipeline.handle, nullptr);
-	vkDestroyPipelineLayout(VulkanInstance::get().getDevice(), pipeline.layout, nullptr);
+Pipeline::~Pipeline() {
+	vkDestroyPipeline(VulkanInstance::get().getDevice(), handle, nullptr);
+	vkDestroyPipelineLayout(VulkanInstance::get().getDevice(), layout, nullptr);
 }

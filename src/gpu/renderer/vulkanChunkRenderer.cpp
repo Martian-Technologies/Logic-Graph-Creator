@@ -12,8 +12,23 @@ void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
 	VkShaderModule wireFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/wire.frag.spv"));
 
 	// create graphic pipelines
-	blockPipeline = createPipeline(blockVertShader, blockFragShader, BlockVertex::getBindingDescriptions(), BlockVertex::getAttributeDescriptions(), sizeof(ViewPushConstants), renderPass);
-	wirePipeline = createPipeline(wireVertShader, wireFragShader, WireVertex::getBindingDescriptions(), WireVertex::getAttributeDescriptions(), sizeof(ViewPushConstants), renderPass);
+	PipelineInformation blockPipelineInfo{};
+	blockPipelineInfo.vertShader = blockVertShader;
+	blockPipelineInfo.fragShader = blockFragShader;
+	blockPipelineInfo.renderPass = renderPass;
+	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
+	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
+	blockPipelineInfo.pushConstantSize = sizeof(ViewPushConstants);
+	blockPipeline = std::make_unique<Pipeline>(blockPipelineInfo);
+	
+	PipelineInformation wirePipelineInfo{};
+	wirePipelineInfo.vertShader = wireVertShader;
+	wirePipelineInfo.fragShader = wireFragShader;
+	wirePipelineInfo.renderPass = renderPass;
+	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
+	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
+	wirePipelineInfo.pushConstantSize = sizeof(ViewPushConstants);
+	wirePipeline = std::make_unique<Pipeline>(wirePipelineInfo);
 
 	// destroy shader modules since we won't be recreating pipelines
 	destroyShaderModule(blockVertShader);
@@ -25,9 +40,6 @@ void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
 void VulkanChunkRenderer::destroy() {
 	// temp way to delete all the buffers
 	chunker.setCircuit(nullptr);
-	
-	destroyPipeline(blockPipeline);
-	destroyPipeline(wirePipeline);
 }
 
 
@@ -66,10 +78,10 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExten
 	// block drawing pass
 	{
 		// bind render pipeline
-		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.handle);
+		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
 
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {
@@ -88,10 +100,10 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExten
 	// wire drawing pass
 	{
 		// bind render pipeline
-		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline.handle);
+		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), wirePipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.getMainCommandBuffer(), wirePipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
 
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getWireBuffer().has_value()) {

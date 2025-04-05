@@ -4,20 +4,26 @@
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 
-struct PipelineData {
+struct PipelineInformation {
+	VkRenderPass renderPass;
+	VkShaderModule vertShader, fragShader;
+	std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
+
+	std::optional<size_t> pushConstantSize;
+};
+
+class Pipeline {
+public:
+	Pipeline(const PipelineInformation& info);
+	~Pipeline();
+
+	inline VkPipeline getHandle() { return handle; }
+	inline VkPipelineLayout getLayout() { return layout; }
+	
+private:
 	VkPipeline handle;
     VkPipelineLayout layout;
 };
-
-struct ViewPushConstants {
-	glm::mat4 mvp;
-};
-
-struct RmlPushConstants {
-	glm::vec2 translation;
-};
-
-PipelineData createPipeline(VkShaderModule vert, VkShaderModule frag, const std::vector<VkVertexInputBindingDescription>& bindingDescriptions, const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions, size_t pushConstantsSize, VkRenderPass renderPass);
-void destroyPipeline(PipelineData& pipeline);
 
 #endif

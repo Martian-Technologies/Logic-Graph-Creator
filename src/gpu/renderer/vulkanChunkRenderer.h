@@ -9,6 +9,10 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
+struct ViewPushConstants {
+	glm::mat4 mvp;
+};
+
 struct BlockVertex {
 	glm::vec2 pos;
 	glm::vec3 color;
@@ -74,8 +78,8 @@ public:
 private:
 	VulkanChunker chunker;
 	
-	PipelineData blockPipeline;
-	PipelineData wirePipeline;
+	std::unique_ptr<Pipeline> blockPipeline = nullptr;
+	std::unique_ptr<Pipeline> wirePipeline = nullptr;
 };
 
 #endif
