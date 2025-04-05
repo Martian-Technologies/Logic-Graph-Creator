@@ -6,14 +6,11 @@
 
 #include "gpu/renderer/rmlRenderer.h"
 #include "gpu/renderer/vulkanFrame.h"
+#include "gpu/renderer/vulkanPipeline.h"
 #include "gui/sdl/sdlWindow.h"
 #include "gpu/renderer/vulkanSwapchain.h"
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
-
-struct RmlPushConstants {
-	glm::vec2 translation;
-};
 
 class WindowRenderer {
 public:
@@ -53,11 +50,13 @@ private:
 	SdlWindow* sdlWindow;
 	VkDevice device;
 	std::atomic<bool> running = false;
-	
+
+	// main vulkan
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
 	std::unique_ptr<Swapchain> swapchain;
 	std::atomic<bool> swapchainRecreationNeeded = false;
+	std::unique_ptr<Pipeline> rmlPipeline;
 
 	// size
 	std::pair<uint32_t, uint32_t> windowSize;

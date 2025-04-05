@@ -1,5 +1,7 @@
 #include "rmlRenderer.h"
 
+#include "gpu/vulkanInstance.h"
+
 RmlGeometryAllocation::RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
 	size_t vertexBufferSize = vertices.size() * sizeof(RmlVertex);
 	size_t indexBufferSize = indices.size() * sizeof(int);

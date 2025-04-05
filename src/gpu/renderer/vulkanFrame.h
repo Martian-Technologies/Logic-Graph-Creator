@@ -21,6 +21,7 @@ public:
 	inline VkSemaphore& getRenderSemaphore() { return renderSemaphore; }
 	inline VkFence& getRenderFence() { return renderFence; };
 	inline std::vector<std::shared_ptr<VulkanChunkAllocation>>& getChunkAllocations() { return chunkAllocations; }
+	inline std::vector<std::shared_ptr<RmlGeometryAllocation>>& getRmlAllocations() { return rmlAllocations; }
 	
 private:
 	// mostly static data

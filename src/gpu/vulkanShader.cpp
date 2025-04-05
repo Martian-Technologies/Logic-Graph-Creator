@@ -10,7 +10,7 @@ VkShaderModule createShaderModule(std::vector<char> byteCode) {
 
 	VkShaderModule shaderModule;
 	if (vkCreateShaderModule(VulkanInstance::get().getDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create shader module!");
+		throwFatalError("failed to create vulkan shader module!");
 	}
 
 	return shaderModule;

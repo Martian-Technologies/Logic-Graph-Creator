@@ -1,5 +1,9 @@
 #include "windowRenderer.h"
 
+#include "gpu/vulkanShader.h"
+#include "computerAPI/directoryManager.h"
+#include "computerAPI/fileLoader.h"
+
 WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
@@ -20,6 +24,21 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	// set up frames
 	frames.resize(FRAMES_IN_FLIGHT);
 
+	// set up pipeline
+	VkShaderModule rmlVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.vert.spv"));
+	VkShaderModule rmlFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
+	PipelineInformation rmlPipelineInfo{};
+	rmlPipelineInfo.vertShader = rmlVertShader;
+	rmlPipelineInfo.fragShader = rmlFragShader;
+	rmlPipelineInfo.renderPass = renderPass;
+	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
+	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
+	rmlPipelineInfo.pushConstantSize = sizeof(RmlPushConstants);
+	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rmlPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+	destroyShaderModule(rmlVertShader);
+	destroyShaderModule(rmlFragShader);
+
 	// start render loop
 	running = true;
 	renderThread = std::thread(&WindowRenderer::renderLoop, this);
@@ -29,7 +48,9 @@ WindowRenderer::~WindowRenderer() {
 	// stop render thread (not completely sure if this is right for the destructor yet)
 	running = false;
 	if (renderThread.joinable()) renderThread.join();
-	
+
+	// manual deletion (RAII blues)
+	rmlPipeline.reset();
 	vkDestroyRenderPass(device, renderPass, nullptr);
 }
 
@@ -155,8 +176,48 @@ void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 
 	// do actual rendering...
 	{
-		std::lock_guard<std::mutex> lock(rmlInstructionMux);
+		// rml rendering
+
+		// bind pipeline
+		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, rmlPipeline->getHandle());
+		// bind dynamic state
+		VkExtent2D& extent = swapchain->getVkbSwapchain().extent;
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
+		VkRect2D scissor{};
+		scissor.offset = {0, 0};
+		scissor.extent = extent;
+		vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
 		
+		std::lock_guard<std::mutex> lock(rmlInstructionMux);
+		for (const auto& instruction : rmlInstructions) {
+			if (std::holds_alternative<RmlRenderInstruction>(instruction)) {
+				// If we have a render instruction
+				const RmlRenderInstruction& renderInstruction = std::get<RmlRenderInstruction>(instruction);
+				frame.getRmlAllocations().push_back(renderInstruction.geometry);
+
+				// upload push constants
+				RmlPushConstants pushConstants{ renderInstruction.translation };
+				vkCmdPushConstants(frame.getMainCommandBuffer(), rmlPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
+
+				// bind vertex buffer
+				VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
+
+				// bind index buffer
+				vkCmdBindIndexBuffer(frame.getMainCommandBuffer(), renderInstruction.geometry->getIndexBuffer().buffer, offsets[0], VK_INDEX_TYPE_UINT32);
+
+				// draw
+				vkCmdDrawIndexed(frame.getMainCommandBuffer(), renderInstruction.geometry->getNumIndices(), 1, 0, 0, 0);
+			}
+		}
 	}
 
 	// end render pass

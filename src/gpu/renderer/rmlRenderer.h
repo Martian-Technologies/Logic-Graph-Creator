@@ -5,7 +5,10 @@
 #include <RmlUi/Core/Vertex.h>
 
 #include "gpu/vulkanBuffer.h"
-#include "gpu/vulkanInstance.h"
+
+struct RmlPushConstants {
+	glm::vec2 translation;
+};
 
 struct RmlVertex : Rml::Vertex {
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
@@ -43,6 +46,10 @@ class RmlGeometryAllocation {
 public:
 	RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
 	~RmlGeometryAllocation();
+
+	inline AllocatedBuffer& getVertexBuffer() { return vertexBuffer; }
+	inline AllocatedBuffer& getIndexBuffer() { return indexBuffer; }
+	inline unsigned int getNumIndices() { return numIndices; }
 	
 private:
 	AllocatedBuffer vertexBuffer, indexBuffer;
