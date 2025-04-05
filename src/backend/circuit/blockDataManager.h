@@ -132,7 +132,7 @@ public:
 	}
 
 private:
-	std::unordered_map<BlockData> blockData;
+	std::vector<BlockData> blockData;
 	DataUpdateEventManager* dataUpdateEventManager;
 };
 

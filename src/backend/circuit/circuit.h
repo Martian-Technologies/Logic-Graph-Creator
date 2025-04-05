@@ -23,9 +23,9 @@ public:
 	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
         circuitId(circuitId), blockContainer(), blockDataManager(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
-		for (unsigned int i = 0; i <= blockDataManager.maxBlockId(); i++) {
-			const BlockData* blockData = blockDataManager.getBlockData(i);
-			if (blockData->getBlockType() == BlockType::NONE) break;
+		for (unsigned int i = 0; i <= blockDataManager->maxBlockId(); i++) {
+			const BlockData* blockData = blockDataManager->getBlockData((BlockType)i);
+			if (!blockData || blockData->getBlockType() == BlockType::NONE) break;
 
 		}
 	}

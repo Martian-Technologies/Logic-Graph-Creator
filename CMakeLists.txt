@@ -115,7 +115,7 @@ elseif (WIN32) # Windows
 		# Set WIN32_EXECUTABLE (Disables Console)
 		set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 	endif ()
-endif()	
+endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
