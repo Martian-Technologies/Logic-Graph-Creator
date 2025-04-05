@@ -130,6 +130,11 @@ public:
 		auto iter = connections.find(connectionId);
 		return iter != connections.end() && iter->second.second;
 	}
+	inline bool isConnectionOutput(connection_end_id_t connectionId) const noexcept {
+		if (defaultData) return connectionId == 0;
+		auto iter = connections.find(connectionId);
+		return iter != connections.end() && !(iter->second.second);
+	}
 	const std::unordered_map<connection_end_id_t, std::pair<Vector, bool>>& getConnections() const noexcept {
 		return connections;
 	}
