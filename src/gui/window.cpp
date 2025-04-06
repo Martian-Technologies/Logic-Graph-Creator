@@ -41,7 +41,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	}
 
 	MenuManager* menuManager = new MenuManager(document);
-
 }
 
 Window::~Window() {

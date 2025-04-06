@@ -2,8 +2,8 @@
 
 	<head>
 		<title>Gatality</title>
-		<link type="text/rcss" href="styles/MainWindowStyle.rcss"/>
-		<link type="text/template" href="templates/CircuitViewWindow.rml"/>
+		<link type="text/rcss" href="styles/mainWindowStyle.rcss"/>
+		<link type="text/template" href="templates/circuitViewElement.rml"/>
 		<link type="text/template" href="templates/menuBar.rml"/>
 	</head>
 

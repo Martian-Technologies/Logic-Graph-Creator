@@ -1,4 +1,4 @@
-<template name="circuit-view-widget" content="content">
+<template name="circuit-view-element" content="content">
 
   <head>
     <link type="text/rcss" href="../styles/style.rcss"/>
