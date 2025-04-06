@@ -1,12 +1,14 @@
 #ifndef rmlRenderer_h
 #define rmlRenderer_h
 
+#include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <RmlUi/Core/Vertex.h>
 
 #include "gpu/vulkanBuffer.h"
 
 struct RmlPushConstants {
+	alignas(16) glm::mat4 view;
 	glm::vec2 translation;
 };
 

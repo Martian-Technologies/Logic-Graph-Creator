@@ -3,6 +3,7 @@
 
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
+#include <glm/mat4x4.hpp>
 
 #include "gpu/renderer/rmlRenderer.h"
 #include "gpu/renderer/vulkanFrame.h"
@@ -61,6 +62,7 @@ private:
 	// size
 	std::pair<uint32_t, uint32_t> windowSize;
 	std::mutex windowSizeMux;
+	glm::mat4 pixelViewMat;
 	
 	// frames
 	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)

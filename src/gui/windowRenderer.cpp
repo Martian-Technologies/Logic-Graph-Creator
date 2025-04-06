@@ -4,6 +4,8 @@
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
@@ -58,6 +60,7 @@ void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 
 	this->windowSize = windowSize;
+	pixelViewMat = glm::ortho(0.0f, (float)windowSize.first, 0.0f, (float)windowSize.second);
 
 	swapchainRecreationNeeded = true;
 }
@@ -194,7 +197,12 @@ void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 		scissor.offset = {0, 0};
 		scissor.extent = extent;
 		vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
-		
+
+		// shared push constants
+		windowSizeMux.lock();
+		RmlPushConstants pushConstants{ pixelViewMat, glm::vec2(0.0f, 0.0f) };
+		windowSizeMux.unlock(); 
+                
 		std::lock_guard<std::mutex> lock(rmlInstructionMux);
 		for (const auto& instruction : rmlInstructions) {
 			if (std::holds_alternative<RmlRenderInstruction>(instruction)) {
@@ -203,7 +211,7 @@ void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 				frame.getRmlAllocations().push_back(renderInstruction.geometry);
 
 				// upload push constants
-				RmlPushConstants pushConstants{ renderInstruction.translation };
+				pushConstants.translation = renderInstruction.translation;
 				vkCmdPushConstants(frame.getMainCommandBuffer(), rmlPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
 
 				// bind vertex buffer

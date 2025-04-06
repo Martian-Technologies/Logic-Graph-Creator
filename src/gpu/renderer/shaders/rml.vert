@@ -2,6 +2,7 @@
 
 layout( push_constant ) uniform constants
 {
+	mat4 view;
 	vec2 translation;
 } push;
 
@@ -16,5 +17,5 @@ void main() {
 	fragTexCoord = inTexCoord;
 	fragColor = inColor;
 	
-    gl_Position = vec4(inPosition + push.translation, 0, 1);
+    gl_Position = push.view * vec4(inPosition + push.translation, 0, 1);
 }
