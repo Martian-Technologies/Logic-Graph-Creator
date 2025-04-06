@@ -4,8 +4,8 @@
 #include <RmlUi/Core.h>
 #include <SDL3/SDL_events.h>
 
-#include "windowRenderer.h"
 #include "sdl/sdlWindow.h"
+#include "gpu/renderer/windowRenderer.h"
 #include "rml/rmlRenderInterface.h"
 
 #include "backend/backend.h"

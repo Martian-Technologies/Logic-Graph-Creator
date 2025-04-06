@@ -5,43 +5,15 @@
 #include <glm/ext/vector_float2.hpp>
 #include <RmlUi/Core/Vertex.h>
 
+#include "gpu/renderer/subrenderer.h"
 #include "gpu/vulkanBuffer.h"
+#include "gpu/renderer/vulkanPipeline.h"
 
-struct RmlPushConstants {
-	alignas(16) glm::mat4 view;
-	glm::vec2 translation;
-};
+// =========================== RML GEOMETRY =================================
 
 struct RmlVertex : Rml::Vertex {
-	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-		bindingDescriptions[0].binding = 0;
-		bindingDescriptions[0].stride = sizeof(RmlVertex);
-		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        return bindingDescriptions;
-    }
-
-	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(3);
-
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(RmlVertex, position);
-
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R8G8B8A8_UNORM;
-		attributeDescriptions[1].offset = offsetof(RmlVertex, colour);
-
-		attributeDescriptions[2].binding = 0;
-		attributeDescriptions[2].location = 2;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[2].offset = offsetof(RmlVertex, tex_coord);
-
-		return attributeDescriptions;
-	}
+	static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
+	static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 };
 
 class RmlGeometryAllocation {
@@ -58,14 +30,71 @@ private:
 	unsigned int numIndices;
 };
 
-struct RmlRenderInstruction {
-	inline RmlRenderInstruction(std::shared_ptr<RmlGeometryAllocation> geometry, glm::vec2 translation)
+struct RmlPushConstants {
+	alignas(16) glm::mat4 view;
+	glm::vec2 translation;
+};
+
+// =========================== RML INSTRUCTIONS =================================
+
+struct RmlDrawInstruction {
+	inline RmlDrawInstruction(std::shared_ptr<RmlGeometryAllocation> geometry, glm::vec2 translation)
 		: geometry(geometry), translation(translation) {}
 	
 	std::shared_ptr<RmlGeometryAllocation> geometry;
 	glm::vec2 translation;
 };
 
-typedef std::variant<RmlRenderInstruction> RmlInstruction;
+struct RmlSetScissorInstruction {
+	inline RmlSetScissorInstruction(glm::vec2 offset, glm::vec2 size)
+		: offset(offset), size(size) {}
+	
+	glm::vec2 offset, size;
+};
+
+struct RmlEnableScissorInstruction {
+	inline RmlEnableScissorInstruction(bool state)
+		: state(state) {}
+	
+	bool state;
+};
+
+typedef std::variant<RmlDrawInstruction, RmlSetScissorInstruction, RmlEnableScissorInstruction> RmlRenderInstruction;
+
+// ========================= RML RENDERER ====================================
+
+class RmlRenderer {
+public:
+	RmlRenderer(VkRenderPass& renderPass);
+
+	void prepareForRmlRender();
+	void endRmlRender();
+
+	void render(SubrendererInfo& info);
+	
+public:
+	// -- Rml::RenderInterface --
+	Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
+	void ReleaseGeometry(Rml::CompiledGeometryHandle geometry);
+	void RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture);
+
+	Rml::TextureHandle LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source);
+	Rml::TextureHandle GenerateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions);
+	void ReleaseTexture(Rml::TextureHandle texture_handle);
+
+	void EnableScissorRegion(bool enable);
+	void SetScissorRegion(Rml::Rectanglei region);
+private:
+	std::unique_ptr<Pipeline> pipeline;
+
+	// geometry
+	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
+	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> rmlGeometryAllocations;
+	
+	// render instructions
+	std::vector<RmlRenderInstruction> renderInstructions;
+	std::vector<RmlRenderInstruction> tempRenderInstructions;
+	std::mutex rmlInstructionMux;
+};
 
 #endif

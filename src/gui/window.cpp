@@ -55,8 +55,7 @@ bool Window::recieveEvent(SDL_Event& event) {
 void Window::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
 	
-	renderer.prepareForRml();
-	renderInterface.pointToWindow(&renderer);
+	renderer.prepareForRml(renderInterface);
 	rmlContext->Render();
 	renderer.endRml();
 }
