@@ -170,10 +170,12 @@ void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
+	renderPassInfo.clearValueCount = 0;
+	renderPassInfo.pClearValues = nullptr;
 
-	VkClearValue clearColor = {0.93f, 0.93f, 0.93f, 1.0f};
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
+	// VkClearValue clearColor = {0.93f, 0.93f, 0.93f, 1.0f};
+	// renderPassInfo.clearValueCount = 1;
+	// renderPassInfo.pClearValues = &clearColor;
 	
 	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -240,7 +242,7 @@ void WindowRenderer::createRenderPass() {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -324,13 +326,15 @@ void WindowRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vec
 
 // Textures
 Rml::TextureHandle WindowRenderer::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) {
+	logInfo("texture load");
 	return 1;
 }
 Rml::TextureHandle WindowRenderer::GenerateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions) {
+	logInfo("texture gen");
 	return 1;
 }
 void WindowRenderer::ReleaseTexture(Rml::TextureHandle texture_handle) {
-	
+	logInfo("texture release");
 }
 
 // Scissor
