@@ -9,7 +9,6 @@ public:
     UndoTree();
     ~UndoTree();
 
-    size_t size() const;
     size_t numBranches() const;
 
     /**
@@ -19,7 +18,7 @@ public:
      * the end of the branch. Otherwise, a new branch is created with
      * the new diff as the first element.
      *
-     * @param it An iterator to the element the new diff will be inserted after.
+     * @param it An iterator to the position the new diff will be inserted at.
      * @param diff A DifferenceSharedPtr to the new diff.
      * @returns An iterator to the inserted diff.
      */
@@ -42,7 +41,6 @@ private:
     class Branch;
     Branch* mainBranch;
     std::unordered_set<Branch*> branches;
-    size_t numNodes;
 };
 
 struct UndoTree::Branch {
@@ -89,7 +87,7 @@ public:
      */
     int whichBranch() const;
 
-    DifferenceSharedPtr& operator*();
+    DifferenceSharedPtr operator*() const;
     bool operator==(const iterator& other) const;
     bool operator!=(const iterator& other) const;
 private:

@@ -66,6 +66,7 @@ jobs:
         build-dir: ${{ steps.strings.outputs.build-output-dir }}
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
+        configure-options: "-DGATALITY_BUILD_TESTS=ON"
         target: Gatality_tests
         build-type: ${{ matrix.build_type }}
 

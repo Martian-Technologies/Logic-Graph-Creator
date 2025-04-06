@@ -46,7 +46,7 @@ class ShiftSelection : public DimensionalSelection {
 public:
 	SharedSelection getSelection(dimensional_selection_size_t index) const override {
 		return shiftSelection(dimensionalSelection->getSelection(index), shift);
-	};
+	}
 	dimensional_selection_size_t size() const override { return dimensionalSelection->size(); }
 
 private:
@@ -122,7 +122,7 @@ inline Position getSelectionOrigin(SharedSelection selection) {
 	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
 	if (dimensionalSelection) {
 		return getSelectionOrigin(dimensionalSelection->getSelection(0));
-	} 
+	}
 
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {

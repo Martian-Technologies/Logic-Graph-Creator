@@ -179,17 +179,24 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool track
 		logError("getGroupIndex: blockData is null");
 		return 0;
 	}
-	const Vector rotatedOffset = reverseRotateVectorWithArea(offset, blockData->getWidth(), blockData->getHeight(), gate.rotation);
-
-	for (auto pair : blockData->getConnections()) {
-		if (pair.second.first == rotatedOffset) {
-			break;
+	if (blockData->isDefaultData()) return 0;
+	if (trackInput) {
+		std::pair<connection_end_id_t, bool> idData = blockData->getInputConnectionId(offset, gate.rotation);
+		if (!idData.second) return 0;
+		int groupIndex = 0;
+		for (connection_end_id_t i = 0; i < idData.first; i++) {
+			groupIndex += blockData->isConnectionInput(i);
 		}
-		if (pair.second.second == trackInput) {
-			groupIndex++;
+		return groupIndex;
+	} else {
+		std::pair<connection_end_id_t, bool> idData = blockData->getOutputConnectionId(offset, gate.rotation);
+		if (!idData.second) return 0;
+		int groupIndex = 0;
+		for (connection_end_id_t i = 0; i < idData.first; i++) {
+			groupIndex += blockData->isConnectionOutput(i);
 		}
+		return groupIndex;
 	}
-	return groupIndex;
 }
 
 std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput) {

@@ -4,9 +4,8 @@
 // Class UndoTree implementation
 
 UndoTree::UndoTree():
-    mainBranch(new Branch(this)), numNodes(0) {
+    mainBranch(new Branch(this)) {
     branches.insert(mainBranch);
-    mainBranch->nodes.emplace_back(DifferenceSharedPtr(new Difference));
 }
 UndoTree::~UndoTree() {
     for (Branch* branch : branches) {
@@ -16,9 +15,6 @@ UndoTree::~UndoTree() {
     mainBranch = nullptr;
 }
 
-size_t UndoTree::size() const {
-    return numNodes;
-}
 size_t UndoTree::numBranches() const {
     return branches.size();
 }
@@ -41,7 +37,6 @@ UndoTree::iterator UndoTree::insert(const iterator& it, DifferenceSharedPtr diff
         it.branch->nodes[it.pos].branches->push_back(newBranch);
         return iterator(newBranch, 0);
     }
-    numNodes++;
 }
 
 void UndoTree::clear() {
@@ -52,7 +47,6 @@ void UndoTree::clear() {
     mainBranch = new Branch(this);
     mainBranch->nodes.emplace_back(DifferenceSharedPtr(new Difference));
     branches.insert(mainBranch);
-    numNodes = 0;
 }
 
 void UndoTree::prune(const iterator& begin) {
@@ -63,18 +57,18 @@ void UndoTree::prune(const iterator& begin) {
         if (begin.branch->nodes[begin.pos].branches != nullptr) {
             for (Branch* b : *begin.branch->nodes[begin.pos].branches) {
                 branches.erase(b);
-                numNodes -= b->nodes.size();
                 delete b;
             }
         }
     }
     // Remove all diffs after begin
-    numNodes -= begin.branch->nodes.size() - begin.pos;
     begin.branch->nodes.erase(begin.branch->nodes.begin() + begin.pos);
 }
 
 UndoTree::iterator UndoTree::begin() {
-    return iterator(mainBranch, 0);
+    if (mainBranch->nodes.empty()) {
+        return end();
+    } else return iterator(mainBranch, 0);
 }
 
 UndoTree::iterator UndoTree::end() {
@@ -99,7 +93,6 @@ UndoTree::iterator UndoTree::iterator::prev() const {
     if (pos == -1) {
         return iterator(this->branch, this->branch->nodes.size() - 1);
     } else if (pos == 0) {
-
         return iterator(this->branch->parentBranch, this->branch->parentNode);
     } else return iterator(this->branch, pos - 1);
 }
@@ -126,16 +119,16 @@ int UndoTree::iterator::whichBranch() const {
     }
 }
 
-DifferenceSharedPtr& UndoTree::iterator::operator*() {
-    return branch->nodes[pos].diff;
+DifferenceSharedPtr UndoTree::iterator::operator*() const {
+    if (this->pos < 0 || this->branch->nodes.size() <= this->pos) {
+        return nullptr;
+    } else return branch->nodes[pos].diff;
 }
 
 bool UndoTree::iterator::operator==(const iterator& other) const {
-    // -1 denotes end iterator
-    if (this->pos == other.pos && other.pos == -1) {
+    if (this->pos == -1 && other.pos == -1) {
         return true;
-    // Otherwise check if they are at same place on same branch
-    } else return this->pos == other.pos && this->branch == other.branch;
+    } else return **this == *other;
 }
 
 bool UndoTree::iterator::operator!=(const iterator& other) const {
