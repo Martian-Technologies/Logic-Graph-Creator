@@ -25,6 +25,10 @@ public:
 		sendChangedSignal();
 	}
 
+	inline const std::string& getActiveTool() const {
+		return activeTool;
+	}
+
 	inline void setMode(std::string tool) {
 		for (auto view : *circuitViews) {
 			view->getToolManager().setMode(tool);
