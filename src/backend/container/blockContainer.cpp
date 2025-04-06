@@ -69,9 +69,9 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 	if (!block) return false;
 	if (checkCollision(position, block->getRotation(), block->type())) return false;
 	// do move
-	difference->addMovedBlock(block->getPosition(), position);
+	difference->addMovedBlock(block->getPosition(), position + (block->getPosition() - positionOfBlock));
 	removeBlockCells(block);
-	block->setPosition(position);
+	block->setPosition(position + (block->getPosition() - positionOfBlock));
 	placeBlockCells(block);
 	return true;
 }

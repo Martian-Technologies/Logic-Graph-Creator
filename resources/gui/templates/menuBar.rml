@@ -1,0 +1,30 @@
+<template name="menuBar" content="content">
+	<head>
+		<link type="text/rcss" href="../styles/menuBar.rcss"/>
+	</head>
+
+	<body>
+
+
+		<div id="menu-bar" class="menu-bar">
+
+			<!-- File Menu -->
+			<div class="menu-item" id="menu-file">File</div>
+				<div id="menu-bar-file" class="menu invisible">
+					<ul class="file-menu">
+						<li id="file-new">File</li>
+						<li id="edit-copy">Edit</li>
+						<li id="help-about">Help</li>
+					</ul>
+				</div>
+			<div class="menu-item" id="menu-edit">Edit</div>
+			<div class="menu-item" id="menu-view">View</div>
+
+		</div>
+
+
+	</body>
+
+</template>
+
+

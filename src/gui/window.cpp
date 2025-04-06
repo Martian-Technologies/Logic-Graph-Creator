@@ -3,31 +3,41 @@
 #include <RmlUi/Core.h>
 
 #include "computerAPI/directoryManager.h"
+#include "gpu/vulkanInstance.h"
+#include "gui/interaction/MenuTree.h"
 #include "gui/interaction/MenuTreeListener.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "gpu/vulkanInstance.h"
+#include "gui/menuBar/menuManager.h"    
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
 	
 	// create rmlUi context
-	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi, calm down janny
-	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainwindow.rml").string());
-
-	// set up event listeners
-	Rml::ElementList menuTreeItems;
-	document->GetElementsByTagName(menuTreeItems, "li");
-	for (Rml::Element* element : menuTreeItems) {
-		if (element->GetClassNames().find("parent") != std::string::npos) {
-			
-			//this line causes compilation error lol!
-			// response: lol!    from: jack (I'm a chill guy)
-			// berman --->    >:(3     (very angry)
-			element->AddEventListener("click", new MenuTreeListener());
-		}
-	}
+	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
+	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// show rmlUi document
 	document->Show();
+
+	//dynamically generating blocks/tools menutree
+	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
+	MenuTree* toolTree = new MenuTree(document, toolTreeParent);
+	toolTree->addPath({"Blocks", "AND"});
+	toolTree->addPath({"Blocks", "OR"});
+	toolTree->addPath({"Blocks", "NOT"});
+	toolTree->addPath({"Tools", "Place", "Single"});
+	toolTree->addPath({"Tools", "Place", "Area"});
+	toolTree->addPath({"Tools", "Move", "Single"});
+	toolTree->addPath({"Tools", "Move", "Tensor"});
+
+	// set up event listeners
+	Rml::ElementList menuTreeItems;
+	
+	document->GetElementsByTagName(menuTreeItems, "li");
+	for (Rml::Element* element : menuTreeItems) {
+		element->AddEventListener("click", new MenuTreeListener());
+	}
+
+	MenuManager* menuManager = new MenuManager(document);
 }
 
 Window::~Window() {

@@ -1,0 +1,32 @@
+<rml>
+
+	<head>
+		<title>Gatality</title>
+		<link type="text/rcss" href="styles/mainWindowStyle.rcss"/>
+		<link type="text/template" href="templates/circuitViewElement.rml"/>
+		<link type="text/template" href="templates/menuBar.rml"/>
+	</head>
+
+	<body>
+		<div id="main-container">
+
+			<div id="top-container">
+				<template src="menuBar">
+				</template>
+			</div>
+
+			<div id="middle-container">
+				<div id="left-sidebar-container"></div>
+
+				<div id="circuitview-container">
+					circuit view
+				</div>
+
+				<div id="right-sidebar-container">
+					dashboard
+				</div>
+			</div>
+
+		</div>
+	</body>
+</rml>

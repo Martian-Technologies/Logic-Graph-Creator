@@ -72,7 +72,7 @@ bool TensorCreationTool::unclick(const Event* event) {
 		tensorStage--;
 	} else { // undo count
 		SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selection);
-		if (projectionSelection->size() == 1 || (followingSelection && selectionToFollow[selectionToFollow.size() - tensorStage / 2 - 1] != 1)) {
+		if (projectionSelection->size() == 1 || (followingSelection && selectionToFollow[selectionToFollow.size() - tensorStage / 2] != 1)) {
 			tensorStage -= 2;
 			selection = projectionSelection->getSelection(0);
 		} else {
