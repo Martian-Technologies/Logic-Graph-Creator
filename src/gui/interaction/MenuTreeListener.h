@@ -5,10 +5,13 @@
 
 class MenuTreeListener : public Rml::EventListener {
 public:
-  MenuTreeListener();
-  ~MenuTreeListener();
-  void ProcessEvent(Rml::Event& event) override;
-  void OnDetach(Rml::Element* element) override;
+	typedef std::function<void(std::string)> ListenerFunction;
+	MenuTreeListener(ListenerFunction* listenerFunction = nullptr);
+	~MenuTreeListener();
+	void ProcessEvent(Rml::Event& event) override;
+	void OnDetach(Rml::Element* element) override;
+private:
+	ListenerFunction* listenerFunction;
 };
 
 #endif /* menutreeListenerH */ 

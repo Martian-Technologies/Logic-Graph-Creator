@@ -35,7 +35,7 @@ void MenuManager::View() {
 
 
 // ---------- Listener ----------
-MenuListener::MenuListener(MenuManager* parent, Rml::Element* element, const std::string& id) : parent(parent), element(element), id(id) {}
+MenuListener::MenuListener(MenuManager* parent, Rml::Element* element, const std::string& id) : parent(parent), element(element), id(id) { }
 
 void MenuListener::OnDetach(Rml::Element* element) {
 	delete this;

@@ -129,7 +129,7 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 		// partition blocks into chunks
 		for (const auto& block : *(circuit->getBlockContainer())) {
 			Position position = block.second.getPosition();
-			chunks[getChunk(position)].getBlocksForUpdating()[position] = RenderedBlock(block.second.type(), block.second.getRotation(), block.second.width(), block.second.height());
+			chunks[getChunk(position)].getBlocksForUpdating()[position] = RenderedBlock(block.second.type(), block.second.getRotation(), block.second.size().dx, block.second.size().dy);
 		}
 
 		// allocate vulkan buffer for all chunks
@@ -167,7 +167,8 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 
 			// Add block
 			Position chunk = getChunk(position);
-			chunks[chunk].getBlocksForUpdating()[position] = RenderedBlock(blockType, rotation, blockDataManager->getBlockWidth(blockType, rotation), blockDataManager->getBlockHeight(blockType, rotation));
+			Vector blockSize = blockDataManager->getBlockSize(blockType, rotation);
+			chunks[chunk].getBlocksForUpdating()[position] = RenderedBlock(blockType, rotation, blockSize.dx, blockSize.dy);
 			chunksToUpdate.insert(chunk);
 			
 			break;

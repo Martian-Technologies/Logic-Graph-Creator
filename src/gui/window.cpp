@@ -3,7 +3,6 @@
 #include <RmlUi/Core.h>
 
 #include "computerAPI/directoryManager.h"
-#include "selectorWindow.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuManager.h"
 
@@ -22,7 +21,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	//dynamically generating blocks/tools menutree
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
-	selectorWindow.emplace(document, toolTreeParentm)
+	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 
 	// MenuTree* toolTree = new MenuTree(document, toolTreeParent);
 	// toolTree->addPath({ "Blocks", "AND" });
@@ -34,12 +33,12 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// toolTree->addPath({ "Tools", "Move", "Tensor" });
 
 	// set up event listeners
-	Rml::ElementList menuTreeItems;
+	// Rml::ElementList menuTreeItems;
 
-	document->GetElementsByTagName(menuTreeItems, "li");
-	for (Rml::Element* element : menuTreeItems) {
-		element->AddEventListener("click", new MenuTreeListener());
-	}
+	// document->GetElementsByTagName(menuTreeItems, "li");
+	// for (Rml::Element* element : menuTreeItems) {
+	// 	element->AddEventListener("click", new MenuTreeListener());
+	// }
 
 	MenuManager* menuManager = new MenuManager(document);
 }

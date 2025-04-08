@@ -11,6 +11,8 @@
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
 
+#include "selectorWindow.h"
+
 class Window {
 public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
