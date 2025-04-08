@@ -1,4 +1,8 @@
-
+#menu-bar.menu-item {
+	background-color: darkblue;
+	padding: 0.2rem;
+	border-radius: 0.2rem;
+}
 
 .menu.visible {
 	display: block;

@@ -23,23 +23,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 
-	// MenuTree* toolTree = new MenuTree(document, toolTreeParent);
-	// toolTree->addPath({ "Blocks", "AND" });
-	// toolTree->addPath({ "Blocks", "OR" });
-	// toolTree->addPath({ "Blocks", "NOT" });
-	// toolTree->addPath({ "Tools", "Place", "Single" });
-	// toolTree->addPath({ "Tools", "Place", "Area" });
-	// toolTree->addPath({ "Tools", "Move", "Single" });
-	// toolTree->addPath({ "Tools", "Move", "Tensor" });
-
-	// set up event listeners
-	// Rml::ElementList menuTreeItems;
-
-	// document->GetElementsByTagName(menuTreeItems, "li");
-	// for (Rml::Element* element : menuTreeItems) {
-	// 	element->AddEventListener("click", new MenuTreeListener());
-	// }
-
 	MenuManager* menuManager = new MenuManager(document);
 }
 

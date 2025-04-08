@@ -11,8 +11,7 @@
 		<div id="main-container">
 
 			<div id="top-container">
-				<template src="menuBar">
-				</template>
+				<template src="menuBar"></template>
 			</div>
 
 			<div id="middle-container">

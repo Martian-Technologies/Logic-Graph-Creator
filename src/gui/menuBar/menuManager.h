@@ -24,7 +24,7 @@ public:
 	~MenuManager();
 
 private:
-	void Intialize();
+	void Initialize();
 	void File();
 	void Edit();
 	void View();

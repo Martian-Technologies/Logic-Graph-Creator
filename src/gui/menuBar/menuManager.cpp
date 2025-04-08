@@ -5,7 +5,7 @@ MenuManager::MenuManager(Rml::ElementDocument* context) : context(context) {
 
 }
 
-void MenuManager::Intialize() {
+void MenuManager::Initialize() {
 
 	Rml::Element* file = context->GetElementById("menu-file");
 	Rml::Element* edit = context->GetElementById("menu-edit");
