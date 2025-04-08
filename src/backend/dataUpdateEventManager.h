@@ -4,13 +4,16 @@
 class DataUpdateEventManager {
 	friend class DataUpdateEventReceiver;
 public:
-	class EventData { virtual void A() { }; };
-	class EventDataUnsignedInt : public EventData {
+	class EventData { public: virtual ~EventData() { }; };
+	template <class T>
+	class EventDataWithValue : public EventData {
 	public:
-		EventDataUnsignedInt(unsigned int value) : value(value) { }
-		unsigned int getValue() const { return value; }
+		EventDataWithValue(const T& value) : value(value) { }
+		inline const T& operator*() const { return value; }
+		inline const T* operator->() const { return &value; }
+		inline const T& get() const { return value; }
 	private:
-		unsigned int value;
+		T value;
 	};
 
 	class DataUpdateEventReceiver {

@@ -1,0 +1,34 @@
+version_2
+Circuit: "Circuit"
+UUID: 2e294f42-9d05-44af-9433-ddc613fb96d2
+blockId 1 SWITCH -4 -3 ZERO 1
+	(connId:0)
+blockId 2 SWITCH -4 -2 ZERO 1
+	(connId:0) (9 0)
+blockId 3 SWITCH -4 -1 ZERO 1
+	(connId:0) (10 0)
+blockId 4 SWITCH -4 0 ZERO 1
+	(connId:0) (9 0) (10 0)
+blockId 5 SWITCH -4 1 ZERO 1
+	(connId:0) (11 0)
+blockId 6 SWITCH -4 2 ZERO 1
+	(connId:0) (9 0) (11 0)
+blockId 7 SWITCH -4 3 ZERO 1
+	(connId:0) (10 0) (11 0)
+blockId 8 SWITCH -4 4 ZERO 1
+	(connId:0) (9 0) (10 0) (11 0)
+blockId 9 OR -1 -1 ZERO 2
+	(connId:0) (8 0) (6 0) (4 0) (2 0)
+	(connId:1) (12 0)
+blockId 10 OR -1 0 ZERO 2
+	(connId:0) (8 0) (7 0) (4 0) (3 0)
+	(connId:1) (13 0)
+blockId 11 OR -1 1 ZERO 2
+	(connId:0) (8 0) (7 0) (6 0) (5 0)
+	(connId:1) (14 0)
+blockId 12 LIGHT 1 -1 ZERO 1
+	(connId:0) (9 1)
+blockId 13 LIGHT 1 0 ZERO 1
+	(connId:0) (10 1)
+blockId 14 LIGHT 1 1 ZERO 1
+	(connId:0) (11 1)
