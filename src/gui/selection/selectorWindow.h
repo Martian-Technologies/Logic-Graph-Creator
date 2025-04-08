@@ -5,7 +5,7 @@
 #include <QListWidgetItem>
 #include <QTreeWidgetItem>
 
-#include "backend/container/block/blockDataManager.h"
+#include "backend/blockData/blockDataManager.h"
 
 namespace Ui {
 	class Selector;
@@ -27,7 +27,7 @@ private:
 
 	const BlockDataManager* blockDataManager;
 	Ui::Selector* ui;
-	DataUpdateEventReceiver dataUpdateEventReceiver;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
 signals:
 	void selectedBlockChange(std::string blockPath);

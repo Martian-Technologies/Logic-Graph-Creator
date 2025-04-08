@@ -1,14 +1,14 @@
 #ifndef blockDataManager_h
 #define blockDataManager_h
 
-#include "../../dataUpdateEventManager.h"
+#include "backend/dataUpdateEventManager.h"
 #include "blockData.h"
 
 class BlockDataManager {
 public:
 	BlockDataManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) {
 		// load default data
-		blockData.resize(13);
+		for (unsigned int i = 0; i < 13; i++) addBlock();
 		getBlockData(BlockType::AND)->setName("And");
 		getBlockData(BlockType::OR)->setName("Or");
 		getBlockData(BlockType::XOR)->setName("Xor");
@@ -19,38 +19,36 @@ public:
 		// TRISTATE_BUFFER
 		getBlockData(BlockType::TRISTATE_BUFFER)->setName("Tristate Buffer");
 		getBlockData(BlockType::TRISTATE_BUFFER)->setDefaultData(false);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 0), 0);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 1), 1);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionOutput(Vector(0, 0), 2);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setHeight(2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0), 0);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 1), 1);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionOutput(Vector(0), 2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Vector(1, 2));
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");
 		getBlockData(BlockType::BUTTON)->setDefaultData(false);
-		getBlockData(BlockType::BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::BUTTON)->setConnectionOutput(Vector(0), 0);
 		// TICK_BUTTON
 		getBlockData(BlockType::TICK_BUTTON)->setName("Tick Button");
 		getBlockData(BlockType::TICK_BUTTON)->setDefaultData(false);
-		getBlockData(BlockType::TICK_BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::TICK_BUTTON)->setConnectionOutput(Vector(0), 0);
 		// SWITCH
 		getBlockData(BlockType::SWITCH)->setName("Switch");
 		getBlockData(BlockType::SWITCH)->setDefaultData(false);
-		getBlockData(BlockType::SWITCH)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::SWITCH)->setConnectionOutput(Vector(0), 0);
 		// CONSTANT
 		getBlockData(BlockType::CONSTANT)->setName("Constant");
 		getBlockData(BlockType::CONSTANT)->setDefaultData(false);
 		getBlockData(BlockType::CONSTANT)->setIsPlaceable(false);
-		getBlockData(BlockType::CONSTANT)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::CONSTANT)->setConnectionOutput(Vector(0), 0);
 		// LIGHT
 		getBlockData(BlockType::LIGHT)->setName("Light");
 		getBlockData(BlockType::LIGHT)->setDefaultData(false);
-		getBlockData(BlockType::LIGHT)->trySetConnectionInput(Vector(0, 0), 0);
-		
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
+		getBlockData(BlockType::LIGHT)->setConnectionInput(Vector(0), 0);
 	}
 
 	inline BlockType addBlock() noexcept {
-		blockData.emplace_back();
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
+		blockData.emplace_back((BlockType)(blockData.size()+1), dataUpdateEventManager);
+		sendBlockDataUpdate();
 		return (BlockType) blockData.size();
 	}
 
@@ -62,6 +60,8 @@ public:
 		}
 		return BlockType::NONE;
 	}
+
+    inline void sendBlockDataUpdate() { dataUpdateEventManager->sendEvent("blockDataUpdate"); }
 
 	inline const BlockData* getBlockData(BlockType type) const noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
 	inline BlockData* getBlockData(BlockType type) noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
@@ -82,19 +82,13 @@ public:
 		return blockData[type-1].getPath();
 	}
 
-	inline block_size_t getBlockWidth(BlockType type) const noexcept {
-		if (!blockExists(type)) return 0;
-		return blockData[type-1].getWidth();
+	inline Vector getBlockSize(BlockType type) const noexcept {
+		if (!blockExists(type)) return Vector();
+		return blockData[type-1].getSize();
 	}
-	inline block_size_t getBlockHeight(BlockType type) const noexcept {
-		if (!blockExists(type)) return 0;
-		return blockData[type-1].getHeight();
-	}
-	inline block_size_t getBlockWidth(BlockType type, Rotation rotation) const noexcept {
-		return isRotated(rotation) ? getBlockHeight(type) : getBlockWidth(type);
-	}
-	inline block_size_t getBlockHeight(BlockType type, Rotation rotation) const noexcept {
-		return isRotated(rotation) ? getBlockWidth(type) : getBlockHeight(type);
+	inline Vector getBlockSize(BlockType type, Rotation rotation) const noexcept {
+		if (!blockExists(type)) return Vector();
+		return blockData[type-1].getSize(rotation);
 	}
 
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, const Vector& vector) const noexcept {

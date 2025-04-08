@@ -12,7 +12,7 @@ public:
         undoPosition = tree.insert(undoPosition, difference);
     }
     inline DifferenceSharedPtr undoDifference() {
-        DifferenceSharedPtr& temp = *undoPosition;
+        DifferenceSharedPtr temp = *undoPosition;
         if (undoPosition != tree.begin()) {
             if (!onSameBranch(undoPosition, undoPosition.prev())) {
                 redoPath.push(std::make_pair(undoPosition.prev(), undoPosition.whichBranch()));

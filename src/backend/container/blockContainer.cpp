@@ -3,22 +3,17 @@
 #include "util/emptyVector.h"
 #include "blockContainer.h"
 #include "block/block.h"
-#include "block/blockDataManager.h"
+#include "backend/blockData/blockDataManager.h"
 
 bool BlockContainer::checkCollision(const Position& positionSmall, const Position& positionLarge) const {
-	for (cord_t x = positionSmall.x; x <= positionLarge.x; x++) {
-		for (cord_t y = positionSmall.y; y <= positionLarge.y; y++) {
-			if (checkCollision(Position(x, y))) return true;
-		}
+	for (auto iter = positionSmall.iterTo(positionLarge); iter; iter++) {
+		if (checkCollision(*iter)) return true;
 	}
 	return false;
 }
 
 bool BlockContainer::checkCollision(const Position& position, Rotation rotation, BlockType blockType) const {
-	return checkCollision(position, position + Vector(
-		blockDataManager->getBlockWidth(blockType, rotation) - 1,
-		blockDataManager->getBlockHeight(blockType, rotation) - 1
-	));
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation) - Vector(1));
 }
 
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
@@ -28,6 +23,8 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
 	iter->second.setId(id);
 	iter->second.setPosition(position);
 	iter->second.setRotation(rotation);
+	if (blockTypeCounts.size() <= blockType) blockTypeCounts.resize(blockType + 1);
+	blockTypeCounts[blockType]++;
 	placeBlockCells(&iter->second);
 	difference->addPlacedBlock(position, rotation, blockType);
 	return true;
@@ -55,6 +52,7 @@ bool BlockContainer::tryRemoveBlock(const Position& position, Difference* differ
 			}
 		}
 	}
+	blockTypeCounts[block.type()]--;
 	difference->addRemovedBlock(block.getPosition(), block.getRotation(), block.type());
 	block.destroy();
 	blocks.erase(iter);
@@ -66,11 +64,41 @@ bool BlockContainer::tryMoveBlock(const Position& positionOfBlock, const Positio
 	if (!block) return false;
 	if (checkCollision(position, block->getRotation(), block->type())) return false;
 	// do move
-	difference->addMovedBlock(block->getPosition(), position);
+	difference->addMovedBlock(block->getPosition(), position + (block->getPosition() - positionOfBlock));
 	removeBlockCells(block);
-	block->setPosition(position);
+	block->setPosition(position + (block->getPosition() - positionOfBlock));
 	placeBlockCells(block);
 	return true;
+}
+
+void BlockContainer::resizeBlockType(BlockType blockType, const Vector& newSize, Difference* difference) {
+	if (blockTypeCounts.size() <= blockType || blockTypeCounts[blockType] == 0) return;
+	for (auto& pair : blocks) {
+		Block* block = &(pair.second);
+		if (block->type() != blockType) continue;
+		removeBlockCells(block);
+		Position position = block->getPosition();
+		Vector newRotatedSize = rotateSize(block->getRotation(), newSize);
+
+		while (true) {
+			bool hitCell = false;
+			for (auto iter = newRotatedSize.iter(); iter; ++iter) {
+				Cell* cell = getCell(position + *iter);
+				if (cell) {
+					// logError("found overlap at {}", "", (position + *iter).toString());
+					hitCell = true;
+					break;
+				}
+			}
+			if (hitCell) {
+				position.x += 1;
+			} else break;
+		}
+		placeBlockCells(block->id(), position, newRotatedSize);
+		if (block->getPosition() == position) continue;
+		difference->addMovedBlock(block->getPosition(), position);
+		block->setPosition(position);
+	}
 }
 
 // block_data_t BlockContainer::getBlockData(const Position& positionOfBlock) const {
@@ -164,26 +192,26 @@ bool BlockContainer::tryRemoveConnection(const Position& outputPosition, const P
 }
 
 void BlockContainer::placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId) {
-	for (cord_t x = 0; x < blockDataManager->getBlockWidth(type, rotation); x++) {
-		for (cord_t y = 0; y < blockDataManager->getBlockHeight(type, rotation); y++) {
-			insertCell(position + Vector(x, y), Cell(blockId));
-		}
+	for (auto iter = (blockDataManager->getBlockSize(type, rotation) - Vector(1)).iter(); iter; iter++) {
+		insertCell(position + *iter, Cell(blockId));
+	}
+}
+
+void BlockContainer::placeBlockCells(block_id_t id, const Position& position, const Vector& size) {
+	for (auto iter = (size - Vector(1)).iter(); iter; iter++) {
+		insertCell(position + *iter, Cell(id));
 	}
 }
 
 void BlockContainer::placeBlockCells(const Block* block) {
-	for (cord_t x = 0; x < block->width(); x++) {
-		for (cord_t y = 0; y < block->height(); y++) {
-			insertCell(block->getPosition() + Vector(x, y), Cell(block->id()));
-		}
+	for (auto iter = (block->size() - Vector(1)).iter(); iter; iter++) {
+		insertCell(block->getPosition() + *iter, Cell(block->id()));
 	}
 }
 
 void BlockContainer::removeBlockCells(const Block* block) {
-	for (cord_t x = 0; x < block->width(); x++) {
-		for (cord_t y = 0; y < block->height(); y++) {
-			removeCell(block->getPosition() + Vector(x, y));
-		}
+	for (auto iter = (block->size() - Vector(1)).iter(); iter; iter++) {
+		removeCell(block->getPosition() + *iter);
 	}
 }
 
