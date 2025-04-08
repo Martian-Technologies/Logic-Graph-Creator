@@ -276,7 +276,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -293,7 +293,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(255, 0, 0, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -310,7 +310,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -353,15 +353,11 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, logic_state_t state) {
 	// block
-	Vector blockSize(
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type),
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(type)
-	);
+	Vector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type));
 
 	Vector blockOriginOffset = rotateVectorWithArea(
-		Vector(0, 0),
-		blockSize.dx,
-		blockSize.dy,
+		Vector(0),
+		blockSize,
 		rotation
 	);
 

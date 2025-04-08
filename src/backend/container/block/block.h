@@ -2,7 +2,7 @@
 #define block_h
 
 #include "connectionContainer.h"
-#include "blockDataManager.h"
+#include "backend/blockData/blockDataManager.h"
 #include "blockHelpers.h"
 
 class Block {
@@ -16,13 +16,11 @@ public:
 	BlockType type() const { return blockType; }
 
 	inline const Position& getPosition() const { return position; }
-	inline Position getLargestPosition() const { return position + Vector(width(), height()); }
+	inline Position getLargestPosition() const { return position + size(); }
 	inline Rotation getRotation() const { return rotation; }
 
-	inline block_size_t width() const { return blockDataManager->getBlockWidth(type(), getRotation()); }
-	inline block_size_t height() const { return blockDataManager->getBlockHeight(type(), getRotation()); }
-	inline block_size_t widthNoRotation() const { return blockDataManager->getBlockWidth(type()); }
-	inline block_size_t heightNoRotation() const { return blockDataManager->getBlockHeight(type()); }
+	inline Vector size() const { return blockDataManager->getBlockSize(type(), getRotation()); }
+	inline Vector sizeNoRotation() const { return blockDataManager->getBlockSize(type()); }
 
 	inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 

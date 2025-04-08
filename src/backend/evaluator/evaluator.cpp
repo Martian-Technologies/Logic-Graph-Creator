@@ -179,18 +179,24 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool track
 		logError("getGroupIndex: blockData is null");
 		return 0;
 	}
-	const Vector rotatedOffset = reverseRotateVectorWithArea(offset, blockData->getWidth(), blockData->getHeight(), gate.rotation);
-
-	const auto connections = blockData->getConnections();
-	for (int j = 0; j < connections.size(); j++) {
-		if (connections[j].first == rotatedOffset) {
-			break;
+	if (blockData->isDefaultData()) return 0;
+	if (trackInput) {
+		std::pair<connection_end_id_t, bool> idData = blockData->getInputConnectionId(offset, gate.rotation);
+		if (!idData.second) return 0;
+		int groupIndex = 0;
+		for (connection_end_id_t i = 0; i < idData.first; i++) {
+			groupIndex += blockData->isConnectionInput(i);
 		}
-		if (connections[j].second == trackInput) {
-			groupIndex++;
+		return groupIndex;
+	} else {
+		std::pair<connection_end_id_t, bool> idData = blockData->getOutputConnectionId(offset, gate.rotation);
+		if (!idData.second) return 0;
+		int groupIndex = 0;
+		for (connection_end_id_t i = 0; i < idData.first; i++) {
+			groupIndex += blockData->isConnectionOutput(i);
 		}
+		return groupIndex;
 	}
-	return groupIndex;
 }
 
 std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput) {
@@ -340,6 +346,11 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
+	const auto gate = addressTree.getValue(address, EvaluatorGate{0, BlockType::NONE, Rotation::ZERO});
+	if (gate.blockType == BlockType::NONE) {
+		logError("setState: gate is not a valid block type");
+		return;
+	}
 	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 	logicSimulatorWrapper.signalToPause();
 	while (!logicSimulatorWrapper.threadIsWaiting()) {

@@ -1,5 +1,26 @@
 #include "tensorCreationTool.h"
 
+void TensorCreationTool::reset() {
+	SelectionHelperTool::reset();
+	selection = nullptr;
+	selectionToFollow.clear();
+	followingSelection = false;
+	tensorStage = -1;
+	updateElements();
+}
+
+void TensorCreationTool::activate() {
+	SelectionHelperTool::activate();
+	registerFunction("Tool Primary Activate", std::bind(&TensorCreationTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&TensorCreationTool::unclick, this, std::placeholders::_1));
+	registerFunction("Confirm", std::bind(&TensorCreationTool::confirm, this, std::placeholders::_1));
+}
+
+void TensorCreationTool::undoFinished() {
+	SelectionHelperTool::undoFinished();
+	if (followingSelection) unclick();
+}
+
 bool TensorCreationTool::click(const Event* event) {
 	if (!circuit) return false;
 
@@ -12,15 +33,27 @@ bool TensorCreationTool::click(const Event* event) {
 		if (step.manhattenlength() == 0) {
 			selection = std::make_shared<ProjectionSelection>(selection, Vector(), 1);
 			tensorStage += 2;
+		} else if (followingSelection) {
+			dimensional_selection_size_t size = selectionToFollow[selectionToFollow.size() - tensorStage / 2 - 1];
+			if (size == 1) {
+				tensorStage++;
+			} else {
+				selection = std::make_shared<ProjectionSelection>(selection, step, size);
+				tensorStage += 2;
+			}
 		} else {
 			tensorStage++;
 		}
 	} else { // count
 		float dis = step.length();
 		float length = lastPointerFPosition.lengthAlongProjectToVec(originPosition.free() + FVector(0.5f, 0.5f), step.free());
-		int count = Abs(round(length / dis)) + 1;
+		int count = abs(round(length / dis)) + 1;
 		selection = std::make_shared<ProjectionSelection>(selection, (length > 0) ? step : step * -1, count);
 		tensorStage++;
+	}
+	if (followingSelection && tensorStage == selectionToFollow.size() * 2) {
+		finished(selection);
+		return true;
 	}
 	updateElements();
 	return true;
@@ -39,7 +72,7 @@ bool TensorCreationTool::unclick(const Event* event) {
 		tensorStage--;
 	} else { // undo count
 		SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selection);
-		if (projectionSelection->size() == 1) {
+		if (projectionSelection->size() == 1 || (followingSelection && selectionToFollow[selectionToFollow.size() - tensorStage / 2] != 1)) {
 			tensorStage -= 2;
 			selection = projectionSelection->getSelection(0);
 		} else {
@@ -85,14 +118,31 @@ void TensorCreationTool::updateElements() {
 		step = lastPointerPosition - originPosition;
 		if (step.manhattenlength() == 0) {
 			displaySelection = std::make_shared<ProjectionSelection>(selection, Vector(), 1);
+		} else if (followingSelection) {
+			dimensional_selection_size_t size = selectionToFollow[selectionToFollow.size() - tensorStage / 2 - 1];
+			if (size == 1) {
+				displaySelection = std::make_shared<ProjectionSelection>(selection, step, 2);
+			} else {
+				displaySelection = std::make_shared<ProjectionSelection>(selection, step, size);
+			}
 		} else {
 			displaySelection = std::make_shared<ProjectionSelection>(selection, step, 2);
 		}
 	} else { // count
 		float dis = step.length();
 		float length = lastPointerFPosition.lengthAlongProjectToVec(originPosition.free() + FVector(0.5f, 0.5f), step.free());
-		int count = Abs(round(length / dis)) + 1;
+		int count = abs(round(length / dis)) + 1;
 		displaySelection = std::make_shared<ProjectionSelection>(selection, (length > 0) ? step : step * -1, count);
 	}
 	elementCreator.addSelectionElement(SelectionObjectElement(displaySelection, SelectionObjectElement::RenderMode::ARROWS));
+}
+
+void TensorCreationTool::setSelectionToFollow(SharedSelection selectionToFollow) {
+	this->selectionToFollow.clear();
+	followingSelection = (bool)selectionToFollow;
+	SharedDimensionalSelection selectionToFollowDimension = selectionCast<DimensionalSelection>(selectionToFollow);
+	while (selectionToFollowDimension) {
+		this->selectionToFollow.push_back(selectionToFollowDimension->size());
+		selectionToFollowDimension = selectionCast<DimensionalSelection>(selectionToFollowDimension->getSelection(0));
+	}
 }

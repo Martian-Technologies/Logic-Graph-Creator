@@ -5,42 +5,50 @@
 
 class ToolManagerManager {
 public:
-	ToolManagerManager(std::set<CircuitView*>* circuitViews) : circuitViews(circuitViews) {}
+	ToolManagerManager(std::set<CircuitView*>* circuitViews);
 
-	inline const std::string& getActiveToo() const { return activeTool; }
-	
 	inline void setBlock(BlockType blockType) {
 		setTool("placement/placement");
 		for (auto view : *circuitViews) {
-			view->setSelectedBlock(blockType);
+			view->getToolManager().selectBlock(blockType);
 		}
 	}
-	
+
 	inline void setTool(std::string toolName) {
 		std::transform(toolName.begin(), toolName.end(), toolName.begin(), ::tolower);
-		if (activeTool == toolName) return;
+		auto iter = tools.find(toolName);
+		if (iter == tools.end()) return;
 		activeTool = toolName;
 		for (auto view : *circuitViews) {
-			view->setSelectedTool(toolName);
+			view->getToolManager().selectTool(iter->second->getInstance());
 		}
 		sendChangedSignal();
 	}
-	
+
+	inline const std::string& getActiveTool() const {
+		return activeTool;
+	}
+
 	inline void setMode(std::string tool) {
 		for (auto view : *circuitViews) {
-			view->setSelectedToolMode(tool);
+			view->getToolManager().setMode(tool);
 		}
 	}
 
-	const std::vector<std::string>* getActiveToolModes() const {
-		auto iter = modes.find(activeTool);
-		if (iter == modes.end()) { return nullptr; }
-		return &(iter->second);
-	}	
-
-	static void registerToolModes(std::string toolName, const std::vector<std::string>& toolModes) {
-		modes[toolName] = toolModes;
+	const std::optional<std::vector<std::string>> getActiveToolModes() const {
+		auto iter = tools.find(activeTool);
+		if (iter == tools.end()) { return std::nullopt; }
+		return iter->second->getModes();
 	}
+
+	SharedCircuitTool getToolInstance() const {
+		auto iter = tools.find(activeTool);
+		if (iter == tools.end()) { return nullptr; }
+		return iter->second->getInstance();
+	}
+
+	template<class T>
+	static void registerTool() { tools[T::getPath_()] = std::make_unique<ToolTypeMaker<T>>(); }
 
 	/* ----------- listener ----------- */
 
@@ -52,6 +60,16 @@ public:
 	void disconnectListener(void* object) { auto iter = listenerFunctions.find(object); if (iter != listenerFunctions.end()) listenerFunctions.erase(iter); }
 
 private:
+	struct BaseToolTypeMaker {
+		virtual ~BaseToolTypeMaker() {}
+		virtual SharedCircuitTool getInstance() const = 0;
+		virtual std::vector<std::string> getModes() const = 0;
+	};
+	template <class T> struct ToolTypeMaker : public BaseToolTypeMaker {
+		SharedCircuitTool getInstance() const override final { return std::make_shared<T>(); }
+		std::vector<std::string> getModes() const override final { return T::getModes_(); }
+	};
+
 	inline void sendChangedSignal() {
 		for (auto pair : listenerFunctions) pair.second(*this);
 	}
@@ -61,7 +79,7 @@ private:
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
 
-	static std::map<std::string, std::vector<std::string>> modes;
+	static std::map<std::string, std::unique_ptr<BaseToolTypeMaker>> tools;
 };
 
 #endif /* toolManagerManager_h */

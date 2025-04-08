@@ -1,5 +1,6 @@
 #include "circuit.h"
 #include "logging/logging.h"
+#include "parsedCircuit.h"
 
 bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
@@ -23,7 +24,7 @@ bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& posi
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, const Vector& movement) {
 	if (checkMoveCollision(selection, movement)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	moveBlocks(selection, movement, difference.get());
@@ -31,7 +32,7 @@ bool Circuit::tryMoveBlocks(const SharedSelection& selection, const Vector& move
 	return true;
 }
 
-void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movement, Difference* difference) {
+void Circuit::moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -47,7 +48,7 @@ void Circuit::moveBlocks(const SharedSelection& selection, const Vector& movemen
 	}
 }
 
-bool Circuit::checkMoveCollision(const SharedSelection& selection, const Vector& movement) {
+bool Circuit::checkMoveCollision(SharedSelection selection, const Vector& movement) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -110,10 +111,15 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 	return false;
 }
 
-bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position) {
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit) {
 	if (!parsedCircuit.isValid()) return false;
 	
-	Vector totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+	Vector totalOffset(0,0);
+    // if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
+    if (!customCircuit) {
+        // this is only relevent for finding offset for given position, generally from mouse position
+        totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+    }
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
 			return false;
@@ -146,9 +152,31 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
 		if (!tryCreateConnection(output, input)) {
+			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]","", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+		}
+	}
+	return true;
+}
+
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position) {
+	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (blockContainer.checkCollision(block.position + totalOffset, block.rotation, block.blockType)) {
+			return false;
+		}
+	}
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+		if (!blockContainer.tryInsertBlock(block.position + totalOffset, block.rotation, block.blockType, difference.get())) {
+			logError("Failed to insert block while inserting block.");
+		}
+	}
+	for (const std::pair<Position, Position>& conn : copiedBlocks->getCopiedConnections()) {
+		if (!blockContainer.tryCreateConnection(conn.second + totalOffset, conn.first + totalOffset, difference.get())) {
 			logError("Failed to create connection while inserting block.");
 		}
 	}
+	sendDifference(difference);
 	return true;
 }
 
@@ -343,4 +371,20 @@ void Circuit::redo() {
 	}
 	sendDifference(newDifference);
 	endUndo();
+}
+
+void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData) {
+	if (!eventData) {
+		logError("eventData passed was null", "Circuit");
+		return;
+	}
+	auto data = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>*>(eventData);
+	if (!data) {
+		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		return;
+	}
+	BlockType type = data->get().first;
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.resizeBlockType(type, data->get().second, difference.get());
+	sendDifference(difference);
 }

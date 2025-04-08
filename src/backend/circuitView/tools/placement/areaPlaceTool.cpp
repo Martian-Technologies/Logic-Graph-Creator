@@ -3,8 +3,8 @@
 
 void AreaPlaceTool::activate() {
 	BaseBlockPlacementTool::activate();
-	registerFunction("tool primary activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
-	registerFunction("tool secondary activate", std::bind(&AreaPlaceTool::startDeleteBlocks, this, std::placeholders::_1));
+	registerFunction("Tool Primary Activate", std::bind(&AreaPlaceTool::startPlaceBlock, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&AreaPlaceTool::startDeleteBlocks, this, std::placeholders::_1));
 }
 
 bool AreaPlaceTool::startPlaceBlock(const Event* event) {

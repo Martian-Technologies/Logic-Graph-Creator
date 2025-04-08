@@ -2,7 +2,7 @@
 #include "util/uuid.h"
 
 void CircuitTest::SetUp() {
-	circuit_id_t circuitId = circuitManager.createNewCircuit(generate_uuid_v4(), "Circuit");
+	circuit_id_t circuitId = circuitManager.createNewCircuit("Circuit", generate_uuid_v4());
 	circuit = circuitManager.getCircuit(circuitId);
     i = 0;
 }

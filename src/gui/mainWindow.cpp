@@ -12,7 +12,6 @@
 #include <QMenu>
 
 #include "backend/circuitView/tools/other/previewPlacementTool.h"
-#include "backend/circuit/validateCircuit.h"
 #include "computerAPI/directoryManager.h"
 #include "selection/selectorWindow.h"
 #include "circuitViewWidget.h"
@@ -29,23 +28,41 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 
 	// set default keybinds
 	keybindManager.setKeybind("Save", "Ctrl+S");
-	keybindManager.setKeybind("Undo", "Z");
-	keybindManager.setKeybind("Redo", "Y");
+	keybindManager.setKeybind("Undo", "Ctrl+Z");
+	keybindManager.setKeybind("Redo", "Ctrl+Y");
+	keybindManager.setKeybind("Copy", "Ctrl+C");
+	keybindManager.setKeybind("Paste", "Ctrl+V");
 	keybindManager.setKeybind("BlockRotateCCW", "Q");
-	keybindManager.setKeybind("BlockRotateCW", "E");
+	keybindManager.setKeybind("BlockRotateCW", "R");
+	keybindManager.setKeybind("Confirm", "E");
 	keybindManager.setKeybind("ToggleInteractive", "I");
 	keybindManager.setKeybind("MakeCircuitBlock", "B");
 
+	connect(keybindManager.createShortcut("Paste", this), &QShortcut::activated, this, [this]() {
+		this->backend.getToolManagerManager().setTool("selection/paste tool");
+	});
+
+	connect(keybindManager.createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() {
+		this->backend.getToolManagerManager().setTool("interactive/state changer");
+	});
+
 	// create default circuit and evaluator
-    logInfo("Creating default circuitViewWidget");
+	logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();
-    
+
 	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
-    logInfo("Linking circuitViewWidget to backend");
+	logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) { emit toolModeOptionsChanged(toolMM.getActiveToolModes()); });
-	
+	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) {
+		auto modesOpt = toolMM.getActiveToolModes();
+		if (!modesOpt) {
+			emit toolModeOptionsChanged(nullptr);
+			return;
+		}
+		emit toolModeOptionsChanged(&(modesOpt.value()));
+	});
+
 	// create default hotbar and selector
 	openNewSelectorWindow();
 
@@ -55,14 +72,13 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 // Utility methods
 
 void MainWindow::setUpMenuBar() {
-    logInfo("Creating MenuBar");
+	logInfo("Creating MenuBar");
 	QMenuBar* menubar = menuBar();
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
 	QMenu* fileMenu = new QMenu(QStringLiteral("File"), this);
-	saveSubMenu = new QMenu("Save Circuit", this);
-	saveAsSubMenu = new QMenu("Save Circuit As", this);
-	loadIntoSubMenu = new QMenu("Load Circuit Into", this);
+	// saveSubMenu = new QMenu("Save Circuit", this);
+	// saveAsSubMenu = new QMenu("Save Circuit As", this);
 
 	menubar->addMenu(windowMenu);
 	menubar->addMenu(fileMenu);
@@ -79,218 +95,153 @@ void MainWindow::setUpMenuBar() {
 	connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
 
 	// submenu setup
-    logInfo("Setting up MenuBar submenus");
-	QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
-	saveAction->setText("Save Circuit");
-	QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
-	saveAsAction->setText("Save Circuit As");
+	logInfo("Setting up MenuBar submenus");
+	// QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
+	// saveAction->setText("Save Circuit");
+	// QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
+	// saveAsAction->setText("Save Circuit As");
 
-	QAction* loadAction = fileMenu->addMenu(loadIntoSubMenu); // should expand to show 1 through circuitViews.size()
-	loadAction->setText("Load Circuit Into");
+	// connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
+	// connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
 
-
-	connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
-	connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
-	connect(loadIntoSubMenu, &QMenu::aboutToShow, this, [this]() { updateLoadIntoMenu(); });
+	QAction* openCircuit = fileMenu->addAction(QStringLiteral("Open Circuit"));
+	connect(openCircuit, &QAction::triggered, this, [this]() { loadCircuit(); });
 }
 
 void MainWindow::updateSaveMenu(bool saveAs) {
-	QMenu* subMenu = saveAs ? saveAsSubMenu : saveSubMenu;
-	subMenu->clear();
-	for (std::pair<circuit_id_t, SharedCircuit> p : backend.getCircuitManager()) {
-		if (!saveAs && p.second->isSaved()) continue;
+	// QMenu* subMenu = saveAs ? saveAsSubMenu : saveSubMenu;
+	// subMenu->clear();
+	// for (std::pair<circuit_id_t, SharedCircuit> p : backend.getCircuitManager()) {
+	// 	if (!saveAs && p.second->isSaved()) continue;
 
-		int i = p.first;
-		std::string text;
-		if (p.second && !p.second->getCircuitNameNumber().empty()) {
-			text = p.second->getCircuitName();
-			if (!saveAs)  text += " - " + p.second->getSaveFilePath();
-		} else {
-			logWarning("Circuit name not found for save menu", "FileSaving");
-			continue;
-		}
-		QAction* action = subMenu->addAction(QString::fromStdString(text));
-		connect(action, &QAction::triggered, this, [this, i, saveAs]() { saveCircuit(i, saveAs); });
-	}
-}
-
-void MainWindow::updateLoadIntoMenu() {
-	QMenu* subMenu = loadIntoSubMenu;
-
-	subMenu->clear();
-	for (std::pair<QWidget*, CircuitViewWidget*> p : activeWidgets) {
-		CircuitView* circuitView = p.second->getCircuitView();
-		Circuit* circuit = circuitView->getCircuit();
-		if (!circuit) continue; // "None"
-		QAction* action = subMenu->addAction(QString::fromStdString(circuit->getCircuitNameNumber()));
-		connect(action, &QAction::triggered, this, [this, circuitView]() { loadCircuitInto(circuitView); });
-	}
-
-	QAction* action = subMenu->addAction("New Circuit");
-	connect(action, &QAction::triggered, this, [this]() { loadCircuit(); });
+	// 	int i = p.first;
+	// 	std::string text;
+	// 	if (p.second && !p.second->getCircuitNameNumber().empty()) {
+	// 		text = p.second->getCircuitName();
+	// 		if (!saveAs)  text += " - " + p.second->getSaveFilePath();
+	// 	} else {
+	// 		logWarning("Circuit name not found for save menu", "FileSaving");
+	// 		continue;
+	// 	}
+	// 	QAction* action = subMenu->addAction(QString::fromStdString(text));
+	// 	connect(action, &QAction::triggered, this, [this, i, saveAs]() { saveCircuit(i, saveAs); });
+	// }
 }
 
 void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
-	Circuit* circuit = backend.getCircuit(id).get();
-	if (!circuit) {
-		logWarning("Invalid circuit id to save: {}", "FileSaving", id);
-		return;
-	}
+	// Circuit* circuit = backend.getCircuit(id).get();
+	// if (!circuit) {
+	// 	logWarning("Invalid circuit id to save: {}", "FileSaving", id);
+	// 	return;
+	// }
 
-	if (!saveAs && circuit->isSaved()) {
-		logInfo("Circuit {} is already saved at: {}", "FileSaving", id, circuit->getSaveFilePath());
-		return;
-	} else if (!saveAs && !circuit->getSaveFilePath().empty()) {
-		const std::string& currentPath = circuit->getSaveFilePath();
-		if (circuitFileManager.saveToFile(currentPath, circuit)) {
-			circuit->setSaved();
-			logInfo("Resaved at: {}", "FileSaving", currentPath);
-		} else {
-			logWarning("Failed to save file at: {}", "FileSaving", currentPath);
-		}
-		return;
-	}
+	// if (!saveAs && circuit->isSaved()) {
+	// 	logInfo("Circuit {} is already saved at: {}", "FileSaving", id, circuit->getSaveFilePath());
+	// 	return;
+	// } else if (!saveAs && !circuit->getSaveFilePath().empty()) {
+	// 	const std::string& currentPath = circuit->getSaveFilePath();
+	// 	if (circuitFileManager.saveToFile(currentPath, circuit->getCircuitId())) {
+	// 		circuit->setSaved();
+	// 		logInfo("Resaved at: {}", "FileSaving", currentPath);
+	// 	} else {
+	// 		logWarning("Failed to save file at: {}", "FileSaving", currentPath);
+	// 	}
+	// 	return;
+	// }
 
-	// "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
-	std::string filePath =
-		QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
-	if (filePath.empty()) {
-		logWarning("Filepath not provided for save", "FileSaving");
-		return;
-	}
-	if (!circuitFileManager.saveToFile(filePath, circuit)) {
-		logWarning("Failed to save file at: {}", "FileSaving", filePath);
-		return;
-	}
+	// // "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
+	// logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
+	// std::string filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
+	// if (filePath.empty()) {
+	// 	logWarning("Filepath not provided for save", "FileSaving");
+	// 	return;
+	// }
+	// if (!circuitFileManager.saveToFile(filePath, circuit->getCircuitId())) {
+	// 	logWarning("Failed to save file at: {}", "FileSaving", filePath);
+	// 	return;
+	// }
 
-	// update saved state for regular saves
-	if (!saveAs) {
-		circuit->setSaved();
-		circuit->setSaveFilePath(filePath);
-	}
-	logInfo("Successfully saved file at: {}", "FileSaving", filePath);
+	// // update saved state for regular saves
+	// if (!saveAs) {
+	// 	circuit->setSaved();
+	// 	circuit->setSaveFilePath(filePath);
+	// }
+	// logInfo("Successfully saved file at: {}", "FileSaving", filePath);
 }
 
 // Loads circuit and all dependencies onto newly created circuits.
 void MainWindow::loadCircuit() {
-	std::string filePath =
-		QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
-
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-	if (!circuitFileManager.loadFromFile(filePath, parsed)) {
+	std::string filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
+	circuit_id_t id = circuitFileManager.loadFromFile(filePath);
+	if (id == 0) {
 		QMessageBox::warning(this, "Error", "Failed to load circuit file.");
 		return;
 	}
-
-	CircuitValidator validator(*parsed, backend.getBlockDataManager());
-	if (parsed->isValid()) {
-		circuit_id_t id = backend.createCircuit();
-		CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
-		backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-
-		Circuit* primaryNewCircuit = circuitViewWidget->getCircuitView()->getCircuit();
-		primaryNewCircuit->tryInsertParsedCircuit(*parsed, Position());
-
-		primaryNewCircuit->setSaved();
-		primaryNewCircuit->setSaveFilePath(filePath);
-		// all dependency circuits should be saved when created by preview tool
-		logInfo("Saved primary circuit: {}", "FileLoading", primaryNewCircuit->getSaveFilePath());
-	} else {
-		logWarning("Parsed circuit is not valid to be placed", "FileLoading");
-	}
-}
-
-// Loads the primary circuit onto an existing circuit, where the user places down the primary.
-// All dependencies are still loaded into their own circuits, upon the placement of the primary.
-void MainWindow::loadCircuitInto(CircuitView* circuitView) {
-	QString filePath = QFileDialog::getOpenFileName(this, "Load Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-	if (filePath.isEmpty()) return;
-
-	SharedParsedCircuit parsed = std::make_shared<ParsedCircuit>();
-    if (!circuitFileManager.loadFromFile(filePath.toStdString(), parsed)) {
-        QMessageBox::warning(this, "Error", "Failed to load circuit file.");
-        logError("Failed to load Circuit file");
-        return;
-    }
-
-    CircuitValidator validator(*parsed, backend.getBlockDataManager()); // validate and dont merge dependencies
-    if (parsed->isValid()){
-		circuitView->getToolManager().selectTool("preview placement tool");
-        // circuitView.getToolManager().getSelectedTool().setPendingPreviewData(parsed);
-        PreviewPlacementTool* previewTool = dynamic_cast<PreviewPlacementTool*>(circuitView->getToolManager().getSelectedTool());
-        if (previewTool) {
-            previewTool->setParsedCircuit(parsed);
-        }else{
-	        logError("Preview tool in mainWindow failed to cast", "FileLoading");
-        }
-    } else {
-        logWarning("Parsed circuit is not valid to be placed", "FileLoading");
-    }
 }
 
 void MainWindow::exportProject() {
-	QString baseDir = QFileDialog::getExistingDirectory(this, tr("Select Parent Directory"), QDir::homePath());
-	if (baseDir.isEmpty()) return;
+	// QString baseDir = QFileDialog::getExistingDirectory(this, tr("Select Parent Directory"), QDir::homePath());
+	// if (baseDir.isEmpty()) return;
 
-	logInfo("Export base directory: {}", "FileSaving", baseDir.toStdString());
+	// logInfo("Export base directory: {}", "FileSaving", baseDir.toStdString());
 
-	bool valid;
-	QString projectName = QInputDialog::getText(this, tr("Project Name"), tr("Enter project name:"), QLineEdit::Normal, "NewProject", &valid);
-	if (!valid || projectName.isEmpty()) return;
+	// bool valid;
+	// QString projectName = QInputDialog::getText(this, tr("Project Name"), tr("Enter project name:"), QLineEdit::Normal, "NewProject", &valid);
+	// if (!valid || projectName.isEmpty()) return;
 
-	QString projectPath = QDir(baseDir).filePath(projectName);
+	// QString projectPath = QDir(baseDir).filePath(projectName);
 
 
-	logInfo("Export full path: {}", "FileSaving", projectPath.toStdString());
+	// logInfo("Export full path: {}", "FileSaving", projectPath.toStdString());
 
-	if (QDir(baseDir).exists(projectName)) {
-		QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Overwrite?"), tr("Directory exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No);
-		if (reply != QMessageBox::Yes) return;
+	// if (QDir(baseDir).exists(projectName)) {
+	// 	QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Overwrite?"), tr("Directory exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No);
+	// 	if (reply != QMessageBox::Yes) return;
 
-		// remove it and then recreate it with new contents
-		//if (!QDir(projectPath).removeRecursively()) {
-		//    QMessageBox::warning(this, tr("Error"), tr("Failed to remove the existing project directory."));
-		//    return;
-		//}
-	}
+	// 	// remove it and then recreate it with new contents
+	// 	//if (!QDir(projectPath).removeRecursively()) {
+	// 	//    QMessageBox::warning(this, tr("Error"), tr("Failed to remove the existing project directory."));
+	// 	//    return;
+	// 	//}
+	// }
 
-	if (!QDir(baseDir).mkpath(projectPath)) {
-		QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
-    logWarning("Failed to create Project directory");
-		return;
-	}
+	// if (!QDir(baseDir).mkpath(projectPath)) {
+	// 	QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
+	// logWarning("Failed to create Project directory");
+	// 	return;
+	// }
 
-	// go through all the circuits and save it into this project directory
-	bool errorsOccurred = false;
+	// // go through all the circuits and save it into this project directory
+	// bool errorsOccurred = false;
 
-	for (std::pair<circuit_id_t, SharedCircuit> p : backend.getCircuitManager()) {
-		Circuit* circuit = p.second.get();
-		if (!circuit) continue;
+	// for (std::pair<circuit_id_t, SharedCircuit> p : backend.getCircuitManager()) {
+	// 	Circuit* circuit = p.second.get();
+	// 	if (!circuit) continue;
 
-		QString filepath = QString::fromStdString(circuit->getSaveFilePath());
-		QString filename;
-		if (!filepath.isEmpty()) {
-			filename = QFileInfo(filepath).fileName();
-		} else {
-			filename = QString("Untitled_%1.cir").arg(p.first);
-		}
+	// 	QString filepath = QString::fromStdString(circuit->getSaveFilePath());
+	// 	QString filename;
+	// 	if (!filepath.isEmpty()) {
+	// 		filename = QFileInfo(filepath).fileName();
+	// 	} else {
+	// 		filename = QString("Untitled_%1.cir").arg(p.first);
+	// 	}
 
-		std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();
+	// 	std::string projectFilePath = QDir(projectPath).filePath(filename).toStdString();
 
-		// save the circuit
-		if (!circuitFileManager.saveToFile(projectFilePath, circuit)) {
-			errorsOccurred = true;
-			logWarning("Failed to save circuit within project export: {}", "FileSaving", projectFilePath);
-		}
-	}
+	// 	// save the circuit
+	// 	if (!circuitFileManager.saveToFile(projectFilePath, circuit->getCircuitId())) {
+	// 		errorsOccurred = true;
+	// 		logWarning("Failed to save circuit within project export: {}", "FileSaving", projectFilePath);
+	// 	}
+	// }
 
-	if (errorsOccurred) {
-		QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
-    logWarning("Partially exported Project; some Circuits could not be exported");
-	} else {
-		QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
-    logInfo("Successfully exported Project");
-	}
+	// if (errorsOccurred) {
+	// 	QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
+	// logWarning("Partially exported Project; some Circuits could not be exported");
+	// } else {
+	// 	QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
+	// logInfo("Successfully exported Project");
+	// }
 }
 
 void MainWindow::openNewSelectorWindow() {
@@ -331,7 +282,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (widget && event->type() == QEvent::Close) {
 		auto itr = activeWidgets.find(widget);
 		if (itr != activeWidgets.end()) {
-			logInfo("Widget (was showing {}) closed", "", itr->second->getCircuitView()->getCircuit()->getCircuitName());
+			logInfo("Circuit view closed");
 			widget->removeEventFilter(this);
 			itr->second->close();
 			activeWidgets.erase(itr);
