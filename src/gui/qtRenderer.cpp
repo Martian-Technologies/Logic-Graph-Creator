@@ -353,15 +353,11 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 
 void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position position, Rotation rotation, logic_state_t state) {
 	// block
-	Vector blockSize(
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockWidth(type),
-		circuit->getBlockContainer()->getBlockDataManager()->getBlockHeight(type)
-	);
+	Vector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type));
 
 	Vector blockOriginOffset = rotateVectorWithArea(
 		Vector(0, 0),
-		blockSize.dx,
-		blockSize.dy,
+		blockSize,
 		rotation
 	);
 

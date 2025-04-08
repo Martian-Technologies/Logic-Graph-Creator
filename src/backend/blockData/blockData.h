@@ -3,7 +3,7 @@
 
 #include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
-#include "connectionEnd.h"
+#include "backend/container/block/connectionEnd.h"
 
 class BlockData {
 	friend class BlockDataManager;
@@ -16,18 +16,13 @@ public:
 	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType)); }
 	inline bool isPrimitive() const noexcept { return primitive; }
 
-	inline void setWidth(block_size_t width) noexcept {
-		this->width = width;
+	inline void setSize(const Vector& size) noexcept {
+		blockSize = size;
 		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
-	inline void setHeight(block_size_t height) noexcept {
-		this->height = height;
-		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
-	}
-	inline block_size_t getWidth() const noexcept { return width; }
-	inline block_size_t getHeight() const noexcept { return height; }
+	inline const Vector& getSize() const noexcept { return blockSize; }
+	inline Vector getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
 
 	inline BlockType getBlockType() const { return blockType; }
 
@@ -69,8 +64,7 @@ public:
 		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
-			width,
-			height,
+			blockSize,
 			rotation
 		);
 		for (auto& pair : connections) {
@@ -83,8 +77,7 @@ public:
 		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
-			width,
-			height,
+			blockSize,
 			rotation
 		);
 		for (auto& pair : connections) {
@@ -106,8 +99,7 @@ public:
 		return {
 			rotateVectorWithArea(
 				iter->second.first,
-				width,
-				height,
+				blockSize,
 				rotation
 			),
 			true
@@ -146,8 +138,7 @@ private:
 	bool placeable = true;
 	std::string name = "Unnamed Block";
 	std::string path = "Basic";
-	block_size_t width = 1;
-	block_size_t height = 1;
+	Vector blockSize = Vector(1, 1);
 	connection_end_id_t inputConnectionCount = 0;
 	std::unordered_map<connection_end_id_t, std::pair<Vector, bool>> connections;
 	DataUpdateEventManager* dataUpdateEventManager;

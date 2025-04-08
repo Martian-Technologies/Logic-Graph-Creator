@@ -294,7 +294,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 	outputFile << "UUID: " << circuit->getUUID() << "\n";
 	if (circuitBlockData) {
 		BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
-		outputFile << "size: (" << (unsigned int)(blockData->getWidth()) << ", " << (unsigned int)(blockData->getHeight()) << ")\n";
+		outputFile << "size: " << blockData->getSize().toString() << "\n";
 		outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
 		for (auto pair : blockData->getConnections()) {
 			const Position* position = circuitBlockData->getConnectionIdToPosition(pair.first);

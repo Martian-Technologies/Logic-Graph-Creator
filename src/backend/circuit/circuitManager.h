@@ -1,7 +1,7 @@
 #ifndef circuitManager_h
 #define circuitManager_h
 
-#include "backend/container/block/blockDataManager.h"
+#include "backend/blockData/blockDataManager.h"
 #include "circuitBlockDataManager.h"
 #include "parsedCircuit.h"
 #include "util/uuid.h"
@@ -69,8 +69,7 @@ public:
 		blockData->setPrimitive(false);
 		blockData->setName(circuit->getCircuitNameNumber());
 		blockData->setPath("Custom");
-		blockData->setWidth(2);
-		blockData->setHeight(1);
+		blockData->setSize(Vector(2, 1));
 
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 
@@ -112,7 +111,7 @@ public:
 				connection_end_id_t inputCount = blockData->getInputConnectionCount();
 				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
 				if (inputCount >= outputCount) {
-					blockData->setHeight(inputCount + 1);
+					blockData->setSize(Vector(2, inputCount + 1));
 				}
 				blockData->trySetConnectionInput(Vector(0, inputCount), inputCount + outputCount);
 				circuitBlockData->setConnectionIdName(inputCount + outputCount, "INPUT: " + std::to_string(inputCount));
@@ -125,7 +124,7 @@ public:
 				connection_end_id_t inputCount = blockData->getInputConnectionCount();
 				connection_end_id_t outputCount = blockData->getOutputConnectionCount();
 				if (outputCount >= inputCount) {
-					blockData->setHeight(outputCount + 1);
+					blockData->setSize(Vector(2, outputCount + 1));
 				}
 				blockData->trySetConnectionOutput(Vector(1, outputCount), inputCount + outputCount);
 				circuitBlockData->setConnectionIdName(inputCount + outputCount, "OUTPUT: " + std::to_string(outputCount));
@@ -185,8 +184,7 @@ public:
         data->setPath("Custom");
         data->setName(parsedCircuit->getName());
 
-        data->setHeight(parsedCircuit->getHeight());
-        data->setWidth(parsedCircuit->getWidth());
+		data->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getWidth()));
 
         const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
 

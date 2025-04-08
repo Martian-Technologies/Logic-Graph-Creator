@@ -386,6 +386,6 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 	BlockType type = (BlockType)(data->getValue());
 	const BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(type);
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	blockContainer.resizeBlockType(type, blockData->getWidth(), blockData->getHeight(), difference.get());
+	blockContainer.resizeBlockType(type, blockData->getSize(), difference.get());
 	sendDifference(difference);
 }

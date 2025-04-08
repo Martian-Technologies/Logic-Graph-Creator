@@ -1,7 +1,7 @@
 #ifndef blockDataManager_h
 #define blockDataManager_h
 
-#include "../../dataUpdateEventManager.h"
+#include "backend/dataUpdateEventManager.h"
 #include "blockData.h"
 
 class BlockDataManager {
@@ -22,7 +22,7 @@ public:
 		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 0), 0);
 		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 1), 1);
 		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionOutput(Vector(0, 0), 2);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setHeight(2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Vector(1, 2));
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");
 		getBlockData(BlockType::BUTTON)->setDefaultData(false);
@@ -82,19 +82,13 @@ public:
 		return blockData[type-1].getPath();
 	}
 
-	inline block_size_t getBlockWidth(BlockType type) const noexcept {
-		if (!blockExists(type)) return 0;
-		return blockData[type-1].getWidth();
+	inline Vector getBlockSize(BlockType type) const noexcept {
+		if (!blockExists(type)) return Vector();
+		return blockData[type-1].getSize();
 	}
-	inline block_size_t getBlockHeight(BlockType type) const noexcept {
-		if (!blockExists(type)) return 0;
-		return blockData[type-1].getHeight();
-	}
-	inline block_size_t getBlockWidth(BlockType type, Rotation rotation) const noexcept {
-		return isRotated(rotation) ? getBlockHeight(type) : getBlockWidth(type);
-	}
-	inline block_size_t getBlockHeight(BlockType type, Rotation rotation) const noexcept {
-		return isRotated(rotation) ? getBlockWidth(type) : getBlockHeight(type);
+	inline Vector getBlockSize(BlockType type, Rotation rotation) const noexcept {
+		if (!blockExists(type)) return Vector();
+		return blockData[type-1].getSize(rotation);
 	}
 
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, const Vector& vector) const noexcept {

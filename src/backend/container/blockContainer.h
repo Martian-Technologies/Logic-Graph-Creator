@@ -40,7 +40,7 @@ public:
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference);
 	// moves blocks until they 
-	void resizeBlockType(BlockType blockType, block_size_t newWidth, block_size_t newHeight, Difference* difference);
+	void resizeBlockType(BlockType blockType, const Vector& size, Difference* difference);
 
 	/* ----------- block data ----------- */
 	// // Gets the data from a block at position. Returns 0 if no block is found. 
