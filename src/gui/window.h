@@ -32,6 +32,7 @@ public:
 private:
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
+	std::optional<SelectorWindow> selectorWindow;
 
 	SdlWindow sdlWindow;
 	SDL_Renderer* sdlRenderer;

@@ -3,8 +3,7 @@
 #include <RmlUi/Core.h>
 
 #include "computerAPI/directoryManager.h"
-#include "gui/interaction/MenuTree.h"
-#include "gui/interaction/MenuTreeListener.h"
+#include "selectorWindow.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuManager.h"
 
@@ -23,18 +22,20 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	//dynamically generating blocks/tools menutree
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
-	MenuTree* toolTree = new MenuTree(document, toolTreeParent);
-	toolTree->addPath({"Blocks", "AND"});
-	toolTree->addPath({"Blocks", "OR"});
-	toolTree->addPath({"Blocks", "NOT"});
-	toolTree->addPath({"Tools", "Place", "Single"});
-	toolTree->addPath({"Tools", "Place", "Area"});
-	toolTree->addPath({"Tools", "Move", "Single"});
-	toolTree->addPath({"Tools", "Move", "Tensor"});
+	selectorWindow.emplace(document, toolTreeParentm)
+
+	// MenuTree* toolTree = new MenuTree(document, toolTreeParent);
+	// toolTree->addPath({ "Blocks", "AND" });
+	// toolTree->addPath({ "Blocks", "OR" });
+	// toolTree->addPath({ "Blocks", "NOT" });
+	// toolTree->addPath({ "Tools", "Place", "Single" });
+	// toolTree->addPath({ "Tools", "Place", "Area" });
+	// toolTree->addPath({ "Tools", "Move", "Single" });
+	// toolTree->addPath({ "Tools", "Move", "Tensor" });
 
 	// set up event listeners
 	Rml::ElementList menuTreeItems;
-	
+
 	document->GetElementsByTagName(menuTreeItems, "li");
 	for (Rml::Element* element : menuTreeItems) {
 		element->AddEventListener("click", new MenuTreeListener());
@@ -51,7 +52,7 @@ bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
 		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);
-		
+
 		return true;
 	}
 	return false;
@@ -61,11 +62,11 @@ void Window::update() {
 	rmlContext->Update();
 }
 
-void Window::render(RenderInterface_SDL& renderInterface) {	
+void Window::render(RenderInterface_SDL& renderInterface) {
 	renderInterface.BeginFrame(sdlRenderer);
 	rmlContext->Render();
 	renderInterface.EndFrame();
-	
+
 	SDL_RenderPresent(sdlRenderer);
 }
 
@@ -91,7 +92,7 @@ void Window::saveCircuit(circuit_id_t id, bool saveAs) {
 	// }
 
 	// // "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
-    // logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
+	// logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
 	// std::string filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 	// if (filePath.empty()) {
 	// 	logWarning("Filepath not provided for save", "FileSaving");
@@ -147,7 +148,7 @@ void Window::exportProject() {
 
 	// if (!QDir(baseDir).mkpath(projectPath)) {
 	// 	QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
-    // logWarning("Failed to create Project directory");
+	// logWarning("Failed to create Project directory");
 	// 	return;
 	// }
 
@@ -177,10 +178,10 @@ void Window::exportProject() {
 
 	// if (errorsOccurred) {
 	// 	QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
-    // logWarning("Partially exported Project; some Circuits could not be exported");
+	// logWarning("Partially exported Project; some Circuits could not be exported");
 	// } else {
 	// 	QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
-    // logInfo("Successfully exported Project");
+	// logInfo("Successfully exported Project");
 	// }
 }
 

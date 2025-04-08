@@ -1,5 +1,5 @@
-#ifndef MENUTREE_LISTENER_H
-#define MENUTREE_LISTENER_H
+#ifndef menutreeListenerH
+#define menutreeListenerH
 
 #include <RmlUi/Core.h>
 
@@ -11,4 +11,4 @@ public:
   void OnDetach(Rml::Element* element) override;
 };
 
-#endif /* MENUTREE_LISTENER_H */ 
+#endif /* menutreeListenerH */ 

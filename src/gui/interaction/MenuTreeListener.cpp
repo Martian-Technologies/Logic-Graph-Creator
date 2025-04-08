@@ -1,13 +1,13 @@
-#include "MenuTreeListener.h"
+#include "menuTreeListener.h"
 
 #include <RmlUi/Core.h>
 
 MenuTreeListener::MenuTreeListener() {
-    logInfo("Event Listener Created");
+    // logInfo("Event Listener Created");
 }
 
 MenuTreeListener::~MenuTreeListener() {
-    logInfo("Event Listener Destroyed");
+    // logInfo("Event Listener Destroyed");
 }
 
 void MenuTreeListener::ProcessEvent(Rml::Event& event) {
