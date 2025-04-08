@@ -12,7 +12,7 @@ constexpr int FastPower(T x) {
 	if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
-constexpr int abs(int x) { return x < 0 ? -x : x; }
+constexpr int Abs(int x) { return x < 0 ? -x : x; }
 
 template <typename T>
 constexpr char signum(T x) {
@@ -32,8 +32,8 @@ constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : 
 
 constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
 
-bool approx_equals(float a, float b) {
-	return abs(a - b) < nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+constexpr bool approx_equals(float a, float b) {
+	return fabs(a - b) < nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
 }
 
 

@@ -25,10 +25,10 @@ bool AreaCreationTool::click(const Event* event) {
 				std::make_shared<ProjectionSelection>(
 					originPosition,
 					Vector(signum(lastPointerPosition.x - originPosition.x), 0),
-					abs(lastPointerPosition.x - originPosition.x)+1
+					Abs(lastPointerPosition.x - originPosition.x)+1
 				),
 				Vector(0, signum(lastPointerPosition.y - originPosition.y)),
-				abs(lastPointerPosition.y - originPosition.y)+1
+				Abs(lastPointerPosition.y - originPosition.y)+1
 			)
 		);
 	} else {

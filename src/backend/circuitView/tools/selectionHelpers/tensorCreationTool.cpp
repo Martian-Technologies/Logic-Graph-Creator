@@ -47,7 +47,7 @@ bool TensorCreationTool::click(const Event* event) {
 	} else { // count
 		float dis = step.length();
 		float length = lastPointerFPosition.lengthAlongProjectToVec(originPosition.free() + FVector(0.5f, 0.5f), step.free());
-		int count = abs(round(length / dis)) + 1;
+		int count = Abs(round(length / dis)) + 1;
 		selection = std::make_shared<ProjectionSelection>(selection, (length > 0) ? step : step * -1, count);
 		tensorStage++;
 	}
@@ -131,7 +131,7 @@ void TensorCreationTool::updateElements() {
 	} else { // count
 		float dis = step.length();
 		float length = lastPointerFPosition.lengthAlongProjectToVec(originPosition.free() + FVector(0.5f, 0.5f), step.free());
-		int count = abs(round(length / dis)) + 1;
+		int count = Abs(round(length / dis)) + 1;
 		displaySelection = std::make_shared<ProjectionSelection>(selection, (length > 0) ? step : step * -1, count);
 	}
 	elementCreator.addSelectionElement(SelectionObjectElement(displaySelection, SelectionObjectElement::RenderMode::ARROWS));
