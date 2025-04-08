@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <mach/processor_info.h>
 
 #include "gatalityParser.h"
 #include "util/uuid.h"
@@ -19,7 +20,7 @@ BlockType stringToBlockType(const std::string& str) {
 	if (str == "CONSTANT") return BlockType::CONSTANT;
 	if (str == "LIGHT") return BlockType::LIGHT;
 	if (str == "CUSTOM" || (str.front() == '\"' && str.back() == '\"')) return BlockType::CUSTOM;
-	return BlockType::NONE;
+	return BlockType::CUSTOM;
 }
 
 Rotation stringToRotation(const std::string& str) {
@@ -84,7 +85,9 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 	inputFile >> token;
 	
 	unsigned int version;
-    if (token == "version_5") {
+    if (token == "version_5_compact") {
+        return loadCompressed(path, inputFile);
+    } else if (token == "version_5") {
         // v5 requires "end" keyword after circuit in save file
 		version = 5;
     } else if (token == "version_3" || token == "version_4") {
@@ -282,7 +285,195 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
     return allParsed;
 }
 
-bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
+std::vector<circuit_id_t> GatalityParser::loadCompressed(const std::string& path, std::ifstream& inputFile) {
+    std::unordered_map<int, std::string> typeDict;
+    std::vector<circuit_id_t> allParsed;
+
+    logInfo("Loading Compressed Circuit: {}", "", path);
+    int typeCount;
+    inputFile >> typeCount;
+
+    for (int i = 0; i < typeCount; ++i) {
+        int typeId;
+        std::string typeStr;
+        inputFile >> typeId >> typeStr;
+        typeDict[typeId] = typeStr;
+    }
+
+    std::string token;
+	int blockId, connId, rot;
+	float posX, posY;
+	BlockType blockType;
+	Rotation rotation;
+
+    const CircuitBlockDataManager* cbdm = circuitManager->getCircuitBlockDataManager();
+
+    SharedParsedCircuit currentCircuit = nullptr;
+    bool isMultiCircuit = false;
+    std::unordered_map<std::string, BlockType> localCircuitMap;
+
+	while (inputFile >> token) {
+		if (token == "I") {
+			std::string importFileName;
+			inputFile >> std::quoted(importFileName);
+
+			std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
+			const std::string& fPath = fullPath.string();
+			logInfo("File to access: {}", "GatalityParser", path);
+
+            std::vector<circuit_id_t> subCircuitIds = circuitFileManager->loadFromFile(fPath);
+			if (!subCircuitIds.empty()) {
+                for (circuit_id_t subId: subCircuitIds) {
+                    const CircuitBlockData* cbd = cbdm->getCircuitBlockData(subId);
+                    if (!cbd) {
+                        logError("Could not find CircuitBlockData loaded from {}", "GatalityParser", fPath);
+                        return {};
+                    }
+                    customBlockMap[importFileName] = cbd->getBlockType();
+                    // log:
+                    SharedCircuit c = circuitManager->getCircuit(subId);
+                    if (!c){ logError("Could not find Circuit loaded from {}", "GatalityParser", fPath); return {}; }
+                    logInfo("Loaded dependency circuit: {} ({})", "GatalityParser", importFileName, c->getUUID());
+                }
+			} else {
+				logError("Failed to import dependency: {}", "GatalityParser", importFileName);
+			}
+		} else if (token == "C") {
+            isMultiCircuit = currentCircuit != nullptr;
+            // make a new parsed circuit for this next circuit
+            currentCircuit = std::make_shared<ParsedCircuit>();
+
+			std::string circuitName;
+			inputFile >> std::quoted(circuitName);
+			currentCircuit->setName(circuitName);
+
+            // log:
+            if (isMultiCircuit == false) {
+                logInfo("Found primary circuit: {}", "GatalityParser", circuitName);
+            } else {
+                logInfo("Found sub-multi circuit: {}", "GatalityParser", circuitName);
+            }
+		} else if (token == "S") {
+			currentCircuit->markAsCustom();
+			unsigned int width, height;
+			inputFile >> width >> height;
+			currentCircuit->setWidth(width);
+			currentCircuit->setHeight(height);
+		} else if (token == "P") {
+			currentCircuit->markAsCustom();
+			unsigned int portCount;
+			inputFile >> portCount;
+			for (unsigned int i = 0; i < portCount; ++i) {
+				connection_end_id_t endId;
+				cord_t vecX, vecY;
+				inputFile >> token >> endId >> blockId >> vecX >> vecY;
+				currentCircuit->addConnectionPort(token == "I", endId, Vector(vecX, vecY), blockId);
+                logInfo("\tAdding port: {} {}, {}, {}, {}", "GatalityParser", token, endId, blockId, vecX, vecY);
+			}
+		} else if (token == "U") {
+			std::string uuid;
+			inputFile >> uuid;
+			currentCircuit->setUUID(uuid == "null" ? generate_uuid_v4() : uuid);
+			logInfo("\tSet UUID: {}", "GatalityParser", uuid);
+		} else if (token == "b") {
+            int blocktypeInt;
+			inputFile >> blockId;
+			inputFile >> blocktypeInt;
+			blockType = stringToBlockType(typeDict.at(blocktypeInt));
+
+			inputFile >> posX;
+			inputFile >> posY;
+
+			inputFile >> rot;
+			rotation = Rotation(rot);
+
+			block_id_t currentBlockId = blockId;
+            int numConns = 0;
+			inputFile >> numConns;
+
+			// Determine if block is a sub-circuit and make sure the conn id count is valid
+			// blockType is set as custom from the stringToBlockType by checking for quotes, this should be improved later
+			if (blockType == BlockType::CUSTOM) {
+				const std::string& circuitIdentifier = typeDict.at(blocktypeInt); // remove quotes
+
+                std::unordered_map<std::string,BlockType>::iterator itr = customBlockMap.find(circuitIdentifier);
+                if (itr != customBlockMap.end()){
+                    // where circuitIdentifier is the relative filename that is being used to reference a subcircuit
+					blockType = itr->second;
+                } else {
+                    // Identifier is expected to be a uuid of the target subcircuit
+                    SharedCircuit circuit = circuitManager->getCircuit(circuitIdentifier);
+                    if (!circuit) {
+                        logError("Could not find Circuit with UUID (possibly from multi-circuit save order): {}", "GatalityParser", circuitIdentifier);
+                        return {};
+                    }
+                    blockType = cbdm->getCircuitBlockData(circuit->getCircuitId())->getBlockType();
+                }
+				const BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(blockType);
+				if (numConns != blockData->getConnectionCount()) {
+					logError("Invalid conn id count for custom block, {} expecting {} for circuit {}", "GatalityParser", numConns, blockData->getConnectionCount(), circuitIdentifier);
+                    return {};
+				}
+			}
+
+			currentCircuit->addBlock(blockId, { .pos = FPosition(posX, posY), .rotation = rotation, .type = blockType });
+
+            std::string line;
+            std::getline(inputFile, line);
+
+            std::vector<std::string> segments;
+            size_t start = 0;
+            size_t end = line.find('|');
+            while (end != std::string::npos) {
+                segments.push_back(line.substr(start, end - start));
+                start = end + 1;
+                end = line.find('|', start);
+            }
+            segments.push_back(line.substr(start));
+
+			for (int i = 0; i < numConns; ++i) {
+                std::istringstream segStream(segments[i+1]);
+				while (segStream >> blockId >> connId) {
+					currentCircuit->addConnection({
+						static_cast<block_id_t>(currentBlockId),
+						static_cast<connection_end_id_t>(i),
+						static_cast<block_id_t>(blockId),
+						static_cast<connection_end_id_t>(connId)
+					});
+				}
+			}
+        } else if (token == "e") {
+            circuit_id_t id = loadParsedCircuit(currentCircuit, false);
+            if (id == 0) {
+                logError("Circuit could not be created from parsed circuit", "GatalityParser");
+                return {};
+            }
+            allParsed.push_back(id);
+        }
+	}
+
+    if (allParsed.empty() && currentCircuit != nullptr) {
+        // old version without "end"
+        // we will simply try to support by parsing this last circuit in the file
+        // should work okay because versions before 5 did not allow multi-circuit files
+        circuit_id_t id = loadParsedCircuit(currentCircuit, false);
+        if (id == 0) {
+            logError("Circuit could not be created from parsed circuit", "GatalityParser");
+            return {};
+        }
+        allParsed.push_back(id);
+    }
+
+    if (allParsed.size() == 1){
+        // only set the path if this was the only circuit in the save file
+        circuitFileManager->setCircuitFilePath(allParsed[0], path);
+    }
+	inputFile.close();
+	importedFiles.erase(path);
+    return allParsed;
+}
+
+bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool compress) {
 	const std::string& path = fileData.fileLocation;
 	
 	std::ofstream outputFile(path);
@@ -290,7 +481,18 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		logError("Couldn't open file at path: {}", "GatalityParser", path);
 		return false;
 	}
-    outputFile << "version_5\n";
+
+    std::unordered_map<std::string, int> typeDict;
+    if (compress) {
+        outputFile << "version_5_compact\n";
+        buildTypeDictionary(fileData, typeDict);
+        outputFile << typeDict.size() << '\n';
+        for (const auto& [typeStr, id] : typeDict) {
+            outputFile << id << " " << typeStr << "\n";
+        }
+    } else {
+        outputFile << "version_5\n";
+    }
 
     const CircuitBlockDataManager* cbdm = circuitManager->getCircuitBlockDataManager();
     const BlockDataManager* bdm = circuitManager->getBlockDataManager();
@@ -326,7 +528,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
                 return false;
             }
             const std::string& relPath = std::filesystem::relative(std::filesystem::path(*subCircuitPath), std::filesystem::path(path)/"..").string();
-            outputFile << "import \"" << relPath << "\"\n"; // TODO make relative path from this file
+            outputFile << (compress ? "I \"" :"import \"") << relPath << "\"\n"; // TODO make relative path from this file
         }
     }
 
@@ -354,15 +556,25 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
         SharedCircuit circuit = circuitManager->getCircuit(circuitId);
         const BlockContainer* bc = circuit->getBlockContainer();
         // Write the data of each circuit
-        outputFile << "\nCircuit: \"" << circuit->getCircuitName() << "\"\n";
-        outputFile << "UUID: " << circuit->getUUID() << "\n";
+        if (compress) {
+            outputFile << "\nC \"" << circuit->getCircuitName() << "\" ";
+            outputFile << "U " << circuit->getUUID() << "\n";
+        } else {
+            outputFile << "\nCircuit: \"" << circuit->getCircuitName() << "\"\n";
+            outputFile << "UUID: " << circuit->getUUID() << "\n";
+        }
 
         // If the circuit has blockdata, then it is an integrated circuit and we have to write the ports and size
         const CircuitBlockData* cbd = cbdm->getCircuitBlockData(circuitId);
         if (cbd) {
             const BlockData* blockData = bdm->getBlockData(cbd->getBlockType());
-            outputFile << "size: (" << (unsigned int)(blockData->getWidth()) << ", " << (unsigned int)(blockData->getHeight()) << ")\n";
-            outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
+            if (compress) {
+                outputFile << "S " << (unsigned int)(blockData->getWidth()) << " " << (unsigned int)(blockData->getHeight()) << " \n";
+                outputFile << "P " << blockData->getConnectionCount();
+            } else {
+                outputFile << "size: (" << (unsigned int)(blockData->getWidth()) << ", " << (unsigned int)(blockData->getHeight()) << ")\n";
+                outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
+            }
 
             for (const std::pair<connection_end_id_t, std::pair<Vector, bool>>& p : blockData->getConnections()) {
                 const Position* position = cbd->getConnectionIdToPosition(p.first);
@@ -371,7 +583,14 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
                     logError("Could not find block for connection: {}", "GatalityParser", p.first);
                     return false;
                 }
-                outputFile << "\t(" << (p.second.second ? "IN, " : "OUT, ") << p.first << ", " << block->id() << ", " << p.second.first.toString() << ")\n";
+                if (compress) {
+                    outputFile << " " << (p.second.second ? "I " : "O ") << p.first << " " << block->id() << " " << p.second.first.dx << " " << p.second.first.dy;
+                } else {
+                    outputFile << "\t(" << (p.second.second ? "IN, " : "OUT, ") << p.first << ", " << block->id() << ", " << p.second.first.toString() << ")\n";
+                }
+            }
+            if (compress) {
+                outputFile << '\n';
             }
         }
 
@@ -388,27 +607,72 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
             if (!blockData->isPrimitive()) {
                 circuit_id_t subCircuitId = cbdm->getCircuitId(block.type());
                 const SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
-                blockTypeStr = '"' + circuit->getUUID() + '"';
+                blockTypeStr = circuit->getUUID();
             } else {
                 blockTypeStr = blockTypeToString(block.type());
             }
 
-            outputFile << "blockId " << p.first << ' '
-                << blockTypeStr << ' ' << pos.x << ' '
-                << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
-                << connectionNum << '\n';
+            if (compress) {
+                outputFile << "b " << p.first << ' '
+                    << typeDict.at(blockTypeStr) << ' ' << pos.x << ' '
+                    << pos.y << ' ' << (unsigned int)block.getRotation() << ' '
+                    << connectionNum << '|';
+            } else {
+                outputFile << "blockId " << p.first << ' '
+                    << blockTypeStr << ' ' << pos.x << ' '
+                    << pos.y << ' ' << rotationToString(block.getRotation()) << ' '
+                    << connectionNum << '\n';
+            }
 
             for (int j = 0; j < connectionNum; ++j) {
-                outputFile << '\t' << "(connId:" << j << ')';
-                for (const ConnectionEnd& conn : connectionContainer.getConnections(j)) {
-                    outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
+                if (compress) {
+                    for (const ConnectionEnd& conn : connectionContainer.getConnections(j)) {
+                        outputFile << ' ' << conn.getBlockId() << ' ' << conn.getConnectionId();
+                    }
+                    if (j < connectionNum-1){
+                        outputFile << " |";
+                    } else {
+                        outputFile << '\n';
+                    }
+                } else {
+                    outputFile << '\t' << "(connId:" << j << ')';
+                    for (const ConnectionEnd& conn : connectionContainer.getConnections(j)) {
+                        outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
+                    }
+                    outputFile << '\n';
                 }
-                outputFile << '\n';
             }
         }
-        outputFile << "end\n"; // end delimeter for each circuit that we add to the save file
+        if (compress) {
+            outputFile << "e\n";
+        } else {
+            outputFile << "end\n"; // end delimeter for each circuit that we add to the save file
+        }
     }
 
 	outputFile.close();
 	return true;
+}
+
+void GatalityParser::buildTypeDictionary(const CircuitFileManager::FileData& fileData, std::unordered_map<std::string, int>& typeDict) {
+    int nextId = 1;
+    const BlockDataManager* bdm = circuitManager->getBlockDataManager();
+    const CircuitBlockDataManager* cbdm = circuitManager->getCircuitBlockDataManager();
+
+    for (circuit_id_t circuitId : fileData.circuitIds) {
+        SharedCircuit circuit = circuitManager->getCircuit(circuitId);
+        if (!circuit) continue;
+
+        for (const auto& [blockId, block] : *circuit->getBlockContainer()) {
+            std::string typeStr;
+            if (cbdm->getCircuitId(block.type()) != 0) {
+                typeStr = circuitManager->getCircuit(cbdm->getCircuitId(block.type()))->getUUID();
+            } else {
+                typeStr = blockTypeToString(block.type());
+            }
+
+            if (!typeDict.emplace(typeStr, nextId).second) continue;
+            ++nextId;
+        }
+    }
 }

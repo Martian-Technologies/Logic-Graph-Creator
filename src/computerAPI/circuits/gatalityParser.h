@@ -10,8 +10,10 @@ class GatalityParser: public ParsedCircuitLoader {
 public:
     GatalityParser(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : ParsedCircuitLoader(circuitFileManager, circuitManager) {}
     std::vector<circuit_id_t> load(const std::string& path);
-    bool save(const CircuitFileManager::FileData& fileData);
+    std::vector<circuit_id_t> loadCompressed(const std::string& path, std::ifstream& input);
+    bool save(const CircuitFileManager::FileData& fileData, bool compress);
 
+    void buildTypeDictionary(const CircuitFileManager::FileData& fileData, std::unordered_map<std::string, int>& typeDict);
 private:
     std::unordered_map<std::string, BlockType> customBlockMap; // filename to type, used at version_3
     std::unordered_set<std::string> importedFiles; // file paths

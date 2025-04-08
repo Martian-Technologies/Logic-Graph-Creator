@@ -34,7 +34,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, circuit_id_t circui
     // Doesn't check if the file is saved, we are just saving as
 	setCircuitFilePath(circuitId, path);
 	GatalityParser saver(this, circuitManager);
-	if (saver.save(filePathToFile.at(path))) {
+	if (saver.save(filePathToFile.at(path), true)) {
 		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", path);
 		return true;
 	} 
@@ -56,7 +56,7 @@ bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
     fd.circuitLastSaved[circuitId] = currentEditCount;
 
 	GatalityParser saver(this, circuitManager);
-	if (saver.save(fd)) {
+	if (saver.save(fd, false)) {
 		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", iter->second);
 		return true;
 	}
@@ -83,7 +83,7 @@ bool CircuitFileManager::saveAsMultiCircuitFile(const std::unordered_set<circuit
     GatalityParser saver(this, circuitManager);
     FileData fileData(fileLocation);
     fileData.circuitIds = circuits; // put all circuits in here, and the saver will save as a single mulit-circuit file
-    if (saver.save(fileData)) {
+    if (saver.save(fileData, true)) {
 		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocation);
 		return true;
     }
@@ -111,7 +111,7 @@ bool CircuitFileManager::saveAsNewProject(const std::unordered_set<circuit_id_t>
             // get the name that we loaded the circuit in as
             fileData.fileLocation = (prefixPath / std::filesystem::path(itr->second).filename()).string();
         }
-        if (saver.save(fileData)) {
+        if (saver.save(fileData, true)) {
             logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocationPrefix);
         } else {
             return false;
