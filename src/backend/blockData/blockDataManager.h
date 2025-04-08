@@ -19,36 +19,36 @@ public:
 		// TRISTATE_BUFFER
 		getBlockData(BlockType::TRISTATE_BUFFER)->setName("Tristate Buffer");
 		getBlockData(BlockType::TRISTATE_BUFFER)->setDefaultData(false);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 0), 0);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionInput(Vector(0, 1), 1);
-		getBlockData(BlockType::TRISTATE_BUFFER)->trySetConnectionOutput(Vector(0, 0), 2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0), 0);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 1), 1);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionOutput(Vector(0), 2);
 		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Vector(1, 2));
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");
 		getBlockData(BlockType::BUTTON)->setDefaultData(false);
-		getBlockData(BlockType::BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::BUTTON)->setConnectionOutput(Vector(0), 0);
 		// TICK_BUTTON
 		getBlockData(BlockType::TICK_BUTTON)->setName("Tick Button");
 		getBlockData(BlockType::TICK_BUTTON)->setDefaultData(false);
-		getBlockData(BlockType::TICK_BUTTON)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::TICK_BUTTON)->setConnectionOutput(Vector(0), 0);
 		// SWITCH
 		getBlockData(BlockType::SWITCH)->setName("Switch");
 		getBlockData(BlockType::SWITCH)->setDefaultData(false);
-		getBlockData(BlockType::SWITCH)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::SWITCH)->setConnectionOutput(Vector(0), 0);
 		// CONSTANT
 		getBlockData(BlockType::CONSTANT)->setName("Constant");
 		getBlockData(BlockType::CONSTANT)->setDefaultData(false);
 		getBlockData(BlockType::CONSTANT)->setIsPlaceable(false);
-		getBlockData(BlockType::CONSTANT)->trySetConnectionOutput(Vector(0, 0), 0);
+		getBlockData(BlockType::CONSTANT)->setConnectionOutput(Vector(0), 0);
 		// LIGHT
 		getBlockData(BlockType::LIGHT)->setName("Light");
 		getBlockData(BlockType::LIGHT)->setDefaultData(false);
-		getBlockData(BlockType::LIGHT)->trySetConnectionInput(Vector(0, 0), 0);
+		getBlockData(BlockType::LIGHT)->setConnectionInput(Vector(0), 0);
 	}
 
 	inline BlockType addBlock() noexcept {
 		blockData.emplace_back((BlockType)(blockData.size()+1), dataUpdateEventManager);
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
+		sendBlockDataUpdate();
 		return (BlockType) blockData.size();
 	}
 

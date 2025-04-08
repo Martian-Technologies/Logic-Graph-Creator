@@ -98,7 +98,7 @@ bool CircuitValidator::setOverlapsUnpositioned() {
 
 		std::vector<Position> takenPositions;
 		bool hasOverlap = false;
-		for (auto iter = (blockData->getSize(block.rotation) - Vector(1, 1)).iter(); iter; iter++) {
+		for (auto iter = (blockData->getSize(block.rotation) - Vector(1)).iter(); iter; iter++) {
 			Position checkPos(intPos + *iter);
 			if (occupiedPositions.count(checkPos)) {
 				hasOverlap = true;
@@ -327,7 +327,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 					takenPositions.clear();
 					std::vector<Position> takenPositions;
 					canPlace = true;
-					for (auto iter = (blockSize - Vector(1, 1)).iter(); iter; iter++) {
+					for (auto iter = (blockSize - Vector(1)).iter(); iter; iter++) {
 						Position checkPos(Position(x, y) + *iter);
 						if (occupiedPositions.count(checkPos)) {
 							canPlace = false;

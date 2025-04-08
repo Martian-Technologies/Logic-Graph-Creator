@@ -20,7 +20,7 @@ class Circuit {
 public:
 	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
         circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
-		dataUpdateEventReceiver.linkFunction("blockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
+		dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
 	}
 
 	inline const std::string& getUUID() const { return circuitUUID; }
@@ -101,7 +101,11 @@ private:
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }
 
-	void sendDifference(DifferenceSharedPtr difference) { if (difference->empty()) return; editCount++; if (!midUndo) undoSystem.addDifference(difference); for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+	void sendDifference(DifferenceSharedPtr difference) {
+		if (difference->empty()) return;
+		editCount++;
+		if (!midUndo) undoSystem.addDifference(difference);
+		for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
 
     std::string circuitName;
     std::string circuitUUID;

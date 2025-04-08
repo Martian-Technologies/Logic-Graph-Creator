@@ -378,14 +378,13 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		logError("eventData passed was null", "Circuit");
 		return;
 	}
-	auto data = dynamic_cast<const DataUpdateEventManager::EventDataUnsignedInt*>(eventData);
+	auto data = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>*>(eventData);
 	if (!data) {
-		logError("Could not get EventDataUnsignedInt from eventData", "Circuit");
+		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
 		return;
 	}
-	BlockType type = (BlockType)(data->getValue());
-	const BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(type);
+	BlockType type = data->get().first;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	blockContainer.resizeBlockType(type, blockData->getSize(), difference.get());
+	blockContainer.resizeBlockType(type, data->get().second, difference.get());
 	sendDifference(difference);
 }

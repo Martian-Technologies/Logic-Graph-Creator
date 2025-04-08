@@ -276,7 +276,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -293,7 +293,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(255, 0, 0, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -310,7 +310,7 @@ void QtRenderer::renderSelection(QPainter* painter, const SharedSelection select
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 		if (cellSelection) {
 			painter->setBrush(QColor(0, 0, 255, 64));
-			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1, 1)).free())));
+			painter->drawRect(QRectF(gridToQt(cellSelection->getPosition().free()), gridToQt((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -356,7 +356,7 @@ void QtRenderer::renderBlock(QPainter* painter, BlockType type, Position positio
 	Vector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type));
 
 	Vector blockOriginOffset = rotateVectorWithArea(
-		Vector(0, 0),
+		Vector(0),
 		blockSize,
 		rotation
 	);

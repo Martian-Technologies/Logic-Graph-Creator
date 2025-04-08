@@ -16,6 +16,8 @@ struct Vector {
 
 	inline Vector() : dx(0), dy(0) { }
 	inline Vector(cord_t dx, cord_t dy) : dx(dx), dy(dy) { }
+	// allows the easy creation of vectors that are all the same value
+	inline Vector(cord_t d) : dx(d), dy(d) { }
 	inline FVector free() const;
 
 	inline std::string toString() const { return "<" + std::to_string(dx) + ", " + std::to_string(dy) + ">"; }
@@ -45,14 +47,14 @@ struct Vector {
 class Vector::Iterator {
 public:
 	inline Iterator(const Vector& vector) {
-		if (vector == Vector()) {
+		if (vector == Vector(0)) {
 			end = 0;
 			return;
 		}
 		xNeg = 1 - 2 * (vector.dx < 0);
 		width = xNeg * vector.dx + 1;
 		yNeg = 1 - 2 * (vector.dy < 0);
-		end = yNeg * (vector.dy + 1) * width - 1;
+		end = (yNeg * vector.dy + 1) * width - 1;
 	}
 	inline Iterator& operator++() { next(); return *this; }
 	inline Iterator& operator--() { prev(); return *this; }

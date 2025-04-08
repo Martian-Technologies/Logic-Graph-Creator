@@ -85,6 +85,7 @@ private:
 	inline Cell* getCell(const Position& position) { return grid.get(position); }
 	inline void insertCell(const Position& position, Cell cell) { grid.insert(position, cell); }
 	inline void removeCell(const Position& position) { grid.remove(position); }
+	void placeBlockCells(block_id_t id, const Position& position, const Vector& size);
 	void placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId);
 	void placeBlockCells(const Block* block);
 	void removeBlockCells(const Block* block);

@@ -131,7 +131,7 @@ void SinglePlaceTool::updateElements() {
 	if (!pointerInView) return;
 	if (selectedBlock != BlockType::NONE) {
 		if (!circuit) return;
-		Vector size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(selectedBlock, rotation)-Vector(1, 1);
+		Vector size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(selectedBlock, rotation)-Vector(1);
 		bool cantPlace = circuit->getBlockContainer()->checkCollision(lastPointerPosition, rotation, selectedBlock);
 		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, lastPointerPosition + size, cantPlace));
 		elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
