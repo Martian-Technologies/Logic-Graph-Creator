@@ -106,7 +106,7 @@ struct FVector {
 
 	inline std::string toString() const { return "<" + std::to_string(dx) + ", " + std::to_string(dy) + ">"; }
 
-	inline bool operator==(const FVector& other) const { return dx == other.dx && dy == other.dy; }
+	inline bool operator==(const FVector& other) const { return approx_equals(dx, other.dx) && approx_equals(dy, other.dy); }
 	inline bool operator!=(const FVector& other) const { return !operator==(other); }
 
 	inline f_cord_t manhattenlength() const { return fabs(dx) + fabs(dy); }
@@ -241,7 +241,7 @@ struct FPosition {
 
 	inline std::string toString() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 
-	inline bool operator==(const FPosition& position) const { return x == position.x && y == position.y; }
+	inline bool operator==(const FPosition& position) const { return approx_equals(x, position.x) && approx_equals(y, position.y); }
 	inline bool operator!=(const FPosition& position) const { return !operator==(position); }
 	inline bool withinArea(const FPosition& small, const FPosition& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 
