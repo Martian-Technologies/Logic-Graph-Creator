@@ -118,6 +118,7 @@ struct FVector {
 	inline FVector operator-(const FVector& other) const { return FVector(dx - other.dx, dy - other.dy); }
 	inline FVector& operator-=(const FVector& other) { dx -= other.dx; dy -= other.dy; return *this; }
 	inline FVector operator*(f_cord_t scalar) const { return FVector(dx * scalar, dy * scalar); }
+	inline FVector& operator*=(f_cord_t scalar) { ; return *this; }
 	inline f_cord_t operator*(const FVector& vector) const { return dx * vector.dx + dy * vector.dy; }
 	inline FVector operator/(f_cord_t scalar) { return FVector(dx / scalar, dy / scalar); }
 	inline FVector& operator/=(f_cord_t scalar) { dx /= scalar; dy /= scalar; return *this; }
