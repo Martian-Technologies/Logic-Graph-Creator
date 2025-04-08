@@ -25,7 +25,7 @@ struct Vector {
 	inline bool operator==(const Vector& other) const { return dx == other.dx && dy == other.dy; }
 	inline bool operator!=(const Vector& other) const { return !operator==(other); }
 
-	inline cord_t manhattenlength() const { return Abs(dx) + Abs(dy); }
+	inline cord_t manhattenlength() const { return abs(dx) + abs(dy); }
 	inline f_cord_t lengthSquared() const { return FastPower<2>(dx) + FastPower<2>(dy); }
 	inline f_cord_t length() const { return sqrt(lengthSquared()); }
 
@@ -149,8 +149,8 @@ struct Position {
 	inline bool operator!=(const Position& position) const { return !operator==(position); }
 	inline bool withinArea(const Position& small, const Position& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 
-	inline cord_t manhattenDistanceTo(const Position& position) const { return Abs(x - position.x) + Abs(y - position.y); }
-	inline cord_t manhattenDistanceToOrigin() const { return Abs(x) + Abs(y); }
+	inline cord_t manhattenDistanceTo(const Position& position) const { return abs(x - position.x) + abs(y - position.y); }
+	inline cord_t manhattenDistanceToOrigin() const { return abs(x) + abs(y); }
 	inline cord_t distanceToSquared(const Position& position) const { return FastPower<2>(x - position.x) + FastPower<2>(y - position.y); }
 	inline cord_t distanceToOriginSquared() const { return FastPower<2>(x) + FastPower<2>(y); }
 	inline cord_t distanceTo(const Position& position) const { return sqrt(FastPower<2>(x - position.x) + FastPower<2>(y - position.y)); }
