@@ -17,11 +17,10 @@ TEST_F(PositionTest, VectorBasicOperations) {
 
 TEST_F(PositionTest, VectorFunctions) {
     Vector a(5,5);
-    std::cout << a.length() << ", " << sqrt(50) << std::endl;
     ASSERT_TRUE(a.toString() == "<5, 5>");
     ASSERT_TRUE(a.manhattenlength() == 10);
-    ASSERT_TRUE(a.lengthSquared() == 50);
-    ASSERT_TRUE(a.length() == sqrt(50));
+    ASSERT_TRUE(approx_equals(a.lengthSquared(), 50.f));
+    ASSERT_TRUE(approx_equals(a.length(), sqrt(50)));
     
 }
 
@@ -50,25 +49,26 @@ TEST_F(PositionTest, VectorComparisons) {
 }
 
 TEST_F(PositionTest, FVectorBasicOperations) {
-    Vector a(5.1,5.2);
+    FVector a(5.1f,5.2f);
 
-    ASSERT_TRUE(a == Vector(5.1,5.2));
-    ASSERT_FALSE(a != Vector(5.1,5.2));
+    ASSERT_TRUE(a == FVector(5.1f,5.2f));
+    ASSERT_FALSE(a != FVector(5.1f,5.2f));
 }
 
 TEST_F(PositionTest, FVectorFunctions) {
-    FVector a(5.1,5.2);
+    FVector a(5.1f,5.2f);
 
-    std::cout << a.manhattenlength() << std::endl;
+	// Idk if we should test this. Maybe a better way is the read the string in as a new vector and then comapare.
     ASSERT_TRUE(a.toString() == "<5.100000, 5.200000>");
-    ASSERT_TRUE(a.manhattenlength() == 10.3);
-    ASSERT_TRUE(a.lengthSquared() == 53.05);
-    ASSERT_TRUE(a.length() == sqrt(53.05));
+
+    ASSERT_TRUE(approx_equals(a.manhattenlength(), 10.3f));
+    ASSERT_TRUE(approx_equals(a.lengthSquared(), 53.05f));
+    ASSERT_TRUE(approx_equals(a.length(), sqrt(53.05f)));
 }
 
 TEST_F(PositionTest, FVectorComparisons) {
-    FVector a(6.72,9.45);
-    FVector b(3.1,3.2);
+    FVector a(6.72f,9.45f);
+    FVector b(3.1f,3.2f);
 
     FVector a1 = a;
     FVector a2 = a;
@@ -76,18 +76,17 @@ TEST_F(PositionTest, FVectorComparisons) {
     FVector a4 = a;
     a1 += b;
     a2 -= b;
-    a3 *= 3.0;
-    a4 /= 2.1;
-    ASSERT_TRUE(a + b == FVector(9.82,12.65));
-    ASSERT_TRUE(a1 == FVector(9.82,12.65));
-    ASSERT_TRUE(a - b == FVector(3.62,6.25));
-    ASSERT_TRUE(a2 == FVector(3.62,6.25));
-    std::cout << (a*3).toString() << std::endl;
-    ASSERT_TRUE(a * 3.0 == FVector(20.16,28.35));
-    ASSERT_TRUE(a * (3.1,3.2) == FVector(20.832,30.24));
-    ASSERT_TRUE(a3 == FVector(20.16,28.35));
-    ASSERT_TRUE(a / 2.1 == FVector(3.2,4.5));
-    ASSERT_TRUE(a4 == FVector(3.2,4.5));
+    a3 *= 3.0f;
+    a4 /= 2.1f;
+    ASSERT_TRUE(a + b == FVector(9.82f,12.65f));
+    ASSERT_TRUE(a1 == FVector(9.82f,12.65f));
+    ASSERT_TRUE(a - b == FVector(3.62f,6.25f));
+    ASSERT_TRUE(a2 == FVector(3.62f,6.25f));
+    ASSERT_TRUE(a * 3.0f == FVector(20.16f,28.35f));
+    ASSERT_TRUE(a * 3.1f == FVector(20.832f,29.295f));
+    ASSERT_TRUE(a3 == FVector(20.16f,28.35f));
+    ASSERT_TRUE(a / 2.1f == FVector(3.2f,4.5f));
+    ASSERT_TRUE(a4 == FVector(3.2f,4.5f));
 }
 
 TEST_F(PositionTest, PositionBasicOperations) {
@@ -103,13 +102,12 @@ TEST_F(PositionTest, PositionFunctions) {
     Position b(1,2);
 
     ASSERT_TRUE(a.toString() == "(5, 5)");
-    std::cout << a.manhattenDistanceTo(b) << std::endl;
     ASSERT_TRUE(a.manhattenDistanceTo(b) == 7);
     ASSERT_TRUE(a.manhattenDistanceToOrigin() == 10);
     ASSERT_TRUE(a.distanceToSquared(b) == 25);
     ASSERT_TRUE(a.distanceToOriginSquared() == 50);
-    ASSERT_TRUE(a.distanceTo(b) == sqrt(25));
-    ASSERT_TRUE(a.distanceToOrigin() == sqrt(50));
+    ASSERT_TRUE(approx_equals(a.distanceTo(b), sqrt(25)));
+    ASSERT_TRUE(approx_equals(a.distanceToOrigin(), sqrt(50)));
 }
 
 TEST_F(PositionTest, PositionComparisons) {
@@ -140,14 +138,13 @@ TEST_F(PositionTest, FPositionFunctions) {
     FPosition a(5.5,5.4);
     FPosition b(1.1,2.2);
 
-    std::cout << a.toString() << std::endl;
     ASSERT_TRUE(a.toString() == "(5.500000, 5.400000)");
-    ASSERT_TRUE(a.manhattenDistanceTo(b) == 7.6);
-    ASSERT_TRUE(a.manhattenDistanceToOrigin() == 10.9);
-    ASSERT_TRUE(a.distanceToSquared(b) == 29.6);
-    ASSERT_TRUE(a.distanceToOriginSquared() == 59.41);
-    ASSERT_TRUE(a.distanceTo(b) == sqrt(29.6));
-    ASSERT_TRUE(a.distanceToOrigin() == sqrt(59.41));
+    ASSERT_TRUE(approx_equals(a.manhattenDistanceTo(b), 7.6f));
+    ASSERT_TRUE(approx_equals(a.manhattenDistanceToOrigin(), 10.9f));
+    ASSERT_TRUE(approx_equals(a.distanceToSquared(b), 29.6f));
+    ASSERT_TRUE(approx_equals(a.distanceToOriginSquared(), 59.41f));
+    ASSERT_TRUE(approx_equals(a.distanceTo(b), sqrt(29.6)));
+    ASSERT_TRUE(approx_equals(a.distanceToOrigin(), sqrt(59.41)));
 }
 
 TEST_F(PositionTest, FPositionComparisons) {
@@ -159,7 +156,6 @@ TEST_F(PositionTest, FPositionComparisons) {
     a1 += b;
     a2 -= b;
 
-    std::cout << (a+b).toString() << std::endl;
     ASSERT_TRUE(a + b == FPosition(9.6,12.3));
     ASSERT_TRUE(a1 == FPosition(9.6,12.3));
     ASSERT_TRUE(a - FPosition(2.1,2.1) == FVector(4.3,7.1));

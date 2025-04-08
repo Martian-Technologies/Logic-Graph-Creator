@@ -118,7 +118,7 @@ struct FVector {
 	inline FVector operator-(const FVector& other) const { return FVector(dx - other.dx, dy - other.dy); }
 	inline FVector& operator-=(const FVector& other) { dx -= other.dx; dy -= other.dy; return *this; }
 	inline FVector operator*(f_cord_t scalar) const { return FVector(dx * scalar, dy * scalar); }
-	inline FVector& operator*=(f_cord_t scalar) { ; return *this; }
+	inline FVector& operator*=(f_cord_t scalar) { dx *= scalar, dy *= scalar; return *this; }
 	inline f_cord_t operator*(const FVector& vector) const { return dx * vector.dx + dy * vector.dy; }
 	inline FVector operator/(f_cord_t scalar) { return FVector(dx / scalar, dy / scalar); }
 	inline FVector& operator/=(f_cord_t scalar) { dx /= scalar; dy /= scalar; return *this; }
@@ -154,8 +154,8 @@ struct Position {
 	inline cord_t manhattenDistanceToOrigin() const { return Abs(x) + Abs(y); }
 	inline cord_t distanceToSquared(const Position& position) const { return FastPower<2>(x - position.x) + FastPower<2>(y - position.y); }
 	inline cord_t distanceToOriginSquared() const { return FastPower<2>(x) + FastPower<2>(y); }
-	inline cord_t distanceTo(const Position& position) const { return sqrt(FastPower<2>(x - position.x) + FastPower<2>(y - position.y)); }
-	inline cord_t distanceToOrigin() const { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
+	inline f_cord_t distanceTo(const Position& position) const { return sqrt(FastPower<2>(x - position.x) + FastPower<2>(y - position.y)); }
+	inline f_cord_t distanceToOrigin() const { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
 
 	inline Position operator+(const Vector& vector) const { return Position(x + vector.dx, y + vector.dy); }
 	inline Position& operator+=(const Vector& vector) { x += vector.dx; y += vector.dy; return *this; }
