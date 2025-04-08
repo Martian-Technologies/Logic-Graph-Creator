@@ -3,50 +3,76 @@
 
 #include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
-#include "connectionEnd.h"
+#include "backend/container/block/connectionEnd.h"
 
 class BlockData {
 	friend class BlockDataManager;
 public:
 	BlockData(BlockType blockType, DataUpdateEventManager* dataUpdateEventManager) : blockType(blockType), dataUpdateEventManager(dataUpdateEventManager) { }
 
-	inline void setDefaultData(bool defaultData) noexcept { this->defaultData = defaultData; }
+	inline void sendBlockDataUpdate() { dataUpdateEventManager->sendEvent("blockDataUpdate"); }
+
+	inline void setDefaultData(bool defaultData) noexcept {
+		if (defaultData == this->defaultData) return;
+		bool sentPre = false;
+		if (defaultData && getSize() != Vector(1)) {
+			dataUpdateEventManager->sendEvent(
+				"preBlockSizeChange",
+				DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+			);
+			sentPre = true;
+		}
+		this->defaultData = defaultData;
+		blockSize = Vector(1);
+		if (sentPre) {
+			dataUpdateEventManager->sendEvent(
+				"postBlockSizeChange",
+				DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+			);
+		}
+		sendBlockDataUpdate();
+	}
 	inline bool isDefaultData() const noexcept { return defaultData; }
 
-	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType)); }
+	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; sendBlockDataUpdate(); }
 	inline bool isPrimitive() const noexcept { return primitive; }
 
-	inline void setWidth(block_size_t width) noexcept {
-		this->width = width;
-		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
+	inline void setSize(const Vector& size) noexcept {
+		if (getSize() == size) return;
+		dataUpdateEventManager->sendEvent(
+			"preBlockSizeChange",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, size })
+		);
+		blockSize = size;
+		dataUpdateEventManager->sendEvent(
+			"postBlockSizeChange",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, getSize() })
+		);
+		sendBlockDataUpdate();
 	}
-	inline void setHeight(block_size_t height) noexcept {
-		this->height = height;
-		dataUpdateEventManager->sendEvent("blockSizeChange", DataUpdateEventManager::EventDataUnsignedInt(blockType));
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
-	}
-	inline block_size_t getWidth() const noexcept { return width; }
-	inline block_size_t getHeight() const noexcept { return height; }
+	inline const Vector& getSize() const noexcept { return blockSize; }
+	inline Vector getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
 
 	inline BlockType getBlockType() const { return blockType; }
 
-	inline void setIsPlaceable(bool placeable) noexcept { this->placeable = placeable; }
+	inline void setIsPlaceable(bool placeable) noexcept { this->placeable = placeable; sendBlockDataUpdate(); }
 	inline bool isPlaceable() const noexcept { return placeable; }
 
-	inline void setName(const std::string& name) noexcept { this->name = name; }
-	inline void setPath(const std::string& path) noexcept { this->path = path; }
+	inline void setName(const std::string& name) noexcept { this->name = name; sendBlockDataUpdate(); }
+	inline void setPath(const std::string& path) noexcept { this->path = path; sendBlockDataUpdate(); }
 	inline const std::string& getName() const noexcept { return name; }
 	inline const std::string& getPath() const noexcept { return path; }
 
 	// trys to set a connection input in the block. Returns success.
-	inline void trySetConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
+	inline void setConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		connections[connectionEndId] = { vector, true };
 		inputConnectionCount++;
+		sendBlockDataUpdate();
 	}
 	// trys to set a connection output in the block. Returns success.
-	inline void trySetConnectionOutput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
+	inline void setConnectionOutput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		connections[connectionEndId] = { vector, false };
+		sendBlockDataUpdate();
 	}
 
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Vector& vector) const noexcept {
@@ -69,8 +95,7 @@ public:
 		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
-			width,
-			height,
+			blockSize,
 			rotation
 		);
 		for (auto& pair : connections) {
@@ -83,8 +108,7 @@ public:
 		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
-			width,
-			height,
+			blockSize,
 			rotation
 		);
 		for (auto& pair : connections) {
@@ -94,20 +118,19 @@ public:
 		return { 0, false };
 	}
 	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId) const noexcept {
-		if (defaultData) return { Vector(0, 0), connectionId < 2 };
+		if (defaultData) return { Vector(0), connectionId < 2 };
 		auto iter = connections.find(connectionId);
 		if (iter == connections.end()) return { Vector(), false };
 		return { iter->second.first, true };
 	}
 	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId, Rotation rotation) const noexcept {
-		if (defaultData) return { Vector(0, 0), connectionId < 2 };
+		if (defaultData) return { Vector(0), connectionId < 2 };
 		auto iter = connections.find(connectionId);
 		if (iter == connections.end()) return { Vector(), false };
 		return {
 			rotateVectorWithArea(
 				iter->second.first,
-				width,
-				height,
+				blockSize,
 				rotation
 			),
 			true
@@ -130,6 +153,11 @@ public:
 		auto iter = connections.find(connectionId);
 		return iter != connections.end() && iter->second.second;
 	}
+	inline bool isConnectionOutput(connection_end_id_t connectionId) const noexcept {
+		if (defaultData) return connectionId == 0;
+		auto iter = connections.find(connectionId);
+		return iter != connections.end() && !(iter->second.second);
+	}
 	const std::unordered_map<connection_end_id_t, std::pair<Vector, bool>>& getConnections() const noexcept {
 		return connections;
 	}
@@ -141,8 +169,7 @@ private:
 	bool placeable = true;
 	std::string name = "Unnamed Block";
 	std::string path = "Basic";
-	block_size_t width = 1;
-	block_size_t height = 1;
+	Vector blockSize = Vector(1);
 	connection_end_id_t inputConnectionCount = 0;
 	std::unordered_map<connection_end_id_t, std::pair<Vector, bool>> connections;
 	DataUpdateEventManager* dataUpdateEventManager;

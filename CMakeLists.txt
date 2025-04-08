@@ -32,6 +32,8 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.cpp"
 )
 
+option(GATALITY_BUILD_TESTS OFF) # these are cpplocate's tests
+
 # ======================================== DEPENDENCY SETUP ========================================
 # Initialize QT
 set(CMAKE_AUTOMOC ON)
@@ -118,30 +120,32 @@ elseif (WIN32) # Windows
 endif()	
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
-set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
-set(TEST_FILES)
-file(GLOB_RECURSE TEST_FILES
-	# "${UI_DIR}/*.ui"
-	# "${UI_DIR}/*.qrc"
-	"${SOURCE_DIR}/backend/*.cpp"
-	"${SOURCE_DIR}/computerAPI/*.cpp"
-	# "${SOURCE_DIR}/gui/*.cpp"
-	"${SOURCE_DIR}/keybinds/*.cpp"
-	"${SOURCE_DIR}/logging/*.cpp"
-	"${SOURCE_DIR}/util/*.cpp"
-	"${TEST_DIR}/*.cpp"
-)
+if (GATALITY_BUILD_TESTS)
+	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
+	set(TEST_FILES)
+	file(GLOB_RECURSE TEST_FILES
+		# "${UI_DIR}/*.ui"
+		# "${UI_DIR}/*.qrc"
+		"${SOURCE_DIR}/backend/*.cpp"
+		"${SOURCE_DIR}/computerAPI/*.cpp"
+		# "${SOURCE_DIR}/gui/*.cpp"
+		"${SOURCE_DIR}/keybinds/*.cpp"
+		"${SOURCE_DIR}/logging/*.cpp"
+		"${SOURCE_DIR}/util/*.cpp"
+		"${TEST_DIR}/*.cpp"
+	)
 
-set(EXTERNAL_LINKS_TESTS
-    cpplocate::cpplocate
-    Qt6::Core Qt6::Gui Qt6::Widgets
-    gtest gtest_main
-    ${GATALITY_JSON_LIB_NAME}
-)
-add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL ${TEST_FILES})
-target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
-target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+	set(EXTERNAL_LINKS_TESTS
+		cpplocate::cpplocate
+		Qt6::Core Qt6::Gui Qt6::Widgets
+		gtest gtest_main
+		${GATALITY_JSON_LIB_NAME}
+	)
+	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${UI_DIR} ${TEST_DIR})
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
+	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+endif()
 
 # ======================================= RESOURCE COPYING =========================================
 # We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution

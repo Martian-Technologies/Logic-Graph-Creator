@@ -18,35 +18,6 @@ class CircuitView {
 public:
 	CircuitView(Renderer* renderer);
 
-	// inline void setInteractive(bool isInteractive) {
-	// 	if (isInteractive) {
-	// 		toolManager.selectTool("interactive/state changer");
-	// 	} else {
-	// 		toolManager.selectStack(0);
-	// 	}
-	// }
-	// inline void toggleInteractive() {
-	// 	if (toolManager.getStack() != 1) {
-	// 		toolManager.selectTool("interactive/state changer");
-	// 	} else {
-	// 		toolManager.selectStack(0);
-	// 	}
-	// }
-
-	// inline void setSelectedTool(std::string tool) {
-	// 	toolManager.selectTool(tool);
-	// }
-	// inline void setSelectedToolMode(std::string mode) {
-	// 	toolManager.setMode(mode);
-	// }
-	// inline void setSelectedBlock(BlockType blockType) {
-	// 	toolManager.selectBlock(blockType);
-	// }
-
-	// inline void paste() {
-	// 	toolManager.selectTool("paste tool");
-	// }
-
 	// --------------- Gettters ---------------
 
 	inline Circuit* getCircuit() { return circuit.get(); }

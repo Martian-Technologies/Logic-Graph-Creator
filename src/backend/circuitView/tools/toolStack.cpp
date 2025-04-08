@@ -1,6 +1,7 @@
 #include "toolStack.h"
 
 void ToolStack::activate() {
+	isActive = true;
 	if (!toolStack.empty()) {
 		if (pointerInView) { 
 			PositionEvent event("Stack Updating Position", lastPointerFPosition);
@@ -71,7 +72,7 @@ void ToolStack::pushTool(SharedCircuitTool newTool, bool resetTool) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->exitBlockView(&event);
 	}
-	toolStack.back()->activate();
+	if (isActive) toolStack.back()->activate();
 }
 
 void ToolStack::popTool() {
@@ -88,7 +89,7 @@ void ToolStack::popTool() {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->exitBlockView(&event);
 	}
-	toolStack.back()->activate();
+	if (isActive) toolStack.back()->activate();
 }
 
 void ToolStack::clearTools() {
@@ -105,7 +106,6 @@ void ToolStack::popAbove(CircuitTool* toolNotToPop) {
 	}
 	if (toolStack.empty()) return;
 	toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
-	toolStack.back()->activate();
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->enterBlockView(&event);
@@ -113,6 +113,7 @@ void ToolStack::popAbove(CircuitTool* toolNotToPop) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->exitBlockView(&event);
 	}
+	if (isActive) toolStack.back()->activate();
 }
 
 void ToolStack::setCircuit(Circuit* circuit) {

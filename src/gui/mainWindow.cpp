@@ -39,13 +39,21 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 	keybindManager.setKeybind("ToggleInteractive", "I");
 	keybindManager.setKeybind("MakeCircuitBlock", "B");
 
+	connect(keybindManager.createShortcut("Paste", this), &QShortcut::activated, this, [this]() {
+		this->backend.getToolManagerManager().setTool("selection/paste tool");
+	});
+
+	connect(keybindManager.createShortcut("ToggleInteractive", this), &QShortcut::activated, this, [this]() {
+		this->backend.getToolManagerManager().setTool("interactive/state changer");
+	});
+
 	// create default circuit and evaluator
-    logInfo("Creating default circuitViewWidget");
+	logInfo("Creating default circuitViewWidget");
 	circuit_id_t id = backend.createCircuit();
-    
+
 	// create default circuitViewWidget
 	CircuitViewWidget* circuitViewWidget = openNewCircuitViewWindow();
-    logInfo("Linking circuitViewWidget to backend");
+	logInfo("Linking circuitViewWidget to backend");
 	backend.linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 	backend.getToolManagerManager().connectListener(this, [this](const ToolManagerManager& toolMM) {
 		auto modesOpt = toolMM.getActiveToolModes();
@@ -55,7 +63,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 		}
 		emit toolModeOptionsChanged(&(modesOpt.value()));
 	});
-	
+
 	// create default hotbar and selector
 	openNewSelectorWindow();
 
@@ -65,7 +73,7 @@ MainWindow::MainWindow(KDDockWidgets::MainWindowOptions options)
 // Utility methods
 
 void MainWindow::setUpMenuBar() {
-    logInfo("Creating MenuBar");
+	logInfo("Creating MenuBar");
 	QMenuBar* menubar = menuBar();
 
 	QMenu* windowMenu = new QMenu(QStringLiteral("Window"), this);
@@ -88,12 +96,12 @@ void MainWindow::setUpMenuBar() {
 	connect(exportProjectAction, &QAction::triggered, this, &MainWindow::exportProject);
 
 	// submenu setup
-    logInfo("Setting up MenuBar submenus");
+	logInfo("Setting up MenuBar submenus");
 	// QAction* saveAction = fileMenu->addMenu(saveSubMenu); // should expand to give options of which circuits to save.
 	// saveAction->setText("Save Circuit");
 	// QAction* saveAsAction = fileMenu->addMenu(saveAsSubMenu);
 	// saveAsAction->setText("Save Circuit As");
-	
+
 	// connect(saveSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(false); });
 	// connect(saveAsSubMenu, &QMenu::aboutToShow, this, [this]() { updateSaveMenu(true); });
 
@@ -143,7 +151,7 @@ void MainWindow::saveCircuit(circuit_id_t id, bool saveAs) {
 	// }
 
 	// // "Save As" or possibly regular save where circuit doesn't have a prexisting filepath
-    // logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
+	// logWarning("This circuit "+ circuit->getCircuitName() +" will be saved with a new UUID");
 	// std::string filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)").toStdString();
 	// if (filePath.empty()) {
 	// 	logWarning("Filepath not provided for save", "FileSaving");
@@ -199,7 +207,7 @@ void MainWindow::exportProject() {
 
 	// if (!QDir(baseDir).mkpath(projectPath)) {
 	// 	QMessageBox::warning(this, tr("Error"), tr("Failed to create project directory."));
-    // logWarning("Failed to create Project directory");
+	// logWarning("Failed to create Project directory");
 	// 	return;
 	// }
 
@@ -229,10 +237,10 @@ void MainWindow::exportProject() {
 
 	// if (errorsOccurred) {
 	// 	QMessageBox::warning(this, tr("Partial Export"), tr("Some circuits could not be exported."));
-    // logWarning("Partially exported Project; some Circuits could not be exported");
+	// logWarning("Partially exported Project; some Circuits could not be exported");
 	// } else {
 	// 	QMessageBox::information(this, tr("Success"), tr("Project was fully exported"));
-    // logInfo("Successfully exported Project");
+	// logInfo("Successfully exported Project");
 	// }
 }
 

@@ -1,0 +1,42 @@
+version_2
+Circuit: "Circuit"
+UUID: e78a9432-b09d-418d-b06f-f5370a3e9842
+blockId 1 NAND -2 -2 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 2 NAND -2 -1 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 3 NAND -2 0 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 15 AND 1 -4 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 16 AND 1 -3 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 17 AND 1 -2 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 18 AND 1 -1 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 19 AND 1 0 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 20 AND 1 1 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 21 AND 1 2 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 22 AND 1 3 ZERO 2
+	(connId:0)
+	(connId:1)
+blockId 23 SWITCH -5 -2 ZERO 1
+	(connId:0)
+blockId 24 SWITCH -5 -1 ZERO 1
+	(connId:0)
+blockId 25 SWITCH -5 0 ZERO 1
+	(connId:0)
