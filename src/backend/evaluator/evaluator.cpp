@@ -351,7 +351,7 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 		logError("setState: gate is not a valid block type");
 		return;
 	}
-	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
+	const wrapper_gate_id_t blockId = gate.gateId;
 	logicSimulatorWrapper.signalToPause();
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
