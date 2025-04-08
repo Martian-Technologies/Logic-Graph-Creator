@@ -1,14 +1,13 @@
-#ifndef circuitTests_h
-#define circuitTests_h
+#ifndef positionTests_h
+#define positionTests_h
 
 #include <gtest/gtest.h>
-#include "backend/circuit/circuitManager.h"
+#include "backend/position/position.h"
 
-class CircuitTest: public ::testing::Test {
+class PositionTest: public ::testing::Test {
 protected:
     void SetUp() override;
     void TearDown() override;
-    int i;
 };
 
-#endif /* circuitTests_h */
+#endif /* PositionTests_h */
