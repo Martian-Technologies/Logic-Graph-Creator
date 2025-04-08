@@ -3,16 +3,16 @@
 
 #include <algorithm>
 
-template <unsigned int p, class T>
-constexpr int FastPower(T x) {
-	if constexpr (p == 0) return 1;
-	if constexpr (p == 1) return x;
+template <unsigned int P, class T>
+constexpr T FastPower(T x) {
+	if constexpr (P == 0) return 1;
+	if constexpr (P == 1) return x;
 
-	int tmp = FastPower<p / 2>(x);
-	if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
+	T tmp = FastPower<P / 2>(x);
+	if constexpr ((P % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
-constexpr int abs(int x) { return x < 0 ? -x : x; }
+constexpr int Abs(int x) { return x < 0 ? -x : x; }
 
 template <typename T>
 constexpr char signum(T x) {
@@ -32,8 +32,12 @@ constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : 
 
 constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
 
-bool approx_equals(float a, float b) {
-	return abs(a - b) < nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+constexpr bool approx_equals(float a, float b) {
+	float i = fabs(a - b);
+	float j = nexttoward(std::max(a, b), HUGE_VALL);
+	float k = std::max(a, b);
+	float g = nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+	return fabs(a - b) <= nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
 }
 
 
