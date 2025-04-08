@@ -184,7 +184,7 @@ public:
         data->setPath("Custom");
         data->setName(parsedCircuit->getName());
 
-		data->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getWidth()));
+		data->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
 
         const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
 
