@@ -7,6 +7,10 @@
 #include "gpu/renderer/rmlRenderer.h"
 #include "gpu/renderer/vulkanChunker.h"
 
+struct ViewData {
+	glm::mat4 pixelViewMat;
+};
+
 class VulkanFrameData {
 public:
 	VulkanFrameData();
@@ -29,6 +33,8 @@ private:
 	VkCommandBuffer mainCommandBuffer;
 	VkSemaphore swapchainSemaphore, renderSemaphore;
 	VkFence renderFence;
+	AllocatedBuffer viewDataBuffer; // buffer for storing view matrix which is pointed to by descriptor set
+	VkDescriptorSet globalDescriptor;
 
 	// dynamically changing data
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;

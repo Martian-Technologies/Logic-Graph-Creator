@@ -12,6 +12,7 @@ struct PipelineInformation {
 	VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE;
 
 	std::optional<size_t> pushConstantSize;
+	std::vector<VkDescriptorSetLayout> descriptorSets;
 };
 
 class Pipeline {

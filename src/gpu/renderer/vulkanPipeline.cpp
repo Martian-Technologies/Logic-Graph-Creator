@@ -98,10 +98,12 @@ Pipeline::Pipeline(const PipelineInformation& info) {
 	// pipeline layout
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0; // unused
-	pipelineLayoutInfo.pSetLayouts = nullptr; // unused
 
-	// push constant
+	// descriptor sets (optional)
+	pipelineLayoutInfo.setLayoutCount = info.descriptorSets.size();
+	if (!info.descriptorSets.empty()) pipelineLayoutInfo.pSetLayouts = info.descriptorSets.data();
+
+	// push constant (optional)
 	if (info.pushConstantSize.has_value()) {
 		VkPushConstantRange pushConstant{};
 		pushConstant.offset = 0;
