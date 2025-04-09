@@ -55,9 +55,11 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install patch without build isolation
-      run: pip install --no-build-isolation patch
-
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
