@@ -55,6 +55,9 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install wheel
+      run: python -m pip install --upgrade pip wheel
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4.1.1
       with:
