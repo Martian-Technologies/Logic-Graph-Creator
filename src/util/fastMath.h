@@ -27,7 +27,11 @@ constexpr char signum(T x) {
 	return T(0) < x;
 }
 
-constexpr float decPart(float x) { return (float)signum(x) * fmodf(Fabs(x), 1.f); }
+constexpr double Fmodf(double x, double y) {
+	return x - trunc(x / y) * y;
+}
+
+constexpr float decPart(float x) { return (float)signum(x) * Fmodf(Fabs(x), 1.f); }
 
 template <typename T>
 constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }
