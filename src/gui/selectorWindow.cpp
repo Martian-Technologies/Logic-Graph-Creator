@@ -15,10 +15,6 @@ SelectorWindow::SelectorWindow(
 	updateToolList();
 }
 
-void SelectorWindow::updateToolModeOptions(const std::vector<std::string>* modes) {
-
-}
-
 void SelectorWindow::updateBlockList() {
 	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
 		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
@@ -48,36 +44,13 @@ void SelectorWindow::updateSelected(std::string string) {
 	} else {
 		logError("Do not recognize cadegory {}", "SelectorWindow", parts[0]);
 	}
-	// for (QTreeWidgetItem* item : ui->SelectorTree->selectedItems()) {
-	// 	if (item) {
-	// 		QString pathName = item->text(0);
-	// 		if (item->childCount() > 0) continue;
-	// 		bool isBlock;
-	// 		QTreeWidgetItem* tmp = item;
-	// 		while (tmp->parent()) {
-	// 			tmp = tmp->parent();
-	// 			QString name = tmp->text(0);
-	// 			if (name == "Blocks") {
-	// 				isBlock = true;
-	// 				break;
-	// 			} else if (name == "Tools") {
-	// 				isBlock = false;
-	// 				break;
-	// 			} else {
-	// 				pathName = name + "/" + pathName;
-	// 			}
-	// 		}
-	// 		if (isBlock) {
-	// 			emit selectedBlockChange(pathName.toStdString());
-	// 		} else {
-	// 			emit selectedToolChange(pathName.toStdString());
-	// 		}
-	// 		return;
-	// 	}
-	// }
 }
 
 void SelectorWindow::updateSelectedMode() {
 	// if (!current || (previous && current->text() == previous->text())) return;
 	// emit selectedModeChange(current->text().toStdString());
+}
+
+void SelectorWindow::updateToolModeOptions(const std::vector<std::string>* modes) {
+
 }
