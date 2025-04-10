@@ -14,6 +14,12 @@ constexpr T FastPower(T x) {
 
 constexpr int Abs(int x) { return x < 0 ? -x : x; }
 
+constexpr double Fabs(double x) {
+	union { double f; uint64_t i; } u = { x };
+	u.i &= -1ULL / 2;
+	return u.f;
+}
+
 template <typename T>
 constexpr char signum(T x) {
 	if constexpr (std::is_signed<T>())
@@ -21,11 +27,7 @@ constexpr char signum(T x) {
 	return T(0) < x;
 }
 
-#if __APPLE__
-constexpr float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
-#else
-inline float decPart(float x) { return (float)signum(x) * fmodf(fabs(x), 1.f); }
-#endif
+constexpr float decPart(float x) { return (float)signum(x) * fmodf(Fabs(x), 1.f); }
 
 template <typename T>
 constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }
@@ -33,12 +35,11 @@ constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : 
 constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
 
 constexpr bool approx_equals(float a, float b) {
-	float i = fabs(a - b);
+	float i = Fabs(a - b);
 	float j = nexttoward(std::max(a, b), HUGE_VALL);
 	float k = std::max(a, b);
 	float g = nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
-	return fabs(a - b) <= nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+	return Fabs(a - b) <= nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
 }
-
 
 #endif /* fastMath_h */
