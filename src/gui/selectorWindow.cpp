@@ -39,7 +39,15 @@ void SelectorWindow::updateToolList() {
 }
 
 void SelectorWindow::updateSelected(std::string string) {
-	logInfo(string, "SelectorWindow");
+	std::vector parts = stringSplit(string, '/');
+	if (parts[0] == "Blocks") {
+		BlockType blockType = blockDataManager->getBlockType(string.substr(7, string.size()-7));
+		toolManagerManager->setBlock(blockType);
+	} else if (parts[0] == "Tools") {
+		toolManagerManager->setTool(string.substr(6, string.size()-6));
+	} else {
+		logError("Do not recognize cadegory {}", "SelectorWindow", parts[0]);
+	}
 	// for (QTreeWidgetItem* item : ui->SelectorTree->selectedItems()) {
 	// 	if (item) {
 	// 		QString pathName = item->text(0);
