@@ -69,7 +69,7 @@ public:
 	void prepareForRmlRender();
 	void endRmlRender();
 
-	void render(VulkanFrameData& frame, VkExtent2D windowExtent);
+	void render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDescriptorSet viewDataSet);
 	
 public:
 	// -- Rml::RenderInterface --

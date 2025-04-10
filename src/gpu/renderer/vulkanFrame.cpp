@@ -32,9 +32,6 @@ VulkanFrameData::VulkanFrameData() {
 	vkCreateFence(VulkanInstance::get().getDevice(), &fenceInfo, nullptr, &renderFence);
 	vkCreateSemaphore(VulkanInstance::get().getDevice(), &semaphoreInfo, nullptr, &swapchainSemaphore);
 	vkCreateSemaphore(VulkanInstance::get().getDevice(), &semaphoreInfo, nullptr, &renderSemaphore);
-
-	// descriptor and buffers
-	viewDataBuffer = createBuffer(sizeof(GPUViewData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
 }
 
 VulkanFrameData::~VulkanFrameData() {

@@ -84,7 +84,7 @@ void RmlRenderer::endRmlRender() {
 	renderInstructions = std::move(tempRenderInstructions);
 }
 
-void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
+void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDescriptorSet viewDataSet) {
 	VkCommandBuffer cmd = frame.getMainCommandBuffer();
 	
 	// bind pipeline
@@ -111,6 +111,9 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 	VkRect2D customScissor{};
 	customScissor.offset = {0, 0};
 	customScissor.extent = extent;
+
+	// view data descriptor
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getLayout(), 0, 1, &viewDataSet, 0, nullptr);
 	
 	// set up shared push constants data
 	RmlPushConstants pushConstants{ glm::vec2(0.0f, 0.0f) };

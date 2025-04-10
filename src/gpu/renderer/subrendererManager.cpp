@@ -1,8 +1,14 @@
 #include "subrendererManager.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "gpu/vulkanInstance.h"
 
-SubrendererManager::SubrendererManager(Swapchain* swapchain)
+struct GPUViewData {
+	glm::mat4 pixelViewMat;
+};
+
+SubrendererManager::SubrendererManager(Swapchain* swapchain, std::vector<VulkanFrameData>& frames)
 	: swapchain(swapchain), descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}}) {
 
 	createRenderPass();
@@ -11,6 +17,10 @@ SubrendererManager::SubrendererManager(Swapchain* swapchain)
 	DescriptorLayoutBuilder builder;
 	builder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 	viewDataLayout = builder.build(VK_SHADER_STAGE_VERTEX_BIT);
+	for (VulkanFrameData& frame : frames) {
+		frame.getViewDataDescriptorSet() = descriptorAllocator.allocate(viewDataLayout);
+		frame.getViewDataBuffer() = createBuffer(sizeof(GPUViewData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+	}
 
 	// rml
 	rmlRenderer = std::make_unique<RmlRenderer>(renderPass, viewDataLayout);
@@ -20,8 +30,6 @@ SubrendererManager::~SubrendererManager() {
 	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), viewDataLayout, nullptr);
 	vkDestroyRenderPass(VulkanInstance::get().getDevice(), renderPass, nullptr);
 }
-
-// pixelViewMat = glm::ortho(0.0f, (float)windowSize.first, 0.0f, (float)windowSize.second);
 
 void SubrendererManager::createRenderPass() {
 	// render pass
@@ -68,6 +76,13 @@ void SubrendererManager::createRenderPass() {
 void SubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
 	// preparation
 	VkExtent2D windowSize = swapchain->getVkbSwapchain().extent;
+	// update view data
+	GPUViewData viewData{ glm::ortho(0.0f, (float)windowSize.width, 0.0f, (float)windowSize.height) };
+	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), &viewData, frame.getViewDataBuffer().allocation, 0, sizeof(GPUViewData));
+	// update view data descriptor
+	DescriptorWriter writer;
+	writer.writeBuffer(0, frame.getViewDataBuffer().buffer, sizeof(GPUViewData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+	writer.updateSet(VulkanInstance::get().getDevice(), frame.getViewDataDescriptorSet());
 	
 	// start recording
 	VkCommandBufferBeginInfo beginInfo{};
@@ -93,7 +108,7 @@ void SubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint32_t im
 	// do actual rendering...
 	{
 		// rml rendering
-		rmlRenderer->render(frame, windowSize);
+		rmlRenderer->render(frame, windowSize, frame.getViewDataDescriptorSet());
 	}
 
 	// end render pass

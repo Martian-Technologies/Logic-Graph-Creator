@@ -1,7 +1,5 @@
 #include "windowRenderer.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
@@ -14,16 +12,16 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	// get window size
 	windowSize = sdlWindow->getSize();
 	
-	// set up swapchain and subrenderer
-	swapchain = std::make_unique<Swapchain>(surface, windowSize);
-	subrenderer = std::make_unique<SubrendererManager>(swapchain.get());
-	swapchain->createFramebuffers(subrenderer->getRenderPass());
-
 	// set up frames
 	frames.reserve(FRAMES_IN_FLIGHT);
 	for (int i = 0; i < FRAMES_IN_FLIGHT; ++i) {
 		frames.emplace_back();
 	}
+	
+	// set up swapchain and subrenderer
+	swapchain = std::make_unique<Swapchain>(surface, windowSize);
+	subrenderer = std::make_unique<SubrendererManager>(swapchain.get(), frames);
+	swapchain->createFramebuffers(subrenderer->getRenderPass());
 	
 	// start render loop
 	running = true;

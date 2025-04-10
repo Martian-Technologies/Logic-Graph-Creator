@@ -9,7 +9,7 @@
 
 class SubrendererManager {
 public:
-	SubrendererManager(Swapchain* swapchain);
+	SubrendererManager(Swapchain* swapchain, std::vector<VulkanFrameData>& frames);
 	~SubrendererManager();
 	
 	void renderCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);

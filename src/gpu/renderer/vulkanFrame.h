@@ -10,10 +10,6 @@
 struct VulkanChunkAllocation;
 struct RmlGeometryAllocation;
 
-struct GPUViewData {
-	glm::mat4 pixelViewMat;
-};
-
 class VulkanFrameData {
 public:
 	VulkanFrameData();
@@ -21,6 +17,9 @@ public:
 
 	void start();
 	float waitAndComplete();
+
+	inline AllocatedBuffer& getViewDataBuffer() { return viewDataBuffer; }
+	inline VkDescriptorSet& getViewDataDescriptorSet() { return viewDataDescriptorSet; }
 
 	inline VkCommandPool& getCommandPool() { return commandPool; };
 	inline VkCommandBuffer& getMainCommandBuffer() { return mainCommandBuffer; };
@@ -37,9 +36,8 @@ private:
 	VkSemaphore swapchainSemaphore, renderSemaphore;
 	VkFence renderFence;
 
-	GPUViewData viewData;
 	AllocatedBuffer viewDataBuffer; // buffer for storing view matrix which is pointed to by descriptor
-	VkDescriptorSet viewDataDescriptor;
+	VkDescriptorSet viewDataDescriptorSet;
 
 	// dynamically changing data
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
