@@ -5,9 +5,9 @@
 #include <glm/ext/vector_float2.hpp>
 #include <RmlUi/Core/Vertex.h>
 
-#include "gpu/renderer/subrenderer.h"
 #include "gpu/vulkanBuffer.h"
-#include "gpu/renderer/vulkanPipeline.h"
+#include "vulkanPipeline.h"
+#include "vulkanFrame.h"
 
 // =========================== RML GEOMETRY =================================
 
@@ -31,7 +31,6 @@ private:
 };
 
 struct RmlPushConstants {
-	alignas(16) glm::mat4 view;
 	glm::vec2 translation;
 };
 
@@ -65,12 +64,12 @@ typedef std::variant<RmlDrawInstruction, RmlSetScissorInstruction, RmlEnableScis
 
 class RmlRenderer {
 public:
-	RmlRenderer(VkRenderPass& renderPass);
+	RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout);
 
 	void prepareForRmlRender();
 	void endRmlRender();
 
-	void render(SubrendererInfo& info);
+	void render(VulkanFrameData& frame, VkExtent2D windowExtent);
 	
 public:
 	// -- Rml::RenderInterface --

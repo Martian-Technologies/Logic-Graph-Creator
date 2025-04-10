@@ -3,11 +3,14 @@
 
 #include <vulkan/vulkan.h>
 #include <chrono>
+#include <glm/ext/matrix_float4x4.hpp>
 
-#include "gpu/renderer/rmlRenderer.h"
-#include "gpu/renderer/vulkanChunker.h"
+#include "gpu/vulkanBuffer.h"
 
-struct ViewData {
+struct VulkanChunkAllocation;
+struct RmlGeometryAllocation;
+
+struct GPUViewData {
 	glm::mat4 pixelViewMat;
 };
 
@@ -33,8 +36,10 @@ private:
 	VkCommandBuffer mainCommandBuffer;
 	VkSemaphore swapchainSemaphore, renderSemaphore;
 	VkFence renderFence;
-	AllocatedBuffer viewDataBuffer; // buffer for storing view matrix which is pointed to by descriptor set
-	VkDescriptorSet globalDescriptor;
+
+	GPUViewData viewData;
+	AllocatedBuffer viewDataBuffer; // buffer for storing view matrix which is pointed to by descriptor
+	VkDescriptorSet viewDataDescriptor;
 
 	// dynamically changing data
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;

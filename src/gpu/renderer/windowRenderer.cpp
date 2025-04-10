@@ -14,16 +14,17 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	// get window size
 	windowSize = sdlWindow->getSize();
 	
-	// set up swapchain
+	// set up swapchain and subrenderer
 	swapchain = std::make_unique<Swapchain>(surface, windowSize);
-	createRenderPass();
-	swapchain->createFramebuffers(renderPass);
+	subrenderer = std::make_unique<SubrendererManager>(swapchain.get());
+	swapchain->createFramebuffers(subrenderer->getRenderPass());
 
 	// set up frames
-	frames.resize(FRAMES_IN_FLIGHT);
-
-	rmlRenderer = std::make_unique<RmlRenderer>(renderPass);
-
+	frames.reserve(FRAMES_IN_FLIGHT);
+	for (int i = 0; i < FRAMES_IN_FLIGHT; ++i) {
+		frames.emplace_back();
+	}
+	
 	// start render loop
 	running = true;
 	renderThread = std::thread(&WindowRenderer::renderLoop, this);
@@ -35,15 +36,13 @@ WindowRenderer::~WindowRenderer() {
 	if (renderThread.joinable()) renderThread.join();
 
 	// manual deletion (RAII blues)
-	rmlRenderer.reset();
-	vkDestroyRenderPass(device, renderPass, nullptr);
+	subrenderer.reset();
 }
 
 void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 
 	this->windowSize = windowSize;
-	pixelViewMat = glm::ortho(0.0f, (float)windowSize.first, 0.0f, (float)windowSize.second);
 
 	swapchainRecreationNeeded = true;
 }
@@ -84,7 +83,7 @@ void WindowRenderer::renderLoop() {
 
 		// record command buffer
 		vkResetCommandBuffer(frame.getMainCommandBuffer(), 0);
-		recordCommandBuffer(frame, imageIndex);
+		subrenderer->renderCommandBuffer(frame, imageIndex);
 
 		// start setting up submission
 		VkSubmitInfo submitInfo{};
@@ -136,106 +135,21 @@ void WindowRenderer::renderLoop() {
 	vkDeviceWaitIdle(device);
 }
 
-void WindowRenderer::recordCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
-	// start recording
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = 0; // Optional
-	beginInfo.pInheritanceInfo = nullptr; // Optional
-	if (vkBeginCommandBuffer(frame.getMainCommandBuffer(), &beginInfo) != VK_SUCCESS) {
-		throw std::runtime_error("failed to begin recording command buffer!");
-	}
-
-	// begin render pass
-	VkRenderPassBeginInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = renderPass;
-	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
-	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
-	renderPassInfo.clearValueCount = 0;
-	renderPassInfo.pClearValues = nullptr;
-
-	// VkClearValue clearColor = {0.93f, 0.93f, 0.93f, 1.0f};
-	// renderPassInfo.clearValueCount = 1;
-	// renderPassInfo.pClearValues = &clearColor;
-	
-	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	// do actual rendering...
-	{
-		windowSizeMux.lock();
-		SubrendererInfo subrendererInfo{frame, pixelViewMat, windowSize, swapchain->getVkbSwapchain().extent};
-		windowSizeMux.unlock();
-		
-		// rml rendering
-		rmlRenderer->render(subrendererInfo);
-	}
-
-	// end render pass
-	vkCmdEndRenderPass(frame.getMainCommandBuffer());
-	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
-		throw std::runtime_error("failed to record command buffer!");
-	}
-}
-
-void WindowRenderer::createRenderPass() {
-	// render pass
-	VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	// subpass
-	VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	// subpass dependency
-	VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	// create pass
-	VkRenderPassCreateInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = 1;
-	renderPassInfo.pAttachments = &colorAttachment;
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
-	
-	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create render pass!");
-	}
-}
-
 void WindowRenderer::recreateSwapchain() {
 	vkDeviceWaitIdle(device);
 	
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 
 	swapchain->recreate(surface, windowSize);
-	swapchain->createFramebuffers(renderPass);
+	swapchain->createFramebuffers(subrenderer->getRenderPass());
 	
 	swapchainRecreationNeeded = false;
 }
 
 void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
-	renderInterface.pointToRenderer(rmlRenderer.get());
-	rmlRenderer->prepareForRmlRender();
+	renderInterface.pointToRenderer(&subrenderer->getRmlRenderer());
+	subrenderer->getRmlRenderer().prepareForRmlRender();
 }
 void WindowRenderer::endRml() {
-	rmlRenderer->endRmlRender();
+	subrenderer->getRmlRenderer().endRmlRender();
 }

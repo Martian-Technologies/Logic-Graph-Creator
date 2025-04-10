@@ -55,7 +55,7 @@ RmlGeometryAllocation::~RmlGeometryAllocation() {
 
 // ================================= RML RENDERER ==================================================
 
-RmlRenderer::RmlRenderer(VkRenderPass& renderPass) {
+RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout) {
 	// set up pipeline
 	VkShaderModule rmlVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.vert.spv"));
 	VkShaderModule rmlFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
@@ -66,6 +66,7 @@ RmlRenderer::RmlRenderer(VkRenderPass& renderPass) {
 	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
 	rmlPipelineInfo.pushConstantSize = sizeof(RmlPushConstants);
+	rmlPipelineInfo.descriptorSets.push_back(viewLayout);
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	pipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
 	destroyShaderModule(rmlVertShader);
@@ -83,13 +84,13 @@ void RmlRenderer::endRmlRender() {
 	renderInstructions = std::move(tempRenderInstructions);
 }
 
-void RmlRenderer::render(SubrendererInfo& info) {
-	VkCommandBuffer cmd = info.frame.getMainCommandBuffer();
+void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
+	VkCommandBuffer cmd = frame.getMainCommandBuffer();
 	
 	// bind pipeline
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getHandle());
 	// set viewport state
-	VkExtent2D& extent = info.windowExtent;
+	VkExtent2D& extent = windowExtent;
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -112,7 +113,7 @@ void RmlRenderer::render(SubrendererInfo& info) {
 	customScissor.extent = extent;
 	
 	// set up shared push constants data
-	RmlPushConstants pushConstants{ info.pixelViewMat, glm::vec2(0.0f, 0.0f) };
+	RmlPushConstants pushConstants{ glm::vec2(0.0f, 0.0f) };
 
 	// go through and do render instructions
 	std::lock_guard<std::mutex> lock(rmlInstructionMux);
@@ -122,7 +123,7 @@ void RmlRenderer::render(SubrendererInfo& info) {
 			const RmlDrawInstruction& renderInstruction = std::get<RmlDrawInstruction>(instruction);
 			
 			// Add geometry we are going to use to the frame
-			info.frame.getRmlAllocations().push_back(renderInstruction.geometry);
+			frame.getRmlAllocations().push_back(renderInstruction.geometry);
 
 			// upload push constants
 			pushConstants.translation = renderInstruction.translation;

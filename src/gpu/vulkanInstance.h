@@ -66,8 +66,9 @@ private:
 //
 // VULKAN IMPROVEMENTS -
 // - [x] VkBootstrap
+// - [ ] Switch from singleton to top down design
+// - [ ] Check macro
 // - [ ] Use dynamic rendering extension to simplify code
 // - [ ] Don't draw directly to swapchain
-// - [ ] Switch from singleton to top down design
 
 #endif
