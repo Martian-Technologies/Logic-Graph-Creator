@@ -28,7 +28,6 @@
 			"binaryDir": "build-tests",
 			"cacheVariables": {
 			    "CMAKE_BUILD_TYPE": "Debug",
-			    "Gatality_BuildApp": "OFF",
 			    "GATALITY_BUILD_TESTS": "ON"
 			}
 		}

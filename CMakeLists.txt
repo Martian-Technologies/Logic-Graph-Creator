@@ -75,35 +75,35 @@ target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/
 # Google Testing
 add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 
-# ===================================== CREATE APP EXECUTABLE ========================================
-# Platform specific business before add_executable
-if(APPLE) # MacOS
-	# Icon
-	set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
-	set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
-	set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-	list(APPEND PROJECT_SOURCES ${ICON_PATH})
-
-elseif (WIN32) # Windows
-	# Icon
-	set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
-	list(APPEND PROJECT_SOURCES ${ICON_PATH})
-endif()
-
-# Add executable
-set(EXTERNAL_LINKS
-	${Vulkan_LIBRARIES}
-	freetype
-	RmlUi::RmlUi
-	SDL3::SDL3
-	SDL3_image-static
-	cpplocate::cpplocate
-	VulkanMemoryAllocator
-	glm
-	${GATALITY_JSON_LIB_NAME}
-)
-
 if (NOT GATALITY_BUILD_TESTS)
+	# ===================================== CREATE APP EXECUTABLE ========================================
+	# Platform specific business before add_executable
+	if(APPLE) # MacOS
+		# Icon
+		set(ICON_PATH "${RESOURCES_DIR}/gateIcon.icns")
+		set(MACOSX_BUNDLE_ICON_FILE "gateIcon.icns")
+		set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+
+	elseif (WIN32) # Windows
+		# Icon
+		set(ICON_PATH "${RESOURCES_DIR}/icon.rc")
+		list(APPEND PROJECT_SOURCES ${ICON_PATH})
+	endif()
+
+	# Add executable
+	set(EXTERNAL_LINKS
+		${Vulkan_LIBRARIES}
+		freetype
+		RmlUi::RmlUi
+		SDL3::SDL3
+		SDL3_image-static
+		cpplocate::cpplocate
+		VulkanMemoryAllocator
+		glm
+		${GATALITY_JSON_LIB_NAME}
+	)
+
 	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
