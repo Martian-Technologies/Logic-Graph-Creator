@@ -1,13 +1,15 @@
 #ifndef fastMath_h
 #define fastMath_h
 
-template <unsigned int p, class T>
-constexpr int FastPower(T x) {
-	if constexpr (p == 0) return 1;
-	if constexpr (p == 1) return x;
+#include <algorithm>
 
-	int tmp = FastPower<p / 2>(x);
-	if constexpr ((p % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
+template <unsigned int P, class T>
+constexpr T FastPower(T x) {
+	if constexpr (P == 0) return 1;
+	if constexpr (P == 1) return x;
+
+	T tmp = FastPower<P / 2>(x);
+	if constexpr ((P % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
 constexpr int Abs(int x) { return x < 0 ? -x : x; }
@@ -29,6 +31,14 @@ template <typename T>
 constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }
 
 constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
+
+constexpr bool approx_equals(float a, float b) {
+	float i = fabs(a - b);
+	float j = nexttoward(std::max(a, b), HUGE_VALL);
+	float k = std::max(a, b);
+	float g = nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+	return fabs(a - b) <= nexttoward(std::max(a, b), HUGE_VALL) - std::max(a, b);
+}
 
 
 #endif /* fastMath_h */
