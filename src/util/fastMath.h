@@ -34,7 +34,7 @@ constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : 
 
 constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
 
-constexpr bool approx_equals(float a, float b) {
+inline bool approx_equals(float a, float b) {
 	float i = Fabs(a - b);
 	float j = nexttoward(std::max(a, b), HUGE_VALL);
 	float k = std::max(a, b);
