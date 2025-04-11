@@ -31,7 +31,7 @@ struct Vec2Int {
 	inline Vec2Int() : x(0), y(0) { }
 	inline Vec2Int(vec_int_cord_t x, vec_int_cord_t y) : x(x), y(y) { }
 
-	inline vec_int_cord_t manhattenDistanceTo(const Vec2Int& other) const { return Abs(x - other.x) + Abs(y - other.y); }
+	inline vec_int_cord_t manhattenDistanceTo(const Vec2Int& other) const { return abs(x - other.x) + abs(y - other.y); }
 	inline vec_int_cord_t distanceToSquared(const Vec2Int& other) const { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
 	bool withinArea(const Vec2Int& small, const Vec2Int& large) const { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 	inline bool operator==(const Vec2Int& other) const { return x == other.x && y == other.y; }

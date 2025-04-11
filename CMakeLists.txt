@@ -82,42 +82,54 @@ set(EXTERNAL_LINKS
 	KDAB::kddockwidgets
 	${GATALITY_JSON_LIB_NAME}
 )
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-# Platform specific business after add_executable
-if(APPLE) # MacOS
-	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+if (NOT GATALITY_BUILD_TESTS)
+	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${UI_DIR})
+	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
+	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-	# Bundle Properties 
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		MACOSX_BUNDLE TRUE
-		# indentification
-		MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
-		MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
-		MACOSX_BUNDLE_NAME "Gatality"
-		MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
-		# version info
-		MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-		MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
-		MACOSX_BUNDLE_INFO_VERSION "6.0"
-		# Dev Region
-		MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
-		# Doc Types that macos can handle
-		MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
-		# Application category
-		MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
-		MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+	# Platform specific business after add_executable
+	if(APPLE) # MacOS
+		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+
+		# Bundle Properties 
+		set_target_properties(${PROJECT_NAME} PROPERTIES
+			MACOSX_BUNDLE TRUE
+			# indentification
+			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
+			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
+			MACOSX_BUNDLE_NAME "Gatality"
+			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
+			# version info
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_INFO_VERSION "6.0"
+			# Dev Region
+			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
+			# Doc Types that macos can handle
+			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
+			# Application category
+			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
+			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+		)
+		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
+	elseif (WIN32) # Windows
+		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
+			# Set WIN32_EXECUTABLE (Disables Console)
+			set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+		endif ()
+	endif()
+	
+	# ======================================= RESOURCE COPYING =========================================
+	# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
+	set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
+		COMMENT "Copying resource directory"
 	)
-	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
-elseif (WIN32) # Windows
-	if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
-		# Set WIN32_EXECUTABLE (Disables Console)
-		set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-	endif ()
-endif()	
+
+endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 if (GATALITY_BUILD_TESTS)
@@ -146,11 +158,3 @@ if (GATALITY_BUILD_TESTS)
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
 	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 endif()
-
-# ======================================= RESOURCE COPYING =========================================
-# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
-set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
-	COMMENT "Copying resource directory"
-)
