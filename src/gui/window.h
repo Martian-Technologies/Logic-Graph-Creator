@@ -44,7 +44,7 @@ private:
 	SdlWindow sdlWindow;
 	WindowRenderingManager rendereringManager;
 
-	std::shared_ptr<CircuitViewWidget> circuitView;
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	 
 	Rml::Context* rmlContext;
 	Rml::ElementDocument* rmlDocument;

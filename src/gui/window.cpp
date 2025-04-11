@@ -17,14 +17,14 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// show rmlUi document
 	rmlDocument->Show();
 
-	//dynamically generating blocks/tools menutree
+	// dynamically generating blocks/tools menutree
 	Rml::Element* toolTreeParent = rmlDocument->GetElementById("left-sidebar-container");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, toolTreeParent);
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
-	circuitView = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent);
-
+	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle());
+	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
 	MenuManager* menuManager = new MenuManager(rmlDocument);
 }

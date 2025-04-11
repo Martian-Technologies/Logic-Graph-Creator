@@ -3,8 +3,41 @@
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+#include <SDL3/SDL.h>
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent) : fileManager(fileManager), document(document), parent(parent) {
+void SaveCallback(void *userData, const char *const *filePaths, int filter) {
+	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
+    if (filePaths && filePaths[0]) {
+        std::cout << "Selected file(s):" << std::endl;
+		std::string filePath = filePaths[0];
+		if (!circuitViewWidget->getCircuitView()->getCircuit()) {
+			logError("Circuit was null, could not save");
+			return;
+		}
+		logWarning("This circuit "+ circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() +" will be saved with a new UUID");
+		circuitViewWidget->getFileManager()->saveToFile(filePath, circuitViewWidget->getCircuitView()->getCircuit()->getCircuitId());
+    } else {
+        std::cout << "File dialog canceled." << std::endl;
+    }
+}
+
+void LoadCallback(void *userData, const char *const *filePaths, int filter) {
+	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
+    if (filePaths && filePaths[0]) {
+        std::cout << "Selected file(s):" << std::endl;
+		std::string filePath = filePaths[0];
+		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
+		if (id == 0) {
+			logError("Error", "Failed to load circuit file.");
+			return;
+		}
+		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+    } else {
+        std::cout << "File dialog canceled." << std::endl;
+    }
+}
+
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element,  SDL_Window* window) : fileManager(fileManager), document(document), window(window), element(element) {
 	// create circuitView
 	renderer = std::make_unique<RendererTMP>();
 	circuitView = std::make_unique<CircuitView>(renderer.get());
@@ -21,7 +54,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
-	parent->AddEventListener("keydown", &keybindHandler);
+	element->AddEventListener("keydown", &keybindHandler);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,
@@ -36,6 +69,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		Rml::Input::KeyIdentifier::KI_S,
 		Rml::Input::KeyModifier::KM_CTRL,
 		[this]() { logInfo("save"); save(); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_O,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("load"); load(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_C,
@@ -115,21 +153,22 @@ void CircuitViewWidget::save() {
 		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
 		if (!fileManager->saveCircuit(circuitId)) {
 			// if failed to save the circuit with out a path
-			// QString filePath = QFileDialog::getSaveFileName(this, "Save Circuit", "", "Circuit Files (*.cir);;All Files (*)");
-			// if (!filePath.isEmpty()) {
-			// 	logWarning("This circuit "+ circuitView->getCircuit()->getCircuitName() +" will be saved with a new UUID");
-			// 	fileManager->saveToFile(filePath.toStdString(), circuitId);
-			// }
+			static SDL_DialogFileFilter filter;
+			filter.name = "Circuit Files";
+			filter.pattern = "*.cir";
+			SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 		}
 	}
 }
 
 // for drag and drop load directly onto this circuit view widget
-void CircuitViewWidget::load(const std::string& filePath) {
+void CircuitViewWidget::load() {
 	if (!fileManager) return;
 
-	if (!fileManager->loadFromFile(filePath)) {
-		logError("Failed to load circuit file.");
-		return;
-	}
+	static SDL_DialogFileFilter filter[2];
+	filter[0].name = "Circuit Files";
+	filter[0].pattern = "*.cir";
+	filter[1].name = "OpenCircuit Files";
+	filter[1].pattern = "*.circiut";
+	SDL_ShowOpenFileDialog(LoadCallback, this, window, filter, 0, nullptr, true);
 }
