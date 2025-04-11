@@ -6,6 +6,7 @@
 #include <RmlUi/Core/Vertex.h>
 
 #include "gpu/vulkanBuffer.h"
+#include "gpu/vulkanImage.h"
 #include "vulkanPipeline.h"
 #include "vulkanFrame.h"
 
@@ -34,14 +35,27 @@ struct RmlPushConstants {
 	glm::vec2 translation;
 };
 
+// ============================= RML TEXTURES ===================================
+class RmlTexture {
+public:
+	RmlTexture(void* data, VkExtent3D size);
+	~RmlTexture();
+
+private:
+	AllocatedImage image;
+	VkSampler sampler;
+	VkDescriptorSet descriptor;
+};
+
 // =========================== RML INSTRUCTIONS =================================
 
 struct RmlDrawInstruction {
-	inline RmlDrawInstruction(std::shared_ptr<RmlGeometryAllocation> geometry, glm::vec2 translation)
-		: geometry(geometry), translation(translation) {}
+	inline RmlDrawInstruction(std::shared_ptr<RmlGeometryAllocation> geometry, glm::vec2 translation, std::shared_ptr<RmlTexture> texture = nullptr)
+		: geometry(geometry), translation(translation), texture(texture) {}
 	
 	std::shared_ptr<RmlGeometryAllocation> geometry;
 	glm::vec2 translation;
+	std::shared_ptr<RmlTexture> texture = nullptr; // optional
 };
 
 struct RmlSetScissorInstruction {
@@ -88,7 +102,11 @@ private:
 
 	// geometry
 	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
-	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> rmlGeometryAllocations;
+	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> geometryAllocations;
+
+	// textures
+	Rml::TextureHandle currentTextureHandle = 1;
+	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlTexture>> textures;
 	
 	// render instructions
 	std::vector<RmlRenderInstruction> renderInstructions;

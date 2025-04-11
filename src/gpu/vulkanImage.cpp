@@ -12,6 +12,9 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
 	if (mipmapped) {
 		newImage.mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(size.width, size.height)))) + 1;
 	}
+	else {
+		newImage.mipLevels = 1;
+	}
 	
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -21,9 +24,7 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
     imageInfo.extent = size;
     imageInfo.mipLevels = newImage.mipLevels;
     imageInfo.arrayLayers = 1;
-    //for MSAA. we will not be using it by default, so default it to 1 sample per pixel.
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    //optimal tiling, which means the image is stored on the best gpu format
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT; // no msaa
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.usage = usage;
 
@@ -33,7 +34,7 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
 	vmaAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	VkResult result = vmaCreateImage(VulkanInstance::get().getAllocator(), &imageInfo, &vmaAllocInfo, &newImage.image, &newImage.allocation, nullptr);
 	if(result != VK_SUCCESS) {
-		logError("Could not allocate vulkan image", "Vulkan");
+		throwFatalError("Could not allocate vulkan image");
 	}
 
 	// set the aspect flag to depth if image is using a depth format
@@ -45,7 +46,7 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
 
 	// create image view
 	VkImageViewCreateInfo imageViewInfo{};
-	imageViewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
+	imageViewInfo.subresourceRange.levelCount = newImage.mipLevels;
 	imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     imageViewInfo.pNext = nullptr;
 
@@ -116,9 +117,9 @@ bool transitionImageLayout(VkCommandBuffer cmd, AllocatedImage& image, VkImageLa
 	barrier.subresourceRange.aspectMask = image.aspect;
 	
 	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = image.mipLevels;
+	barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 1;
+	barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
 
 	// determine access masks
 	VkPipelineStageFlags sourceStage;

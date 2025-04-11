@@ -19,7 +19,7 @@ AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaAllo
 	// allocate the buffer
 	VkResult result = vmaCreateBuffer(VulkanInstance::get().getAllocator(), &bufferInfo, &vmaAllocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info);
 	if(result != VK_SUCCESS) {
-		logError("failed to create vulkan buffer", "Vulkan");
+		throwFatalError("failed to create vulkan buffer");
 	}
 	return newBuffer;
 }

@@ -53,6 +53,14 @@ RmlGeometryAllocation::~RmlGeometryAllocation() {
 	destroyBuffer(vertexBuffer);
 }
 
+RmlTexture::RmlTexture(void* data, VkExtent3D size) {
+	image = createImage(data, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+}
+
+RmlTexture::~RmlTexture() {
+	destroyImage(image);
+}
+
 // ================================= RML RENDERER ==================================================
 
 RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout) {
@@ -124,24 +132,26 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 		if (std::holds_alternative<RmlDrawInstruction>(instruction)) {
 			// DRAW instruction
 			const RmlDrawInstruction& renderInstruction = std::get<RmlDrawInstruction>(instruction);
-			
-			// Add geometry we are going to use to the frame
-			frame.getRmlAllocations().push_back(renderInstruction.geometry);
 
-			// upload push constants
-			pushConstants.translation = renderInstruction.translation;
-			vkCmdPushConstants(cmd, pipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
+			if (renderInstruction.texture == nullptr) {
+				// Add geometry we are going to use to the frame
+				frame.getRmlAllocations().push_back(renderInstruction.geometry);
 
-			// bind vertex buffer
-			VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+				// upload push constants
+				pushConstants.translation = renderInstruction.translation;
+				vkCmdPushConstants(cmd, pipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
 
-			// bind index buffer
-			vkCmdBindIndexBuffer(cmd, renderInstruction.geometry->getIndexBuffer().buffer, offsets[0], VK_INDEX_TYPE_UINT32);
+				// bind vertex buffer
+				VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 
-			// draw
-			vkCmdDrawIndexed(cmd, renderInstruction.geometry->getNumIndices(), 1, 0, 0, 0);
+				// bind index buffer
+				vkCmdBindIndexBuffer(cmd, renderInstruction.geometry->getIndexBuffer().buffer, offsets[0], VK_INDEX_TYPE_UINT32);
+
+				// draw
+				vkCmdDrawIndexed(cmd, renderInstruction.geometry->getNumIndices(), 1, 0, 0, 0);
+			}
 		}
 		else if (std::holds_alternative<RmlEnableScissorInstruction>(instruction)) {
 			// ENABLE SCISSOR instruction
@@ -171,35 +181,53 @@ Rml::CompiledGeometryHandle RmlRenderer::CompileGeometry(Rml::Span<const Rml::Ve
 	// get and increment handle
 	Rml::CompiledGeometryHandle newHandle = currentGeometryHandle++;
 	// alocate new geometry
-	rmlGeometryAllocations[newHandle] = std::make_shared<RmlGeometryAllocation>(vertices, indices);
+	geometryAllocations[newHandle] = std::make_shared<RmlGeometryAllocation>(vertices, indices);
 	
 	return newHandle;
 }
 void RmlRenderer::ReleaseGeometry(Rml::CompiledGeometryHandle geometry) {
-	rmlGeometryAllocations.erase(geometry);
+	geometryAllocations.erase(geometry);
 }
 void RmlRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture) {
 	// find geometry
-	auto geometryItr = rmlGeometryAllocations.find(handle);
-	if (geometryItr == rmlGeometryAllocations.end()) {
+	auto geometryItr = geometryAllocations.find(handle);
+	if (geometryItr == geometryAllocations.end()) {
 		logError("tried to render non-existent RML geometry", "Vulkan");
 		return;
 	}
+
+	// find texture if specified
+	std::shared_ptr<RmlTexture> texturePtr = nullptr;
+	if (texture != 0) {
+		auto textureItr = textures.find(texture);
+		if (textureItr != textures.end()) {
+			texturePtr = textureItr->second;
+		}
+	}
 	
-	tempRenderInstructions.push_back(RmlDrawInstruction(geometryItr->second, {translation.x, translation.y}));
+	tempRenderInstructions.push_back(RmlDrawInstruction(geometryItr->second, {translation.x, translation.y}, texturePtr));
 }
 
 // Textures
 Rml::TextureHandle RmlRenderer::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) {
-	logInfo("texture load");
+	logWarning("rml attempting to load texture from file, unsupported right now", "Vulkan");
 	return 1;
 }
 Rml::TextureHandle RmlRenderer::GenerateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions) {
-	logInfo("texture gen");
-	return 1;
+	// get and increment handle
+	Rml::TextureHandle newHandle = currentTextureHandle++;
+	
+	// alocate new texture
+	VkExtent3D size;
+	size.width = source_dimensions.x;
+	size.height = source_dimensions.y;
+	size.depth = 1;
+	textures[newHandle] = std::make_shared<RmlTexture>((void*)source.data(), size);
+	
+	return newHandle;
 }
 void RmlRenderer::ReleaseTexture(Rml::TextureHandle texture_handle) {
-	logInfo("texture release");
+	textures.erase(texture_handle);
 }
 
 // Scissor
