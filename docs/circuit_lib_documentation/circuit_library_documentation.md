@@ -22,7 +22,8 @@ The default library comes with different sizes of decoders that users can import
 The input to the below cirucit is 8 lines with P0 being the top line.  P0 corresponds to an input of 0 while P7 corresponds to an input of 7.
 The output is the encoded binary number where Q0 is the least significant bit of the output and Q2 is the most significant output.
 
-![image](https://github.com/user-attachments/assets/e0f6fef1-1c78-43cd-92e0-9f0685548dcf)
+![image](https://github.com/user-attachments/assets/22fc5f9e-c6fd-4697-8edc-75f1cb5c3f0d)
+
 
 
 
