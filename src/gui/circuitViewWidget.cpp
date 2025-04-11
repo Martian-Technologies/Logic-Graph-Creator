@@ -3,12 +3,11 @@
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
-#include "interaction/keybind.h"
 
 CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent) : fileManager(fileManager), document(document), parent(parent) {
 	// create circuitView
-	// renderer = std::make_unique<QtRenderer>();
-	// circuitView = std::make_unique<CircuitView>(renderer.get());
+	renderer = std::make_unique<RendererTMP>();
+	circuitView = std::make_unique<CircuitView>(renderer.get());
 
 
 	// float w = size().width();
@@ -22,33 +21,43 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
-	parent->AddEventListener("keydown", new Keybind(
-		[this]() {
-			circuitView->getCircuit()->undo();
-		}
-	));
-	// connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
-	// connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getCircuit()->undo();
-	// });
-	// connect(keybindManager->createShortcut("Redo", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getCircuit()->redo();
-	// });
-	// connect(keybindManager->createShortcut("Copy", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getEventRegister().doEvent(Event("Copy"));
-	// });
-	// connect(keybindManager->createShortcut("BlockRotateCCW", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW"));
-	// });
-	// connect(keybindManager->createShortcut("BlockRotateCW", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CW"));
-	// });
-	// connect(keybindManager->createShortcut("Confirm", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getEventRegister().doEvent(Event("Confirm"));
-	// });
-	// connect(keybindManager->createShortcut("MakeCircuitBlock", this), &QShortcut::activated, this, [this]() {
-	// 	circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId());
-	// });
+	parent->AddEventListener("keydown", &keybindHandler);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Z,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("undo"); if (circuitView->getCircuit()) circuitView->getCircuit()->undo(); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Z,
+		Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
+		[this]() { logInfo("redo"); if (circuitView->getCircuit()) circuitView->getCircuit()->redo(); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_S,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("save"); save(); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_C,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("Copy"); circuitView->getEventRegister().doEvent(Event("Copy")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Q,
+		[this]() { logInfo("Tool Rotate Block CCW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_E,
+		[this]() { logInfo("Tool Rotate Block CW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CW")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_E,
+		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_B,
+		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
+	);
 
 	// connect buttons and actions
 	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
@@ -119,8 +128,8 @@ void CircuitViewWidget::save() {
 void CircuitViewWidget::load(const std::string& filePath) {
 	if (!fileManager) return;
 
-    if (!fileManager->loadFromFile(filePath)) {
-        logError("Failed to load circuit file.");
-        return;
-    }
+	if (!fileManager->loadFromFile(filePath)) {
+		logError("Failed to load circuit file.");
+		return;
+	}
 }
