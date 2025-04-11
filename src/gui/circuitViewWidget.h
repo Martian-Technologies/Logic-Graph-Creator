@@ -5,9 +5,11 @@
 #include "backend/circuitView/circuitView.h"
 #include "util/vec2.h"
 
+#include <RmlUi/Core.h>
+
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent);
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
@@ -26,10 +28,12 @@ private:
 	std::unique_ptr<CircuitView> circuitView;
 	// std::unique_ptr<Renderer> renderer;
 	CircuitFileManager* fileManager;
+	Rml::ElementDocument* document;
+	Rml::Element* parent;
 
 
 	// settings (temp)
-	bool mouseControls;
+	bool mouseControls = false;
 };
 
 #endif /* circuitViewWidget_h */

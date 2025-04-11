@@ -17,7 +17,6 @@ public:
 	void runLoop();
 	
 private:
-	// 
 	Backend backend;
     CircuitFileManager circuitFileManager;
 
@@ -31,4 +30,4 @@ private:
 	bool running = false;
 };
 
-#endif
+#endif /* app_h */

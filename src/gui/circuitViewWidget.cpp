@@ -3,8 +3,9 @@
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+#include "interaction/keybind.h"
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager) : mouseControls(false), fileManager(fileManager) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent) : fileManager(fileManager), document(document), parent(parent) {
 	// create circuitView
 	// renderer = std::make_unique<QtRenderer>();
 	// circuitView = std::make_unique<CircuitView>(renderer.get());
@@ -21,6 +22,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager) : mouseCon
 	// renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
+	parent->AddEventListener("keydown", new Keybind(
+		[this]() {
+			circuitView->getCircuit()->undo();
+		}
+	));
 	// connect(keybindManager->createShortcut("Save", this), &QShortcut::activated, this, &CircuitViewWidget::save);
 	// connect(keybindManager->createShortcut("Undo", this), &QShortcut::activated, this, [this]() {
 	// 	circuitView->getCircuit()->undo();
