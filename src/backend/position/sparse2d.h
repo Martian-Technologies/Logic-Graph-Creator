@@ -2,6 +2,7 @@
 #define sparse2d_h
 
 #include "position.h"
+#include "../../external/hash_table5.hpp"
 
 /*
 Should be defined as:
@@ -35,47 +36,36 @@ public:
 	inline void remove(const Position& position);
 
 private:
-	std::unordered_map<Position, T> data;
-
-	typedef typename std::unordered_map<Position, T>::iterator iterator;
-	typedef typename std::unordered_map<Position, T>::const_iterator const_iterator;
+    emhash5::HashMap<int, T> data;
+    inline int cantorPair(const Position& pos) const { return pos.y + ((pos.x + pos.y) * (pos.x + pos.y + 1) / 2); }
 };
 
 template<class T>
 T* Sparse2dArray<T>::get(const Position& position) {
-	iterator iter = data.find(position);
-	if (iter == data.end()) {
-		return nullptr;
-	} else {
-		return &iter->second;
-	}
+    int key = cantorPair(position);
+    if (data.contains(key)) {
+        return &data.at(key);
+    } else return nullptr;
 }
 
 template<class T>
 const T* Sparse2dArray<T>::get(const Position& position) const {
-	const_iterator iter = data.find(position);
-	if (iter == data.end()) {
-		return nullptr;
-	} else {
-		return &iter->second;
-	}
+    int key = cantorPair(position);
+    if (data.contains(key)) {
+        return &data.at(key);
+    } else return nullptr;
 }
 
 template<class T>
 void Sparse2dArray<T>::insert(const Position& position, const T& value) {
-	iterator iter = data.find(position);
-	if (iter == data.end()) {
-		data.insert(std::make_pair(position, value));
-	} else {
-		iter->second = value;
-	}
+    int key = cantorPair(position);
+    data.emplace_unique(key, value);
 }
 
 template<class T>
 void Sparse2dArray<T>::remove(const Position& position) {
-	iterator iter = data.find(position);
-	if (iter != data.end())
-		data.erase(iter);
+    int key = cantorPair(position);
+    data.erase(key);
 }
 
 #endif /* sparse2d_h */
