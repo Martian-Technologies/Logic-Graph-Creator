@@ -29,7 +29,7 @@
 			"cacheVariables": {
 			    "CMAKE_BUILD_TYPE": "Debug",
 			    "Gatality_BuildApp": "OFF",
-			    "Gatality_BuildTests": "ON"
+			    "GATALITY_BUILD_TESTS": "ON"
 			}
 		}
 	],
