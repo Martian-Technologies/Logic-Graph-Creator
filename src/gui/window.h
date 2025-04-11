@@ -5,7 +5,7 @@
 #include <SDL3/SDL_events.h>
 
 #include "sdl/sdlWindow.h"
-#include "gpu/renderer/windowRenderer.h"
+#include "gpu/renderer/windowRenderingManager.h"
 #include "rml/rmlRenderInterface.h"
 
 #include "backend/backend.h"
@@ -38,7 +38,7 @@ private:
 	CircuitFileManager* circuitFileManager;
 
 	SdlWindow sdlWindow;
-	WindowRenderer renderer;
+	WindowRenderingManager rendereringManager;
 	 
 	Rml::Context* rmlContext;
 };
