@@ -78,7 +78,7 @@ RmlTexture::~RmlTexture() {
 // ================================= RML RENDERER ==================================================
 
 RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout)
-	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }}) {
+	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }}) {
 	
 	// set up image descriptor
 	DescriptorLayoutBuilder layoutBuilder;

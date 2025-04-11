@@ -137,8 +137,11 @@ void VulkanInstance::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& 
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &immediateCommandBuffer;
-	if (vkQueueSubmit(graphicsQueue->queue, 1, &submitInfo, immediateFence) != VK_SUCCESS) {
-		throwFatalError("failed to submit draw command buffer!");
+	{
+		std::lock_guard<std::mutex> lock(graphicsSubmitMux);
+		if (vkQueueSubmit(graphicsQueue->queue, 1, &submitInfo, immediateFence) != VK_SUCCESS) {
+			throwFatalError("failed to submit draw command buffer!");
+		}
 	}
 
 	// wait for completion

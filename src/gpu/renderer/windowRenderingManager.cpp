@@ -104,8 +104,11 @@ void WindowRenderingManager::renderLoop() {
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
-		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.getRenderFence()) != VK_SUCCESS) {
-			throwFatalError("failed to submit draw command buffer!");
+		{
+			std::lock_guard<std::mutex> lock(VulkanInstance::get().getGraphicsSubmitMux());
+			if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.getRenderFence()) != VK_SUCCESS) {
+				throwFatalError("failed to submit draw command buffer!");
+			}
 		}
 		
 		// present
@@ -118,12 +121,15 @@ void WindowRenderingManager::renderLoop() {
 		presentInfo.pSwapchains = swapchains;
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
-
-		VkResult imagePresentResult = vkQueuePresentKHR(presentQueue, &presentInfo);
-		if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imagePresentResult == VK_SUBOPTIMAL_KHR) {
-			swapchainRecreationNeeded = true;
-		} else if (imagePresentResult != VK_SUCCESS) {
-			logError("failed to present swap chain image!");
+		{
+			std::lock_guard<std::mutex> lock(VulkanInstance::get().getPresentSubmitMux());
+			
+			VkResult imagePresentResult = vkQueuePresentKHR(presentQueue, &presentInfo);
+			if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imagePresentResult == VK_SUBOPTIMAL_KHR) {
+				swapchainRecreationNeeded = true;
+			} else if (imagePresentResult != VK_SUCCESS) {
+				logError("failed to present swap chain image!");
+			}
 		}
 
 		//increase the number of frames drawn

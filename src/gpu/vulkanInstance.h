@@ -29,7 +29,9 @@ public:
 	inline vkb::Device& getVkbDevice() { return device.value(); }
 	inline VkDevice& getDevice() { return device.value().device; }
 	inline QueueInfo& getGraphicsQueue() { return graphicsQueue.value(); }
+	inline std::mutex& getGraphicsSubmitMux() { return graphicsSubmitMux; }
 	inline QueueInfo& getPresentQueue() { return presentQueue.value(); }
+	inline std::mutex& getPresentSubmitMux() { return presentSubmitMux; }
 
 private:
 	void createAllocator();
@@ -43,7 +45,9 @@ private:
 
 	// Queues
 	std::optional<QueueInfo> graphicsQueue;
+	std::mutex graphicsSubmitMux;
 	std::optional<QueueInfo> presentQueue;
+	std::mutex presentSubmitMux;
 
 	// Immediate submission
     VkFence immediateFence;
