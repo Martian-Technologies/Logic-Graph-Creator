@@ -11,7 +11,7 @@ public:
 	void ProcessEvent(Rml::Event& event) override;
 	void OnDetach(Rml::Element* element) override;
 private:
-	MenuManager* parent;  
+	MenuManager* parent;
 	Rml::Element* element;
 	std::string id;
 
@@ -24,7 +24,7 @@ public:
 	~MenuManager();
 
 private:
-	void Intialize();
+	void Initialize();
 	void File();
 	void Edit();
 	void View();

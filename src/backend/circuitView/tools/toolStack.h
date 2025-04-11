@@ -20,7 +20,7 @@ public:
 	inline ToolStack& operator=(const ToolStack& other) = delete;
 
 	void activate();
-	void deactivate() { if (!toolStack.empty()) { toolStack.back()->deactivate(); toolStack.back()->elementCreator.clear(); } }
+	void deactivate() { isActive = false; if (!toolStack.empty()) { toolStack.back()->deactivate(); toolStack.back()->elementCreator.clear(); } }
 
 	void reset();
 	void pushTool(SharedCircuitTool newTool, bool resetTool = true);
@@ -61,6 +61,7 @@ private:
 	Renderer* renderer;
 	EvaluatorStateInterface* evaluatorStateInterface;
 
+	bool isActive = false;
 	std::vector<SharedCircuitTool> toolStack;
 };
 

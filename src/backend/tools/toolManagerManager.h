@@ -47,6 +47,8 @@ public:
 		return iter->second->getInstance();
 	}
 
+	const std::map<std::string, std::unique_ptr<void>>& getAllTools() const { return *reinterpret_cast<const std::map<std::string, std::unique_ptr<void>>*>(&tools); }
+
 	template<class T>
 	static void registerTool() { tools[T::getPath_()] = std::make_unique<ToolTypeMaker<T>>(); }
 

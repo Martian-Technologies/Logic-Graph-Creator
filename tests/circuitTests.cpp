@@ -186,3 +186,26 @@ TEST_F(CircuitTest, ConnectionRemovalConnectionEnd) {
 	
 	ASSERT_FALSE(container->connectionExists(pos1, pos2));
 }
+
+TEST_F(CircuitTest, CircuitPlacement) {
+	
+
+	circuit_id_t circuitId = circuitManager.createNewCircuit(generate_uuid_v4(), "Circuit");
+	SharedCircuit circuit2 = circuitManager.getCircuit(circuitId);
+	
+	const BlockType block = circuitManager.setupBlockData(circuitId);
+
+	
+	ASSERT_NE(block,NONE);
+	ASSERT_TRUE(circuitManager.getBlockDataManager()->blockExists(block));
+	ASSERT_TRUE(circuit->tryInsertBlock(Position(), Rotation::ZERO, block));
+
+
+	const Block* block1 = circuit->getBlockContainer()->getBlock(Position());
+	const Block* block2 = circuit->getBlockContainer()->getBlock(Position(0,1));
+	const Block* block3 = circuit->getBlockContainer()->getBlock(Position(1,0));
+	const Block* block4 = circuit->getBlockContainer()->getBlock(Position(1,1));
+	ASSERT_NE(block1, nullptr);
+	ASSERT_EQ(block1->type(), block);
+	ASSERT_TRUE(block1==block2 || block1==block3 || block1==block4);
+}

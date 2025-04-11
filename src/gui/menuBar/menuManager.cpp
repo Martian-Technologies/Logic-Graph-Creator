@@ -5,7 +5,7 @@ MenuManager::MenuManager(Rml::ElementDocument* context) : context(context) {
 
 }
 
-void MenuManager::Intialize() {
+void MenuManager::Initialize() {
 
 	Rml::Element* file = context->GetElementById("menu-file");
 	Rml::Element* edit = context->GetElementById("menu-edit");
@@ -35,7 +35,7 @@ void MenuManager::View() {
 
 
 // ---------- Listener ----------
-MenuListener::MenuListener(MenuManager* parent, Rml::Element* element, const std::string& id) : parent(parent), element(element), id(id) {}
+MenuListener::MenuListener(MenuManager* parent, Rml::Element* element, const std::string& id) : parent(parent), element(element), id(id) { }
 
 void MenuListener::OnDetach(Rml::Element* element) {
 	delete this;

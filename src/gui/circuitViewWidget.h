@@ -7,14 +7,14 @@
 
 class CircuitViewWidget {
 public:
-    CircuitViewWidget(CircuitFileManager* fileManager);
+	CircuitViewWidget(CircuitFileManager* fileManager);
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
 	void setSimState(bool state);
 	void simUseSpeed(bool state);
 	void setSimSpeed(double speed);
-	
+
 	void load(const std::string& filePath);
 	void save();
 
@@ -25,7 +25,7 @@ private:
 
 	std::unique_ptr<CircuitView> circuitView;
 	// std::unique_ptr<Renderer> renderer;
-    CircuitFileManager* fileManager;
+	CircuitFileManager* fileManager;
 
 
 	// settings (temp)
