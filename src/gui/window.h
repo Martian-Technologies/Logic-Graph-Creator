@@ -37,15 +37,17 @@ public:
 	void setMode(std::string tool);
 
 private:
-	std::shared_ptr<CircuitViewWidget> circuitView;
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	std::optional<SelectorWindow> selectorWindow;
 
 	SdlWindow sdlWindow;
 	WindowRenderingManager rendereringManager;
+
+	std::shared_ptr<CircuitViewWidget> circuitView;
 	 
 	Rml::Context* rmlContext;
+	Rml::ElementDocument* rmlDocument;
 };
 
 #endif

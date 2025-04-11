@@ -12,21 +12,21 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
-	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
+	rmlDocument = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// show rmlUi document
-	document->Show();
+	rmlDocument->Show();
 
 	//dynamically generating blocks/tools menutree
-	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
-	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
+	Rml::Element* toolTreeParent = rmlDocument->GetElementById("left-sidebar-container");
+	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, toolTreeParent);
 
 	// get widget for circuit view
-	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
-	circuitView = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent);
+	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
+	circuitView = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent);
 
 
-	MenuManager* menuManager = new MenuManager(document);
+	MenuManager* menuManager = new MenuManager(rmlDocument);
 }
 
 Window::~Window() {
