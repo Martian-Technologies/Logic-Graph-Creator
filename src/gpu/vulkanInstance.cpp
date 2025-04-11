@@ -44,8 +44,45 @@ VulkanInstance::~VulkanInstance() {
 	logInfo("Shutting down Vulkan..", "Vulkan");
 
 	if (allocator.has_value()) vmaDestroyAllocator(allocator.value());
-	if (device.has_value()) vkb::destroy_device(device.value());
+	if (device.has_value()) {
+		vkDestroyFence(device->device, immediateFence, nullptr);
+		vkDestroyCommandPool(device->device, immediateCommandPool, nullptr);
+		vkb::destroy_device(device.value());
+	}
 	vkb::destroy_instance(instance);
+}
+
+void VulkanInstance::createAllocator() {
+	VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = physicalDevice.value();
+    allocatorInfo.device = device.value().device;
+    allocatorInfo.instance = instance;
+	
+	VmaAllocator alloc;
+    if (vmaCreateAllocator(&allocatorInfo, &alloc) != VK_SUCCESS) { throwFatalError("Could not create Vulkan VMA allocator.");}
+	allocator = alloc;
+}
+
+void VulkanInstance::initializeImmediateSubmission() {
+	VkCommandPoolCreateInfo commandPoolInfo = {};
+	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolInfo.pNext = nullptr;
+	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	commandPoolInfo.queueFamilyIndex = graphicsQueue->index;
+	vkCreateCommandPool(device->device, &commandPoolInfo, nullptr, &immediateCommandPool);
+
+	VkCommandBufferAllocateInfo commandBufferInfo = {};
+	commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	commandBufferInfo.pNext = nullptr;
+	commandBufferInfo.commandPool = immediateCommandPool;
+	commandBufferInfo.commandBufferCount = 1;
+	commandBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	vkAllocateCommandBuffers(device->device, &commandBufferInfo, &immediateCommandBuffer);
+
+	VkFenceCreateInfo fenceInfo = {};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.pNext = nullptr;
+	vkCreateFence(device->device, &fenceInfo, nullptr, &immediateFence);
 }
 
 void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
@@ -73,18 +110,39 @@ void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
 
 		// Create vma allocator
 		createAllocator();
+
+		// Initialize immediate submission
+		initializeImmediateSubmission();
 	}
 }
 
-void VulkanInstance::createAllocator() {
-	VmaAllocatorCreateInfo allocatorInfo = {};
-    allocatorInfo.physicalDevice = physicalDevice.value();
-    allocatorInfo.device = device.value().device;
-    allocatorInfo.instance = instance;
-	
-	VmaAllocator alloc;
-    if (vmaCreateAllocator(&allocatorInfo, &alloc) != VK_SUCCESS) { throwFatalError("Could not create Vulkan VMA allocator.");}
-	allocator = alloc;
+void VulkanInstance::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function) {
+	// set up
+	vkResetFences(device->device, 1, &immediateFence);
+	vkResetCommandBuffer(immediateCommandBuffer, 0);
+
+	// start command buffer
+	VkCommandBufferBeginInfo cmdBeginInfo{};
+	cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	vkBeginCommandBuffer(immediateCommandBuffer, &cmdBeginInfo);
+
+	// run commands
+	function(immediateCommandBuffer);
+
+	// end command buffer
+	vkEndCommandBuffer(immediateCommandBuffer);
+
+	// submit command buffer
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &immediateCommandBuffer;
+	if (vkQueueSubmit(graphicsQueue->queue, 1, &submitInfo, immediateFence) != VK_SUCCESS) {
+		throwFatalError("failed to submit draw command buffer!");
+	}
+
+	// wait for completion
+	vkWaitForFences(device->device, 1, &immediateFence, VK_TRUE, UINT64_MAX);
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(

@@ -20,8 +20,10 @@ public:
 	~VulkanInstance();
 
 	void ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting);
+	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 public:
+	// getters
 	inline VkInstance& getInstance() { return instance.instance; }
 	inline VmaAllocator& getAllocator() { return allocator.value(); }
 	inline vkb::Device& getVkbDevice() { return device.value(); }
@@ -31,6 +33,7 @@ public:
 
 private:
 	void createAllocator();
+	void initializeImmediateSubmission();
 	
 private:
 	vkb::Instance instance;
@@ -41,6 +44,11 @@ private:
 	// Queues
 	std::optional<QueueInfo> graphicsQueue;
 	std::optional<QueueInfo> presentQueue;
+
+	// Immediate submission
+    VkFence immediateFence;
+    VkCommandBuffer immediateCommandBuffer;
+    VkCommandPool immediateCommandPool;
 };
 
 // Vulkan Renderer Design Notes
