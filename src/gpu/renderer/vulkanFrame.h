@@ -9,6 +9,7 @@
 
 struct VulkanChunkAllocation;
 struct RmlGeometryAllocation;
+struct RmlTexture;
 
 class VulkanFrameData {
 public:
@@ -26,8 +27,10 @@ public:
 	inline VkSemaphore& getSwapchainSemaphore() { return swapchainSemaphore; };
 	inline VkSemaphore& getRenderSemaphore() { return renderSemaphore; }
 	inline VkFence& getRenderFence() { return renderFence; };
+	
 	inline std::vector<std::shared_ptr<VulkanChunkAllocation>>& getChunkAllocations() { return chunkAllocations; }
 	inline std::vector<std::shared_ptr<RmlGeometryAllocation>>& getRmlAllocations() { return rmlAllocations; }
+	inline std::vector<std::shared_ptr<RmlGeometryAllocation>>& getRmlTextures() { return rmlTextures; }
 	
 private:
 	// mostly static data
@@ -43,6 +46,7 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunkAllocations;
 	std::vector<std::shared_ptr<RmlGeometryAllocation>> rmlAllocations;
+	std::vector<std::shared_ptr<RmlGeometryAllocation>> rmlTextures;
 };
 
 #endif

@@ -62,6 +62,7 @@ float VulkanFrameData::waitAndComplete() {
 	// clear used allocations
 	chunkAllocations.clear();
 	rmlAllocations.clear();
+	rmlTextures.clear();
 
 	return time;
 }

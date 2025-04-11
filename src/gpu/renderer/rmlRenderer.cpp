@@ -1,6 +1,5 @@
 #include "rmlRenderer.h"
 
-#include "vulkanFrame.h"
 #include "gpu/vulkanInstance.h"
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
@@ -53,32 +52,69 @@ RmlGeometryAllocation::~RmlGeometryAllocation() {
 	destroyBuffer(vertexBuffer);
 }
 
-RmlTexture::RmlTexture(void* data, VkExtent3D size) {
+RmlTexture::RmlTexture(void* data, VkExtent3D size, VkDescriptorSet myDescriptor) {
+	// create image
 	image = createImage(data, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+
+	// create image sampler
+	VkSamplerCreateInfo samplerInfo{};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	vkCreateSampler(VulkanInstance::get().getDevice(), &samplerInfo, nullptr, &sampler);
+
+	// update image descriptor
+	descriptor = myDescriptor;
+	DescriptorWriter writer;
+	writer.writeImage(0, image.imageView, sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+	writer.updateSet(VulkanInstance::get().getDevice(), descriptor);
 }
 
 RmlTexture::~RmlTexture() {
+	vkDestroySampler(VulkanInstance::get().getDevice(), sampler, nullptr);
 	destroyImage(image);
 }
 
 // ================================= RML RENDERER ==================================================
 
-RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout) {
-	// set up pipeline
+RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout)
+	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }}) {
+	
+	// set up image descriptor
+	DescriptorLayoutBuilder layoutBuilder;
+	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+	singleImageDescriptorSetLayout = layoutBuilder.build(VK_SHADER_STAGE_FRAGMENT_BIT);
+	
+	// load shaders
 	VkShaderModule rmlVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.vert.spv"));
-	VkShaderModule rmlFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
+	VkShaderModule rmlFragShaderUntextured = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
+	VkShaderModule rmlFragShaderTextured = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rmlTextured.frag.spv"));
+
+	// set up pipelines
+	// untextured
 	PipelineInformation rmlPipelineInfo{};
 	rmlPipelineInfo.vertShader = rmlVertShader;
-	rmlPipelineInfo.fragShader = rmlFragShader;
+	rmlPipelineInfo.fragShader = rmlFragShaderUntextured;
 	rmlPipelineInfo.renderPass = renderPass;
 	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
 	rmlPipelineInfo.pushConstantSize = sizeof(RmlPushConstants);
-	rmlPipelineInfo.descriptorSets.push_back(viewLayout);
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	pipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+	rmlPipelineInfo.descriptorSets.push_back(viewLayout); // descriptor set 0 (view info)
+	untexturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+	// textured
+	rmlPipelineInfo.fragShader = rmlFragShaderTextured;
+	rmlPipelineInfo.descriptorSets.push_back(singleImageDescriptorSetLayout); // descriptor set 1 (texture image)
+	texturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+
+	// destroy shaders
 	destroyShaderModule(rmlVertShader);
-	destroyShaderModule(rmlFragShader);
+	destroyShaderModule(rmlFragShaderUntextured);
+	destroyShaderModule(rmlFragShaderTextured);
+}
+
+RmlRenderer::~RmlRenderer() {
+	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), singleImageDescriptorSetLayout, nullptr);
 }
 
 void RmlRenderer::prepareForRmlRender() {
@@ -95,8 +131,6 @@ void RmlRenderer::endRmlRender() {
 void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDescriptorSet viewDataSet) {
 	VkCommandBuffer cmd = frame.getMainCommandBuffer();
 	
-	// bind pipeline
-	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getHandle());
 	// set viewport state
 	VkExtent2D& extent = windowExtent;
 	VkViewport viewport{};
@@ -108,7 +142,7 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(cmd, 0, 1, &viewport);
 
-	// set scissor (default)
+	// set default scissor
 	VkRect2D defaultScissor{};
 	defaultScissor.offset = {0, 0};
 	defaultScissor.extent = extent;
@@ -120,8 +154,9 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 	customScissor.offset = {0, 0};
 	customScissor.extent = extent;
 
-	// view data descriptor
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getLayout(), 0, 1, &viewDataSet, 0, nullptr);
+	// bind untextured pipeline by default
+	bool pipelineRebindNeeded = true;
+	Pipeline* currentPipeline = untexturedPipeline.get();
 	
 	// set up shared push constants data
 	RmlPushConstants pushConstants{ glm::vec2(0.0f, 0.0f) };
@@ -133,25 +168,42 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 			// DRAW instruction
 			const RmlDrawInstruction& renderInstruction = std::get<RmlDrawInstruction>(instruction);
 
-			if (renderInstruction.texture == nullptr) {
-				// Add geometry we are going to use to the frame
-				frame.getRmlAllocations().push_back(renderInstruction.geometry);
-
-				// upload push constants
-				pushConstants.translation = renderInstruction.translation;
-				vkCmdPushConstants(cmd, pipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
-
-				// bind vertex buffer
-				VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };
-				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-
-				// bind index buffer
-				vkCmdBindIndexBuffer(cmd, renderInstruction.geometry->getIndexBuffer().buffer, offsets[0], VK_INDEX_TYPE_UINT32);
-
-				// draw
-				vkCmdDrawIndexed(cmd, renderInstruction.geometry->getNumIndices(), 1, 0, 0, 0);
+			// Add geometry we are going to use to the frame
+			frame.getRmlAllocations().push_back(renderInstruction.geometry);
+			
+			// update pipeline if needed
+			bool texturedDraw = renderInstruction.texture != nullptr;
+			Pipeline* newPipeline = texturedDraw ? texturedPipeline.get() : untexturedPipeline.get();
+			if (newPipeline != currentPipeline || pipelineRebindNeeded) {
+				currentPipeline = newPipeline;
+				pipelineRebindNeeded = false;
+				
+				// bind untextured pipeline
+				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->getHandle());
+				// upload view data descriptor
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->getLayout(), 0, 1, &viewDataSet, 0, nullptr);
 			}
+
+			// bind texture descriptor if needed
+			if (texturedDraw) {
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 1, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
+			}
+	
+			// upload push constants
+			pushConstants.translation = renderInstruction.translation;
+			vkCmdPushConstants(cmd, currentPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
+
+			// bind vertex buffer
+			VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+
+			// bind index buffer
+			vkCmdBindIndexBuffer(cmd, renderInstruction.geometry->getIndexBuffer().buffer, offsets[0], VK_INDEX_TYPE_UINT32);
+
+			// draw
+			vkCmdDrawIndexed(cmd, renderInstruction.geometry->getNumIndices(), 1, 0, 0, 0);
+			
 		}
 		else if (std::holds_alternative<RmlEnableScissorInstruction>(instruction)) {
 			// ENABLE SCISSOR instruction
@@ -222,7 +274,7 @@ Rml::TextureHandle RmlRenderer::GenerateTexture(Rml::Span<const Rml::byte> sourc
 	size.width = source_dimensions.x;
 	size.height = source_dimensions.y;
 	size.depth = 1;
-	textures[newHandle] = std::make_shared<RmlTexture>((void*)source.data(), size);
+	textures[newHandle] = std::make_shared<RmlTexture>((void*)source.data(), size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
 	
 	return newHandle;
 }

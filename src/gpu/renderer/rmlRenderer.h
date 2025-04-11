@@ -5,6 +5,7 @@
 #include <glm/ext/vector_float2.hpp>
 #include <RmlUi/Core/Vertex.h>
 
+#include "gpu/renderer/vulkanDescriptor.h"
 #include "gpu/vulkanBuffer.h"
 #include "gpu/vulkanImage.h"
 #include "vulkanPipeline.h"
@@ -38,8 +39,10 @@ struct RmlPushConstants {
 // ============================= RML TEXTURES ===================================
 class RmlTexture {
 public:
-	RmlTexture(void* data, VkExtent3D size);
+	RmlTexture(void* data, VkExtent3D size, VkDescriptorSet myDescriptor);
 	~RmlTexture();
+
+	inline VkDescriptorSet& getDescriptor() { return descriptor; }
 
 private:
 	AllocatedImage image;
@@ -79,6 +82,7 @@ typedef std::variant<RmlDrawInstruction, RmlSetScissorInstruction, RmlEnableScis
 class RmlRenderer {
 public:
 	RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout);
+	~RmlRenderer();
 
 	void prepareForRmlRender();
 	void endRmlRender();
@@ -98,7 +102,8 @@ public:
 	void EnableScissorRegion(bool enable);
 	void SetScissorRegion(Rml::Rectanglei region);
 private:
-	std::unique_ptr<Pipeline> pipeline;
+	std::unique_ptr<Pipeline> untexturedPipeline;
+	std::unique_ptr<Pipeline> texturedPipeline;
 
 	// geometry
 	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
@@ -107,6 +112,9 @@ private:
 	// textures
 	Rml::TextureHandle currentTextureHandle = 1;
 	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlTexture>> textures;
+	// texture descriptor
+	DescriptorAllocator descriptorAllocator;
+	VkDescriptorSetLayout singleImageDescriptorSetLayout;
 	
 	// render instructions
 	std::vector<RmlRenderInstruction> renderInstructions;

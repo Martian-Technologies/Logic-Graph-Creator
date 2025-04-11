@@ -76,7 +76,7 @@ private:
 // - [x] VkBootstrap
 // - [ ] Switch from singleton to top down design
 // - [ ] Fix validation layers on mac, and weird resize messages
-// - [ ] Standardization of subrenderer params and input, better way for subrenderer to communicate and put data on the "frame"
+// - [ ] Standardization of subrenderer params and input, better way for subrenderer to communicate and put data on the "frame", growable descriptor pool
 // - [ ] Check macro
 // - [ ] Use dynamic rendering and other QOL extensions to simplify code
 // - [ ] Don't draw directly to swapchain
