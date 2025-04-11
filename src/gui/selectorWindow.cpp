@@ -16,6 +16,7 @@ SelectorWindow::SelectorWindow(
 }
 
 void SelectorWindow::updateBlockList() {
+	menuTree.clear("Blocks");
 	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
 		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
 		std::vector<std::string> parts = {"Blocks"};

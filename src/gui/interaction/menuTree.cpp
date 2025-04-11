@@ -50,3 +50,22 @@ Rml::Element* MenuTree::addPath(const std::vector<std::string>& path) {
 	logInfo("added menu path " + path.back());
 	return current;
 }
+
+void MenuTree::clear(const std::string& path) {
+	// while (parent->GetNumChildren() != 0) {
+	// 	for (int i = 0; i < path.size(); i++) {
+	// 		const std::string item = path[i];
+	// 		id += (id.empty() ? "" : "/") + item;
+	// 		//identify the next list to search through, or if it's not there, make one
+	// 		if (!current->HasChildNodes()) {
+	// 			Rml::ElementPtr newList = document->CreateElement("ul");
+	// 			//all ul's besides the root one are labeled for sublist collapse capability
+	// 			newList->SetClass("collapsed", true);
+	// 			logInfo("labeled sublist of node as collapseable: " + item);
+	// 			current->AppendChild(std::move(newList));
+	// 		}
+	// 		current = current->GetFirstChild();
+	// 	parent->RemoveChild(parent->GetChild(0));
+		
+	// }
+}

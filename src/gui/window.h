@@ -33,7 +33,7 @@ public:
 	void setMode(std::string tool);
 
 private:
-	std::shared_ptr<CircuitViewWidget> circuitView;
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	std::optional<SelectorWindow> selectorWindow;

@@ -6,21 +6,23 @@
 #include "backend/circuitView/circuitView.h"
 #include "interaction/keybindHandler.h"
 #include "util/vec2.h"
+#include "sdl/sdlWindow.h"
 
 #include <RmlUi/Core.h>
 
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent, SDL_Window* window);
 	~CircuitViewWidget() { parent->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
+	inline CircuitFileManager* getFileManager() { return fileManager; }
 	void setSimState(bool state);
 	void simUseSpeed(bool state);
 	void setSimSpeed(double speed);
 
-	void load(const std::string& filePath);
+	void load();
 	void save();
 
 private:
@@ -33,6 +35,7 @@ private:
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
 	Rml::Element* parent;
+	SDL_Window* window;
 	KeybindHandler keybindHandler;
 
 	// settings (temp)
