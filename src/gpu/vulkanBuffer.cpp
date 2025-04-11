@@ -2,7 +2,7 @@
 
 #include "vulkanInstance.h"
 
-AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
+AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags) {
 	// allocate buffer
 	VkBufferCreateInfo bufferInfo = {};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -12,12 +12,15 @@ AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemo
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 	VmaAllocationCreateInfo vmaAllocInfo = {};
-	vmaAllocInfo.usage = memoryUsage;
-	vmaAllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+	vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	vmaAllocInfo.flags = flags;
 	AllocatedBuffer newBuffer;
 
 	// allocate the buffer
-	vmaCreateBuffer(VulkanInstance::get().getAllocator(), &bufferInfo, &vmaAllocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info);
+	VkResult result = vmaCreateBuffer(VulkanInstance::get().getAllocator(), &bufferInfo, &vmaAllocInfo, &newBuffer.buffer, &newBuffer.allocation, &newBuffer.info);
+	if(result != VK_SUCCESS) {
+		logError("failed to create vulkan buffer", "Vulkan");
+	}
 	return newBuffer;
 }
 

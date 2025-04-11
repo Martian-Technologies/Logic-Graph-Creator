@@ -19,7 +19,7 @@ WindowRenderer::WindowRenderer(Swapchain* swapchain, std::vector<VulkanFrameData
 	viewDataLayout = builder.build(VK_SHADER_STAGE_VERTEX_BIT);
 	for (VulkanFrameData& frame : frames) {
 		frame.getViewDataDescriptorSet() = descriptorAllocator.allocate(viewDataLayout);
-		frame.getViewDataBuffer() = createBuffer(sizeof(GPUViewData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		frame.getViewDataBuffer() = createBuffer(sizeof(GPUViewData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 	}
 
 	// rml

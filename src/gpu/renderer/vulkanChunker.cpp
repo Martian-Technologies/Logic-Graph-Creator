@@ -32,7 +32,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 		// upload block vertices
 		numBlockVertices = blockVertices.size();
 		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
-		blockBuffer = createBuffer(blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		blockBuffer = createBuffer(blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
@@ -45,7 +45,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 		// upload wire vertices
 		numWireVertices = wireVertices.size();
 		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
-		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_AUTO);
+		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 }

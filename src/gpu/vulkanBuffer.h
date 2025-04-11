@@ -10,7 +10,7 @@ struct AllocatedBuffer {
     VmaAllocationInfo info;
 };
 
-AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags);
 void destroyBuffer(AllocatedBuffer& buffer);
 
 #endif
