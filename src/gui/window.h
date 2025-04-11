@@ -12,6 +12,7 @@
 #include "computerAPI/circuits/circuitFileManager.h"
 
 #include "selectorWindow.h"
+#include "circuitViewWidget.h"
 
 class Window {
 public:
@@ -36,6 +37,7 @@ public:
 	void setMode(std::string tool);
 
 private:
+	std::shared_ptr<CircuitViewWidget> circuitView;
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	std::optional<SelectorWindow> selectorWindow;

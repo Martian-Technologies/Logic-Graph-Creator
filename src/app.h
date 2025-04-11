@@ -32,4 +32,4 @@ private:
 	bool running = false;
 };
 
-#endif
+#endif /* app_h */

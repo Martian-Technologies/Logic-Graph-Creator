@@ -1,8 +1,6 @@
 #include "menuTree.h"
 #include "menuTreeListener.h"
 
-#include <RmlUi/Core.h>
-
 MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent) : document(document), parent(parent) {
 	Rml::ElementPtr rootList = document->CreateElement("ul");
 	rootList->SetClass("menutree", true);

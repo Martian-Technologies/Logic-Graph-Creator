@@ -21,6 +21,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 
+	// get widget for circuit view
+	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
+	circuitView = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent);
+
+
 	MenuManager* menuManager = new MenuManager(document);
 }
 

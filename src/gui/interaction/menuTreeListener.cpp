@@ -1,14 +1,6 @@
 #include "menuTreeListener.h"
 
-#include <RmlUi/Core.h>
-
-MenuTreeListener::MenuTreeListener(ListenerFunction* listenerFunction) : listenerFunction(listenerFunction) {
-	// logInfo("Event Listener Created");
-}
-
-MenuTreeListener::~MenuTreeListener() {
-	// logInfo("Event Listener Destroyed");
-}
+MenuTreeListener::MenuTreeListener(ListenerFunction* listenerFunction) : listenerFunction(listenerFunction) { }
 
 void MenuTreeListener::ProcessEvent(Rml::Event& event) {
 	event.StopPropagation();
