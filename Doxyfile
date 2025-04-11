@@ -1,0 +1,7 @@
+PROJECT_NAME = Gatality
+OUTPUT_DIRECTORY = docs/doxyoutput
+
+INPUT = src
+RECURSIVE = yes
+EXTRACT_ALL = yes
+FILE_PATTERNS = *.h
