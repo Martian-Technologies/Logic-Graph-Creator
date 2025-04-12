@@ -21,7 +21,7 @@ Rml::Element* MenuTree::addPath(const std::vector<std::string>& path) {
 		if (elements.empty()) {
 			Rml::ElementPtr newList = document->CreateElement("ul");
 			//all ul's besides the root one are labeled for sublist collapse capability
-			newList->SetClass("collapsed", true);
+			newList->SetClass("collapsed", false);
 			logInfo("labeled sublist of node as collapseable: " + item);
 			current->AppendChild(std::move(newList));
 			current->GetElementsByTagName(elements, "ul");
@@ -59,16 +59,22 @@ void MenuTree::clear(const std::vector<std::string>& path) {
 	Rml::Element* current = parent;
 	std::string id;
 	for (int i = 0; i < path.size(); i++) {
-		const std::string item = path[i];
+		std::string item = path[i];
+		item[0] = toupper(item[0]);
 		id += (id.empty() ? "" : "/") + item;
 		//identify the next list to search through, or if it's not there, make one
-		if (!current->HasChildNodes()) return;
-		current = current->GetFirstChild();
+		Rml::ElementList elements;
+		current->GetElementsByTagName(elements, "ul");
+		if (elements.empty()) return;
+		current = elements[0];
 		Rml::Element* nextItem = current->GetElementById(id + "-menu");
 		if (!nextItem) return;
 		current = nextItem;
 	}
-	current = current->GetFirstChild();
+	Rml::ElementList elements;
+	current->GetElementsByTagName(elements, "ul");
+	if (elements.empty()) return;
+	current = elements[0];
 	Rml::Element* par = current->GetParentNode();
 	par->RemoveChild(current);
 }
