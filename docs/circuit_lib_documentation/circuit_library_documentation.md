@@ -65,4 +65,22 @@ This uses the same principle as the 2:1 MUX expect there are 16 inputs and 4 sel
 
 ![image](https://github.com/user-attachments/assets/b1731128-71bc-4c68-97c8-62df1cf4d72f)
 
+## Adders
+
+### Overview
+
+Adders are circuits which take in two inputs of the same size and add the numbers represented in binary by the inputs.  Generally there is one more output than the number of bits in one number that can be added in order to account for overflow.
+
+### 4-bit Adder
+
+This adder takes in 2 four bit inputs where the numbers are are inputted in binary representation as (P3 ... P0) + (Q3 ... Q0).  The output (R4 ... R0) is the sum of these two numbers.  As stated R4 is the overflow bit of the sum if one occurs.  In this case the number represented by (P3 .. P0) is (0110) = 6 and the number represented by (Q3 .. Q0) is (0010) = 2.  As seen in the output R3 is high implying the output of (01000) = 8.  Therefore it is shown that the addition is correct.
+
+![image](https://github.com/user-attachments/assets/d17d16cb-c90e-46b7-abf9-3a7cf446dd4e)
+
+### 8-bit Adder
+
+This is the same as the 4-bit adder except each input is a whole byte and the output is a byte plus an overflow bit.
+
+
+
 
