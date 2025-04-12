@@ -22,7 +22,6 @@ Rml::Element* MenuTree::addPath(const std::vector<std::string>& path) {
 			Rml::ElementPtr newList = document->CreateElement("ul");
 			//all ul's besides the root one are labeled for sublist collapse capability
 			newList->SetClass("collapsed", false);
-			logInfo("labeled sublist of node as collapseable: " + item);
 			current->AppendChild(std::move(newList));
 			current->GetElementsByTagName(elements, "ul");
 		}

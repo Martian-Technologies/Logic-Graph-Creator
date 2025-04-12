@@ -30,8 +30,8 @@ public:
 
 private:
 	// utility functions
-	inline Vec2 pixelsToView(const SDL_Point& point) const;
-	inline bool insideWindow(const SDL_Point& point) const;
+	inline Vec2 pixelsToView(const SDL_FPoint& point) const;
+	inline bool insideWindow(const SDL_FPoint& point) const;
 	inline float getPixelsWidth() const;
 	inline float getPixelsHeight() const;
 	inline float getPixelsXPos() const;

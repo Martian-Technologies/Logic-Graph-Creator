@@ -94,66 +94,106 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		Rml::Input::KeyIdentifier::KI_B,
 		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
 	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_R,
+		[this]() {
+			int w = this->element->GetClientWidth();
+			int h = this->element->GetClientHeight();
+			int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
+			int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
 
-	element->AddEventListener(Rml::EventId::Resize, new EventPasser([this](Rml::Event& event) {
-		int w = this->element->GetClientWidth();
-		int h = this->element->GetClientHeight();
-		int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
-		int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
+			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+		}
+	);
 
-		circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+	element->AddEventListener(Rml::EventId::Resize, new EventPasser(
+		[this](Rml::Event& event) {
+			int w = this->element->GetClientWidth();
+			int h = this->element->GetClientHeight();
+			int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
+			int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
+
+			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
 		}
 	));
 
-	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser([this](Rml::Event& event) {
-		int button = event.GetParameter<int>("button", 0);
-		if (button == 0) { // left
-			const bool* state = SDL_GetKeyboardState(nullptr);
-			if (state[SDL_SCANCODE_LALT] || state[SDL_SCANCODE_RALT]) {
-				if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
+	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
+		[this](Rml::Event& event) {
+			int button = event.GetParameter<int>("button", 0);
+			if (button == 0) { // left
+				const bool* state = SDL_GetKeyboardState(nullptr);
+				if (state[SDL_SCANCODE_LALT] || state[SDL_SCANCODE_RALT]) {
+					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
+				}
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
+			} else if (button == 1) { // right
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
 			}
-			if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();;
-		} else if (button == 1) { // right
-			if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();;
-		}
 		}
 	));
 
-	element->AddEventListener(Rml::EventId::Mouseup, new EventPasser([this](Rml::Event& event) {
-		int button = event.GetParameter<int>("button", 0);
-		if (button == 0) { // left
-			circuitView->getEventRegister().doEvent(PositionEvent("View Dettach Anchor", circuitView->getViewManager().getPointerPosition()));
-			circuitView->getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView->getViewManager().getPointerPosition()));
-		} else if (button == 1) { // right
-			circuitView->getEventRegister().doEvent(PositionEvent("tool secondary deactivate", circuitView->getViewManager().getPointerPosition()));
-		}
+	Rml::Element* root = document->GetElementById("main-container");
+	root->AddEventListener(Rml::EventId::Mouseup, new EventPasser(
+		[this](Rml::Event& event) {
+			int button = event.GetParameter<int>("button", 0);
+			if (button == 0) { // left
+				circuitView->getEventRegister().doEvent(PositionEvent("View Dettach Anchor", circuitView->getViewManager().getPointerPosition()));
+				circuitView->getEventRegister().doEvent(PositionEvent("tool primary deactivate", circuitView->getViewManager().getPointerPosition()));
+			} else if (button == 1) { // right
+				circuitView->getEventRegister().doEvent(PositionEvent("tool secondary deactivate", circuitView->getViewManager().getPointerPosition()));
+			}
 		}
 	));
 
-	element->AddEventListener(Rml::EventId::Mousemove, new EventPasser([this](Rml::Event& event) {
-		SDL_Point point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
-		if (insideWindow(point)) { // inside the widget
+	element->AddEventListener(Rml::EventId::Mousemove, new EventPasser(
+		[this](Rml::Event& event) {
+			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
+			if (insideWindow(point)) { // inside the widget
+				Vec2 viewPos = pixelsToView(point);
+				circuitView->getEventRegister().doEvent(PositionEvent("Pointer Move", circuitView->getViewManager().viewToGrid(viewPos)));
+			}
+		}
+	));
+
+	element->AddEventListener(Rml::EventId::Mouseover, new EventPasser(
+		[this](Rml::Event& event) {
+			// // grab focus so key inputs work without clicking
+			// setFocus(Qt::MouseFocusReason);
+			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			Vec2 viewPos = pixelsToView(point);
-			circuitView->getEventRegister().doEvent(PositionEvent("Pointer Move", circuitView->getViewManager().viewToGrid(viewPos)));
-		}
-		}
-	));
-
-	element->AddEventListener(Rml::EventId::Mouseover, new EventPasser([this](Rml::Event& event) {
-		// // grab focus so key inputs work without clicking
-		// setFocus(Qt::MouseFocusReason);
-		SDL_Point point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
-		Vec2 viewPos = pixelsToView(point);
-		if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
-		circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)));
+			if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
+			circuitView->getEventRegister().doEvent(PositionEvent("pointer enter view", circuitView->getViewManager().viewToGrid(viewPos)));
 		}
 	));
 
-	element->AddEventListener(Rml::EventId::Mouseout, new EventPasser([this](Rml::Event& event) {
-		SDL_Point point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
-		Vec2 viewPos = pixelsToView(point);
-		if (viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x <= 1 && viewPos.y <= 1) return;
-		circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)));
+	element->AddEventListener(Rml::EventId::Mouseout, new EventPasser(
+		[this](Rml::Event& event) {
+			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
+			Vec2 viewPos = pixelsToView(point);
+			if (viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x <= 1 && viewPos.y <= 1) return;
+			circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)));
+		}
+	));
+
+	element->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
+		[this](Rml::Event& event) {
+			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*4, event.GetParameter<float>("wheel_delta_y", 0)*-4);
+			// logInfo("{}, {}", "", delta.x, delta.y);
+			if (mouseControls) {
+				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
+			} else {
+				const bool* state = SDL_GetKeyboardState(nullptr);
+				if (state[SDL_SCANCODE_LSHIFT] || state[SDL_SCANCODE_LSHIFT]) {
+					// do zoom
+					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+				} else {
+					if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
+						"view pan",
+						delta.x / getPixelsWidth() * circuitView->getViewManager().getViewWidth(),
+						delta.y / getPixelsHeight() * circuitView->getViewManager().getViewHeight()
+					))) event.StopPropagation();
+				}
+			}
 		}
 	));
 
@@ -234,11 +274,11 @@ void CircuitViewWidget::load() {
 }
 
 
-inline Vec2 CircuitViewWidget::pixelsToView(const SDL_Point& point) const {
-	return Vec2((float)(point.x - getPixelsXPos()) / getPixelsWidth(), (float)(point.y - getPixelsYPos()) / getPixelsHeight());
+inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
+	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());
 }
 
-inline bool CircuitViewWidget::insideWindow(const SDL_Point& point) const {
+inline bool CircuitViewWidget::insideWindow(const SDL_FPoint& point) const {
 	int x = point.x - getPixelsXPos();
 	int y = point.y - getPixelsYPos();
 	return x >= 0 && y >= 0 && x < getPixelsWidth() && y < getPixelsHeight();
