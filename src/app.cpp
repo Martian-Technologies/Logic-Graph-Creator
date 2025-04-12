@@ -1,6 +1,6 @@
 #include "app.h"
 
-App::App() : circuitFileManager(&(backend.getCircuitManager())), rml(&rmlSystemInterface, &rmlRenderInterface) {
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
 	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager));
 }
 

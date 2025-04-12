@@ -27,13 +27,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
 	MenuManager* menuManager = new MenuManager(rmlDocument);
-
-	KeyboardController::addHandler(SDLK_Q, [](SDL_Event) {
-		logInfo("Q key pressed, quitting...", "Keyboard");
-		SDL_Event e;
-		e.type = SDL_EVENT_QUIT;
-		SDL_PushEvent(&e);
-	});
 }
 
 Window::~Window() {
@@ -46,16 +39,8 @@ bool Window::recieveEvent(SDL_Event& event) {
 	if (sdlWindow.isThisMyEvent(event)) {
 
 		// let renderer know we if resized the window
-		switch (event.type) {
-			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
-				rendereringManager.resize({event.window.data1, event.window.data2});
-				break;
-			}
-			case SDL_EVENT_KEY_UP:
-			case SDL_EVENT_KEY_DOWN: {
-				KeyboardController::EventHandler(event);
-			    break;
-			}
+		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+			rendereringManager.resize({event.window.data1, event.window.data2});
 		}
 		
 		// send event to RML
