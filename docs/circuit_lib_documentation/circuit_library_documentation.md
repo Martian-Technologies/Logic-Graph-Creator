@@ -79,8 +79,16 @@ This adder takes in 2 four bit inputs where the numbers are are inputted in bina
 
 ### 8-bit Adder
 
-This is the same as the 4-bit adder except each input is a whole byte and the output is a byte plus an overflow bit.
+This is the same as the 4-bit adder except each input is a whole byte and the output is a byte plus an overflow bit.  Notice how in this example the sum of both inputs is 9 bits long and therefore the overflow bit is used.
 
+![image](https://github.com/user-attachments/assets/ca51ac0c-e2a1-4916-b196-12e3647b6efc)
+
+### Full-word adder
+
+A lot of computers either use 32-bit or 64-bit hardware so a 32-bit adder is extremely useful to have for computer architecture.
+One key thing to note is that the two input binary numbers (P31 ... P0) and (Q31 ... Q0) are parallel to each other to save vertical room.  The output (R32 ... R0) is still on the right side though.
+
+![image](https://github.com/user-attachments/assets/bb60f85d-e107-47d7-9070-05359cc90330)
 
 
 
