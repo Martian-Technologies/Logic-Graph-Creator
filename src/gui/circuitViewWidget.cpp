@@ -134,9 +134,9 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 				if (state[SDL_SCANCODE_LALT] || state[SDL_SCANCODE_RALT]) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
 				}
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();;
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
 			} else if (button == 1) { // right
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();;
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
 			}
 		}
 	));
@@ -181,6 +181,28 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			Vec2 viewPos = pixelsToView(point);
 			if (viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x <= 1 && viewPos.y <= 1) return;
 			circuitView->getEventRegister().doEvent(PositionEvent("pointer exit view", circuitView->getViewManager().viewToGrid(viewPos)));
+		}
+	));
+
+	parent->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
+		[this](Rml::Event& event) {
+			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*4, event.GetParameter<float>("wheel_delta_y", 0)*4);
+			logInfo("{}, {}", "", delta.x, delta.y);
+			if (mouseControls) {
+				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
+			} else {
+				const bool* state = SDL_GetKeyboardState(nullptr);
+				if (state[SDL_SCANCODE_LSHIFT] || state[SDL_SCANCODE_LSHIFT]) {
+					// do zoom
+					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+				} else {
+					if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
+						"view pan",
+						delta.x / getPixelsWidth() * circuitView->getViewManager().getViewWidth(),
+						delta.y / getPixelsHeight() * circuitView->getViewManager().getViewHeight()
+					))) event.StopPropagation();
+				}
+			}
 		}
 	));
 
@@ -262,7 +284,7 @@ void CircuitViewWidget::load() {
 
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
-	return Vec2((float)(point.x - getPixelsXPos()) / getPixelsWidth(), (float)(point.y - getPixelsYPos()) / getPixelsHeight());
+	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());
 }
 
 inline bool CircuitViewWidget::insideWindow(const SDL_FPoint& point) const {
