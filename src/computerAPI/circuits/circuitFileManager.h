@@ -15,11 +15,11 @@ public:
 		std::unordered_set<circuit_id_t> circuitIds;
 	};
 
-    CircuitFileManager(CircuitManager* circuitManager);
+	CircuitFileManager(CircuitManager* circuitManager);
 
-    circuit_id_t loadFromFile(const std::string& path);
-    bool saveToFile(const std::string& path, circuit_id_t circuitId);
-    bool saveCircuit(circuit_id_t circuitId);
+	circuit_id_t loadFromFile(const std::string& path);
+	bool saveToFile(const std::string& path, circuit_id_t circuitId);
+	bool saveCircuit(circuit_id_t circuitId);
 
 	void setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation);
 	
@@ -39,7 +39,7 @@ private:
 		return circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
 	}
 
-    CircuitManager* circuitManager;
+	CircuitManager* circuitManager;
 	std::map<std::string, FileData> filePathToFile;
 	std::map<circuit_id_t, std::string> circuitIdToFilePath;
 };

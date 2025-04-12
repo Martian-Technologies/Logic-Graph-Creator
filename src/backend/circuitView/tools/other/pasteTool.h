@@ -13,12 +13,12 @@ public:
 	inline std::string getPath() const override final { return getPath_(); }
 	inline unsigned int getStackId() const override final { return 1; }
 
-    void activate() override final;
+	void activate() override final;
 	void updateElements() override final;
-    bool place(const Event* event);
+	bool place(const Event* event);
 
 private:
-    bool validatePlacement() const;
+	bool validatePlacement() const;
 };
 
 #endif /* pasteTool_h */ 

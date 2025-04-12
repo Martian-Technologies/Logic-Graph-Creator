@@ -29,9 +29,9 @@ public:
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 
-    void saveCircuit(circuit_id_t id, bool saveAs);
-    void loadCircuit();
-    void exportProject();
+	void saveCircuit(circuit_id_t id, bool saveAs);
+	void loadCircuit();
+	void exportProject();
 	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
 	void setMode(std::string tool);

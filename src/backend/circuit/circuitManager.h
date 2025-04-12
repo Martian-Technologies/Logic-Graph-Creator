@@ -47,7 +47,7 @@ public:
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
-            UUIDToCircuits.erase(iter->second->getUUID());
+	        UUIDToCircuits.erase(iter->second->getUUID());
 			circuits.erase(iter);
 		}
 	}
@@ -133,12 +133,12 @@ public:
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
-    // Create a custom new block from a parsed circuit
+	// Create a custom new block from a parsed circuit
 	inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
-        if (!parsedCircuit->isValid()){
-            logError("parsedCircuit is not validated", "CircuitManager");
-            return 0;
-        }
+	    if (!parsedCircuit->isValid()){
+	        logError("parsedCircuit is not validated", "CircuitManager");
+	        return 0;
+	    }
 
 		std::string uuid = parsedCircuit->getUUID();
 		if (uuid.empty()){
@@ -156,47 +156,47 @@ public:
 		}
 
 		
-        circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
-        SharedCircuit circuit = getCircuit(id);
+	    circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
+	    SharedCircuit circuit = getCircuit(id);
 		
-        circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
+	    circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
 
 		if (!parsedCircuit->isCustom()) return id;
 
-        BlockType type = blockDataManager.addBlock();
-        BlockData* data = blockDataManager.getBlockData(type);
-        if (!data) {
+	    BlockType type = blockDataManager.addBlock();
+	    BlockData* data = blockDataManager.getBlockData(type);
+	    if (!data) {
 			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(type));
-            return id;
-        }
+	        return id;
+	    }
 
 		circuitBlockDataManager.newCircuitBlockData(id, type);
-        CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
+	    CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
 		if (!circuitBlockData) {
 			logError("Did not find newly created circuit block data with circuit id: {}", "CircuitManager", (unsigned int)id);
-            return id;
-        }
+	        return id;
+	    }
 		
-        data->setPrimitive(false);
-        data->setDefaultData(false);
+	    data->setPrimitive(false);
+	    data->setDefaultData(false);
 		
-        data->setPath("Custom");
-        data->setName(parsedCircuit->getName());
+	    data->setPath("Custom");
+	    data->setName(parsedCircuit->getName());
 
 		data->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
 
-        const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
+	    const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
 
 		for (const ParsedCircuit::ConnectionPort& port : ports) {
 			if (port.isInput) data->setConnectionInput(port.positionOnBlock, port.connectionEndId);
 			else data->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
-            circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
-        }
+	        circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
+	    }
 
-        dataUpdateEventManager->sendEvent("blockDataUpdate");
+	    dataUpdateEventManager->sendEvent("blockDataUpdate");
 
-        return id;
-    }
+	    return id;
+	}
 
 	// Iterator
 	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;
@@ -229,7 +229,7 @@ private:
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
 	std::map<std::string, SharedCircuit> UUIDToCircuits;
-    std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
+	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
 };
 
 #endif /* circuitManager_h */

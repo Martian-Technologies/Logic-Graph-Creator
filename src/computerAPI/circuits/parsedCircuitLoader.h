@@ -7,7 +7,7 @@
 
 class ParsedCircuitLoader {
 public:
-    ParsedCircuitLoader(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : circuitFileManager(circuitFileManager), circuitManager(circuitManager) {}
+	ParsedCircuitLoader(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : circuitFileManager(circuitFileManager), circuitManager(circuitManager) {}
 
 	BlockType loadParsedCircuit(SharedParsedCircuit parsedCircuit) { return circuitFileManager->loadParsedCircuit(parsedCircuit); }
 

@@ -1,5 +1,5 @@
 #menu-bar.menu-item {
-	background-color: darkblue;
+	background-color: grey;
 	padding: 0.2rem;
 	border-radius: 0.2rem;
 }

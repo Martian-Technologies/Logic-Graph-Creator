@@ -55,9 +55,9 @@ bool ViewManager::pointerMove(const Event* event) {
 	if (!pointerActive) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
 	if (!positionEvent) return false;
-
+	
 	pointerViewPosition = gridToView(positionEvent->getFPosition());
-
+	
 	if (anchored) {
 		FVector delta = pointerPosition - positionEvent->getFPosition();
 		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos

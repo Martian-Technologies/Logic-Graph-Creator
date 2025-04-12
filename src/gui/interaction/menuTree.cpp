@@ -51,7 +51,7 @@ Rml::Element* MenuTree::addPath(const std::vector<std::string>& path) {
 			current = current->GetElementById(id + "-menu");
 		}
 	}
-	logInfo("added menu path " + path.back());
+	// logInfo("added menu path " + path.back());
 	return current;
 }
 

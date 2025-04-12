@@ -18,7 +18,7 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 			return 0;
 		}
 		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
-        circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
+	    circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
 		setCircuitFilePath(id, path);
 		return id;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
@@ -29,7 +29,7 @@ circuit_id_t CircuitFileManager::loadFromFile(const std::string& path) {
 			return 0;
 		}
 		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
-        return circuitManager->createNewCircuit(parsedCircuit.get());
+	    return circuitManager->createNewCircuit(parsedCircuit.get());
 	} else {
 		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
 	}

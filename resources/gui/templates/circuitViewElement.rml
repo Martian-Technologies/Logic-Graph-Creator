@@ -1,11 +1,11 @@
 <template name="circuit-view-element" content="content">
 
-  <head>
-    <link type="text/rcss" href="../styles/style.rcss"/>
-  </head>
+	<head>
+		<link type="text/rcss" href="../styles/style.rcss"/>
+	</head>
 
-  <body>
-    <p id="content"></p>
-  </body>
-  
+	<body>
+		<p id="content"></p>
+	</body>
+	
 </template>

@@ -19,7 +19,7 @@ public:
 	
 private:
 	Backend backend;
-    CircuitFileManager circuitFileManager;
+	CircuitFileManager circuitFileManager;
 
 	RmlRenderInterface rmlRenderInterface;
 	RmlSystemInterface rmlSystemInterface;
