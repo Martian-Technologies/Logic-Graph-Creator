@@ -8,11 +8,17 @@
 #include "gpu/renderer/vulkanChunkRenderer.h"
 #include "gpu/renderer/vulkanFrame.h"
 
-struct WindowRenderingManager;
+struct WindowRenderer;
+
+struct ViewportViewData {
+	glm::mat4 viewportViewMat;
+	std::pair<FPosition, FPosition> viewBounds;
+	VkViewport viewport;
+};
 
 class ViewportRenderInterface : public Renderer {
 public:
-	ViewportRenderInterface(WindowRenderingManager* windowRenderer, Rml::Element* element);
+	ViewportRenderInterface(WindowRenderer* windowRenderer, Rml::Element* element);
 	~ViewportRenderInterface();
 
 	void initializeVulkan(VkRenderPass renderPass);
@@ -47,11 +53,14 @@ private:
 
 private:
 	// From the UI Side
-	WindowRenderingManager* windowRenderer;
+	WindowRenderer* windowRenderer;
 	Rml::Element* element;
 
 	// Vulkan
 	std::unique_ptr<VulkanChunkRenderer> chunkRenderer = nullptr;
+
+	ViewportViewData viewData;
+	std::mutex viewMux;
 };
 
 #endif

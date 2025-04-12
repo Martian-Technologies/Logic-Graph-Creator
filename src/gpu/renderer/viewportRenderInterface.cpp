@@ -1,8 +1,10 @@
 #include "viewportRenderInterface.h"
 
-#include "gpu/renderer/windowRenderingManager.h"
+#include <glm/ext/matrix_clip_space.hpp>
 
-ViewportRenderInterface::ViewportRenderInterface(WindowRenderingManager* windowRenderer, Rml::Element* element)
+#include "gpu/renderer/windowRenderer.h"
+
+ViewportRenderInterface::ViewportRenderInterface(WindowRenderer* windowRenderer, Rml::Element* element)
 	: windowRenderer(windowRenderer), element(element) {
 
 	windowRenderer->registerViewportRenderInterface(this);
@@ -18,15 +20,7 @@ void ViewportRenderInterface::initializeVulkan(VkRenderPass renderPass) {
 }
 
 void ViewportRenderInterface::render(VulkanFrameData& frame) {
-	// Get viewport size
-	VkViewport viewport;
-	viewport.x = element->GetAbsoluteOffset().x;
-	viewport.y = element->GetAbsoluteOffset().y;
-	viewport.width = element->GetBox().GetSize().x;
-	viewport.height = element->GetBox().GetSize().y;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	
+
 	// logInfo("({}, {})", "Vulkan", element->GetBox().GetSize().x, element->GetBox().GetSize().y);
 }
 
@@ -38,7 +32,21 @@ void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
 	
 }
 void ViewportRenderInterface::updateView(ViewManager* viewManager) {
-	logInfo("update view");
+	std::lock_guard<std::mutex> lock(viewMux);
+	
+	// Update vulkan viewport
+	viewData.viewport.x = element->GetAbsoluteOffset().x;
+	viewData.viewport.y = element->GetAbsoluteOffset().y;
+	viewData.viewport.width = element->GetBox().GetSize().x;
+	viewData.viewport.height = element->GetBox().GetSize().y;
+	viewData.viewport.minDepth = 0.0f;
+	viewData.viewport.maxDepth = 1.0f;
+
+	// Create view mat
+	FPosition topLeft = viewManager->getTopLeft();
+	FPosition bottomRight = viewManager->getBottomRight();
+	viewData.viewportViewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+	viewData.viewBounds = { topLeft, bottomRight };
 }
 void ViewportRenderInterface::updateCircuit(DifferenceSharedPtr diff) {
 	

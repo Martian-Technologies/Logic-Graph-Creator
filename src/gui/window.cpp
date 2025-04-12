@@ -9,7 +9,7 @@
 #include "gui/rml/rmlSystemInterface.h"
 #include "gui/menuBar/menuManager.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), rendereringManager(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
 	
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
@@ -26,7 +26,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
-	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &rendereringManager);
+	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &renderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
 	MenuManager* menuManager = new MenuManager(rmlDocument);
@@ -43,7 +43,7 @@ bool Window::recieveEvent(SDL_Event& event) {
 
 		// let renderer know we if resized the window
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
-			rendereringManager.resize({event.window.data1, event.window.data2});
+			renderer.resize({event.window.data1, event.window.data2});
 		}
 		
 		// send event to RML
@@ -57,9 +57,9 @@ bool Window::recieveEvent(SDL_Event& event) {
 void Window::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
 	
-	rendereringManager.prepareForRml(renderInterface);
+	renderer.prepareForRml(renderInterface);
 	rmlContext->Render();
-	rendereringManager.endRml();
+	renderer.endRml();
 }
 
 void Window::saveCircuit(circuit_id_t id, bool saveAs) {

@@ -5,7 +5,7 @@
 #include <SDL3/SDL.h>
 
 #include "gpu/renderer/viewportRenderInterface.h"
-#include "gpu/renderer/windowRenderingManager.h"
+#include "gpu/renderer/windowRenderer.h"
 #include "sdl/sdlWindow.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
@@ -15,7 +15,7 @@
 
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderingManager* windowRendereringManager);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderer* windowRenderer);
 	~CircuitViewWidget() { element->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup

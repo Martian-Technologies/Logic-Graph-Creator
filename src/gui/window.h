@@ -5,7 +5,7 @@
 #include <SDL3/SDL_events.h>
 
 #include "sdl/sdlWindow.h"
-#include "gpu/renderer/windowRenderingManager.h"
+#include "gpu/renderer/windowRenderer.h"
 #include "rml/rmlRenderInterface.h"
 
 #include "backend/backend.h"
@@ -42,7 +42,7 @@ private:
 	std::optional<SelectorWindow> selectorWindow;
 
 	SdlWindow sdlWindow;
-	WindowRenderingManager rendereringManager;
+	WindowRenderer renderer;
 
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	 
