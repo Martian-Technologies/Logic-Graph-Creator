@@ -7,8 +7,8 @@
 
 void SaveCallback(void *userData, const char *const *filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
-    if (filePaths && filePaths[0]) {
-        std::cout << "Selected file(s):" << std::endl;
+	if (filePaths && filePaths[0]) {
+	    std::cout << "Selected file(s):" << std::endl;
 		std::string filePath = filePaths[0];
 		if (!circuitViewWidget->getCircuitView()->getCircuit()) {
 			logError("Circuit was null, could not save");
@@ -16,15 +16,15 @@ void SaveCallback(void *userData, const char *const *filePaths, int filter) {
 		}
 		logWarning("This circuit "+ circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() +" will be saved with a new UUID");
 		circuitViewWidget->getFileManager()->saveToFile(filePath, circuitViewWidget->getCircuitView()->getCircuit()->getCircuitId());
-    } else {
-        std::cout << "File dialog canceled." << std::endl;
-    }
+	} else {
+	    std::cout << "File dialog canceled." << std::endl;
+	}
 }
 
 void LoadCallback(void *userData, const char *const *filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
-    if (filePaths && filePaths[0]) {
-        std::cout << "Selected file(s):" << std::endl;
+	if (filePaths && filePaths[0]) {
+	    std::cout << "Selected file(s):" << std::endl;
 		std::string filePath = filePaths[0];
 		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
 		if (id == 0) {
@@ -32,9 +32,9 @@ void LoadCallback(void *userData, const char *const *filePaths, int filter) {
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-    } else {
-        std::cout << "File dialog canceled." << std::endl;
-    }
+	} else {
+	    std::cout << "File dialog canceled." << std::endl;
+	}
 }
 
 CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent,  SDL_Window* window) : fileManager(fileManager), document(document), window(window), parent(parent) {

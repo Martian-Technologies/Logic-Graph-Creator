@@ -2,6 +2,7 @@
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
+#include <SDL3/SDL.h>
 
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
@@ -30,7 +31,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent, sdlWindow.getHandle());
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
-
 	MenuManager* menuManager = new MenuManager(document);
 }
 
@@ -54,6 +54,10 @@ void Window::update() {
 
 void Window::render(RenderInterface_SDL& renderInterface) {
 	renderInterface.BeginFrame(sdlRenderer);
+	int w, h;
+	SDL_GetWindowSizeInPixels(sdlWindow.getHandle(), &w, &h);
+	SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderLine(sdlRenderer, 0, 0, w-1, h-1);
 	rmlContext->Render();
 	renderInterface.EndFrame();
 

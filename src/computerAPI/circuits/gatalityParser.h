@@ -8,13 +8,13 @@
 
 class GatalityParser: public ParsedCircuitLoader{
 public:
-    GatalityParser(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : ParsedCircuitLoader(circuitFileManager, circuitManager) {}
-    bool load(const std::string& path, SharedParsedCircuit outParsedCircuit);
-    bool save(const CircuitFileManager::FileData& fileData);
+	GatalityParser(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : ParsedCircuitLoader(circuitFileManager, circuitManager) {}
+	bool load(const std::string& path, SharedParsedCircuit outParsedCircuit);
+	bool save(const CircuitFileManager::FileData& fileData);
 
 private:
-    std::unordered_map<std::string, BlockType> customBlockMap;
-    std::unordered_set<std::string> importedFiles;
+	std::unordered_map<std::string, BlockType> customBlockMap;
+	std::unordered_set<std::string> importedFiles;
 };
 
 #endif

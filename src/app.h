@@ -18,7 +18,7 @@ public:
 	
 private:
 	Backend backend;
-    CircuitFileManager circuitFileManager;
+	CircuitFileManager circuitFileManager;
 
 	RenderInterface_SDL rmlRenderInterface;
 	SystemInterface_SDL rmlSystemInterface;

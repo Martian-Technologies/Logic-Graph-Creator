@@ -115,11 +115,11 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 	if (!parsedCircuit.isValid()) return false;
 	
 	Vector totalOffset(0,0);
-    // if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
-    if (!customCircuit) {
-        // this is only relevent for finding offset for given position, generally from mouse position
-        totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
-    }
+	// if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
+	if (!customCircuit) {
+	    // this is only relevent for finding offset for given position, generally from mouse position
+	    totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+	}
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
 			return false;
