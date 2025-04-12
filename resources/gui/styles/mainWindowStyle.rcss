@@ -22,6 +22,10 @@ body {
 
 /* Mainbar Styles */
 
+#top-container {
+	background-color: #0b0b0b;
+}
+
 #menubar-container {
 	flex-shrink: 0;
 	display: flex;
@@ -30,7 +34,7 @@ body {
 #menubar {
 	display: flex;
 	padding: 0.4rem;
-	background-color: aqua;
+	background-color: #1d1d1d;
 }
 
 .menu {
@@ -39,7 +43,7 @@ body {
 	border-radius: 0.25rem;
 	margin: 0.25rem;
 	text-align: center;
-	background-color: aqua;
+	background-color: #1d1d1d;
 }
 
 /* Middle Container Styles */
@@ -54,7 +58,7 @@ body {
 #left-sidebar-container {
 	flex-shrink: 0;
 	flex-basis: 8rem;
-	background-color: aqua;
+	background-color: #1d1d1d;
 }
 
 .menutree {
@@ -89,5 +93,5 @@ body {
 #right-sidebar-container {
 	flex-shrink: 0;
 	flex-basis: 8rem;
-	background-color: aqua;
+	background-color: #1d1d1d;
 }
