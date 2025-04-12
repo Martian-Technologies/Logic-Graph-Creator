@@ -91,5 +91,34 @@ One key thing to note is that the two input binary numbers (P31 ... P0) and (Q31
 
 ![image](https://github.com/user-attachments/assets/bb60f85d-e107-47d7-9070-05359cc90330)
 
+## Reigsters
+
+### Overview
+
+Registers are the fastest type of "memory" on a computer.  Obviously it isnt true memory like SRAM or DRAM but it does store information and replaces it upon clock tics.  Registers are the direct piece of hardware used for feeding information into components such as an ALU because of how fast they are.  Additionally, registers are used for microcontroller peripherals such as for the use of a timer.
+
+### Shift Register
+
+This compoenent is a special register which acts like a normal register loading in data on a clock pulse but also has the ability to shift the output bits of the register.  This application is useful for things like counting or for serial communication hardware such as UART which transmits one bit at a time between microcontrollers.  This chip has a variety of inputs so a list will be given below of what each input does.
+
+Pin Usage
+
+CLK - On rising or falling edge triggers either a load, shift or nothing depending on S0 and S1.
+EN - Must be high in order for the register to work correctly
+(P0 - P7) - The byte to load in when (S1, S0) = (11) and a clock edge occurs
+(S1, S0) - Selects the action of the register when a clock edge occurs : {00, 01, 10, 11} -> {HOLD, RIGHT SHIFT, LEFT SHIFT, LOAD}.  Note that right shifts (R7 .. R1) into bits (R6 .. R0).
+LI - Set this input to high if a 1 should replace R0 on a left shift.
+RI - Set this input to high if a 1 should replace R7 on a right shift.
+(R7 .. R0) - This is the registers output where R7 is the most significant bit of the output.
+
+NOTE* : if (P7 .. P0) = (00111010) and (S1, S0) = (11) when a clock edge triggers, then (R7 .. R0) -> (00111010)
+
+![image](https://github.com/user-attachments/assets/2ee9653f-c27f-46b2-a01e-ef3fdb835831)
+
+
+
+![image](https://github.com/user-attachments/assets/82dae735-33dc-4bf3-a3b1-bb716ced5846)
+
+
 
 
