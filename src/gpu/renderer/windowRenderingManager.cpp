@@ -157,3 +157,11 @@ void WindowRenderingManager::prepareForRml(RmlRenderInterface& renderInterface) 
 void WindowRenderingManager::endRml() {
 	subrenderer->getRmlRenderer().endRmlRender();
 }
+
+void WindowRenderingManager::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
+	subrenderer->registerViewportRenderInterface(renderInterface);
+}
+
+void WindowRenderingManager::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
+	subrenderer->deregisterViewportRenderInterface(renderInterface);
+}

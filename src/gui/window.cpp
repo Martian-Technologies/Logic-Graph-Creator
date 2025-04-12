@@ -26,7 +26,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
-	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle());
+	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &rendereringManager);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
 	MenuManager* menuManager = new MenuManager(rmlDocument);

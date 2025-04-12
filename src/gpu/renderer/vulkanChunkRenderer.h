@@ -69,11 +69,12 @@ struct WireVertex {
 
 class VulkanChunkRenderer {
 public:
-	void initialize(VkRenderPass& renderPass);
+	VulkanChunkRenderer(VkRenderPass& renderPass);
+	~VulkanChunkRenderer();
+	
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
-	void render(VulkanFrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
-	void destroy();
+	void render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
 
 private:
 	VulkanChunker chunker;

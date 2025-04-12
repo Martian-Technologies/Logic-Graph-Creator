@@ -1,18 +1,19 @@
 #ifndef circuitViewWidget_h
 #define circuitViewWidget_h
 
-#include "backend/circuitView/renderer/rendererTMP.h"
+#include <RmlUi/Core.h>
+
+#include "gpu/renderer/viewportRenderInterface.h"
+#include "gpu/renderer/windowRenderingManager.h"
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/circuitView/circuitView.h"
 #include "interaction/keybindHandler.h"
 #include "util/vec2.h"
 #include "sdl/sdlWindow.h"
 
-#include <RmlUi/Core.h>
-
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderingManager* windowRendereringManager);
 	~CircuitViewWidget() { element->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
@@ -31,7 +32,7 @@ private:
 	// inline float getPixelsHeight() { return (float)rect().height(); }
 
 	std::unique_ptr<CircuitView> circuitView;
-	std::unique_ptr<RendererTMP> renderer;
+	std::unique_ptr<ViewportRenderInterface> renderer;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
 	Rml::Element* element;

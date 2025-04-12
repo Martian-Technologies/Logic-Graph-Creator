@@ -4,7 +4,7 @@
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
 
-void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
+VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass) {
 	// load shaders
 	VkShaderModule blockVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.vert.spv"));
 	VkShaderModule blockFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.frag.spv"));
@@ -37,9 +37,9 @@ void VulkanChunkRenderer::initialize(VkRenderPass& renderPass) {
 	destroyShaderModule(wireFragShader);
 }
 
-void VulkanChunkRenderer::destroy() {
+VulkanChunkRenderer::~VulkanChunkRenderer() {
 	// temp way to delete all the buffers
-	chunker.setCircuit(nullptr);
+	// chunker.setCircuit(nullptr);
 }
 
 
@@ -51,7 +51,7 @@ void VulkanChunkRenderer::updateCircuit(DifferenceSharedPtr diff) {
 	chunker.updateCircuit(diff);
 }
 
-void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExtent, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
+void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunks = chunker.getAllocations(viewBounds.first.snap(), viewBounds.second.snap());
 
 	// save chunk data to frame
@@ -62,18 +62,11 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkExtent2D& renderExten
 	pushConstants.mvp = viewMatrix;
 
 	// shared dynamic state
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(renderExtent.width);
-	viewport.height = static_cast<float>(renderExtent.height);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
 	VkRect2D scissor{};
-	scissor.offset = {0, 0};
-	scissor.extent = renderExtent;
+	scissor.offset = {static_cast<int32_t>(viewport.x), static_cast<int32_t>(viewport.y)};
+	scissor.extent = {static_cast<uint32_t>(viewport.width), static_cast<uint32_t>(viewport.height)};
 	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
+	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
 	
 	// block drawing pass
 	{

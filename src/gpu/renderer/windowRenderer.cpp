@@ -109,6 +109,12 @@ void WindowRenderer::renderCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 	{
 		// rml rendering
 		rmlRenderer->render(frame, windowSize, frame.getViewDataDescriptorSet());
+
+		// viewports
+		std::lock_guard<std::mutex> lock(viewportRenderersMux);
+		for (ViewportRenderInterface* viewportRenderer : viewportRenderers) {
+			viewportRenderer->render(frame);
+		}
 	}
 
 	// end render pass
@@ -116,4 +122,16 @@ void WindowRenderer::renderCommandBuffer(VulkanFrameData& frame, uint32_t imageI
 	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
+}
+
+void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
+	renderInterface->initializeVulkan(renderPass);
+	
+	std::lock_guard<std::mutex> lock(viewportRenderersMux);
+	viewportRenderers.insert(renderInterface);
+}
+
+void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
+	std::lock_guard<std::mutex> lock(viewportRenderersMux);
+	viewportRenderers.erase(renderInterface);
 }
