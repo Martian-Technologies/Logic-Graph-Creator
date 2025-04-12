@@ -117,8 +117,6 @@ NOTE* : if (P7 .. P0) = (00111010) and (S1, S0) = (11) when a clock edge trigger
 
 
 
-![image](https://github.com/user-attachments/assets/82dae735-33dc-4bf3-a3b1-bb716ced5846)
-
 
 
 
