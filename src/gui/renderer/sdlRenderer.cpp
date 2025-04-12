@@ -12,7 +12,7 @@ void SdlRenderer::initializeTileSet(const std::string& filePath) {
 		tileSet = IMG_LoadTexture(sdlRenderer, filePath.c_str());
 
 
-		if (tileSet) {
+		if (!tileSet) {
 			logError("TileSet image could not be loaded from file: {}", "SdlRenderer", filePath);
 		}
 
@@ -83,7 +83,7 @@ void SdlRenderer::render() {
 	emptyTileSetRect.w = emptyTileSize.x;
 	emptyTileSetRect.h = emptyTileSize.y;
 
-	// // get bounds
+	// get bounds
 	Position topLeftBound = viewManager->getTopLeft().snap();
 	Position bottomRightBound = viewManager->getBottomRight().snap();
 
@@ -103,8 +103,8 @@ void SdlRenderer::render() {
 				SDL_Point point = gridToSDL(FPosition(x, y));
 				SDL_Point pointBR = gridToSDL(FPosition(x + 1, y + 1));
 				SDL_FRect dstrect;
-				dstrect.x = point.x;
-				dstrect.y = point.y;
+				dstrect.x = point.x + this->x;
+				dstrect.y = point.y + this->y;
 				dstrect.w = pointBR.x - point.x;
 				dstrect.h = pointBR.y - point.y;
 				SDL_RenderTexture(sdlRenderer, tileSet, &emptyTileSetRect, &dstrect);
@@ -167,8 +167,8 @@ void SdlRenderer::render() {
 				SDL_Point point = gridToSDL(FPosition(x, y));
 				SDL_Point pointBR = gridToSDL(FPosition(x + 1, y + 1));
 				SDL_FRect dstrect;
-				dstrect.x = point.x;
-				dstrect.y = point.y;
+				dstrect.x = point.x + this->x;
+				dstrect.y = point.y + this->y;
 				dstrect.w = pointBR.x - point.x;
 				dstrect.h = pointBR.y - point.y;
 				SDL_RenderTexture(sdlRenderer, tileSet, &emptyTileSetRect, &dstrect);
@@ -399,8 +399,8 @@ void SdlRenderer::renderBlock(BlockType type, Position position, Rotation rotati
 	tileSetRect.h = tileSize.y;
 
 	SDL_FRect dstrect;
-	dstrect.x = rotationPoint.x;
-	dstrect.y = rotationPoint.y;
+	dstrect.x = rotationPoint.x + x;
+	dstrect.y = rotationPoint.y + y;
 	dstrect.w = size.x;
 	dstrect.h = size.y;
 	SDL_RenderTextureRotated(sdlRenderer, tileSet, &tileSetRect, &dstrect, getDegrees(rotation), nullptr, SDL_FLIP_NONE);
@@ -453,7 +453,7 @@ void SdlRenderer::renderConnection(FPosition aPos, FPosition bPos, FVector aCont
 
 	// sdlRenderer->drawLine(start, end);
 
-	SDL_RenderLine(sdlRenderer, start.x, start.y, end.x, end.y);
+	SDL_RenderLine(sdlRenderer, start.x+x, start.y+y, end.x+x, end.y+y);
 
 	// SDL_RendererPath myPath;
 	// myPath.moveTo(start);
