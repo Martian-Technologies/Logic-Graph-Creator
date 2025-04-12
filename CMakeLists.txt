@@ -98,6 +98,7 @@ if (NOT GATALITY_BUILD_TESTS)
 		${Vulkan_LIBRARIES}
 		freetype
 		RmlUi::RmlUi
+		RmlUi::Debugger
 		SDL3::SDL3
 		vk-bootstrap::vk-bootstrap
 		cpplocate::cpplocate

@@ -16,10 +16,10 @@ SelectorWindow::SelectorWindow(
 }
 
 void SelectorWindow::updateBlockList() {
-	menuTree.clear("Blocks");
+	menuTree.clear({ "Blocks" });
 	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
 		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
-		std::vector<std::string> parts = {"Blocks"};
+		std::vector<std::string> parts = { "Blocks" };
 		stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', parts);
 		parts.push_back(blockDataManager->getName((BlockType)blockType));
 		menuTree.addPath(parts);
@@ -27,8 +27,9 @@ void SelectorWindow::updateBlockList() {
 }
 
 void SelectorWindow::updateToolList() {
+	menuTree.clear({ "Tools" });
 	for (auto& iter : toolManagerManager->getAllTools()) {
-		std::vector<std::string> parts = {"Tools"};
+		std::vector<std::string> parts = { "Tools" };
 		stringSplitInto(iter.first, '/', parts);
 		// parts.push_back(blockDataManager->getName((BlockType)blockType));
 		menuTree.addPath(parts);
@@ -37,11 +38,12 @@ void SelectorWindow::updateToolList() {
 
 void SelectorWindow::updateSelected(std::string string) {
 	std::vector parts = stringSplit(string, '/');
+	if (parts.size() <= 1) return;
 	if (parts[0] == "Blocks") {
-		BlockType blockType = blockDataManager->getBlockType(string.substr(7, string.size()-7));
+		BlockType blockType = blockDataManager->getBlockType(string.substr(7, string.size() - 7));
 		toolManagerManager->setBlock(blockType);
 	} else if (parts[0] == "Tools") {
-		toolManagerManager->setTool(string.substr(6, string.size()-6));
+		toolManagerManager->setTool(string.substr(6, string.size() - 6));
 	} else {
 		logError("Do not recognize cadegory {}", "SelectorWindow", parts[0]);
 	}

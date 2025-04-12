@@ -34,7 +34,7 @@ SdlInstance::~SdlInstance() {
 
 std::vector<SDL_Event> SdlInstance::pollEvents() {
 	std::vector<SDL_Event> events;
-	
+
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		events.push_back(event);

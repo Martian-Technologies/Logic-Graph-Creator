@@ -11,6 +11,7 @@ public:
 	~SdlWindow();
 
 	bool isThisMyEvent(const SDL_Event& event);
+	
 	VkSurfaceKHR createVkSurface(VkInstance instance);
 	std::pair<uint32_t, uint32_t> getSize();
 	

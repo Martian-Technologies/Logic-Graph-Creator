@@ -8,7 +8,7 @@ public:
 	typedef std::function<void(std::string)> ListenerFunction;
 	MenuTree(Rml::ElementDocument* document, Rml::Element* parent);
 	Rml::Element* addPath(const std::vector<std::string>& path);
-	void clear(const std::string& path = "");
+	void clear(const std::vector<std::string>& path = {});
 	void setListener(ListenerFunction listenerFunction) { this->listenerFunction = listenerFunction; }
 
 private:
