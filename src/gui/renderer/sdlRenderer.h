@@ -43,8 +43,8 @@ private:
 	void spawnConfetti(FPosition start) override;
 
 private:
-	SDL_Point gridToSDL(FPosition position);
-	SDL_Point gridToSDL(FVector vector);
+	SDL_FPoint gridToSDL(FPosition position);
+	SDL_FPoint gridToSDL(FVector vector);
 	inline float scalePixelCount(float pixelCount) { return pixelCount / viewManager->getViewHeight() * ((float)h) / 500.f; }
 
 	SDL_Color getStateColor(logic_state_t state);
@@ -56,8 +56,8 @@ private:
 	void renderConnection(Position aPos, Position bPos, logic_state_t state);
 	void renderConnection(Position aPos, FPosition bPos, logic_state_t state);
 
-	void drawArrow(const SDL_Point& start, const SDL_Point& end, float size, const SDL_Color& color);
-	void drawText(const SDL_Point& center, const std::string& text, float size, const SDL_Color& color);
+	void drawArrow(const SDL_FPoint& start, const SDL_FPoint& end, float size, const SDL_Color& color);
+	void drawText(const SDL_FPoint& center, const std::string& text, float size, const SDL_Color& color);
 
 	int w, h, x, y;
 	Circuit* circuit;

@@ -31,15 +31,15 @@ public:
 
 private:
 	// utility functions
-	inline Vec2 pixelsToView(const SDL_Point& point) const;
-	inline bool insideWindow(const SDL_Point& point) const;
+	inline Vec2 pixelsToView(const SDL_FPoint& point) const;
+	inline bool insideWindow(const SDL_FPoint& point) const;
 	inline float getPixelsWidth() const;
 	inline float getPixelsHeight() const;
 	inline float getPixelsXPos() const;
 	inline float getPixelsYPos() const;
 
-	std::unique_ptr<CircuitView> circuitView;
 	std::unique_ptr<SdlRenderer> renderer;
+	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
 	Rml::Element* parent;
