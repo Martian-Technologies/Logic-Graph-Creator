@@ -8,13 +8,15 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
 
 	// collapsing submenus
 	if (target->GetClassNames().find("parent") != std::string::npos) {
-		Rml::Element* sublist = target->GetFirstChild();
-		if (sublist) {
+		Rml::ElementList elements;
+		target->GetElementsByTagName(elements, "ul");
+		if (!elements.empty()) {
+			Rml::Element* sublist = elements[0];
 			sublist->SetClass("collapsed", sublist->GetClassNames().find("collapsed") == std::string::npos);
-			logInfo(target->GetInnerRML() + " Parent Menu Clicked, Toggling Submenu");
+			// logInfo(target->GetInnerRML() + " Parent Menu Clicked, Toggling Submenu");
 		}
 	} else {
-		logInfo(target->GetInnerRML() + " Menu Clicked");
+		// logInfo(target->GetInnerRML() + " Menu Clicked");
 	}
 	if (listenerFunction) {
 		(*listenerFunction)(target->GetId().substr(0, target->GetId().size() - 5));

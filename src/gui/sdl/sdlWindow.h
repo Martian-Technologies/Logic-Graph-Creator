@@ -11,7 +11,7 @@ public:
 	~SdlWindow();
 
 	bool isThisMyEvent(const SDL_Event& event);
-	
+
 	// temp
 	inline SDL_Window* getHandle() { return handle; }
 

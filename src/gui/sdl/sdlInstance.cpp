@@ -4,8 +4,7 @@
 
 SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
-	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
-	{
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
 		throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
 	}
 
@@ -20,7 +19,7 @@ SdlInstance::~SdlInstance() {
 
 std::vector<SDL_Event> SdlInstance::pollEvents() {
 	std::vector<SDL_Event> events;
-	
+
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		events.push_back(event);
