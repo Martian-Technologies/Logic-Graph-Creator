@@ -81,7 +81,8 @@ This adder takes in 2 four bit inputs where the numbers are are inputted in bina
 
 This is the same as the 4-bit adder except each input is a whole byte and the output is a byte plus an overflow bit.  Notice how in this example the sum of both inputs is 9 bits long and therefore the overflow bit is used.
 
-![image](https://github.com/user-attachments/assets/ca51ac0c-e2a1-4916-b196-12e3647b6efc)
+![image](https://github.com/user-attachments/assets/c669b8fd-a775-4fda-9eca-7bd56fa2f6c4)
+
 
 ### Full-word adder
 
