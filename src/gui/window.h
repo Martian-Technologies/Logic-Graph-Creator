@@ -14,6 +14,8 @@
 #include "selectorWindow.h"
 #include "circuitViewWidget.h"
 
+#include "gui/keyboardController.h"
+
 class Window {
 public:
 	Window(Backend* backend, CircuitFileManager* circuitFileManager);
