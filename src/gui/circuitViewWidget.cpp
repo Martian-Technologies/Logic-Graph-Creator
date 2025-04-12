@@ -3,6 +3,7 @@
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
 #include "backend/backend.h"
+
 #include <SDL3/SDL.h>
 
 void SaveCallback(void *userData, const char *const *filePaths, int filter) {
@@ -37,21 +38,22 @@ void LoadCallback(void *userData, const char *const *filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent,  SDL_Window* window) : fileManager(fileManager), document(document), window(window), parent(parent) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent, SDL_Window* window, SDL_Renderer* sdlRenderer) : fileManager(fileManager), document(document), window(window), parent(parent) {
 	// create circuitView
-	renderer = std::make_unique<RendererTMP>();
+	renderer = std::make_unique<SdlRenderer>(sdlRenderer);
 	circuitView = std::make_unique<CircuitView>(renderer.get());
 
-
-	// float w = size().width();
-	// float h = size().height();
-
+	int w = parent->GetClientWidth();
+	int h = parent->GetClientHeight();
+	int x = parent->GetAbsoluteLeft() + parent->GetClientLeft();
+	int y = parent->GetAbsoluteTop() + parent->GetClientTop();
 	// set viewmanager aspect ratio to begin with
-	// circuitView->getViewManager().setAspectRatio(w / h);
+	circuitView->getViewManager().setAspectRatio(w / h);
 
-	// initialize QTRenderer with width and height + tileset
-	// renderer->resize(w, h);
-	// renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
+	// initialize SdlRenderer with width and height + tileset
+	renderer->resize(w, h);
+	renderer->reposition(x, y);
+	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
 	parent->AddEventListener("keydown", &keybindHandler);

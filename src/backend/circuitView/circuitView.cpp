@@ -1,7 +1,7 @@
 #include "circuitView.h"
 
-CircuitView::CircuitView(Renderer* renderer)
-	: renderer(renderer), toolManager(&eventRegister, renderer, this) {
+CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&eventRegister, renderer, this) {
+	renderer->updateView(&viewManager);
 	viewManager.setUpEvents(eventRegister);
 	viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
 }
@@ -29,7 +29,6 @@ void CircuitView::setCircuit(SharedCircuit circuit) {
 }
 
 void CircuitView::viewChanged() {
-	renderer->updateView(&viewManager);
 	eventRegister.doEvent(PositionEvent("Pointer Move", viewManager.getPointerPosition()));
 }
 

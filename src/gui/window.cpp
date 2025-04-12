@@ -29,7 +29,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
-	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent, sdlWindow.getHandle());
+	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent, sdlWindow.getHandle(), sdlRenderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 	MenuManager* menuManager = new MenuManager(document);
 }
@@ -54,10 +54,11 @@ void Window::update() {
 
 void Window::render(RenderInterface_SDL& renderInterface) {
 	renderInterface.BeginFrame(sdlRenderer);
-	int w, h;
-	SDL_GetWindowSizeInPixels(sdlWindow.getHandle(), &w, &h);
-	SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderLine(sdlRenderer, 0, 0, w-1, h-1);
+	// int w, h;
+	// SDL_GetWindowSizeInPixels(sdlWindow.getHandle(), &w, &h);
+	// SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	// SDL_RenderLine(sdlRenderer, 0, 0, w-1, h-1);
+	circuitViewWidget->render();
 	rmlContext->Render();
 	renderInterface.EndFrame();
 
