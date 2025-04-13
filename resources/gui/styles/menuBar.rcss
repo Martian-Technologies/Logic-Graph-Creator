@@ -1,13 +1,43 @@
-#menu-bar.menu-item {
-	background-color: grey;
-	padding: 0.2rem;
-	border-radius: 0.2rem;
+.menu-bar {
+	display: flex;
+	background-color: #333;
+	color: white;
 }
 
-.menu.visible {
-	display: block;
+.menu {
+	position: relative;
+	cursor: pointer;
 }
 
-.menu.invisible {
-	display: none;
+.menu-title {
+	padding: 4px 4px;
+	text-align: center;
+    line-height: 1.5em;
 }
+
+.dropdown {
+	display: none; /* makes it invisible */
+	position: absolute;
+	top: 100%;
+	left: 0;
+	min-width: 100%;
+	background: #444;
+	z-index: 100;
+}
+
+.menu:hover .dropdown {
+	display: block; /* hover makes it visible */
+}
+
+.menu-item {
+	padding: 2px 4px;
+    margin: 1px 0;   
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.menu-item:hover {
+	background: #555555;
+	margin: 0;
+}
+

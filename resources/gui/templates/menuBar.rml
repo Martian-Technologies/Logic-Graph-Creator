@@ -5,21 +5,36 @@
 
 	<body>
 
-
 		<div id="menu-bar" class="menu-bar">
-
-			<!-- File Menu -->
-			<div class="menu-item" id="menu-file">File</div>
-				<div id="menu-bar-file" class="menu invisible">
-					<ul class="file-menu">
-						<li id="file-new">File</li>
-						<li id="edit-copy">Edit</li>
-						<li id="help-about">Help</li>
-					</ul>
+			<!-- File -->	
+			<div class="menu" id="menu-file">
+				<div class="menu-title">File</div>
+				<div class="dropdown">
+					<div class="menu-item" id="file-new">New</div>
+					<div class="menu-item" id="file-open">Open</div>
+					<div class="menu-item" id="file-save">Save</div>
 				</div>
-			<div class="menu-item" id="menu-edit">Edit</div>
-			<div class="menu-item" id="menu-view">View</div>
+			</div>
 
+			<!-- Edit -->
+			<div class="menu" id="menu-edit">
+				<div class="menu-title">Edit</div>
+				<div class="dropdown">
+					<div class="menu-item" id="edit-new">New</div>
+					<div class="menu-item" id="edit-open">Open</div>
+					<div class="menu-item" id="edit-save">Save</div>
+				</div>
+			</div>
+
+			<!-- View -->
+			<div class="menu" id="menu-view">
+				<div class="menu-title">View</div>
+				<div class="dropdown">
+					<div class="menu-item" id="view-new">New</div>
+					<div class="menu-item" id="view-open">Open</div>
+					<div class="menu-item" id="view-save">Save</div>
+				</div>
+			</div>
 		</div>
 
 
