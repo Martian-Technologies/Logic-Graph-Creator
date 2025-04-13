@@ -76,3 +76,4 @@ CppProperties.json
 
 # .log files we generate
 *.log
+/docs/doxyoutput
