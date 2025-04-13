@@ -140,8 +140,10 @@ void SdlRenderer::render() {
 		std::vector<Address> blockAddresses;
 		std::vector<const Block*> blocks;
 		for (const auto& block : *(circuit->getBlockContainer())) {
-			blockAddresses.push_back(Address(block.second.getPosition()));
-			blocks.push_back(&(block.second));
+			if (areaWithinArea(block.second.getPosition(), block.second.getLargestPosition(), topLeftBound, bottomRightBound)) {
+				blockAddresses.push_back(Address(block.second.getPosition()));
+				blocks.push_back(&(block.second));
+			}
 		}
 		std::vector<logic_state_t> blockStates = evaluator->getBulkStates(blockAddresses);
 
@@ -161,9 +163,7 @@ void SdlRenderer::render() {
 		// render blocks
 		// sdlRenderer->setRenderHint(SDL_Renderer::SmoothPixmapTransform);
 		for (unsigned int i = 0; i < blocks.size(); i++) {
-			if (blocks[i]->getPosition().withinArea(topLeftBound, bottomRightBound) || blocks[i]->getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
-				renderBlock(blocks[i]->type(), blocks[i]->getPosition(), blocks[i]->getRotation(), blockStates[i]);
-			}
+			renderBlock(blocks[i]->type(), blocks[i]->getPosition(), blocks[i]->getRotation(), blockStates[i]);
 		}
 
 		// render block previews
@@ -221,7 +221,7 @@ void SdlRenderer::render() {
 		// sdlRenderer->setRenderHint(SDL_Renderer::SmoothPixmapTransform);
 		std::vector<const Block*> blocks;
 		for (const auto& block : *(circuit->getBlockContainer())) {
-			if (block.second.getPosition().withinArea(topLeftBound, bottomRightBound) || block.second.getLargestPosition().withinArea(topLeftBound, bottomRightBound)) {
+			if (areaWithinArea(block.second.getPosition(), block.second.getLargestPosition(), topLeftBound, bottomRightBound)) {
 				renderBlock(block.second.type(), block.second.getPosition(), block.second.getRotation(), logic_state_t::UNDEFINED);
 			}
 			blocks.push_back(&(block.second));

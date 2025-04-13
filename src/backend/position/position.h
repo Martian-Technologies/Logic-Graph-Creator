@@ -219,6 +219,14 @@ private:
 
 Position::Iterator Position::iterTo(const Position& other) const { return Iterator(*this, other); }
 
+inline bool areaWithinArea(const Position& area1Small, const Position& area1Large, const Position& area2Small, const Position& area2Large) {
+	return (
+		area2Small.withinArea(area1Small, area1Large) ||
+		area2Large.withinArea(area1Small, area1Large) ||
+		area1Small.withinArea(area2Small, area2Large) ||
+		area2Large.withinArea(area2Small, area2Large)
+	);
+}
 
 template<>
 struct std::hash<Position> {
@@ -265,6 +273,15 @@ struct FPosition {
 
 	f_cord_t x, y;
 };
+
+inline bool areaWithinArea(const FPosition& area1Small, const FPosition& area1Large, const FPosition& area2Small, const FPosition& area2Large) {
+	return (
+		area2Small.withinArea(area1Small, area1Large) ||
+		area2Large.withinArea(area1Small, area1Large) ||
+		area1Small.withinArea(area2Small, area2Large) ||
+		area2Large.withinArea(area2Small, area2Large)
+	);
+}
 
 template <>
 struct std::formatter<FPosition> : std::formatter<std::string> {
@@ -318,4 +335,5 @@ inline Vector reverseRotateVectorWithArea(const Vector& vector, const Vector& si
 	default: return vector;
 	}
 }
+
 #endif /* position_h */
