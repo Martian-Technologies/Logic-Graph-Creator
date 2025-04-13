@@ -49,6 +49,7 @@ public:
 	inline Iterator(const Vector& vector) {
 		if (vector == Vector(0)) {
 			end = 0;
+			width = 1;
 			return;
 		}
 		xNeg = 1 - 2 * (vector.dx < 0);
@@ -174,6 +175,7 @@ public:
 		if (start == end) {
 			this->end = 0;
 			this->start = start;
+			width = 1;
 			return;
 		}
 		if (start.x > end.x) {
