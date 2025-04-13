@@ -14,7 +14,7 @@ inline bool contains(Iterator firstIter, Iterator lastIter, const T& value) {
 	return false;
 }
 
-inline std::vector<std::string> stringSplit(std::string s, const char delimiter) {
+inline std::vector<std::string> stringSplit(const std::string& s, const char delimiter) {
 	size_t start = 0;
 	size_t end = s.find_first_of(delimiter);
 
@@ -33,7 +33,7 @@ inline std::vector<std::string> stringSplit(std::string s, const char delimiter)
 	return output;
 }
 
-inline void stringSplitInto(std::string s, const char delimiter, std::vector<std::string>& vectorToFill) {
+inline void stringSplitInto(const std::string& s, const char delimiter, std::vector<std::string>& vectorToFill) {
 	size_t start = 0;
 	size_t end = s.find_first_of(delimiter);
 

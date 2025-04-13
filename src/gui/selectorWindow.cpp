@@ -9,31 +9,24 @@ SelectorWindow::SelectorWindow(
 	Rml::ElementDocument* document,
 	Rml::Element* parent
 ) : menuTree(document, parent), blockDataManager(blockDataManager), toolManagerManager(toolManagerManager), dataUpdateEventReceiver(dataUpdateEventManager) {
-	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&SelectorWindow::updateBlockList, this));
+	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&SelectorWindow::updateList, this));
 	menuTree.setListener(std::bind(&SelectorWindow::updateSelected, this, std::placeholders::_1));
-	updateBlockList();
-	updateToolList();
+	updateList();
 }
 
-void SelectorWindow::updateBlockList() {
-	menuTree.clear({ "Blocks" });
+void SelectorWindow::updateList() {
+	std::vector<std::vector<std::string>> paths;
 	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
 		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
-		std::vector<std::string> parts = { "Blocks" };
-		stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', parts);
-		parts.push_back(blockDataManager->getName((BlockType)blockType));
-		menuTree.addPath(parts);
+		std::vector<std::string>& path = paths.emplace_back(1, "Blocks");
+		stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', path);
+		path.push_back(blockDataManager->getName((BlockType)blockType));
 	}
-}
-
-void SelectorWindow::updateToolList() {
-	menuTree.clear({ "Tools" });
 	for (auto& iter : toolManagerManager->getAllTools()) {
-		std::vector<std::string> parts = { "Tools" };
-		stringSplitInto(iter.first, '/', parts);
-		// parts.push_back(blockDataManager->getName((BlockType)blockType));
-		menuTree.addPath(parts);
+		std::vector<std::string>& path = paths.emplace_back(1, "Tools");
+		stringSplitInto(iter.first, '/', path);
 	}
+	menuTree.setPaths(paths);
 }
 
 void SelectorWindow::updateSelected(std::string string) {

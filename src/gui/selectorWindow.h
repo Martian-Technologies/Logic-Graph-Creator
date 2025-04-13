@@ -16,8 +16,7 @@ public:
 	);
 
 	void updateToolModeOptions(const std::vector<std::string>* modes);
-	void updateBlockList();
-	void updateToolList();
+	void updateList();
 
 private:
 	void updateSelected(std::string string);

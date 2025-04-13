@@ -40,10 +40,10 @@ void SDL_DrawThickLine(SDL_Renderer* renderer, float x1, float y1, float x2, flo
 
 	// Set color (no texture, so ignore tex coords)
 	for (int i = 0; i < 4; i++) {
-		verts[i].color.r = color.r;
-		verts[i].color.g = color.g;
-		verts[i].color.b = color.b;
-		verts[i].color.a = color.a;
+		verts[i].color.r = ((float)color.r) / 255.f;
+		verts[i].color.g = ((float)color.g) / 255.f;
+		verts[i].color.b = ((float)color.b) / 255.f;
+		verts[i].color.a = ((float)color.a) / 255.f;
 		verts[i].tex_coord.x = 0.0f;
 		verts[i].tex_coord.y = 0.0f;
 	}
@@ -509,7 +509,7 @@ void SdlRenderer::renderConnection(FPosition aPos, FPosition bPos, FVector aCont
 
 	// sdlRenderer->drawLine(start, end);
 
-	SDL_DrawThickLine(sdlRenderer, start.x + x, start.y + y, end.x + x, end.y + y, 4, getStateColor(state));
+	SDL_DrawThickLine(sdlRenderer, start.x + x, start.y + y, end.x + x, end.y + y, scalePixelCount(30.f), getStateColor(state));
 
 	// SDL_RendererPath myPath;
 	// myPath.moveTo(start);
