@@ -34,6 +34,11 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+		auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
+		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
+		circuitViewWidget->setSimState(true);
+		circuitViewWidget->simUseSpeed(true);
+		circuitViewWidget->setSimSpeed(20);
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}

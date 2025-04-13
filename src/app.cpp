@@ -49,6 +49,11 @@ void App::runLoop() {
 						return;
 					}
 					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(window.getCircuitViewWidget()->getCircuitView(), id);
+					auto evaluatorId = window.getCircuitViewWidget()->getCircuitView()->getBackend()->createEvaluator(id);
+					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(window.getCircuitViewWidget()->getCircuitView(), evaluatorId.value(), Address());
+					window.getCircuitViewWidget()->setSimState(true);
+					window.getCircuitViewWidget()->simUseSpeed(true);
+					window.getCircuitViewWidget()->setSimSpeed(20);
 				}
 			}
 			default: {
