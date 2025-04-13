@@ -39,6 +39,18 @@ void App::runLoop() {
 				}
 				break;
 			}
+			case SDL_EVENT_DROP_FILE: {
+				std::string file = event.drop.data;
+				std::cout << file << "\n";
+				for (Window& window : windows) {
+					circuit_id_t id = window.getCircuitViewWidget()->getFileManager()->loadFromFile(file);
+					if (id == 0) {
+						logError("Error", "Failed to load circuit file.");
+						return;
+					}
+					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(window.getCircuitViewWidget()->getCircuitView(), id);
+				}
+			}
 			default: {
 				// Send event to all windows
 				for (Window& window : windows) {

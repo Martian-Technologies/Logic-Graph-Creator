@@ -24,6 +24,7 @@ public:
 	void render(RenderInterface_SDL& renderInterface);
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
+	inline std::shared_ptr<CircuitViewWidget> getCircuitViewWidget() { return circuitViewWidget; };
 
 	void saveCircuit(circuit_id_t id, bool saveAs);
 	void loadCircuit();
