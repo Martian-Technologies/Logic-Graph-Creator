@@ -11,9 +11,17 @@
 
 typedef unsigned int evaluator_id_t;
 
+class DataUpdateEventManager;
+
 class Evaluator {
 public:
-	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId);
+	struct EvaluatorGate {
+		wrapper_gate_id_t gateId;
+		BlockType blockType;
+		Rotation rotation;
+	};
+
+	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Evaluator " + std::to_string(evaluatorId) + " (Circuit: " + std::to_string(addressTree.getContainerId()) + ")"; }
@@ -36,12 +44,9 @@ public:
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
+	const AddressTreeNode<EvaluatorGate>& getAddressTree() const { return addressTree; }
+
 private:
-	struct EvaluatorGate {
-		wrapper_gate_id_t gateId;
-		BlockType blockType;
-		Rotation rotation;
-	};
 
 	evaluator_id_t evaluatorId;
 	bool paused;

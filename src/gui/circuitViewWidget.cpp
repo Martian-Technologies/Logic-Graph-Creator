@@ -99,19 +99,8 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		Rml::Input::KeyIdentifier::KI_B,
 		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
 	);
-	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_R,
-		[this]() {
-			int w = this->element->GetClientWidth();
-			int h = this->element->GetClientHeight();
-			int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
-			int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
 
-			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-		}
-	);
-
-	element->AddEventListener(Rml::EventId::Resize, new EventPasser(
+	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
 		[this](Rml::Event& event) {
 			int w = this->element->GetClientWidth();
 			int h = this->element->GetClientHeight();
@@ -181,7 +170,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 
 	element->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
 		[this](Rml::Event& event) {
-			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*4, event.GetParameter<float>("wheel_delta_y", 0)*-4);
+			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*8, event.GetParameter<float>("wheel_delta_y", 0)*-8);
 			// logInfo("{}, {}", "", delta.x, delta.y);
 			if (mouseControls) {
 				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();

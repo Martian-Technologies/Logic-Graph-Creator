@@ -1,0 +1,24 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: Monaspace Argon;
+	font-size: 50px;
+}
+
+body {
+	width: 100%;
+	height: auto;
+}
+
+
+
+.content-section {
+	display: none;
+}
+
+.content-section.active {
+	display: block;
+}
+
+

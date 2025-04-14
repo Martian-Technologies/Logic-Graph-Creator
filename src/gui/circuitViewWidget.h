@@ -24,7 +24,7 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(bool state);
 	void setSimSpeed(double speed);
-
+	
 	void load();
 	void save();
 
@@ -44,6 +44,7 @@ private:
 	Rml::Element* element;
 	SDL_Window* window;
 	KeybindHandler keybindHandler;
+	bool doResize = false;
 
 	// settings (temp)
 	bool mouseControls = false;

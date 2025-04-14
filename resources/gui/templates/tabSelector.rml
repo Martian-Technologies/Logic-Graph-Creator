@@ -1,0 +1,16 @@
+<template name="tab-selector" content="content">
+
+	<head>
+		<link type="text/rcss" href="../styles/tabSelector.rcss"/>
+	</head>
+
+	<body>
+		
+		<div id="tab-bar">
+			<button class="tab-selector-bar active" id="tab-bar-0">Tab 1</button>
+			<button id="add-tab-button">+</button>
+		</div>
+
+	</body>
+	
+</template>

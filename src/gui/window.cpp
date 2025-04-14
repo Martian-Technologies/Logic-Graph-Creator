@@ -8,6 +8,7 @@
 #include "gui/interaction/menuTreeListener.h"
 #include "gui/rml/rmlSystemInterface.h"
 #include "gui/menuBar/menuManager.h"
+#include "gui/circuitView/tabsManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
 	
@@ -20,7 +21,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// show rmlUi document
 	rmlDocument->Show();
 
-	// dynamically generating blocks/tools menutree
+	// eval menutree
+	Rml::Element* evalTreeParent = rmlDocument->GetElementById("right-sidebar-container");
+	evalWindow.emplace(&(backend->getEvaluatorManager()), backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
+
+	//  blocks/tools menutree
 	Rml::Element* toolTreeParent = rmlDocument->GetElementById("left-sidebar-container");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, toolTreeParent);
 
@@ -29,7 +34,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &renderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
+	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(rmlDocument);
+
+	// tabs
+	TabsManager* tabsManager = new TabsManager(rmlDocument);
 }
 
 Window::~Window() {
@@ -42,7 +51,7 @@ bool Window::recieveEvent(SDL_Event& event) {
 	if (sdlWindow.isThisMyEvent(event)) {
 
 		// let renderer know we if resized the window
-		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+		if (event.type == SDL_EVENT_WINDOW_RESIZED) {
 			renderer.resize({event.window.data1, event.window.data2});
 		}
 		if (event.type == SDL_EVENT_DROP_FILE) {

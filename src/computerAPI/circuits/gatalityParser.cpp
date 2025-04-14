@@ -176,7 +176,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 				cord_t vecX, vecY;
 				inputFile >> cToken >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken;
 				outParsed->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId);
-				std::cout << "Adding port: " << token << ", " << endId << ", " << blockId << ", " << vecX << ", " << vecY << std::endl;
 			}
 		} else if (token == "UUID:") {
 			std::string uuid;
