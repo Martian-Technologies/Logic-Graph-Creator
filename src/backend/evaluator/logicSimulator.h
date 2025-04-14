@@ -58,6 +58,11 @@ public:
 private:
 	std::vector<Gate> gates;
 	int numDecomissioned;
+	int rollingAvgLength;
+	int rollingAvgIndex;
+	std::vector<int> rollingAvg;
+
+	void updateRollingAverage(int newValue);
 
 	std::thread tickrateMonitorThread;
 	std::thread simulationThread;

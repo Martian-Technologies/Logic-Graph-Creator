@@ -13,7 +13,10 @@ LogicSimulator::LogicSimulator()
 	isWaiting(false),
 	nextTick_us(std::chrono::duration_cast<std::chrono::microseconds>(
 		std::chrono::system_clock::now().time_since_epoch()).count()),
-	targetTickrate(40*60) {
+	rollingAvgLength(8),
+	rollingAvgIndex(0),
+	targetTickrate(40 * 60) {
+	rollingAvg.resize(rollingAvgLength, 0);
 	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
 	tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
 }
@@ -756,20 +759,23 @@ bool LogicSimulator::threadIsWaiting() const {
 }
 
 long long int LogicSimulator::getRealTickrate() const {
-	return realTickrate.load(std::memory_order_acquire);
+	if (proceedFlag.load(std::memory_order_acquire)) {
+		return realTickrate.load(std::memory_order_acquire);
+	}
+	return 0;
 }
 
 void LogicSimulator::tickrateMonitor() {
 	while (running.load(std::memory_order_acquire)) {
 		if (proceedFlag.load(std::memory_order_acquire)) {
 			const long long int ticks = ticksRun.exchange(0, std::memory_order_relaxed);
-			realTickrate.store(ticks, std::memory_order_release);
+			updateRollingAverage(ticks);
 		} else {
-			realTickrate.store(0, std::memory_order_release);
+			updateRollingAverage(0);
 		}
 
 		std::unique_lock<std::mutex> lk(killThreadsMux);
-		killThreadsCv.wait_for(lk, std::chrono::seconds(1));
+		killThreadsCv.wait_for(lk, std::chrono::microseconds(1000000 / rollingAvgLength));
 	}
 }
 
@@ -784,4 +790,13 @@ void LogicSimulator::triggerNextTickReset() {
 		std::memory_order_release);
 
 	simulationCv.notify_one();
+}
+
+void LogicSimulator::updateRollingAverage(int reading) {
+	long long int localRealTickrate = realTickrate.load(std::memory_order_acquire);
+	localRealTickrate -= rollingAvg[rollingAvgIndex];
+	rollingAvg[rollingAvgIndex] = reading;
+	localRealTickrate += reading;
+	rollingAvgIndex = (rollingAvgIndex + 1) % rollingAvgLength;
+	realTickrate.store(localRealTickrate, std::memory_order_release);
 }
