@@ -58,10 +58,11 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	makeEditInPlace(difference, containerId, addressTree, false);
+	DiffCache diffCache(circuitManager);
+	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
 }
 
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC) {
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
 	logicSimulatorWrapper.signalToPause();
 	// wait for the thread to pause
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
@@ -114,12 +115,10 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 					break;
 				}
 				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId, rotation);
-				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
-				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
-				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
+				const auto integratedDifference = diffCache.getDifference(integratedCircuitId);
 				for (const auto& address : addresses) {
 					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
-					makeEditInPlace(integratedDifference, integratedCircuitId, branch, true);
+					makeEditInPlace(integratedDifference, integratedCircuitId, branch, diffCache, true);
 				}
 			}
 			break;
