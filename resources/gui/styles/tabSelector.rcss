@@ -25,22 +25,23 @@
     top: 1px; 
 }
 
-.tab-selector-bar:hover {
+
+/* .tab-selector-bar:hover {
 	background-color: #3e3e3e;
 }
 
 .add-tab-button {
-    background-color: #2d2d2d; /* Matching dark box */
+    background-color: #2d2d2d; /* Matching dark box *
     color: #d4d4d4;
     border: 1px solid #333;
     border-radius: 5px 5px 0 0;
-    width: 32px; /* Fixed width */
-    height: 32px; /* Fixed height */
+    width: 32px; /* Fixed width *
+    height: 32px; /* Fixed height *
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    margin-left: 8px; /* Space from last tab */
+    margin-left: 8px; /* Space from last tab *
     transition: all 0.2s ease;
 }
 
@@ -49,7 +50,8 @@
     border-color: #007bff;
 }
 
-/* Bonus: Add subtle animation to + on hover */
+/* Bonus: Add subtle animation to + on hover *
 .add-tab-button:hover::before {
     transform: scale(1.1);
-}
+} */
+

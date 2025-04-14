@@ -180,7 +180,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 
 	parent->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
 		[this](Rml::Event& event) {
-			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*12, event.GetParameter<float>("wheel_delta_y", 0)*-12);
+			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0) * 12, event.GetParameter<float>("wheel_delta_y", 0) * -12);
 			// logInfo("{}, {}", "", delta.x, delta.y);
 			if (mouseControls) {
 				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
