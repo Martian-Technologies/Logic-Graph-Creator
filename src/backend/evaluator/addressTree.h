@@ -5,10 +5,12 @@
 
 #include "backend/address.h"
 
+#include "backend/dataUpdateEventManager.h"
+
 template <class T>
 class AddressTreeNode {
 public:
-	AddressTreeNode(circuit_id_t contId, Rotation rotation) : containerId(contId), rotation(rotation) {}
+	AddressTreeNode(circuit_id_t contId, Rotation rotation, DataUpdateEventManager* dataUpdateEventManager) : containerId(contId), rotation(rotation), dataUpdateEventManager(dataUpdateEventManager) {}
 
 	void addValue(Position position, T value);
 	void addValue(const Address& address, T value);
@@ -52,7 +54,7 @@ public:
 	void setValue(Position position, T value);
 	void setValue(const Address& address, T value);
 
-	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position);
+	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position) const;
 
 	AddressTreeNode<T>& getParentBranch(const Address& address);
 	const AddressTreeNode<T>& getParentBranch(const Address& address) const;
@@ -76,6 +78,7 @@ public:
 private:
 	std::unordered_map<Position, T> values;
 	std::unordered_map<Position, AddressTreeNode<T>> branches;
+	DataUpdateEventManager* dataUpdateEventManager;
 	circuit_id_t containerId;
 	Rotation rotation;
 };
@@ -125,7 +128,8 @@ void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainer
 		logError("AddressTree::makeBranch: position already exists");
 		return;
 	}
-	branches.emplace(position, AddressTreeNode<T>(newContainerId, rotation));
+	dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
+	branches.emplace(position, AddressTreeNode<T>(newContainerId, rotation, dataUpdateEventManager));
 }
 
 template<class T>
@@ -235,7 +239,7 @@ void AddressTreeNode<T>::setValue(const Address& address, T value) {
 }
 
 template<class T>
-std::vector<Address> AddressTreeNode<T>::getPositions(circuit_id_t targetParentContainerId, Position position) {
+std::vector<Address> AddressTreeNode<T>::getPositions(circuit_id_t targetParentContainerId, Position position) const {
 	std::vector<Address> addresses;
 	if (containerId == targetParentContainerId) {
 		addresses.push_back(Address(position));
