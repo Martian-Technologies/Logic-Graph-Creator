@@ -1,9 +1,21 @@
 #include "sdlInstance.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_video.h>
 
 SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
+
+#if defined(unix) && !(defined(__APPLE__) || defined(__MACH__))
+	int numberOfVideoDrivers = SDL_GetNumVideoDrivers();
+	for (int i = 0; i < numberOfVideoDrivers; i++) {
+		if (std::string(SDL_GetVideoDriver(i)) == "wayland") {
+			SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "wayland", SDL_HINT_OVERRIDE);
+		}
+	}
+#endif
+
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
 		throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
 	}
