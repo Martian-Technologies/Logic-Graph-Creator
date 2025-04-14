@@ -7,6 +7,7 @@
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuManager.h"
+#include "gui/circuitView/tabsManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
 	// create SDL renderer
@@ -31,7 +32,12 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent, sdlWindow.getHandle(), sdlRenderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
+
+	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(document);
+
+	// tabs
+	TabsManager* tabsManager = new TabsManager(document);	
 }
 
 Window::~Window() {

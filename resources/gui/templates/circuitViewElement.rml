@@ -1,11 +1,18 @@
 <template name="circuit-view-element" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/style.rcss"/>
+		<link type="text/rcss" href="../styles/circuitViewElement.rcss"/>
 	</head>
 
 	<body>
-		<p id="content"></p>
+		 
+		<!-- each one corresponds to tab in tabSelector -->
+		<div class="tab-content">
+			<div id="content1" class="content-section active"></div>
+			<div id="content2" class="content-section"></div>
+		</div>
+
+
 	</body>
 	
 </template>
