@@ -8,7 +8,7 @@ EvalWindow::EvalWindow(
 	DataUpdateEventManager* dataUpdateEventManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent), blockDataManager(blockDataManager), toolManagerManager(toolManagerManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+) : menuTree(document, parent), dataUpdateEventReceiver(dataUpdateEventManager) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
@@ -16,13 +16,13 @@ EvalWindow::EvalWindow(
 
 void EvalWindow::updateList() {
 	std::vector<std::vector<std::string>> paths;
-	for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
+	// for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
 
-		if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
-		std::vector<std::string>& path = paths.emplace_back(1, "Blocks");
-		stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', path);
-		path.push_back(blockDataManager->getName((BlockType)blockType));
-	}
+	// 	if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
+	// 	std::vector<std::string>& path = paths.emplace_back(1, "Blocks");
+	// 	stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', path);
+	// 	path.push_back(blockDataManager->getName((BlockType)blockType));
+	// }
 	menuTree.setPaths(paths);
 }
 
