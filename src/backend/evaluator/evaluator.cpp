@@ -58,16 +58,18 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	DiffCache diffCache(circuitManager);
-	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
-}
-
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
 	logicSimulatorWrapper.signalToPause();
-	// wait for the thread to pause
+	DiffCache diffCache(circuitManager);
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
 	}
+	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
+	if (!paused) {
+		logicSimulatorWrapper.signalToProceed();
+	}
+}
+
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
 	const auto modifications = difference->getModifications();
 	bool deletedBlocks = false;
 	for (const auto& modification : modifications) {
@@ -163,9 +165,6 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::SET_DATA: break;
 		}
-	}
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
 	}
 }
 
