@@ -27,8 +27,8 @@ public:
 	void prepareForRml(RmlRenderInterface& renderInterface);
 	void endRml();
 
-	void registerViewportRenderInterface(ViewportRenderInterface* renderInterface);
-	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
+	void registerViewportRenderInterface(ViewportRenderer* renderInterface);
+	void deregisterViewportRenderInterface(ViewportRenderer* renderInterface);
 
 private:
 	void recreateSwapchain();

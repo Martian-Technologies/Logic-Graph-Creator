@@ -112,7 +112,7 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 
 		// viewports
 		std::lock_guard<std::mutex> lock(viewportRenderersMux);
-		for (ViewportRenderInterface* viewportRenderer : viewportRenderers) {
+		for (ViewportRenderer* viewportRenderer : viewportRenderers) {
 			viewportRenderer->render(frame);
 		}
 	}
@@ -124,14 +124,14 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 	}
 }
 
-void WindowSubrendererManager::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
+void WindowSubrendererManager::registerViewportRenderInterface(ViewportRenderer *renderInterface) {
 	renderInterface->initializeVulkan(renderPass);
 	
 	std::lock_guard<std::mutex> lock(viewportRenderersMux);
 	viewportRenderers.insert(renderInterface);
 }
 
-void WindowSubrendererManager::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
+void WindowSubrendererManager::deregisterViewportRenderInterface(ViewportRenderer* renderInterface) {
 	std::lock_guard<std::mutex> lock(viewportRenderersMux);
 	viewportRenderers.erase(renderInterface);
 }
