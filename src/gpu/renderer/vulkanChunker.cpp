@@ -41,6 +41,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, 
 		std::vector<WireVertex> wireVertices;
 		wireVertices.reserve(wires.size() * 6);
 		for (const auto& wire : wires) {
+			
 		}
 		// upload wire vertices
 		numWireVertices = wireVertices.size();
@@ -176,12 +177,28 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		case Difference::ModificationType::REMOVED_CONNECTION:
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+
+			std::vector<Position> wireChunks;
+			getChunksOverConnection(outputPosition, inputPosition, wireChunks);
+
+			for (auto& chunk : wireChunks) {
+				// chunks[chunk].getWiresForUpdating().erase({outputPosition, inputPosition});
+				chunksToUpdate.insert(chunk);
+			}
 			
 			break;
 		}
 		case Difference::ModificationType::CREATED_CONNECTION:
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
+
+			std::vector<Position> wireChunks;
+			getChunksOverConnection(outputPosition, inputPosition, wireChunks);
+			
+			for (auto& chunk : wireChunks) {
+				// chunks[chunk].getWiresForUpdating().insert({outputPosition, inputPosition});
+				chunksToUpdate.insert(chunk);
+			}
 			
 			break;
 		}
@@ -222,6 +239,10 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	for (const Position& chunk : chunksToUpdate) {
 		chunks[chunk].updateAllocation();
 	}
+}
+
+void VulkanChunker::getChunksOverConnection(Position p1, Position p2, std::vector<Position>& chunks) {
+	
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {

@@ -36,7 +36,7 @@ void WindowSubrendererManager::createRenderPass() {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -100,8 +100,9 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
-	renderPassInfo.clearValueCount = 0;
-	renderPassInfo.pClearValues = nullptr;
+	renderPassInfo.clearValueCount = 1;
+	VkClearValue clearColor = {1.0f-0.69f, 1.0f-0.69f, 1.0f-0.69f, 1.0f};
+	renderPassInfo.pClearValues = &clearColor;
 	
 	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 

@@ -13,11 +13,14 @@ void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32
 	// Create swapchain
 	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), surface);
 	swapchainBuilder.set_desired_extent(size.first, size.second);
+	swapchainBuilder.set_desired_format({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
 	if (useOld) swapchainBuilder.set_old_swapchain(swapchain);
 	
 	auto swapchainRet = swapchainBuilder.build();
-	if (!swapchainRet) { throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message()); }
-	if (useOld) vkb::destroy_swapchain(swapchain);
+	if (!swapchainRet)
+		throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message());
+	if (useOld)
+		vkb::destroy_swapchain(swapchain);
 	swapchain = swapchainRet.value();
 
 	// Get image views

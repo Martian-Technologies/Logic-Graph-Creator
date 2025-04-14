@@ -44,6 +44,7 @@ private:
 class ChunkChain {
 public:
 	inline std::unordered_map<Position, RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return blocks; }
+	inline std::set<RenderedWire>& getWiresForUpdating() { allocationDirty = true; return wires; }
 	void updateAllocation();
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
@@ -58,7 +59,7 @@ private:
 
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> currentlyAllocating;
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // gay baby jail
+	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // gay baby jail (deleted chunks mid allocation go here)
 };
 
 class VulkanChunker {
@@ -67,6 +68,9 @@ public:
 	void updateCircuit(DifferenceSharedPtr diff);
 	
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
+
+private:
+	void getChunksOverConnection(Position p1, Position p2, std::vector<Position>& chunks);
 	
 private:
 	Circuit* circuit = nullptr;
