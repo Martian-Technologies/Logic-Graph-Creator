@@ -107,14 +107,14 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 
 	// do actual rendering...
 	{
-		// rml rendering
-		rmlRenderer->render(frame, windowSize, frame.getViewDataDescriptorSet());
-
 		// viewports
 		std::lock_guard<std::mutex> lock(viewportRenderersMux);
 		for (ViewportRenderer* viewportRenderer : viewportRenderers) {
 			viewportRenderer->render(frame);
 		}
+		
+		// rml rendering
+		rmlRenderer->render(frame, windowSize, frame.getViewDataDescriptorSet());
 	}
 
 	// end render pass

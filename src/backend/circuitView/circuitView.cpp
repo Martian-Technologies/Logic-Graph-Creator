@@ -30,6 +30,7 @@ void CircuitView::setCircuit(SharedCircuit circuit) {
 
 void CircuitView::viewChanged() {
 	eventRegister.doEvent(PositionEvent("Pointer Move", viewManager.getPointerPosition()));
+	renderer->updateView(&viewManager);
 }
 
 void CircuitView::circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId) {
