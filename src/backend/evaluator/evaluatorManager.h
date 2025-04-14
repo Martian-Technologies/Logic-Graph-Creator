@@ -3,8 +3,12 @@
 
 #include "evaluator.h"
 
+class DataUpdateEventManager;
+
 class EvaluatorManager {
 public:
+	EvaluatorManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) {}
+
 	inline SharedEvaluator getEvaluator(evaluator_id_t id) {
 		auto iter = evaluators.find(id);
 		if (iter == evaluators.end()) return nullptr;
@@ -18,7 +22,7 @@ public:
 
 	inline evaluator_id_t createNewEvaluator(CircuitManager& circuitManager, circuit_id_t circuitId) {
 		evaluator_id_t id = getNewEvaluatorId();
-		evaluators.emplace(id, std::make_shared<Evaluator>(id, circuitManager, circuitId));
+		evaluators.emplace(id, std::make_shared<Evaluator>(id, circuitManager, circuitId, dataUpdateEventManager));
 		return id;
 	}
 	inline void destroyEvaluator(evaluator_id_t id) {
@@ -45,6 +49,8 @@ public:
 private:
 	evaluator_id_t getNewEvaluatorId() { return ++lastId; }
 
+	DataUpdateEventManager* dataUpdateEventManager;
+	
 	evaluator_id_t lastId = 0;
 	std::map<evaluator_id_t, SharedEvaluator> evaluators;
 };

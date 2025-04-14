@@ -1,9 +1,9 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId)
+Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager)
 	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
-	addressTree(circuitId, Rotation::ZERO),
+	addressTree(circuitId, Rotation::ZERO, dataUpdateEventManager),
 	usingTickrate(false),
 	circuitManager(circuitManager) {
 
