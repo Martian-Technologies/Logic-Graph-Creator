@@ -117,17 +117,9 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	);
 
-	parent->AddEventListener(Rml::EventId::Resize, new EventPasser(
+	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
 		[this](Rml::Event& event) {
-			int w = this->parent->GetClientWidth();
-			int h = this->parent->GetClientHeight();
-			int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
-			int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
-
-			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-
-			renderer->resize(w, h);
-			renderer->reposition(x, y);
+			doResize = true;
 		}
 	));
 
@@ -240,6 +232,22 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// 		backend->createEvaluator(this->circuitView->getCircuit()->getCircuitId());
 	// 	}
 	// });
+}
+
+void CircuitViewWidget::render() {
+	if (doResize) {
+		doResize = false;
+		int w = this->parent->GetClientWidth();
+		int h = this->parent->GetClientHeight();
+		int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
+		int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
+
+		circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+
+		renderer->resize(w, h);
+		renderer->reposition(x, y);
+	}
+	renderer->render();
 }
 
 void CircuitViewWidget::setSimState(bool state) {

@@ -12,6 +12,7 @@
 #include "computerAPI/circuits/circuitFileManager.h"
 
 #include "selectorWindow.h"
+#include "evalWindow.h"
 #include "circuitViewWidget.h"
 
 class Window {
@@ -38,6 +39,7 @@ private:
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	std::optional<SelectorWindow> selectorWindow;
+	std::optional<EvalWindow> evalWindow;
 
 	SdlWindow sdlWindow;
 	SDL_Renderer* sdlRenderer;

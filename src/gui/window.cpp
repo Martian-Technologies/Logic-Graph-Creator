@@ -23,7 +23,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// show rmlUi document
 	document->Show();
 
-	//dynamically generating blocks/tools menutree
+	// eval menutree
+	Rml::Element* evalTreeParent = document->GetElementById("right-sidebar-container");
+	evalWindow.emplace(&(backend->getEvaluatorManager()), backend->getDataUpdateEventManager(), document, evalTreeParent);
+
+	//  blocks/tools menutree
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 

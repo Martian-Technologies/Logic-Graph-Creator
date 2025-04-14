@@ -25,6 +25,7 @@ private:
 
 	MenuTree menuTree;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
+	const EvaluatorManager* evaluatorManager;
 };
 
 #endif /* evalWindow_h */

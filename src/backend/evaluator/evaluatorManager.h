@@ -9,6 +9,8 @@ class EvaluatorManager {
 public:
 	EvaluatorManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) {}
 
+	inline const std::map<evaluator_id_t, SharedEvaluator>& getEvaluators() const { return evaluators; }
+
 	inline SharedEvaluator getEvaluator(evaluator_id_t id) {
 		auto iter = evaluators.find(id);
 		if (iter == evaluators.end()) return nullptr;

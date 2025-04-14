@@ -54,7 +54,7 @@ public:
 	void setValue(Position position, T value);
 	void setValue(const Address& address, T value);
 
-	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position);
+	std::vector<Address> getPositions(circuit_id_t targetParentContainerId, Position position) const;
 
 	AddressTreeNode<T>& getParentBranch(const Address& address);
 	const AddressTreeNode<T>& getParentBranch(const Address& address) const;
@@ -239,7 +239,7 @@ void AddressTreeNode<T>::setValue(const Address& address, T value) {
 }
 
 template<class T>
-std::vector<Address> AddressTreeNode<T>::getPositions(circuit_id_t targetParentContainerId, Position position) {
+std::vector<Address> AddressTreeNode<T>::getPositions(circuit_id_t targetParentContainerId, Position position) const {
 	std::vector<Address> addresses;
 	if (containerId == targetParentContainerId) {
 		addresses.push_back(Address(position));
