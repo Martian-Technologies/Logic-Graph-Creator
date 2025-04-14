@@ -34,6 +34,11 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+		auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
+		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
+		circuitViewWidget->setSimState(true);
+		circuitViewWidget->simUseSpeed(true);
+		circuitViewWidget->setSimSpeed(20);
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}
@@ -121,8 +126,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
 			if (button == 0) { // left
-				const bool* state = SDL_GetKeyboardState(nullptr);
-				if (state[SDL_SCANCODE_LALT] || state[SDL_SCANCODE_RALT]) {
+				if (event.GetParameter<int>("alt_key", 0)) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
 				}
 				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
@@ -182,8 +186,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			if (mouseControls) {
 				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
 			} else {
-				const bool* state = SDL_GetKeyboardState(nullptr);
-				if (state[SDL_SCANCODE_LSHIFT] || state[SDL_SCANCODE_LSHIFT]) {
+				if (event.GetParameter<int>("shift_key", 0)) {
 					// do zoom
 					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
 				} else {

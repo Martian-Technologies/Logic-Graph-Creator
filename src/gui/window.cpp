@@ -45,6 +45,20 @@ bool Window::recieveEvent(SDL_Event& event) {
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
 			renderer.resize({event.window.data1, event.window.data2});
 		}
+		if (event.type == SDL_EVENT_DROP_FILE) {
+			circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(event.drop.data);
+			if (id == 0) {
+				logError("Error", "Failed to load circuit file.");
+			}
+			else {
+				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+				auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
+				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
+				circuitViewWidget->setSimState(true);
+				circuitViewWidget->simUseSpeed(true);
+				circuitViewWidget->setSimSpeed(20);
+			}
+		}
 		
 		// send event to RML
 		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);

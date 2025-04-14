@@ -7,73 +7,82 @@ MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent) : docum
 	parent->AppendChild(std::move(rootList));
 }
 
-Rml::Element* MenuTree::addPath(const std::vector<std::string>& path) {
-	// walk down the ul/li structure of the menutree using our path
-	std::string id;
-	Rml::Element* current = parent;
-	for (int i = 0; i < path.size(); i++) {
-		std::string item = path[i];
-		item[0] = toupper(item[0]);
-		id += (id.empty() ? "" : "/") + item;
-		//identify the next list to search through, or if it's not there, make one
-		Rml::ElementList elements;
-		current->GetElementsByTagName(elements, "ul");
-		if (elements.empty()) {
-			Rml::ElementPtr newList = document->CreateElement("ul");
-			//all ul's besides the root one are labeled for sublist collapse capability
-			newList->SetClass("collapsed", false);
-			current->AppendChild(std::move(newList));
-			current->GetElementsByTagName(elements, "ul");
-		}
-		current = elements[0];
-
-		//try to find the next element in the path
-		Rml::Element* nextItem = current->GetElementById(id + "-menu");
-		//if the next element in the path doesn't exist:
-		//1. create a new li with the name/id matching missing path item
-		//2. append child: current->li, then set current to li
-		if (nextItem) {
-			current = nextItem;
-		} else {
-			Rml::ElementPtr newItem = document->CreateElement("li");
-			newItem->SetId(id + "-menu");
-			newItem->SetInnerRML(item);
-			//classes must be assigned to elements before they are appended to the DOM
-			//all parents besides the root are labeled for sublist collapse capability
-			if (i < path.size() - 1) {
-				newItem->SetClass("parent", true);
-				newItem->AddEventListener("click", new MenuTreeListener(&listenerFunction));
-			} else {
-				newItem->AddEventListener("click", new MenuTreeListener(&listenerFunction));
-			}
-			current->AppendChild(std::move(newItem));
-			current = current->GetElementById(id + "-menu");
-		}
+void MenuTree::setPaths(const std::vector<std::string>& paths) {
+	std::vector<std::vector<std::string>> vecPaths(paths.size());
+	for (unsigned int i = 0; i < vecPaths.size(); i++) {
+		stringSplitInto(paths[i], '/', vecPaths[i]);
 	}
-	// logInfo("added menu path " + path.back());
-	return current;
+	setPaths(vecPaths, parent);
 }
 
-void MenuTree::clear(const std::vector<std::string>& path) {
-	Rml::Element* current = parent;
-	std::string id;
-	for (int i = 0; i < path.size(); i++) {
-		std::string item = path[i];
-		item[0] = toupper(item[0]);
-		id += (id.empty() ? "" : "/") + item;
-		//identify the next list to search through, or if it's not there, make one
+
+void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml::Element* current) {
+	if (paths.empty()) {
+		current->SetClass("parent", false);
 		Rml::ElementList elements;
 		current->GetElementsByTagName(elements, "ul");
 		if (elements.empty()) return;
-		current = elements[0];
-		Rml::Element* nextItem = current->GetElementById(id + "-menu");
-		if (!nextItem) return;
-		current = nextItem;
+		current->RemoveChild(elements[0]);
+		return;
 	}
+	std::map<std::string, std::vector<std::vector<std::string>>> pathsByRoot;
+	for (const auto& path : paths) {
+		if (path.size() == 1) {
+			pathsByRoot[path[0]];
+		} else {
+			auto& pathVec = pathsByRoot[path[0]].emplace_back(path.size() - 1);
+			for (unsigned int i = 1; i < path.size(); i++) {
+				pathVec[i - 1] = path[i];
+			}
+		}
+	}
+
 	Rml::ElementList elements;
+	Rml::Element* listElement;
 	current->GetElementsByTagName(elements, "ul");
-	if (elements.empty()) return;
-	current = elements[0];
-	Rml::Element* par = current->GetParentNode();
-	par->RemoveChild(current);
+	if (elements.empty()) {
+		Rml::ElementPtr newList = document->CreateElement("ul");
+		newList->SetClass("collapsed", false);
+		current->AppendChild(std::move(newList));
+		current->GetElementsByTagName(elements, "ul");
+		listElement = elements[0];
+	} else {
+		listElement = elements[0];
+		std::vector<Rml::Element*> children;
+		for (unsigned int i = 0; i < listElement->GetNumChildren(); i++) {
+			children.push_back(listElement->GetChild(i));
+		}
+		for (auto element : children) {
+			getPath(element);
+			const std::string& id = element->GetId();
+			unsigned int index = id.size() - 5;
+			while (index != 0 && id[index] != '/') index--;
+			auto iter = pathsByRoot.find(id.substr(index + (index != 0), id.size() - 5 - index - (index != 0)));
+			if (iter == pathsByRoot.end()) {
+				listElement->RemoveChild(element);
+				continue;
+			}
+			setPaths(iter->second, element);
+			pathsByRoot.erase(iter);
+		}
+	}
+	std::string pathStr = getPath(current);
+	if (!(pathStr.empty())) pathStr += "/";
+	for (auto iter : pathsByRoot) {
+		Rml::ElementPtr newItem = document->CreateElement("li");
+		newItem->SetId(pathStr + iter.first + "-menu");
+		newItem->SetInnerRML(iter.first);
+		newItem->AddEventListener("click", new MenuTreeListener(&listenerFunction));
+		if (iter.second.empty()) {
+			listElement->AppendChild(std::move(newItem));
+		} else {
+			newItem->SetClass("parent", true);
+			setPaths(iter.second, listElement->AppendChild(std::move(newItem)));
+		}
+	}
+}
+
+std::string MenuTree::getPath(Rml::Element* item) {
+	if (item == parent) return "";
+	return item->GetId().substr(0, item->GetId().size() - 5);
 }
