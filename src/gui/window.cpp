@@ -7,7 +7,7 @@
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuManager.h"
-#include "gui/circuitView/tabsManager.h"
+#include "gui/circuitView/simControlsManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
 	// create SDL renderer
@@ -40,8 +40,12 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(document);
 
-	// tabs
 	// TabsManager* tabsManager = new TabsManager(document);	
+	// TabsManager* tabsManager = new TabsManager(document);	
+
+	// status of sim
+	SimControlsManager* simControlsManager = new SimControlsManager(document);
+	//terst
 }
 
 Window::~Window() {

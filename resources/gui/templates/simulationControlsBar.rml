@@ -1,0 +1,23 @@
+<template name="sim-controls" content="content">
+
+	<head>
+		<link type="text/rcss" href="../styles/simControls.rcss"/>
+	</head>
+
+	<body>
+		
+		<div id="status-area">
+			<button id="toggle-simulation-option">Toggle Simulation</button>
+			<input id="limit-speed-checkbox" type="checkbox" /> 
+			<textarea id="tps-input" rows="1" cols="15" placeholder="40.00tps"></textarea>
+		</div>
+	</body>
+	
+</template>
+
+
+
+
+
+
+

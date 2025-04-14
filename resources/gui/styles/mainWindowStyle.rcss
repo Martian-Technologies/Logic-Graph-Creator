@@ -53,6 +53,16 @@ body {
 	display: flex;
 }
 
+#center-container {
+    flex: 1;  /* Takes available space between sidebars */
+    display: flex;
+    flex-direction: column;  /* Stacks children vertically */
+}
+
+#simulation-controls-container {
+	background-color: #0b0b0b;
+}
+
 /* Left Sidebar Styles */
 
 #left-sidebar-container {
