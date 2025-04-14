@@ -2,9 +2,7 @@
 #include "menuTreeListener.h"
 
 MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent) : document(document), parent(parent) {
-	Rml::ElementPtr rootList = document->CreateElement("ul");
-	rootList->SetClass("menutree", true);
-	parent->AppendChild(std::move(rootList));
+	parent->SetClass("menutree", true);
 }
 
 void MenuTree::setPaths(const std::vector<std::string>& paths) {
