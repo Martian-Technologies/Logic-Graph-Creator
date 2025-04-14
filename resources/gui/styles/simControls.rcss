@@ -10,7 +10,6 @@
 #toggle-simulation {
     background-color: #333;
     color: #fff;
-    border: 1px solid #444;
     padding: 2px 8px;
     height: 20px;
 }
@@ -22,7 +21,6 @@
 #tps-input {
     background-color: #252525;
     color: #fff;
-    border: 1px solid #444;
     height: 18px;
     width: 60px;
 } 
@@ -36,7 +34,6 @@ input[type="checkbox"] {
     border-radius: 3px;
     color: #f0f0f0; /* Color for potential checkmark (if using text-based) */
     cursor: pointer;
-    outline: none;
     margin-right: 8px;
 
 }
