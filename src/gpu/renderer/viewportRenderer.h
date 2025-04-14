@@ -22,6 +22,7 @@ public:
 	~ViewportRenderer();
 
 	void initializeVulkan(VkRenderPass renderPass);
+	void destroyVulkan();
 	void render(VulkanFrameData& frame);
 	
 public:

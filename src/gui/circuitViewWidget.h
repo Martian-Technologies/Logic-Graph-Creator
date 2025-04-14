@@ -37,8 +37,8 @@ private:
 	inline float getPixelsXPos() const;
 	inline float getPixelsYPos() const;
 
-	std::unique_ptr<CircuitView> circuitView;
 	std::unique_ptr<ViewportRenderer> renderer;
+	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
 	Rml::Element* element;

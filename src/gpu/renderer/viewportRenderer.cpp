@@ -12,12 +12,18 @@ ViewportRenderer::ViewportRenderer(WindowRenderer* windowRenderer, Rml::Element*
 
 ViewportRenderer::~ViewportRenderer() {
 	windowRenderer->deregisterViewportRenderInterface(this);
+	destroyVulkan();
 }
 
 
 void ViewportRenderer::initializeVulkan(VkRenderPass renderPass) {
 	chunkRenderer = std::make_unique<VulkanChunkRenderer>(renderPass);
 }
+
+void ViewportRenderer::destroyVulkan() {
+	chunkRenderer.reset();
+}
+
 
 void ViewportRenderer::render(VulkanFrameData& frame) {
 
