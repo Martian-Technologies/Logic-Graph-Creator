@@ -17,8 +17,8 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
-	// Rml::Debugger::Initialise(rmlContext);
-	// Rml::Debugger::SetVisible(true);
+	Rml::Debugger::Initialise(rmlContext);
+	Rml::Debugger::SetVisible(true);
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// show rmlUi document
@@ -26,7 +26,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// eval menutree
 	Rml::Element* evalTreeParent = document->GetElementById("right-sidebar-container");
-	evalWindow.emplace(&(backend->getEvaluatorManager()), backend->getDataUpdateEventManager(), document, evalTreeParent);
+	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), backend->getDataUpdateEventManager(), document, evalTreeParent);
 
 	//  blocks/tools menutree
 	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");

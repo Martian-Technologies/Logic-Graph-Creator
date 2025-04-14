@@ -10,7 +10,7 @@
 template <class T>
 class AddressTreeNode {
 public:
-	AddressTreeNode(circuit_id_t contId, Rotation rotation, DataUpdateEventManager* dataUpdateEventManager) : containerId(contId), rotation(rotation), dataUpdateEventManager(dataUpdateEventManager) {}
+	AddressTreeNode(circuit_id_t contId, Rotation rotation, DataUpdateEventManager* dataUpdateEventManager) : containerId(contId), rotation(rotation), dataUpdateEventManager(dataUpdateEventManager) { }
 
 	void addValue(Position position, T value);
 	void addValue(const Address& address, T value);
@@ -37,6 +37,7 @@ public:
 	void nukeBranch(Position position) { branches.erase(position); }
 	void nukeBranch(const Address& address) {
 		const_cast<AddressTreeNode<T>&>(getParentBranch(address)).branches.erase(address.getPosition(address.size() - 1));
+		dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 	}
 
 	inline T getValue(Position position) const { return values.at(position); }
@@ -61,6 +62,7 @@ public:
 
 	inline AddressTreeNode<T>& getBranch(Position position);
 	AddressTreeNode<T>& getBranch(const Address& address);
+	const std::unordered_map<Position, AddressTreeNode<T>>& getBranchs() const { return branches; }
 
 	inline bool hasValue(const Position position) const { return values.find(position) != values.end(); }
 	inline bool hasValue(const Address& address) const { return getParentBranch(address).hasValue(address.getPosition(address.size() - 1)); }
@@ -128,8 +130,8 @@ void AddressTreeNode<T>::makeBranch(Position position, circuit_id_t newContainer
 		logError("AddressTree::makeBranch: position already exists");
 		return;
 	}
-	dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 	branches.emplace(position, AddressTreeNode<T>(newContainerId, rotation, dataUpdateEventManager));
+	dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 }
 
 template<class T>

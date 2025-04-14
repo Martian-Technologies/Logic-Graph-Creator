@@ -10,7 +10,6 @@
 void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
 	if (filePaths && filePaths[0]) {
-		std::cout << "Selected file(s):" << std::endl;
 		std::string filePath = filePaths[0];
 		if (!circuitViewWidget->getCircuitView()->getCircuit()) {
 			logError("Circuit was null, could not save");
@@ -26,7 +25,6 @@ void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
 	if (filePaths && filePaths[0]) {
-		std::cout << "Selected file(s):" << std::endl;
 		std::string filePath = filePaths[0];
 		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
 		if (id == 0) {
@@ -182,7 +180,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 
 	parent->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
 		[this](Rml::Event& event) {
-			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*8, event.GetParameter<float>("wheel_delta_y", 0)*-8);
+			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0)*12, event.GetParameter<float>("wheel_delta_y", 0)*-12);
 			// logInfo("{}, {}", "", delta.x, delta.y);
 			if (mouseControls) {
 				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();

@@ -28,11 +28,8 @@
 					</div>
 				</div>
 
-				<div id="right-sidebar-container">
-
-				</div>
+				<div id="right-sidebar-container"></div>
 			</div>
-
 		</div>
 	</body>
 </rml>
