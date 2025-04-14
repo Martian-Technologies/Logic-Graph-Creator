@@ -77,3 +77,6 @@ CppProperties.json
 # .log files we generate
 *.log
 /docs/doxyoutput
+
+# for cbuild plugin
+build_error.txt

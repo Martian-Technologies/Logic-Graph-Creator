@@ -9,13 +9,16 @@ public:
 	TabsManager(Rml::ElementDocument* document);
 	~TabsManager();
 
+	Rml::Element* getActiveTab() const { return active; }
+	const int getTabCount() const { return tabCount; }
 private:
 	void Initialize();
-	void addTab();
+	void addTab(Rml::Element* addTabButton);
 	void removeTab();
 
 	Rml::Element* tabTemplate;
-	Rml::Element* active;
+	Rml::Element* active; // active tab
+	int tabCount;
 };
 
 #endif

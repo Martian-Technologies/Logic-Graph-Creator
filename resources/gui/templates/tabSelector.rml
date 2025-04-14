@@ -7,8 +7,7 @@
 	<body>
 		
 		<div id="tab-bar">
-			<button class="tab-selector-bar active" id="tab-bar-1">Tab 1</button>
-			<button class="tab-selector-bar" id="tab-bar-2">Tab 2</button>
+			<button class="tab-selector-bar active" id="tab-bar-0">Tab 1</button>
 			<button id="add-tab-button">+</button>
 		</div>
 
