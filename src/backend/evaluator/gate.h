@@ -1,9 +1,6 @@
 #ifndef gate_h
 #define gate_h
 
-#include <vector>
-#include <array>
-#include <unordered_map>
 #include "logicState.h"
 #include "gateType.h"
 #include "backend/container/block/blockDefs.h"

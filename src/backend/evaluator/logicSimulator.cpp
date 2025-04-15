@@ -1,6 +1,3 @@
-#include <stdexcept>
-#include <chrono>
-
 #include "logicSimulator.h"
 
 LogicSimulator::LogicSimulator()
