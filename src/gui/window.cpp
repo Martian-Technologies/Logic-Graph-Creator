@@ -25,11 +25,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	document->Show();
 
 	// eval menutree
-	Rml::Element* evalTreeParent = document->GetElementById("eval tree");
+	Rml::Element* evalTreeParent = document->GetElementById("eval-tree");
 	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), backend->getDataUpdateEventManager(), document, evalTreeParent);
 
 	//  blocks/tools menutree
-	Rml::Element* toolTreeParent = document->GetElementById("left-sidebar-container");
+	Rml::Element* toolTreeParent = document->GetElementById("selection-tree");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 
 	// get widget for circuit view

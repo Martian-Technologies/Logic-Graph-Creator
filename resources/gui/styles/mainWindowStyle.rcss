@@ -67,15 +67,7 @@ body {
 
 #left-sidebar-container {
 	flex-shrink: 0;
-	flex-basis: 12rem;
-	background-color: #1d1d1d;
-}
-
-/* Right Sidebar Styles */
-
-#right-sidebar-container {
-	flex-shrink: 0;
-	flex-basis: 12rem;
+	flex-basis: 16rem;
 	background-color: #1d1d1d;
 }
 
@@ -90,7 +82,7 @@ body {
 	display: block;
 }
 
-.menutree ul {
+.menutree ul ul {
 	padding-left: 1rem;
 }
 

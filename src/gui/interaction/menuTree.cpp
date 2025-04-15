@@ -1,7 +1,7 @@
 #include "menuTree.h"
 #include "menuTreeListener.h"
 
-MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent) : document(document), parent(parent) {
+MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool startOpen) : document(document), parent(parent), startOpen(startOpen) {
 	parent->SetClass("menutree", true);
 }
 
@@ -40,7 +40,7 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	current->GetElementsByTagName(elements, "ul");
 	if (elements.empty()) {
 		Rml::ElementPtr newList = document->CreateElement("ul");
-		newList->SetClass("collapsed", false);
+		newList->SetClass("collapsed", !startOpen && current != parent);
 		current->AppendChild(std::move(newList));
 		current->GetElementsByTagName(elements, "ul");
 		listElement = elements[0];

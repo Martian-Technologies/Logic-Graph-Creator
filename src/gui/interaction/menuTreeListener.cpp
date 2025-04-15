@@ -14,8 +14,7 @@ void MenuTreeListener::ProcessEvent(Rml::Event& event) {
 			Rml::Element* sublist = elements[0];
 			sublist->SetClass("collapsed", sublist->GetClassNames().find("collapsed") == std::string::npos);
 		}
-	}
-	if (listenerFunction) {
+	} else if (listenerFunction) {
 		(*listenerFunction)(target->GetId().substr(0, target->GetId().size() - 5));
 	}
 }

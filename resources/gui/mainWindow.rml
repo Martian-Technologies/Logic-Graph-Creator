@@ -16,7 +16,22 @@
 			</div>
 
 			<div id="middle-container">
-				<div id="left-sidebar-container"></div>
+				<div id="left-sidebar-container">
+					<tabset>
+						<tab>Blocks</tab>
+						<panel>
+							<div id="selection-tree"></div>
+						</panel>
+						<tab>Simulation</tab>
+						<panel>
+							<div id="eval-tree"></div>
+						</panel>
+						<tab>IC Editor</tab>
+						<panel>
+							<template src="block-creation"></template>
+						</panel>
+					</tabset>
+				</div>
 
 				
 				<div id="center-container">
@@ -24,19 +39,6 @@
 						<template src="sim-controls"></template>
 					</div>
 					<div id="circuitview-container"> </div>
-				</div>
-
-				<div id="right-sidebar-container">
-					<tabset>
-						<tab>Eval Tree</tab>
-						<panel>
-							<div id="eval tree"></div>
-						</panel>
-						<tab>IC Editor</tab>
-						<panel>
-							<template src="block-creation"></template>
-						</panel>
-					</tabset>
 				</div>
 			</div>
 		</div>

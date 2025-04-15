@@ -10,7 +10,7 @@ EvalWindow::EvalWindow(
 	DataUpdateEventManager* dataUpdateEventManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager) {
+) : menuTree(document, parent, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
@@ -20,7 +20,7 @@ void EvalWindow::updateList() {
 	std::vector<std::vector<std::string>> paths;
 	for (auto pair : evaluatorManager->getEvaluators()) {
 		std::vector<std::string> path({ pair.second->getEvaluatorName() });
-			makePaths(paths, path, pair.second->getAddressTree());
+		makePaths(paths, path, pair.second->getAddressTree());
 	}
 	menuTree.setPaths(paths);
 }
@@ -31,7 +31,7 @@ void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::ve
 		paths.push_back(path);
 	} else {
 		for (auto& pair : branches) {
-			path.push_back(circuitManager->getCircuit(pair.second.getContainerId())->getCircuitNameNumber());
+			path.push_back(circuitManager->getCircuit(pair.second.getContainerId())->getCircuitName() + pair.first.toString());
 			makePaths(paths, path, pair.second);
 			path.pop_back();
 		}
@@ -39,6 +39,7 @@ void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::ve
 }
 
 void EvalWindow::updateSelected(std::string string) {
+	logInfo(string);
 	// std::vector parts = stringSplit(string, '/');
 	// if (parts.size() <= 1) return;
 	// if (parts[0] == "Blocks") {
