@@ -17,12 +17,28 @@ struct RenderedBlock {
 	int realHeight;
 };
 
-typedef std::pair<Position, Position> RenderedWire;
+struct RenderedWire {
+	FPosition start;
+	FPosition end;
+};
+
+struct WireHash {
+    std::size_t operator () (const std::pair<Position,Position> &p) const {
+        auto h1 = std::hash<Position>{}(p.first);
+        auto h2 = std::hash<Position>{}(p.second);
+
+		// temp hash
+        return h1 ^ h2;
+    }
+};
+
+typedef std::unordered_map<Position, RenderedBlock> RenderedBlocks;
+typedef std::unordered_map<std::pair<Position, Position>, RenderedWire, WireHash> RenderedWires;
 
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks, std::set<RenderedWire>& wires);
+	VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires);
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
@@ -43,8 +59,8 @@ private:
 
 class ChunkChain {
 public:
-	inline std::unordered_map<Position, RenderedBlock>& getBlocksForUpdating() { allocationDirty = true; return blocks; }
-	inline std::set<RenderedWire>& getWiresForUpdating() { allocationDirty = true; return wires; }
+	inline RenderedBlocks& getBlocksForUpdating() { allocationDirty = true; return blocks; }
+	inline RenderedWires& getWiresForUpdating() { allocationDirty = true; return wires; }
 	void updateAllocation();
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
@@ -53,8 +69,8 @@ private:
 	void annihilateOrphanGBs();
 	
 private:
-	std::unordered_map<Position, RenderedBlock> blocks;
-	std::set<RenderedWire> wires;
+	RenderedBlocks blocks;
+	RenderedWires wires;
 	bool allocationDirty = false;
 
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;

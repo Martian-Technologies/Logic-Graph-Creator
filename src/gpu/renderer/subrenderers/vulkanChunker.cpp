@@ -6,7 +6,7 @@
 // VulkanChunkAllocation
 // =========================================================================================================
 
-VulkanChunkAllocation::VulkanChunkAllocation(const std::unordered_map<Position, RenderedBlock>& blocks, std::set<RenderedWire>& wires) {
+VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - should abstract this function
 	
@@ -196,7 +196,7 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 			getChunksOverConnection(outputPosition, inputPosition, wireChunks);
 			
 			for (auto& chunk : wireChunks) {
-				// chunks[chunk].getWiresForUpdating().insert({outputPosition, inputPosition});
+				chunks[chunk].getWiresForUpdating()[{outputPosition, inputPosition}] = { outputPosition.free(), inputPosition.free() };
 				chunksToUpdate.insert(chunk);
 			}
 			
