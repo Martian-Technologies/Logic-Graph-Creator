@@ -3,12 +3,22 @@
 #include "vulkanChunkRenderer.h"
 #include "gpu/vulkanInstance.h"
 
+const unsigned int CHUNK_SIZE = 25;
+cord_t getChunk(cord_t in) {
+	return std::floor( (float)in / (float)CHUNK_SIZE ) * (int)CHUNK_SIZE;
+}
+Position getChunk(Position in) {
+	in.x = getChunk(in.x);
+	in.y = getChunk(in.y);
+	return in;
+}
+
 // VulkanChunkAllocation
 // =========================================================================================================
 
 VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires) {
 	// TODO - should pre-allocate buffers with size and pool them
-	// TODO - should abstract this function
+	// TODO - maybe should use smaller size coordinates with one big offset
 	
 	// Generate block vertices
 	if (blocks.size() > 0) {
@@ -29,6 +39,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			blockVertices.push_back(v5);
 			blockVertices.push_back(v6);
 		}
+		
 		// upload block vertices
 		numBlockVertices = blockVertices.size();
 		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
@@ -36,13 +47,46 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
+	
+	// Generate wire vertices
 	if (wires.size() > 0) {
-		// Generate wire vertices
 		std::vector<WireVertex> wireVertices;
 		wireVertices.reserve(wires.size() * 6);
 		for (const auto& wire : wires) {
+
+			constexpr float WIRE_WIDTH = 0.1f;
 			
+			// get normalized direction
+			FVector dir = wire.second.end - wire.second.start;
+			dir /= dir.length();
+
+			// direction rotated clockwise (I'm thinking right as in a vector pointed in (1, 1) rotated to (1, -1))
+			FVector right(-dir.dy, dir.dx);
+			right *= WIRE_WIDTH; // apply thickness of wire
+
+			// reused position
+			FPosition vertexPos;
+
+			logInfo("wire");
+
+			// first triangle
+			// vertexPos = wire.second.start + right;
+			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			// vertexPos = wire.second.start - right;
+			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			// vertexPos = wire.second.end + right;
+			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			// second triangle
+			vertexPos = wire.second.start - right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			vertexPos = wire.second.end - right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			vertexPos = wire.second.end + right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+
+
 		}
+		
 		// upload wire vertices
 		numWireVertices = wireVertices.size();
 		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
@@ -111,13 +155,6 @@ void ChunkChain::annihilateOrphanGBs() {
 // VulkanChunker
 // =========================================================================================================
 
-const unsigned int CHUNK_SIZE = 25;
-Position getChunk(Position in) {
-	in.x = std::floor(in.x / (float)CHUNK_SIZE) * (int)CHUNK_SIZE;
-	in.y = std::floor(in.y / (float)CHUNK_SIZE) * (int)CHUNK_SIZE;
-	return in;
-}
-
 void VulkanChunker::setCircuit(Circuit* circuit) {
 	std::lock_guard<std::mutex> lock(mux);
 	
@@ -178,13 +215,7 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
-			std::vector<Position> wireChunks;
-			getChunksOverConnection(outputPosition, inputPosition, wireChunks);
-
-			for (auto& chunk : wireChunks) {
-				// chunks[chunk].getWiresForUpdating().erase({outputPosition, inputPosition});
-				chunksToUpdate.insert(chunk);
-			}
+			updateChunksOverConnection(outputPosition, inputPosition, false, chunksToUpdate);
 			
 			break;
 		}
@@ -192,13 +223,7 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
-			std::vector<Position> wireChunks;
-			getChunksOverConnection(outputPosition, inputPosition, wireChunks);
-			
-			for (auto& chunk : wireChunks) {
-				chunks[chunk].getWiresForUpdating()[{outputPosition, inputPosition}] = { outputPosition.free(), inputPosition.free() };
-				chunksToUpdate.insert(chunk);
-			}
+			updateChunksOverConnection(outputPosition, inputPosition, true, chunksToUpdate);
 			
 			break;
 		}
@@ -241,8 +266,37 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	}
 }
 
-void VulkanChunker::getChunksOverConnection(Position p1, Position p2, std::vector<Position>& chunks) {
+void VulkanChunker::updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate) {
+	// TODO - MAKE SURE not at same position better
+	if (start == end) return;
 	
+	// chunk position (lines can technically be outside of chunk)
+	Position chunk = getChunk(start);
+	Position endChunk = getChunk(end);
+
+	// start line position
+	f_cord_t x = start.x;
+	f_cord_t y = start.y;
+
+	// line change and slopes
+	f_cord_t dx = (float)end.x - (float)start.x;
+	f_cord_t dy = (float)end.y - (float)start.y;
+	f_cord_t slope = dy/dx;
+	f_cord_t iSlope = dx/dy;
+
+	while (chunk != endChunk) {
+		return;
+		// get line distances for horizontal
+		f_cord_t nextChunkBorderX; // todo func
+		f_cord_t dstToNextChunkBorderX = x - nextChunkBorderX;
+		f_cord_t yChange = dstToNextChunkBorderX * slope;
+		f_cord_t xTravelCost = (dstToNextChunkBorderX * dstToNextChunkBorderX) + (yChange * yChange);
+	}
+
+	// temp connect last wire
+	if (add) chunks[chunk].getWiresForUpdating()[{start, end}] = {{x, y}, {(float)end.x, (float)end.y}};
+	else chunks[chunk].getWiresForUpdating().erase({start, end});
+	chunksToUpdate.insert(chunk);
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {

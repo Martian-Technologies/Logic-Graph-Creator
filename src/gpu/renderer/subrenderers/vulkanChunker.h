@@ -86,7 +86,7 @@ public:
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 
 private:
-	void getChunksOverConnection(Position p1, Position p2, std::vector<Position>& chunks);
+	void updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate);
 	
 private:
 	Circuit* circuit = nullptr;
