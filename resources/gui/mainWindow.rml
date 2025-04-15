@@ -38,31 +38,6 @@
 						</panel>
 					</tabset>
 				</div>
-
-				<!-- <div id="tab-container">
-						<template src="tab-selector"></template>
-					</div>
-					<div id="simulation-controls-container">
-						<template src="sim-controls"></template>	
-					</div>
-
-					<head>
-						<link type="text/rcss" href="../styles/circuitViewElement.rcss"/>
-					</head>
-
-					<body>
-						
-						< !-- each one corresponds to tab in tabSelector - ->
-						<div class="tab-content">
-							<div id="content1" class="content-section active"></div>
-							<div id="content2" class="content-section"></div>
-						</div>
-
-
-					</body>
-
-					<template src="circuit-view-element"></template> -->
-
 			</div>
 		</div>
 	</body>
