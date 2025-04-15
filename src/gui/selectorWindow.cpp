@@ -8,7 +8,7 @@ SelectorWindow::SelectorWindow(
 	ToolManagerManager* toolManagerManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent), blockDataManager(blockDataManager), toolManagerManager(toolManagerManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+) : menuTree(document, parent, false), blockDataManager(blockDataManager), toolManagerManager(toolManagerManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&SelectorWindow::updateList, this));
 	menuTree.setListener(std::bind(&SelectorWindow::updateSelected, this, std::placeholders::_1));
 	updateList();

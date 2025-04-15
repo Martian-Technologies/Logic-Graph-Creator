@@ -8,7 +8,7 @@
 class MenuTree {
 public:
 	typedef std::function<void(std::string)> ListenerFunction;
-	MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool startOpen = true);
+	MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool clickableName = true, bool startOpen = true);
 	void setListener(ListenerFunction listenerFunction) { this->listenerFunction = listenerFunction; }
 
 	// Modifying items
@@ -22,6 +22,7 @@ private:
 	ListenerFunction listenerFunction;
 	Rml::ElementDocument* document;
 	Rml::Element* parent;
+	bool clickableName;
 	bool startOpen;
 };
 

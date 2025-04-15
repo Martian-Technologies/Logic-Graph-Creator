@@ -83,15 +83,17 @@ body {
 }
 
 .menutree ul ul {
-	padding-left: 1rem;
+	padding-left: 0.5rem;
+}
+
+.menutree li span {
+	/* margin-right: 0.1rem; */
+	/* margin-left: 0.1rem; */
+	display: inline;
 }
 
 .menutree li {
 	cursor: pointer;
-}
-
-.menutree .parent::before {
-	content: ">";
 }
 
 .collapsed {

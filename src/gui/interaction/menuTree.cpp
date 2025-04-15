@@ -1,7 +1,8 @@
 #include "menuTree.h"
 #include "menuTreeListener.h"
+#include "eventPasser.h"
 
-MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool startOpen) : document(document), parent(parent), startOpen(startOpen) {
+MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool clickableName, bool startOpen) : document(document), parent(parent), clickableName(clickableName), startOpen(startOpen) {
 	parent->SetClass("menutree", true);
 }
 
@@ -68,9 +69,28 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	if (!(pathStr.empty())) pathStr += "/";
 	for (auto iter : pathsByRoot) {
 		Rml::ElementPtr newItem = document->CreateElement("li");
+		if (!(iter.second.empty())) {
+			Rml::ElementPtr arrow = document->CreateElement("span");
+			arrow->SetInnerRML(">");
+			arrow->AddEventListener("click", new MenuTreeListener());
+			// arrow->SetClass("arrow", true);
+			newItem->AppendChild(std::move(arrow));
+		}
+		if (!clickableName) newItem->AddEventListener("click", new MenuTreeListener(false, &listenerFunction));
+		else {
+			newItem->AddEventListener("click", new EventPasser(
+				[this](Rml::Event& event) {
+					event.StopPropagation();
+					Rml::Element* target = event.GetTargetElement();
+					if (listenerFunction)
+						listenerFunction(target->GetId().substr(0, target->GetId().size() - 5));
+				}
+			));
+		}
 		newItem->SetId(pathStr + iter.first + "-menu");
-		newItem->SetInnerRML(iter.first);
-		newItem->AddEventListener("click", new MenuTreeListener(&listenerFunction));
+		// Rml::ElementPtr text = document->CreateElement("li");
+		newItem->AppendChild(std::move(document->CreateTextNode(iter.first)));
+		// newItem->SetInnerRML(newItem->GetInnerRML() + " " + );
 		if (iter.second.empty()) {
 			listElement->AppendChild(std::move(newItem));
 		} else {
