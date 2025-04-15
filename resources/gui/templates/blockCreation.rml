@@ -1,0 +1,13 @@
+<template name="block-creation" content="content">
+
+	<head>
+		<link type="text/rcss" href="../styles/blockCreation.rcss"/>
+	</head>
+
+	<body>
+		<div  id="block-creation-view">
+			This will be creation UI!!!!
+		</div>
+	</body>
+	
+</template>

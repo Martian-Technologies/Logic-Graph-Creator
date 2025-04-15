@@ -5,7 +5,8 @@
 		<link type="text/rcss" href="styles/mainWindowStyle.rcss"/>
 		<link type="text/template" href="templates/circuitViewElement.rml"/>
 		<link type="text/template" href="templates/menuBar.rml"/>
-		<link type="text/template" href="templates/tabSelector.rml"/>
+		<link type="text/template" href="templates/simulationControlsBar.rml"/>
+		<link type="text/template" href="templates/blockCreation.rml"/>
 	</head>
 
 	<body>
@@ -18,21 +19,52 @@
 			<div id="middle-container">
 				<div id="left-sidebar-container"></div>
 
+				
 				<div id="center-container">
-					<div id="tab-container">
-						<template src="tab-selector"></template>
+					<div id="simulation-controls-container">
+						<template src="sim-controls"></template>
 					</div>
-
-					<div id="circuitview-container">
-						<template src="circuit-view-element"></template>
-					</div>
+					<div id="circuitview-container"> </div>
 				</div>
 
 				<div id="right-sidebar-container">
-
+					<tabset>
+						<tab>Eval Tree</tab>
+						<panel>
+							<div id="eval tree"></div>
+						</panel>
+						<tab>IC Editor</tab>
+						<panel>
+							<template src="block-creation"></template>
+						</panel>
+					</tabset>
 				</div>
-			</div>
 
+				<!-- <div id="tab-container">
+						<template src="tab-selector"></template>
+					</div>
+					<div id="simulation-controls-container">
+						<template src="sim-controls"></template>	
+					</div>
+
+					<head>
+						<link type="text/rcss" href="../styles/circuitViewElement.rcss"/>
+					</head>
+
+					<body>
+						
+						< !-- each one corresponds to tab in tabSelector - ->
+						<div class="tab-content">
+							<div id="content1" class="content-section active"></div>
+							<div id="content2" class="content-section"></div>
+						</div>
+
+
+					</body>
+
+					<template src="circuit-view-element"></template> -->
+
+			</div>
 		</div>
 	</body>
 </rml>

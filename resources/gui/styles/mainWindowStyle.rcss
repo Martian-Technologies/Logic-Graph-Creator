@@ -59,13 +59,27 @@ body {
     flex-direction: column;  /* Stacks children vertically */
 }
 
+#simulation-controls-container {
+	background-color: #0b0b0b;
+}
+
 /* Left Sidebar Styles */
 
 #left-sidebar-container {
 	flex-shrink: 0;
-	flex-basis: 8rem;
+	flex-basis: 12rem;
 	background-color: #1d1d1d;
 }
+
+/* Right Sidebar Styles */
+
+#right-sidebar-container {
+	flex-shrink: 0;
+	flex-basis: 12rem;
+	background-color: #1d1d1d;
+}
+
+/* Menu Tree Styles */
 
 .menutree {
 	display: flex;
@@ -91,13 +105,38 @@ body {
 .collapsed {
 	display: none;
 }
- 
+
 #circuitview-container {
 	flex: 1;
 }
 
-#right-sidebar-container {
-	flex-shrink: 0;
-	flex-basis: 8rem;
-	background-color: #1d1d1d;
+/* Display the panel container as a block element 180 pixels high; it will
+   be positioned below the tab container and take up the rest of the space
+   in the tabset. */
+
+tabset {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+tabset panels {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+tabset tabs tab {
+	padding: 4px 2px;
+	background-color: #0b0b0b;
+}
+
+tabset tabs  {
+	width: 100%;
+}
+
+tabset panels panel {
+	display: block;
+	width: 100%;
+	height: 100%;
 }

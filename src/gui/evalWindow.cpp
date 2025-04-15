@@ -1,14 +1,16 @@
 #include "evalWindow.h"
 #include "backend/dataUpdateEventManager.h"
 #include "backend/evaluator/evaluatorManager.h"
+#include "backend/circuit/circuitManager.h"
 #include "util/algorithm.h"
 
 EvalWindow::EvalWindow(
 	const EvaluatorManager* evaluatorManager,
+	const CircuitManager* circuitManager,
 	DataUpdateEventManager* dataUpdateEventManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager) {
+) : menuTree(document, parent), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
@@ -17,18 +19,23 @@ EvalWindow::EvalWindow(
 void EvalWindow::updateList() {
 	std::vector<std::vector<std::string>> paths;
 	for (auto pair : evaluatorManager->getEvaluators()) {
-		paths.push_back({pair.second->getEvaluatorName()});
-		auto& addressTree = pair.second->getAddressTree();
-		// addressTree.
+		std::vector<std::string> path({ pair.second->getEvaluatorName() });
+			makePaths(paths, path, pair.second->getAddressTree());
 	}
-	// for (unsigned int blockType = 1; blockType <= blockDataManager->maxBlockId(); blockType++) {
-		
-	// 	if (!blockDataManager->isPlaceable((BlockType)blockType)) continue;
-	// 	std::vector<std::string>& path = paths.emplace_back(1, "Blocks");
-	// 	stringSplitInto(blockDataManager->getPath((BlockType)blockType), '/', path);
-	// 	path.push_back(blockDataManager->getName((BlockType)blockType));
-	// }
 	menuTree.setPaths(paths);
+}
+
+void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree) {
+	auto& branches = addressTree.getBranchs();
+	if (branches.empty()) {
+		paths.push_back(path);
+	} else {
+		for (auto& pair : branches) {
+			path.push_back(circuitManager->getCircuit(pair.second.getContainerId())->getCircuitNameNumber());
+			makePaths(paths, path, pair.second);
+			path.pop_back();
+		}
+	}
 }
 
 void EvalWindow::updateSelected(std::string string) {

@@ -8,7 +8,7 @@
 #include "gui/interaction/menuTreeListener.h"
 #include "gui/rml/rmlSystemInterface.h"
 #include "gui/menuBar/menuManager.h"
-#include "gui/circuitView/tabsManager.h"
+#include "gui/circuitView/simControlsManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
 	
@@ -22,8 +22,8 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	rmlDocument->Show();
 
 	// eval menutree
-	Rml::Element* evalTreeParent = rmlDocument->GetElementById("right-sidebar-container");
-	evalWindow.emplace(&(backend->getEvaluatorManager()), backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
+	Rml::Element* evalTreeParent = rmlDocument->GetElementById("eval tree");
+	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
 
 	//  blocks/tools menutree
 	Rml::Element* toolTreeParent = rmlDocument->GetElementById("left-sidebar-container");
@@ -37,8 +37,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(rmlDocument);
 
-	// tabs
-	TabsManager* tabsManager = new TabsManager(rmlDocument);
+	// TabsManager* tabsManager = new TabsManager(document);	
+	// TabsManager* tabsManager = new TabsManager(document);	
+
+	// status of sim
+	SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);
 }
 
 Window::~Window() {
