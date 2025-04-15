@@ -6,8 +6,6 @@
 #include <thread>
 #include <condition_variable>
 #include <shared_mutex>
-#include <unordered_map>
-#include <vector>
 
 #include "logicState.h"
 #include "gateType.h"
