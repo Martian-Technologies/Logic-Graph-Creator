@@ -3,7 +3,7 @@
 
 #include <RmlUi/Core/RenderInterface.h>
 
-#include "gpu/renderer/rmlRenderer.h"
+#include "gpu/renderer/subrenderers/rmlRenderer.h"
 
 // This class is basically a pointer to a windowRenderer that rmlUi uses
 

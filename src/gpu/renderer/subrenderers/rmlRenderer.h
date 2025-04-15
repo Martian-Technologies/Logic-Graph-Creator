@@ -5,11 +5,11 @@
 #include <glm/ext/vector_float2.hpp>
 #include <RmlUi/Core/Vertex.h>
 
-#include "gpu/renderer/vulkanDescriptor.h"
+#include "gpu/vulkanDescriptor.h"
 #include "gpu/vulkanBuffer.h"
 #include "gpu/vulkanImage.h"
-#include "vulkanPipeline.h"
-#include "vulkanFrame.h"
+#include "gpu/renderer/vulkanPipeline.h"
+#include "gpu/renderer/vulkanFrame.h"
 
 // =========================== RML GEOMETRY =================================
 

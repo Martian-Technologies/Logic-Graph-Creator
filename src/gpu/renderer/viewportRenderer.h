@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #include "backend/circuitView/renderer/renderer.h"
-#include "gpu/renderer/vulkanChunkRenderer.h"
+#include "gpu/renderer/subrenderers/vulkanChunker.h"
 #include "gpu/renderer/vulkanFrame.h"
 
 struct WindowRenderer;
@@ -21,8 +21,9 @@ public:
 	ViewportRenderer(WindowRenderer* windowRenderer, Rml::Element* element);
 	~ViewportRenderer();
 
-	void initializeVulkan(VkRenderPass renderPass);
-	void destroyVulkan();
+	ViewportViewData getViewData();
+	inline VulkanChunker& getChunker() { return chunker; }
+	
 	void render(VulkanFrameData& frame);
 	
 public:
@@ -58,8 +59,9 @@ private:
 	Rml::Element* element;
 
 	// Vulkan
-	std::unique_ptr<VulkanChunkRenderer> chunkRenderer = nullptr;
+	VulkanChunker chunker;
 
+	// View data
 	ViewportViewData viewData;
 	std::mutex viewMux;
 };

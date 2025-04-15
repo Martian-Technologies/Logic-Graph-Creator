@@ -37,23 +37,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass) {
 	destroyShaderModule(wireFragShader);
 }
 
-VulkanChunkRenderer::~VulkanChunkRenderer() {
-	// temp way to delete all the buffers
-	// chunker.setCircuit(nullptr);
-}
-
-
-void VulkanChunkRenderer::setCircuit(Circuit* circuit) {
-	chunker.setCircuit(circuit);
-}
-
-void VulkanChunkRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	chunker.updateCircuit(diff);
-}
-
-void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds) {
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunks = chunker.getAllocations(viewBounds.first.snap(), viewBounds.second.snap());
-
+void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	frame.getChunkAllocations().insert(frame.getChunkAllocations().begin(), chunks.begin(), chunks.end());
 

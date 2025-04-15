@@ -12,33 +12,17 @@ ViewportRenderer::ViewportRenderer(WindowRenderer* windowRenderer, Rml::Element*
 
 ViewportRenderer::~ViewportRenderer() {
 	windowRenderer->deregisterViewportRenderInterface(this);
-	destroyVulkan();
 }
 
 
-void ViewportRenderer::initializeVulkan(VkRenderPass renderPass) {
-	chunkRenderer = std::make_unique<VulkanChunkRenderer>(renderPass);
-}
-
-void ViewportRenderer::destroyVulkan() {
-	chunkRenderer.reset();
-}
-
-
-void ViewportRenderer::render(VulkanFrameData& frame) {
-
-	viewMux.lock();
-	ViewportViewData frameViewData = viewData;
-	viewMux.unlock();
-	
-	
-	chunkRenderer->render(frame, frameViewData.viewport, frameViewData.viewportViewMat, frameViewData.viewBounds);
-	// logInfo("({}, {})", "Vulkan", element->GetBox().GetSize().x, element->GetBox().GetSize().y);
+ViewportViewData ViewportRenderer::getViewData() {
+	std::lock_guard<std::mutex> lock(viewMux);
+	return viewData;
 }
 
 
 void ViewportRenderer::setCircuit(Circuit* circuit) {
-	chunkRenderer->setCircuit(circuit);
+	chunker.setCircuit(circuit);
 }
 
 void ViewportRenderer::setEvaluator(Evaluator* evaluator) {
@@ -64,7 +48,7 @@ void ViewportRenderer::updateView(ViewManager* viewManager) {
 }
 
 void ViewportRenderer::updateCircuit(DifferenceSharedPtr diff) {
-	chunkRenderer->updateCircuit(diff);
+	chunker.updateCircuit(diff);
 }
 
 float ViewportRenderer::getLastFrameTimeMs() const {

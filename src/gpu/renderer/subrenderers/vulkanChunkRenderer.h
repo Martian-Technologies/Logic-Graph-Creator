@@ -70,15 +70,10 @@ struct WireVertex {
 class VulkanChunkRenderer {
 public:
 	VulkanChunkRenderer(VkRenderPass& renderPass);
-	~VulkanChunkRenderer();
 	
-	void setCircuit(Circuit* circuit);
-	void updateCircuit(DifferenceSharedPtr diff);
-	void render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::pair<FPosition, FPosition>& viewBounds);
+	void render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
-	VulkanChunker chunker;
-	
 	std::unique_ptr<Pipeline> blockPipeline = nullptr;
 	std::unique_ptr<Pipeline> wirePipeline = nullptr;
 };

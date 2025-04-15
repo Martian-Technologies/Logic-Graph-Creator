@@ -24,6 +24,9 @@ WindowSubrendererManager::WindowSubrendererManager(Swapchain* swapchain, std::ve
 
 	// rml
 	rmlRenderer = std::make_unique<RmlRenderer>(renderPass, viewDataLayout);
+
+	// chunk renderer
+	chunkRenderer = std::make_unique<VulkanChunkRenderer>(renderPass);
 }
 
 WindowSubrendererManager::~WindowSubrendererManager() {
@@ -111,7 +114,8 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 		// viewports
 		std::lock_guard<std::mutex> lock(viewportRenderersMux);
 		for (ViewportRenderer* viewportRenderer : viewportRenderers) {
-			viewportRenderer->render(frame);
+			ViewportViewData viewData = viewportRenderer->getViewData();
+			chunkRenderer->render(frame, viewData.viewport, viewData.viewportViewMat, viewportRenderer->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
 		}
 		
 		// rml rendering
@@ -126,8 +130,6 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 }
 
 void WindowSubrendererManager::registerViewportRenderInterface(ViewportRenderer *renderInterface) {
-	renderInterface->initializeVulkan(renderPass);
-	
 	std::lock_guard<std::mutex> lock(viewportRenderersMux);
 	viewportRenderers.insert(renderInterface);
 }

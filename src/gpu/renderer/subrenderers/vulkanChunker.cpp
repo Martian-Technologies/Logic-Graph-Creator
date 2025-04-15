@@ -1,6 +1,6 @@
 #include "vulkanChunker.h"
 
-#include "gpu/renderer/vulkanChunkRenderer.h"
+#include "vulkanChunkRenderer.h"
 #include "gpu/vulkanInstance.h"
 
 // VulkanChunkAllocation
