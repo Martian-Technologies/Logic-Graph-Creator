@@ -54,7 +54,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		wireVertices.reserve(wires.size() * 6);
 		for (const auto& wire : wires) {
 
-			constexpr float WIRE_WIDTH = 0.1f;
+			constexpr float WIRE_WIDTH = 0.03f;
 			
 			// get normalized direction
 			FVector dir = wire.second.end - wire.second.start;
@@ -67,15 +67,13 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			// reused position
 			FPosition vertexPos;
 
-			logInfo("wire");
-
 			// first triangle
-			// vertexPos = wire.second.start + right;
-			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
-			// vertexPos = wire.second.start - right;
-			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
-			// vertexPos = wire.second.end + right;
-			// wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			vertexPos = wire.second.start + right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			vertexPos = wire.second.start - right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			vertexPos = wire.second.end + right;
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
 			// second triangle
 			vertexPos = wire.second.start - right;
 			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
@@ -83,8 +81,6 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
 			vertexPos = wire.second.end + right;
 			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
-
-
 		}
 		
 		// upload wire vertices
@@ -164,23 +160,19 @@ void VulkanChunker::setCircuit(Circuit* circuit) {
 	chunks.clear();
 
 	if (circuit) {
-		// partition blocks into chunks
-		for (const auto& block : *(circuit->getBlockContainer())) {
-			Position position = block.second.getPosition();
-			chunks[getChunk(position)].getBlocksForUpdating()[position] = RenderedBlock(block.second.type(), block.second.getRotation(), block.second.size().dx, block.second.size().dy);
-		}
-
-		// allocate vulkan buffer for all chunks
 		// TODO - this should be improved to happen deferred
-		for (auto& chunk : chunks) {
-			chunk.second.updateAllocation();
-		}
+		Difference creationDiff = circuit->getBlockContainer()->getCreationDifference();
+		updateCircuit(&creationDiff);
 	}
 }
 
 void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	std::lock_guard<std::mutex> lock(mux);
+	
+	updateCircuit(diff.get());
+}
 
+void VulkanChunker::updateCircuit(Difference* diff) {
 	std::unordered_set<Position> chunksToUpdate;
 	
 	for (const auto& modification : diff->getModifications()) {
