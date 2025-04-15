@@ -44,16 +44,19 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 
 CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window), element(element) {
 	// create circuitView
-	renderer = std::make_unique<ViewportRenderer>(windowRenderer, element);
-	circuitView = std::make_unique<CircuitView>(renderer.get());
+	rendererInterface = std::make_unique<ViewportRenderInterface>(element);
+	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
 
+	// set initial view
 	int w = element->GetClientWidth();
 	int h = element->GetClientHeight();
 	int x = element->GetAbsoluteLeft() + element->GetClientLeft();
 	int y = element->GetAbsoluteTop() + element->GetClientTop();
-
 	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
 
+	// link render interface to windowRenderer
+	rendererInterface->linkToWindowRenderer(windowRenderer);
+	
 	// create keybind shortcuts and connect them
 	element->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
 	keybindHandler.addListener(

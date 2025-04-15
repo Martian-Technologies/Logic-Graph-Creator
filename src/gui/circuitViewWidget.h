@@ -4,7 +4,7 @@
 #include <RmlUi/Core.h>
 #include <SDL3/SDL.h>
 
-#include "gpu/renderer/viewportRenderer.h"
+#include "gpu/renderer/viewportRenderInterface.h"
 #include "gpu/renderer/windowRenderer.h"
 #include "sdl/sdlWindow.h"
 
@@ -39,7 +39,7 @@ private:
 	inline float getPixelsXPos() const;
 	inline float getPixelsYPos() const;
 
-	std::unique_ptr<ViewportRenderer> renderer;
+	std::unique_ptr<ViewportRenderInterface> rendererInterface;
 	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;

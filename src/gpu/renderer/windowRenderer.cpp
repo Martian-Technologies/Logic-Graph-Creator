@@ -158,10 +158,10 @@ void WindowRenderer::endRml() {
 	subrenderer->getRmlRenderer().endRmlRender();
 }
 
-void WindowRenderer::registerViewportRenderInterface(ViewportRenderer *renderInterface) {
+void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
 	subrenderer->registerViewportRenderInterface(renderInterface);
 }
 
-void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderer* renderInterface) {
+void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
 	subrenderer->deregisterViewportRenderInterface(renderInterface);
 }

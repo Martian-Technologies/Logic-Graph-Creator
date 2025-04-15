@@ -17,8 +17,6 @@ void MenuManager::Initialize(Rml::Element* element) {
 	Rml::ElementList items;
     Rml::ElementUtilities::GetElementsByClassName(items, element, "menu-item"); // idk 
 
-	logInfo("linking");
-
 	for (size_t i = 0; i < items.size(); ++i) {
 		Rml::Element* item = items[i];
 		item->AddEventListener("click", new MenuBarListener(this, static_cast<int>(i)));

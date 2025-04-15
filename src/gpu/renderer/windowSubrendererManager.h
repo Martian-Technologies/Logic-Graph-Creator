@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "gpu/renderer/viewportRenderer.h"
+#include "gpu/renderer/viewportRenderInterface.h"
 #include "gpu/renderer/vulkanSwapchain.h"
 #include "gpu/vulkanDescriptor.h"
 #include "subrenderers/rmlRenderer.h"
@@ -17,8 +17,8 @@ public:
 	void renderCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);
 
 	// viewport renderers
-	void registerViewportRenderInterface(ViewportRenderer* renderInterface);
-	void deregisterViewportRenderInterface(ViewportRenderer* renderInterface);
+	void registerViewportRenderInterface(ViewportRenderInterface* renderInterface);
+	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
 
 	// getters
 	inline VkRenderPass getRenderPass() { return renderPass; }
@@ -36,7 +36,7 @@ private:
 	// subrenderers
 	std::unique_ptr<RmlRenderer> rmlRenderer = nullptr;
 	std::unique_ptr<VulkanChunkRenderer> chunkRenderer = nullptr;
-	std::set<ViewportRenderer*> viewportRenderers;
+	std::set<ViewportRenderInterface*> viewportRenderers;
 	std::mutex viewportRenderersMux;
 
 	// references

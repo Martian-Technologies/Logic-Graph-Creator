@@ -1,5 +1,5 @@
-#ifndef viewportRenderer_h
-#define viewportRenderer_h
+#ifndef viewportRenderInterface_h
+#define viewportRenderInterface_h
 
 #include <RmlUi/Core/Element.h>
 #include <vulkan/vulkan.h>
@@ -16,11 +16,13 @@ struct ViewportViewData {
 	VkViewport viewport;
 };
 
-class ViewportRenderer : public Renderer {
+class ViewportRenderInterface : public Renderer {
 public:
-	ViewportRenderer(WindowRenderer* windowRenderer, Rml::Element* element);
-	~ViewportRenderer();
+	ViewportRenderInterface(Rml::Element* element);
+	~ViewportRenderInterface();
 
+	void linkToWindowRenderer(WindowRenderer* windowRenderer);
+	
 	ViewportViewData getViewData();
 	inline VulkanChunker& getChunker() { return chunker; }
 	
@@ -55,11 +57,11 @@ private:
 
 private:
 	// From the UI Side
-	WindowRenderer* windowRenderer;
+	WindowRenderer* linkedWindowRenderer = nullptr;
 	Rml::Element* element;
 
 	// Vulkan
-	VulkanChunker chunker;
+	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view
 
 	// View data
 	ViewportViewData viewData;
