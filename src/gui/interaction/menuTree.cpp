@@ -16,12 +16,20 @@ void MenuTree::setPaths(const std::vector<std::string>& paths) {
 
 
 void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml::Element* current) {
+	Rml::ElementList elements;
+	current->GetElementsByTagName(elements, "div");
+	if (elements.empty()) {
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		elements.push_back(current->AppendChild(std::move(newDiv)));
+	}
+	Rml::Element* div = elements[0];
+
 	if (paths.empty()) {
 		current->SetClass("parent", false);
-		Rml::ElementList elements;
-		current->GetElementsByTagName(elements, "ul");
+		
+		div->GetElementsByTagName(elements, "ul");
 		if (elements.empty()) return;
-		current->RemoveChild(elements[0]);
+		div->RemoveChild(elements[0]);
 		return;
 	}
 	std::map<std::string, std::vector<std::vector<std::string>>> pathsByRoot;
@@ -36,14 +44,14 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 		}
 	}
 
-	Rml::ElementList elements;
 	Rml::Element* listElement;
-	current->GetElementsByTagName(elements, "ul");
+	elements.clear();
+	div->GetElementsByTagName(elements, "ul");
 	if (elements.empty()) {
 		Rml::ElementPtr newList = document->CreateElement("ul");
 		newList->SetClass("collapsed", !startOpen && current != parent);
-		current->AppendChild(std::move(newList));
-		current->GetElementsByTagName(elements, "ul");
+		div->AppendChild(std::move(newList));
+		div->GetElementsByTagName(elements, "ul");
 		listElement = elements[0];
 	} else {
 		listElement = elements[0];
@@ -69,11 +77,11 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	if (!(pathStr.empty())) pathStr += "/";
 	for (auto iter : pathsByRoot) {
 		Rml::ElementPtr newItem = document->CreateElement("li");
-		if (!(iter.second.empty())) {
+		if (!iter.second.empty()) {
+			newItem->SetClass("parent", true);
 			Rml::ElementPtr arrow = document->CreateElement("span");
 			arrow->SetInnerRML(">");
 			arrow->AddEventListener("click", new MenuTreeListener());
-			// arrow->SetClass("arrow", true);
 			newItem->AppendChild(std::move(arrow));
 		}
 		if (!clickableName) newItem->AddEventListener("click", new MenuTreeListener(false, &listenerFunction));
@@ -88,14 +96,13 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 			));
 		}
 		newItem->SetId(pathStr + iter.first + "-menu");
-		// Rml::ElementPtr text = document->CreateElement("li");
-		newItem->AppendChild(std::move(document->CreateTextNode(iter.first)));
-		// newItem->SetInnerRML(newItem->GetInnerRML() + " " + );
-		if (iter.second.empty()) {
-			listElement->AppendChild(std::move(newItem));
-		} else {
-			newItem->SetClass("parent", true);
-			setPaths(iter.second, listElement->AppendChild(std::move(newItem)));
+		Rml::ElementPtr text = document->CreateElement("li");
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		newDiv->AppendChild(std::move(document->CreateTextNode(iter.first)));
+		newItem->AppendChild(std::move(newDiv));
+		Rml::Element* newItem2 = listElement->AppendChild(std::move(newItem));
+		if (!iter.second.empty()) {
+			setPaths(iter.second, newItem2);
 		}
 	}
 }

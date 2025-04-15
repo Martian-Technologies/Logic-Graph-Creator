@@ -4,12 +4,14 @@ MenuTreeListener::MenuTreeListener(bool goUp, ListenerFunction* listenerFunction
 
 void MenuTreeListener::ProcessEvent(Rml::Event& event) {
 	event.StopPropagation();
-	Rml::Element* target = event.GetTargetElement();
+	Rml::Element* target = event.GetCurrentElement();
 	if (goUp) target = target->GetParentNode();
-	logInfo(goUp);
 	// collapsing submenus
 	if (target->GetClassNames().find("parent") != std::string::npos) {
 		Rml::ElementList elements;
+		target->GetElementsByTagName(elements, "div");
+		target = elements[0];
+		elements.clear();
 		target->GetElementsByTagName(elements, "ul");
 		if (!elements.empty()) {
 			Rml::Element* sublist = elements[0];

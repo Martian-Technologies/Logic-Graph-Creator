@@ -162,6 +162,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this](Rml::Event& event) {
 			// // grab focus so key inputs work without clicking
 			// setFocus(Qt::MouseFocusReason);
+			this->parent->Focus();
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			Vec2 viewPos = pixelsToView(point);
 			if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;

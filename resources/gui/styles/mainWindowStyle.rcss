@@ -87,9 +87,13 @@ body {
 }
 
 .menutree li span {
-	/* margin-right: 0.1rem; */
-	/* margin-left: 0.1rem; */
+	padding: 0em 0.2em;
 	display: inline;
+	vertical-align: top;
+}
+
+.menutree li div {
+	display: inline-block;
 }
 
 .menutree li {
@@ -121,7 +125,7 @@ tabset panels {
 }
 
 tabset tabs tab {
-	padding: 4px 2px;
+	margin: 0.2em;
 	background-color: #0b0b0b;
 }
 
