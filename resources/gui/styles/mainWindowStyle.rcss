@@ -3,7 +3,7 @@
 	padding: 0;
 	box-sizing: border-box;
 	font-family: Monaspace Argon;
-	font-size: 20px;
+	font-size: 12px;
 }
 
 /* Main Container Styles */
