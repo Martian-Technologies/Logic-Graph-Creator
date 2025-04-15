@@ -67,15 +67,23 @@ void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputG
 								 simulator_gate_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
-	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid())
-		throw std::out_of_range("connectGates: sourceGate index out of range or invalid");
-	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid())
-		throw std::out_of_range("connectGates: targetGate index out of range or invalid");
+	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid()) {
+		logError("connectGates: sourceGate index out of range or invalid", "Simulator");
+		return;
+	}
+	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid()) {
+		logError("connectGates: targetGate index out of range or invalid", "Simulator");
+		return;
+	}
 
-	if (outputGroup >= gates[sourceGate].getOutputGroupCount())
-		throw std::out_of_range("connectGates: outputGroup index out of range");
-	if (inputGroup >= gates[targetGate].getInputGroupCount())
-		throw std::out_of_range("connectGates: inputGroup index out of range");
+	if (outputGroup >= gates[sourceGate].getOutputGroupCount()) {
+		logError("connectGates: outputGroup index out of range", "Simulator");
+		return;
+	}
+	if (inputGroup >= gates[targetGate].getInputGroupCount()) {
+		logError("connectGates: inputGroup index out of range", "Simulator");
+		return;
+	}
 
 	GateConnection connection(sourceGate, outputGroup);
 
@@ -96,14 +104,20 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 	simulator_gate_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
-	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid())
-		throw std::out_of_range("disconnectGates: sourceGate index out of range or invalid");
-	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid())
-		throw std::out_of_range("disconnectGates: targetGate index out of range or invalid");
+	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid()) {
+		logError("disconnectGates: sourceGate index out of range or invalid", "Simulator");
+		return;
+	}
+	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid()) {
+		logError("disconnectGates: targetGate index out of range or invalid", "Simulator");
+		return;
+	}
 
 	if (outputGroup >= gates[sourceGate].getOutputGroupCount() ||
-		inputGroup >= gates[targetGate].getInputGroupCount())
+		inputGroup >= gates[targetGate].getInputGroupCount()) {
+		logWarning("disconnectGates: outputGroup or inputGroup index out of range", "Simulator");
 		return;
+	}
 
 	GateConnection connection(sourceGate, outputGroup);
 
@@ -143,8 +157,10 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 
 void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
-		throw std::out_of_range("decomissionGate: gate index out of range or already decommissioned");
+	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
+		logError("decomissionGate: gate index out of range or already decommissioned", "Simulator");
+		return;
+	}
 
 	for (size_t groupIdx = 0; groupIdx < gates[gate].inputGroups.size(); ++groupIdx) {
 		auto& inputGroup = gates[gate].inputGroups[groupIdx];
@@ -531,11 +547,15 @@ void LogicSimulator::swapStates() {
 
 void LogicSimulator::setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
-		throw std::out_of_range("setState: gate index out of range or invalid");
+	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
+		logError("setState: gate index out of range or invalid", "Simulator");
+		return;
+	}
 
-	if (outputGroup >= gates[gate].getOutputGroupCount())
-		throw std::out_of_range("setState: outputGroup index out of range");
+	if (outputGroup >= gates[gate].getOutputGroupCount()) {
+		logError("setState: outputGroup index out of range", "Simulator");
+		return;
+	}
 
 	gates[gate].statesA[outputGroup] = state;
 	gates[gate].statesB[outputGroup] = state;
@@ -554,11 +574,15 @@ void LogicSimulator::reserveGates(unsigned int numGates) {
 
 logic_state_t LogicSimulator::getState(simulator_gate_id_t gate, size_t outputGroup) const {
 	std::shared_lock<std::shared_mutex> lock(simulationMutex);
-	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid())
-		throw std::out_of_range("getState: gate index out of range or invalid");
+	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
+		logError("getState: gate index out of range or invalid", "Simulator");
+		return logic_state_t::UNDEFINED;
+	}
 
-	if (outputGroup >= gates[gate].getOutputGroupCount())
-		throw std::out_of_range("getState: outputGroup index out of range");
+	if (outputGroup >= gates[gate].getOutputGroupCount()) {
+		logError("getState: outputGroup index out of range", "Simulator");
+		return logic_state_t::UNDEFINED;
+	}
 
 	return gates[gate].statesA[outputGroup];
 }
