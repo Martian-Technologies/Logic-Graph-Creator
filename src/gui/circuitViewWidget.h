@@ -24,6 +24,8 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(bool state);
 	void setSimSpeed(double speed);
+
+	void handleResize();
 	
 	void load();
 	void save();

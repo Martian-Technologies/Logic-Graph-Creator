@@ -52,11 +52,6 @@ Window::~Window() {
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
-
-		// let renderer know we if resized the window
-		if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-			renderer.resize({event.window.data1, event.window.data2});
-		}
 		if (event.type == SDL_EVENT_DROP_FILE) {
 			circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(event.drop.data);
 			if (id == 0) {
@@ -75,6 +70,11 @@ bool Window::recieveEvent(SDL_Event& event) {
 		// send event to RML
 		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);
 
+		// let renderer know we if resized the window
+		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+			renderer.resize({event.window.data1, event.window.data2});
+		}
+
 		return true;
 	}
 	return false;
@@ -82,6 +82,8 @@ bool Window::recieveEvent(SDL_Event& event) {
 
 void Window::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
+
+	circuitViewWidget->handleResize();
 	
 	renderer.prepareForRml(renderInterface);
 	rmlContext->Render();

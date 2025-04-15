@@ -98,17 +98,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
 	);
 
-	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
-		[this](Rml::Event& event) {
-			int w = this->element->GetClientWidth();
-			int h = this->element->GetClientHeight();
-			int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
-			int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
-
-			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-		}
-	));
-
 	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
@@ -263,6 +252,14 @@ void CircuitViewWidget::load() {
 	SDL_ShowOpenFileDialog(LoadCallback, this, window, filter, 0, nullptr, true);
 }
 
+void CircuitViewWidget::handleResize() {
+	int w = this->element->GetClientWidth();
+	int h = this->element->GetClientHeight();
+	int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
+	int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
+
+	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+}
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
 	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());
