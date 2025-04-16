@@ -103,6 +103,8 @@ struct std::formatter<Vector> : std::formatter<std::string> {
 struct FVector {
 	inline FVector() : dx(0.0f), dy(0.0f) { }
 	inline FVector(f_cord_t dx, f_cord_t dy) : dx(dx), dy(dy) { }
+	// allows the easy creation of fvectors that are all the same value
+	inline FVector(f_cord_t d) : dx(d), dy(d) { }
 	inline Vector snap() const;
 
 	inline std::string toString() const { return "<" + std::to_string(dx) + ", " + std::to_string(dy) + ">"; }
@@ -332,6 +334,22 @@ inline Vector reverseRotateVectorWithArea(const Vector& vector, const Vector& si
 	case Rotation::NINETY: return Vector(vector.dy, size.dy - vector.dx - 1);
 	case Rotation::ONE_EIGHTY: return Vector(size.dx - vector.dx - 1, size.dy - vector.dy - 1);
 	case Rotation::TWO_SEVENTY: return Vector(size.dx - vector.dy - 1, vector.dx);
+	default: return vector;
+	}
+}
+inline FVector rotateVectorWithArea(const FVector& vector, const FVector& size, Rotation rotationAmount) {
+	switch (rotationAmount) {
+	case Rotation::NINETY: return FVector(size.dy - vector.dy - 1.f, vector.dx);
+	case Rotation::ONE_EIGHTY: return FVector(size.dx - vector.dx - 1.f, size.dy - vector.dy - 1.f);
+	case Rotation::TWO_SEVENTY: return FVector(vector.dy, size.dx - vector.dx - 1.f);
+	default: return vector;
+	}
+}
+inline FVector reverseRotateVectorWithArea(const FVector& vector, const FVector& size, Rotation rotationAmount) {
+	switch (rotationAmount) {
+	case Rotation::NINETY: return FVector(vector.dy, size.dy - vector.dx - 1.f);
+	case Rotation::ONE_EIGHTY: return FVector(size.dx - vector.dx - 1.f, size.dy - vector.dy - 1.f);
+	case Rotation::TWO_SEVENTY: return FVector(size.dx - vector.dy - 1.f, vector.dx);
 	default: return vector;
 	}
 }

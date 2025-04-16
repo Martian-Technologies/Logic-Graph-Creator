@@ -421,34 +421,16 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 
 void SdlRenderer::renderBlock(BlockType type, Position position, Rotation rotation, logic_state_t state) {
 	// block
-	Vector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type));
+	FVector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type).free());
 
-	Vector blockOriginOffset = rotateVectorWithArea(
-		Vector(0),
+	FVector blockOriginOffset = rotateVectorWithArea(
+		blockSize / 2.f - FVector(0.5f), 
 		blockSize,
 		rotation
-	);
+	) - blockSize / 2.f + FVector(0.5f);
 
-	FVector shift;
-	switch (rotation) {
-	case Rotation::ZERO:
-		break;
-	case Rotation::NINETY:
-		shift.dx = -0.5f;
-		shift.dy = -0.5f;
-		break;
-	case Rotation::ONE_EIGHTY:
-		shift.dx = 0;
-		shift.dy = -1;
-		break;
-	case Rotation::TWO_SEVENTY:
-		shift.dx = 0.5f;
-		shift.dy = -0.5f;
-		break;
-	}
-
-	SDL_FPoint size = gridToSDL(blockSize.free());
-	SDL_FPoint rotationPoint = gridToSDL((position + blockOriginOffset).free() + shift);
+	SDL_FPoint size = gridToSDL(blockSize);
+	SDL_FPoint rotationPoint = gridToSDL(position.free() + blockOriginOffset);
 	// get tile set coordinate
 	if (type > 13) {
 		type = BlockType::LIGHT;
@@ -462,25 +444,12 @@ void SdlRenderer::renderBlock(BlockType type, Position position, Rotation rotati
 	tileSetRect.w = tileSize.x;
 	tileSetRect.h = tileSize.y;
 
-
 	SDL_FRect dstrect;
 	dstrect.x = rotationPoint.x + x;
 	dstrect.y = rotationPoint.y + y;
 	dstrect.w = size.x;
 	dstrect.h = size.y;
 	SDL_RenderTextureRotated(sdlRenderer, tileSet, &tileSetRect, &dstrect, getDegrees(rotation), nullptr, SDL_FLIP_NONE);
-
-
-	// // rotate and position sdlRenderer to center of block
-	// sdlRenderer->translate(rotationPoint);
-	// sdlRenderer->rotate(getDegrees(rotation));
-
-	// // draw the block from the center
-	// sdlRenderer->drawPixmap(drawRect, tileSet, tileSetRect);
-
-	// // undo transformations
-	// sdlRenderer->rotate(-getDegrees(rotation));
-	// sdlRenderer->translate(-rotationPoint);
 }
 
 SDL_Color SdlRenderer::getStateColor(logic_state_t state) {
