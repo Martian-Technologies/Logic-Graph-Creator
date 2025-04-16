@@ -141,7 +141,8 @@ void SdlRenderer::render() {
 		std::vector<const Block*> blocks;
 		for (const auto& block : *(circuit->getBlockContainer())) {
 			if (areaWithinArea(block.second.getPosition(), block.second.getLargestPosition(), topLeftBound, bottomRightBound)) {
-				blockAddresses.push_back(Address(block.second.getPosition()));
+				blockAddresses.push_back(address);
+				blockAddresses.back().addBlockId(block.second.getPosition());
 				blocks.push_back(&(block.second));
 			}
 		}

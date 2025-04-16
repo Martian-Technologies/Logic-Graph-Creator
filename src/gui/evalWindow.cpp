@@ -1,16 +1,19 @@
 #include "evalWindow.h"
-#include "backend/dataUpdateEventManager.h"
 #include "backend/evaluator/evaluatorManager.h"
+#include "backend/dataUpdateEventManager.h"
 #include "backend/circuit/circuitManager.h"
+#include "circuitViewWidget.h"
+#include "backend/backend.h"
 #include "util/algorithm.h"
 
 EvalWindow::EvalWindow(
 	const EvaluatorManager* evaluatorManager,
 	const CircuitManager* circuitManager,
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget,
 	DataUpdateEventManager* dataUpdateEventManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager) {
+) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager), circuitViewWidget(circuitViewWidget) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
@@ -39,8 +42,27 @@ void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::ve
 }
 
 void EvalWindow::updateSelected(std::string string) {
-	logInfo(string);
-	// std::vector parts = stringSplit(string, '/');
+	std::vector<std::string> parts = stringSplit(string, '/');
+	std::stringstream evalName(parts.front());
+	std::string str;
+	evaluator_id_t evalId;
+	evalName >> str >> evalId;
+	Address address;
+	for (unsigned int i = 1; i < parts.size(); i++) {
+		std::string part = parts[i];
+		unsigned int index = part.size();
+		while (index != 0 && part[index-1] != '(') index--;
+		std::stringstream posString(part.substr(index, part.size()-index-1));
+		Position position;
+		char c;
+		posString >> position.x >> c >> position.y;
+		logInfo(position.toString());
+		address.addBlockId(position);
+	}
+
+	CircuitView* circuitView = circuitViewWidget->getCircuitView();
+	circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
+
 	// if (parts.size() <= 1) return;
 	// if (parts[0] == "Blocks") {
 	// 	BlockType blockType = blockDataManager->getBlockType(string.substr(7, string.size() - 7));

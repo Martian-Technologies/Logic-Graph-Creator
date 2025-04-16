@@ -19,7 +19,7 @@ public:
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
 	inline BlockDataManager* getBlockDataManager() { return getCircuitManager().getBlockDataManager(); }
-	
+
 	inline CircuitManager& getCircuitManager() { return circuitManager; }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }
 
@@ -29,7 +29,7 @@ public:
 	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
 
 	inline DataUpdateEventManager* getDataUpdateEventManager() { return &dataUpdateEventManager; }
-	
+
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
 
@@ -47,7 +47,7 @@ public:
 
 private:
 	std::set<CircuitView*> circuitViews;
-	
+
 	SharedCopiedBlocks clipboard = nullptr;
 
 	DataUpdateEventManager dataUpdateEventManager; // this needs to be constructed first

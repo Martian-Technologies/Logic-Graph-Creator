@@ -1,4 +1,5 @@
 #include "circuitView.h"
+#include "backend/backend.h"
 
 CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&eventRegister, renderer, this) {
 	renderer->updateView(&viewManager);
@@ -7,6 +8,11 @@ CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&
 }
 
 void CircuitView::setBackend(Backend* backend) {
+	if (this->backend) {
+		Backend* oldBackend = this->backend;
+		this->backend = nullptr;
+		oldBackend->unlinkCircuitView(this);
+	}
 	this->backend = backend;
 }
 
@@ -26,6 +32,11 @@ void CircuitView::setCircuit(SharedCircuit circuit) {
 	if (circuit) {
 		circuit->connectListener(this, std::bind(&CircuitView::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
 	}
+}
+
+void CircuitView::setAddress(const Address& address) {
+	this->address = address;
+	renderer->setAddress(address);
 }
 
 void CircuitView::viewChanged() {

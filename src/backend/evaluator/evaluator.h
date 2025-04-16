@@ -26,7 +26,7 @@ public:
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(addressTree.getContainerId())->getCircuitNameNumber() + ")"; }
 
-	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address).getContainerId(); }
+	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address)->getContainerId(); }
 
 	void setPause(bool pause);
 	void reset();

@@ -19,6 +19,7 @@ public:
 	// updating
 	void setCircuit(Circuit* circuit) override;
 	void setEvaluator(Evaluator* evaluator) override;
+	void setAddress(const Address& address) override { this->address = address; }
 
 	void updateView(ViewManager* viewManager) override;
 	virtual void updateCircuit(DifferenceSharedPtr diff) override;
@@ -65,6 +66,7 @@ private:
 	ViewManager* viewManager;
 	SDL_Texture* tileSet;
 	SDL_Renderer* sdlRenderer;
+	Address address;
 	std::unique_ptr<TileSetInfo> tileSetInfo;
 
 	// Elements

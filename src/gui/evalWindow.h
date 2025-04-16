@@ -7,13 +7,14 @@
 
 class EvaluatorManager;
 class CircuitManager;
-
+class CircuitViewWidget;
 
 class EvalWindow {
 public:
 	EvalWindow(
 		const EvaluatorManager* evaluatorManager,
 		const CircuitManager* circuitManager,
+		std::shared_ptr<CircuitViewWidget> circuitViewWidget,
 		DataUpdateEventManager* dataUpdateEventManager,
 		Rml::ElementDocument* document,
 		Rml::Element* parent
@@ -29,6 +30,7 @@ private:
 
 	MenuTree menuTree;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	const EvaluatorManager* evaluatorManager;
 	const CircuitManager* circuitManager;
 

@@ -47,13 +47,9 @@ bool Backend::unlinkCircuitView(CircuitView* circuitView) {
 bool Backend::linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t circuitId) {
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
 	if (circuit) {
-		if (circuitView->getBackend() != this) {
-			circuitView->setBackend(this);
-			circuitView->setEvaluator(nullptr);
-		} else if (true) { // TODO: check that circuitView address is in the eval
-			circuitView->setEvaluator(nullptr);
-		}
-
+		if (circuitView->getCircuit() == circuit.get()) return true;
+		linkCircuitView(circuitView);
+		circuitView->setEvaluator(nullptr);
 		circuitView->setCircuit(circuit);
 		return true;
 	}
@@ -61,17 +57,14 @@ bool Backend::linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t 
 }
 
 bool Backend::linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_id_t evalId, const Address& address) {
-	if (!circuitView->getCircuit()) return false;
+	// if (!circuitView->getCircuit()) return false;
 
 	SharedEvaluator evaluator = evaluatorManager.getEvaluator(evalId);
 	if (evaluator) {
-		if (
-			(circuitView->getBackend() != this) ||
-			(evaluator->getCircuitId(address) != circuitView->getCircuit()->getCircuitId())
-		) {
-			return false;
-		}
+		circuit_id_t circuitId = evaluator->getCircuitId(address);
+		linkCircuitViewWithCircuit(circuitView, circuitId);
 		circuitView->setEvaluator(evaluator);
+		circuitView->setAddress(address);
 		return true;
 	}
 	return false;

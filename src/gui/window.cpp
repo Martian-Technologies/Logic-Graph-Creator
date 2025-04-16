@@ -24,18 +24,18 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// show rmlUi document
 	document->Show();
 
-	// eval menutree
-	Rml::Element* evalTreeParent = document->GetElementById("eval-tree");
-	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), backend->getDataUpdateEventManager(), document, evalTreeParent);
-
-	//  blocks/tools menutree
-	Rml::Element* toolTreeParent = document->GetElementById("selection-tree");
-	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
-
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = document->GetElementById("circuitview-container");
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, document, circuitViewParent, sdlWindow.getHandle(), sdlRenderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
+
+	// eval menutree
+	Rml::Element* evalTreeParent = document->GetElementById("eval-tree");
+	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), document, evalTreeParent);
+
+	//  blocks/tools menutree
+	Rml::Element* toolTreeParent = document->GetElementById("selection-tree");
+	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
 
 	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(document);

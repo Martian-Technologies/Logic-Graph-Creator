@@ -89,7 +89,7 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 			newItem->AddEventListener("click", new EventPasser(
 				[this](Rml::Event& event) {
 					event.StopPropagation();
-					Rml::Element* target = event.GetTargetElement();
+					Rml::Element* target = event.GetCurrentElement();
 					if (listenerFunction)
 						listenerFunction(target->GetId().substr(0, target->GetId().size() - 5));
 				}

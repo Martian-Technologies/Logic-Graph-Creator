@@ -81,7 +81,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const bool exists = addressTree.hasValue(address);
 				if (!exists) { // integrated circuit
 					const auto branch = addressTree.getBranch(address);
-					const auto allValues = branch.getAllValues();
+					const auto allValues = branch->getAllValues();
 					for (const auto value : allValues) {
 						logicSimulatorWrapper.deleteGate(value.gateId);
 					}
@@ -118,8 +118,8 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
 				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
 				for (const auto& address : addresses) {
-					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
-					makeEditInPlace(integratedDifference, integratedCircuitId, branch, true);
+					const auto branch = addressTree.getBranch(address);
+					makeEditInPlace(integratedDifference, integratedCircuitId, *branch, true);
 				}
 			}
 			break;
@@ -207,7 +207,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 	}
 	// custom circuits here
 	const auto branch = addressTree.getBranch(address);
-	const circuit_id_t integratedCircuitId = branch.getContainerId();
+	const circuit_id_t integratedCircuitId = branch->getContainerId();
 	const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
 	const BlockDataManager* blockDataManager = circuitManager.getBlockDataManager();
 	const CircuitBlockDataManager* circuitBlockDataManager = circuitManager.getCircuitBlockDataManager();
@@ -223,7 +223,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 	}
 	connection_end_id_t connectionId = 0;
 	if (trackInput) {
-		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch.getRotation());
+		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch->getRotation());
 		if (inputConnectionIdData.second) {
 			connectionId = inputConnectionIdData.first;
 		}
@@ -232,7 +232,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 		}
 	}
 	else {
-		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch.getRotation());
+		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch->getRotation());
 		if (outputConnectionIdData.second) {
 			connectionId = outputConnectionIdData.first;
 		}
@@ -245,7 +245,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 		logError("getConnectionPoint: connection position is null");
 		return { 0, 0 };
 	}
-	return { branch.getValue(*connectionPosition).gateId, 0 };
+	return { branch->getValue(*connectionPosition).gateId, 0 };
 }
 
 GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
