@@ -147,7 +147,7 @@ void SystemInterface_SDL::DeactivateKeyboard()
 	}
 }
 
-bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev)
+bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev, float windowScalingSize)
 {
 #if SDL_MAJOR_VERSION >= 3
 	#define RMLSDL_WINDOW_EVENTS_BEGIN
@@ -195,7 +195,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	{
 	case event_mouse_motion:
 	{
-		result = context->ProcessMouseMove(int(ev.motion.x*2.f), int(ev.motion.y*2.f), GetKeyModifierState());
+		result = context->ProcessMouseMove(int(ev.motion.x*windowScalingSize), int(ev.motion.y*windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_mouse_down:
@@ -212,7 +212,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	break;
 	case event_mouse_wheel:
 	{
-		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x*2.f, -ev.wheel.y*2.f), GetKeyModifierState());
+		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x*windowScalingSize, -ev.wheel.y*windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_key_down:

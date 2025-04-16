@@ -12,12 +12,14 @@ public:
 
 	bool isThisMyEvent(const SDL_Event& event);
 
+	inline float getWindowScalingSize() const { return windowScalingSize; }
 	// temp
 	inline SDL_Window* getHandle() { return handle; }
 
 private:
 	// TODO - smart pointer with custom deleter?
 	SDL_Window* handle;
+	float windowScalingSize;
 };
 
 #endif

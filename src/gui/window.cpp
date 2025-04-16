@@ -55,7 +55,7 @@ Window::~Window() {
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
-		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);
+		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event, getSdlWindowScalingSize());
 
 		return true;
 	}
