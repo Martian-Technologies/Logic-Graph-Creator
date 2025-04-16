@@ -2,5 +2,30 @@
     display: block;
 	height: 100%;
 	width: 100%;
-    background-color: #ffffff;
+}
+
+#block-creation-form {
+	display: block;
+	background-color: #2e2e2e;
+	border-radius: 0.3em;
+	margin: 1em 0.1em;
+}
+
+#block-creation-form input {
+	/* display: inline-block; */
+	background-color: #151515;
+}
+/*
+.form-label {
+	display: inline-block;
+	background-color: #3b3b3b;
+	margin: 1em 0.1em;
+} */
+
+.name {
+	width: 11rem;
+}
+
+.number {
+	width: 2.4rem;
 }
