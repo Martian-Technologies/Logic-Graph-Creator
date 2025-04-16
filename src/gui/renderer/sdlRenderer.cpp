@@ -53,6 +53,124 @@ void SDL_DrawThickLine(SDL_Renderer* renderer, float x1, float y1, float x2, flo
 	SDL_RenderGeometry(renderer, NULL, verts, 4, indices, 6);
 }
 
+#include <SDL3/SDL.h>
+#include <math.h>
+
+void drawCircleGeometry(SDL_Renderer* renderer, float cx, float cy, float radius, int segments, const SDL_Color& color) {
+    // Allocate memory for vertices
+    SDL_Vertex* verts = (SDL_Vertex*)SDL_malloc(sizeof(SDL_Vertex) * (segments + 2));
+    if (!verts) return;
+
+    // Center vertex
+    verts[0].position.x = cx;
+    verts[0].position.y = cy;
+	verts[0].color.r = ((float)color.r) / 255.f;
+	verts[0].color.g = ((float)color.g) / 255.f;
+	verts[0].color.b = ((float)color.b) / 255.f;
+	verts[0].color.a = ((float)color.a) / 255.f;
+    verts[0].tex_coord.x = 0;
+    verts[0].tex_coord.y = 0;
+
+    // Circle points
+    for (int i = 0; i <= segments; ++i) {
+        float theta = ((float)i / segments) * (2.0f * M_PI);
+        float x = cx + radius * cosf(theta);
+        float y = cy + radius * sinf(theta);
+
+        verts[i + 1].position.x = x;
+        verts[i + 1].position.y = y;
+		verts[i + 1].color.r = ((float)color.r) / 255.f;
+		verts[i + 1].color.g = ((float)color.g) / 255.f;
+		verts[i + 1].color.b = ((float)color.b) / 255.f;
+		verts[i + 1].color.a = ((float)color.a) / 255.f;
+        verts[i + 1].tex_coord.x = 0;
+        verts[i + 1].tex_coord.y = 0;
+    }
+
+    // Indices to draw triangle fan
+    int num_indices = segments * 3;
+    int* indices = (int*)SDL_malloc(sizeof(int) * num_indices);
+    if (!indices) {
+        SDL_free(verts);
+        return;
+    }
+
+    for (int i = 0; i < segments; ++i) {
+        indices[i * 3 + 0] = 0;         // center
+        indices[i * 3 + 1] = i + 1;     // current point
+        indices[i * 3 + 2] = i + 2;     // next point
+    }
+
+    SDL_RenderGeometry(renderer, NULL, verts, segments + 2, indices, num_indices);
+
+    SDL_free(verts);
+    SDL_free(indices);
+}
+
+void SDL_DrawArrow(SDL_Renderer* renderer, float x1, float y1, float x2, float y2, float thickness, const SDL_Color& color) {
+	float arrow_size = 2.f * thickness;
+
+	float dx = x2 - x1;
+	float dy = y2 - y1;
+	float length = sqrtf(dx * dx + dy * dy);
+
+	if (length == 0) {
+		drawCircleGeometry(renderer, x1, y1, thickness, thickness/5+8, color);
+		return;
+	}
+
+	dx /= length;
+	dy /= length;
+	x2 -= dx * arrow_size;
+	y2 -= dy * arrow_size;
+
+
+	// Normalize perpendicular vector
+	float perpX = -dy * (thickness / 2.0f);
+	float perpY = dx * (thickness / 2.0f);
+
+	SDL_Vertex verts[7];
+
+	verts[0].position.x = x1 + perpX;
+	verts[0].position.y = y1 + perpY;
+
+	verts[1].position.x = x2 + perpX;
+	verts[1].position.y = y2 + perpY;
+
+	verts[2].position.x = x2 - perpX;
+	verts[2].position.y = y2 - perpY;
+
+	verts[3].position.x = x1 - perpX;
+	verts[3].position.y = y1 - perpY;
+
+	// Normalize perpendicular vector
+	float perpX2 = -dy * (arrow_size / 2.f);
+	float perpY2 = dx * (arrow_size / 2.f);
+
+	verts[4].position.x = x2 + perpX2;
+	verts[4].position.y = y2 + perpY2;
+
+	verts[5].position.x = x2 - perpX2;
+	verts[5].position.y = y2 - perpY2;
+
+	verts[6].position.x = x2 + dx * arrow_size;
+	verts[6].position.y = y2 + dy * arrow_size;
+
+	// Set color (no texture, so ignore tex coords)
+	for (int i = 0; i < 7; i++) {
+		verts[i].color.r = ((float)color.r) / 255.f;
+		verts[i].color.g = ((float)color.g) / 255.f;
+		verts[i].color.b = ((float)color.b) / 255.f;
+		verts[i].color.a = ((float)color.a) / 255.f;
+		verts[i].tex_coord.x = 0.0f;
+		verts[i].tex_coord.y = 0.0f;
+	}
+
+	int indices[9] = { 0, 1, 2, 2, 3, 0, 4, 5, 6 };
+
+	SDL_RenderGeometry(renderer, NULL, verts, 7, indices, 9);
+}
+
 SdlRenderer::SdlRenderer(SDL_Renderer* sdlRenderer) : sdlRenderer(sdlRenderer), w(0), h(0), circuit(nullptr), tileSetInfo(nullptr) { }
 
 void SdlRenderer::initializeTileSet(const std::string& filePath) {
@@ -154,8 +272,8 @@ void SdlRenderer::render() {
 				SDL_FPoint point = gridToSDL(FPosition(x, y));
 				SDL_FPoint pointBR = gridToSDL(FPosition(x + 1, y + 1));
 				SDL_FRect dstrect;
-				dstrect.x = point.x + this->x;
-				dstrect.y = point.y + this->y;
+				dstrect.x = point.x;
+				dstrect.y = point.y;
 				dstrect.w = pointBR.x - point.x;
 				dstrect.h = pointBR.y - point.y;
 				SDL_RenderTexture(sdlRenderer, tileSet, &emptyTileSetRect, &dstrect);
@@ -211,8 +329,8 @@ void SdlRenderer::render() {
 				SDL_FPoint point = gridToSDL(FPosition(x, y));
 				SDL_FPoint pointBR = gridToSDL(FPosition(x + 1, y + 1));
 				SDL_FRect dstrect;
-				dstrect.x = point.x + this->x;
-				dstrect.y = point.y + this->y;
+				dstrect.x = point.x;
+				dstrect.y = point.y;
 				dstrect.w = pointBR.x - point.x;
 				dstrect.h = pointBR.y - point.y;
 				SDL_RenderTexture(sdlRenderer, tileSet, &emptyTileSetRect, &dstrect);
@@ -273,7 +391,7 @@ void SdlRenderer::render() {
 	for (const auto& selection : selectionElements) {
 		SDL_FPoint topLeft = gridToSDL(selection.second.topLeft.free());
 		SDL_FPoint size = gridToSDL((selection.second.bottomRight - selection.second.topLeft + Vector(1.0f, 1.0f)).free());
-		SDL_FRect rect(topLeft.x + x, topLeft.y + y, size.x, size.y);
+		SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 		SDL_RenderFillRect(sdlRenderer, &rect);
 	}
 	// inverted selections
@@ -282,7 +400,7 @@ void SdlRenderer::render() {
 	for (const auto& selection : invertedSelectionElements) {
 		SDL_FPoint topLeft = gridToSDL(selection.second.topLeft.free());
 		SDL_FPoint size = gridToSDL((selection.second.bottomRight - selection.second.topLeft + Vector(1.0f, 1.0f)).free());
-		SDL_FRect rect(topLeft.x + x, topLeft.y + y, size.x, size.y);
+		SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 		SDL_RenderFillRect(sdlRenderer, &rect);
 	}
 	// selection object
@@ -299,32 +417,32 @@ void SdlRenderer::render() {
 }
 
 const SDL_Color arrowColorOrder[] = {
-	SDL_Color(255, 0, 0, 180),
-	SDL_Color(0, 255, 0, 180),
-	SDL_Color(0, 0, 255, 180),
-	SDL_Color(255, 255, 0, 180),
-	SDL_Color(255, 0, 255, 180),
-	SDL_Color(0, 255, 255, 180),
-	SDL_Color(255, 255, 255, 180),
-	SDL_Color(127, 0, 0, 180),
-	SDL_Color(0, 127, 0, 180),
-	SDL_Color(0, 0, 127, 180),
-	SDL_Color(127, 127, 0, 180),
-	SDL_Color(127, 0, 127, 180),
-	SDL_Color(0, 127, 127, 180),
-	SDL_Color(127, 127, 127, 180),
-	SDL_Color(255, 127, 0, 180),
-	SDL_Color(255, 0, 127, 180),
-	SDL_Color(0, 255, 127, 180),
-	SDL_Color(127, 255, 0, 180),
-	SDL_Color(127, 0, 255, 180),
-	SDL_Color(0, 127, 255, 180),
-	SDL_Color(255, 127, 127, 180),
-	SDL_Color(127, 255, 127, 180),
-	SDL_Color(127, 127, 255, 180),
-	SDL_Color(255, 255, 127, 180),
-	SDL_Color(255, 127, 255, 180),
-	SDL_Color(127, 255, 255, 180)
+	SDL_Color(255, 0, 0, 120),
+	SDL_Color(0, 255, 0, 120),
+	SDL_Color(0, 0, 255, 120),
+	SDL_Color(255, 255, 0, 120),
+	SDL_Color(255, 0, 255, 120),
+	SDL_Color(0, 255, 255, 120),
+	SDL_Color(255, 255, 255, 120),
+	SDL_Color(127, 0, 0, 120),
+	SDL_Color(0, 127, 0, 120),
+	SDL_Color(0, 0, 127, 120),
+	SDL_Color(127, 127, 0, 120),
+	SDL_Color(127, 0, 127, 120),
+	SDL_Color(0, 127, 127, 120),
+	SDL_Color(127, 127, 127, 120),
+	SDL_Color(255, 127, 0, 120),
+	SDL_Color(255, 0, 127, 120),
+	SDL_Color(0, 255, 127, 120),
+	SDL_Color(127, 255, 0, 120),
+	SDL_Color(127, 0, 255, 120),
+	SDL_Color(0, 127, 255, 120),
+	SDL_Color(255, 127, 127, 120),
+	SDL_Color(127, 255, 127, 120),
+	SDL_Color(127, 127, 255, 120),
+	SDL_Color(255, 255, 127, 120),
+	SDL_Color(255, 127, 255, 120),
+	SDL_Color(127, 255, 255, 120)
 };
 
 void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObjectElement::RenderMode mode, unsigned int depth) {
@@ -336,7 +454,7 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
 			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(0, 0, 255, 64));
-			SDL_FRect rect(topLeft.x + x, topLeft.y + y, size.x, size.y);
+			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
 			return;
 		}
@@ -356,7 +474,7 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
 			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(255, 0, 0, 64));
-			SDL_FRect rect(topLeft.x + x, topLeft.y + y, size.x, size.y);
+			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -375,10 +493,8 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
 			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(255, 0, 0255, 64));
-			SDL_FRect rect(topLeft.x + x, topLeft.y + y, size.x, size.y);
+			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
-			// sdlRenderer->setBrush(SDL_Color(0, 0, 255, 64));
-			// sdlRenderer->drawRect(QRectF(gridToSDL(cellSelection->getPosition().free()), gridToSDL((cellSelection->getPosition() + Vector(1)).free())));
 			return;
 		}
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
@@ -398,13 +514,18 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 					height++;
 					dSel = selectionCast<DimensionalSelection>(sel);
 				}
-				for (int i = 1; i < projectionSelection->size(); i++) {
-					SDL_FPoint start = gridToSDL(orgin.free() + FVector(0.5f, 0.5f));
-					orgin += projectionSelection->getStep();
-					SDL_FPoint end = gridToSDL(orgin.free() + FVector(0.5f, 0.5f));
-					drawArrow(start, end, 16.0f, arrowColorOrder[height % 26]);
-				}
 				renderSelection(dimensionalSelection->getSelection(0), mode, depth + 1);
+				if (projectionSelection->size() == 1) {
+					SDL_FPoint point = gridToSDL(orgin.free() + FVector(0.5f, 0.5f));
+					SDL_DrawArrow(sdlRenderer, point.x, point.y, point.x, point.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
+				} else {
+					for (int i = 1; i < projectionSelection->size(); i++) {
+						SDL_FPoint start = gridToSDL(orgin.free() + FVector(0.5f, 0.5f));
+						orgin += projectionSelection->getStep();
+						SDL_FPoint end = gridToSDL(orgin.free() + FVector(0.5f, 0.5f));
+						SDL_DrawArrow(sdlRenderer, start.x, start.y, end.x, end.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
+					}
+				}
 			} else {
 				for (int i = 0; i < dimensionalSelection->size(); i++) {
 					renderSelection(dimensionalSelection->getSelection(i), mode, depth + 1);
@@ -424,7 +545,7 @@ void SdlRenderer::renderBlock(BlockType type, Position position, Rotation rotati
 	FVector blockSize(circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(type).free());
 
 	FVector blockOriginOffset = rotateVectorWithArea(
-		blockSize / 2.f - FVector(0.5f), 
+		blockSize / 2.f - FVector(0.5f),
 		blockSize,
 		rotation
 	) - blockSize / 2.f + FVector(0.5f);
@@ -445,8 +566,8 @@ void SdlRenderer::renderBlock(BlockType type, Position position, Rotation rotati
 	tileSetRect.h = tileSize.y;
 
 	SDL_FRect dstrect;
-	dstrect.x = rotationPoint.x + x;
-	dstrect.y = rotationPoint.y + y;
+	dstrect.x = rotationPoint.x;
+	dstrect.y = rotationPoint.y;
 	dstrect.w = size.x;
 	dstrect.h = size.y;
 	SDL_RenderTextureRotated(sdlRenderer, tileSet, &tileSetRect, &dstrect, getDegrees(rotation), nullptr, SDL_FLIP_NONE);
@@ -479,7 +600,7 @@ void SdlRenderer::renderConnection(FPosition aPos, FPosition bPos, FVector aCont
 
 	// sdlRenderer->drawLine(start, end);
 
-	SDL_DrawThickLine(sdlRenderer, start.x + x, start.y + y, end.x + x, end.y + y, scalePixelCount(30.f), getStateColor(state));
+	SDL_DrawThickLine(sdlRenderer, start.x, start.y, end.x, end.y, scalePixelCount(30.f), getStateColor(state));
 
 	// SDL_RendererPath myPath;
 	// myPath.moveTo(start);
@@ -493,10 +614,10 @@ const float sideShift = 0.25f;
 void SdlRenderer::renderConnection(Position aPos, const Block* a, Position bPos, const Block* b, logic_state_t state) {
 	FVector centerOffset(0.5f, 0.5f);
 
-	if (a == b) {
-		drawText(gridToSDL(aPos.free() + centerOffset), "S", 30, getStateColor(state));
-		return;
-	}
+	// if (a == b) {
+	// 	drawText(gridToSDL(aPos.free() + centerOffset), "S", 30, getStateColor(state));
+	// 	return;
+	// }
 
 	FVector aSocketOffset(0.0f, 0.0f);
 	FVector bSocketOffset(0.0f, 0.0f);
@@ -553,7 +674,7 @@ SDL_FPoint SdlRenderer::gridToSDL(FPosition position) {
 	assert(viewManager);
 
 	Vec2 viewPos = viewManager->gridToView(position);
-	return SDL_FPoint(viewPos.x * w, viewPos.y * h);
+	return SDL_FPoint(viewPos.x * w + x, viewPos.y * h + y);
 }
 
 SDL_FPoint SdlRenderer::gridToSDL(FVector vector) {
@@ -648,13 +769,14 @@ void SdlRenderer::spawnConfetti(FPosition start) {
 
 // helpers
 void SdlRenderer::drawArrow(const SDL_FPoint& start, const SDL_FPoint& end, float size, const SDL_Color& color) {
-	// // Draw main line
+	// // // Draw main line
 	// size = scalePixelCount(size);
 	// sdlRenderer->save();
 	// sdlRenderer->setPen(QPen(color, 3.f * size, Qt::SolidLine, Qt::RoundCap));
 	// auto vec = QVector2D(start - end);
 	// vec.normalize();
-	// sdlRenderer->drawLine(start, end + vec.toPointF() * size * 10);
+	// SDL_DrawThickLine()
+	// // sdlRenderer->drawLine(start, end + vec.toPointF() * size * 10);
 	// sdlRenderer->restore();
 	// sdlRenderer->setBrush(color);
 
