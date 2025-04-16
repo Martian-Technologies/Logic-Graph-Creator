@@ -199,23 +199,6 @@ std::vector<wrapper_gate_id_t> LogicSimulatorWrapper::findConnectedJunctionGates
 				toVisit.insert(output);
 			}
 		}
-
-		// for (const auto& input : currentJunctionGate.externalInputs) {
-		// 	wrapper_gate_id_t inputGateId = input.first;
-		// 	size_t inputGroup = input.second;
-		// 	// go through every buffer gate in junctionGates vec
-		// 	for (const auto& junctionGate : junctionGates) {
-		// 		for (const auto& input2 : junctionGate.externalInputs) {
-		// 			if (input2.first == inputGateId && input2.second == inputGroup) {
-		// 				wrapper_gate_id_t junctionGateId = junctionGate.gateId;
-		// 				// Don't need to check if it's in toVisit - sets handle duplicates automatically
-		// 				if (!visited.contains(junctionGateId) && junctionGateId != currentGateId) {
-		// 					toVisit.insert(junctionGateId);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
 	}
 	std::vector<wrapper_gate_id_t> connectedJunctionGates;
 	connectedJunctionGates.reserve(visited.size());
