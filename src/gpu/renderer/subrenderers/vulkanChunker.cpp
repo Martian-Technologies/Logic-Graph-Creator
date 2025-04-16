@@ -263,12 +263,33 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 	}
 }
 
+constexpr float edgeDistance = 0.48f;
+constexpr float sideShift = 0.25f;
+
 FVector VulkanChunker::getOutputOffset(Rotation rotation) {
-	return {0.5f, 0.5f};
+	FVector offset = { 0.5, 0.5 };
+	
+	switch (rotation) {
+	case Rotation::ZERO: offset += { edgeDistance, sideShift }; break;
+	case Rotation::NINETY: offset += { -sideShift, edgeDistance }; break;
+	case Rotation::ONE_EIGHTY: offset += { -edgeDistance, -sideShift }; break;
+	case Rotation::TWO_SEVENTY: offset += { sideShift, -edgeDistance }; break;
+	}
+	
+	return offset;
 }
 
 FVector VulkanChunker::getInputOffset(Rotation rotation) {
-	return {0.5f, 0.5f};
+	FVector offset = { 0.5, 0.5 };
+	
+	switch (rotation) {
+	case Rotation::ZERO: offset += { -edgeDistance, -sideShift }; break;
+	case Rotation::NINETY: offset += { sideShift, -edgeDistance }; break;
+	case Rotation::ONE_EIGHTY: offset += { edgeDistance, sideShift }; break;
+	case Rotation::TWO_SEVENTY: offset += { -sideShift, edgeDistance }; break;
+	}
+	
+	return offset;
 }
 
 void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate) {
@@ -277,6 +298,9 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 
 	// the Jamisonian algorithm for calculating (lines which aren't necessary inside of a chunk but still bound to them)'s input and output points of intersections with chunks on a grid
 	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license)
+	
+	// honestly it's a little jank and it may break if the offsets leave the block far enough
+	// and it won't work at all for curved wires, we will prob redesign system for that
 	
 	// chunk positions
 	Position currentChunk = getChunk(start);
