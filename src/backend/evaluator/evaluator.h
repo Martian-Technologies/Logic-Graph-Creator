@@ -4,6 +4,7 @@
 #include "backend/circuit/circuit.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/container/difference.h"
+#include "backend/dataUpdateEventManager.h"
 
 #include "logicSimulatorWrapper.h"
 #include "addressTree.h"
@@ -17,6 +18,7 @@ class DataUpdateEventManager;
 
 class Evaluator {
 public:
+	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData;
 	struct EvaluatorGate {
 		wrapper_gate_id_t gateId;
 		BlockType blockType;
@@ -45,6 +47,7 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
+	void removeCircuitIO(const DataUpdateEventManager::EventData* data);
 
 	const AddressTreeNode<EvaluatorGate>& getAddressTree() const { return addressTree; }
 
@@ -57,6 +60,7 @@ private:
 	LogicSimulatorWrapper logicSimulatorWrapper;
 	AddressTreeNode<EvaluatorGate> addressTree;
 	CircuitManager& circuitManager;
+	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
 	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);

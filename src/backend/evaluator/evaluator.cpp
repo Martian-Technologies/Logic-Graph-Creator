@@ -5,12 +5,13 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	targetTickrate(0),
 	addressTree(circuitId, Rotation::ZERO, dataUpdateEventManager),
 	usingTickrate(false),
-	circuitManager(circuitManager) {
-
+	circuitManager(circuitManager),
+	receiver(dataUpdateEventManager) {
 	setTickrate(40 * 60);
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
+	receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
 
 	makeEdit(std::make_shared<Difference>(difference), circuitId);
 
@@ -165,6 +166,28 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::SET_DATA: break;
 		}
+	}
+}
+
+void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
+	logError("removeCircuitIO: not implemented yet");
+	const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>*>(data);
+	if (eventData == nullptr) {
+		logError("removeCircuitIO: eventData is null");
+		return;
+	}
+	const std::pair<BlockType, connection_end_id_t> dataValue = eventData->get();
+	const BlockType blockType = dataValue.first;
+	const connection_end_id_t connectionId = dataValue.second;
+	const auto blockData = circuitManager.getBlockDataManager()->getBlockData(blockType);
+
+	if (blockData == nullptr) {
+		logError("removeCircuitIO: blockData is null");
+		return;
+	}
+	if (blockData->isDefaultData()) {
+		logWarning("removeCircuitIO: blockData is default data");
+		return;
 	}
 }
 

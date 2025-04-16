@@ -64,12 +64,20 @@ void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputG
 								 simulator_gate_id_t targetGate, size_t inputGroup) {
 	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 
-	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid()) {
-		logError("connectGates: sourceGate index out of range or invalid", "Simulator");
+	if (sourceGate < 0 || sourceGate >= gates.size()) {
+		logError("connectGates: sourceGate index out of range", "Simulator");
 		return;
 	}
-	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid()) {
-		logError("connectGates: targetGate index out of range or invalid", "Simulator");
+	if (!gates[sourceGate].isValid()) {
+		logError("connectGates: sourceGate is invalid", "Simulator");
+		return;
+	}
+	if (targetGate < 0 || targetGate >= gates.size()) {
+		logError("connectGates: targetGate index out of range", "Simulator");
+		return;
+	}
+	if (!gates[targetGate].isValid()) {
+		logError("connectGates: targetGate is invalid", "Simulator");
 		return;
 	}
 
