@@ -207,6 +207,7 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
+			// TODO - technically removing connections could use a faster algorithm since it doesn't need to know the input/output points of each chunk
 			updateChunksOverConnection(outputPosition, inputPosition, false, chunksToUpdate);
 			
 			break;
@@ -259,36 +260,90 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 }
 
 void VulkanChunker::updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate) {
+	
 	// TODO - MAKE SURE not at same position better
 	if (start == end) return;
 	
 	// chunk position (lines can technically be outside of chunk)
-	Position chunk = getChunk(start);
+	Position currentChunk = getChunk(start);
 	Position endChunk = getChunk(end);
 
 	// start line position
-	f_cord_t x = start.x;
-	f_cord_t y = start.y;
+	f_cord_t currentX = start.x;
+	f_cord_t currentY = start.y;
 
 	// line change and slopes
 	f_cord_t dx = (float)end.x - (float)start.x;
+	cord_t dirX = (dx > 0) ? 1 : -1;
 	f_cord_t dy = (float)end.y - (float)start.y;
+	cord_t dirY = (dy > 0) ? 1 : -1;
 	f_cord_t slope = dy/dx;
 	f_cord_t iSlope = dx/dy;
 
-	while (chunk != endChunk) {
-		return;
-		// get line distances for horizontal
-		f_cord_t nextChunkBorderX; // todo func
-		f_cord_t dstToNextChunkBorderX = x - nextChunkBorderX;
+	f_cord_t relativeChunkX = (currentX / CHUNK_SIZE);
+	relativeChunkX -= std::floor(relativeChunkX);
+	f_cord_t dstToNextChunkBorderX = (dirX > 0 ? 1.0f - relativeChunkX : -relativeChunkX) * CHUNK_SIZE;
+	
+	f_cord_t relativeChunkY = (currentY / CHUNK_SIZE);
+	relativeChunkY -= std::floor(relativeChunkY);
+	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkY : -relativeChunkY - 1.0f) * CHUNK_SIZE;
+
+	// go along line connecting chunks until last one
+	int itrs = 0;
+	while (currentChunk != endChunk) {
+		// get line distance (squared) for moving to vertical (x) chunk edge
 		f_cord_t yChange = dstToNextChunkBorderX * slope;
 		f_cord_t xTravelCost = (dstToNextChunkBorderX * dstToNextChunkBorderX) + (yChange * yChange);
+
+		// get line distance (squared) for moving to horizontal (y) chunk edge
+		f_cord_t xChange = dstToNextChunkBorderY * iSlope;
+		f_cord_t yTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChange * xChange);
+
+		if (xTravelCost < yTravelCost) {
+			// get next position and connect chunk
+			f_cord_t newX = currentX + dstToNextChunkBorderX;
+			f_cord_t newY = currentY + yChange;
+
+			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
+			else chunks[currentChunk].getWiresForUpdating().erase({start, end});
+			chunksToUpdate.insert(currentChunk);
+
+			// update positions
+			currentX = newX;
+			currentY = newY;
+
+			dstToNextChunkBorderX = CHUNK_SIZE * dirX;
+			dstToNextChunkBorderY -= yChange;
+
+			currentChunk.x += CHUNK_SIZE * dirX;
+				
+		} else {
+			// get next position and connect chunk
+			f_cord_t newX = currentX + xChange;
+			f_cord_t newY = currentY + dstToNextChunkBorderY;
+
+			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
+			else chunks[currentChunk].getWiresForUpdating().erase({start, end});
+			chunksToUpdate.insert(currentChunk);
+
+			// update positions
+			currentX = newX;
+			currentY = newY;
+
+			dstToNextChunkBorderX -= xChange;
+			dstToNextChunkBorderY = CHUNK_SIZE * dirY;
+
+			currentChunk.y += CHUNK_SIZE * dirY;
+		}
+
+		++itrs;
+		logInfo(itrs);
 	}
 
-	// temp connect last wire
-	if (add) chunks[chunk].getWiresForUpdating()[{start, end}] = {{x, y}, {(float)end.x, (float)end.y}};
-	else chunks[chunk].getWiresForUpdating().erase({start, end});
-	chunksToUpdate.insert(chunk);
+	// connect last chunk
+	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {(float)end.x, (float)end.y}};
+	else chunks[currentChunk].getWiresForUpdating().erase({start, end});
+	chunksToUpdate.insert(currentChunk);
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {

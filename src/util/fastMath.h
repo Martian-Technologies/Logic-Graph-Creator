@@ -21,6 +21,7 @@ constexpr double Fabs(double x) {
 }
 
 template <typename T>
+// (nerd emoji) I literally had to google what signum was to confirm it was sign. you can't even spell english words why are you trying to use latin? Also I love the capitalization conventions in this file.
 constexpr char signum(T x) {
 	if constexpr (std::is_signed<T>())
 		return (T(0) < x) - (x < T(0));
