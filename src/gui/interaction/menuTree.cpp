@@ -25,11 +25,16 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	Rml::Element* div = elements[0];
 
 	if (paths.empty()) {
+		// remove class
 		current->SetClass("parent", false);
-		
+		// remove ul
+		elements.clear();
 		div->GetElementsByTagName(elements, "ul");
-		if (elements.empty()) return;
-		div->RemoveChild(elements[0]);
+		if (!elements.empty()) div->RemoveChild(elements[0]);
+		// remove span
+		elements.clear();
+		current->GetElementsByTagName(elements, "span");
+		if (!elements.empty()) current->RemoveChild(elements[0]);
 		return;
 	}
 	std::map<std::string, std::vector<std::vector<std::string>>> pathsByRoot;
@@ -50,9 +55,14 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	if (elements.empty()) {
 		Rml::ElementPtr newList = document->CreateElement("ul");
 		newList->SetClass("collapsed", !startOpen && current != parent);
-		div->AppendChild(std::move(newList));
-		div->GetElementsByTagName(elements, "ul");
-		listElement = elements[0];
+		listElement = div->AppendChild(std::move(newList));
+		current->SetClass("parent", true);
+		if (current != parent) {
+			Rml::ElementPtr arrow = document->CreateElement("span");
+			arrow->SetInnerRML(">");
+			arrow->AddEventListener("click", new MenuTreeListener());
+			current->InsertBefore(std::move(arrow), div);
+		}
 	} else {
 		listElement = elements[0];
 		std::vector<Rml::Element*> children;
@@ -77,13 +87,7 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	if (!(pathStr.empty())) pathStr += "/";
 	for (auto iter : pathsByRoot) {
 		Rml::ElementPtr newItem = document->CreateElement("li");
-		if (!iter.second.empty()) {
-			newItem->SetClass("parent", true);
-			Rml::ElementPtr arrow = document->CreateElement("span");
-			arrow->SetInnerRML(">");
-			arrow->AddEventListener("click", new MenuTreeListener());
-			newItem->AppendChild(std::move(arrow));
-		}
+		// add listener
 		if (!clickableName) newItem->AddEventListener("click", new MenuTreeListener(false, &listenerFunction));
 		else {
 			newItem->AddEventListener("click", new EventPasser(
@@ -95,8 +99,9 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 				}
 			));
 		}
+		// set id
 		newItem->SetId(pathStr + iter.first + "-menu");
-		Rml::ElementPtr text = document->CreateElement("li");
+		// create div for text
 		Rml::ElementPtr newDiv = document->CreateElement("div");
 		newDiv->AppendChild(std::move(document->CreateTextNode(iter.first)));
 		newItem->AppendChild(std::move(newDiv));
