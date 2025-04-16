@@ -57,10 +57,12 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 		newList->SetClass("collapsed", !startOpen && current != parent);
 		listElement = div->AppendChild(std::move(newList));
 		current->SetClass("parent", true);
-		Rml::ElementPtr arrow = document->CreateElement("span");
-		arrow->SetInnerRML(">");
-		arrow->AddEventListener("click", new MenuTreeListener());
-		current->InsertBefore(std::move(arrow), div);
+		if (current != parent) {
+			Rml::ElementPtr arrow = document->CreateElement("span");
+			arrow->SetInnerRML(">");
+			arrow->AddEventListener("click", new MenuTreeListener());
+			current->InsertBefore(std::move(arrow), div);
+		}
 	} else {
 		listElement = elements[0];
 		std::vector<Rml::Element*> children;
