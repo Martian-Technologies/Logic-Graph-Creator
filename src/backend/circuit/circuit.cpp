@@ -378,7 +378,8 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		logError("eventData passed was null", "Circuit");
 		return;
 	}
-	auto data = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>*>(eventData);
+	
+	auto data = eventData->cast<std::pair<BlockType, Vector>>();
 	if (!data) {
 		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
 		return;
