@@ -55,8 +55,6 @@ void SelectorWindow::updateSelected(const std::string& string) {
 
 void SelectorWindow::updateSelectedMode(const std::string& string) {
 	toolManagerManager->setMode(string);
-	// if (!current || (previous && current->text() == previous->text())) return;
-	// emit selectedModeChange(current->text().toStdString());
 }
 
 
