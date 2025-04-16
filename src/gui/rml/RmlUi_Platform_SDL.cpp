@@ -195,7 +195,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	{
 	case event_mouse_motion:
 	{
-		result = context->ProcessMouseMove(int(ev.motion.x), int(ev.motion.y), GetKeyModifierState());
+		result = context->ProcessMouseMove(int(ev.motion.x*2.f), int(ev.motion.y*2.f), GetKeyModifierState());
 	}
 	break;
 	case event_mouse_down:
@@ -212,7 +212,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	break;
 	case event_mouse_wheel:
 	{
-		result = context->ProcessMouseWheel(Rml::Vector2f(float(-ev.wheel.x), float(-ev.wheel.y)), GetKeyModifierState());
+		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x*2.f, -ev.wheel.y*2.f), GetKeyModifierState());
 	}
 	break;
 	case event_key_down:
