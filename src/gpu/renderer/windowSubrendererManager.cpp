@@ -104,7 +104,7 @@ void WindowSubrendererManager::renderCommandBuffer(VulkanFrameData& frame, uint3
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
 	renderPassInfo.clearValueCount = 1;
-	VkClearValue clearColor = {1.0f-0.69f, 1.0f-0.69f, 1.0f-0.69f, 1.0f};
+	VkClearValue clearColor = {0.69f * 1.3478f, 0.69f * 1.3478f, 0.69f * 1.3478f, 1.0f};
 	renderPassInfo.pClearValues = &clearColor;
 	
 	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
