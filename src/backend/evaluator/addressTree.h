@@ -1,8 +1,6 @@
 #ifndef addressTree_h
 #define addressTree_h
 
-#include <stdexcept>
-
 #include "backend/address.h"
 
 #include "backend/dataUpdateEventManager.h"

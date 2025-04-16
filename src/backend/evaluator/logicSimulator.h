@@ -6,8 +6,6 @@
 #include <thread>
 #include <condition_variable>
 #include <shared_mutex>
-#include <unordered_map>
-#include <vector>
 
 #include "logicState.h"
 #include "gateType.h"
@@ -58,6 +56,11 @@ public:
 private:
 	std::vector<Gate> gates;
 	int numDecomissioned;
+	int rollingAvgLength;
+	int rollingAvgIndex;
+	std::vector<int> rollingAvg;
+
+	void updateRollingAverage(int newValue);
 
 	std::thread tickrateMonitorThread;
 	std::thread simulationThread;
