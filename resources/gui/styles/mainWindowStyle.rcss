@@ -74,6 +74,9 @@ body {
 /* Menu Tree Styles */
 
 .menutree {
+	background-color: #2e2e2e;
+	border-radius: 0.3em;
+	margin: 1em 0.1em;
 	display: flex;
 	flex-direction: column;
 }
@@ -98,11 +101,17 @@ body {
 
 .menutree li {
 	cursor: pointer;
+	padding: 0.1em 0.1em;
 }
 
-.collapsed {
+.collapsed div ul {
 	display: none;
 }
+
+/* .collapsed span text {
+	/* transform:rotate(90deg); *
+	writing-mode:vertical-rl;
+} */
 
 #circuitview-container {
 	flex: 1;
@@ -125,7 +134,7 @@ tabset panels {
 }
 
 tabset tabs tab {
-	margin: 0.2em;
+	margin: 0.3em;
 	background-color: #0b0b0b;
 }
 

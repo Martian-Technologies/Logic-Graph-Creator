@@ -54,7 +54,7 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	div->GetElementsByTagName(elements, "ul");
 	if (elements.empty()) {
 		Rml::ElementPtr newList = document->CreateElement("ul");
-		newList->SetClass("collapsed", !startOpen && current != parent);
+		current->SetClass("collapsed", !startOpen && current != parent);
 		listElement = div->AppendChild(std::move(newList));
 		current->SetClass("parent", true);
 		if (current != parent) {

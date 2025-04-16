@@ -34,8 +34,9 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), document, evalTreeParent);
 
 	//  blocks/tools menutree
-	Rml::Element* toolTreeParent = document->GetElementById("selection-tree");
-	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, toolTreeParent);
+	Rml::Element* itemTreeParent = document->GetElementById("item-selection-tree");
+	Rml::Element* modeTreeParent = document->GetElementById("mode-selection-tree");
+	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, itemTreeParent, modeTreeParent);
 
 	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(document);

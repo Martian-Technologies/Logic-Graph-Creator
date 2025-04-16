@@ -3,8 +3,8 @@
 	<head>
 		<title>Gatality</title>
 		<link type="text/rcss" href="styles/mainWindowStyle.rcss"/>
-		<link type="text/template" href="templates/circuitViewElement.rml"/>
 		<link type="text/template" href="templates/menuBar.rml"/>
+		<link type="text/template" href="templates/blockCreation.rml"/>
 		<link type="text/template" href="templates/simulationControlsBar.rml"/>
 	</head>
 
@@ -20,7 +20,10 @@
 					<tabset>
 						<tab>Blocks</tab>
 						<panel>
-							<div id="selection-tree"></div>
+							<div id="selection-tree">
+								<div id="item-selection-tree"></div>
+								<div id="mode-selection-tree"></div>
+							</div>
 						</panel>
 						<tab>Simulation</tab>
 						<panel>

@@ -7,13 +7,14 @@ SelectorWindow::SelectorWindow(
 	DataUpdateEventManager* dataUpdateEventManager,
 	ToolManagerManager* toolManagerManager,
 	Rml::ElementDocument* document,
-	Rml::Element* parent
+	Rml::Element* itemTreeParent,
+	Rml::Element* modeTreeParent
 ) : blockDataManager(blockDataManager), toolManagerManager(toolManagerManager), dataUpdateEventReceiver(dataUpdateEventManager) {
-	menuTree.emplace(document, parent->AppendChild(document->CreateElement("div")), false);
+	menuTree.emplace(document, itemTreeParent, false);
 	menuTree->setListener(std::bind(&SelectorWindow::updateSelected, this, std::placeholders::_1));
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&SelectorWindow::updateList, this));
 	
-	modeMenuTree.emplace(document, parent->AppendChild(document->CreateElement("div")), false);
+	modeMenuTree.emplace(document, modeTreeParent, false);
 	modeMenuTree->setListener(std::bind(&SelectorWindow::updateSelectedMode, this, std::placeholders::_1));
 	dataUpdateEventReceiver.linkFunction("setToolUpdate", std::bind(&SelectorWindow::updateToolModeOptions, this));
 	updateList();

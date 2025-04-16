@@ -12,7 +12,8 @@ public:
 		DataUpdateEventManager* dataUpdateEventManager,
 		ToolManagerManager* toolManagerManager,
 		Rml::ElementDocument* document,
-		Rml::Element* parent
+		Rml::Element* itemTreeParent,
+		Rml::Element* modeTreeParent
 	);
 
 	void updateToolModeOptions();
