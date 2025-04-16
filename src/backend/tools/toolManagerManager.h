@@ -5,7 +5,7 @@
 
 class ToolManagerManager {
 public:
-	ToolManagerManager(std::set<CircuitView*>* circuitViews);
+	ToolManagerManager(std::set<CircuitView*>* circuitViews, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline void setBlock(BlockType blockType) {
 		setTool("placement/placement");
@@ -73,6 +73,7 @@ private:
 	};
 
 	inline void sendChangedSignal() {
+		dataUpdateEventManager->sendEvent("setToolUpdate");
 		for (auto pair : listenerFunctions) pair.second(*this);
 	}
 
@@ -80,6 +81,8 @@ private:
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
+
+	DataUpdateEventManager* dataUpdateEventManager;
 
 	static std::map<std::string, std::unique_ptr<BaseToolTypeMaker>> tools;
 };

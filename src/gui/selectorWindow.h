@@ -15,14 +15,15 @@ public:
 		Rml::Element* parent
 	);
 
-	void updateToolModeOptions(const std::vector<std::string>* modes);
+	void updateToolModeOptions();
 	void updateList();
 
 private:
-	void updateSelected(std::string string);
-	void updateSelectedMode();
+	void updateSelected(const std::string& string);
+	void updateSelectedMode(const std::string& string);
 
-	MenuTree menuTree;
+	std::optional<MenuTree> menuTree;
+	std::optional<MenuTree> modeMenuTree;
 	const BlockDataManager* blockDataManager;
 	ToolManagerManager* toolManagerManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
