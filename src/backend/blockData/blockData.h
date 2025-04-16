@@ -64,6 +64,19 @@ public:
 	inline const std::string& getPath() const noexcept { return path; }
 
 	// trys to set a connection input in the block. Returns success.
+	inline void removeConnection(connection_end_id_t connectionEndId) noexcept {
+		auto iter = connections.find(connectionEndId);
+		if (iter == connections.end()) return;
+		dataUpdateEventManager->sendEvent(
+			"blockDataRemoveConnection",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+		);
+		sendBlockDataUpdate();
+		bool isInput = iter->second.second;
+		connections.erase(iter);
+		inputConnectionCount -= isInput;
+		sendBlockDataUpdate();
+	}
 	inline void setConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		connections[connectionEndId] = { vector, true };
 		inputConnectionCount++;
