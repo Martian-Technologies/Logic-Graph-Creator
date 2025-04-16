@@ -3,7 +3,7 @@
 #include "vulkanChunkRenderer.h"
 #include "gpu/vulkanInstance.h"
 
-const unsigned int CHUNK_SIZE = 25;
+const int CHUNK_SIZE = 25;
 cord_t getChunk(cord_t in) {
 	return std::floor( (float)in / (float)CHUNK_SIZE ) * (int)CHUNK_SIZE;
 }
@@ -208,7 +208,9 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
 			// TODO - technically removing connections could use a faster algorithm since it doesn't need to know the input/output points of each chunk
-			updateChunksOverConnection(outputPosition, inputPosition, false, chunksToUpdate);
+			Rotation outputRotation = circuit->getBlockContainer()->getBlock(outputBlockPosition)->getRotation();
+			Rotation inputRotation = circuit->getBlockContainer()->getBlock(inputBlockPosition)->getRotation();
+			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, false, chunksToUpdate);
 			
 			break;
 		}
@@ -216,7 +218,9 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
-			updateChunksOverConnection(outputPosition, inputPosition, true, chunksToUpdate);
+			Rotation outputRotation = circuit->getBlockContainer()->getBlock(outputBlockPosition)->getRotation();
+			Rotation inputRotation = circuit->getBlockContainer()->getBlock(inputBlockPosition)->getRotation();
+			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, true, chunksToUpdate);
 			
 			break;
 		}
@@ -259,11 +263,19 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 	}
 }
 
-void VulkanChunker::updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate) {
+FVector VulkanChunker::getOutputOffset(Rotation rotation) {
+	return {0.5f, 0.5f};
+}
+
+FVector VulkanChunker::getInputOffset(Rotation rotation) {
+	return {0.5f, 0.5f};
+}
+
+void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate) {
 	
 	// TODO - handle same position
 
-	// the Jamisonian algorithm for calculating lines which aren't necessary inside of a chunk but still bound to them's input and output points of intersections with chunks on a grid
+	// the Jamisonian algorithm for calculating (lines which aren't necessary inside of a chunk but still bound to them)'s input and output points of intersections with chunks on a grid
 	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license)
 	
 	// chunk positions
@@ -271,26 +283,32 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 	Position endChunk = getChunk(end);
 
 	// start line position
-	f_cord_t currentX = start.x;
-	f_cord_t currentY = start.y;
+	FVector startOffset = getOutputOffset(startRotation);
+	f_cord_t currentX = start.x + startOffset.dx;
+	f_cord_t currentY = start.y + startOffset.dy;
+
+	// end line position
+	FVector endOffset = getInputOffset(endRotation);
+	f_cord_t endX = end.x + endOffset.dx;
+	f_cord_t endY = end.y + endOffset.dy;
 
 	// line change and slopes
-	f_cord_t dx = (float)end.x - (float)start.x;
+	f_cord_t dx = endX - currentX;
 	cord_t dirX = (dx > 0) ? 1 : -1;
-	f_cord_t dy = (float)end.y - (float)start.y;
+	f_cord_t dy = endY - currentY;
 	cord_t dirY = (dy > 0) ? 1 : -1;
 	f_cord_t slope = dy/dx;
 	f_cord_t iSlope = dx/dy;
 
 	// calculate the distance to the next chunk border from starting X
-	f_cord_t relativeChunkX = (currentX / CHUNK_SIZE);
-	relativeChunkX -= std::floor(relativeChunkX);
-	f_cord_t dstToNextChunkBorderX = (dirX > 0 ? 1.0f - relativeChunkX : -relativeChunkX) * CHUNK_SIZE;
+	f_cord_t relativeChunkPercentX = (currentX / CHUNK_SIZE);
+	relativeChunkPercentX -= (float)currentChunk.x / CHUNK_SIZE; // make it relative
+	f_cord_t dstToNextChunkBorderX = (dirX > 0 ? 1.0f - relativeChunkPercentX : -relativeChunkPercentX) * CHUNK_SIZE;
 
 	// calculate the distance to the next chunk border from starting Y
-	f_cord_t relativeChunkY = (currentY / CHUNK_SIZE);
-	relativeChunkY -= std::floor(relativeChunkY);
-	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkY : -relativeChunkY) * CHUNK_SIZE;
+	f_cord_t relativeChunkPercentY = (currentY / CHUNK_SIZE);
+	relativeChunkPercentY -= (float)currentChunk.y / CHUNK_SIZE; // make it relative
+	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkPercentY : -relativeChunkPercentY) * CHUNK_SIZE;
 
 	// go along line connecting chunks until last one
 	while (currentChunk != endChunk) {
@@ -310,6 +328,10 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 
 			// get line distance (squared) for moving to horizontal (y) chunk edge
 			f_cord_t verticalTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChangeForVertical * xChangeForVertical);
+
+			if (verticalTravelCost > 50 || horizontalTravelCost > 50) {
+				logInfo("AAAH");
+			}
 
 			moveHorizontal = horizontalTravelCost < verticalTravelCost;
 		}
@@ -354,7 +376,7 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 	}
 
 	// connect last chunk
-	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {(float)end.x, (float)end.y}};
+	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {endX, endY}};
 	else chunks[currentChunk].getWiresForUpdating().erase({start, end});
 	chunksToUpdate.insert(currentChunk);
 }

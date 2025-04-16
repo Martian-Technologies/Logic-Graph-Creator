@@ -87,7 +87,9 @@ public:
 
 private:
 	void updateCircuit(Difference* diff);
-	void updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate);
+	void updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
+	FVector getOutputOffset(Rotation rotation);
+	FVector getInputOffset(Rotation rotation);
 	
 private:
 	Circuit* circuit = nullptr;
