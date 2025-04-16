@@ -58,15 +58,18 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	makeEditInPlace(difference, containerId, addressTree, false);
-}
-
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC) {
 	logicSimulatorWrapper.signalToPause();
-	// wait for the thread to pause
+	DiffCache diffCache(circuitManager);
 	while (!logicSimulatorWrapper.threadIsWaiting()) {
 		std::this_thread::yield();
 	}
+	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
+	if (!paused) {
+		logicSimulatorWrapper.signalToProceed();
+	}
+}
+
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
 	const auto modifications = difference->getModifications();
 	bool deletedBlocks = false;
 	for (const auto& modification : modifications) {
@@ -114,12 +117,10 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 					break;
 				}
 				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId, rotation);
-				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
-				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
-				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
+				const auto integratedDifference = diffCache.getDifference(integratedCircuitId);
 				for (const auto& address : addresses) {
 					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
-					makeEditInPlace(integratedDifference, integratedCircuitId, branch, true);
+					makeEditInPlace(integratedDifference, integratedCircuitId, branch, diffCache, true);
 				}
 			}
 			break;
@@ -164,9 +165,6 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::SET_DATA: break;
 		}
-	}
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
 	}
 }
 

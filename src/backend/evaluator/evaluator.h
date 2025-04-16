@@ -4,10 +4,12 @@
 #include "backend/circuit/circuit.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/container/difference.h"
+
 #include "logicSimulatorWrapper.h"
 #include "addressTree.h"
 #include "backend/address.h"
 #include "logicState.h"
+#include "diffCache.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -51,7 +53,7 @@ private:
 	AddressTreeNode<EvaluatorGate> addressTree;
 	CircuitManager& circuitManager;
 
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
 	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput);
 };
