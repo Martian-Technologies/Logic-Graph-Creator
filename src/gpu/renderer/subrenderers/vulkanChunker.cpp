@@ -261,10 +261,12 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 
 void VulkanChunker::updateChunksOverConnection(Position start, Position end, bool add, std::unordered_set<Position>& chunksToUpdate) {
 	
-	// TODO - MAKE SURE not at same position better
-	if (start == end) return;
+	// TODO - handle same position
+
+	// the Jamisonian algorithm for calculating lines which aren't necessary inside of a chunk but still bound to them's input and output points of intersections with chunks on a grid
+	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license)
 	
-	// chunk position (lines can technically be outside of chunk)
+	// chunk positions
 	Position currentChunk = getChunk(start);
 	Position endChunk = getChunk(end);
 
@@ -280,29 +282,43 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 	f_cord_t slope = dy/dx;
 	f_cord_t iSlope = dx/dy;
 
+	// calculate the distance to the next chunk border from starting X
 	f_cord_t relativeChunkX = (currentX / CHUNK_SIZE);
 	relativeChunkX -= std::floor(relativeChunkX);
 	f_cord_t dstToNextChunkBorderX = (dirX > 0 ? 1.0f - relativeChunkX : -relativeChunkX) * CHUNK_SIZE;
-	
+
+	// calculate the distance to the next chunk border from starting Y
 	f_cord_t relativeChunkY = (currentY / CHUNK_SIZE);
 	relativeChunkY -= std::floor(relativeChunkY);
-	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkY : -relativeChunkY - 1.0f) * CHUNK_SIZE;
+	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkY : -relativeChunkY) * CHUNK_SIZE;
 
 	// go along line connecting chunks until last one
-	int itrs = 0;
 	while (currentChunk != endChunk) {
-		// get line distance (squared) for moving to vertical (x) chunk edge
-		f_cord_t yChange = dstToNextChunkBorderX * slope;
-		f_cord_t xTravelCost = (dstToNextChunkBorderX * dstToNextChunkBorderX) + (yChange * yChange);
+		bool moveHorizontal;
+		
+		f_cord_t yChangeForHorizontal = dstToNextChunkBorderX * slope;
+		f_cord_t xChangeForVertical = dstToNextChunkBorderY * iSlope;
 
-		// get line distance (squared) for moving to horizontal (y) chunk edge
-		f_cord_t xChange = dstToNextChunkBorderY * iSlope;
-		f_cord_t yTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChange * xChange);
+		// figure out which direction we should move
+		if (currentChunk.x == endChunk.x) { moveHorizontal = false; } // check if we have purely vertical to go
+		else if (currentChunk.y == endChunk.y) { moveHorizontal = true; } // check if we have purely horizontal to go
+		else {
+			// compare movement distances, pick shortest
+			
+			// get line distance (squared) for moving to vertical (x) chunk edge
+			f_cord_t horizontalTravelCost = (dstToNextChunkBorderX * dstToNextChunkBorderX) + (yChangeForHorizontal * yChangeForHorizontal);
 
-		if (xTravelCost < yTravelCost) {
+			// get line distance (squared) for moving to horizontal (y) chunk edge
+			f_cord_t verticalTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChangeForVertical * xChangeForVertical);
+
+			moveHorizontal = horizontalTravelCost < verticalTravelCost;
+		}
+
+		// move in the desired direction
+		if (moveHorizontal) {
 			// get next position and connect chunk
 			f_cord_t newX = currentX + dstToNextChunkBorderX;
-			f_cord_t newY = currentY + yChange;
+			f_cord_t newY = currentY + yChangeForHorizontal;
 
 			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
 			else chunks[currentChunk].getWiresForUpdating().erase({start, end});
@@ -313,13 +329,13 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 			currentY = newY;
 
 			dstToNextChunkBorderX = CHUNK_SIZE * dirX;
-			dstToNextChunkBorderY -= yChange;
+			dstToNextChunkBorderY -= yChangeForHorizontal;
 
 			currentChunk.x += CHUNK_SIZE * dirX;
 				
 		} else {
 			// get next position and connect chunk
-			f_cord_t newX = currentX + xChange;
+			f_cord_t newX = currentX + xChangeForVertical;
 			f_cord_t newY = currentY + dstToNextChunkBorderY;
 
 			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
@@ -330,14 +346,11 @@ void VulkanChunker::updateChunksOverConnection(Position start, Position end, boo
 			currentX = newX;
 			currentY = newY;
 
-			dstToNextChunkBorderX -= xChange;
+			dstToNextChunkBorderX -= xChangeForVertical;
 			dstToNextChunkBorderY = CHUNK_SIZE * dirY;
 
 			currentChunk.y += CHUNK_SIZE * dirY;
 		}
-
-		++itrs;
-		logInfo(itrs);
 	}
 
 	// connect last chunk
