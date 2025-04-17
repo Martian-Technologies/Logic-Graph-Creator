@@ -32,11 +32,12 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-		auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
-		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
-		circuitViewWidget->setSimState(true);
-		circuitViewWidget->simUseSpeed(true);
-		circuitViewWidget->setSimSpeed(20);
+		for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
+			if (iter.second->getCircuitId(Address()) == id) {
+				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+				return;
+			}
+		}
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}
@@ -106,8 +107,19 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_B,
-		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
+		Rml::Input::KeyIdentifier::KI_N,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() {
+			logInfo("New Circuit");
+			circuit_id_t id = circuitView->getBackend()->createCircuit();
+			circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
+			for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
+				if (iter.second->getCircuitId(Address()) == id) {
+					circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
+					return;
+				}
+			}
+		}
 	);
 
 	document->AddEventListener(Rml::EventId::Resize, new EventPasser(

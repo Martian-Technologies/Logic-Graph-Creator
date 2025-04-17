@@ -44,17 +44,27 @@ void App::runLoop() {
 				std::string file = event.drop.data;
 				std::cout << file << "\n";
 				for (Window& window : windows) {
-					circuit_id_t id = window.getCircuitViewWidget()->getFileManager()->loadFromFile(file);
+					std::shared_ptr<CircuitViewWidget> circuitViewWidget = window.getCircuitViewWidget();
+					circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(file);
 					if (id == 0) {
 						logError("Error", "Failed to load circuit file.");
 						return;
 					}
-					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(window.getCircuitViewWidget()->getCircuitView(), id);
-					auto evaluatorId = window.getCircuitViewWidget()->getCircuitView()->getBackend()->createEvaluator(id);
-					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(window.getCircuitViewWidget()->getCircuitView(), evaluatorId.value(), Address());
-					window.getCircuitViewWidget()->setSimState(true);
-					window.getCircuitViewWidget()->simUseSpeed(true);
-					window.getCircuitViewWidget()->setSimSpeed(20);
+					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+					bool foundEval = false;
+					for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
+						if (iter.second->getCircuitId(Address()) == id) {
+							circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+							foundEval = true;
+						}
+					}
+					if (!foundEval) {
+						auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
+						circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
+						circuitViewWidget->setSimState(true);
+						circuitViewWidget->simUseSpeed(true);
+						circuitViewWidget->setSimSpeed(20);
+					}
 				}
 			}
 			default: {

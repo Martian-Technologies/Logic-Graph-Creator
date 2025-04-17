@@ -1,8 +1,8 @@
 #include "parsedCircuit.h"
 #include "circuit.h"
 
-void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id) {
-	ports.emplace_back(isInput, connectionEndId, positionOnBlock, id);
+void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id, const std::string& portName) {
+	ports.emplace_back(isInput, connectionEndId, positionOnBlock, id, portName);
 }
 
 void ParsedCircuit::addBlock(block_id_t id, const BlockData& block) {
