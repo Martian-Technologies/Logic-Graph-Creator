@@ -18,7 +18,7 @@
 
 class Window {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager);
+	Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId);
 	~Window();
 
 	bool recieveEvent(SDL_Event& event);
@@ -47,6 +47,7 @@ private:
 	SdlWindow sdlWindow;
 	SDL_Renderer* sdlRenderer;
 
+	Rml::EventId pinchEventId;
 	Rml::Context* rmlContext;
 };
 

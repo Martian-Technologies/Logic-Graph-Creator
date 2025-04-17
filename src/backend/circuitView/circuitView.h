@@ -60,6 +60,8 @@ private:
 	Renderer* renderer;
 	std::shared_ptr<Evaluator> evaluator;
 
+	DataUpdateEventManager* dataUpdateEventManager = nullptr;
+
 	EvaluatorStateInterface evaluatorStateInterface;
 	EventRegister eventRegister;
 	ViewManager viewManager;

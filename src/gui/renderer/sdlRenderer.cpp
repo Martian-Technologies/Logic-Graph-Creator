@@ -57,54 +57,54 @@ void SDL_DrawThickLine(SDL_Renderer* renderer, float x1, float y1, float x2, flo
 #include <math.h>
 
 void drawCircleGeometry(SDL_Renderer* renderer, float cx, float cy, float radius, int segments, const SDL_Color& color) {
-    // Allocate memory for vertices
-    SDL_Vertex* verts = (SDL_Vertex*)SDL_malloc(sizeof(SDL_Vertex) * (segments + 2));
-    if (!verts) return;
+	// Allocate memory for vertices
+	SDL_Vertex* verts = (SDL_Vertex*)SDL_malloc(sizeof(SDL_Vertex) * (segments + 2));
+	if (!verts) return;
 
-    // Center vertex
-    verts[0].position.x = cx;
-    verts[0].position.y = cy;
+	// Center vertex
+	verts[0].position.x = cx;
+	verts[0].position.y = cy;
 	verts[0].color.r = ((float)color.r) / 255.f;
 	verts[0].color.g = ((float)color.g) / 255.f;
 	verts[0].color.b = ((float)color.b) / 255.f;
 	verts[0].color.a = ((float)color.a) / 255.f;
-    verts[0].tex_coord.x = 0;
-    verts[0].tex_coord.y = 0;
+	verts[0].tex_coord.x = 0;
+	verts[0].tex_coord.y = 0;
 
-    // Circle points
-    for (int i = 0; i <= segments; ++i) {
-        float theta = ((float)i / segments) * (2.0f * M_PI);
-        float x = cx + radius * cosf(theta);
-        float y = cy + radius * sinf(theta);
+	// Circle points
+	for (int i = 0; i <= segments; ++i) {
+		float theta = ((float)i / segments) * (2.0f * M_PI);
+		float x = cx + radius * cosf(theta);
+		float y = cy + radius * sinf(theta);
 
-        verts[i + 1].position.x = x;
-        verts[i + 1].position.y = y;
+		verts[i + 1].position.x = x;
+		verts[i + 1].position.y = y;
 		verts[i + 1].color.r = ((float)color.r) / 255.f;
 		verts[i + 1].color.g = ((float)color.g) / 255.f;
 		verts[i + 1].color.b = ((float)color.b) / 255.f;
 		verts[i + 1].color.a = ((float)color.a) / 255.f;
-        verts[i + 1].tex_coord.x = 0;
-        verts[i + 1].tex_coord.y = 0;
-    }
+		verts[i + 1].tex_coord.x = 0;
+		verts[i + 1].tex_coord.y = 0;
+	}
 
-    // Indices to draw triangle fan
-    int num_indices = segments * 3;
-    int* indices = (int*)SDL_malloc(sizeof(int) * num_indices);
-    if (!indices) {
-        SDL_free(verts);
-        return;
-    }
+	// Indices to draw triangle fan
+	int num_indices = segments * 3;
+	int* indices = (int*)SDL_malloc(sizeof(int) * num_indices);
+	if (!indices) {
+		SDL_free(verts);
+		return;
+	}
 
-    for (int i = 0; i < segments; ++i) {
-        indices[i * 3 + 0] = 0;         // center
-        indices[i * 3 + 1] = i + 1;     // current point
-        indices[i * 3 + 2] = i + 2;     // next point
-    }
+	for (int i = 0; i < segments; ++i) {
+		indices[i * 3 + 0] = 0;         // center
+		indices[i * 3 + 1] = i + 1;     // current point
+		indices[i * 3 + 2] = i + 2;     // next point
+	}
 
-    SDL_RenderGeometry(renderer, NULL, verts, segments + 2, indices, num_indices);
+	SDL_RenderGeometry(renderer, NULL, verts, segments + 2, indices, num_indices);
 
-    SDL_free(verts);
-    SDL_free(indices);
+	SDL_free(verts);
+	SDL_free(indices);
 }
 
 void SDL_DrawArrow(SDL_Renderer* renderer, float x1, float y1, float x2, float y2, float thickness, const SDL_Color& color) {
@@ -115,7 +115,7 @@ void SDL_DrawArrow(SDL_Renderer* renderer, float x1, float y1, float x2, float y
 	float length = sqrtf(dx * dx + dy * dy);
 
 	if (length == 0) {
-		drawCircleGeometry(renderer, x1, y1, thickness, thickness/5+8, color);
+		drawCircleGeometry(renderer, x1, y1, thickness, thickness / 5 + 8, color);
 		return;
 	}
 

@@ -17,6 +17,7 @@ public:
 	void runLoop();
 	
 private:
+	Rml::EventId pinchEventId;
 	Backend backend;
 	CircuitFileManager circuitFileManager;
 

@@ -1,7 +1,8 @@
 #include "app.h"
 
 App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
-	windows.emplace_back(&backend, &circuitFileManager);
+	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
+	windows.emplace_back(&backend, &circuitFileManager, pinchEventId);
 }
 
 void App::runLoop() {
@@ -19,7 +20,7 @@ void App::runLoop() {
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
 				// Single window was closed, check which window was closed and remove it
 				auto itr = windows.begin();
-				while (itr != windows.end()) {	
+				while (itr != windows.end()) {
 					if (itr->recieveEvent(event)) {
 						windows.erase(itr);
 						break;
@@ -72,4 +73,3 @@ void App::runLoop() {
 		}
 	}
 }
-

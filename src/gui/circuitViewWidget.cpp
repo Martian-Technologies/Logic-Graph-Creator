@@ -85,6 +85,15 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("Copy"); circuitView->getEventRegister().doEvent(Event("Copy")); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_V,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection/paste tool"); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_I,
+		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("interactive/state changer"); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
 		[this]() { logInfo("Tool Rotate Block CCW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
 	);
@@ -99,20 +108,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_B,
 		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
-	);
-	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_R,
-		[this]() {
-			int w = this->parent->GetClientWidth();
-			int h = this->parent->GetClientHeight();
-			int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
-			int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
-
-			circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-
-			renderer->resize(w, h);
-			renderer->reposition(x, y);
-		}
 	);
 
 	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
@@ -184,11 +179,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0) * 12, event.GetParameter<float>("wheel_delta_y", 0) * -12);
 			// logInfo("{}, {}", "", delta.x, delta.y);
 			if (mouseControls) {
-				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
+				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 150.f))) event.StopPropagation();
 			} else {
 				if (event.GetParameter<int>("shift_key", 0)) {
 					// do zoom
-					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 150.f))) event.StopPropagation();
 				} else {
 					if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
 						"view pan",
@@ -199,6 +194,28 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			}
 		}
 	));
+	parent->AddEventListener("pinch", new EventPasser(
+		[this](Rml::Event& event) {
+			float delta = event.GetParameter<float>("delta", 0);
+			logInfo(delta);
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta)*50))) event.StopPropagation();
+			// if (mouseControls) {
+			// } else {
+			// 	if (event.GetParameter<int>("shift_key", 0)) {
+			// 		// do zoom
+			// 		if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+			// 	} else {
+			// 		if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
+			// 			"view pan",
+			// 			delta.x / getPixelsWidth() * circuitView->getViewManager().getViewWidth(),
+			// 			delta.y / getPixelsHeight() * circuitView->getViewManager().getViewHeight()
+			// 		))) event.StopPropagation();
+			// 	}
+			// }
+		}
+	));
+
+
 
 	// connect buttons and actions
 	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);

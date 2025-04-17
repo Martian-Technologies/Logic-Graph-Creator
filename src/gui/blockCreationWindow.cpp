@@ -24,6 +24,7 @@ BlockCreationWindow::BlockCreationWindow(
 	Rml::Element* resetButton = menu->GetElementById("reset-block-creation");
 	resetButton->AddEventListener("click", new EventPasser(std::bind(&BlockCreationWindow::resetMenu, this)));
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&BlockCreationWindow::resetMenu, this));
+	dataUpdateEventReceiver.linkFunction("circuitViewChangeCircuit", std::bind(&BlockCreationWindow::resetMenu, this));
 	resetMenu();
 }
 

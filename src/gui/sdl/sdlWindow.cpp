@@ -28,5 +28,6 @@ SdlWindow::~SdlWindow() {
 }
 
 bool SdlWindow::isThisMyEvent(const SDL_Event& event) {
+	if (event.type == 2050) return true;
 	return SDL_GetWindowFromEvent(&event) == handle;
 }

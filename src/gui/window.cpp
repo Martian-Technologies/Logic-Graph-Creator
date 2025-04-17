@@ -9,7 +9,7 @@
 #include "gui/menuBar/menuManager.h"
 #include "gui/circuitView/simControlsManager.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), pinchEventId(pinchEventId) {
 	// create SDL renderer
 	sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
 	if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
@@ -17,8 +17,8 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
-	Rml::Debugger::Initialise(rmlContext);
-	Rml::Debugger::SetVisible(true);
+	// Rml::Debugger::Initialise(rmlContext);
+	// Rml::Debugger::SetVisible(true);
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// show rmlUi document
@@ -59,7 +59,7 @@ Window::~Window() {
 bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
-		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event, getSdlWindowScalingSize());
+		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event, getSdlWindowScalingSize(), pinchEventId);
 
 		return true;
 	}

@@ -31,6 +31,8 @@
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
 #include <RmlUi/Core/SystemInterface.h>
+#include <RmlUi/Core/Element.h>
+// #include "gui/sdl/SDL_gesture.h"
 
 SystemInterface_SDL::SystemInterface_SDL()
 {
@@ -147,7 +149,7 @@ void SystemInterface_SDL::DeactivateKeyboard()
 	}
 }
 
-bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev, float windowScalingSize)
+bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev, float windowScalingSize, Rml::EventId pinchEventId)
 {
 #if SDL_MAJOR_VERSION >= 3
 	#define RMLSDL_WINDOW_EVENTS_BEGIN
@@ -162,6 +164,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	constexpr auto event_text_input = SDL_EVENT_TEXT_INPUT;
 	constexpr auto event_window_size_changed = SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED;
 	constexpr auto event_window_leave = SDL_EVENT_WINDOW_MOUSE_LEAVE;
+	// constexpr auto event_gesture = GESTURE_MULTIGESTURE;
 	constexpr auto rmlsdl_true = true;
 	constexpr auto rmlsdl_false = false;
 #else
@@ -193,6 +196,26 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 
 	switch (ev.type)
 	{
+	// case event_gesture:
+	// {
+	// 	Gesture_MultiGestureEvent *mgesture = (Gesture_MultiGestureEvent *)&ev;
+	// 	//Rotation detected
+	// 	if( SDL_fabs( mgesture->dTheta ) > 3.14 / 180.0 )
+	// 	{
+	// 		// touchLocation.x = mgesture->x * gScreenRect.w;
+	// 		// touchLocation.y = mgesture->y * gScreenRect.h;
+	// 		// currentTexture = &gRotateTexture;
+	// 	}
+	// 	//Pinch detected
+	// 	else if( SDL_fabs( mgesture->dDist ) > 0.002 ) {
+	// 		// logInfo(mgesture->dDist);
+	// 		Rml::Dictionary dict;
+	// 		dict["delta"] = mgesture->dDist;
+	// 		context->GetHoverElement()->DispatchEvent(pinchEventId, dict);
+	// 		// mgesture->dDist
+	// 	}
+	// }
+	// break;
 	case event_mouse_motion:
 	{
 		result = context->ProcessMouseMove(int(ev.motion.x*windowScalingSize), int(ev.motion.y*windowScalingSize), GetKeyModifierState());

@@ -14,6 +14,7 @@ void CircuitView::setBackend(Backend* backend) {
 		oldBackend->unlinkCircuitView(this);
 	}
 	this->backend = backend;
+	dataUpdateEventManager = backend->getDataUpdateEventManager();
 }
 
 void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
@@ -25,13 +26,13 @@ void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 
 void CircuitView::setCircuit(SharedCircuit circuit) {
 	if (this->circuit) this->circuit->disconnectListener(this);
-
 	this->circuit = circuit;
 	toolManager.setCircuit(circuit.get());
 	renderer->setCircuit(circuit.get());
 	if (circuit) {
 		circuit->connectListener(this, std::bind(&CircuitView::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
 	}
+	if (dataUpdateEventManager) dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
 }
 
 void CircuitView::setAddress(const Address& address) {
