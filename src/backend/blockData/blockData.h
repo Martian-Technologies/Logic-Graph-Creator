@@ -80,11 +80,19 @@ public:
 	inline void setConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		connections[connectionEndId] = { vector, true };
 		inputConnectionCount++;
+		dataUpdateEventManager->sendEvent(
+			"blockDataSetConnection",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+		);
 		sendBlockDataUpdate();
 	}
 	// trys to set a connection output in the block. Returns success.
 	inline void setConnectionOutput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
 		connections[connectionEndId] = { vector, false };
+		dataUpdateEventManager->sendEvent(
+			"blockDataSetConnection",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+		);
 		sendBlockDataUpdate();
 	}
 
@@ -131,13 +139,13 @@ public:
 		return { 0, false };
 	}
 	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId) const noexcept {
-		if (defaultData) return { Vector(0), connectionId < 2 };
+		if (defaultData) return { Vector(0), connectionId <= 1 };
 		auto iter = connections.find(connectionId);
 		if (iter == connections.end()) return { Vector(), false };
 		return { iter->second.first, true };
 	}
 	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId, Rotation rotation) const noexcept {
-		if (defaultData) return { Vector(0), connectionId < 2 };
+		if (defaultData) return { Vector(0), connectionId <= 1 };
 		auto iter = connections.find(connectionId);
 		if (iter == connections.end()) return { Vector(), false };
 		return {
@@ -160,6 +168,9 @@ public:
 	inline connection_end_id_t getOutputConnectionCount() const noexcept {
 		if (defaultData) return 1;
 		return connections.size() - inputConnectionCount;
+	}
+	inline bool connectionExists(connection_end_id_t connectionId) const noexcept {
+		return defaultData ? connectionId <= 1 : connections.contains(connectionId);
 	}
 	inline bool isConnectionInput(connection_end_id_t connectionId) const noexcept {
 		if (defaultData) return connectionId == 0;

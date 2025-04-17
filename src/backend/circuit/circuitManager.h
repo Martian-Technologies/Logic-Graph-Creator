@@ -11,7 +11,8 @@ class EvaluatorManager;
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) : dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager), evaluatorManager(evaluatorManager) { }
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
+		dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager) , evaluatorManager(evaluatorManager) { }
 
 	// Circuit
 	inline SharedCircuit getCircuit(circuit_id_t id) {
@@ -50,6 +51,7 @@ public:
 	// Block Data
 	inline BlockDataManager* getBlockDataManager() { return &blockDataManager; }
 	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
+	inline CircuitBlockDataManager* getCircuitBlockDataManager() { return &circuitBlockDataManager; }
 	inline const CircuitBlockDataManager* getCircuitBlockDataManager() const { return &circuitBlockDataManager; }
 
 	inline BlockType setupBlockData(circuit_id_t circuitId) {

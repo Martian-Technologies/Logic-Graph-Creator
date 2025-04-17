@@ -25,6 +25,7 @@ public:
 	void resetMenu();
 
 private:
+	void addListItem();
 	void updateSelected(std::string string);
 	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree);
 

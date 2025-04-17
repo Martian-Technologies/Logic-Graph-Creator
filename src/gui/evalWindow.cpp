@@ -15,6 +15,7 @@ EvalWindow::EvalWindow(
 	Rml::Element* parent
 ) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager), circuitViewWidget(circuitViewWidget) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
+	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
 }

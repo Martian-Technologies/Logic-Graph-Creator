@@ -24,6 +24,7 @@ bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation,
 	iter->second.setPosition(position);
 	iter->second.setRotation(rotation);
 	if (blockTypeCounts.size() <= blockType) blockTypeCounts.resize(blockType + 1);
+	logInfo("Placed {}, at {}", "BlockContainer", (int)blockType, position.toString());
 	blockTypeCounts[blockType]++;
 	placeBlockCells(&iter->second);
 	difference->addPlacedBlock(position, rotation, blockType);

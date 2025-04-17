@@ -2,15 +2,16 @@
 #define circuitBlockDataManager_h
 
 #include "circuitBlockData.h"
-#include "circuit.h"
 
 class CircuitBlockDataManager {
 public:
+	CircuitBlockDataManager(DataUpdateEventManager* dataUpdateEventManager) : dataUpdateEventManager(dataUpdateEventManager) { }
+
 	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType) {
-		circuitBlockData[circuitId].setBlockType(blockType);
+		(circuitBlockData.emplace(std::pair<circuit_id_t, CircuitBlockData>(circuitId, {circuitId, dataUpdateEventManager}))).first->second.setBlockType(blockType);
 		blockTypeToCircuitId[blockType] = circuitId;
 	}
- 	CircuitBlockData* getCircuitBlockData(circuit_id_t circuitId) {
+	CircuitBlockData* getCircuitBlockData(circuit_id_t circuitId) {
 		auto iter = circuitBlockData.find(circuitId);
 		if (iter == circuitBlockData.end()) return nullptr;
 		return &(iter->second);
@@ -27,6 +28,7 @@ public:
 	}
 
 private:
+	DataUpdateEventManager* dataUpdateEventManager;
 	std::map<BlockType, circuit_id_t> blockTypeToCircuitId;
 	std::map<circuit_id_t, CircuitBlockData> circuitBlockData;
 
