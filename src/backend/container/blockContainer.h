@@ -12,6 +12,9 @@ public:
 
 	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
+	inline BlockType getBlockType() const { return selfBlockType; }
+	inline void setBlockType(BlockType type) { if (getBlockTypeCount(type) == 0) selfBlockType = type; }
+
 	/* ----------- collision ----------- */
 	inline bool checkCollision(const Position& position) const { return getCell(position); }
 	bool checkCollision(const Position& positionSmall, const Position& positionLarge) const;
@@ -91,6 +94,7 @@ private:
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
 
+	BlockType selfBlockType = BlockType::NONE;
 	BlockDataManager* blockDataManager;
 	block_id_t lastId;
 	Sparse2d<Cell> grid;

@@ -389,3 +389,16 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 	blockContainer.resizeBlockType(type, data->get().second, difference.get());
 	sendDifference(difference);
 }
+
+void Circuit::setBlockType(BlockType blockType) {
+	blockContainer.setBlockType(blockType);
+	blockContainer.getBlockDataManager()->getBlockData(blockType)->setName(getCircuitNameNumber());
+}
+
+
+void Circuit::setCircuitName(const std::string& name) {
+	circuitName = name;
+	if (blockContainer.getBlockType() == BlockType::NONE) return;
+	BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(blockContainer.getBlockType());
+	if (blockData) blockData->setName(getCircuitNameNumber());
+}

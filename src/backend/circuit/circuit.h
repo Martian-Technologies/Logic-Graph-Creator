@@ -23,10 +23,12 @@ public:
 		dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
 	}
 
+	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
+	void setCircuitName(const std::string& name);
 
 	inline unsigned long long getEditCount() const { return editCount; }
 
@@ -89,6 +91,7 @@ public:
 	void redo();
 
 private:
+	void setBlockType(BlockType blockType);
 	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers

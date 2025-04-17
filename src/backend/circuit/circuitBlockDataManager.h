@@ -6,7 +6,10 @@
 
 class CircuitBlockDataManager {
 public:
-	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType) { circuitBlockData[circuitId].setBlockType(blockType); blockTypeToCircuitId[blockType] = circuitId; }
+	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType) {
+		circuitBlockData[circuitId].setBlockType(blockType);
+		blockTypeToCircuitId[blockType] = circuitId;
+	}
  	CircuitBlockData* getCircuitBlockData(circuit_id_t circuitId) {
 		auto iter = circuitBlockData.find(circuitId);
 		if (iter == circuitBlockData.end()) return nullptr;

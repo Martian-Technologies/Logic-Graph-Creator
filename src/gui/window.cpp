@@ -38,6 +38,9 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	Rml::Element* modeTreeParent = document->GetElementById("mode-selection-tree");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, itemTreeParent, modeTreeParent);
 
+	Rml::Element* blockCreationMenu = document->GetElementById("block-creation-form");
+	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, blockCreationMenu);
+
 	// menu bar with file, edit, view ...
 	MenuManager* menuManager = new MenuManager(document);
 

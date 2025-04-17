@@ -62,23 +62,4 @@ void EvalWindow::updateSelected(std::string string) {
 
 	CircuitView* circuitView = circuitViewWidget->getCircuitView();
 	circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
-
-	// if (parts.size() <= 1) return;
-	// if (parts[0] == "Blocks") {
-	// 	BlockType blockType = blockDataManager->getBlockType(string.substr(7, string.size() - 7));
-	// 	toolManagerManager->setBlock(blockType);
-	// } else if (parts[0] == "Tools") {
-	// 	toolManagerManager->setTool(string.substr(6, string.size() - 6));
-	// } else {
-	// 	logError("Do not recognize cadegory {}", "EvalWindow", parts[0]);
-	// }
-}
-
-void EvalWindow::updateSelectedMode() {
-	// if (!current || (previous && current->text() == previous->text())) return;
-	// emit selectedModeChange(current->text().toStdString());
-}
-
-void EvalWindow::updateToolModeOptions(const std::vector<std::string>* modes) {
-
 }

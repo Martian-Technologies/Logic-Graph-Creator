@@ -13,6 +13,7 @@
 
 #include "selectorWindow.h"
 #include "evalWindow.h"
+#include "blockCreationWindow.h"
 #include "circuitViewWidget.h"
 
 class Window {
@@ -41,6 +42,7 @@ private:
 	CircuitFileManager* circuitFileManager;
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
+	std::optional<BlockCreationWindow> blockCreationWindow;
 
 	SdlWindow sdlWindow;
 	SDL_Renderer* sdlRenderer;

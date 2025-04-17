@@ -54,33 +54,8 @@ public:
 
 	// Block Data
 	inline BlockDataManager* getBlockDataManager() { return &blockDataManager; }
+	inline const BlockDataManager* getBlockDataManager() const { return &blockDataManager; }
 	inline const CircuitBlockDataManager* getCircuitBlockDataManager() const { return &circuitBlockDataManager; }
-	inline BlockType setupBlockData(circuit_id_t circuitId) {
-		auto iter = circuits.find(circuitId);
-		if (iter == circuits.end()) return BlockType::NONE;
-		SharedCircuit circuit = iter->second;
-		// Block Data
-		BlockType blockType = blockDataManager.addBlock();
-		auto blockData = blockDataManager.getBlockData(blockType);
-		if (!blockData) {
-			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
-			return BlockType::NONE;
-		}
-		blockData->setDefaultData(false);
-		blockData->setPrimitive(false);
-		blockData->setName(circuit->getCircuitNameNumber());
-		blockData->setPath("Custom");
-		blockData->setSize(Vector(2, 1));
-
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
-
-		// Circuit Block Data
-		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
-
-		updateBlockPorts(circuit->getBlockContainer()->getCreationDifferenceShared(), circuitId);
-
-		return blockType;
-	}
 
 	inline void updateBlockPorts(DifferenceSharedPtr dif, circuit_id_t circuitId) {
 		auto iter = circuits.find(circuitId);
@@ -133,6 +108,31 @@ public:
 		dataUpdateEventManager->sendEvent("blockDataUpdate");
 	}
 
+	inline BlockType setupBlockData(circuit_id_t circuitId) {
+		auto iter = circuits.find(circuitId);
+		if (iter == circuits.end()) return BlockType::NONE;
+		SharedCircuit circuit = iter->second;
+		// Block Data
+		BlockType blockType = blockDataManager.addBlock();
+		auto blockData = blockDataManager.getBlockData(blockType);
+		if (!blockData) {
+			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
+			return BlockType::NONE;
+		}
+		blockData->setDefaultData(false);
+		blockData->setPrimitive(false);
+		blockData->setPath("Custom");
+		blockData->setSize(Vector(2, 1));
+
+		// Circuit Block Data
+		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
+		circuit->setBlockType(blockType);
+
+		updateBlockPorts(circuit->getBlockContainer()->getCreationDifferenceShared(), circuitId);
+
+		return blockType;
+	}
+
 	// Create a custom new block from a parsed circuit
 	inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
 	    if (!parsedCircuit->isValid()){
@@ -158,43 +158,42 @@ public:
 		
 	    circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
 	    SharedCircuit circuit = getCircuit(id);
-		
 	    circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
 
+		// if is custom
 		if (!parsedCircuit->isCustom()) return id;
+		
+		// Block Data
+	    BlockType blockType = blockDataManager.addBlock();
+	    BlockData* blockData = blockDataManager.getBlockData(blockType);
+		if (!blockData) {
+			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
+			return id;
+		}
+		blockData->setDefaultData(false);
+		blockData->setPrimitive(false);
+		blockData->setPath("Custom");
+		blockData->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
 
-	    BlockType type = blockDataManager.addBlock();
-	    BlockData* data = blockDataManager.getBlockData(type);
-	    if (!data) {
-			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(type));
-	        return id;
-	    }
+		// Circuit Block Data
+		circuitBlockDataManager.newCircuitBlockData(id, blockType);
+		circuit->setBlockType(blockType);
 
-		circuitBlockDataManager.newCircuitBlockData(id, type);
 	    CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
 		if (!circuitBlockData) {
 			logError("Did not find newly created circuit block data with circuit id: {}", "CircuitManager", (unsigned int)id);
 	        return id;
 	    }
-		
-	    data->setPrimitive(false);
-	    data->setDefaultData(false);
-		
-	    data->setPath("Custom");
-	    data->setName(parsedCircuit->getName());
 
-		data->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
-
+		// Connections
 	    const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
 
 		for (const ParsedCircuit::ConnectionPort& port : ports) {
-			if (port.isInput) data->setConnectionInput(port.positionOnBlock, port.connectionEndId);
-			else data->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
+			if (port.isInput) blockData->setConnectionInput(port.positionOnBlock, port.connectionEndId);
+			else blockData->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
 	        circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
 	    }
-
-	    dataUpdateEventManager->sendEvent("blockDataUpdate");
-
+		
 	    return id;
 	}
 

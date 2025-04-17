@@ -17,7 +17,7 @@ bool BlockContainer::checkCollision(const Position& position, Rotation rotation,
 }
 
 bool BlockContainer::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference) {
-	if (!blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType)) return false;
+	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType)) return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
 	iter->second.setId(id);

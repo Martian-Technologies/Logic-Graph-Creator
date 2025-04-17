@@ -15,12 +15,23 @@
 	/* display: inline-block; */
 	background-color: #151515;
 }
-/*
-.form-label {
-	display: inline-block;
+
+#connection-menu {
+	display: block;
 	background-color: #3b3b3b;
-	margin: 1em 0.1em;
-} */
+	border-radius: 0.3em;
+	width: 80%;
+	margin: 0.3em 0.1em;
+	padding: 0.1em 0.1em;
+}
+
+#connection-list {
+	display: block;
+	background-color: #151515;
+	border-radius: 0.1em;
+	margin: 0.3em 0.3em;
+	min-height: 3rem;;
+}
 
 .name {
 	width: 11rem;
