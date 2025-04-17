@@ -4,6 +4,7 @@
 	box-sizing: border-box;
 	font-family: Monaspace Argon;
 	font-size: 12dp;
+	cursor: pointer;
 }
 
 /* Main Container Styles */
@@ -67,7 +68,7 @@ body {
 
 #left-sidebar-container {
 	flex-shrink: 0;
-	flex-basis: 16rem;
+	flex-basis: 20rem;
 	background-color: #1d1d1d;
 }
 
@@ -100,7 +101,6 @@ body {
 }
 
 .menutree li {
-	cursor: pointer;
 	padding: 0.1em 0.1em;
 }
 

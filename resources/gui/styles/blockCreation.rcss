@@ -9,6 +9,9 @@
 	background-color: #2e2e2e;
 	border-radius: 0.3em;
 	margin: 1em 0.1em;
+	padding: 0.2em;
+	/* display: flex; */
+	/* flex-direction: column; */
 }
 
 #block-creation-form input {
@@ -20,7 +23,6 @@
 	display: block;
 	background-color: #3b3b3b;
 	border-radius: 0.3em;
-	width: 80%;
 	margin: 0.3em 0.1em;
 	padding: 0.1em 0.1em;
 }
@@ -29,8 +31,24 @@
 	display: block;
 	background-color: #151515;
 	border-radius: 0.1em;
-	margin: 0.3em 0.3em;
-	min-height: 3rem;;
+	margin: 0.2em 0.2em;
+	min-height: 3rem;
+}
+
+.connection-list-item {
+	display: block;
+	background-color: #232323;
+	border-radius: 0.2em;
+	padding: 0.075em;
+	margin: 0.15em;
+}
+
+.connection-list-item input {
+	/* display: inline-block; */
+	background-color: #151515;
+	border-radius: 0.1em;
+	vertical-align: middle;
+	margin: 0 0.1em;
 }
 
 .name {
@@ -39,4 +57,24 @@
 
 .number {
 	width: 2.4rem;
+}
+
+.number-long {
+	width: 4rem;
+}
+
+input[type="checkbox"] {
+    appearance: none; /* Remove default checkbox appearance */
+    width: 16px;
+    height: 16px;
+    background-color: #5a6262; /* Unchecked background */
+    border: 1px; /* Unchecked border */
+    border-radius: 3px;
+    color: #f0f0f0; /* Color for potential checkmark (if using text-based) */
+    margin-right: 8px;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #8fbc8f;
+    border-color: #a9d1a9; 
 }
