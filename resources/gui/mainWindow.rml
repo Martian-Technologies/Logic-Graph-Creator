@@ -11,9 +11,9 @@
 	<body>
 		<div id="main-container">
 
-			<div id="top-container">
+			<!-- <div id="top-container">
 				<template src="menuBar"></template>
-			</div>
+			</div> -->
 
 			<div id="middle-container">
 				<div id="left-sidebar-container">
@@ -38,9 +38,9 @@
 
 				
 				<div id="center-container">
-					<div id="simulation-controls-container">
+					<!-- <div id="simulation-controls-container">
 						<template src="sim-controls"></template>
-					</div>
+					</div> -->
 					<div id="circuitview-container"> </div>
 				</div>
 			</div>

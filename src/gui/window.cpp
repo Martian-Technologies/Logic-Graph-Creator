@@ -42,13 +42,13 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, blockCreationMenu);
 
 	// menu bar with file, edit, view ...
-	MenuManager* menuManager = new MenuManager(document);
+	// MenuManager* menuManager = new MenuManager(document);
 
 	// TabsManager* tabsManager = new TabsManager(document);	
 	// TabsManager* tabsManager = new TabsManager(document);	
 
 	// status of sim
-	SimControlsManager* simControlsManager = new SimControlsManager(document);
+	// SimControlsManager* simControlsManager = new SimControlsManager(document);
 	//terst
 }
 

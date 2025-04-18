@@ -59,7 +59,14 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
 
 	// create keybind shortcuts and connect them
-	parent->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
+	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
+	// keybindHandler.addListener(
+	// 	Rml::Input::KeyIdentifier::KI_D,
+	// 	Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
+	// 	[this]() {
+	// 		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), 0);
+	// 	}
+	// );
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,
@@ -211,7 +218,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this](Rml::Event& event) {
 			float delta = event.GetParameter<float>("delta", 0);
 			logInfo(delta);
-			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta)*50))) event.StopPropagation();
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta) * 50))) event.StopPropagation();
 			// if (mouseControls) {
 			// } else {
 			// 	if (event.GetParameter<int>("shift_key", 0)) {

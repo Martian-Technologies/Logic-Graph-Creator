@@ -27,6 +27,20 @@
 	padding: 0.1em 0.1em;
 }
 
+#reset-block-creation {
+	display: inline-block;
+	margin: 0 1em;
+}
+#update-block-creation {
+	display: inline-block;
+	margin: 0 1em;
+}
+
+#connection-menu div div {
+	display: inline-block;
+	margin: 0 1em;
+}
+
 #connection-list {
 	display: block;
 	background-color: #151515;

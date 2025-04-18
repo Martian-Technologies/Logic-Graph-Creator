@@ -26,11 +26,15 @@ void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 
 void CircuitView::setCircuit(SharedCircuit circuit) {
 	if (this->circuit) this->circuit->disconnectListener(this);
-	this->circuit = circuit;
-	toolManager.setCircuit(circuit.get());
-	renderer->setCircuit(circuit.get());
 	if (circuit) {
+		this->circuit = circuit;
+		toolManager.setCircuit(circuit.get());
+		renderer->setCircuit(circuit.get());
 		circuit->connectListener(this, std::bind(&CircuitView::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
+	} else {
+		this->circuit = circuit;
+		toolManager.setCircuit(nullptr);
+		renderer->setCircuit(nullptr);
 	}
 	if (dataUpdateEventManager) dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
 }

@@ -21,8 +21,8 @@
 				</div>
 				<div id="connection-menu">
 					<div>
-						<div id="connection-list-add">add</div>
-						<div id="connection-list-remove">remove</div>
+						<div id="connection-list-add">Add</div>
+						<div id="connection-list-remove">Remove</div>
 					</div>
 					<div id="connection-list"></div>
 				</div>

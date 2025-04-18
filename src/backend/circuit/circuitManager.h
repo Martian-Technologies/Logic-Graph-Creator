@@ -35,6 +35,7 @@ public:
 		if (iter == UUIDToCircuits.end()) return nullptr;
 		return iter->second;
 	}
+	inline const std::map<circuit_id_t, SharedCircuit>& getCircuits() const { return circuits; }
 
 	inline circuit_id_t createNewCircuit() {
 		return createNewCircuit("circuit" + std::to_string(lastId+1), generate_uuid_v4());
@@ -43,6 +44,7 @@ public:
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
+			// circuitBlockDataManager.removeCircuitBlockData(id);
 	        UUIDToCircuits.erase(iter->second->getUUID());
 			circuits.erase(iter);
 		}

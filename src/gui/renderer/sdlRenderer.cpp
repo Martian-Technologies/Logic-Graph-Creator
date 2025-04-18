@@ -623,20 +623,24 @@ void SdlRenderer::renderConnection(Position aPos, const Block* a, Position bPos,
 	FVector bSocketOffset(0.0f, 0.0f);
 
 	if (a) {
-		switch (a->getRotation()) {
-		case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
-		case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
-		case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
-		case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
+		if (a->type() != BlockType::JUNCTION) {
+			switch (a->getRotation()) {
+			case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
+			case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
+			case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
+			case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
+			}
 		}
 	}
 
 	if (b) {
-		switch (b->getRotation()) {
-		case Rotation::ZERO: bSocketOffset = { -edgeDis, -sideShift }; break;
-		case Rotation::NINETY: bSocketOffset = { sideShift, -edgeDis }; break;
-		case Rotation::ONE_EIGHTY: bSocketOffset = { edgeDis, sideShift }; break;
-		case Rotation::TWO_SEVENTY: bSocketOffset = { -sideShift, edgeDis }; break;
+		if (b->type() != BlockType::JUNCTION) {
+			switch (b->getRotation()) {
+			case Rotation::ZERO: bSocketOffset = { -edgeDis, -sideShift }; break;
+			case Rotation::NINETY: bSocketOffset = { sideShift, -edgeDis }; break;
+			case Rotation::ONE_EIGHTY: bSocketOffset = { edgeDis, sideShift }; break;
+			case Rotation::TWO_SEVENTY: bSocketOffset = { -sideShift, edgeDis }; break;
+			}
 		}
 	}
 
@@ -659,11 +663,13 @@ void SdlRenderer::renderConnection(Position aPos, FPosition bPos, logic_state_t 
 	const Block* a = circuit->getBlockContainer()->getBlock(aPos);
 
 	if (a) {
-		switch (a->getRotation()) {
-		case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
-		case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
-		case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
-		case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
+		if (a->type() != BlockType::JUNCTION) {
+			switch (a->getRotation()) {
+			case Rotation::ZERO: aSocketOffset = { edgeDis, sideShift }; break;
+			case Rotation::NINETY: aSocketOffset = { -sideShift, edgeDis }; break;
+			case Rotation::ONE_EIGHTY: aSocketOffset = { -edgeDis, -sideShift }; break;
+			case Rotation::TWO_SEVENTY: aSocketOffset = { sideShift, -edgeDis }; break;
+			}
 		}
 	}
 

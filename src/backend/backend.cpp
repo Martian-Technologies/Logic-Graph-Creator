@@ -4,6 +4,16 @@ Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager),
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
 }
 
+// void Backend::clear() {
+// 	for (auto iter : evaluatorManager.getEvaluators()) {
+// 		evaluatorManager.destroyEvaluator(iter.second->getEvaluatorId());
+// 	}
+// 	for (auto iter : circuitManager.getCircuits()) {
+// 		circuitManager.destroyCircuit(iter.second->getCircuitId());
+// 	}
+// }
+
+
 circuit_id_t Backend::createCircuit(const std::string& name, const std::string& uuid) {
 	return circuitManager.createNewCircuit(name, uuid);
 }
@@ -51,6 +61,11 @@ bool Backend::linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t 
 		linkCircuitView(circuitView);
 		circuitView->setEvaluator(nullptr);
 		circuitView->setCircuit(circuit);
+		return true;
+	} else {
+		linkCircuitView(circuitView);
+		circuitView->setEvaluator(nullptr);
+		circuitView->setCircuit(nullptr);
 		return true;
 	}
 	return false;

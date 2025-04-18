@@ -13,6 +13,8 @@ class Backend {
 public:
 	Backend();
 
+	// void clear();
+
 	// Creates a new Circuit. Returns circuit_id_t.
 	circuit_id_t createCircuit() { return circuitManager.createNewCircuit(); }
 	circuit_id_t createCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4());
