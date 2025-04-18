@@ -34,7 +34,6 @@ LogicSimulator::~LogicSimulator() {
 }
 
 void LogicSimulator::initialize() {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	for (auto& gate : gates) {
 		if (gate.isValid()) {
 			std::fill(gate.statesA.begin(), gate.statesA.end(), logic_state_t::LOW);
@@ -44,8 +43,6 @@ void LogicSimulator::initialize() {
 }
 
 simulator_gate_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-
 	if (allowSubstituteDecomissioned && numDecomissioned > 0) {
 		for (size_t i = 0; i < gates.size(); ++i) {
 			if (gates[i].type == GateType::NONE) {
@@ -62,8 +59,6 @@ simulator_gate_id_t LogicSimulator::addGate(const GateType& gateType, bool allow
 
 void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
 								 simulator_gate_id_t targetGate, size_t inputGroup) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-
 	if (sourceGate < 0 || sourceGate >= gates.size()) {
 		logError("connectGates: sourceGate index out of range", "Simulator");
 		return;
@@ -107,8 +102,6 @@ void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputG
 
 void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
 	simulator_gate_id_t targetGate, size_t inputGroup) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-
 	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid()) {
 		logError("disconnectGates: sourceGate index out of range or invalid", "Simulator");
 		return;
@@ -161,7 +154,6 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 }
 
 void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
 		logError("decomissionGate: gate index out of range or already decommissioned", "Simulator");
 		return;
@@ -226,7 +218,6 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 }
 
 std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::compressGates() {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> gateMap;
 	int newGateIndex = 0;
 
@@ -525,33 +516,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	logError("computeGateStates: Unknown gate type {}", "", static_cast<int>(gate.type));
 }
 
-void LogicSimulator::computeNextState() {
-	std::shared_lock<std::shared_mutex> lock(simulationMutex);
-
-	for (auto& gate : gates) {
-		if (gate.type == GateType::JUNCTION) {
-			computeJunctionStates(gate);
-		}
-	}
-	for (auto& gate : gates) {
-		if (gate.isValid() && gate.type != GateType::JUNCTION) {
-			computeGateStates(gate);
-		}
-	}
-}
-
-void LogicSimulator::swapStates() {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-
-	for (auto& gate : gates) {
-		if (gate.isValid()) {
-			std::swap(gate.statesA, gate.statesB);
-		}
-	}
-}
-
 void LogicSimulator::setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
 		logError("setState: gate index out of range or invalid", "Simulator");
 		return;
@@ -567,18 +532,11 @@ void LogicSimulator::setState(simulator_gate_id_t gate, size_t outputGroup, logi
 }
 
 void LogicSimulator::clearGates() {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
 	gates.clear();
 	numDecomissioned = 0;
 }
 
-void LogicSimulator::reserveGates(unsigned int numGates) {
-	std::unique_lock<std::shared_mutex> lock(simulationMutex);
-	gates.reserve(numGates);
-}
-
 logic_state_t LogicSimulator::getState(simulator_gate_id_t gate, size_t outputGroup) const {
-	std::shared_lock<std::shared_mutex> lock(simulationMutex);
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
 		logError("getState: gate index out of range or invalid", "Simulator");
 		return logic_state_t::UNDEFINED;
@@ -593,7 +551,6 @@ logic_state_t LogicSimulator::getState(simulator_gate_id_t gate, size_t outputGr
 }
 
 std::vector<std::vector<logic_state_t>> LogicSimulator::getCurrentState() const {
-	std::shared_lock<std::shared_mutex> lock(simulationMutex);
 	std::vector<std::vector<logic_state_t>> states;
 	states.reserve(gates.size());
 
@@ -608,128 +565,30 @@ std::vector<std::vector<logic_state_t>> LogicSimulator::getCurrentState() const 
 	return states;
 }
 
-void LogicSimulator::debugPrint() {
-	std::shared_lock<std::shared_mutex> lock(simulationMutex);
-	std::cout << "ID:        ";
-	for (size_t i = 0; i < gates.size(); ++i) {
-		std::cout << i << " ";
-	}
-	std::cout << "\nGate type: ";
-	for (const auto& gate : gates) {
-		std::cout << static_cast<int>(gate.type) << " ";
-	}
-
-	std::cout << "\nInput Groups:" << std::endl;
-
-	size_t maxInputGroups = 0;
-	for (const auto& gate : gates) {
-		maxInputGroups = std::max(maxInputGroups, gate.getInputGroupCount());
-	}
-
-	for (size_t groupIdx = 0; groupIdx < maxInputGroups; ++groupIdx) {
-		std::cout << "Group " << groupIdx << ":  ";
-		for (size_t gateIdx = 0; gateIdx < gates.size(); ++gateIdx) {
-			const auto& gate = gates[gateIdx];
-			if (groupIdx < gate.getInputGroupCount()) {
-				std::cout << "[";
-				for (size_t inputIdx = 0; inputIdx < gate.inputGroups[groupIdx].size(); ++inputIdx) {
-					const auto& conn = gate.inputGroups[groupIdx][inputIdx];
-					std::cout << conn.gateId << ":" << conn.outputGroup;
-					if (inputIdx < gate.inputGroups[groupIdx].size() - 1) {
-						std::cout << ",";
-					}
-				}
-				std::cout << "] ";
-			} else {
-				std::cout << "[] ";
-			}
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << "\nOutput Groups:" << std::endl;
-
-	size_t maxOutputGroups = 0;
-	for (const auto& gate : gates) {
-		maxOutputGroups = std::max(maxOutputGroups, gate.getOutputGroupCount());
-	}
-
-	for (size_t groupIdx = 0; groupIdx < maxOutputGroups; ++groupIdx) {
-		std::cout << "Group " << groupIdx << ":  ";
-		for (size_t gateIdx = 0; gateIdx < gates.size(); ++gateIdx) {
-			const auto& gate = gates[gateIdx];
-			if (groupIdx < gate.getOutputGroupCount()) {
-				std::cout << "[";
-				for (size_t outputIdx = 0; outputIdx < gate.outputGroups[groupIdx].size(); ++outputIdx) {
-					const auto& conn = gate.outputGroups[groupIdx][outputIdx];
-					std::cout << conn.first << ":" << conn.second;
-					if (outputIdx < gate.outputGroups[groupIdx].size() - 1) {
-						std::cout << ",";
-					}
-				}
-				std::cout << "] ";
-			} else {
-				std::cout << "[] ";
-			}
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << "\nStates:" << std::endl;
-
-	for (size_t groupIdx = 0; groupIdx < maxOutputGroups; ++groupIdx) {
-		std::cout << "Group " << groupIdx << " StateA: ";
-		for (size_t gateIdx = 0; gateIdx < gates.size(); ++gateIdx) {
-			const auto& gate = gates[gateIdx];
-			if (gate.isValid() && groupIdx < gate.getOutputGroupCount()) {
-				const char* stateStr;
-				switch (gate.statesA[groupIdx]) {
-					case logic_state_t::LOW: stateStr = "L"; break;
-					case logic_state_t::HIGH: stateStr = "H"; break;
-					case logic_state_t::FLOATING: stateStr = "Z"; break;
-					case logic_state_t::UNDEFINED: stateStr = "X"; break;
-					default: stateStr = "?";
-				}
-				std::cout << stateStr << " ";
-			} else {
-				std::cout << "- ";
-			}
-		}
-		std::cout << std::endl;
-
-		std::cout << "Group " << groupIdx << " StateB: ";
-		for (size_t gateIdx = 0; gateIdx < gates.size(); ++gateIdx) {
-			const auto& gate = gates[gateIdx];
-			if (gate.isValid() && groupIdx < gate.getOutputGroupCount()) {
-				const char* stateStr;
-				switch (gate.statesB[groupIdx]) {
-					case logic_state_t::LOW: stateStr = "L"; break;
-					case logic_state_t::HIGH: stateStr = "H"; break;
-					case logic_state_t::FLOATING: stateStr = "Z"; break;
-					case logic_state_t::UNDEFINED: stateStr = "X"; break;
-					default: stateStr = "?";
-				}
-				std::cout << stateStr << " ";
-			} else {
-				std::cout << "- ";
-			}
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << std::endl;
-}
-
 void LogicSimulator::simulationLoop() {
 	while (running.load(std::memory_order_acquire)) {
 		if (proceedFlag.load(std::memory_order_acquire)) {
 			{
-				computeNextState();
+				std::unique_lock<std::shared_mutex> lock(simulationMutex);
+				for (auto& gate : gates) {
+					if (gate.type == GateType::JUNCTION) {
+						computeJunctionStates(gate);
+					}
+				}
+				for (auto& gate : gates) {
+					if (gate.isValid() && gate.type != GateType::JUNCTION) {
+						computeGateStates(gate);
+					}
+				}
+				for (auto& gate : gates) {
+					if (gate.isValid()) {
+						std::swap(gate.statesA, gate.statesB);
+					}
+				}
+				lock.unlock();
 			}
 
 			++ticksRun;
-
-			swapStates(); // later we will just have two different computestate functions.
 
 			const unsigned long long int target = targetTickrate.load(std::memory_order_acquire);
 			nextTick_us.store(

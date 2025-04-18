@@ -59,15 +59,10 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	logicSimulatorWrapper.signalToPause();
 	DiffCache diffCache(circuitManager);
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
 	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
 }
 
 void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
@@ -324,14 +319,10 @@ logic_state_t Evaluator::getState(const Address& address) {
 	}
 	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
 	const logic_state_t state = logicSimulatorWrapper.getState(blockId, 0); // TODO: 0 temp
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
+
 	return state;
 }
 
@@ -342,10 +333,7 @@ bool Evaluator::getBoolState(const Address& address) {
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses) {
 	std::vector<logic_state_t> states;
 	states.reserve(addresses.size());
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
 	for (const auto& address : addresses) {
 		// check if the address is valid
 		if (addressTree.hasBranch(address)) {
@@ -360,9 +348,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 			states.push_back(logicSimulatorWrapper.getState(blockId, 0)); // TODO: 0 temp
 		}
 	}
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
 	return states;
 }
 
@@ -373,12 +359,7 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 		return;
 	}
 	const wrapper_gate_id_t blockId = gate.gateId;
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
 	logicSimulatorWrapper.setState(blockId, 0, state); // TODO: 0 temp
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
 }

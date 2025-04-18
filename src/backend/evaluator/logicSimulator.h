@@ -34,13 +34,11 @@ public:
 
 	std::vector<std::vector<logic_state_t>> getCurrentState() const;
 	void clearGates();
-	void reserveGates(unsigned int numGates);
 
 	void setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state);
 
 	logic_state_t getState(simulator_gate_id_t gate, size_t outputGroup) const;
 
-	void debugPrint();
 	void signalToPause();
 	void signalToProceed();
 	bool threadIsWaiting() const;
@@ -51,6 +49,13 @@ public:
 
 	int getDecomissionedCount() const {
 		return numDecomissioned;
+	}
+
+	std::unique_lock<std::shared_mutex> getSimulationUniqueLock() {
+		return std::unique_lock<std::shared_mutex>(simulationMutex);
+	}
+	std::shared_lock<std::shared_mutex> getSimulationSharedLock() {
+		return std::shared_lock<std::shared_mutex>(simulationMutex);
 	}
 
 private:

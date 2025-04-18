@@ -5,10 +5,10 @@ LogicSimulatorWrapper::LogicSimulatorWrapper(): logicSimulator() {
 }
 
 wrapper_gate_id_t LogicSimulatorWrapper::createGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
-	if (!logicSimulator.threadIsWaiting()) {
-		logError("Trying to create a gate while the simulator is running: {}", "", static_cast<int>(gateType));
-		return 0;
-	}
+	// if (!logicSimulator.threadIsWaiting()) {
+	// 	logError("Trying to create a gate while the simulator is running: {}", "", static_cast<int>(gateType));
+	// 	return 0;
+	// }
 	wrapper_gate_id_t wrapperGateId = 0;
 	bool found = false;
 	simulator_gate_id_t simulatorGateId = logicSimulator.addGate(gateType, allowSubstituteDecomissioned);
@@ -35,10 +35,10 @@ wrapper_gate_id_t LogicSimulatorWrapper::createGate(const GateType& gateType, bo
 }
 
 void LogicSimulatorWrapper::deleteGate(wrapper_gate_id_t gateId) {
-	if (!logicSimulator.threadIsWaiting()) {
-		logError("Trying to delete a gate while the simulator is running: {}", "", static_cast<int>(gateId));
-		return;
-	}
+	// if (!logicSimulator.threadIsWaiting()) {
+	// 	logError("Trying to delete a gate while the simulator is running: {}", "", static_cast<int>(gateId));
+	// 	return;
+	// }
 	if (gateId >= wrapperToSimulatorGateIdMap.size()) {
 		logError("Trying to delete a gate with an invalid ID: {}", "", static_cast<int>(gateId));
 		return;
@@ -74,10 +74,10 @@ void LogicSimulatorWrapper::deleteGate(wrapper_gate_id_t gateId) {
 }
 
 void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t outputGroup, wrapper_gate_id_t targetGate, size_t inputGroup) {
-	if (!logicSimulator.threadIsWaiting()) {
-		logError("Trying to connect gates while the simulator is running: {} {}", "", sourceGate, targetGate);
-		return;
-	}
+	// if (!logicSimulator.threadIsWaiting()) {
+	// 	logError("Trying to connect gates while the simulator is running: {} {}", "", sourceGate, targetGate);
+	// 	return;
+	// }
 	bool sourceIsJunction = allJunctionGateIds.contains(sourceGate);
 	bool targetIsJunction = allJunctionGateIds.contains(targetGate);
 	simulator_gate_id_t sourceGateId = wrapperToSimulatorGateIdMap.at(sourceGate).value();
@@ -121,10 +121,10 @@ void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t ou
 }
 
 void LogicSimulatorWrapper::disconnectGates(wrapper_gate_id_t sourceGate, size_t outputGroup, wrapper_gate_id_t targetGate, size_t inputGroup) {
-	if (!logicSimulator.threadIsWaiting()) {
-		logError("Trying to disconnect gates while the simulator is running: {} {}", "", sourceGate, targetGate);
-		return;
-	}
+	// if (!logicSimulator.threadIsWaiting()) {
+	// 	logError("Trying to disconnect gates while the simulator is running: {} {}", "", sourceGate, targetGate);
+	// 	return;
+	// }
 	simulator_gate_id_t sourceGateId = wrapperToSimulatorGateIdMap.at(sourceGate).value();
 	simulator_gate_id_t targetGateId = wrapperToSimulatorGateIdMap.at(targetGate).value();
 	bool sourceIsJunction = allJunctionGateIds.contains(sourceGate);

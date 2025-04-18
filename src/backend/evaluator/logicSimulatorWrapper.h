@@ -23,7 +23,15 @@ public:
 
 	long long int getRealTickrate() const { return logicSimulator.getRealTickrate(); }
 	void setTargetTickrate(unsigned long long tickrate) { logicSimulator.setTargetTickrate(tickrate); }
-	void triggerNextTickReset() {logicSimulator.triggerNextTickReset();}
+	void triggerNextTickReset() { logicSimulator.triggerNextTickReset(); }
+
+	std::unique_lock<std::shared_mutex> getSimulationUniqueLock() {
+		return logicSimulator.getSimulationUniqueLock();
+	}
+	std::shared_lock<std::shared_mutex> getSimulationSharedLock() {
+		return logicSimulator.getSimulationSharedLock();
+	}
+
 private:
 	struct JunctionGate {
 		wrapper_gate_id_t gateId;
