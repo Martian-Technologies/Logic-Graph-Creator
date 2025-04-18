@@ -144,49 +144,58 @@ if (NOT GATALITY_BUILD_TESTS)
 	
 	# ======================================= RESOURCE COPYING =========================================
 	# We copy the resources directory to the location of the output executable. This is our solution for "resource installing" until we fully set up cpack solution
-	set(COPIED_RESOURCES_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory "${RESOURCES_DIR}" "${COPIED_RESOURCES_DIR}"
-		COMMENT "Copying resource directory"
-	)
+	
+	# Get resource files relative to resources dir
+	file(GLOB_RECURSE RESOURCE_FILES RELATIVE "${RESOURCES_DIR}" "${RESOURCES_DIR}/*")
+	set(RESOURCE_FILES_COPIED)
+
+	foreach(resource_path_relative IN LISTS RESOURCE_FILES)
+		set(original_resource "${RESOURCES_DIR}/${resource_path_relative}")
+		set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
+		get_filename_component(copied_resource_dir "${copied_resource}" DIRECTORY)
+
+		# Custom command which makes the parent directory and copies the resource
+		add_custom_command(
+			OUTPUT "${copied_resource}"
+			COMMAND "${CMAKE_COMMAND}" -E make_directory "${copied_resource_dir}"
+			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${original_resource}" "${copied_resource}"
+			DEPENDS "${original_resource}"
+			COMMENT "Copying resource: ${resource_path_relative}"
+		)
+
+		list(APPEND RESOURCE_FILES_COPIED "${copied_resource}")
+	endforeach()
+	
+	add_custom_target(copy-resources DEPENDS ${RESOURCE_FILES_COPIED})
+	add_dependencies(${PROJECT_NAME} copy-resources)
 
 	# ===================================== SHADER COMPILATION =========================================
-	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
 	file(GLOB_RECURSE SHADER_SOURCE_FILES
 		"${SOURCE_DIR}/*.vert"
 		"${SOURCE_DIR}/*.frag"
 	)
-
-	# list of commands to execute to compile all shaders
-	set(SHADER_COMMANDS)
 	set(SHADER_PRODUCTS)
-	list(APPEND SHADER_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_BINARY_DIR})
 
-	foreach(SHADER_SOURCE IN LISTS SHADER_SOURCE_FILES)
-		cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
-		
-		# Build command
-		list(APPEND SHADER_COMMANDS COMMAND)
-		list(APPEND SHADER_COMMANDS Vulkan::glslc)
-		list(APPEND SHADER_COMMANDS "${SHADER_SOURCE}")
-		list(APPEND SHADER_COMMANDS "-o")
-		list(APPEND SHADER_COMMANDS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
-		
-		# Add product
-		list(APPEND SHADER_PRODUCTS "${SHADER_BINARY_DIR}/${SHADER_NAME}.spv")
+	foreach(shader_source IN LISTS SHADER_SOURCE_FILES)
+		cmake_path(GET shader_source FILENAME shader_name)
+		set(compiled_shader "${SHADER_BINARY_DIR}/${shader_name}.spv")
+
+		# Custom command which makes the parent directory and compiles the shader
+		add_custom_command(
+			OUTPUT "${compiled_shader}"
+			COMMAND "${CMAKE_COMMAND}" -E make_directory "${SHADER_BINARY_DIR}"
+			COMMAND Vulkan::glslc "${shader_source}" "-o" "${compiled_shader}"
+			DEPENDS "${shader_source}"
+			COMMENT "Compiling shader: ${shader_source}"
+		)
+
+		list(APPEND SHADER_PRODUCTS "${compiled_shader}")
 	endforeach()
-
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		${SHADER_COMMANDS}
-		DEPENDS ${SHADER_SOURCE_FILES}
-		BYPRODUCTS ${SHADER_PRODUCTS}
-		COMMENT "Compiling Shaders"
-	)
-
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_BINARY_DIR} "${COPIED_RESOURCES_DIR}/shaders"
-		COMMENT "Copying shader directory"
-	)
+	
+	add_custom_target(compile-shaders DEPENDS ${SHADER_PRODUCTS})
+	add_dependencies(${PROJECT_NAME} compile-shaders)
+	
 endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================

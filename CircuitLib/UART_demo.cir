@@ -1,0 +1,28 @@
+version_5
+import "UART_TX.cir"
+import "UART_RX.cir"
+Circuit: "circuit5"
+UUID: 19a7921b-a73f-4ea1-a6b4-97f8d395bc70
+size: <2, 1>
+ports (0):
+blockId 1 "45270b21-42b5-4b16-bf5c-4c59b1a11a2c" 0 0 ZERO 9
+	(connId:0)
+	(connId:1)
+	(connId:2)
+	(connId:3)
+	(connId:4)
+	(connId:5)
+	(connId:6)
+	(connId:7)
+	(connId:8) (2 0) (2 1)
+blockId 2 "2fa0f707-46b7-4b56-a2b3-62d28b966182" 8 0 ZERO 10
+	(connId:0) (1 8)
+	(connId:1) (1 8)
+	(connId:2)
+	(connId:3)
+	(connId:4)
+	(connId:5)
+	(connId:6)
+	(connId:7)
+	(connId:8)
+	(connId:9)
