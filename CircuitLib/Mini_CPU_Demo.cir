@@ -1,5 +1,5 @@
 version_5
-import "SimpleRegister.circ"
+import "SimpleRegister.cir"
 import "FourBitDecoder.cir"
 Circuit: "circuit4"
 UUID: ec58588c-6251-423d-8b85-e9d64718e9f5
