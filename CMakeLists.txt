@@ -149,9 +149,9 @@ if (NOT GATALITY_BUILD_TESTS)
 	file(GLOB_RECURSE RESOURCE_FILES RELATIVE "${RESOURCES_DIR}" "${RESOURCES_DIR}/*")
 	set(RESOURCE_FILES_COPIED)
 
-	foreach(resource_path IN LISTS RESOURCE_FILES)
-		set(original_resource "${RESOURCES_DIR}/${resource_path}")
-		set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path}")
+	foreach(resource_path_relative IN LISTS RESOURCE_FILES)
+		set(original_resource "${RESOURCES_DIR}/${resource_path_relative}")
+		set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
 		get_filename_component(copied_resource_dir "${copied_resource}" DIRECTORY)
 
 		# Custom command which makes the parent directory and copies the resource
@@ -160,7 +160,7 @@ if (NOT GATALITY_BUILD_TESTS)
 			COMMAND "${CMAKE_COMMAND}" -E make_directory "${copied_resource_dir}"
 			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${original_resource}" "${copied_resource}"
 			DEPENDS "${original_resource}"
-			COMMENT "Copying resource: ${resource_path}"
+			COMMENT "Copying resource: ${resource_path_relative}"
 		)
 
 		list(APPEND RESOURCE_FILES_COPIED "${copied_resource}")
@@ -177,17 +177,17 @@ if (NOT GATALITY_BUILD_TESTS)
 	)
 	set(SHADER_PRODUCTS)
 
-	foreach(shader_path IN LISTS SHADER_SOURCE_FILES)
-		cmake_path(GET shader_path FILENAME shader_name)
+	foreach(shader_source IN LISTS SHADER_SOURCE_FILES)
+		cmake_path(GET shader_source FILENAME shader_name)
 		set(compiled_shader "${SHADER_BINARY_DIR}/${shader_name}.spv")
 
 		# Custom command which makes the parent directory and compiles the shader
 		add_custom_command(
 			OUTPUT "${compiled_shader}"
 			COMMAND "${CMAKE_COMMAND}" -E make_directory "${SHADER_BINARY_DIR}"
-			COMMAND Vulkan::glslc "${shader_path}" "-o" "${compiled_shader}"
-			DEPENDS "${shader_path}"
-			COMMENT "Compiling shader: ${shader_path}"
+			COMMAND Vulkan::glslc "${shader_source}" "-o" "${compiled_shader}"
+			DEPENDS "${shader_source}"
+			COMMENT "Compiling shader: ${shader_source}"
 		)
 
 		list(APPEND SHADER_PRODUCTS "${compiled_shader}")
