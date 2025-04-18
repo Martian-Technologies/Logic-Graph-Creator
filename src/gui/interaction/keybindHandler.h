@@ -13,4 +13,4 @@ private:
 	std::unordered_multimap<unsigned int, ListenerFunction> listenerFunctions;
 };
 
-#endif /* keybindHandler_h */ 
+#endif /* keybindHandler_h */

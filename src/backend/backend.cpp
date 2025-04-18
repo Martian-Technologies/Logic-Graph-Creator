@@ -1,8 +1,18 @@
 #include "backend.h"
 
-Backend::Backend() : toolManagerManager(&circuitViews), circuitManager(&dataUpdateEventManager), evaluatorManager(&dataUpdateEventManager) {
+Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager), evaluatorManager(&dataUpdateEventManager) {
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
 }
+
+// void Backend::clear() {
+// 	for (auto iter : evaluatorManager.getEvaluators()) {
+// 		evaluatorManager.destroyEvaluator(iter.second->getEvaluatorId());
+// 	}
+// 	for (auto iter : circuitManager.getCircuits()) {
+// 		circuitManager.destroyCircuit(iter.second->getCircuitId());
+// 	}
+// }
+
 
 circuit_id_t Backend::createCircuit(const std::string& name, const std::string& uuid) {
 	return circuitManager.createNewCircuit(name, uuid);
@@ -47,31 +57,29 @@ bool Backend::unlinkCircuitView(CircuitView* circuitView) {
 bool Backend::linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t circuitId) {
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
 	if (circuit) {
-		if (circuitView->getBackend() != this) {
-			circuitView->setBackend(this);
-			circuitView->setEvaluator(nullptr);
-		} else if (true) { // TODO: check that circuitView address is in the eval
-			circuitView->setEvaluator(nullptr);
-		}
-
+		if (circuitView->getCircuit() == circuit.get()) return true;
+		linkCircuitView(circuitView);
+		circuitView->setEvaluator(nullptr);
 		circuitView->setCircuit(circuit);
+		return true;
+	} else {
+		linkCircuitView(circuitView);
+		circuitView->setEvaluator(nullptr);
+		circuitView->setCircuit(nullptr);
 		return true;
 	}
 	return false;
 }
 
 bool Backend::linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_id_t evalId, const Address& address) {
-	if (!circuitView->getCircuit()) return false;
+	// if (!circuitView->getCircuit()) return false;
 
 	SharedEvaluator evaluator = evaluatorManager.getEvaluator(evalId);
 	if (evaluator) {
-		if (
-			(circuitView->getBackend() != this) ||
-			(evaluator->getCircuitId(address) != circuitView->getCircuit()->getCircuitId())
-		) {
-			return false;
-		}
+		circuit_id_t circuitId = evaluator->getCircuitId(address);
+		linkCircuitViewWithCircuit(circuitView, circuitId);
 		circuitView->setEvaluator(evaluator);
+		circuitView->setAddress(address);
 		return true;
 	}
 	return false;

@@ -1,5 +1,5 @@
 #include "logicToucher.h"
-
+#include "backend/circuitView/circuitView.h"
 
 bool LogicToucher::press(const Event* event) {
 	if (!circuit || !evaluatorStateInterface) return false;
@@ -12,7 +12,9 @@ bool LogicToucher::press(const Event* event) {
 		clickPosition = lastPointerPosition;
 		if (circuit->getBlockContainer()->checkCollision(clickPosition)) {
 			bool stateToSet = true;
-			evaluatorStateInterface->setState(Address(clickPosition), !evaluatorStateInterface->getBoolState(Address(clickPosition)));
+			Address address = circuitView->getAddress();
+			address.addBlockId(clickPosition);
+			evaluatorStateInterface->setState(address, !evaluatorStateInterface->getBoolState(address));
 		}
 		clicked = true;
 		return true;

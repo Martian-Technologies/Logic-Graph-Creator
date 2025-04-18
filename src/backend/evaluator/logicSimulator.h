@@ -6,8 +6,6 @@
 #include <thread>
 #include <condition_variable>
 #include <shared_mutex>
-#include <unordered_map>
-#include <vector>
 
 #include "logicState.h"
 #include "gateType.h"
@@ -36,13 +34,11 @@ public:
 
 	std::vector<std::vector<logic_state_t>> getCurrentState() const;
 	void clearGates();
-	void reserveGates(unsigned int numGates);
 
 	void setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state);
 
 	logic_state_t getState(simulator_gate_id_t gate, size_t outputGroup) const;
 
-	void debugPrint();
 	void signalToPause();
 	void signalToProceed();
 	bool threadIsWaiting() const;
@@ -55,9 +51,21 @@ public:
 		return numDecomissioned;
 	}
 
+	std::unique_lock<std::shared_mutex> getSimulationUniqueLock() {
+		return std::unique_lock<std::shared_mutex>(simulationMutex);
+	}
+	std::shared_lock<std::shared_mutex> getSimulationSharedLock() {
+		return std::shared_lock<std::shared_mutex>(simulationMutex);
+	}
+
 private:
 	std::vector<Gate> gates;
 	int numDecomissioned;
+	int rollingAvgLength;
+	int rollingAvgIndex;
+	std::vector<int> rollingAvg;
+
+	void updateRollingAverage(int newValue);
 
 	std::thread tickrateMonitorThread;
 	std::thread simulationThread;

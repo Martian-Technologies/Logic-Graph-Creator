@@ -50,8 +50,9 @@ bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
 	auto iter = circuitIdToFilePath.find(circuitId);
 	if (iter == circuitIdToFilePath.end()) return false;
 	GatalityParser saver(this, circuitManager);
-	if (saver.save(filePathToFile.at(iter->second))) {
-		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager");
+	CircuitFileManager::FileData& fileData = filePathToFile.at(iter->second);
+	if (saver.save(fileData)) {
+		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileData.fileLocation);
 		return true;
 	}
 	return false;

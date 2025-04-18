@@ -32,11 +32,12 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-		auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
-		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
-		circuitViewWidget->setSimState(true);
-		circuitViewWidget->simUseSpeed(true);
-		circuitViewWidget->setSimSpeed(20);
+		for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
+			if (iter.second->getCircuitId(Address()) == id) {
+				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+				return;
+			}
+		}
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}
@@ -59,6 +60,13 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	
 	// create keybind shortcuts and connect them
 	element->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
+	// keybindHandler.addListener(
+	// 	Rml::Input::KeyIdentifier::KI_D,
+	// 	Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
+	// 	[this]() {
+	// 		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), 0);
+	// 	}
+	// );
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,
@@ -85,6 +93,15 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("Copy"); circuitView->getEventRegister().doEvent(Event("Copy")); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_V,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection/paste tool"); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_I,
+		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("interactive/state changer"); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
 		[this]() { logInfo("Tool Rotate Block CCW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
 	);
@@ -97,13 +114,31 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_B,
-		[this]() { logInfo("setupBlockData"); if (circuitView->getCircuit()) circuitView->getBackend()->getCircuitManager().setupBlockData(circuitView->getCircuit()->getCircuitId()); }
+		Rml::Input::KeyIdentifier::KI_N,
+		Rml::Input::KeyModifier::KM_CTRL,
+		[this]() {
+			logInfo("New Circuit");
+			circuit_id_t id = circuitView->getBackend()->createCircuit();
+			circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
+			for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
+				if (iter.second->getCircuitId(Address()) == id) {
+					circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
+					return;
+				}
+			}
+		}
 	);
 
-	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
+	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
+		[this](Rml::Event& event) {
+			doResize = true;
+		}
+	));
+
+	document->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
+			logInfo("Clicked: {}", "", circuitView->getViewManager().getPointerPosition().snap().toString());
 			if (button == 0) { // left
 				if (event.GetParameter<int>("alt_key", 0)) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
@@ -142,6 +177,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this](Rml::Event& event) {
 			// // grab focus so key inputs work without clicking
 			// setFocus(Qt::MouseFocusReason);
+			this->document->Focus();
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			Vec2 viewPos = pixelsToView(point);
 			if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
@@ -163,11 +199,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0) * 12, event.GetParameter<float>("wheel_delta_y", 0) * -12);
 			// logInfo("{}, {}", "", delta.x, delta.y);
 			if (mouseControls) {
-				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 200.f))) event.StopPropagation();
+				if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 150.f))) event.StopPropagation();
 			} else {
 				if (event.GetParameter<int>("shift_key", 0)) {
 					// do zoom
-					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+					if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 150.f))) event.StopPropagation();
 				} else {
 					if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
 						"view pan",
@@ -178,6 +214,8 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			}
 		}
 	));
+
+
 
 	// connect buttons and actions
 	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);

@@ -4,7 +4,14 @@
 class DataUpdateEventManager {
 	friend class DataUpdateEventReceiver;
 public:
-	class EventData { public: virtual ~EventData() { }; };
+	template <class T>
+	class EventDataWithValue;
+	class EventData {
+	public:
+		virtual ~EventData() { }
+		template <class V>
+		inline const DataUpdateEventManager::EventDataWithValue<V>* cast() const;
+	};
 	template <class T>
 	class EventDataWithValue : public EventData {
 	public:
@@ -52,5 +59,9 @@ private:
 	std::set<DataUpdateEventReceiver*> dataUpdateEventReceivers;
 
 };
+
+template <class V>
+inline const DataUpdateEventManager::EventDataWithValue<V>* DataUpdateEventManager::EventData::cast() const { return dynamic_cast<const EventDataWithValue<V>*>(this); }
+
 
 #endif /* dataUpdateEventManager_h */

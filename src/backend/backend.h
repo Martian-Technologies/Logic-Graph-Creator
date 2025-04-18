@@ -13,13 +13,16 @@ class Backend {
 public:
 	Backend();
 
+	// void clear();
+
 	// Creates a new Circuit. Returns circuit_id_t.
-	circuit_id_t createCircuit(const std::string& name = "Circuit", const std::string& uuid = generate_uuid_v4());
+	circuit_id_t createCircuit() { return circuitManager.createNewCircuit(); }
+	circuit_id_t createCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4());
 	// Attempts to create a Evaluator for a Circuit. Returns evaluator_id_t if successful.
 	std::optional<evaluator_id_t> createEvaluator(circuit_id_t circuitId);
 
 	inline BlockDataManager* getBlockDataManager() { return getCircuitManager().getBlockDataManager(); }
-	
+
 	inline CircuitManager& getCircuitManager() { return circuitManager; }
 	inline const CircuitManager& getCircuitManager() const { return circuitManager; }
 
@@ -29,7 +32,7 @@ public:
 	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
 
 	inline DataUpdateEventManager* getDataUpdateEventManager() { return &dataUpdateEventManager; }
-	
+
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
 
@@ -47,7 +50,7 @@ public:
 
 private:
 	std::set<CircuitView*> circuitViews;
-	
+
 	SharedCopiedBlocks clipboard = nullptr;
 
 	DataUpdateEventManager dataUpdateEventManager; // this needs to be constructed first

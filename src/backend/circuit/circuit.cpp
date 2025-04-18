@@ -378,7 +378,8 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		logError("eventData passed was null", "Circuit");
 		return;
 	}
-	auto data = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>*>(eventData);
+	
+	auto data = eventData->cast<std::pair<BlockType, Vector>>();
 	if (!data) {
 		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
 		return;
@@ -387,4 +388,17 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.resizeBlockType(type, data->get().second, difference.get());
 	sendDifference(difference);
+}
+
+void Circuit::setBlockType(BlockType blockType) {
+	blockContainer.setBlockType(blockType);
+	blockContainer.getBlockDataManager()->getBlockData(blockType)->setName(getCircuitNameNumber());
+}
+
+
+void Circuit::setCircuitName(const std::string& name) {
+	circuitName = name;
+	if (blockContainer.getBlockType() == BlockType::NONE) return;
+	BlockData* blockData = blockContainer.getBlockDataManager()->getBlockData(blockContainer.getBlockType());
+	if (blockData) blockData->setName(getCircuitNameNumber());
 }

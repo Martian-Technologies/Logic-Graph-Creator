@@ -1,0 +1,102 @@
+version_5
+import "ShiftRegister.cir"
+import "TenPulseClock.cir"
+Circuit: "UART_TX"
+UUID: 45270b21-42b5-4b16-bf5c-4c59b1a11a2c
+size: <3, 8>
+ports (8):
+	(IN, 0, 5, <0, 0>, "P0")
+	(IN, 1, 6, <0, 1>, "P1")
+	(IN, 2, 7, <0, 2>, "P2")
+	(IN, 3, 8, <0, 3>, "P3")
+	(IN, 4, 1, <0, 4>, "P4")
+	(IN, 5, 9, <0, 5>, "P5")
+	(IN, 6, 8, <0, 6>, "P6")
+	(OUT, 8, 15, <2, 0>, "TX")
+blockId 1 SWITCH 2 7 ZERO 1
+	(connId:0) (2 7)
+blockId 2 "4c1db4db-d14f-4e8c-8361-53b21ec09fd8" 5 0 ZERO 22
+	(connId:0) (25 0)
+	(connId:1) (23 1)
+	(connId:2) (27 1)
+	(connId:3) (5 0)
+	(connId:4) (6 0)
+	(connId:5) (7 0)
+	(connId:6) (8 0)
+	(connId:7) (1 0)
+	(connId:8) (9 0)
+	(connId:9) (10 0)
+	(connId:10) (12 1)
+	(connId:11) (24 1)
+	(connId:12) (13 1)
+	(connId:13) (14 1)
+	(connId:14) (15 0) (24 0)
+	(connId:15) (16 0) (24 0)
+	(connId:16) (17 0) (24 0)
+	(connId:17) (18 0) (24 0)
+	(connId:18) (19 0) (24 0)
+	(connId:19) (20 0) (24 0)
+	(connId:20) (21 0) (24 0)
+	(connId:21) (22 0) (24 0)
+blockId 3 BUTTON 0 11 ZERO 1
+	(connId:0) (4 0)
+blockId 4 NOR 1 11 ZERO 2
+	(connId:0) (3 0)
+	(connId:1) (24 0)
+blockId 5 SWITCH 2 3 ZERO 1
+	(connId:0) (2 3)
+blockId 6 SWITCH 2 4 ZERO 1
+	(connId:0) (2 4)
+blockId 7 SWITCH 2 5 ZERO 1
+	(connId:0) (2 5)
+blockId 8 SWITCH 2 6 ZERO 1
+	(connId:0) (2 6)
+blockId 9 SWITCH 2 8 ZERO 1
+	(connId:0) (2 8)
+blockId 10 SWITCH 2 9 ZERO 1
+	(connId:0) (2 9)
+blockId 11 AND 1 10 ZERO 2
+	(connId:0)
+	(connId:1) (12 0)
+blockId 12 NOR 2 10 ZERO 2
+	(connId:0) (11 1)
+	(connId:1) (2 10)
+blockId 13 AND 2 12 ZERO 2
+	(connId:0)
+	(connId:1) (2 12)
+blockId 14 AND 2 13 ZERO 2
+	(connId:0)
+	(connId:1) (2 13)
+blockId 15 LIGHT 9 2 ZERO 1
+	(connId:0) (2 14)
+blockId 16 LIGHT 9 3 ZERO 1
+	(connId:0) (2 15)
+blockId 17 LIGHT 9 4 ZERO 1
+	(connId:0) (2 16)
+blockId 18 LIGHT 9 5 ZERO 1
+	(connId:0) (2 17)
+blockId 19 LIGHT 9 6 ZERO 1
+	(connId:0) (2 18)
+blockId 20 LIGHT 9 7 ZERO 1
+	(connId:0) (2 19)
+blockId 21 LIGHT 9 8 ZERO 1
+	(connId:0) (2 20)
+blockId 22 LIGHT 9 9 ZERO 1
+	(connId:0) (2 21)
+blockId 23 AND 2 1 ZERO 2
+	(connId:0)
+	(connId:1) (2 1)
+blockId 24 NOR 2 11 ZERO 2
+	(connId:0) (2 14) (2 15) (2 16) (2 17) (2 18) (2 19) (2 20) (2 21) (4 1)
+	(connId:1) (2 11)
+blockId 25 "4b9d9242-88e0-4fbb-aa7b-73a0b37ef254" 2 0 ZERO 1
+	(connId:0) (2 0)
+blockId 26 AND 1 2 ZERO 2
+	(connId:0)
+	(connId:1) (27 0)
+blockId 27 NAND 2 2 ZERO 2
+	(connId:0) (26 1)
+	(connId:1) (2 2)
+blockId 29 AND -6 5 ZERO 2
+	(connId:0)
+	(connId:1)

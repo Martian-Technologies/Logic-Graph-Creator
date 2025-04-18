@@ -19,9 +19,9 @@ public:
 		// TRISTATE_BUFFER
 		getBlockData(BlockType::TRISTATE_BUFFER)->setName("Tristate Buffer");
 		getBlockData(BlockType::TRISTATE_BUFFER)->setDefaultData(false);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0), 0);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 1), 1);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionOutput(Vector(0), 2);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 1), 0);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 0), 1);
+		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionOutput(Vector(0, 1), 2);
 		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Vector(1, 2));
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");

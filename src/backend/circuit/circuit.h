@@ -19,14 +19,16 @@ class Circuit {
 	friend class CircuitManager;
 public:
 	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
-	    circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+		circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 		dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
 	}
 
+	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
+	void setCircuitName(const std::string& name);
 
 	inline unsigned long long getEditCount() const { return editCount; }
 
@@ -89,6 +91,7 @@ public:
 	void redo();
 
 private:
+	void setBlockType(BlockType blockType);
 	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers
@@ -105,7 +108,8 @@ private:
 		if (difference->empty()) return;
 		editCount++;
 		if (!midUndo) undoSystem.addDifference(difference);
-		for (auto pair : listenerFunctions) pair.second(difference, circuitId); }
+		for (auto pair : listenerFunctions) pair.second(difference, circuitId);
+	}
 
 	std::string circuitName;
 	std::string circuitUUID;
@@ -115,7 +119,7 @@ private:
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
 	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
-	
+
 	UndoSystem undoSystem;
 	bool midUndo = false;
 

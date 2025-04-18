@@ -31,6 +31,8 @@
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
 #include <RmlUi/Core/SystemInterface.h>
+#include <RmlUi/Core/Element.h>
+// #include "gui/sdl/SDL_gesture.h"
 
 RmlSystemInterface::RmlSystemInterface()
 {
@@ -169,7 +171,7 @@ void RmlSystemInterface::DeactivateKeyboard()
 	}
 }
 
-bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev)
+bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev, float windowScalingSize)
 {
 #if SDL_MAJOR_VERSION >= 3
 	#define RMLSDL_WINDOW_EVENTS_BEGIN
@@ -184,6 +186,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	constexpr auto event_text_input = SDL_EVENT_TEXT_INPUT;
 	constexpr auto event_window_size_changed = SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED;
 	constexpr auto event_window_leave = SDL_EVENT_WINDOW_MOUSE_LEAVE;
+	// constexpr auto event_gesture = GESTURE_MULTIGESTURE;
 	constexpr auto rmlsdl_true = true;
 	constexpr auto rmlsdl_false = false;
 #else
@@ -217,7 +220,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	{
 	case event_mouse_motion:
 	{
-		result = context->ProcessMouseMove(int(ev.motion.x), int(ev.motion.y), GetKeyModifierState());
+		result = context->ProcessMouseMove(int(ev.motion.x*windowScalingSize), int(ev.motion.y*windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_mouse_down:
@@ -234,7 +237,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	break;
 	case event_mouse_wheel:
 	{
-		result = context->ProcessMouseWheel(Rml::Vector2f(float(-ev.wheel.x), float(-ev.wheel.y)), GetKeyModifierState());
+		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x*windowScalingSize, -ev.wheel.y*windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_key_down:

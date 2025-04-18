@@ -3,7 +3,8 @@
 	padding: 0;
 	box-sizing: border-box;
 	font-family: Monaspace Argon;
-	font-size: 12px;
+	font-size: 12dp;
+	cursor: pointer;
 }
 
 /* Main Container Styles */
@@ -40,7 +41,7 @@ body {
 .menu {
 	width: 5rem;
 	height: 2rem;
-	border-radius: 0.25rem;
+	border-radius: 0.23rem;
 	margin: 0.25rem;
 	text-align: center;
 	background-color: #1d1d1d;
@@ -67,44 +68,51 @@ body {
 
 #left-sidebar-container {
 	flex-shrink: 0;
-	flex-basis: 12rem;
-	background-color: #1d1d1d;
-}
-
-/* Right Sidebar Styles */
-
-#right-sidebar-container {
-	flex-shrink: 0;
-	flex-basis: 12rem;
+	flex-basis: 20rem;
 	background-color: #1d1d1d;
 }
 
 /* Menu Tree Styles */
 
 .menutree {
+	background-color: #2e2e2e;
+	border-radius: 0.3em;
+	margin: 0.5em 0.1em;
 	display: flex;
 	flex-direction: column;
+	min-height: 2rem;
 }
 
 .menutree * {
 	display: block;
 }
 
-.menutree ul {
-	padding-left: 1rem;
+.menutree ul ul {
+	padding-left: 0.5rem;
+}
+
+.menutree li span {
+	padding: 0em 0.2em;
+	display: inline;
+	vertical-align: top;
+}
+
+.menutree li div {
+	display: inline-block;
 }
 
 .menutree li {
-	cursor: pointer;
+	padding: 0.1em 0.1em;
 }
 
-.menutree .parent::before {
-	content: ">";
-}
-
-.collapsed {
+.collapsed div ul {
 	display: none;
 }
+
+/* .collapsed span text {
+	/* transform:rotate(90deg); *
+	writing-mode:vertical-rl;
+} */
 
 #circuitview-container {
 	flex: 1;
@@ -127,12 +135,16 @@ tabset panels {
 }
 
 tabset tabs tab {
-	padding: 4px 2px;
+	margin: 0.4em;
+	padding: 0.3em;
+	border-radius: 0.25rem;
 	background-color: #0b0b0b;
+	display: inline-block;
 }
 
 tabset tabs  {
 	width: 100%;
+	display: block;
 }
 
 tabset panels panel {

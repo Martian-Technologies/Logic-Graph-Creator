@@ -1,5 +1,5 @@
-#ifndef STATUS_MANAGER_H
-#define STATUS_MANAGER_H
+#ifndef simControlsManager_h
+#define simControlsManager_h
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Element.h>
@@ -22,4 +22,4 @@ private:
 	bool limitSimSpeed;
 };
 
-#endif
+#endif /* simControlsManager_h */

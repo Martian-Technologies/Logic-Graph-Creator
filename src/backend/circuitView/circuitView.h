@@ -41,21 +41,27 @@ public:
 	inline Backend* getBackend() { return backend; }
 	inline const Backend* getBackend() const { return backend; }
 
+	inline const Address& getAddress() const { return address; }
+
 private:
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
 	void setCircuit(SharedCircuit circuit);
 	void setBackend(Backend* backend);
+	void setAddress(const Address& address);
 
 	void viewChanged();
 	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId);
 
 private:
 	Backend* backend;
-	
+
+	Address address;
 	SharedCircuit circuit;
 	Renderer* renderer;
 	std::shared_ptr<Evaluator> evaluator;
-	
+
+	DataUpdateEventManager* dataUpdateEventManager = nullptr;
+
 	EvaluatorStateInterface evaluatorStateInterface;
 	EventRegister eventRegister;
 	ViewManager viewManager;

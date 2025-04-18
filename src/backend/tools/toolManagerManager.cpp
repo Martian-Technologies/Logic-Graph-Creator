@@ -9,7 +9,7 @@ std::map<std::string, std::unique_ptr<ToolManagerManager::BaseToolTypeMaker>> To
 #include "backend/circuitView/tools/other/pasteTool.h"
 #include "backend/circuitView/tools/other/logicToucher.h"
 
-ToolManagerManager::ToolManagerManager(std::set<CircuitView*>* circuitViews) : circuitViews(circuitViews) {
+ToolManagerManager::ToolManagerManager(std::set<CircuitView*>* circuitViews, DataUpdateEventManager* dataUpdateEventManager) : circuitViews(circuitViews), dataUpdateEventManager(dataUpdateEventManager) {
 	ToolManagerManager::registerTool<ConnectionTool>();
 	ToolManagerManager::registerTool<MoveTool>();
 	ToolManagerManager::registerTool<BlockPlacementTool>();

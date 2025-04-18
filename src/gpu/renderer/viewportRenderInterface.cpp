@@ -33,6 +33,10 @@ void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
 	
 }
 
+void ViewportRenderInterface::setAddress(const Address& address) {
+	
+}
+
 void ViewportRenderInterface::updateView(ViewManager* viewManager) {
 	std::lock_guard<std::mutex> lock(viewMux);
 	

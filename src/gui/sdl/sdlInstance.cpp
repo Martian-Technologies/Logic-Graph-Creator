@@ -4,6 +4,9 @@
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_video.h>
 
+#define SDL_GESTURE_IMPLEMENTATION 1
+// #include "SDL_gesture.h"
+
 SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
 
@@ -23,12 +26,19 @@ SdlInstance::SdlInstance() {
 		throwFatalError("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
 	}
 
+	// if (Gesture_Init() == -1) {
+	// 	throw std::runtime_error("SDL Gestures could not initialize! SDL_Error: " + std::string(SDL_GetError()));
+	// }
+
 	// Submit click events when focusing the window.
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+	
+
 }
 
 SdlInstance::~SdlInstance() {
 	logInfo("Shutting down SDL...");
+	// Gesture_Quit();
 	SDL_Quit();
 }
 

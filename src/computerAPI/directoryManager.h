@@ -8,6 +8,7 @@ public:
 	static void findDirectories();
 
 	static std::filesystem::path getExecutablePath();
+	static std::filesystem::path getBundlePath();
 
 	// The resource data holds immutable data shipped with the application (images, shaders, etc)
 	inline static const std::filesystem::path& getResourceDirectory() { return resourceDirectory; }

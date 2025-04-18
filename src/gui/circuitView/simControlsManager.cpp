@@ -49,10 +49,10 @@ void SimControlsManager::limitSpeed() {
 	logInfo("limited sim speed");
 }
 void SimControlsManager::setTPS(Rml::Element* element) {
-	Rml::String value = element->GetAttribute<Rml::String>("value","");
+	Rml::String value = element->GetAttribute<Rml::String>("value", "");
 
 	element->SetInnerRML(value + "tps");
 
-	logInfo("very janky, needs works");
-	logInfo(static_cast<std::string>(value));	
+	// logInfo("very janky, needs works");
+	logInfo(static_cast<std::string>(value));
 }

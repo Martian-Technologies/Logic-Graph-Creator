@@ -1,7 +1,8 @@
 #include "menuTree.h"
 #include "menuTreeListener.h"
+#include "eventPasser.h"
 
-MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent) : document(document), parent(parent) {
+MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool clickableName, bool startOpen) : document(document), parent(parent), clickableName(clickableName), startOpen(startOpen) {
 	parent->SetClass("menutree", true);
 }
 
@@ -15,12 +16,25 @@ void MenuTree::setPaths(const std::vector<std::string>& paths) {
 
 
 void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml::Element* current) {
+	Rml::ElementList elements;
+	current->GetElementsByTagName(elements, "div");
+	if (elements.empty()) {
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		elements.push_back(current->AppendChild(std::move(newDiv)));
+	}
+	Rml::Element* div = elements[0];
+
 	if (paths.empty()) {
+		// remove class
 		current->SetClass("parent", false);
-		Rml::ElementList elements;
-		current->GetElementsByTagName(elements, "ul");
-		if (elements.empty()) return;
-		current->RemoveChild(elements[0]);
+		// remove ul
+		elements.clear();
+		div->GetElementsByTagName(elements, "ul");
+		if (!elements.empty()) div->RemoveChild(elements[0]);
+		// remove span
+		elements.clear();
+		current->GetElementsByTagName(elements, "span");
+		if (!elements.empty()) current->RemoveChild(elements[0]);
 		return;
 	}
 	std::map<std::string, std::vector<std::vector<std::string>>> pathsByRoot;
@@ -35,15 +49,20 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 		}
 	}
 
-	Rml::ElementList elements;
 	Rml::Element* listElement;
-	current->GetElementsByTagName(elements, "ul");
+	elements.clear();
+	div->GetElementsByTagName(elements, "ul");
 	if (elements.empty()) {
 		Rml::ElementPtr newList = document->CreateElement("ul");
-		newList->SetClass("collapsed", false);
-		current->AppendChild(std::move(newList));
-		current->GetElementsByTagName(elements, "ul");
-		listElement = elements[0];
+		current->SetClass("collapsed", !startOpen && current != parent);
+		listElement = div->AppendChild(std::move(newList));
+		current->SetClass("parent", true);
+		if (current != parent) {
+			Rml::ElementPtr arrow = document->CreateElement("span");
+			arrow->SetInnerRML(">");
+			arrow->AddEventListener("click", new MenuTreeListener());
+			current->InsertBefore(std::move(arrow), div);
+		}
 	} else {
 		listElement = elements[0];
 		std::vector<Rml::Element*> children;
@@ -68,14 +87,27 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 	if (!(pathStr.empty())) pathStr += "/";
 	for (auto iter : pathsByRoot) {
 		Rml::ElementPtr newItem = document->CreateElement("li");
+		// add listener
+		if (!clickableName) newItem->AddEventListener("click", new MenuTreeListener(false, &listenerFunction));
+		else {
+			newItem->AddEventListener("click", new EventPasser(
+				[this](Rml::Event& event) {
+					event.StopPropagation();
+					Rml::Element* target = event.GetCurrentElement();
+					if (listenerFunction)
+						listenerFunction(target->GetId().substr(0, target->GetId().size() - 5));
+				}
+			));
+		}
+		// set id
 		newItem->SetId(pathStr + iter.first + "-menu");
-		newItem->SetInnerRML(iter.first);
-		newItem->AddEventListener("click", new MenuTreeListener(&listenerFunction));
-		if (iter.second.empty()) {
-			listElement->AppendChild(std::move(newItem));
-		} else {
-			newItem->SetClass("parent", true);
-			setPaths(iter.second, listElement->AppendChild(std::move(newItem)));
+		// create div for text
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		newDiv->AppendChild(std::move(document->CreateTextNode(iter.first)));
+		newItem->AppendChild(std::move(newDiv));
+		Rml::Element* newItem2 = listElement->AppendChild(std::move(newItem));
+		if (!iter.second.empty()) {
+			setPaths(iter.second, newItem2);
 		}
 	}
 }

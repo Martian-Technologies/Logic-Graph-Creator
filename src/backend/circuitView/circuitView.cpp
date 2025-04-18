@@ -1,4 +1,5 @@
 #include "circuitView.h"
+#include "backend/backend.h"
 
 CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&eventRegister, renderer, this) {
 	renderer->updateView(&viewManager);
@@ -7,7 +8,13 @@ CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&
 }
 
 void CircuitView::setBackend(Backend* backend) {
+	if (this->backend) {
+		Backend* oldBackend = this->backend;
+		this->backend = nullptr;
+		oldBackend->unlinkCircuitView(this);
+	}
 	this->backend = backend;
+	dataUpdateEventManager = backend->getDataUpdateEventManager();
 }
 
 void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
@@ -19,13 +26,22 @@ void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 
 void CircuitView::setCircuit(SharedCircuit circuit) {
 	if (this->circuit) this->circuit->disconnectListener(this);
-
-	this->circuit = circuit;
-	toolManager.setCircuit(circuit.get());
-	renderer->setCircuit(circuit.get());
 	if (circuit) {
+		this->circuit = circuit;
+		toolManager.setCircuit(circuit.get());
+		renderer->setCircuit(circuit.get());
 		circuit->connectListener(this, std::bind(&CircuitView::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
+	} else {
+		this->circuit = circuit;
+		toolManager.setCircuit(nullptr);
+		renderer->setCircuit(nullptr);
 	}
+	if (dataUpdateEventManager) dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
+}
+
+void CircuitView::setAddress(const Address& address) {
+	this->address = address;
+	renderer->setAddress(address);
 }
 
 void CircuitView::viewChanged() {

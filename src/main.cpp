@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 
 		App app;
 		app.runLoop();
-		
+
 	} catch (const std::exception& e) {
 		// Top level fatal error catcher, logs issue
 		logFatalError("Exiting Gatality because of fatal error: '{}'", "", e.what());

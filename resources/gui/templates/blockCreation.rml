@@ -1,13 +1,34 @@
 <template name="block-creation" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/blockCreation.rcss"/>
+		<link type="text/rcss" href="../styles/blockCreation.rcss" />
 	</head>
 
 	<body>
-		<div  id="block-creation-view">
-			This will be creation UI!!!!
+		<div id="block-creation-view">
+			<div id="block-creation-form">
+				<div>
+					<label class="form-label" for="name"> Name: </label>
+					<input id="name-input" type="text" name="name" maxlength="15" class="name" /><br />
+				</div>
+				<div>
+					<label class="form-label" for="width"> Width: </label>
+					<input id="width-input" type="text" name="width" maxlength="3" class="number" /><br />
+				</div>
+				<div>
+					<label class="form-label" for="height"> Height: </label>
+					<input id="height-input" type="text" name="height" maxlength="3" class="number" /><br /><br />
+				</div>
+				<div id="connection-menu">
+					<div>
+						<div id="connection-list-add">Add</div>
+						<div id="connection-list-remove">Remove</div>
+					</div>
+					<div id="connection-list"></div>
+				</div>
+				<span id="reset-block-creation" class="">Reset</span>
+				<span id="update-block-creation" class="">Update</span>
+			</div>
 		</div>
 	</body>
-	
 </template>

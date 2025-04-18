@@ -29,15 +29,16 @@ public:
 	};
 
 	struct ConnectionPort {
-		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block) :
-			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block) {}
+		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block, const std::string& portName) :
+			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block), portName(portName) {}
 		bool isInput;
 		connection_end_id_t connectionEndId;
 		Vector positionOnBlock;
 		block_id_t block;
+		std::string portName;
 	};
 
-	void addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id);
+	void addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id, const std::string& portName);
 	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
 
 

@@ -5,12 +5,13 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	targetTickrate(0),
 	addressTree(circuitId, Rotation::ZERO, dataUpdateEventManager),
 	usingTickrate(false),
-	circuitManager(circuitManager) {
-
+	circuitManager(circuitManager),
+	receiver(dataUpdateEventManager) {
 	setTickrate(40 * 60);
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
+	receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
 
 	makeEdit(std::make_shared<Difference>(difference), circuitId);
 
@@ -58,15 +59,13 @@ long long int Evaluator::getRealTickrate() const {
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
-	makeEditInPlace(difference, containerId, addressTree, false);
+	DiffCache diffCache(circuitManager);
+	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
+	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
+	lock.unlock();
 }
 
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC) {
-	logicSimulatorWrapper.signalToPause();
-	// wait for the thread to pause
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
 	const auto modifications = difference->getModifications();
 	bool deletedBlocks = false;
 	for (const auto& modification : modifications) {
@@ -81,7 +80,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 				const bool exists = addressTree.hasValue(address);
 				if (!exists) { // integrated circuit
 					const auto branch = addressTree.getBranch(address);
-					const auto allValues = branch.getAllValues();
+					const auto allValues = branch->getAllValues();
 					for (const auto value : allValues) {
 						logicSimulatorWrapper.deleteGate(value.gateId);
 					}
@@ -114,12 +113,10 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 					break;
 				}
 				const auto addresses = addressTree.makeBranch(position, containerId, integratedCircuitId, rotation);
-				const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
-				const auto integratedBlockContainer = integratedCircuit->getBlockContainer();
-				const auto integratedDifference = std::make_shared<Difference>(integratedBlockContainer->getCreationDifference());
+				const auto integratedDifference = diffCache.getDifference(integratedCircuitId);
 				for (const auto& address : addresses) {
-					AddressTreeNode<EvaluatorGate>& branch = addressTree.getBranch(address);
-					makeEditInPlace(integratedDifference, integratedCircuitId, branch, true);
+					auto branch = addressTree.getBranch(address);
+					makeEditInPlace(integratedDifference, integratedCircuitId, *branch, diffCache, true);
 				}
 			}
 			break;
@@ -165,8 +162,27 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		case Difference::SET_DATA: break;
 		}
 	}
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
+}
+
+void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
+	logError("removeCircuitIO: not implemented yet");
+	const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>*>(data);
+	if (eventData == nullptr) {
+		logError("removeCircuitIO: eventData is null");
+		return;
+	}
+	const std::pair<BlockType, connection_end_id_t> dataValue = eventData->get();
+	const BlockType blockType = dataValue.first;
+	const connection_end_id_t connectionId = dataValue.second;
+	const auto blockData = circuitManager.getBlockDataManager()->getBlockData(blockType);
+
+	if (blockData == nullptr) {
+		logError("removeCircuitIO: blockData is null");
+		return;
+	}
+	if (blockData->isDefaultData()) {
+		logWarning("removeCircuitIO: blockData is default data");
+		return;
 	}
 }
 
@@ -207,7 +223,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 	}
 	// custom circuits here
 	const auto branch = addressTree.getBranch(address);
-	const circuit_id_t integratedCircuitId = branch.getContainerId();
+	const circuit_id_t integratedCircuitId = branch->getContainerId();
 	const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
 	const BlockDataManager* blockDataManager = circuitManager.getBlockDataManager();
 	const CircuitBlockDataManager* circuitBlockDataManager = circuitManager.getCircuitBlockDataManager();
@@ -223,7 +239,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 	}
 	connection_end_id_t connectionId = 0;
 	if (trackInput) {
-		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch.getRotation());
+		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch->getRotation());
 		if (inputConnectionIdData.second) {
 			connectionId = inputConnectionIdData.first;
 		}
@@ -232,7 +248,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 		}
 	}
 	else {
-		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch.getRotation());
+		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch->getRotation());
 		if (outputConnectionIdData.second) {
 			connectionId = outputConnectionIdData.first;
 		}
@@ -245,7 +261,7 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 		logError("getConnectionPoint: connection position is null");
 		return { 0, 0 };
 	}
-	return { branch.getValue(*connectionPosition).gateId, 0 };
+	return { branch->getValue(*connectionPosition).gateId, 0 };
 }
 
 GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
@@ -303,14 +319,10 @@ logic_state_t Evaluator::getState(const Address& address) {
 	}
 	const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
 	const logic_state_t state = logicSimulatorWrapper.getState(blockId, 0); // TODO: 0 temp
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
+
 	return state;
 }
 
@@ -321,10 +333,7 @@ bool Evaluator::getBoolState(const Address& address) {
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses) {
 	std::vector<logic_state_t> states;
 	states.reserve(addresses.size());
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
 	for (const auto& address : addresses) {
 		// check if the address is valid
 		if (addressTree.hasBranch(address)) {
@@ -339,9 +348,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 			states.push_back(logicSimulatorWrapper.getState(blockId, 0)); // TODO: 0 temp
 		}
 	}
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
 	return states;
 }
 
@@ -352,12 +359,7 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 		return;
 	}
 	const wrapper_gate_id_t blockId = gate.gateId;
-	logicSimulatorWrapper.signalToPause();
-	while (!logicSimulatorWrapper.threadIsWaiting()) {
-		std::this_thread::yield();
-	}
+	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
 	logicSimulatorWrapper.setState(blockId, 0, state); // TODO: 0 temp
-	if (!paused) {
-		logicSimulatorWrapper.signalToProceed();
-	}
+	lock.unlock();
 }

@@ -13,6 +13,7 @@
 
 #include "selectorWindow.h"
 #include "evalWindow.h"
+#include "blockCreationWindow.h"
 #include "circuitViewWidget.h"
 
 class Window {
@@ -29,6 +30,7 @@ public:
 	void updateRml(RmlRenderInterface& renderInterface);
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
+	inline float getSdlWindowScalingSize() const { return sdlWindow.getWindowScalingSize(); }
 	inline std::shared_ptr<CircuitViewWidget> getCircuitViewWidget() { return circuitViewWidget; };
 
 	void saveCircuit(circuit_id_t id, bool saveAs);
@@ -41,14 +43,16 @@ public:
 private:
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
-	std::optional<SelectorWindow> selectorWindow;
-	std::optional<EvalWindow> evalWindow;
 
 	SdlWindow sdlWindow;
 	WindowRenderer renderer;
 
+	std::optional<SelectorWindow> selectorWindow;
+	std::optional<EvalWindow> evalWindow;
+	std::optional<BlockCreationWindow> blockCreationWindow;
+	
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
-	 
+	
 	Rml::Context* rmlContext;
 	Rml::ElementDocument* rmlDocument;
 };

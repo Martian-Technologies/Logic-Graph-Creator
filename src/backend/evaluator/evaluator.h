@@ -4,10 +4,13 @@
 #include "backend/circuit/circuit.h"
 #include "backend/circuit/circuitManager.h"
 #include "backend/container/difference.h"
+#include "backend/dataUpdateEventManager.h"
+
 #include "logicSimulatorWrapper.h"
 #include "addressTree.h"
 #include "backend/address.h"
 #include "logicState.h"
+#include "diffCache.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -15,6 +18,7 @@ class DataUpdateEventManager;
 
 class Evaluator {
 public:
+	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData;
 	struct EvaluatorGate {
 		wrapper_gate_id_t gateId;
 		BlockType blockType;
@@ -24,9 +28,9 @@ public:
 	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
-	std::string getEvaluatorName() const { return "Evaluator " + std::to_string(evaluatorId) + " (Circuit: " + std::to_string(addressTree.getContainerId()) + ")"; }
+	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(addressTree.getContainerId())->getCircuitNameNumber() + ")"; }
 
-	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address).getContainerId(); }
+	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address)->getContainerId(); }
 
 	void setPause(bool pause);
 	void reset();
@@ -43,6 +47,7 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
+	void removeCircuitIO(const DataUpdateEventManager::EventData* data);
 
 	const AddressTreeNode<EvaluatorGate>& getAddressTree() const { return addressTree; }
 
@@ -55,8 +60,9 @@ private:
 	LogicSimulatorWrapper logicSimulatorWrapper;
 	AddressTreeNode<EvaluatorGate> addressTree;
 	CircuitManager& circuitManager;
+	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, bool insideIC);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
 	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput);
 };

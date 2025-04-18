@@ -11,7 +11,6 @@
 #include "gui/circuitView/simControlsManager.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
-	
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
 	// Rml::Debugger::Initialise(rmlContext);
@@ -21,27 +20,30 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 	// show rmlUi document
 	rmlDocument->Show();
 
-	// eval menutree
-	Rml::Element* evalTreeParent = rmlDocument->GetElementById("eval tree");
-	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
-
-	//  blocks/tools menutree
-	Rml::Element* toolTreeParent = rmlDocument->GetElementById("left-sidebar-container");
-	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, toolTreeParent);
-
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &renderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
+	// eval menutree
+	Rml::Element* evalTreeParent = rmlDocument->GetElementById("eval-tree");
+	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
+
+	//  blocks/tools menutree
+	Rml::Element* itemTreeParent = rmlDocument->GetElementById("item-selection-tree");
+	Rml::Element* modeTreeParent = rmlDocument->GetElementById("mode-selection-tree");
+	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, itemTreeParent, modeTreeParent);
+
+	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
+	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
+
 	// menu bar with file, edit, view ...
-	MenuManager* menuManager = new MenuManager(rmlDocument);
 
 	// TabsManager* tabsManager = new TabsManager(document);	
 	// TabsManager* tabsManager = new TabsManager(document);	
 
 	// status of sim
-	SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);
+	// SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);
 }
 
 Window::~Window() {
@@ -53,22 +55,22 @@ bool Window::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
 		if (event.type == SDL_EVENT_DROP_FILE) {
-			circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(event.drop.data);
+			std::string file = event.drop.data;
+			circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(file);
 			if (id == 0) {
 				logError("Error", "Failed to load circuit file.");
+				return false;
 			}
-			else {
-				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-				auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
-				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
-				circuitViewWidget->setSimState(true);
-				circuitViewWidget->simUseSpeed(true);
-				circuitViewWidget->setSimSpeed(20);
+			circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+			for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
+				if (iter.second->getCircuitId(Address()) == id) {
+					circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+				}
 			}
 		}
 		
 		// send event to RML
-		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event);
+		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event, getSdlWindowScalingSize());
 
 		// let renderer know we if resized the window
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {

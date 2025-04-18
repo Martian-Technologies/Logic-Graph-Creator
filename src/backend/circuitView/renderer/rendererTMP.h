@@ -8,6 +8,7 @@ public:
 	// main flow
 	void setCircuit(Circuit* circuit) override {};
 	void setEvaluator(Evaluator* evaluator) override {};
+	void setAddress(const Address& address) override {};
 
 	void updateView(ViewManager* viewManager) override {};
 	void updateCircuit(DifferenceSharedPtr diff) override {};
