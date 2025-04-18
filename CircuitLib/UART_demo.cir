@@ -1,28 +1,62 @@
 version_5
 import "UART_TX.cir"
 import "UART_RX.cir"
+import "StopAndHold.cir"
 Circuit: "circuit5"
 UUID: 19a7921b-a73f-4ea1-a6b4-97f8d395bc70
 size: <2, 1>
 ports (0):
-blockId 1 "45270b21-42b5-4b16-bf5c-4c59b1a11a2c" 0 0 ZERO 9
-	(connId:0)
-	(connId:1)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
+blockId 1 "45270b21-42b5-4b16-bf5c-4c59b1a11a2c" 8 0 ZERO 9
+	(connId:0) (3 0)
+	(connId:1) (4 0)
+	(connId:2) (5 0)
+	(connId:3) (6 0)
+	(connId:4) (7 0)
+	(connId:5) (8 0)
+	(connId:6) (9 0)
+	(connId:7) (45 1)
 	(connId:8) (2 0) (2 1)
-blockId 2 "2fa0f707-46b7-4b56-a2b3-62d28b966182" 8 0 ZERO 10
+blockId 2 "2fa0f707-46b7-4b56-a2b3-62d28b966182" 16 0 ZERO 10
 	(connId:0) (1 8)
 	(connId:1) (1 8)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
+	(connId:2) (11 0)
+	(connId:3) (12 0)
+	(connId:4) (13 0)
+	(connId:5) (14 0)
+	(connId:6) (15 0)
+	(connId:7) (16 0)
+	(connId:8) (17 0)
 	(connId:9)
+blockId 3 SWITCH 6 0 ZERO 1
+	(connId:0) (1 0)
+blockId 4 SWITCH 6 1 ZERO 1
+	(connId:0) (1 1)
+blockId 5 SWITCH 6 2 ZERO 1
+	(connId:0) (1 2)
+blockId 6 SWITCH 6 3 ZERO 1
+	(connId:0) (1 3)
+blockId 7 SWITCH 6 4 ZERO 1
+	(connId:0) (1 4)
+blockId 8 SWITCH 6 5 ZERO 1
+	(connId:0) (1 5)
+blockId 9 SWITCH 6 6 ZERO 1
+	(connId:0) (1 6)
+blockId 10 BUTTON 0 7 ZERO 1
+	(connId:0) (45 0)
+blockId 11 LIGHT 20 0 ZERO 1
+	(connId:0) (2 2)
+blockId 12 LIGHT 20 1 ZERO 1
+	(connId:0) (2 3)
+blockId 13 LIGHT 20 2 ZERO 1
+	(connId:0) (2 4)
+blockId 14 LIGHT 20 3 ZERO 1
+	(connId:0) (2 5)
+blockId 15 LIGHT 20 4 ZERO 1
+	(connId:0) (2 6)
+blockId 16 LIGHT 20 5 ZERO 1
+	(connId:0) (2 7)
+blockId 17 LIGHT 20 6 ZERO 1
+	(connId:0) (2 8)
+blockId 45 "ae3a049e-98aa-412b-baf9-28422e30cf27" 5 7 ZERO 2
+	(connId:0) (10 0)
+	(connId:1) (1 7)
