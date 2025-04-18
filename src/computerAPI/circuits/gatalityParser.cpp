@@ -206,6 +206,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 					SharedCircuit circuit = circuitManager->getCircuit(circuitString);
 					if (!circuit) {
 						logError("Count not find Circuit with UUID: {}", "GatalityParser", circuitString);
+						return false;
 					}
 					blockType = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuit->getCircuitId())->getBlockType();
 				}
