@@ -51,19 +51,10 @@ void App::runLoop() {
 						return;
 					}
 					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-					bool foundEval = false;
 					for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
 						if (iter.second->getCircuitId(Address()) == id) {
 							circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
-							foundEval = true;
 						}
-					}
-					if (!foundEval) {
-						auto evaluatorId = circuitViewWidget->getCircuitView()->getBackend()->createEvaluator(id);
-						circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), evaluatorId.value(), Address());
-						circuitViewWidget->setSimState(true);
-						circuitViewWidget->simUseSpeed(true);
-						circuitViewWidget->setSimSpeed(20);
 					}
 				}
 			}
