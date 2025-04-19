@@ -196,7 +196,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 	int currentYOffset = 0;
 	for (int ccIndex = 0; ccIndex < componentAdjs.size(); ++ccIndex) {
 		const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj = componentAdjs[ccIndex];
-		logInfo("Parsing CC {}", "", ccIndex);
+		// logInfo("Parsing CC {}", "", ccIndex);
 
 		// find SCC metagraph DAG for topological sort using kosaraju's
 		// gather stack that shows decreasing post visit numbers
