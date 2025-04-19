@@ -49,19 +49,10 @@ jobs:
         submodules: 'true'
 
     - name: Install Vulkan SDK
-      uses: jakoch/install-vulkan-sdk-action@v1
+      uses: humbletim/install-vulkan-sdk@v1.2
       with:
-          # You can set the Vulkan SDK version to download.
-          # Defaults to latest version, if version not set.
-          vulkan_version: 1.3.231.1
-          optional_components: com.lunarg.vulkan.vma
-          install_runtime: true
-          cache: true
-          stripdown: true
-
-          # You can install a software rasterizer.
-          install_swiftshader: true
-          install_lavapipe: true
+         version: 1.4.309.0
+         cache: true
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
