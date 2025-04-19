@@ -85,7 +85,7 @@ bool ViewManager::pointerExitView(const Event* event) {
 }
 
 void ViewManager::applyLimits() {
-	if (viewScale > 150.0f) viewScale = 150.0f;
+	if (viewScale > 600.0f) viewScale = 600.0f;
 	if (viewScale < 0.5f) viewScale = 0.5f;
 	if (viewCenter.x > 10000000) viewCenter.x = 10000000;
 	if (viewCenter.x < -10000000) viewCenter.x = -10000000;
