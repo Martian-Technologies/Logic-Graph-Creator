@@ -4,7 +4,7 @@ import "FourBitDecoder.cir"
 Circuit: "SimpleALU"
 UUID: 42751bb6-bce4-4cba-b021-bfbed525735f
 size: <3, 16>
-ports (24):
+ports (23):
 	(IN, 0, 74, <0, 0>, "P0")
 	(IN, 1, 75, <0, 1>, "P1")
 	(IN, 2, 76, <0, 2>, "P2")

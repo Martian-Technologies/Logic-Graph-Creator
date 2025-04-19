@@ -25,13 +25,13 @@ public:
 	inline bool withinBlock(const Position& position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 
 	inline const ConnectionContainer& getConnectionContainer() const { return connections; }
-	inline const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const {
+	inline const std::vector<ConnectionEnd>* getInputConnections(const Position& position) const {
 		auto [connectionId, success] = getInputConnectionId(position);
-		return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+		return success ? getConnectionContainer().getConnections(connectionId) : nullptr;
 	}
-	inline const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const {
+	inline const std::vector<ConnectionEnd>* getOutputConnections(const Position& position) const {
 		auto [connectionId, success] = getOutputConnectionId(position);
-		return success ? getConnectionContainer().getConnections(connectionId) : getEmptyVector<ConnectionEnd>();
+		return success ? getConnectionContainer().getConnections(connectionId) : nullptr;
 	}
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Position& position) const {
 		return withinBlock(position) ? blockDataManager->getInputConnectionId(type(), getRotation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
@@ -66,7 +66,7 @@ protected:
 	inline void setRotation(Rotation rotation) { this->rotation = rotation; }
 	inline void setId(block_id_t id) { blockId = id; }
 
-	inline Block(const BlockDataManager* blockDataManager, BlockType blockType) : blockType(blockType), connections(blockDataManager->getConnectionCount(blockType)), blockDataManager(blockDataManager) { }
+	inline Block(const BlockDataManager* blockDataManager, BlockType blockType) : blockType(blockType), blockDataManager(blockDataManager) { }
 
 	// const data
 	BlockType blockType;

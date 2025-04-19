@@ -30,10 +30,10 @@ jobs:
               c_compiler: cl
               cpp_compiler: cl
               runExecutable: .\Debug\Gatality_tests.exe
-            # - os: ubuntu-latest
-            #   c_compiler: gcc
-            #   cpp_compiler: g++
-            #   runExecutable:
+            - os: ubuntu-latest
+              c_compiler: gcc
+              cpp_compiler: g++
+              runExecutable: .\Debug\Gatality_tests.exe
             # - os: ubuntu-latest
             #   c_compiler: clang
             #   cpp_compiler: clang++
@@ -48,17 +48,18 @@ jobs:
       with:
         submodules: 'true'
 
+    - name: Install Vulkan SDK
+      uses: humbletim/install-vulkan-sdk@v1.2
+      with:
+         version: 1.4.309.0
+         cache: true
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: 6.8.*
 
     - name: Build with CMake
       uses: ashutoshvarma/action-cmake-build@master

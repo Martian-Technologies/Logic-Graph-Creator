@@ -37,32 +37,10 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.qrc"
 )
 
+option(GATALITY_BUILD_APP ON)
 option(GATALITY_BUILD_TESTS OFF)
 
-# ======================================== DEPENDENCY SETUP ========================================
-
-# Vulkan
-find_package(Vulkan REQUIRED COMPONENTS glslc)
-
-# SDL
-add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
-
-# Freetype
-add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
-add_library(Freetype::Freetype ALIAS freetype)
-
-# RmlUi
-set(RMLUI_BACKEND native)
-add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM EXCLUDE_FROM_ALL)
-
-# VMA
-add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM EXCLUDE_FROM_ALL)
-
-# Vk Bootstrap
-add_subdirectory("${EXTERNAL_DIR}/vk-bootstrap" SYSTEM EXCLUDE_FROM_ALL)
-
-# GLM
-add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
+# ======================================= SHARED DEPENDENCY SETUP ========================================
 
 # CPPLocate (they have extreme cmake goofyness)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
@@ -74,10 +52,37 @@ set(GATALITY_JSON_LIB_NAME "json")
 add_library(${GATALITY_JSON_LIB_NAME} INTERFACE)
 target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
 
-# Google Testing
-add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
+if (GATALITY_BUILD_APP)
 
-if (NOT GATALITY_BUILD_TESTS)
+	# ======================================= APP DEPENDENCY SETUP =======================================
+	# Vulkan
+	find_package(Vulkan REQUIRED COMPONENTS glslc)
+
+	# SDL
+	if (GATALITY_BUILD_TESTS) # hack to allow SDL to build without window system on linux
+		set(SDL_UNIX_CONSOLE_BUILD ON)
+	endif()
+	add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
+	add_subdirectory("${EXTERNAL_DIR}/SDL_image" SYSTEM EXCLUDE_FROM_ALL)
+
+	# Freetype
+	add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
+	add_library(Freetype::Freetype ALIAS freetype)
+
+	# RmlUi
+	set(RMLUI_BACKEND native)
+	add_subdirectory("${EXTERNAL_DIR}/RmlUi" SYSTEM EXCLUDE_FROM_ALL)
+
+	# VMA
+	add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM EXCLUDE_FROM_ALL)
+
+	# Vk Bootstrap
+	add_subdirectory("${EXTERNAL_DIR}/vk-bootstrap" SYSTEM EXCLUDE_FROM_ALL)
+
+	# GLM
+	add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
+
+	
 	# ===================================== CREATE APP EXECUTABLE ========================================
 	# Platform specific business before add_executable
 	if(APPLE) # MacOS
@@ -202,12 +207,15 @@ endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 if (GATALITY_BUILD_TESTS)
+
+	# Google Testing
+	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
+	
 	set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 	set(TEST_FILES)
 	file(GLOB_RECURSE TEST_FILES
 		"${SOURCE_DIR}/backend/*.cpp"
 		"${SOURCE_DIR}/computerAPI/*.cpp"
-		"${SOURCE_DIR}/keybinds/*.cpp"
 		"${SOURCE_DIR}/logging/*.cpp"
 		"${SOURCE_DIR}/util/*.cpp"
 		"${TEST_DIR}/*.cpp"

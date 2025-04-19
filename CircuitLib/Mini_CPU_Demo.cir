@@ -1,1838 +1,1694 @@
-version_5
+version_6
 import "SimpleRegister.cir"
 import "FourBitDecoder.cir"
 import "SimpleALU.cir"
 Circuit: "circuit4"
 UUID: ec58588c-6251-423d-8b85-e9d64718e9f5
 size: <2, 1>
-ports (0):
-blockId 1 "28533056-c6f2-418a-b915-00a1763d5598" 29 20 ZERO 18
-	(connId:0) (14 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (71 0) (250 0) (339 0)
-	(connId:11) (72 0) (104 0) (340 0)
-	(connId:12) (73 0) (131 0) (341 0)
-	(connId:13) (74 0) (224 0) (342 0)
-	(connId:14) (75 0) (136 0) (343 0)
-	(connId:15) (76 0) (161 0) (344 0)
-	(connId:16) (77 0) (95 0) (345 0)
-	(connId:17) (78 0) (188 0) (346 0)
-blockId 393 TRISTATE_BUFFER 52 61 ZERO 3
-	(connId:0) (45 16)
-	(connId:1) (451 12)
-	(connId:2) (462 0)
-blockId 2 SWITCH 3 30 ZERO 1
-	(connId:0) (46 1) (47 1) (48 1) (49 1) (42 1) (43 1) (44 1) (45 1) (36 1) (37 1) (38 1) (40 1) (6 1) (1 1) (5 1) (3 1)
-blockId 3 "28533056-c6f2-418a-b915-00a1763d5598" 19 20 ZERO 18
-	(connId:0) (12 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (20 0) (238 0) (319 0)
-	(connId:11) (22 0) (239 0) (321 0)
-	(connId:12) (24 0) (240 0) (322 0)
-	(connId:13) (26 0) (242 0) (323 0)
-	(connId:14) (28 0) (243 0) (324 0)
-	(connId:15) (30 0) (245 0) (328 0)
-	(connId:16) (32 0) (246 0) (329 0)
-	(connId:17) (34 0) (248 0) (330 0)
-blockId 387 TRISTATE_BUFFER 52 49 ZERO 3
-	(connId:0) (45 10)
-	(connId:1) (451 12)
-	(connId:2) (456 0)
-blockId 4 SWITCH 39 5 ZERO 1
-	(connId:0) (61 2)
-blockId 5 "28533056-c6f2-418a-b915-00a1763d5598" 24 20 ZERO 18
-	(connId:0) (13 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (39 0) (249 0) (331 0)
-	(connId:11) (41 0) (257 0) (332 0)
-	(connId:12) (65 0) (262 0) (333 0)
-	(connId:13) (66 0) (268 0) (334 0)
-	(connId:14) (67 0) (274 0) (335 0)
-	(connId:15) (68 0) (279 0) (336 0)
-	(connId:16) (69 0) (284 0) (337 0)
-	(connId:17) (70 0) (289 0) (338 0)
-blockId 397 TRISTATE_BUFFER 53 53 ZERO 3
-	(connId:0) (44 12)
-	(connId:1) (451 13)
-	(connId:2) (458 0)
-blockId 6 "28533056-c6f2-418a-b915-00a1763d5598" 34 20 ZERO 18
-	(connId:0) (15 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (79 0) (251 0) (347 0)
-	(connId:11) (80 0) (258 0) (348 0)
-	(connId:12) (81 0) (263 0) (349 0)
-	(connId:13) (82 0) (269 0) (350 0)
-	(connId:14) (83 0) (275 0) (351 0)
-	(connId:15) (84 0) (280 0) (352 0)
-	(connId:16) (85 0) (285 0) (353 0)
-	(connId:17) (87 0) (290 0) (354 0)
-blockId 7 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 3 3 ZERO 20
-	(connId:0) (8 0)
-	(connId:1) (9 0)
-	(connId:2) (10 0)
-	(connId:3) (11 0)
-	(connId:4) (12 1)
-	(connId:5) (13 1)
-	(connId:6) (14 1)
-	(connId:7) (15 1)
-	(connId:8) (16 1)
-	(connId:9) (17 1)
-	(connId:10) (18 1)
-	(connId:11) (19 1)
-	(connId:12) (21 1)
-	(connId:13) (23 1)
-	(connId:14) (25 1)
-	(connId:15) (27 1)
-	(connId:16) (29 1)
-	(connId:17) (31 1)
-	(connId:18) (33 1)
-	(connId:19) (35 1)
-blockId 407 TRISTATE_BUFFER 54 57 ZERO 3
-	(connId:0) (43 14)
-	(connId:1) (451 14)
-	(connId:2) (460 0)
-blockId 8 SWITCH 0 3 ZERO 1
-	(connId:0) (7 0)
-blockId 9 SWITCH 0 4 ZERO 1
-	(connId:0) (7 1)
-blockId 401 TRISTATE_BUFFER 53 61 ZERO 3
-	(connId:0) (44 16)
-	(connId:1) (451 13)
-	(connId:2) (462 0)
-blockId 10 SWITCH 0 5 ZERO 1
-	(connId:0) (7 2)
-blockId 11 SWITCH 0 6 ZERO 1
-	(connId:0) (7 3)
-blockId 395 TRISTATE_BUFFER 53 49 ZERO 3
-	(connId:0) (44 10)
-	(connId:1) (451 13)
-	(connId:2) (456 0)
-blockId 12 TRISTATE_BUFFER 9 3 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 4)
-	(connId:2) (3 0)
-blockId 13 TRISTATE_BUFFER 9 5 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 5)
+ports:
+blockId 456 TRISTATE_BUFFER 52 53 ZERO
+	(connId:1) (374 12)
 	(connId:2) (5 0)
-blockId 405 TRISTATE_BUFFER 54 53 ZERO 3
-	(connId:0) (43 12)
-	(connId:1) (451 14)
-	(connId:2) (458 0)
-blockId 14 TRISTATE_BUFFER 9 7 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 6)
-	(connId:2) (1 0)
-blockId 15 TRISTATE_BUFFER 9 9 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 7)
-	(connId:2) (6 0)
-blockId 415 TRISTATE_BUFFER 55 57 ZERO 3
-	(connId:0) (42 14)
-	(connId:1) (451 15)
-	(connId:2) (460 0)
-blockId 16 TRISTATE_BUFFER 9 11 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 8)
-	(connId:2) (40 0)
-blockId 17 TRISTATE_BUFFER 9 13 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 9)
-	(connId:2) (38 0)
-blockId 409 TRISTATE_BUFFER 54 61 ZERO 3
-	(connId:0) (43 16)
-	(connId:1) (451 14)
-	(connId:2) (462 0)
-blockId 18 TRISTATE_BUFFER 9 15 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 10)
-	(connId:2) (37 0)
-blockId 19 TRISTATE_BUFFER 9 17 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 11)
-	(connId:2) (36 0)
-blockId 403 TRISTATE_BUFFER 54 49 ZERO 3
-	(connId:0) (43 10)
-	(connId:1) (451 14)
-	(connId:2) (456 0)
-blockId 20 TRISTATE_BUFFER 44 31 ZERO 3
-	(connId:0) (3 10)
-	(connId:1) (61 4)
-	(connId:2) (226 0)
-blockId 21 TRISTATE_BUFFER 12 3 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 12)
-	(connId:2) (45 0)
-blockId 413 TRISTATE_BUFFER 55 53 ZERO 3
-	(connId:0) (42 12)
-	(connId:1) (451 15)
-	(connId:2) (458 0)
-blockId 22 TRISTATE_BUFFER 44 33 ZERO 3
-	(connId:0) (3 11)
-	(connId:1) (61 4)
-	(connId:2) (228 0)
-blockId 23 TRISTATE_BUFFER 12 5 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 13)
-	(connId:2) (44 0)
-blockId 24 TRISTATE_BUFFER 44 35 ZERO 3
-	(connId:0) (3 12)
-	(connId:1) (61 4)
-	(connId:2) (229 0)
-blockId 25 TRISTATE_BUFFER 12 7 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 14)
-	(connId:2) (43 0)
-blockId 26 TRISTATE_BUFFER 44 37 ZERO 3
-	(connId:0) (3 13)
-	(connId:1) (61 4)
-	(connId:2) (231 0)
-blockId 27 TRISTATE_BUFFER 12 9 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 15)
-	(connId:2) (42 0)
-blockId 411 TRISTATE_BUFFER 55 49 ZERO 3
-	(connId:0) (42 10)
-	(connId:1) (451 15)
-	(connId:2) (456 0)
-blockId 28 TRISTATE_BUFFER 44 39 ZERO 3
-	(connId:0) (3 14)
-	(connId:1) (61 4)
-	(connId:2) (232 0)
-blockId 29 TRISTATE_BUFFER 12 11 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 16)
-	(connId:2) (49 0)
-blockId 30 TRISTATE_BUFFER 44 41 ZERO 3
-	(connId:0) (3 15)
-	(connId:1) (61 4)
-	(connId:2) (234 0)
-blockId 31 TRISTATE_BUFFER 12 13 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 17)
-	(connId:2) (48 0)
-blockId 431 TRISTATE_BUFFER 57 57 ZERO 3
-	(connId:0) (48 14)
-	(connId:1) (451 17)
-	(connId:2) (460 0)
-blockId 32 TRISTATE_BUFFER 44 43 ZERO 3
-	(connId:0) (3 16)
-	(connId:1) (61 4)
-	(connId:2) (235 0)
-blockId 33 TRISTATE_BUFFER 12 15 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 18)
-	(connId:2) (47 0)
-blockId 425 TRISTATE_BUFFER 56 61 ZERO 3
-	(connId:0) (49 16)
-	(connId:1) (451 16)
-	(connId:2) (462 0)
-blockId 34 TRISTATE_BUFFER 44 45 ZERO 3
-	(connId:0) (3 17)
-	(connId:1) (61 4)
-	(connId:2) (237 0)
-blockId 35 TRISTATE_BUFFER 12 17 ZERO 3
-	(connId:0) (52 1)
-	(connId:1) (7 19)
-	(connId:2) (46 0)
-blockId 419 TRISTATE_BUFFER 56 49 ZERO 3
-	(connId:0) (49 10)
-	(connId:1) (451 16)
-	(connId:2) (456 0)
-blockId 36 "28533056-c6f2-418a-b915-00a1763d5598" 34 32 ZERO 18
-	(connId:0) (19 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (124 0) (255 0) (379 0)
-	(connId:11) (126 0) (260 0) (380 0)
-	(connId:12) (127 0) (265 0) (381 0)
-	(connId:13) (129 0) (272 0) (382 0)
-	(connId:14) (130 0) (277 0) (383 0)
-	(connId:15) (132 0) (282 0) (384 0)
-	(connId:16) (133 0) (287 0) (385 0)
-	(connId:17) (134 0) (292 0) (386 0)
-blockId 37 "28533056-c6f2-418a-b915-00a1763d5598" 29 32 ZERO 18
-	(connId:0) (18 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (112 0) (107 0) (371 0)
-	(connId:11) (114 0) (110 0) (372 0)
-	(connId:12) (115 0) (113 0) (373 0)
-	(connId:13) (117 0) (271 0) (374 0)
-	(connId:14) (118 0) (164 0) (375 0)
-	(connId:15) (120 0) (167 0) (376 0)
-	(connId:16) (121 0) (170 0) (377 0)
-	(connId:17) (123 0) (194 0) (378 0)
-blockId 429 TRISTATE_BUFFER 57 53 ZERO 3
-	(connId:0) (48 12)
-	(connId:1) (451 17)
-	(connId:2) (458 0)
-blockId 38 "28533056-c6f2-418a-b915-00a1763d5598" 24 32 ZERO 18
-	(connId:0) (17 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (100 0) (253 0) (363 0)
-	(connId:11) (102 0) (259 0) (364 0)
-	(connId:12) (103 0) (264 0) (365 0)
-	(connId:13) (105 0) (270 0) (366 0)
-	(connId:14) (106 0) (276 0) (367 0)
-	(connId:15) (108 0) (281 0) (368 0)
-	(connId:16) (109 0) (286 0) (369 0)
-	(connId:17) (111 0) (291 0) (370 0)
-blockId 39 TRISTATE_BUFFER 45 31 ZERO 3
-	(connId:0) (5 10)
-	(connId:1) (61 5)
-	(connId:2) (226 0)
-blockId 439 TRISTATE_BUFFER 58 57 ZERO 3
-	(connId:0) (47 14)
-	(connId:1) (451 18)
-	(connId:2) (460 0)
-blockId 40 "28533056-c6f2-418a-b915-00a1763d5598" 19 32 ZERO 18
-	(connId:0) (16 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (88 0) (252 0) (355 0)
-	(connId:11) (90 0) (119 0) (356 0)
-	(connId:12) (91 0) (122 0) (357 0)
-	(connId:13) (93 0) (125 0) (358 0)
-	(connId:14) (94 0) (149 0) (359 0)
-	(connId:15) (96 0) (176 0) (360 0)
-	(connId:16) (97 0) (86 0) (361 0)
-	(connId:17) (99 0) (181 0) (362 0)
-blockId 41 TRISTATE_BUFFER 45 33 ZERO 3
-	(connId:0) (5 11)
-	(connId:1) (61 5)
-	(connId:2) (228 0)
-blockId 433 TRISTATE_BUFFER 57 61 ZERO 3
-	(connId:0) (48 16)
-	(connId:1) (451 17)
-	(connId:2) (462 0)
-blockId 42 "28533056-c6f2-418a-b915-00a1763d5598" 34 44 ZERO 18
-	(connId:0) (27 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (169 0) (294 0) (411 0)
-	(connId:11) (171 0) (221 0) (412 0)
-	(connId:12) (172 0) (299 0) (413 0)
-	(connId:13) (174 0) (303 0) (414 0)
-	(connId:14) (175 0) (307 0) (415 0)
-	(connId:15) (177 0) (311 0) (416 0)
-	(connId:16) (178 0) (314 0) (417 0)
-	(connId:17) (179 0) (241 0) (418 0)
-blockId 43 "28533056-c6f2-418a-b915-00a1763d5598" 29 44 ZERO 18
-	(connId:0) (25 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (157 0) (89 0) (403 0)
-	(connId:11) (159 0) (116 0) (404 0)
-	(connId:12) (160 0) (267 0) (405 0)
-	(connId:13) (162 0) (143 0) (406 0)
-	(connId:14) (163 0) (146 0) (407 0)
-	(connId:15) (165 0) (173 0) (408 0)
-	(connId:16) (166 0) (197 0) (409 0)
-	(connId:17) (168 0) (200 0) (410 0)
-blockId 427 TRISTATE_BUFFER 57 49 ZERO 3
-	(connId:0) (48 10)
-	(connId:1) (451 17)
-	(connId:2) (456 0)
-blockId 44 "28533056-c6f2-418a-b915-00a1763d5598" 24 44 ZERO 18
-	(connId:0) (23 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (145 0) (256 0) (395 0)
-	(connId:11) (147 0) (261 0) (396 0)
-	(connId:12) (148 0) (266 0) (397 0)
-	(connId:13) (150 0) (273 0) (398 0)
-	(connId:14) (151 0) (278 0) (399 0)
-	(connId:15) (153 0) (283 0) (400 0)
-	(connId:16) (154 0) (288 0) (401 0)
-	(connId:17) (156 0) (293 0) (402 0)
-blockId 45 "28533056-c6f2-418a-b915-00a1763d5598" 19 44 ZERO 18
-	(connId:0) (21 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (135 0) (98 0) (387 0)
-	(connId:11) (137 0) (101 0) (388 0)
-	(connId:12) (138 0) (128 0) (389 0)
-	(connId:13) (139 0) (152 0) (390 0)
-	(connId:14) (140 0) (155 0) (391 0)
-	(connId:15) (141 0) (158 0) (392 0)
-	(connId:16) (142 0) (92 0) (393 0)
-	(connId:17) (144 0) (209 0) (394 0)
-blockId 437 TRISTATE_BUFFER 58 53 ZERO 3
-	(connId:0) (47 12)
-	(connId:1) (451 18)
-	(connId:2) (458 0)
-blockId 46 "28533056-c6f2-418a-b915-00a1763d5598" 34 56 ZERO 18
-	(connId:0) (35 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (214 0) (296 0) (443 0)
-	(connId:11) (216 0) (203 0) (444 0)
-	(connId:12) (217 0) (302 0) (445 0)
-	(connId:13) (219 0) (306 0) (446 0)
-	(connId:14) (220 0) (310 0) (447 0)
-	(connId:15) (222 0) (244 0) (448 0)
-	(connId:16) (223 0) (316 0) (449 0)
-	(connId:17) (225 0) (247 0) (450 0)
-blockId 47 "28533056-c6f2-418a-b915-00a1763d5598" 29 56 ZERO 18
-	(connId:0) (33 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (202 0) (206 0) (435 0)
-	(connId:11) (204 0) (298 0) (436 0)
-	(connId:12) (205 0) (301 0) (437 0)
-	(connId:13) (207 0) (305 0) (438 0)
-	(connId:14) (208 0) (309 0) (439 0)
-	(connId:15) (210 0) (313 0) (440 0)
-	(connId:16) (211 0) (227 0) (441 0)
-	(connId:17) (213 0) (318 0) (442 0)
-blockId 447 TRISTATE_BUFFER 59 57 ZERO 3
-	(connId:0) (46 14)
-	(connId:1) (451 19)
-	(connId:2) (460 0)
-blockId 48 "28533056-c6f2-418a-b915-00a1763d5598" 24 56 ZERO 18
-	(connId:0) (31 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (190 0) (295 0) (427 0)
-	(connId:11) (192 0) (212 0) (428 0)
-	(connId:12) (193 0) (300 0) (429 0)
-	(connId:13) (195 0) (215 0) (430 0)
-	(connId:14) (196 0) (308 0) (431 0)
-	(connId:15) (198 0) (230 0) (432 0)
-	(connId:16) (199 0) (315 0) (433 0)
-	(connId:17) (201 0) (254 0) (434 0)
-blockId 49 "28533056-c6f2-418a-b915-00a1763d5598" 19 56 ZERO 18
-	(connId:0) (29 2)
-	(connId:1) (2 0)
-	(connId:2)
-	(connId:3)
-	(connId:4)
-	(connId:5)
-	(connId:6)
-	(connId:7)
-	(connId:8)
-	(connId:9)
-	(connId:10) (180 0) (191 0) (419 0)
-	(connId:11) (182 0) (297 0) (420 0)
-	(connId:12) (183 0) (218 0) (421 0)
-	(connId:13) (184 0) (304 0) (422 0)
-	(connId:14) (185 0) (233 0) (423 0)
-	(connId:15) (186 0) (312 0) (424 0)
-	(connId:16) (187 0) (236 0) (425 0)
-	(connId:17) (189 0) (317 0) (426 0)
-blockId 441 TRISTATE_BUFFER 58 61 ZERO 3
-	(connId:0) (47 16)
-	(connId:1) (451 18)
-	(connId:2) (462 0)
-blockId 50 SWITCH 40 0 ZERO 1
-	(connId:0) (51 0) (52 0)
-blockId 51 NAND 15 0 ZERO 2
-	(connId:0) (50 0)
-	(connId:1) (52 0)
-blockId 435 TRISTATE_BUFFER 58 49 ZERO 3
-	(connId:0) (47 10)
-	(connId:1) (451 18)
-	(connId:2) (456 0)
-blockId 52 AND 14 0 ZERO 2
-	(connId:0) (50 0) (51 1)
-	(connId:1) (35 0) (33 0) (31 0) (29 0) (27 0) (25 0) (23 0) (21 0) (19 0) (18 0) (17 0) (16 0) (15 0) (14 0) (13 0) (12 0)
-blockId 445 TRISTATE_BUFFER 59 53 ZERO 3
-	(connId:0) (46 12)
-	(connId:1) (451 19)
-	(connId:2) (458 0)
-blockId 391 TRISTATE_BUFFER 52 57 ZERO 3
-	(connId:0) (45 14)
-	(connId:1) (451 12)
-	(connId:2) (460 0)
-blockId 385 TRISTATE_BUFFER 51 61 ZERO 3
-	(connId:0) (36 16)
-	(connId:1) (451 11)
-	(connId:2) (462 0)
-blockId 443 TRISTATE_BUFFER 59 49 ZERO 3
-	(connId:0) (46 10)
-	(connId:1) (451 19)
-	(connId:2) (456 0)
-blockId 61 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 42 3 ZERO 20
-	(connId:0) (62 0)
-	(connId:1) (63 0)
+	(connId:0) (398 12)
+blockId 455 TRISTATE_BUFFER 52 57 ZERO
+	(connId:1) (374 12)
 	(connId:2) (4 0)
-	(connId:3) (64 0)
-	(connId:4) (34 1) (32 1) (30 1) (28 1) (26 1) (24 1) (22 1) (20 1)
-	(connId:5) (70 1) (69 1) (68 1) (67 1) (66 1) (65 1) (41 1) (39 1)
-	(connId:6) (78 1) (77 1) (76 1) (75 1) (74 1) (73 1) (72 1) (71 1)
-	(connId:7) (87 1) (85 1) (84 1) (83 1) (82 1) (81 1) (80 1) (79 1)
-	(connId:8) (99 1) (97 1) (96 1) (94 1) (93 1) (91 1) (90 1) (88 1)
-	(connId:9) (111 1) (109 1) (108 1) (106 1) (105 1) (103 1) (102 1) (100 1)
-	(connId:10) (123 1) (121 1) (120 1) (118 1) (117 1) (115 1) (114 1) (112 1)
-	(connId:11) (134 1) (133 1) (132 1) (130 1) (129 1) (127 1) (126 1) (124 1)
-	(connId:12) (144 1) (142 1) (141 1) (140 1) (139 1) (138 1) (137 1) (135 1)
-	(connId:13) (156 1) (154 1) (153 1) (151 1) (150 1) (148 1) (147 1) (145 1)
-	(connId:14) (168 1) (166 1) (165 1) (163 1) (162 1) (160 1) (159 1) (157 1)
-	(connId:15) (179 1) (178 1) (177 1) (175 1) (174 1) (172 1) (171 1) (169 1)
-	(connId:16) (189 1) (187 1) (186 1) (185 1) (184 1) (183 1) (182 1) (180 1)
-	(connId:17) (201 1) (199 1) (198 1) (196 1) (195 1) (193 1) (192 1) (190 1)
-	(connId:18) (213 1) (211 1) (210 1) (208 1) (207 1) (205 1) (204 1) (202 1)
-	(connId:19) (225 1) (223 1) (222 1) (220 1) (219 1) (217 1) (216 1) (214 1)
-blockId 389 TRISTATE_BUFFER 52 53 ZERO 3
-	(connId:0) (45 12)
-	(connId:1) (451 12)
-	(connId:2) (458 0)
-blockId 62 SWITCH 39 3 ZERO 1
-	(connId:0) (61 0)
-blockId 63 SWITCH 39 4 ZERO 1
-	(connId:0) (61 1)
-blockId 463 JUNCTION 62 47 ZERO 2
-	(connId:0) (450 2) (442 2) (434 2) (426 2) (418 2) (410 2) (402 2) (394 2) (386 2) (378 2) (370 2) (362 2) (354 2) (346 2) (338 2) (330 2)
-	(connId:1) (465 15)
-blockId 64 SWITCH 39 6 ZERO 1
-	(connId:0) (61 3)
-blockId 65 TRISTATE_BUFFER 45 35 ZERO 3
-	(connId:0) (5 12)
-	(connId:1) (61 5)
-	(connId:2) (229 0)
-blockId 457 JUNCTION 62 41 ZERO 2
-	(connId:0) (444 2) (436 2) (428 2) (420 2) (412 2) (404 2) (396 2) (388 2) (380 2) (372 2) (364 2) (356 2) (348 2) (340 2) (332 2) (321 2)
-	(connId:1) (465 9)
-blockId 66 TRISTATE_BUFFER 45 37 ZERO 3
-	(connId:0) (5 13)
-	(connId:1) (61 5)
-	(connId:2) (231 0)
-blockId 67 TRISTATE_BUFFER 45 39 ZERO 3
-	(connId:0) (5 14)
-	(connId:1) (61 5)
-	(connId:2) (232 0)
-blockId 451 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 49 3 ZERO 20
-	(connId:0) (452 0)
-	(connId:1) (453 0)
-	(connId:2) (454 0)
-	(connId:3) (455 0)
-	(connId:4) (330 1) (329 1) (328 1) (324 1) (323 1) (322 1) (321 1) (319 1)
-	(connId:5) (338 1) (337 1) (336 1) (335 1) (334 1) (333 1) (332 1) (331 1)
-	(connId:6) (346 1) (345 1) (344 1) (343 1) (342 1) (341 1) (340 1) (339 1)
-	(connId:7) (354 1) (353 1) (352 1) (351 1) (350 1) (349 1) (348 1) (347 1)
-	(connId:8) (362 1) (361 1) (360 1) (359 1) (358 1) (357 1) (356 1) (355 1)
-	(connId:9) (370 1) (369 1) (368 1) (367 1) (366 1) (365 1) (364 1) (363 1)
-	(connId:10) (378 1) (377 1) (376 1) (375 1) (374 1) (373 1) (372 1) (371 1)
-	(connId:11) (386 1) (385 1) (384 1) (383 1) (382 1) (381 1) (380 1) (379 1)
-	(connId:12) (394 1) (393 1) (392 1) (391 1) (390 1) (389 1) (388 1) (387 1)
-	(connId:13) (402 1) (401 1) (400 1) (399 1) (398 1) (397 1) (396 1) (395 1)
-	(connId:14) (410 1) (409 1) (408 1) (407 1) (406 1) (405 1) (404 1) (403 1)
-	(connId:15) (418 1) (417 1) (416 1) (415 1) (414 1) (413 1) (412 1) (411 1)
-	(connId:16) (426 1) (425 1) (424 1) (423 1) (422 1) (421 1) (420 1) (419 1)
-	(connId:17) (434 1) (433 1) (432 1) (431 1) (430 1) (429 1) (428 1) (427 1)
-	(connId:18) (442 1) (441 1) (440 1) (439 1) (438 1) (437 1) (436 1) (435 1)
-	(connId:19) (450 1) (449 1) (448 1) (447 1) (446 1) (445 1) (444 1) (443 1)
-blockId 68 TRISTATE_BUFFER 45 41 ZERO 3
-	(connId:0) (5 15)
-	(connId:1) (61 5)
-	(connId:2) (234 0)
-blockId 69 TRISTATE_BUFFER 45 43 ZERO 3
-	(connId:0) (5 16)
-	(connId:1) (61 5)
-	(connId:2) (235 0)
-blockId 461 JUNCTION 62 45 ZERO 2
-	(connId:0) (448 2) (440 2) (432 2) (424 2) (416 2) (408 2) (400 2) (392 2) (384 2) (376 2) (368 2) (360 2) (352 2) (344 2) (336 2) (328 2)
-	(connId:1) (465 13)
-blockId 70 TRISTATE_BUFFER 45 45 ZERO 3
-	(connId:0) (5 17)
-	(connId:1) (61 5)
-	(connId:2) (237 0)
-blockId 71 TRISTATE_BUFFER 46 31 ZERO 3
-	(connId:0) (1 10)
-	(connId:1) (61 6)
-	(connId:2) (226 0)
-blockId 72 TRISTATE_BUFFER 46 33 ZERO 3
-	(connId:0) (1 11)
-	(connId:1) (61 6)
-	(connId:2) (228 0)
-blockId 73 TRISTATE_BUFFER 46 35 ZERO 3
-	(connId:0) (1 12)
-	(connId:1) (61 6)
-	(connId:2) (229 0)
-blockId 465 "42751bb6-bce4-4cba-b021-bfbed525735f" 70 31 ZERO 28
-	(connId:0) (226 1)
-	(connId:1) (228 1)
-	(connId:2) (229 1)
-	(connId:3) (231 1)
-	(connId:4) (232 1)
-	(connId:5) (234 1)
-	(connId:6) (235 1)
-	(connId:7) (237 1)
-	(connId:8) (456 1)
-	(connId:9) (457 1)
-	(connId:10) (458 1)
-	(connId:11) (459 1)
-	(connId:12) (460 1)
-	(connId:13) (461 1)
-	(connId:14) (462 1)
-	(connId:15) (463 1)
-	(connId:16)
-	(connId:17)
-	(connId:18)
-	(connId:19)
-	(connId:20)
-	(connId:21)
-	(connId:22)
-	(connId:23)
-	(connId:24) (466 0)
-	(connId:25) (467 0)
-	(connId:26) (468 0)
-	(connId:27) (469 0)
-blockId 74 TRISTATE_BUFFER 46 37 ZERO 3
-	(connId:0) (1 13)
-	(connId:1) (61 6)
-	(connId:2) (231 0)
-blockId 75 TRISTATE_BUFFER 46 39 ZERO 3
-	(connId:0) (1 14)
-	(connId:1) (61 6)
-	(connId:2) (232 0)
-blockId 459 JUNCTION 62 43 ZERO 2
-	(connId:0) (446 2) (438 2) (430 2) (422 2) (414 2) (406 2) (398 2) (390 2) (382 2) (374 2) (366 2) (358 2) (350 2) (342 2) (334 2) (323 2)
-	(connId:1) (465 11)
-blockId 76 TRISTATE_BUFFER 46 41 ZERO 3
-	(connId:0) (1 15)
-	(connId:1) (61 6)
-	(connId:2) (234 0)
-blockId 77 TRISTATE_BUFFER 46 43 ZERO 3
-	(connId:0) (1 16)
-	(connId:1) (61 6)
-	(connId:2) (235 0)
-blockId 469 SWITCH 74 51 ZERO 1
-	(connId:0) (465 27)
-blockId 78 TRISTATE_BUFFER 46 45 ZERO 3
-	(connId:0) (1 17)
-	(connId:1) (61 6)
-	(connId:2) (237 0)
-blockId 79 TRISTATE_BUFFER 47 31 ZERO 3
-	(connId:0) (6 10)
-	(connId:1) (61 7)
-	(connId:2) (226 0)
-blockId 80 TRISTATE_BUFFER 47 33 ZERO 3
-	(connId:0) (6 11)
-	(connId:1) (61 7)
-	(connId:2) (228 0)
-blockId 81 TRISTATE_BUFFER 47 35 ZERO 3
-	(connId:0) (6 12)
-	(connId:1) (61 7)
-	(connId:2) (229 0)
-blockId 82 TRISTATE_BUFFER 47 37 ZERO 3
-	(connId:0) (6 13)
-	(connId:1) (61 7)
-	(connId:2) (231 0)
-blockId 83 TRISTATE_BUFFER 47 39 ZERO 3
-	(connId:0) (6 14)
-	(connId:1) (61 7)
-	(connId:2) (232 0)
-blockId 467 SWITCH 72 51 ZERO 1
-	(connId:0) (465 25)
-blockId 84 TRISTATE_BUFFER 47 41 ZERO 3
-	(connId:0) (6 15)
-	(connId:1) (61 7)
-	(connId:2) (234 0)
-blockId 85 TRISTATE_BUFFER 47 43 ZERO 3
-	(connId:0) (6 16)
-	(connId:1) (61 7)
-	(connId:2) (235 0)
-blockId 86 LIGHT 29 75 ZERO 1
-	(connId:0) (40 16)
-blockId 87 TRISTATE_BUFFER 47 45 ZERO 3
-	(connId:0) (6 17)
-	(connId:1) (61 7)
-	(connId:2) (237 0)
-blockId 88 TRISTATE_BUFFER 48 31 ZERO 3
-	(connId:0) (40 10)
-	(connId:1) (61 8)
-	(connId:2) (226 0)
-blockId 89 LIGHT 23 81 ZERO 1
-	(connId:0) (43 10)
-blockId 90 TRISTATE_BUFFER 48 33 ZERO 3
-	(connId:0) (40 11)
-	(connId:1) (61 8)
-	(connId:2) (228 0)
-blockId 91 TRISTATE_BUFFER 48 35 ZERO 3
-	(connId:0) (40 12)
-	(connId:1) (61 8)
-	(connId:2) (229 0)
-blockId 92 LIGHT 29 79 ZERO 1
-	(connId:0) (45 16)
-blockId 93 TRISTATE_BUFFER 48 37 ZERO 3
-	(connId:0) (40 13)
-	(connId:1) (61 8)
-	(connId:2) (231 0)
-blockId 94 TRISTATE_BUFFER 48 39 ZERO 3
-	(connId:0) (40 14)
-	(connId:1) (61 8)
-	(connId:2) (232 0)
-blockId 95 LIGHT 29 73 ZERO 1
-	(connId:0) (1 16)
-blockId 96 TRISTATE_BUFFER 48 41 ZERO 3
-	(connId:0) (40 15)
-	(connId:1) (61 8)
-	(connId:2) (234 0)
-blockId 97 TRISTATE_BUFFER 48 43 ZERO 3
-	(connId:0) (40 16)
-	(connId:1) (61 8)
-	(connId:2) (235 0)
-blockId 98 LIGHT 23 79 ZERO 1
-	(connId:0) (45 10)
-blockId 99 TRISTATE_BUFFER 48 45 ZERO 3
-	(connId:0) (40 17)
-	(connId:1) (61 8)
-	(connId:2) (237 0)
-blockId 100 TRISTATE_BUFFER 49 31 ZERO 3
-	(connId:0) (38 10)
-	(connId:1) (61 9)
-	(connId:2) (226 0)
-blockId 101 LIGHT 24 79 ZERO 1
-	(connId:0) (45 11)
-blockId 102 TRISTATE_BUFFER 49 33 ZERO 3
-	(connId:0) (38 11)
-	(connId:1) (61 9)
-	(connId:2) (228 0)
-blockId 103 TRISTATE_BUFFER 49 35 ZERO 3
-	(connId:0) (38 12)
-	(connId:1) (61 9)
-	(connId:2) (229 0)
-blockId 104 LIGHT 24 73 ZERO 1
-	(connId:0) (1 11)
-blockId 105 TRISTATE_BUFFER 49 37 ZERO 3
-	(connId:0) (38 13)
-	(connId:1) (61 9)
-	(connId:2) (231 0)
-blockId 106 TRISTATE_BUFFER 49 39 ZERO 3
-	(connId:0) (38 14)
-	(connId:1) (61 9)
-	(connId:2) (232 0)
-blockId 107 LIGHT 23 77 ZERO 1
-	(connId:0) (37 10)
-blockId 108 TRISTATE_BUFFER 49 41 ZERO 3
-	(connId:0) (38 15)
-	(connId:1) (61 9)
-	(connId:2) (234 0)
-blockId 109 TRISTATE_BUFFER 49 43 ZERO 3
-	(connId:0) (38 16)
-	(connId:1) (61 9)
-	(connId:2) (235 0)
-blockId 110 LIGHT 24 77 ZERO 1
-	(connId:0) (37 11)
-blockId 111 TRISTATE_BUFFER 49 45 ZERO 3
-	(connId:0) (38 17)
-	(connId:1) (61 9)
-	(connId:2) (237 0)
-blockId 112 TRISTATE_BUFFER 50 31 ZERO 3
-	(connId:0) (37 10)
-	(connId:1) (61 10)
-	(connId:2) (226 0)
-blockId 113 LIGHT 25 77 ZERO 1
-	(connId:0) (37 12)
-blockId 114 TRISTATE_BUFFER 50 33 ZERO 3
-	(connId:0) (37 11)
-	(connId:1) (61 10)
-	(connId:2) (228 0)
-blockId 115 TRISTATE_BUFFER 50 35 ZERO 3
-	(connId:0) (37 12)
-	(connId:1) (61 10)
-	(connId:2) (229 0)
-blockId 116 LIGHT 24 81 ZERO 1
-	(connId:0) (43 11)
-blockId 117 TRISTATE_BUFFER 50 37 ZERO 3
-	(connId:0) (37 13)
-	(connId:1) (61 10)
-	(connId:2) (231 0)
-blockId 118 TRISTATE_BUFFER 50 39 ZERO 3
-	(connId:0) (37 14)
-	(connId:1) (61 10)
-	(connId:2) (232 0)
-blockId 119 LIGHT 24 75 ZERO 1
-	(connId:0) (40 11)
-blockId 455 SWITCH 39 11 ZERO 1
-	(connId:0) (451 3)
-blockId 120 TRISTATE_BUFFER 50 41 ZERO 3
-	(connId:0) (37 15)
-	(connId:1) (61 10)
-	(connId:2) (234 0)
-blockId 121 TRISTATE_BUFFER 50 43 ZERO 3
-	(connId:0) (37 16)
-	(connId:1) (61 10)
-	(connId:2) (235 0)
-blockId 449 TRISTATE_BUFFER 59 61 ZERO 3
-	(connId:0) (46 16)
-	(connId:1) (451 19)
-	(connId:2) (462 0)
-blockId 122 LIGHT 25 75 ZERO 1
-	(connId:0) (40 12)
-blockId 123 TRISTATE_BUFFER 50 45 ZERO 3
-	(connId:0) (37 17)
-	(connId:1) (61 10)
-	(connId:2) (237 0)
-blockId 124 TRISTATE_BUFFER 51 31 ZERO 3
-	(connId:0) (36 10)
-	(connId:1) (61 11)
-	(connId:2) (226 0)
-blockId 125 LIGHT 26 75 ZERO 1
-	(connId:0) (40 13)
-blockId 453 SWITCH 39 9 ZERO 1
-	(connId:0) (451 1)
-blockId 126 TRISTATE_BUFFER 51 33 ZERO 3
-	(connId:0) (36 11)
-	(connId:1) (61 11)
-	(connId:2) (228 0)
-blockId 127 TRISTATE_BUFFER 51 35 ZERO 3
-	(connId:0) (36 12)
-	(connId:1) (61 11)
-	(connId:2) (229 0)
-blockId 128 LIGHT 25 79 ZERO 1
-	(connId:0) (45 12)
-blockId 314 LIGHT 29 82 ZERO 1
-	(connId:0) (42 16)
-blockId 129 TRISTATE_BUFFER 51 37 ZERO 3
-	(connId:0) (36 13)
-	(connId:1) (61 11)
-	(connId:2) (231 0)
-blockId 130 TRISTATE_BUFFER 51 39 ZERO 3
-	(connId:0) (36 14)
-	(connId:1) (61 11)
-	(connId:2) (232 0)
-blockId 260 LIGHT 24 78 ZERO 1
-	(connId:0) (36 11)
-blockId 131 LIGHT 25 73 ZERO 1
-	(connId:0) (1 12)
-blockId 132 TRISTATE_BUFFER 51 41 ZERO 3
-	(connId:0) (36 15)
-	(connId:1) (61 11)
-	(connId:2) (234 0)
-blockId 318 LIGHT 30 85 ZERO 1
-	(connId:0) (47 17)
-blockId 133 TRISTATE_BUFFER 51 43 ZERO 3
-	(connId:0) (36 16)
-	(connId:1) (61 11)
-	(connId:2) (235 0)
-blockId 134 TRISTATE_BUFFER 51 45 ZERO 3
-	(connId:0) (36 17)
-	(connId:1) (61 11)
-	(connId:2) (237 0)
-blockId 312 LIGHT 28 83 ZERO 1
-	(connId:0) (49 15)
-blockId 135 TRISTATE_BUFFER 52 31 ZERO 3
-	(connId:0) (45 10)
-	(connId:1) (61 12)
-	(connId:2) (226 0)
-blockId 136 LIGHT 27 73 ZERO 1
-	(connId:0) (1 14)
-blockId 258 LIGHT 24 74 ZERO 1
-	(connId:0) (6 11)
-blockId 137 TRISTATE_BUFFER 52 33 ZERO 3
-	(connId:0) (45 11)
-	(connId:1) (61 12)
-	(connId:2) (228 0)
-blockId 138 TRISTATE_BUFFER 52 35 ZERO 3
-	(connId:0) (45 12)
-	(connId:1) (61 12)
-	(connId:2) (229 0)
-blockId 268 LIGHT 26 72 ZERO 1
-	(connId:0) (5 13)
-blockId 139 TRISTATE_BUFFER 52 37 ZERO 3
-	(connId:0) (45 13)
-	(connId:1) (61 12)
-	(connId:2) (231 0)
-blockId 140 TRISTATE_BUFFER 52 39 ZERO 3
-	(connId:0) (45 14)
-	(connId:1) (61 12)
-	(connId:2) (232 0)
-blockId 262 LIGHT 25 72 ZERO 1
-	(connId:0) (5 12)
-blockId 141 TRISTATE_BUFFER 52 41 ZERO 3
-	(connId:0) (45 15)
-	(connId:1) (61 12)
-	(connId:2) (234 0)
-blockId 142 TRISTATE_BUFFER 52 43 ZERO 3
-	(connId:0) (45 16)
-	(connId:1) (61 12)
-	(connId:2) (235 0)
-blockId 256 LIGHT 23 80 ZERO 1
-	(connId:0) (44 10)
-blockId 143 LIGHT 26 81 ZERO 1
-	(connId:0) (43 13)
-blockId 144 TRISTATE_BUFFER 52 45 ZERO 3
-	(connId:0) (45 17)
-	(connId:1) (61 12)
-	(connId:2) (237 0)
-blockId 266 LIGHT 25 80 ZERO 1
-	(connId:0) (44 12)
-blockId 145 TRISTATE_BUFFER 53 31 ZERO 3
-	(connId:0) (44 10)
-	(connId:1) (61 13)
-	(connId:2) (226 0)
-blockId 146 LIGHT 27 81 ZERO 1
-	(connId:0) (43 14)
-blockId 276 LIGHT 27 76 ZERO 1
-	(connId:0) (38 14)
-blockId 147 TRISTATE_BUFFER 53 33 ZERO 3
-	(connId:0) (44 11)
-	(connId:1) (61 13)
-	(connId:2) (228 0)
-blockId 148 TRISTATE_BUFFER 53 35 ZERO 3
-	(connId:0) (44 12)
-	(connId:1) (61 13)
-	(connId:2) (229 0)
-blockId 270 LIGHT 26 76 ZERO 1
-	(connId:0) (38 13)
-blockId 149 LIGHT 27 75 ZERO 1
-	(connId:0) (40 14)
-blockId 150 TRISTATE_BUFFER 53 37 ZERO 3
-	(connId:0) (44 13)
-	(connId:1) (61 13)
-	(connId:2) (231 0)
-blockId 264 LIGHT 25 76 ZERO 1
-	(connId:0) (38 12)
-blockId 151 TRISTATE_BUFFER 53 39 ZERO 3
-	(connId:0) (44 14)
-	(connId:1) (61 13)
-	(connId:2) (232 0)
-blockId 152 LIGHT 26 79 ZERO 1
-	(connId:0) (45 13)
-blockId 274 LIGHT 27 72 ZERO 1
-	(connId:0) (5 14)
-blockId 153 TRISTATE_BUFFER 53 41 ZERO 3
-	(connId:0) (44 15)
-	(connId:1) (61 13)
-	(connId:2) (234 0)
-blockId 154 TRISTATE_BUFFER 53 43 ZERO 3
-	(connId:0) (44 16)
-	(connId:1) (61 13)
-	(connId:2) (235 0)
-blockId 284 LIGHT 29 72 ZERO 1
-	(connId:0) (5 16)
-blockId 155 LIGHT 27 79 ZERO 1
-	(connId:0) (45 14)
-blockId 156 TRISTATE_BUFFER 53 45 ZERO 3
-	(connId:0) (44 17)
-	(connId:1) (61 13)
-	(connId:2) (237 0)
-blockId 278 LIGHT 27 80 ZERO 1
-	(connId:0) (44 14)
-blockId 157 TRISTATE_BUFFER 54 31 ZERO 3
-	(connId:0) (43 10)
-	(connId:1) (61 14)
-	(connId:2) (226 0)
-blockId 158 LIGHT 28 79 ZERO 1
-	(connId:0) (45 15)
-blockId 272 LIGHT 26 78 ZERO 1
-	(connId:0) (36 13)
-blockId 159 TRISTATE_BUFFER 54 33 ZERO 3
-	(connId:0) (43 11)
-	(connId:1) (61 14)
-	(connId:2) (228 0)
-blockId 160 TRISTATE_BUFFER 54 35 ZERO 3
-	(connId:0) (43 12)
-	(connId:1) (61 14)
-	(connId:2) (229 0)
-blockId 161 LIGHT 28 73 ZERO 1
-	(connId:0) (1 15)
-blockId 162 TRISTATE_BUFFER 54 37 ZERO 3
-	(connId:0) (43 13)
-	(connId:1) (61 14)
-	(connId:2) (231 0)
-blockId 292 LIGHT 30 78 ZERO 1
-	(connId:0) (36 17)
-blockId 163 TRISTATE_BUFFER 54 39 ZERO 3
-	(connId:0) (43 14)
-	(connId:1) (61 14)
-	(connId:2) (232 0)
-blockId 164 LIGHT 27 77 ZERO 1
-	(connId:0) (37 14)
-blockId 165 TRISTATE_BUFFER 54 41 ZERO 3
-	(connId:0) (43 15)
-	(connId:1) (61 14)
-	(connId:2) (234 0)
-blockId 166 TRISTATE_BUFFER 54 43 ZERO 3
-	(connId:0) (43 16)
-	(connId:1) (61 14)
-	(connId:2) (235 0)
-blockId 167 LIGHT 28 77 ZERO 1
-	(connId:0) (37 15)
-blockId 168 TRISTATE_BUFFER 54 45 ZERO 3
-	(connId:0) (43 17)
-	(connId:1) (61 14)
-	(connId:2) (237 0)
-blockId 290 LIGHT 30 74 ZERO 1
-	(connId:0) (6 17)
-blockId 169 TRISTATE_BUFFER 55 31 ZERO 3
-	(connId:0) (42 10)
-	(connId:1) (61 15)
-	(connId:2) (226 0)
-blockId 170 LIGHT 29 77 ZERO 1
-	(connId:0) (37 16)
-blockId 300 LIGHT 25 84 ZERO 1
-	(connId:0) (48 12)
-blockId 171 TRISTATE_BUFFER 55 33 ZERO 3
-	(connId:0) (42 11)
-	(connId:1) (61 15)
-	(connId:2) (228 0)
-blockId 172 TRISTATE_BUFFER 55 35 ZERO 3
-	(connId:0) (42 12)
-	(connId:1) (61 15)
-	(connId:2) (229 0)
-blockId 294 LIGHT 23 82 ZERO 1
-	(connId:0) (42 10)
-blockId 173 LIGHT 28 81 ZERO 1
-	(connId:0) (43 15)
-blockId 174 TRISTATE_BUFFER 55 37 ZERO 3
-	(connId:0) (42 13)
-	(connId:1) (61 15)
-	(connId:2) (231 0)
-blockId 288 LIGHT 29 80 ZERO 1
-	(connId:0) (44 16)
-blockId 175 TRISTATE_BUFFER 55 39 ZERO 3
-	(connId:0) (42 14)
-	(connId:1) (61 15)
-	(connId:2) (232 0)
-blockId 176 LIGHT 28 75 ZERO 1
-	(connId:0) (40 15)
-blockId 298 LIGHT 24 85 ZERO 1
-	(connId:0) (47 11)
-blockId 177 TRISTATE_BUFFER 55 41 ZERO 3
-	(connId:0) (42 15)
-	(connId:1) (61 15)
-	(connId:2) (234 0)
-blockId 178 TRISTATE_BUFFER 55 43 ZERO 3
-	(connId:0) (42 16)
-	(connId:1) (61 15)
-	(connId:2) (235 0)
-blockId 308 LIGHT 27 84 ZERO 1
-	(connId:0) (48 14)
-blockId 179 TRISTATE_BUFFER 55 45 ZERO 3
-	(connId:0) (42 17)
-	(connId:1) (61 15)
-	(connId:2) (237 0)
-blockId 180 TRISTATE_BUFFER 56 31 ZERO 3
-	(connId:0) (49 10)
-	(connId:1) (61 16)
-	(connId:2) (226 0)
-blockId 302 LIGHT 25 86 ZERO 1
-	(connId:0) (46 12)
-blockId 181 LIGHT 30 75 ZERO 1
-	(connId:0) (40 17)
-blockId 182 TRISTATE_BUFFER 56 33 ZERO 3
-	(connId:0) (49 11)
-	(connId:1) (61 16)
-	(connId:2) (228 0)
-blockId 296 LIGHT 23 86 ZERO 1
-	(connId:0) (46 10)
-blockId 183 TRISTATE_BUFFER 56 35 ZERO 3
-	(connId:0) (49 12)
-	(connId:1) (61 16)
-	(connId:2) (229 0)
-blockId 184 TRISTATE_BUFFER 56 37 ZERO 3
-	(connId:0) (49 13)
-	(connId:1) (61 16)
-	(connId:2) (231 0)
-blockId 306 LIGHT 26 86 ZERO 1
-	(connId:0) (46 13)
-blockId 185 TRISTATE_BUFFER 56 39 ZERO 3
-	(connId:0) (49 14)
-	(connId:1) (61 16)
-	(connId:2) (232 0)
-blockId 186 TRISTATE_BUFFER 56 41 ZERO 3
-	(connId:0) (49 15)
-	(connId:1) (61 16)
-	(connId:2) (234 0)
-blockId 316 LIGHT 29 86 ZERO 1
-	(connId:0) (46 16)
-blockId 187 TRISTATE_BUFFER 56 43 ZERO 3
-	(connId:0) (49 16)
-	(connId:1) (61 16)
-	(connId:2) (235 0)
-blockId 188 LIGHT 30 73 ZERO 1
-	(connId:0) (1 17)
-blockId 310 LIGHT 27 86 ZERO 1
-	(connId:0) (46 14)
-blockId 189 TRISTATE_BUFFER 56 45 ZERO 3
-	(connId:0) (49 17)
-	(connId:1) (61 16)
-	(connId:2) (237 0)
-blockId 190 TRISTATE_BUFFER 57 31 ZERO 3
-	(connId:0) (48 10)
-	(connId:1) (61 17)
-	(connId:2) (226 0)
-blockId 304 LIGHT 26 83 ZERO 1
-	(connId:0) (49 13)
-blockId 191 LIGHT 23 83 ZERO 1
-	(connId:0) (49 10)
-blockId 192 TRISTATE_BUFFER 57 33 ZERO 3
-	(connId:0) (48 11)
-	(connId:1) (61 17)
-	(connId:2) (228 0)
-blockId 378 TRISTATE_BUFFER 50 63 ZERO 3
-	(connId:0) (37 17)
-	(connId:1) (451 10)
-	(connId:2) (463 0)
-blockId 193 TRISTATE_BUFFER 57 35 ZERO 3
-	(connId:0) (48 12)
-	(connId:1) (61 17)
-	(connId:2) (229 0)
-blockId 194 LIGHT 30 77 ZERO 1
-	(connId:0) (37 17)
-blockId 324 TRISTATE_BUFFER 44 57 ZERO 3
-	(connId:0) (3 14)
-	(connId:1) (451 4)
-	(connId:2) (460 0)
-blockId 195 TRISTATE_BUFFER 57 37 ZERO 3
-	(connId:0) (48 13)
-	(connId:1) (61 17)
-	(connId:2) (231 0)
-blockId 196 TRISTATE_BUFFER 57 39 ZERO 3
-	(connId:0) (48 14)
-	(connId:1) (61 17)
-	(connId:2) (232 0)
-blockId 382 TRISTATE_BUFFER 51 55 ZERO 3
-	(connId:0) (36 13)
-	(connId:1) (451 11)
-	(connId:2) (459 0)
-blockId 197 LIGHT 29 81 ZERO 1
-	(connId:0) (43 16)
-blockId 198 TRISTATE_BUFFER 57 41 ZERO 3
-	(connId:0) (48 15)
-	(connId:1) (61 17)
-	(connId:2) (234 0)
-blockId 376 TRISTATE_BUFFER 50 59 ZERO 3
-	(connId:0) (37 15)
-	(connId:1) (451 10)
-	(connId:2) (461 0)
-blockId 199 TRISTATE_BUFFER 57 43 ZERO 3
-	(connId:0) (48 16)
-	(connId:1) (61 17)
-	(connId:2) (235 0)
-blockId 200 LIGHT 30 81 ZERO 1
-	(connId:0) (43 17)
-blockId 322 TRISTATE_BUFFER 44 53 ZERO 3
-	(connId:0) (3 12)
-	(connId:1) (451 4)
-	(connId:2) (458 0)
-blockId 201 TRISTATE_BUFFER 57 45 ZERO 3
-	(connId:0) (48 17)
-	(connId:1) (61 17)
-	(connId:2) (237 0)
-blockId 202 TRISTATE_BUFFER 58 31 ZERO 3
-	(connId:0) (47 10)
-	(connId:1) (61 18)
-	(connId:2) (226 0)
-blockId 332 TRISTATE_BUFFER 45 51 ZERO 3
-	(connId:0) (5 11)
-	(connId:1) (451 5)
-	(connId:2) (457 0)
-blockId 203 LIGHT 24 86 ZERO 1
-	(connId:0) (46 11)
-blockId 204 TRISTATE_BUFFER 58 33 ZERO 3
-	(connId:0) (47 11)
-	(connId:1) (61 18)
-	(connId:2) (228 0)
-blockId 205 TRISTATE_BUFFER 58 35 ZERO 3
-	(connId:0) (47 12)
-	(connId:1) (61 18)
-	(connId:2) (229 0)
-blockId 206 LIGHT 23 85 ZERO 1
-	(connId:0) (47 10)
-blockId 207 TRISTATE_BUFFER 58 37 ZERO 3
-	(connId:0) (47 13)
-	(connId:1) (61 18)
-	(connId:2) (231 0)
-blockId 208 TRISTATE_BUFFER 58 39 ZERO 3
-	(connId:0) (47 14)
-	(connId:1) (61 18)
-	(connId:2) (232 0)
-blockId 330 TRISTATE_BUFFER 44 63 ZERO 3
-	(connId:0) (3 17)
-	(connId:1) (451 4)
-	(connId:2) (463 0)
-blockId 209 LIGHT 30 79 ZERO 1
-	(connId:0) (45 17)
-blockId 210 TRISTATE_BUFFER 58 41 ZERO 3
-	(connId:0) (47 15)
-	(connId:1) (61 18)
-	(connId:2) (234 0)
-blockId 340 TRISTATE_BUFFER 46 51 ZERO 3
-	(connId:0) (1 11)
-	(connId:1) (451 6)
-	(connId:2) (457 0)
-blockId 211 TRISTATE_BUFFER 58 43 ZERO 3
-	(connId:0) (47 16)
-	(connId:1) (61 18)
-	(connId:2) (235 0)
-blockId 212 LIGHT 24 84 ZERO 1
-	(connId:0) (48 11)
-blockId 334 TRISTATE_BUFFER 45 55 ZERO 3
-	(connId:0) (5 13)
-	(connId:1) (451 5)
-	(connId:2) (459 0)
-blockId 213 TRISTATE_BUFFER 58 45 ZERO 3
-	(connId:0) (47 17)
-	(connId:1) (61 18)
-	(connId:2) (237 0)
-blockId 214 TRISTATE_BUFFER 59 31 ZERO 3
-	(connId:0) (46 10)
-	(connId:1) (61 19)
-	(connId:2) (226 0)
-blockId 328 TRISTATE_BUFFER 44 59 ZERO 3
-	(connId:0) (3 15)
-	(connId:1) (451 4)
-	(connId:2) (461 0)
-blockId 215 LIGHT 26 84 ZERO 1
-	(connId:0) (48 13)
-blockId 216 TRISTATE_BUFFER 59 33 ZERO 3
-	(connId:0) (46 11)
-	(connId:1) (61 19)
-	(connId:2) (228 0)
-blockId 338 TRISTATE_BUFFER 45 63 ZERO 3
-	(connId:0) (5 17)
-	(connId:1) (451 5)
-	(connId:2) (463 0)
-blockId 217 TRISTATE_BUFFER 59 35 ZERO 3
-	(connId:0) (46 12)
-	(connId:1) (61 19)
-	(connId:2) (229 0)
-blockId 218 LIGHT 25 83 ZERO 1
-	(connId:0) (49 12)
-blockId 348 TRISTATE_BUFFER 47 51 ZERO 3
-	(connId:0) (6 11)
-	(connId:1) (451 7)
-	(connId:2) (457 0)
-blockId 219 TRISTATE_BUFFER 59 37 ZERO 3
-	(connId:0) (46 13)
-	(connId:1) (61 19)
-	(connId:2) (231 0)
-blockId 220 TRISTATE_BUFFER 59 39 ZERO 3
-	(connId:0) (46 14)
-	(connId:1) (61 19)
-	(connId:2) (232 0)
-blockId 342 TRISTATE_BUFFER 46 55 ZERO 3
-	(connId:0) (1 13)
-	(connId:1) (451 6)
-	(connId:2) (459 0)
-blockId 221 LIGHT 24 82 ZERO 1
-	(connId:0) (42 11)
-blockId 222 TRISTATE_BUFFER 59 41 ZERO 3
-	(connId:0) (46 15)
-	(connId:1) (61 19)
-	(connId:2) (234 0)
-blockId 336 TRISTATE_BUFFER 45 59 ZERO 3
-	(connId:0) (5 15)
-	(connId:1) (451 5)
-	(connId:2) (461 0)
-blockId 223 TRISTATE_BUFFER 59 43 ZERO 3
-	(connId:0) (46 16)
-	(connId:1) (61 19)
-	(connId:2) (235 0)
-blockId 224 LIGHT 26 73 ZERO 1
-	(connId:0) (1 13)
-blockId 282 LIGHT 28 78 ZERO 1
-	(connId:0) (36 15)
-blockId 225 TRISTATE_BUFFER 59 45 ZERO 3
-	(connId:0) (46 17)
-	(connId:1) (61 19)
-	(connId:2) (237 0)
-blockId 226 JUNCTION 62 31 ZERO 2
-	(connId:0) (20 2) (39 2) (71 2) (79 2) (88 2) (100 2) (112 2) (124 2) (135 2) (145 2) (157 2) (169 2) (180 2) (190 2) (202 2) (214 2)
-	(connId:1) (465 0)
-blockId 356 TRISTATE_BUFFER 48 51 ZERO 3
-	(connId:0) (40 11)
-	(connId:1) (451 8)
-	(connId:2) (457 0)
-blockId 227 LIGHT 29 85 ZERO 1
-	(connId:0) (47 16)
-blockId 228 JUNCTION 62 32 ZERO 2
-	(connId:0) (22 2) (41 2) (72 2) (80 2) (90 2) (102 2) (114 2) (126 2) (137 2) (147 2) (159 2) (171 2) (182 2) (192 2) (204 2) (216 2)
-	(connId:1) (465 1)
-blockId 286 LIGHT 29 76 ZERO 1
-	(connId:0) (38 16)
-blockId 229 JUNCTION 62 33 ZERO 2
-	(connId:0) (24 2) (65 2) (73 2) (81 2) (91 2) (103 2) (115 2) (127 2) (138 2) (148 2) (160 2) (172 2) (183 2) (193 2) (205 2) (217 2)
-	(connId:1) (465 2)
-blockId 230 LIGHT 28 84 ZERO 1
-	(connId:0) (48 15)
-blockId 280 LIGHT 28 74 ZERO 1
-	(connId:0) (6 15)
-blockId 231 JUNCTION 62 34 ZERO 2
-	(connId:0) (26 2) (66 2) (74 2) (82 2) (93 2) (105 2) (117 2) (129 2) (139 2) (150 2) (162 2) (174 2) (184 2) (195 2) (207 2) (219 2)
-	(connId:1) (465 3)
-blockId 232 JUNCTION 62 35 ZERO 2
-	(connId:0) (28 2) (67 2) (75 2) (83 2) (94 2) (106 2) (118 2) (130 2) (140 2) (151 2) (163 2) (175 2) (185 2) (196 2) (208 2) (220 2)
-	(connId:1) (465 4)
-blockId 354 TRISTATE_BUFFER 47 63 ZERO 3
-	(connId:0) (6 17)
-	(connId:1) (451 7)
-	(connId:2) (463 0)
-blockId 233 LIGHT 27 83 ZERO 1
-	(connId:0) (49 14)
-blockId 234 JUNCTION 62 36 ZERO 2
-	(connId:0) (30 2) (68 2) (76 2) (84 2) (96 2) (108 2) (120 2) (132 2) (141 2) (153 2) (165 2) (177 2) (186 2) (198 2) (210 2) (222 2)
-	(connId:1) (465 5)
-blockId 364 TRISTATE_BUFFER 49 51 ZERO 3
-	(connId:0) (38 11)
-	(connId:1) (451 9)
-	(connId:2) (457 0)
-blockId 235 JUNCTION 62 37 ZERO 2
-	(connId:0) (32 2) (69 2) (77 2) (85 2) (97 2) (109 2) (121 2) (133 2) (142 2) (154 2) (166 2) (178 2) (187 2) (199 2) (211 2) (223 2)
-	(connId:1) (465 6)
-blockId 236 LIGHT 29 83 ZERO 1
-	(connId:0) (49 16)
-blockId 358 TRISTATE_BUFFER 48 55 ZERO 3
-	(connId:0) (40 13)
-	(connId:1) (451 8)
-	(connId:2) (459 0)
-blockId 237 JUNCTION 62 38 ZERO 2
-	(connId:0) (34 2) (70 2) (78 2) (87 2) (99 2) (111 2) (123 2) (134 2) (144 2) (156 2) (168 2) (179 2) (189 2) (201 2) (213 2) (225 2)
-	(connId:1) (465 7)
-blockId 238 LIGHT 23 71 ZERO 1
-	(connId:0) (3 10)
-blockId 352 TRISTATE_BUFFER 47 59 ZERO 3
-	(connId:0) (6 15)
-	(connId:1) (451 7)
-	(connId:2) (461 0)
-blockId 239 LIGHT 24 71 ZERO 1
-	(connId:0) (3 11)
-blockId 240 LIGHT 25 71 ZERO 1
-	(connId:0) (3 12)
-blockId 362 TRISTATE_BUFFER 48 63 ZERO 3
-	(connId:0) (40 17)
-	(connId:1) (451 8)
-	(connId:2) (463 0)
-blockId 241 LIGHT 30 82 ZERO 1
-	(connId:0) (42 17)
-blockId 242 LIGHT 26 71 ZERO 1
-	(connId:0) (3 13)
-blockId 372 TRISTATE_BUFFER 50 51 ZERO 3
-	(connId:0) (37 11)
-	(connId:1) (451 10)
-	(connId:2) (457 0)
-blockId 243 LIGHT 27 71 ZERO 1
-	(connId:0) (3 14)
-blockId 244 LIGHT 28 86 ZERO 1
-	(connId:0) (46 15)
-blockId 366 TRISTATE_BUFFER 49 55 ZERO 3
-	(connId:0) (38 13)
-	(connId:1) (451 9)
-	(connId:2) (459 0)
-blockId 245 LIGHT 28 71 ZERO 1
-	(connId:0) (3 15)
-blockId 246 LIGHT 29 71 ZERO 1
-	(connId:0) (3 16)
-blockId 360 TRISTATE_BUFFER 48 59 ZERO 3
-	(connId:0) (40 15)
-	(connId:1) (451 8)
-	(connId:2) (461 0)
-blockId 247 LIGHT 30 86 ZERO 1
-	(connId:0) (46 17)
-blockId 248 LIGHT 30 71 ZERO 1
-	(connId:0) (3 17)
-blockId 370 TRISTATE_BUFFER 49 63 ZERO 3
-	(connId:0) (38 17)
-	(connId:1) (451 9)
-	(connId:2) (463 0)
-blockId 249 LIGHT 23 72 ZERO 1
-	(connId:0) (5 10)
-blockId 250 LIGHT 23 73 ZERO 1
-	(connId:0) (1 10)
-blockId 380 TRISTATE_BUFFER 51 51 ZERO 3
-	(connId:0) (36 11)
-	(connId:1) (451 11)
-	(connId:2) (457 0)
-blockId 251 LIGHT 23 74 ZERO 1
-	(connId:0) (6 10)
-blockId 252 LIGHT 23 75 ZERO 1
-	(connId:0) (40 10)
-blockId 374 TRISTATE_BUFFER 50 55 ZERO 3
-	(connId:0) (37 13)
-	(connId:1) (451 10)
-	(connId:2) (459 0)
-blockId 253 LIGHT 23 76 ZERO 1
-	(connId:0) (38 10)
-blockId 254 LIGHT 30 84 ZERO 1
-	(connId:0) (48 17)
-blockId 368 TRISTATE_BUFFER 49 59 ZERO 3
-	(connId:0) (38 15)
-	(connId:1) (451 9)
-	(connId:2) (461 0)
-blockId 255 LIGHT 23 78 ZERO 1
-	(connId:0) (36 10)
-blockId 257 LIGHT 24 72 ZERO 1
-	(connId:0) (5 11)
-blockId 259 LIGHT 24 76 ZERO 1
-	(connId:0) (38 11)
-blockId 261 LIGHT 24 80 ZERO 1
-	(connId:0) (44 11)
-blockId 263 LIGHT 25 74 ZERO 1
-	(connId:0) (6 12)
-blockId 265 LIGHT 25 78 ZERO 1
-	(connId:0) (36 12)
-blockId 267 LIGHT 25 81 ZERO 1
-	(connId:0) (43 12)
-blockId 269 LIGHT 26 74 ZERO 1
-	(connId:0) (6 13)
-blockId 271 LIGHT 26 77 ZERO 1
-	(connId:0) (37 13)
-blockId 273 LIGHT 26 80 ZERO 1
-	(connId:0) (44 13)
-blockId 275 LIGHT 27 74 ZERO 1
-	(connId:0) (6 14)
-blockId 277 LIGHT 27 78 ZERO 1
-	(connId:0) (36 14)
-blockId 279 LIGHT 28 72 ZERO 1
-	(connId:0) (5 15)
-blockId 281 LIGHT 28 76 ZERO 1
-	(connId:0) (38 15)
-blockId 283 LIGHT 28 80 ZERO 1
-	(connId:0) (44 15)
-blockId 285 LIGHT 29 74 ZERO 1
-	(connId:0) (6 16)
-blockId 287 LIGHT 29 78 ZERO 1
-	(connId:0) (36 16)
-blockId 289 LIGHT 30 72 ZERO 1
-	(connId:0) (5 17)
-blockId 291 LIGHT 30 76 ZERO 1
-	(connId:0) (38 17)
-blockId 293 LIGHT 30 80 ZERO 1
-	(connId:0) (44 17)
-blockId 295 LIGHT 23 84 ZERO 1
-	(connId:0) (48 10)
-blockId 297 LIGHT 24 83 ZERO 1
-	(connId:0) (49 11)
-blockId 299 LIGHT 25 82 ZERO 1
-	(connId:0) (42 12)
-blockId 301 LIGHT 25 85 ZERO 1
-	(connId:0) (47 12)
-blockId 303 LIGHT 26 82 ZERO 1
-	(connId:0) (42 13)
-blockId 305 LIGHT 26 85 ZERO 1
-	(connId:0) (47 13)
-blockId 307 LIGHT 27 82 ZERO 1
-	(connId:0) (42 14)
-blockId 309 LIGHT 27 85 ZERO 1
-	(connId:0) (47 14)
-blockId 311 LIGHT 28 82 ZERO 1
-	(connId:0) (42 15)
-blockId 313 LIGHT 28 85 ZERO 1
-	(connId:0) (47 15)
-blockId 315 LIGHT 29 84 ZERO 1
-	(connId:0) (48 16)
-blockId 317 LIGHT 30 83 ZERO 1
-	(connId:0) (49 17)
-blockId 319 TRISTATE_BUFFER 44 49 ZERO 3
-	(connId:0) (3 10)
-	(connId:1) (451 4)
-	(connId:2) (456 0)
-blockId 321 TRISTATE_BUFFER 44 51 ZERO 3
-	(connId:0) (3 11)
-	(connId:1) (451 4)
-	(connId:2) (457 0)
-blockId 323 TRISTATE_BUFFER 44 55 ZERO 3
-	(connId:0) (3 13)
-	(connId:1) (451 4)
-	(connId:2) (459 0)
-blockId 329 TRISTATE_BUFFER 44 61 ZERO 3
-	(connId:0) (3 16)
-	(connId:1) (451 4)
-	(connId:2) (462 0)
-blockId 331 TRISTATE_BUFFER 45 49 ZERO 3
-	(connId:0) (5 10)
-	(connId:1) (451 5)
-	(connId:2) (456 0)
-blockId 333 TRISTATE_BUFFER 45 53 ZERO 3
-	(connId:0) (5 12)
-	(connId:1) (451 5)
-	(connId:2) (458 0)
-blockId 335 TRISTATE_BUFFER 45 57 ZERO 3
-	(connId:0) (5 14)
-	(connId:1) (451 5)
-	(connId:2) (460 0)
-blockId 337 TRISTATE_BUFFER 45 61 ZERO 3
-	(connId:0) (5 16)
-	(connId:1) (451 5)
-	(connId:2) (462 0)
-blockId 339 TRISTATE_BUFFER 46 49 ZERO 3
-	(connId:0) (1 10)
-	(connId:1) (451 6)
-	(connId:2) (456 0)
-blockId 341 TRISTATE_BUFFER 46 53 ZERO 3
-	(connId:0) (1 12)
-	(connId:1) (451 6)
-	(connId:2) (458 0)
-blockId 343 TRISTATE_BUFFER 46 57 ZERO 3
-	(connId:0) (1 14)
-	(connId:1) (451 6)
-	(connId:2) (460 0)
-blockId 344 TRISTATE_BUFFER 46 59 ZERO 3
-	(connId:0) (1 15)
-	(connId:1) (451 6)
-	(connId:2) (461 0)
-blockId 345 TRISTATE_BUFFER 46 61 ZERO 3
-	(connId:0) (1 16)
-	(connId:1) (451 6)
-	(connId:2) (462 0)
-blockId 346 TRISTATE_BUFFER 46 63 ZERO 3
-	(connId:0) (1 17)
-	(connId:1) (451 6)
-	(connId:2) (463 0)
-blockId 347 TRISTATE_BUFFER 47 49 ZERO 3
-	(connId:0) (6 10)
-	(connId:1) (451 7)
-	(connId:2) (456 0)
-blockId 349 TRISTATE_BUFFER 47 53 ZERO 3
-	(connId:0) (6 12)
-	(connId:1) (451 7)
-	(connId:2) (458 0)
-blockId 350 TRISTATE_BUFFER 47 55 ZERO 3
-	(connId:0) (6 13)
-	(connId:1) (451 7)
-	(connId:2) (459 0)
-blockId 351 TRISTATE_BUFFER 47 57 ZERO 3
-	(connId:0) (6 14)
-	(connId:1) (451 7)
-	(connId:2) (460 0)
-blockId 353 TRISTATE_BUFFER 47 61 ZERO 3
-	(connId:0) (6 16)
-	(connId:1) (451 7)
-	(connId:2) (462 0)
-blockId 355 TRISTATE_BUFFER 48 49 ZERO 3
-	(connId:0) (40 10)
-	(connId:1) (451 8)
-	(connId:2) (456 0)
-blockId 357 TRISTATE_BUFFER 48 53 ZERO 3
-	(connId:0) (40 12)
-	(connId:1) (451 8)
-	(connId:2) (458 0)
-blockId 359 TRISTATE_BUFFER 48 57 ZERO 3
-	(connId:0) (40 14)
-	(connId:1) (451 8)
-	(connId:2) (460 0)
-blockId 361 TRISTATE_BUFFER 48 61 ZERO 3
-	(connId:0) (40 16)
-	(connId:1) (451 8)
-	(connId:2) (462 0)
-blockId 363 TRISTATE_BUFFER 49 49 ZERO 3
-	(connId:0) (38 10)
-	(connId:1) (451 9)
-	(connId:2) (456 0)
-blockId 365 TRISTATE_BUFFER 49 53 ZERO 3
-	(connId:0) (38 12)
-	(connId:1) (451 9)
-	(connId:2) (458 0)
-blockId 367 TRISTATE_BUFFER 49 57 ZERO 3
-	(connId:0) (38 14)
-	(connId:1) (451 9)
-	(connId:2) (460 0)
-blockId 369 TRISTATE_BUFFER 49 61 ZERO 3
-	(connId:0) (38 16)
-	(connId:1) (451 9)
-	(connId:2) (462 0)
-blockId 371 TRISTATE_BUFFER 50 49 ZERO 3
-	(connId:0) (37 10)
-	(connId:1) (451 10)
-	(connId:2) (456 0)
-blockId 373 TRISTATE_BUFFER 50 53 ZERO 3
-	(connId:0) (37 12)
-	(connId:1) (451 10)
-	(connId:2) (458 0)
-blockId 375 TRISTATE_BUFFER 50 57 ZERO 3
-	(connId:0) (37 14)
-	(connId:1) (451 10)
-	(connId:2) (460 0)
-blockId 377 TRISTATE_BUFFER 50 61 ZERO 3
-	(connId:0) (37 16)
-	(connId:1) (451 10)
-	(connId:2) (462 0)
-blockId 379 TRISTATE_BUFFER 51 49 ZERO 3
-	(connId:0) (36 10)
-	(connId:1) (451 11)
-	(connId:2) (456 0)
-blockId 381 TRISTATE_BUFFER 51 53 ZERO 3
-	(connId:0) (36 12)
-	(connId:1) (451 11)
-	(connId:2) (458 0)
-blockId 383 TRISTATE_BUFFER 51 57 ZERO 3
-	(connId:0) (36 14)
-	(connId:1) (451 11)
-	(connId:2) (460 0)
-blockId 384 TRISTATE_BUFFER 51 59 ZERO 3
-	(connId:0) (36 15)
-	(connId:1) (451 11)
-	(connId:2) (461 0)
-blockId 386 TRISTATE_BUFFER 51 63 ZERO 3
-	(connId:0) (36 17)
-	(connId:1) (451 11)
-	(connId:2) (463 0)
-blockId 388 TRISTATE_BUFFER 52 51 ZERO 3
-	(connId:0) (45 11)
-	(connId:1) (451 12)
-	(connId:2) (457 0)
-blockId 390 TRISTATE_BUFFER 52 55 ZERO 3
-	(connId:0) (45 13)
-	(connId:1) (451 12)
-	(connId:2) (459 0)
-blockId 392 TRISTATE_BUFFER 52 59 ZERO 3
-	(connId:0) (45 15)
-	(connId:1) (451 12)
-	(connId:2) (461 0)
-blockId 394 TRISTATE_BUFFER 52 63 ZERO 3
-	(connId:0) (45 17)
-	(connId:1) (451 12)
-	(connId:2) (463 0)
-blockId 396 TRISTATE_BUFFER 53 51 ZERO 3
-	(connId:0) (44 11)
-	(connId:1) (451 13)
-	(connId:2) (457 0)
-blockId 398 TRISTATE_BUFFER 53 55 ZERO 3
-	(connId:0) (44 13)
-	(connId:1) (451 13)
-	(connId:2) (459 0)
-blockId 399 TRISTATE_BUFFER 53 57 ZERO 3
-	(connId:0) (44 14)
-	(connId:1) (451 13)
-	(connId:2) (460 0)
-blockId 400 TRISTATE_BUFFER 53 59 ZERO 3
-	(connId:0) (44 15)
-	(connId:1) (451 13)
-	(connId:2) (461 0)
-blockId 402 TRISTATE_BUFFER 53 63 ZERO 3
-	(connId:0) (44 17)
-	(connId:1) (451 13)
-	(connId:2) (463 0)
-blockId 404 TRISTATE_BUFFER 54 51 ZERO 3
-	(connId:0) (43 11)
-	(connId:1) (451 14)
-	(connId:2) (457 0)
-blockId 406 TRISTATE_BUFFER 54 55 ZERO 3
-	(connId:0) (43 13)
-	(connId:1) (451 14)
-	(connId:2) (459 0)
-blockId 408 TRISTATE_BUFFER 54 59 ZERO 3
-	(connId:0) (43 15)
-	(connId:1) (451 14)
-	(connId:2) (461 0)
-blockId 410 TRISTATE_BUFFER 54 63 ZERO 3
-	(connId:0) (43 17)
-	(connId:1) (451 14)
-	(connId:2) (463 0)
-blockId 412 TRISTATE_BUFFER 55 51 ZERO 3
-	(connId:0) (42 11)
-	(connId:1) (451 15)
-	(connId:2) (457 0)
-blockId 414 TRISTATE_BUFFER 55 55 ZERO 3
-	(connId:0) (42 13)
-	(connId:1) (451 15)
-	(connId:2) (459 0)
-blockId 416 TRISTATE_BUFFER 55 59 ZERO 3
-	(connId:0) (42 15)
-	(connId:1) (451 15)
-	(connId:2) (461 0)
-blockId 417 TRISTATE_BUFFER 55 61 ZERO 3
-	(connId:0) (42 16)
-	(connId:1) (451 15)
-	(connId:2) (462 0)
-blockId 418 TRISTATE_BUFFER 55 63 ZERO 3
-	(connId:0) (42 17)
-	(connId:1) (451 15)
-	(connId:2) (463 0)
-blockId 420 TRISTATE_BUFFER 56 51 ZERO 3
-	(connId:0) (49 11)
-	(connId:1) (451 16)
-	(connId:2) (457 0)
-blockId 421 TRISTATE_BUFFER 56 53 ZERO 3
-	(connId:0) (49 12)
-	(connId:1) (451 16)
-	(connId:2) (458 0)
-blockId 422 TRISTATE_BUFFER 56 55 ZERO 3
-	(connId:0) (49 13)
-	(connId:1) (451 16)
-	(connId:2) (459 0)
-blockId 423 TRISTATE_BUFFER 56 57 ZERO 3
-	(connId:0) (49 14)
-	(connId:1) (451 16)
-	(connId:2) (460 0)
-blockId 424 TRISTATE_BUFFER 56 59 ZERO 3
-	(connId:0) (49 15)
-	(connId:1) (451 16)
-	(connId:2) (461 0)
-blockId 426 TRISTATE_BUFFER 56 63 ZERO 3
-	(connId:0) (49 17)
-	(connId:1) (451 16)
-	(connId:2) (463 0)
-blockId 428 TRISTATE_BUFFER 57 51 ZERO 3
-	(connId:0) (48 11)
-	(connId:1) (451 17)
-	(connId:2) (457 0)
-blockId 430 TRISTATE_BUFFER 57 55 ZERO 3
-	(connId:0) (48 13)
-	(connId:1) (451 17)
-	(connId:2) (459 0)
-blockId 432 TRISTATE_BUFFER 57 59 ZERO 3
-	(connId:0) (48 15)
-	(connId:1) (451 17)
-	(connId:2) (461 0)
-blockId 434 TRISTATE_BUFFER 57 63 ZERO 3
-	(connId:0) (48 17)
-	(connId:1) (451 17)
-	(connId:2) (463 0)
-blockId 436 TRISTATE_BUFFER 58 51 ZERO 3
-	(connId:0) (47 11)
-	(connId:1) (451 18)
-	(connId:2) (457 0)
-blockId 438 TRISTATE_BUFFER 58 55 ZERO 3
-	(connId:0) (47 13)
-	(connId:1) (451 18)
-	(connId:2) (459 0)
-blockId 440 TRISTATE_BUFFER 58 59 ZERO 3
-	(connId:0) (47 15)
-	(connId:1) (451 18)
-	(connId:2) (461 0)
-blockId 442 TRISTATE_BUFFER 58 63 ZERO 3
-	(connId:0) (47 17)
-	(connId:1) (451 18)
-	(connId:2) (463 0)
-blockId 444 TRISTATE_BUFFER 59 51 ZERO 3
-	(connId:0) (46 11)
-	(connId:1) (451 19)
-	(connId:2) (457 0)
-blockId 446 TRISTATE_BUFFER 59 55 ZERO 3
-	(connId:0) (46 13)
-	(connId:1) (451 19)
-	(connId:2) (459 0)
-blockId 448 TRISTATE_BUFFER 59 59 ZERO 3
-	(connId:0) (46 15)
-	(connId:1) (451 19)
-	(connId:2) (461 0)
-blockId 450 TRISTATE_BUFFER 59 63 ZERO 3
-	(connId:0) (46 17)
-	(connId:1) (451 19)
-	(connId:2) (463 0)
-blockId 452 SWITCH 39 8 ZERO 1
-	(connId:0) (451 0)
-blockId 454 SWITCH 39 10 ZERO 1
-	(connId:0) (451 2)
-blockId 456 JUNCTION 62 40 ZERO 2
-	(connId:0) (443 2) (435 2) (427 2) (419 2) (411 2) (403 2) (395 2) (387 2) (379 2) (371 2) (363 2) (355 2) (347 2) (339 2) (331 2) (319 2)
-	(connId:1) (465 8)
-blockId 458 JUNCTION 62 42 ZERO 2
-	(connId:0) (445 2) (437 2) (429 2) (421 2) (413 2) (405 2) (397 2) (389 2) (381 2) (373 2) (365 2) (357 2) (349 2) (341 2) (333 2) (322 2)
-	(connId:1) (465 10)
-blockId 460 JUNCTION 62 44 ZERO 2
-	(connId:0) (447 2) (439 2) (431 2) (423 2) (415 2) (407 2) (399 2) (391 2) (383 2) (375 2) (367 2) (359 2) (351 2) (343 2) (335 2) (324 2)
-	(connId:1) (465 12)
-blockId 462 JUNCTION 62 46 ZERO 2
-	(connId:0) (449 2) (441 2) (433 2) (425 2) (417 2) (409 2) (401 2) (393 2) (385 2) (377 2) (369 2) (361 2) (353 2) (345 2) (337 2) (329 2)
-	(connId:1) (465 14)
-blockId 466 SWITCH 71 51 ZERO 1
-	(connId:0) (465 24)
-blockId 468 SWITCH 73 51 ZERO 1
-	(connId:0) (465 26)
+	(connId:0) (398 14)
+blockId 454 SWITCH 3 30 ZERO
+	(connId:0) (379 1) (387 1) (383 1) (378 1) (396 1) (393 1) (388 1) (398 1) (400 1) (448 1) (391 1) (394 1) (433 1) (450 1) (453 1) (446 1)
+blockId 453 "28533056-c6f2-418a-b915-00a1763d5598" 24 20 ZERO
+	(connId:17) (356 0) (95 0) (170 0)
+	(connId:16) (366 0) (258 0) (73 0)
+	(connId:15) (352 0) (100 0) (161 0)
+	(connId:14) (360 0) (344 0) (74 0)
+	(connId:13) (364 0) (351 0) (176 0)
+	(connId:1) (454 0)
+	(connId:12) (373 0) (370 0) (75 0)
+	(connId:10) (399 0) (121 0) (76 0)
+	(connId:0) (444 2)
+	(connId:11) (390 0) (111 0) (189 0)
+blockId 452 TRISTATE_BUFFER 52 61 ZERO
+	(connId:1) (374 12)
+	(connId:0) (398 16)
+	(connId:2) (3 0)
+blockId 451 TRISTATE_BUFFER 53 49 ZERO
+	(connId:1) (374 13)
+	(connId:0) (388 10)
+	(connId:2) (6 0)
+blockId 450 "28533056-c6f2-418a-b915-00a1763d5598" 29 20 ZERO
+	(connId:17) (343 0) (211 0) (67 0)
+	(connId:16) (345 0) (325 0) (68 0)
+	(connId:15) (346 0) (249 0) (69 0)
+	(connId:14) (349 0) (277 0) (70 0)
+	(connId:13) (350 0) (159 0) (164 0)
+	(connId:1) (454 0)
+	(connId:12) (358 0) (282 0) (71 0)
+	(connId:0) (414 2)
+	(connId:11) (347 0) (316 0) (179 0)
+	(connId:10) (354 0) (120 0) (72 0)
+blockId 449 TRISTATE_BUFFER 12 13 ZERO
+	(connId:0) (294 1)
+	(connId:2) (383 0)
+	(connId:1) (439 17)
+blockId 448 "28533056-c6f2-418a-b915-00a1763d5598" 29 32 ZERO
+	(connId:17) (292 0) (202 0) (204 0)
+	(connId:16) (297 0) (238 0) (50 0)
+	(connId:15) (298 0) (242 0) (195 0)
+	(connId:14) (300 0) (245 0) (51 0)
+	(connId:13) (302 0) (104 0) (116 0)
+	(connId:1) (454 0)
+	(connId:12) (305 0) (307 0) (52 0)
+	(connId:10) (308 0) (313 0) (53 0)
+	(connId:0) (426 2)
+	(connId:11) (306 0) (310 0) (131 0)
+blockId 447 TRISTATE_BUFFER 53 53 ZERO
+	(connId:1) (374 13)
+	(connId:0) (388 12)
+	(connId:2) (5 0)
+blockId 446 "28533056-c6f2-418a-b915-00a1763d5598" 19 20 ZERO
+	(connId:17) (409 0) (123 0) (182 0)
+	(connId:16) (406 0) (126 0) (77 0)
+	(connId:15) (403 0) (127 0) (173 0)
+	(connId:14) (411 0) (130 0) (201 0)
+	(connId:13) (416 0) (132 0) (78 0)
+	(connId:1) (454 0)
+	(connId:12) (417 0) (135 0) (192 0)
+	(connId:10) (424 0) (138 0) (80 0)
+	(connId:0) (429 2)
+	(connId:11) (418 0) (136 0) (79 0)
+blockId 445 TRISTATE_BUFFER 52 49 ZERO
+	(connId:1) (374 12)
+	(connId:0) (398 10)
+	(connId:2) (6 0)
+blockId 444 TRISTATE_BUFFER 9 5 ZERO
+	(connId:0) (294 1)
+	(connId:2) (453 0)
+	(connId:1) (439 5)
+blockId 443 TRISTATE_BUFFER 54 57 ZERO
+	(connId:1) (374 14)
+	(connId:0) (393 14)
+	(connId:2) (4 0)
+blockId 442 SWITCH 0 5 ZERO
+	(connId:0) (439 2)
+blockId 441 TRISTATE_BUFFER 53 61 ZERO
+	(connId:1) (374 13)
+	(connId:0) (388 16)
+	(connId:2) (3 0)
+blockId 440 SWITCH 39 5 ZERO
+	(connId:0) (377 2)
+blockId 439 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 3 3 ZERO
+	(connId:3) (436 0)
+	(connId:2) (442 0)
+	(connId:1) (432 0)
+	(connId:0) (437 0)
+	(connId:19) (405 1)
+	(connId:18) (402 1)
+	(connId:17) (449 1)
+	(connId:16) (435 1)
+	(connId:15) (428 1)
+	(connId:14) (420 1)
+	(connId:13) (412 1)
+	(connId:12) (425 1)
+	(connId:11) (421 1)
+	(connId:10) (426 1)
+	(connId:9) (413 1)
+	(connId:8) (422 1)
+	(connId:7) (431 1)
+	(connId:6) (414 1)
+	(connId:5) (444 1)
+	(connId:4) (429 1)
+blockId 438 TRISTATE_BUFFER 54 53 ZERO
+	(connId:1) (374 14)
+	(connId:0) (393 12)
+	(connId:2) (5 0)
+blockId 437 SWITCH 0 3 ZERO
+	(connId:0) (439 0)
+blockId 436 SWITCH 0 6 ZERO
+	(connId:0) (439 3)
+blockId 435 TRISTATE_BUFFER 12 11 ZERO
+	(connId:0) (294 1)
+	(connId:2) (378 0)
+	(connId:1) (439 16)
+blockId 434 TRISTATE_BUFFER 54 49 ZERO
+	(connId:1) (374 14)
+	(connId:0) (393 10)
+	(connId:2) (6 0)
+blockId 433 "28533056-c6f2-418a-b915-00a1763d5598" 34 20 ZERO
+	(connId:17) (333 0) (240 0) (146 0)
+	(connId:16) (335 0) (97 0) (62 0)
+	(connId:15) (336 0) (149 0) (137 0)
+	(connId:14) (337 0) (102 0) (63 0)
+	(connId:13) (338 0) (105 0) (64 0)
+	(connId:1) (454 0)
+	(connId:12) (339 0) (108 0) (65 0)
+	(connId:10) (342 0) (118 0) (66 0)
+	(connId:0) (431 2)
+	(connId:11) (340 0) (375 0) (167 0)
+blockId 432 SWITCH 0 4 ZERO
+	(connId:0) (439 1)
+blockId 431 TRISTATE_BUFFER 9 9 ZERO
+	(connId:0) (294 1)
+	(connId:2) (433 0)
+	(connId:1) (439 7)
+blockId 430 TRISTATE_BUFFER 54 61 ZERO
+	(connId:1) (374 14)
+	(connId:0) (393 16)
+	(connId:2) (3 0)
+blockId 429 TRISTATE_BUFFER 9 3 ZERO
+	(connId:0) (294 1)
+	(connId:2) (446 0)
+	(connId:1) (439 4)
+blockId 428 TRISTATE_BUFFER 12 9 ZERO
+	(connId:0) (294 1)
+	(connId:2) (396 0)
+	(connId:1) (439 15)
+blockId 427 TRISTATE_BUFFER 55 57 ZERO
+	(connId:1) (374 15)
+	(connId:0) (396 14)
+	(connId:2) (4 0)
+blockId 426 TRISTATE_BUFFER 9 15 ZERO
+	(connId:0) (294 1)
+	(connId:2) (448 0)
+	(connId:1) (439 10)
+blockId 425 TRISTATE_BUFFER 12 3 ZERO
+	(connId:0) (294 1)
+	(connId:2) (398 0)
+	(connId:1) (439 12)
+blockId 424 TRISTATE_BUFFER 44 31 ZERO
+	(connId:1) (377 4)
+	(connId:2) (156 0)
+	(connId:0) (446 10)
+blockId 423 TRISTATE_BUFFER 55 53 ZERO
+	(connId:1) (374 15)
+	(connId:0) (396 12)
+	(connId:2) (5 0)
+blockId 422 TRISTATE_BUFFER 9 11 ZERO
+	(connId:0) (294 1)
+	(connId:2) (394 0)
+	(connId:1) (439 8)
+blockId 421 TRISTATE_BUFFER 9 17 ZERO
+	(connId:0) (294 1)
+	(connId:2) (400 0)
+	(connId:1) (439 11)
+blockId 420 TRISTATE_BUFFER 12 7 ZERO
+	(connId:0) (294 1)
+	(connId:2) (393 0)
+	(connId:1) (439 14)
+blockId 419 TRISTATE_BUFFER 56 49 ZERO
+	(connId:1) (374 16)
+	(connId:0) (378 10)
+	(connId:2) (6 0)
+blockId 418 TRISTATE_BUFFER 44 33 ZERO
+	(connId:1) (377 4)
+	(connId:2) (153 0)
+	(connId:0) (446 11)
+blockId 417 TRISTATE_BUFFER 44 35 ZERO
+	(connId:1) (377 4)
+	(connId:2) (151 0)
+	(connId:0) (446 12)
+blockId 416 TRISTATE_BUFFER 44 37 ZERO
+	(connId:1) (377 4)
+	(connId:2) (148 0)
+	(connId:0) (446 13)
+blockId 415 TRISTATE_BUFFER 55 49 ZERO
+	(connId:1) (374 15)
+	(connId:0) (396 10)
+	(connId:2) (6 0)
+blockId 414 TRISTATE_BUFFER 9 7 ZERO
+	(connId:0) (294 1)
+	(connId:2) (450 0)
+	(connId:1) (439 6)
+blockId 413 TRISTATE_BUFFER 9 13 ZERO
+	(connId:0) (294 1)
+	(connId:2) (391 0)
+	(connId:1) (439 9)
+blockId 412 TRISTATE_BUFFER 12 5 ZERO
+	(connId:0) (294 1)
+	(connId:2) (388 0)
+	(connId:1) (439 13)
+blockId 411 TRISTATE_BUFFER 44 39 ZERO
+	(connId:1) (377 4)
+	(connId:2) (147 0)
+	(connId:0) (446 14)
+blockId 410 TRISTATE_BUFFER 56 61 ZERO
+	(connId:1) (374 16)
+	(connId:0) (378 16)
+	(connId:2) (3 0)
+blockId 409 TRISTATE_BUFFER 44 45 ZERO
+	(connId:1) (377 4)
+	(connId:2) (139 0)
+	(connId:0) (446 17)
+blockId 408 TRISTATE_BUFFER 57 57 ZERO
+	(connId:1) (374 17)
+	(connId:0) (383 14)
+	(connId:2) (4 0)
+blockId 407 TRISTATE_BUFFER 57 53 ZERO
+	(connId:1) (374 17)
+	(connId:0) (383 12)
+	(connId:2) (5 0)
+blockId 406 TRISTATE_BUFFER 44 43 ZERO
+	(connId:1) (377 4)
+	(connId:2) (142 0)
+	(connId:0) (446 16)
+blockId 405 TRISTATE_BUFFER 12 17 ZERO
+	(connId:0) (294 1)
+	(connId:2) (379 0)
+	(connId:1) (439 19)
+blockId 404 TRISTATE_BUFFER 57 49 ZERO
+	(connId:1) (374 17)
+	(connId:0) (383 10)
+	(connId:2) (6 0)
+blockId 403 TRISTATE_BUFFER 44 41 ZERO
+	(connId:1) (377 4)
+	(connId:2) (144 0)
+	(connId:0) (446 15)
+blockId 402 TRISTATE_BUFFER 12 15 ZERO
+	(connId:0) (294 1)
+	(connId:2) (387 0)
+	(connId:1) (439 18)
+blockId 401 TRISTATE_BUFFER 57 61 ZERO
+	(connId:1) (374 17)
+	(connId:0) (383 16)
+	(connId:2) (3 0)
+blockId 400 "28533056-c6f2-418a-b915-00a1763d5598" 34 32 ZERO
+	(connId:17) (279 0) (247 0) (45 0)
+	(connId:16) (280 0) (96 0) (381 0)
+	(connId:15) (281 0) (158 0) (46 0)
+	(connId:14) (283 0) (101 0) (47 0)
+	(connId:13) (284 0) (252 0) (198 0)
+	(connId:1) (454 0)
+	(connId:12) (286 0) (107 0) (48 0)
+	(connId:10) (291 0) (112 0) (49 0)
+	(connId:0) (421 2)
+	(connId:11) (287 0) (367 0) (119 0)
+blockId 399 TRISTATE_BUFFER 45 31 ZERO
+	(connId:1) (377 5)
+	(connId:2) (156 0)
+	(connId:0) (453 10)
+blockId 398 "28533056-c6f2-418a-b915-00a1763d5598" 19 44 ZERO
+	(connId:17) (269 0) (181 0) (41 0)
+	(connId:16) (271 0) (328 0) (452 0)
+	(connId:15) (272 0) (253 0) (42 0)
+	(connId:14) (273 0) (257 0) (455 0)
+	(connId:13) (274 0) (261 0) (43 0)
+	(connId:1) (454 0)
+	(connId:12) (275 0) (285 0) (456 0)
+	(connId:10) (278 0) (322 0) (445 0)
+	(connId:0) (425 2)
+	(connId:11) (276 0) (319 0) (44 0)
+blockId 397 TRISTATE_BUFFER 58 57 ZERO
+	(connId:1) (374 18)
+	(connId:0) (387 14)
+	(connId:2) (4 0)
+blockId 396 "28533056-c6f2-418a-b915-00a1763d5598" 34 44 ZERO
+	(connId:17) (224 0) (133 0) (27 0)
+	(connId:16) (226 0) (301 0) (28 0)
+	(connId:15) (227 0) (84 0) (29 0)
+	(connId:14) (230 0) (86 0) (427 0)
+	(connId:13) (232 0) (88 0) (30 0)
+	(connId:1) (454 0)
+	(connId:12) (235 0) (90 0) (423 0)
+	(connId:10) (239 0) (234 0) (415 0)
+	(connId:0) (428 2)
+	(connId:11) (236 0) (163 0) (31 0)
+blockId 395 TRISTATE_BUFFER 58 53 ZERO
+	(connId:1) (374 18)
+	(connId:0) (387 12)
+	(connId:2) (5 0)
+blockId 394 "28533056-c6f2-418a-b915-00a1763d5598" 19 32 ZERO
+	(connId:17) (321 0) (221 0) (134 0)
+	(connId:16) (323 0) (334 0) (58 0)
+	(connId:15) (324 0) (229 0) (125 0)
+	(connId:14) (326 0) (264 0) (59 0)
+	(connId:13) (327 0) (290 0) (140 0)
+	(connId:1) (454 0)
+	(connId:12) (329 0) (293 0) (60 0)
+	(connId:10) (332 0) (117 0) (61 0)
+	(connId:0) (422 2)
+	(connId:11) (330 0) (299 0) (155 0)
+blockId 393 "28533056-c6f2-418a-b915-00a1763d5598" 29 44 ZERO
+	(connId:17) (241 0) (193 0) (32 0)
+	(connId:16) (243 0) (197 0) (430 0)
+	(connId:15) (244 0) (233 0) (33 0)
+	(connId:14) (246 0) (267 0) (443 0)
+	(connId:13) (248 0) (270 0) (34 0)
+	(connId:1) (454 0)
+	(connId:12) (250 0) (106 0) (438 0)
+	(connId:10) (254 0) (331 0) (434 0)
+	(connId:0) (420 2)
+	(connId:11) (251 0) (303 0) (35 0)
+blockId 392 TRISTATE_BUFFER 58 49 ZERO
+	(connId:1) (374 18)
+	(connId:2) (6 0)
+	(connId:0) (387 10)
+blockId 391 "28533056-c6f2-418a-b915-00a1763d5598" 24 32 ZERO
+	(connId:17) (309 0) (94 0) (122 0)
+	(connId:16) (311 0) (152 0) (54 0)
+	(connId:15) (312 0) (99 0) (113 0)
+	(connId:14) (314 0) (341 0) (55 0)
+	(connId:13) (315 0) (357 0) (128 0)
+	(connId:1) (454 0)
+	(connId:12) (317 0) (359 0) (56 0)
+	(connId:10) (320 0) (115 0) (57 0)
+	(connId:0) (413 2)
+	(connId:11) (318 0) (110 0) (143 0)
+blockId 390 TRISTATE_BUFFER 45 33 ZERO
+	(connId:1) (377 5)
+	(connId:2) (153 0)
+	(connId:0) (453 11)
+blockId 389 TRISTATE_BUFFER 58 61 ZERO
+	(connId:1) (374 18)
+	(connId:2) (3 0)
+	(connId:0) (387 16)
+blockId 388 "28533056-c6f2-418a-b915-00a1763d5598" 24 44 ZERO
+	(connId:17) (256 0) (93 0) (36 0)
+	(connId:16) (259 0) (231 0) (441 0)
+	(connId:15) (260 0) (98 0) (37 0)
+	(connId:14) (262 0) (255 0) (38 0)
+	(connId:13) (263 0) (103 0) (39 0)
+	(connId:1) (454 0)
+	(connId:12) (265 0) (365 0) (447 0)
+	(connId:10) (268 0) (288 0) (451 0)
+	(connId:0) (412 2)
+	(connId:11) (266 0) (109 0) (40 0)
+blockId 387 "28533056-c6f2-418a-b915-00a1763d5598" 29 56 ZERO
+	(connId:17) (175 0) (296 0) (13 0)
+	(connId:16) (178 0) (154 0) (389 0)
+	(connId:15) (180 0) (83 0) (14 0)
+	(connId:14) (183 0) (85 0) (397 0)
+	(connId:13) (184 0) (87 0) (15 0)
+	(connId:1) (454 0)
+	(connId:12) (186 0) (89 0) (395 0)
+	(connId:10) (190 0) (185 0) (392 0)
+	(connId:0) (402 2)
+	(connId:11) (187 0) (228 0) (16 0)
+blockId 386 SWITCH 40 0 ZERO
+	(connId:0) (382 0) (294 0)
+blockId 385 TRISTATE_BUFFER 59 57 ZERO
+	(connId:1) (374 19)
+	(connId:2) (4 0)
+	(connId:0) (379 14)
+blockId 384 TRISTATE_BUFFER 59 53 ZERO
+	(connId:1) (374 19)
+	(connId:2) (5 0)
+	(connId:0) (379 12)
+blockId 383 "28533056-c6f2-418a-b915-00a1763d5598" 24 56 ZERO
+	(connId:17) (191 0) (114 0) (17 0)
+	(connId:16) (194 0) (82 0) (401 0)
+	(connId:15) (196 0) (150 0) (18 0)
+	(connId:14) (199 0) (225 0) (408 0)
+	(connId:13) (200 0) (172 0) (19 0)
+	(connId:1) (454 0)
+	(connId:12) (203 0) (237 0) (407 0)
+	(connId:10) (208 0) (92 0) (404 0)
+	(connId:0) (449 2)
+	(connId:11) (205 0) (177 0) (20 0)
+blockId 382 NAND 15 0 ZERO
+	(connId:1) (294 0)
+	(connId:0) (386 0)
+blockId 381 TRISTATE_BUFFER 51 61 ZERO
+	(connId:1) (374 11)
+	(connId:2) (3 0)
+	(connId:0) (400 16)
+blockId 380 TRISTATE_BUFFER 59 49 ZERO
+	(connId:1) (374 19)
+	(connId:2) (6 0)
+	(connId:0) (379 10)
+blockId 379 "28533056-c6f2-418a-b915-00a1763d5598" 34 56 ZERO
+	(connId:17) (157 0) (124 0) (9 0)
+	(connId:16) (160 0) (213 0) (295 0)
+	(connId:15) (162 0) (129 0) (10 0)
+	(connId:14) (165 0) (210 0) (385 0)
+	(connId:13) (166 0) (216 0) (11 0)
+	(connId:1) (454 0)
+	(connId:12) (169 0) (222 0) (384 0)
+	(connId:10) (174 0) (219 0) (380 0)
+	(connId:0) (405 2)
+	(connId:11) (171 0) (188 0) (12 0)
+blockId 378 "28533056-c6f2-418a-b915-00a1763d5598" 19 56 ZERO
+	(connId:17) (209 0) (81 0) (21 0)
+	(connId:16) (212 0) (141 0) (410 0)
+	(connId:15) (214 0) (304 0) (22 0)
+	(connId:14) (215 0) (145 0) (23 0)
+	(connId:13) (217 0) (207 0) (24 0)
+	(connId:1) (454 0)
+	(connId:12) (218 0) (168 0) (25 0)
+	(connId:10) (223 0) (206 0) (419 0)
+	(connId:0) (435 2)
+	(connId:11) (220 0) (91 0) (26 0)
+blockId 377 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 42 3 ZERO
+	(connId:3) (361 0)
+	(connId:1) (368 0)
+	(connId:0) (371 0)
+	(connId:19) (157 1) (160 1) (162 1) (165 1) (166 1) (169 1) (171 1) (174 1)
+	(connId:18) (175 1) (178 1) (180 1) (183 1) (184 1) (186 1) (187 1) (190 1)
+	(connId:17) (191 1) (194 1) (196 1) (199 1) (200 1) (203 1) (205 1) (208 1)
+	(connId:16) (209 1) (212 1) (214 1) (215 1) (217 1) (218 1) (220 1) (223 1)
+	(connId:15) (224 1) (226 1) (227 1) (230 1) (232 1) (235 1) (236 1) (239 1)
+	(connId:14) (241 1) (243 1) (244 1) (246 1) (248 1) (250 1) (251 1) (254 1)
+	(connId:12) (269 1) (271 1) (272 1) (273 1) (274 1) (275 1) (276 1) (278 1)
+	(connId:11) (279 1) (280 1) (281 1) (283 1) (284 1) (286 1) (287 1) (291 1)
+	(connId:10) (292 1) (297 1) (298 1) (300 1) (302 1) (305 1) (306 1) (308 1)
+	(connId:9) (309 1) (311 1) (312 1) (314 1) (315 1) (317 1) (318 1) (320 1)
+	(connId:8) (321 1) (323 1) (324 1) (326 1) (327 1) (329 1) (330 1) (332 1)
+	(connId:6) (343 1) (345 1) (346 1) (349 1) (350 1) (358 1) (347 1) (354 1)
+	(connId:5) (356 1) (366 1) (352 1) (360 1) (364 1) (373 1) (390 1) (399 1)
+	(connId:4) (409 1) (406 1) (403 1) (411 1) (416 1) (417 1) (418 1) (424 1)
+	(connId:7) (333 1) (335 1) (336 1) (337 1) (338 1) (339 1) (340 1) (342 1)
+	(connId:13) (256 1) (259 1) (260 1) (262 1) (263 1) (265 1) (266 1) (268 1)
+	(connId:2) (440 0)
+blockId 376 SWITCH 39 11 ZERO
+	(connId:0) (374 3)
+blockId 375 LIGHT 24 74 ZERO
+	(connId:0) (433 11)
+blockId 374 "c5ea9727-1e28-4082-ba17-e2f44dffe631" 49 3 ZERO
+	(connId:2) (7 0)
+	(connId:0) (8 0)
+	(connId:1) (289 0)
+	(connId:3) (376 0)
+	(connId:19) (9 1) (295 1) (10 1) (385 1) (11 1) (384 1) (12 1) (380 1)
+	(connId:18) (13 1) (389 1) (14 1) (397 1) (15 1) (395 1) (16 1) (392 1)
+	(connId:17) (17 1) (401 1) (18 1) (408 1) (19 1) (407 1) (20 1) (404 1)
+	(connId:16) (21 1) (410 1) (22 1) (23 1) (24 1) (25 1) (26 1) (419 1)
+	(connId:15) (27 1) (28 1) (29 1) (427 1) (30 1) (423 1) (31 1) (415 1)
+	(connId:14) (32 1) (430 1) (33 1) (443 1) (34 1) (438 1) (35 1) (434 1)
+	(connId:13) (36 1) (441 1) (37 1) (38 1) (39 1) (447 1) (40 1) (451 1)
+	(connId:12) (41 1) (452 1) (42 1) (455 1) (43 1) (456 1) (44 1) (445 1)
+	(connId:11) (45 1) (381 1) (46 1) (47 1) (198 1) (48 1) (119 1) (49 1)
+	(connId:10) (204 1) (50 1) (195 1) (51 1) (116 1) (52 1) (131 1) (53 1)
+	(connId:9) (122 1) (54 1) (113 1) (55 1) (128 1) (56 1) (143 1) (57 1)
+	(connId:8) (134 1) (58 1) (125 1) (59 1) (140 1) (60 1) (155 1) (61 1)
+	(connId:7) (146 1) (62 1) (137 1) (63 1) (64 1) (65 1) (167 1) (66 1)
+	(connId:6) (67 1) (68 1) (69 1) (70 1) (164 1) (71 1) (179 1) (72 1)
+	(connId:5) (170 1) (73 1) (161 1) (74 1) (176 1) (75 1) (189 1) (76 1)
+	(connId:4) (182 1) (77 1) (173 1) (201 1) (78 1) (192 1) (79 1) (80 1)
+blockId 373 TRISTATE_BUFFER 45 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 5)
+	(connId:0) (453 12)
+blockId 372 JUNCTION 62 43 ZERO
+	(connId:0) (198 2) (176 2) (164 2) (140 2) (128 2) (116 2) (78 2) (64 2) (43 2) (39 2) (34 2) (30 2) (24 2) (19 2) (15 2) (11 2)
+	(connId:1) (353 11)
+blockId 371 SWITCH 39 3 ZERO
+	(connId:0) (377 0)
+blockId 370 LIGHT 25 72 ZERO
+	(connId:0) (453 12)
+blockId 369 JUNCTION 62 41 ZERO
+	(connId:0) (189 2) (179 2) (167 2) (155 2) (143 2) (131 2) (119 2) (79 2) (44 2) (40 2) (35 2) (31 2) (26 2) (20 2) (16 2) (12 2)
+	(connId:1) (353 9)
+blockId 368 SWITCH 39 4 ZERO
+	(connId:0) (377 1)
+blockId 367 LIGHT 24 78 ZERO
+	(connId:0) (400 11)
+blockId 366 TRISTATE_BUFFER 45 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 5)
+	(connId:0) (453 16)
+blockId 365 LIGHT 25 80 ZERO
+	(connId:0) (388 12)
+blockId 364 TRISTATE_BUFFER 45 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 5)
+	(connId:0) (453 13)
+blockId 363 JUNCTION 62 47 ZERO
+	(connId:0) (204 2) (182 2) (170 2) (146 2) (134 2) (122 2) (67 2) (45 2) (41 2) (36 2) (32 2) (27 2) (21 2) (17 2) (13 2) (9 2)
+	(connId:1) (353 15)
+blockId 362 JUNCTION 62 45 ZERO
+	(connId:0) (195 2) (173 2) (161 2) (137 2) (125 2) (113 2) (69 2) (46 2) (42 2) (37 2) (33 2) (29 2) (22 2) (18 2) (14 2) (10 2)
+	(connId:1) (353 13)
+blockId 361 SWITCH 39 6 ZERO
+	(connId:0) (377 3)
+blockId 360 TRISTATE_BUFFER 45 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 5)
+	(connId:0) (453 14)
+blockId 359 LIGHT 25 76 ZERO
+	(connId:0) (391 12)
+blockId 358 TRISTATE_BUFFER 46 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 6)
+	(connId:0) (450 12)
+blockId 357 LIGHT 26 76 ZERO
+	(connId:0) (391 13)
+blockId 356 TRISTATE_BUFFER 45 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 5)
+	(connId:0) (453 17)
+blockId 355 SWITCH 72 51 ZERO
+blockId 354 TRISTATE_BUFFER 46 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 6)
+	(connId:0) (450 10)
+blockId 353 "42751bb6-bce4-4cba-b021-bfbed525735f" 70 31 ZERO
+	(connId:14) (3 1)
+	(connId:12) (4 1)
+	(connId:10) (5 1)
+	(connId:8) (6 1)
+	(connId:7) (139 1)
+	(connId:6) (142 1)
+	(connId:5) (144 1)
+	(connId:3) (148 1)
+	(connId:1) (153 1)
+	(connId:0) (156 1)
+	(connId:11) (372 1)
+	(connId:2) (151 1)
+	(connId:13) (362 1)
+	(connId:9) (369 1)
+	(connId:4) (147 1)
+	(connId:15) (363 1)
+blockId 352 TRISTATE_BUFFER 45 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 5)
+	(connId:0) (453 15)
+blockId 351 LIGHT 26 72 ZERO
+	(connId:0) (453 13)
+blockId 350 TRISTATE_BUFFER 46 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 6)
+	(connId:0) (450 13)
+blockId 349 TRISTATE_BUFFER 46 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 6)
+	(connId:0) (450 14)
+blockId 348 SWITCH 74 51 ZERO
+blockId 347 TRISTATE_BUFFER 46 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 6)
+	(connId:0) (450 11)
+blockId 346 TRISTATE_BUFFER 46 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 6)
+	(connId:0) (450 15)
+blockId 345 TRISTATE_BUFFER 46 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 6)
+	(connId:0) (450 16)
+blockId 344 LIGHT 27 72 ZERO
+	(connId:0) (453 14)
+blockId 343 TRISTATE_BUFFER 46 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 6)
+	(connId:0) (450 17)
+blockId 342 TRISTATE_BUFFER 47 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 7)
+	(connId:0) (433 10)
+blockId 341 LIGHT 27 76 ZERO
+	(connId:0) (391 14)
+blockId 340 TRISTATE_BUFFER 47 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 7)
+	(connId:0) (433 11)
+blockId 339 TRISTATE_BUFFER 47 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 7)
+	(connId:0) (433 12)
+blockId 338 TRISTATE_BUFFER 47 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 7)
+	(connId:0) (433 13)
+blockId 337 TRISTATE_BUFFER 47 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 7)
+	(connId:0) (433 14)
+blockId 336 TRISTATE_BUFFER 47 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 7)
+	(connId:0) (433 15)
+blockId 335 TRISTATE_BUFFER 47 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 7)
+	(connId:0) (433 16)
+blockId 334 LIGHT 29 75 ZERO
+	(connId:0) (394 16)
+blockId 333 TRISTATE_BUFFER 47 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 7)
+	(connId:0) (433 17)
+blockId 332 TRISTATE_BUFFER 48 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 8)
+	(connId:0) (394 10)
+blockId 331 LIGHT 23 81 ZERO
+	(connId:0) (393 10)
+blockId 330 TRISTATE_BUFFER 48 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 8)
+	(connId:0) (394 11)
+blockId 329 TRISTATE_BUFFER 48 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 8)
+	(connId:0) (394 12)
+blockId 328 LIGHT 29 79 ZERO
+	(connId:0) (398 16)
+blockId 327 TRISTATE_BUFFER 48 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 8)
+	(connId:0) (394 13)
+blockId 326 TRISTATE_BUFFER 48 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 8)
+	(connId:0) (394 14)
+blockId 325 LIGHT 29 73 ZERO
+	(connId:0) (450 16)
+blockId 324 TRISTATE_BUFFER 48 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 8)
+	(connId:0) (394 15)
+blockId 323 TRISTATE_BUFFER 48 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 8)
+	(connId:0) (394 16)
+blockId 322 LIGHT 23 79 ZERO
+	(connId:0) (398 10)
+blockId 321 TRISTATE_BUFFER 48 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 8)
+	(connId:0) (394 17)
+blockId 320 TRISTATE_BUFFER 49 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 9)
+	(connId:0) (391 10)
+blockId 319 LIGHT 24 79 ZERO
+	(connId:0) (398 11)
+blockId 318 TRISTATE_BUFFER 49 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 9)
+	(connId:0) (391 11)
+blockId 317 TRISTATE_BUFFER 49 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 9)
+	(connId:0) (391 12)
+blockId 316 LIGHT 24 73 ZERO
+	(connId:0) (450 11)
+blockId 315 TRISTATE_BUFFER 49 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 9)
+	(connId:0) (391 13)
+blockId 314 TRISTATE_BUFFER 49 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 9)
+	(connId:0) (391 14)
+blockId 313 LIGHT 23 77 ZERO
+	(connId:0) (448 10)
+blockId 312 TRISTATE_BUFFER 49 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 9)
+	(connId:0) (391 15)
+blockId 311 TRISTATE_BUFFER 49 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 9)
+	(connId:0) (391 16)
+blockId 310 LIGHT 24 77 ZERO
+	(connId:0) (448 11)
+blockId 309 TRISTATE_BUFFER 49 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 9)
+	(connId:0) (391 17)
+blockId 308 TRISTATE_BUFFER 50 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 10)
+	(connId:0) (448 10)
+blockId 307 LIGHT 25 77 ZERO
+	(connId:0) (448 12)
+blockId 306 TRISTATE_BUFFER 50 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 10)
+	(connId:0) (448 11)
+blockId 305 TRISTATE_BUFFER 50 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 10)
+	(connId:0) (448 12)
+blockId 304 LIGHT 28 83 ZERO
+	(connId:0) (378 15)
+blockId 303 LIGHT 24 81 ZERO
+	(connId:0) (393 11)
+blockId 302 TRISTATE_BUFFER 50 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 10)
+	(connId:0) (448 13)
+blockId 301 LIGHT 29 82 ZERO
+	(connId:0) (396 16)
+blockId 300 TRISTATE_BUFFER 50 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 10)
+	(connId:0) (448 14)
+blockId 299 LIGHT 24 75 ZERO
+	(connId:0) (394 11)
+blockId 298 TRISTATE_BUFFER 50 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 10)
+	(connId:0) (448 15)
+blockId 297 TRISTATE_BUFFER 50 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 10)
+	(connId:0) (448 16)
+blockId 296 LIGHT 30 85 ZERO
+	(connId:0) (387 17)
+blockId 295 TRISTATE_BUFFER 59 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 19)
+	(connId:0) (379 16)
+blockId 294 AND 14 0 ZERO
+	(connId:1) (405 0) (402 0) (449 0) (435 0) (428 0) (420 0) (412 0) (425 0) (421 0) (426 0) (413 0) (422 0) (431 0) (414 0) (444 0) (429 0)
+	(connId:0) (386 0) (382 1)
+blockId 293 LIGHT 25 75 ZERO
+	(connId:0) (394 12)
+blockId 292 TRISTATE_BUFFER 50 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 10)
+	(connId:0) (448 17)
+blockId 291 TRISTATE_BUFFER 51 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 11)
+	(connId:0) (400 10)
+blockId 290 LIGHT 26 75 ZERO
+	(connId:0) (394 13)
+blockId 289 SWITCH 39 9 ZERO
+	(connId:0) (374 1)
+blockId 288 LIGHT 23 80 ZERO
+	(connId:0) (388 10)
+blockId 287 TRISTATE_BUFFER 51 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 11)
+	(connId:0) (400 11)
+blockId 286 TRISTATE_BUFFER 51 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 11)
+	(connId:0) (400 12)
+blockId 285 LIGHT 25 79 ZERO
+	(connId:0) (398 12)
+blockId 284 TRISTATE_BUFFER 51 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 11)
+	(connId:0) (400 13)
+blockId 283 TRISTATE_BUFFER 51 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 11)
+	(connId:0) (400 14)
+blockId 282 LIGHT 25 73 ZERO
+	(connId:0) (450 12)
+blockId 281 TRISTATE_BUFFER 51 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 11)
+	(connId:0) (400 15)
+blockId 280 TRISTATE_BUFFER 51 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 11)
+	(connId:0) (400 16)
+blockId 279 TRISTATE_BUFFER 51 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 11)
+	(connId:0) (400 17)
+blockId 278 TRISTATE_BUFFER 52 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 12)
+	(connId:0) (398 10)
+blockId 277 LIGHT 27 73 ZERO
+	(connId:0) (450 14)
+blockId 276 TRISTATE_BUFFER 52 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 12)
+	(connId:0) (398 11)
+blockId 275 TRISTATE_BUFFER 52 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 12)
+	(connId:0) (398 12)
+blockId 274 TRISTATE_BUFFER 52 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 12)
+	(connId:0) (398 13)
+blockId 273 TRISTATE_BUFFER 52 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 12)
+	(connId:0) (398 14)
+blockId 272 TRISTATE_BUFFER 52 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 12)
+	(connId:0) (398 15)
+blockId 271 TRISTATE_BUFFER 52 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 12)
+	(connId:0) (398 16)
+blockId 270 LIGHT 26 81 ZERO
+	(connId:0) (393 13)
+blockId 269 TRISTATE_BUFFER 52 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 12)
+	(connId:0) (398 17)
+blockId 268 TRISTATE_BUFFER 53 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 13)
+	(connId:0) (388 10)
+blockId 267 LIGHT 27 81 ZERO
+	(connId:0) (393 14)
+blockId 266 TRISTATE_BUFFER 53 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 13)
+	(connId:0) (388 11)
+blockId 265 TRISTATE_BUFFER 53 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 13)
+	(connId:0) (388 12)
+blockId 264 LIGHT 27 75 ZERO
+	(connId:0) (394 14)
+blockId 263 TRISTATE_BUFFER 53 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 13)
+	(connId:0) (388 13)
+blockId 262 TRISTATE_BUFFER 53 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 13)
+	(connId:0) (388 14)
+blockId 261 LIGHT 26 79 ZERO
+	(connId:0) (398 13)
+blockId 260 TRISTATE_BUFFER 53 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 13)
+	(connId:0) (388 15)
+blockId 259 TRISTATE_BUFFER 53 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 13)
+	(connId:0) (388 16)
+blockId 258 LIGHT 29 72 ZERO
+	(connId:0) (453 16)
+blockId 257 LIGHT 27 79 ZERO
+	(connId:0) (398 14)
+blockId 256 TRISTATE_BUFFER 53 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 13)
+	(connId:0) (388 17)
+blockId 255 LIGHT 27 80 ZERO
+	(connId:0) (388 14)
+blockId 254 TRISTATE_BUFFER 54 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 14)
+	(connId:0) (393 10)
+blockId 253 LIGHT 28 79 ZERO
+	(connId:0) (398 15)
+blockId 252 LIGHT 26 78 ZERO
+	(connId:0) (400 13)
+blockId 251 TRISTATE_BUFFER 54 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 14)
+	(connId:0) (393 11)
+blockId 250 TRISTATE_BUFFER 54 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 14)
+	(connId:0) (393 12)
+blockId 249 LIGHT 28 73 ZERO
+	(connId:0) (450 15)
+blockId 248 TRISTATE_BUFFER 54 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 14)
+	(connId:0) (393 13)
+blockId 247 LIGHT 30 78 ZERO
+	(connId:0) (400 17)
+blockId 246 TRISTATE_BUFFER 54 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 14)
+	(connId:0) (393 14)
+blockId 245 LIGHT 27 77 ZERO
+	(connId:0) (448 14)
+blockId 244 TRISTATE_BUFFER 54 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 14)
+	(connId:0) (393 15)
+blockId 243 TRISTATE_BUFFER 54 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 14)
+	(connId:0) (393 16)
+blockId 242 LIGHT 28 77 ZERO
+	(connId:0) (448 15)
+blockId 241 TRISTATE_BUFFER 54 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 14)
+	(connId:0) (393 17)
+blockId 240 LIGHT 30 74 ZERO
+	(connId:0) (433 17)
+blockId 239 TRISTATE_BUFFER 55 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 15)
+	(connId:0) (396 10)
+blockId 238 LIGHT 29 77 ZERO
+	(connId:0) (448 16)
+blockId 237 LIGHT 25 84 ZERO
+	(connId:0) (383 12)
+blockId 236 TRISTATE_BUFFER 55 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 15)
+	(connId:0) (396 11)
+blockId 235 TRISTATE_BUFFER 55 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 15)
+	(connId:0) (396 12)
+blockId 234 LIGHT 23 82 ZERO
+	(connId:0) (396 10)
+blockId 233 LIGHT 28 81 ZERO
+	(connId:0) (393 15)
+blockId 232 TRISTATE_BUFFER 55 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 15)
+	(connId:0) (396 13)
+blockId 231 LIGHT 29 80 ZERO
+	(connId:0) (388 16)
+blockId 230 TRISTATE_BUFFER 55 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 15)
+	(connId:0) (396 14)
+blockId 229 LIGHT 28 75 ZERO
+	(connId:0) (394 15)
+blockId 228 LIGHT 24 85 ZERO
+	(connId:0) (387 11)
+blockId 227 TRISTATE_BUFFER 55 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 15)
+	(connId:0) (396 15)
+blockId 226 TRISTATE_BUFFER 55 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 15)
+	(connId:0) (396 16)
+blockId 225 LIGHT 27 84 ZERO
+	(connId:0) (383 14)
+blockId 224 TRISTATE_BUFFER 55 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 15)
+	(connId:0) (396 17)
+blockId 223 TRISTATE_BUFFER 56 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 16)
+	(connId:0) (378 10)
+blockId 222 LIGHT 25 86 ZERO
+	(connId:0) (379 12)
+blockId 221 LIGHT 30 75 ZERO
+	(connId:0) (394 17)
+blockId 220 TRISTATE_BUFFER 56 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 16)
+	(connId:0) (378 11)
+blockId 219 LIGHT 23 86 ZERO
+	(connId:0) (379 10)
+blockId 218 TRISTATE_BUFFER 56 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 16)
+	(connId:0) (378 12)
+blockId 217 TRISTATE_BUFFER 56 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 16)
+	(connId:0) (378 13)
+blockId 216 LIGHT 26 86 ZERO
+	(connId:0) (379 13)
+blockId 215 TRISTATE_BUFFER 56 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 16)
+	(connId:0) (378 14)
+blockId 214 TRISTATE_BUFFER 56 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 16)
+	(connId:0) (378 15)
+blockId 213 LIGHT 29 86 ZERO
+	(connId:0) (379 16)
+blockId 212 TRISTATE_BUFFER 56 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 16)
+	(connId:0) (378 16)
+blockId 211 LIGHT 30 73 ZERO
+	(connId:0) (450 17)
+blockId 210 LIGHT 27 86 ZERO
+	(connId:0) (379 14)
+blockId 209 TRISTATE_BUFFER 56 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 16)
+	(connId:0) (378 17)
+blockId 208 TRISTATE_BUFFER 57 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 17)
+	(connId:0) (383 10)
+blockId 207 LIGHT 26 83 ZERO
+	(connId:0) (378 13)
+blockId 206 LIGHT 23 83 ZERO
+	(connId:0) (378 10)
+blockId 205 TRISTATE_BUFFER 57 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 17)
+	(connId:0) (383 11)
+blockId 204 TRISTATE_BUFFER 50 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 10)
+	(connId:0) (448 17)
+blockId 203 TRISTATE_BUFFER 57 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 17)
+	(connId:0) (383 12)
+blockId 202 LIGHT 30 77 ZERO
+	(connId:0) (448 17)
+blockId 201 TRISTATE_BUFFER 44 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 4)
+	(connId:0) (446 14)
+blockId 200 TRISTATE_BUFFER 57 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 17)
+	(connId:0) (383 13)
+blockId 199 TRISTATE_BUFFER 57 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 17)
+	(connId:0) (383 14)
+blockId 198 TRISTATE_BUFFER 51 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 11)
+	(connId:0) (400 13)
+blockId 197 LIGHT 29 81 ZERO
+	(connId:0) (393 16)
+blockId 196 TRISTATE_BUFFER 57 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 17)
+	(connId:0) (383 15)
+blockId 195 TRISTATE_BUFFER 50 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 10)
+	(connId:0) (448 15)
+blockId 194 TRISTATE_BUFFER 57 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 17)
+	(connId:0) (383 16)
+blockId 193 LIGHT 30 81 ZERO
+	(connId:0) (393 17)
+blockId 192 TRISTATE_BUFFER 44 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 4)
+	(connId:0) (446 12)
+blockId 191 TRISTATE_BUFFER 57 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 17)
+	(connId:0) (383 17)
+blockId 190 TRISTATE_BUFFER 58 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 18)
+	(connId:0) (387 10)
+blockId 189 TRISTATE_BUFFER 45 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 5)
+	(connId:0) (453 11)
+blockId 188 LIGHT 24 86 ZERO
+	(connId:0) (379 11)
+blockId 187 TRISTATE_BUFFER 58 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 18)
+	(connId:0) (387 11)
+blockId 186 TRISTATE_BUFFER 58 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 18)
+	(connId:0) (387 12)
+blockId 185 LIGHT 23 85 ZERO
+	(connId:0) (387 10)
+blockId 184 TRISTATE_BUFFER 58 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 18)
+	(connId:0) (387 13)
+blockId 183 TRISTATE_BUFFER 58 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 18)
+	(connId:0) (387 14)
+blockId 182 TRISTATE_BUFFER 44 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 4)
+	(connId:0) (446 17)
+blockId 181 LIGHT 30 79 ZERO
+	(connId:0) (398 17)
+blockId 180 TRISTATE_BUFFER 58 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 18)
+	(connId:0) (387 15)
+blockId 179 TRISTATE_BUFFER 46 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 6)
+	(connId:0) (450 11)
+blockId 178 TRISTATE_BUFFER 58 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 18)
+	(connId:0) (387 16)
+blockId 177 LIGHT 24 84 ZERO
+	(connId:0) (383 11)
+blockId 176 TRISTATE_BUFFER 45 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 5)
+	(connId:0) (453 13)
+blockId 175 TRISTATE_BUFFER 58 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 18)
+	(connId:0) (387 17)
+blockId 174 TRISTATE_BUFFER 59 31 ZERO
+	(connId:2) (156 0)
+	(connId:1) (377 19)
+	(connId:0) (379 10)
+blockId 173 TRISTATE_BUFFER 44 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 4)
+	(connId:0) (446 15)
+blockId 172 LIGHT 26 84 ZERO
+	(connId:0) (383 13)
+blockId 171 TRISTATE_BUFFER 59 33 ZERO
+	(connId:2) (153 0)
+	(connId:1) (377 19)
+	(connId:0) (379 11)
+blockId 170 TRISTATE_BUFFER 45 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 5)
+	(connId:0) (453 17)
+blockId 169 TRISTATE_BUFFER 59 35 ZERO
+	(connId:2) (151 0)
+	(connId:1) (377 19)
+	(connId:0) (379 12)
+blockId 168 LIGHT 25 83 ZERO
+	(connId:0) (378 12)
+blockId 167 TRISTATE_BUFFER 47 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 7)
+	(connId:0) (433 11)
+blockId 166 TRISTATE_BUFFER 59 37 ZERO
+	(connId:2) (148 0)
+	(connId:1) (377 19)
+	(connId:0) (379 13)
+blockId 165 TRISTATE_BUFFER 59 39 ZERO
+	(connId:2) (147 0)
+	(connId:1) (377 19)
+	(connId:0) (379 14)
+blockId 164 TRISTATE_BUFFER 46 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 6)
+	(connId:0) (450 13)
+blockId 163 LIGHT 24 82 ZERO
+	(connId:0) (396 11)
+blockId 162 TRISTATE_BUFFER 59 41 ZERO
+	(connId:2) (144 0)
+	(connId:1) (377 19)
+	(connId:0) (379 15)
+blockId 161 TRISTATE_BUFFER 45 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 5)
+	(connId:0) (453 15)
+blockId 160 TRISTATE_BUFFER 59 43 ZERO
+	(connId:2) (142 0)
+	(connId:1) (377 19)
+	(connId:0) (379 16)
+blockId 159 LIGHT 26 73 ZERO
+	(connId:0) (450 13)
+blockId 158 LIGHT 28 78 ZERO
+	(connId:0) (400 15)
+blockId 157 TRISTATE_BUFFER 59 45 ZERO
+	(connId:2) (139 0)
+	(connId:1) (377 19)
+	(connId:0) (379 17)
+blockId 156 JUNCTION 62 31 ZERO
+	(connId:1) (353 0)
+	(connId:0) (424 2) (399 2) (354 2) (342 2) (332 2) (320 2) (308 2) (291 2) (278 2) (268 2) (254 2) (239 2) (223 2) (208 2) (190 2) (174 2)
+blockId 155 TRISTATE_BUFFER 48 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 8)
+	(connId:0) (394 11)
+blockId 154 LIGHT 29 85 ZERO
+	(connId:0) (387 16)
+blockId 153 JUNCTION 62 32 ZERO
+	(connId:1) (353 1)
+	(connId:0) (418 2) (390 2) (347 2) (340 2) (330 2) (318 2) (306 2) (287 2) (276 2) (266 2) (251 2) (236 2) (220 2) (205 2) (187 2) (171 2)
+blockId 152 LIGHT 29 76 ZERO
+	(connId:0) (391 16)
+blockId 151 JUNCTION 62 33 ZERO
+	(connId:1) (353 2)
+	(connId:0) (417 2) (373 2) (358 2) (339 2) (329 2) (317 2) (305 2) (286 2) (275 2) (265 2) (250 2) (235 2) (218 2) (203 2) (186 2) (169 2)
+blockId 150 LIGHT 28 84 ZERO
+	(connId:0) (383 15)
+blockId 149 LIGHT 28 74 ZERO
+	(connId:0) (433 15)
+blockId 148 JUNCTION 62 34 ZERO
+	(connId:1) (353 3)
+	(connId:0) (416 2) (364 2) (350 2) (338 2) (327 2) (315 2) (302 2) (284 2) (274 2) (263 2) (248 2) (232 2) (217 2) (200 2) (184 2) (166 2)
+blockId 147 JUNCTION 62 35 ZERO
+	(connId:1) (353 4)
+	(connId:0) (411 2) (360 2) (349 2) (337 2) (326 2) (314 2) (300 2) (283 2) (273 2) (262 2) (246 2) (230 2) (215 2) (199 2) (183 2) (165 2)
+blockId 146 TRISTATE_BUFFER 47 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 7)
+	(connId:0) (433 17)
+blockId 145 LIGHT 27 83 ZERO
+	(connId:0) (378 14)
+blockId 144 JUNCTION 62 36 ZERO
+	(connId:1) (353 5)
+	(connId:0) (403 2) (352 2) (346 2) (336 2) (324 2) (312 2) (298 2) (281 2) (272 2) (260 2) (244 2) (227 2) (214 2) (196 2) (180 2) (162 2)
+blockId 143 TRISTATE_BUFFER 49 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 9)
+	(connId:0) (391 11)
+blockId 142 JUNCTION 62 37 ZERO
+	(connId:1) (353 6)
+	(connId:0) (406 2) (366 2) (345 2) (335 2) (323 2) (311 2) (297 2) (280 2) (271 2) (259 2) (243 2) (226 2) (212 2) (194 2) (178 2) (160 2)
+blockId 141 LIGHT 29 83 ZERO
+	(connId:0) (378 16)
+blockId 140 TRISTATE_BUFFER 48 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 8)
+	(connId:0) (394 13)
+blockId 139 JUNCTION 62 38 ZERO
+	(connId:1) (353 7)
+	(connId:0) (409 2) (356 2) (343 2) (333 2) (321 2) (309 2) (292 2) (279 2) (269 2) (256 2) (241 2) (224 2) (209 2) (191 2) (175 2) (157 2)
+blockId 138 LIGHT 23 71 ZERO
+	(connId:0) (446 10)
+blockId 137 TRISTATE_BUFFER 47 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 7)
+	(connId:0) (433 15)
+blockId 136 LIGHT 24 71 ZERO
+	(connId:0) (446 11)
+blockId 135 LIGHT 25 71 ZERO
+	(connId:0) (446 12)
+blockId 134 TRISTATE_BUFFER 48 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 8)
+	(connId:0) (394 17)
+blockId 133 LIGHT 30 82 ZERO
+	(connId:0) (396 17)
+blockId 132 LIGHT 26 71 ZERO
+	(connId:0) (446 13)
+blockId 131 TRISTATE_BUFFER 50 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 10)
+	(connId:0) (448 11)
+blockId 130 LIGHT 27 71 ZERO
+	(connId:0) (446 14)
+blockId 129 LIGHT 28 86 ZERO
+	(connId:0) (379 15)
+blockId 128 TRISTATE_BUFFER 49 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 9)
+	(connId:0) (391 13)
+blockId 127 LIGHT 28 71 ZERO
+	(connId:0) (446 15)
+blockId 126 LIGHT 29 71 ZERO
+	(connId:0) (446 16)
+blockId 125 TRISTATE_BUFFER 48 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 8)
+	(connId:0) (394 15)
+blockId 124 LIGHT 30 86 ZERO
+	(connId:0) (379 17)
+blockId 123 LIGHT 30 71 ZERO
+	(connId:0) (446 17)
+blockId 122 TRISTATE_BUFFER 49 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 9)
+	(connId:0) (391 17)
+blockId 121 LIGHT 23 72 ZERO
+	(connId:0) (453 10)
+blockId 120 LIGHT 23 73 ZERO
+	(connId:0) (450 10)
+blockId 119 TRISTATE_BUFFER 51 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 11)
+	(connId:0) (400 11)
+blockId 118 LIGHT 23 74 ZERO
+	(connId:0) (433 10)
+blockId 117 LIGHT 23 75 ZERO
+	(connId:0) (394 10)
+blockId 116 TRISTATE_BUFFER 50 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 10)
+	(connId:0) (448 13)
+blockId 115 LIGHT 23 76 ZERO
+	(connId:0) (391 10)
+blockId 114 LIGHT 30 84 ZERO
+	(connId:0) (383 17)
+blockId 113 TRISTATE_BUFFER 49 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 9)
+	(connId:0) (391 15)
+blockId 112 LIGHT 23 78 ZERO
+	(connId:0) (400 10)
+blockId 111 LIGHT 24 72 ZERO
+	(connId:0) (453 11)
+blockId 110 LIGHT 24 76 ZERO
+	(connId:0) (391 11)
+blockId 109 LIGHT 24 80 ZERO
+	(connId:0) (388 11)
+blockId 108 LIGHT 25 74 ZERO
+	(connId:0) (433 12)
+blockId 107 LIGHT 25 78 ZERO
+	(connId:0) (400 12)
+blockId 106 LIGHT 25 81 ZERO
+	(connId:0) (393 12)
+blockId 105 LIGHT 26 74 ZERO
+	(connId:0) (433 13)
+blockId 104 LIGHT 26 77 ZERO
+	(connId:0) (448 13)
+blockId 103 LIGHT 26 80 ZERO
+	(connId:0) (388 13)
+blockId 102 LIGHT 27 74 ZERO
+	(connId:0) (433 14)
+blockId 101 LIGHT 27 78 ZERO
+	(connId:0) (400 14)
+blockId 100 LIGHT 28 72 ZERO
+	(connId:0) (453 15)
+blockId 99 LIGHT 28 76 ZERO
+	(connId:0) (391 15)
+blockId 98 LIGHT 28 80 ZERO
+	(connId:0) (388 15)
+blockId 97 LIGHT 29 74 ZERO
+	(connId:0) (433 16)
+blockId 96 LIGHT 29 78 ZERO
+	(connId:0) (400 16)
+blockId 95 LIGHT 30 72 ZERO
+	(connId:0) (453 17)
+blockId 94 LIGHT 30 76 ZERO
+	(connId:0) (391 17)
+blockId 93 LIGHT 30 80 ZERO
+	(connId:0) (388 17)
+blockId 92 LIGHT 23 84 ZERO
+	(connId:0) (383 10)
+blockId 91 LIGHT 24 83 ZERO
+	(connId:0) (378 11)
+blockId 90 LIGHT 25 82 ZERO
+	(connId:0) (396 12)
+blockId 89 LIGHT 25 85 ZERO
+	(connId:0) (387 12)
+blockId 88 LIGHT 26 82 ZERO
+	(connId:0) (396 13)
+blockId 87 LIGHT 26 85 ZERO
+	(connId:0) (387 13)
+blockId 86 LIGHT 27 82 ZERO
+	(connId:0) (396 14)
+blockId 85 LIGHT 27 85 ZERO
+	(connId:0) (387 14)
+blockId 84 LIGHT 28 82 ZERO
+	(connId:0) (396 15)
+blockId 83 LIGHT 28 85 ZERO
+	(connId:0) (387 15)
+blockId 82 LIGHT 29 84 ZERO
+	(connId:0) (383 16)
+blockId 81 LIGHT 30 83 ZERO
+	(connId:0) (378 17)
+blockId 80 TRISTATE_BUFFER 44 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 4)
+	(connId:0) (446 10)
+blockId 79 TRISTATE_BUFFER 44 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 4)
+	(connId:0) (446 11)
+blockId 78 TRISTATE_BUFFER 44 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 4)
+	(connId:0) (446 13)
+blockId 77 TRISTATE_BUFFER 44 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 4)
+	(connId:0) (446 16)
+blockId 76 TRISTATE_BUFFER 45 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 5)
+	(connId:0) (453 10)
+blockId 75 TRISTATE_BUFFER 45 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 5)
+	(connId:0) (453 12)
+blockId 74 TRISTATE_BUFFER 45 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 5)
+	(connId:0) (453 14)
+blockId 73 TRISTATE_BUFFER 45 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 5)
+	(connId:0) (453 16)
+blockId 72 TRISTATE_BUFFER 46 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 6)
+	(connId:0) (450 10)
+blockId 71 TRISTATE_BUFFER 46 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 6)
+	(connId:0) (450 12)
+blockId 70 TRISTATE_BUFFER 46 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 6)
+	(connId:0) (450 14)
+blockId 69 TRISTATE_BUFFER 46 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 6)
+	(connId:0) (450 15)
+blockId 68 TRISTATE_BUFFER 46 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 6)
+	(connId:0) (450 16)
+blockId 67 TRISTATE_BUFFER 46 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 6)
+	(connId:0) (450 17)
+blockId 66 TRISTATE_BUFFER 47 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 7)
+	(connId:0) (433 10)
+blockId 65 TRISTATE_BUFFER 47 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 7)
+	(connId:0) (433 12)
+blockId 64 TRISTATE_BUFFER 47 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 7)
+	(connId:0) (433 13)
+blockId 63 TRISTATE_BUFFER 47 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 7)
+	(connId:0) (433 14)
+blockId 62 TRISTATE_BUFFER 47 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 7)
+	(connId:0) (433 16)
+blockId 61 TRISTATE_BUFFER 48 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 8)
+	(connId:0) (394 10)
+blockId 60 TRISTATE_BUFFER 48 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 8)
+	(connId:0) (394 12)
+blockId 59 TRISTATE_BUFFER 48 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 8)
+	(connId:0) (394 14)
+blockId 58 TRISTATE_BUFFER 48 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 8)
+	(connId:0) (394 16)
+blockId 57 TRISTATE_BUFFER 49 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 9)
+	(connId:0) (391 10)
+blockId 56 TRISTATE_BUFFER 49 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 9)
+	(connId:0) (391 12)
+blockId 55 TRISTATE_BUFFER 49 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 9)
+	(connId:0) (391 14)
+blockId 54 TRISTATE_BUFFER 49 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 9)
+	(connId:0) (391 16)
+blockId 53 TRISTATE_BUFFER 50 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 10)
+	(connId:0) (448 10)
+blockId 52 TRISTATE_BUFFER 50 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 10)
+	(connId:0) (448 12)
+blockId 51 TRISTATE_BUFFER 50 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 10)
+	(connId:0) (448 14)
+blockId 50 TRISTATE_BUFFER 50 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 10)
+	(connId:0) (448 16)
+blockId 49 TRISTATE_BUFFER 51 49 ZERO
+	(connId:2) (6 0)
+	(connId:1) (374 11)
+	(connId:0) (400 10)
+blockId 48 TRISTATE_BUFFER 51 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 11)
+	(connId:0) (400 12)
+blockId 47 TRISTATE_BUFFER 51 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 11)
+	(connId:0) (400 14)
+blockId 46 TRISTATE_BUFFER 51 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 11)
+	(connId:0) (400 15)
+blockId 45 TRISTATE_BUFFER 51 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 11)
+	(connId:0) (400 17)
+blockId 44 TRISTATE_BUFFER 52 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 12)
+	(connId:0) (398 11)
+blockId 43 TRISTATE_BUFFER 52 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 12)
+	(connId:0) (398 13)
+blockId 42 TRISTATE_BUFFER 52 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 12)
+	(connId:0) (398 15)
+blockId 41 TRISTATE_BUFFER 52 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 12)
+	(connId:0) (398 17)
+blockId 40 TRISTATE_BUFFER 53 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 13)
+	(connId:0) (388 11)
+blockId 39 TRISTATE_BUFFER 53 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 13)
+	(connId:0) (388 13)
+blockId 38 TRISTATE_BUFFER 53 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 13)
+	(connId:0) (388 14)
+blockId 37 TRISTATE_BUFFER 53 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 13)
+	(connId:0) (388 15)
+blockId 36 TRISTATE_BUFFER 53 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 13)
+	(connId:0) (388 17)
+blockId 35 TRISTATE_BUFFER 54 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 14)
+	(connId:0) (393 11)
+blockId 34 TRISTATE_BUFFER 54 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 14)
+	(connId:0) (393 13)
+blockId 33 TRISTATE_BUFFER 54 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 14)
+	(connId:0) (393 15)
+blockId 32 TRISTATE_BUFFER 54 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 14)
+	(connId:0) (393 17)
+blockId 31 TRISTATE_BUFFER 55 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 15)
+	(connId:0) (396 11)
+blockId 30 TRISTATE_BUFFER 55 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 15)
+	(connId:0) (396 13)
+blockId 29 TRISTATE_BUFFER 55 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 15)
+	(connId:0) (396 15)
+blockId 28 TRISTATE_BUFFER 55 61 ZERO
+	(connId:2) (3 0)
+	(connId:1) (374 15)
+	(connId:0) (396 16)
+blockId 27 TRISTATE_BUFFER 55 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 15)
+	(connId:0) (396 17)
+blockId 26 TRISTATE_BUFFER 56 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 16)
+	(connId:0) (378 11)
+blockId 25 TRISTATE_BUFFER 56 53 ZERO
+	(connId:2) (5 0)
+	(connId:1) (374 16)
+	(connId:0) (378 12)
+blockId 24 TRISTATE_BUFFER 56 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 16)
+	(connId:0) (378 13)
+blockId 23 TRISTATE_BUFFER 56 57 ZERO
+	(connId:2) (4 0)
+	(connId:1) (374 16)
+	(connId:0) (378 14)
+blockId 22 TRISTATE_BUFFER 56 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 16)
+	(connId:0) (378 15)
+blockId 21 TRISTATE_BUFFER 56 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 16)
+	(connId:0) (378 17)
+blockId 20 TRISTATE_BUFFER 57 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 17)
+	(connId:0) (383 11)
+blockId 19 TRISTATE_BUFFER 57 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 17)
+	(connId:0) (383 13)
+blockId 18 TRISTATE_BUFFER 57 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 17)
+	(connId:0) (383 15)
+blockId 17 TRISTATE_BUFFER 57 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 17)
+	(connId:0) (383 17)
+blockId 16 TRISTATE_BUFFER 58 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 18)
+	(connId:0) (387 11)
+blockId 15 TRISTATE_BUFFER 58 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 18)
+	(connId:0) (387 13)
+blockId 14 TRISTATE_BUFFER 58 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 18)
+	(connId:0) (387 15)
+blockId 13 TRISTATE_BUFFER 58 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 18)
+	(connId:0) (387 17)
+blockId 12 TRISTATE_BUFFER 59 51 ZERO
+	(connId:2) (369 0)
+	(connId:1) (374 19)
+	(connId:0) (379 11)
+blockId 11 TRISTATE_BUFFER 59 55 ZERO
+	(connId:2) (372 0)
+	(connId:1) (374 19)
+	(connId:0) (379 13)
+blockId 10 TRISTATE_BUFFER 59 59 ZERO
+	(connId:2) (362 0)
+	(connId:1) (374 19)
+	(connId:0) (379 15)
+blockId 9 TRISTATE_BUFFER 59 63 ZERO
+	(connId:2) (363 0)
+	(connId:1) (374 19)
+	(connId:0) (379 17)
+blockId 8 SWITCH 39 8 ZERO
+	(connId:0) (374 0)
+blockId 7 SWITCH 39 10 ZERO
+	(connId:0) (374 2)
+blockId 6 JUNCTION 62 40 ZERO
+	(connId:1) (353 8)
+	(connId:0) (445 2) (451 2) (434 2) (415 2) (419 2) (404 2) (392 2) (380 2) (80 2) (76 2) (72 2) (66 2) (61 2) (57 2) (53 2) (49 2)
+blockId 5 JUNCTION 62 42 ZERO
+	(connId:1) (353 10)
+	(connId:0) (447 2) (438 2) (423 2) (407 2) (395 2) (384 2) (456 2) (192 2) (75 2) (71 2) (65 2) (60 2) (56 2) (52 2) (48 2) (25 2)
+blockId 4 JUNCTION 62 44 ZERO
+	(connId:1) (353 12)
+	(connId:0) (443 2) (427 2) (408 2) (397 2) (385 2) (455 2) (201 2) (74 2) (70 2) (63 2) (59 2) (55 2) (51 2) (47 2) (38 2) (23 2)
+blockId 3 JUNCTION 62 46 ZERO
+	(connId:1) (353 14)
+	(connId:0) (452 2) (441 2) (430 2) (410 2) (401 2) (389 2) (381 2) (295 2) (77 2) (73 2) (68 2) (62 2) (58 2) (54 2) (50 2) (28 2)
+blockId 2 SWITCH 71 51 ZERO
+blockId 1 SWITCH 73 51 ZERO
