@@ -321,9 +321,9 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		const Position& pos = block.getPosition();
 
 		const ConnectionContainer& connectionContainer = block.getConnectionContainer();
-		connection_end_id_t connectionNum = connectionContainer.getConnectionCount();
-
+		
 		const BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(block.type());
+		connection_end_id_t connectionNum = blockData->getConnectionCount();
 		std::string blockTypeStr;
 		if (!blockData->isPrimitive()) {
 			circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(block.type());
@@ -339,9 +339,11 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 			<< connectionNum << '\n';
 		for (int j = 0; j < connectionNum; ++j) {
 			outputFile << '\t' << "(connId:" << j << ')';
-			const std::vector<ConnectionEnd>& connections = connectionContainer.getConnections(j);
-			for (const ConnectionEnd& conn : connections) {
-				outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
+			const std::vector<ConnectionEnd>* connections = connectionContainer.getConnections(j);
+			if (connections) {
+				for (const ConnectionEnd& conn : *connections) {
+					outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
+				}
 			}
 			outputFile << '\n';
 		}

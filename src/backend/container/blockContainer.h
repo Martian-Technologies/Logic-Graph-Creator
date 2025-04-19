@@ -58,8 +58,8 @@ public:
 	/* ----------- connections ----------- */
 	// -- getters --
 	bool connectionExists(const Position& outputPosition, const Position& inputPosition) const;
-	const std::vector<ConnectionEnd>& getInputConnections(const Position& position) const;
-	const std::vector<ConnectionEnd>& getOutputConnections(const Position& position) const;
+	const std::vector<ConnectionEnd>* getInputConnections(const Position& position) const;
+	const std::vector<ConnectionEnd>* getOutputConnections(const Position& position) const;
 	const std::optional<ConnectionEnd> getInputConnectionEnd(const Position& position) const;
 	const std::optional<ConnectionEnd> getOutputConnectionEnd(const Position& position) const;
 

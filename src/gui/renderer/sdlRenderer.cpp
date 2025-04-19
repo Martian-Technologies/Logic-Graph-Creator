@@ -295,14 +295,16 @@ void SdlRenderer::render() {
 		// render connections
 		for (unsigned int i = 0; i < blocks.size(); i++) {
 			logic_state_t state = blockStates[i];
-			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
+			for (auto& connectionIter : blocks[i]->getConnectionContainer().getConnections()) {
 				// continue if input, we only want outputs
-				if (blocks[i]->isConnectionInput(id)) continue;
+				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
-				Position pos = blocks[i]->getConnectionPosition(id).first;
-				for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
-					const Block* other = circuit->getBlockContainer()->getBlock(connectionIter.getBlockId());
-					Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
+				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
+				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				if (!connections) continue;
+				for (auto otherConnectionIter : *connections) {
+					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
+					Position otherPos = other->getConnectionPosition(otherConnectionIter.getConnectionId()).first;
 					if (
 						(pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
 						(pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
@@ -355,14 +357,16 @@ void SdlRenderer::render() {
 
 		// render connections
 		for (unsigned int i = 0; i < blocks.size(); i++) {
-			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
+			for (auto& connectionIter : blocks[i]->getConnectionContainer().getConnections()) {
 				// continue if input, we only want outputs
-				if (blocks[i]->isConnectionInput(id)) continue;
+				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
-				Position pos = blocks[i]->getConnectionPosition(id).first;
-				for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
-					const Block* other = circuit->getBlockContainer()->getBlock(connectionIter.getBlockId());
-					Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
+				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
+				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				if (!connections) continue;
+				for (auto otherConnectionIter : *connections) {
+					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
+					Position otherPos = other->getConnectionPosition(otherConnectionIter.getConnectionId()).first;
 					if (
 						(pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
 						(pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&

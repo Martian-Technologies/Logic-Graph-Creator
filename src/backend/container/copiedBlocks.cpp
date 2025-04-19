@@ -27,12 +27,14 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 			block->getRawData()
 		);
 		const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
-		for (connection_end_id_t i = 0; i < block->getConnectionContainer().getConnectionCount(); i++) {
-			auto pair = blockData->getConnectionVector(i, block->getRotation());
+		for (auto& iter : block->getConnectionContainer().getConnections()) {
+			auto pair = blockData->getConnectionVector(iter.first, block->getRotation());
 			if (!pair.second) continue;
 			Position connectionPosition = block->getPosition() + pair.first;
-			bool isInput = blockData->isConnectionInput(i);
-			for (const ConnectionEnd& connectionEnd : block->getConnectionContainer().getConnections(i)) {
+			bool isInput = blockData->isConnectionInput(iter.first);
+			const std::vector<ConnectionEnd>* otherConnections = block->getConnectionContainer().getConnections(iter.first);
+			if (!otherConnections) continue;
+			for (const ConnectionEnd& connectionEnd : *otherConnections) {
 				const Block* otherBlock = blockContainer->getBlock(connectionEnd.getBlockId());
 				if (!otherBlock) continue;
 				bool skipConnection = true;
