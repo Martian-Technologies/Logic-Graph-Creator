@@ -4,6 +4,7 @@
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
 #include "gpu/vulkanShader.h"
+#include "stb_image.h"
 
 std::vector<VkVertexInputBindingDescription> RmlVertex::getBindingDescriptions() {
 	std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -262,8 +263,22 @@ void RmlRenderer::RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector
 
 // Textures
 Rml::TextureHandle RmlRenderer::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) {
-	logWarning("rml attempting to load texture from file, unsupported right now", "Vulkan");
-	return 1;
+
+	// get and increment handle
+	Rml::TextureHandle newHandle = currentTextureHandle++;
+
+	// load texture
+	int texWidth, texHeight, texChannels;
+    stbi_uc* pixels = stbi_load(source.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+	// allocate new texture
+	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
+    textures[newHandle] = std::make_shared<RmlTexture>((void*)source.data(), size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
+
+	// free pixels
+	stbi_image_free(pixels);
+	
+	return newHandle;
 }
 Rml::TextureHandle RmlRenderer::GenerateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions) {
 	// get and increment handle
