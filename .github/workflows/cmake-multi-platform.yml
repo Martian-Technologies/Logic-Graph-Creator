@@ -54,11 +54,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: 6.8.*
 
     - name: Build with CMake
       uses: ashutoshvarma/action-cmake-build@master
