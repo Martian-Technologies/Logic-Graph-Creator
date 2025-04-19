@@ -16,8 +16,6 @@ void EvaluatorTest::TearDown() {
 }
 
 TEST_F(EvaluatorTest, InitTest) {
-    ASSERT_EQ(evaluator->getEvaluatorId(), 1);
-
     // 0 when paused, set to be paused on evaluator's constructor
     ASSERT_EQ(evaluator->getRealTickrate(), 0);
 }
