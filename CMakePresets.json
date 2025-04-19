@@ -11,7 +11,8 @@
 			"displayName": "Debug",
 			"binaryDir": "build",
 			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug"
+				"CMAKE_BUILD_TYPE": "Debug",
+				"GATALITY_BUILD_APP": "ON"
 			}
 		},
 		{
@@ -19,7 +20,8 @@
 			"displayName": "Release",
 			"binaryDir": "build-release",
 			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release"
+				"CMAKE_BUILD_TYPE": "Release",
+				"GATALITY_BUILD_APP": "ON"
 			}
 		},
 		{
@@ -28,7 +30,8 @@
 			"binaryDir": "build-tests",
 			"cacheVariables": {
 			    "CMAKE_BUILD_TYPE": "Debug",
-			    "GATALITY_BUILD_TESTS": "ON"
+			    "GATALITY_BUILD_TESTS": "ON",
+				"GATALITY_BUILD_APP": "OFF"
 			}
 		}
 	],
