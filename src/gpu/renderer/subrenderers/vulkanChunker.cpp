@@ -2,6 +2,7 @@
 
 #include "vulkanChunkRenderer.h"
 #include "gpu/vulkanInstance.h"
+#include "backend/circuitView/renderer/tileSet.h"
 
 const int CHUNK_SIZE = 25;
 cord_t getChunk(cord_t in) {
@@ -16,6 +17,8 @@ Position getChunk(Position in) {
 // VulkanChunkAllocation
 // =========================================================================================================
 
+TileSetInfo blockTileSet(256, 15, 4);
+
 VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
@@ -26,12 +29,20 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		blockVertices.reserve(blocks.size() * 6);
 		for (const auto& block : blocks) {
 			Position blockPosition = block.first;
-			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {1.0f, 0.0f}};
-			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, {0.0f, 0.0f}};
-			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, {0.0f, 1.0f}};
-			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, {0.0f, 1.0f}};
-			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, {1.0f, 1.0f}};
-			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, {1.0f, 0.0f}};
+			Vec2 uvOrigin = blockTileSet.getTopLeftUV(block.second.blockType + 1, 0);
+			Vec2 uvSize = blockTileSet.getCellUVSize();
+
+			glm::vec2 topLeftUV = {uvOrigin.x, uvOrigin.y};
+			glm::vec2 topRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y};
+			glm::vec2 bottomLeftUV = {uvOrigin.x, uvOrigin.y + uvSize.y};
+			glm::vec2 bottomRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y};
+			
+			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, bottomRightUV};
+			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, bottomLeftUV};
+			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, topLeftUV};
+			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, topLeftUV};
+			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, topRightUV};
+			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, bottomRightUV};
 			blockVertices.push_back(v1);
 			blockVertices.push_back(v2);
 			blockVertices.push_back(v3);
