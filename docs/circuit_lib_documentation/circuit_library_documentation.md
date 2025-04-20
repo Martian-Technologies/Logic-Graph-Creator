@@ -226,6 +226,32 @@ Here is the picture of the IC and its pinout.
 
 This only sends 7 bits instead of 8 because UART requires a start bit transmitted at the beginning to notify the other IC to start clocking data into the register.  We only have a default 8 bit shift register but this would ideally use a 9 or 11 bit shift register to handle start/stop bits.
 
+## UART RX Hardware
+
+This hardware loads in communication data starting for the start bit the TX circuit sends.  A start bit must be sent to start clocking the data in.
+
+### Pin Usage
+
+| Pin Number | Explanation |
+| ---------- | ----------- |
+| (Q0 - Q6)  | The data received byte via UART.  The first bit recieved is put in Q0 while the last received in put in Q6.  See "Errata" section for this section for why there are only 6 bit |
+| RX_Start  | This should be hooked up to the TX pin of the UART TX IC and indicates when the message is started being received |
+| RX  | The bits to receive in a serial fashion. |
+
+### Circuit Implementation
+![image](https://github.com/user-attachments/assets/f6016f0e-0047-4356-a4b1-d309e10322da)
+
+### IC Doucmentation
+
+![image](https://github.com/user-attachments/assets/c9b57bed-905e-496a-bb90-5bb0b9ff508f)
+
+### Errata
+
+Again, this RX is only 7 bits instead of 8 to make room for the start bit.
+
+
+
+
 
 
 
