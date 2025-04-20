@@ -184,6 +184,53 @@ This is the circuit in IC form with the pinout shown below.
 ![image](https://github.com/user-attachments/assets/02174750-36a4-4397-b378-072f85c8ae1a)
 
 
+## Serial Communication ICs
+
+## Serial Communication Overview
+
+Serial communication is a method is which bits are transferring between ICs in a serial manner.  Transmitting serially means that only 1 bit is transmitted at a time.  Having serial communication is useful since it reduces the number of wires that need to be drawn between ICs in order to communicate information.  There are many types of serial communication, and people can make their own but some are common enough where specific microcontrollers implement the their ability in hardware.  Implementing serial communication through hardware is useful since it means the CPU does not need to worry about sending individual bits and only has to set specific registers in order to begin communication.  Below we list out some hardware components provided in circuitlib.
+
+## UART
+
+UART is an asynchronous serial communication protocol.  This means that both ICs do not share a common clock in order to communicate.  However, the clocks must share a common frequency knwon as a "baud rate".  UART occurs between devices via RX and TX pins where one ICs output is the other ICs input.  Below is a resource discussing UART.  There is an addition to this protocol known as "USART" (Universal Synchronous-Asynchronous Receive-Transmit).  Microcontrollers with this module can transmit (TX) and receive (RX) at the same time.
+
+https://www.circuitbasics.com/basics-uart-communication/
+
+## UART TX Circuit
+
+### Overview
+
+This circuit loads in a byte from input and serially transmits it.  One bit is transmitted with each clock cycle.  This is made specifically for the transmit side of UART.  This IC also comes with a send pin that when driven high sends the data.
+
+### Pin Usage
+
+| Pin Number | Explanation |
+| ---------- | ----------- |
+| (P0 - P6)  | The data to transmit when the SEND input is given a RISING edge.  The bits are send P0 - P6 with P0 being sent first.  See "Errata" section for this section for why there are only 6 bit |
+| Send  | Begin sending the data when this input is driven high.  This input must be driven low again before sending |
+| TX  | The transmit bit of what is actually transmitting the bits. |
+
+### Circuit Implementation
+
+This is the circuit implementation of the UART hardware module programmed through logic gates.
+![image](https://github.com/user-attachments/assets/24f44b51-7e54-4320-9bca-3e7b4c204c69)
+
+
+### IC Documentation
+
+Here is the picture of the IC and its pinout.
+
+![image](https://github.com/user-attachments/assets/e4dc7cfa-51cd-4a51-b78c-5c1bf49c652f)
+
+### Errata
+
+This only sends 7 bits instead of 8 because UART requires a start bit transmitted at the beginning to notify the other IC to start clocking data into the register.  We only have a default 8 bit shift register but this would ideally use a 9 or 11 bit shift register to handle start/stop bits.
+
+
+
+
+
+
 
 
 
