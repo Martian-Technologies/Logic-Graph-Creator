@@ -4,6 +4,8 @@
 #include "gpu/renderer/vulkanFrame.h"
 #include "gpu/renderer/vulkanPipeline.h"
 #include "backend/circuit/circuit.h"
+#include "gpu/vulkanDescriptor.h"
+#include "gpu/vulkanImage.h"
 #include "vulkanChunker.h"
 
 #include <glm/vec2.hpp>
@@ -15,7 +17,7 @@ struct ViewPushConstants {
 
 struct BlockVertex {
 	glm::vec2 pos;
-	glm::vec3 color;
+	glm::vec2 tex;
 
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -36,8 +38,8 @@ struct BlockVertex {
 
 		attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(BlockVertex, color);
+		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(BlockVertex, tex);
 
 		return attributeDescriptions;
 	}
@@ -70,12 +72,20 @@ struct WireVertex {
 class VulkanChunkRenderer {
 public:
 	VulkanChunkRenderer(VkRenderPass& renderPass);
+	~VulkanChunkRenderer();
 	
 	void render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
 	std::unique_ptr<Pipeline> blockPipeline = nullptr;
 	std::unique_ptr<Pipeline> wirePipeline = nullptr;
+
+	// descriptors and textures
+	DescriptorAllocator descriptorAllocator;
+	VkDescriptorSetLayout blockTextureDescriptorSetLayout;
+	VkSampler blockTextureSampler;
+	VkDescriptorSet blockTextureDescriptor;
+	AllocatedImage blockTexture;
 };
 
 #endif

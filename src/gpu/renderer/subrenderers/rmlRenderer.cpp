@@ -273,7 +273,6 @@ Rml::TextureHandle RmlRenderer::LoadTexture(Rml::Vector2i& texture_dimensions, c
 
 	// allocate new texture
 	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
-	logInfo(source);
     textures[newHandle] = std::make_shared<RmlTexture>(pixels, size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
 	
 	// free pixels

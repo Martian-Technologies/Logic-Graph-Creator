@@ -3,15 +3,48 @@
 #include "gpu/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
+#include "gpu/vulkanInstance.h"
 
-VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass) {
+#include <stb_image.h>
+
+VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
+	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }}) {
+
+	// ==================== TEXTURE setup =================================================
+
+	// upload texture
+	int texWidth, texHeight, texChannels;
+    stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
+	blockTexture = createImage(pixels, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+	stbi_image_free(pixels);
+	        
+	// create layout
+	DescriptorLayoutBuilder layoutBuilder;
+	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+	blockTextureDescriptorSetLayout = layoutBuilder.build(VK_SHADER_STAGE_FRAGMENT_BIT);
+	blockTextureDescriptor = descriptorAllocator.allocate(blockTextureDescriptorSetLayout);
+
+	// create sampler
+	VkSamplerCreateInfo samplerInfo{};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	vkCreateSampler(VulkanInstance::get().getDevice(), &samplerInfo, nullptr, &blockTextureSampler);
+
+	// write descriptor
+	DescriptorWriter writer;
+	writer.writeImage(0, blockTexture.imageView, blockTextureSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+	writer.updateSet(VulkanInstance::get().getDevice(), blockTextureDescriptor);        
+
+	// ==================== PIPELINE setup =================================================
+	
 	// load shaders
 	VkShaderModule blockVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.vert.spv"));
 	VkShaderModule blockFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/block.frag.spv"));
 	VkShaderModule wireVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/wire.vert.spv"));
 	VkShaderModule wireFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/wire.frag.spv"));
-
-	// create graphic pipelines
+	
 	PipelineInformation blockPipelineInfo{};
 	blockPipelineInfo.vertShader = blockVertShader;
 	blockPipelineInfo.fragShader = blockFragShader;
@@ -19,6 +52,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass) {
 	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
 	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
 	blockPipelineInfo.pushConstantSize = sizeof(ViewPushConstants);
+	blockPipelineInfo.descriptorSets.push_back(blockTextureDescriptorSetLayout);
 	blockPipeline = std::make_unique<Pipeline>(blockPipelineInfo);
 	
 	PipelineInformation wirePipelineInfo{};
@@ -37,6 +71,12 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass) {
 	destroyShaderModule(wireFragShader);
 }
 
+VulkanChunkRenderer::~VulkanChunkRenderer() {
+	destroyImage(blockTexture);
+	vkDestroySampler(VulkanInstance::get().getDevice(), blockTextureSampler, nullptr);
+	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), blockTextureDescriptorSetLayout, nullptr);
+}
+
 void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	frame.getChunkAllocations().insert(frame.getChunkAllocations().begin(), chunks.begin(), chunks.end());
@@ -51,7 +91,7 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, c
 	scissor.extent = {static_cast<uint32_t>(viewport.width), static_cast<uint32_t>(viewport.height)};
 	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
 	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
-	
+        
 	// block drawing pass
 	{
 		// bind render pipeline
@@ -60,6 +100,9 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, c
 		// bind push constants
 		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
 
+		// bind texture descriptor
+		vkCmdBindDescriptorSets(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 0, 1, &blockTextureDescriptor, 0, nullptr);                
+                
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {
 				
