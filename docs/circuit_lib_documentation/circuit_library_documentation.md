@@ -97,6 +97,27 @@ One key thing to note is that the two input binary numbers (P31 ... P0) and (Q31
 
 Registers are the fastest type of "memory" on a computer.  Obviously it isnt true memory like SRAM or DRAM but it does store information and replaces it upon clock tics.  Registers are the direct piece of hardware used for feeding information into components such as an ALU because of how fast they are.  Additionally, registers are used for microcontroller peripherals such as for the use of a timer.
 
+### Basic Register
+
+This register only has CLR functionality and loads on a clock ege.  On a rising clock edge the reigster will load in whatever the input is and return it as the output.  This is useful for for computer since it allows for operations to be performed on a clock edge.  One thing to watch out for is ensuring that the clock edge does not trigger too quickly or else unknown behavior may occur.
+
+Pin Usage
+
+CLK - A RISING edge (Low -> High) triggers the register to read in the current input and hold as its output until the next clock cycle.
+CLR - When input is high the register clears its current output to 0s.  This is useful on startup for ensuring registers do not contain bad data.
+(P0 - P7) - The byte to load into the register.  P0 is the least significant bit and P7 is the most significant.
+(Q0 - Q7) - This is the output byte of the register.  Note that Q0 becomes the state of P0 on a rising edge while Qn becomes the state of Pn on the clock egde.
+
+Circuit Implementation:
+
+![image](https://github.com/user-attachments/assets/a1424d35-accb-4c4f-b54b-24967bde6f38)
+
+
+Pinout on IC:
+
+![image](https://github.com/user-attachments/assets/83f3a2c1-0c07-47aa-884e-188719bc4aae)
+
+
 ### Shift Register
 
 This compoenent is a special register which acts like a normal register loading in data on a clock pulse but also has the ability to shift the output bits of the register.  This application is useful for things like counting or for serial communication hardware such as UART which transmits one bit at a time between microcontrollers.  This chip has a variety of inputs so a list will be given below of what each input does.
