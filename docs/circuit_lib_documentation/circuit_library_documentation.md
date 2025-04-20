@@ -110,12 +110,14 @@ CLR - When input is high the register clears its current output to 0s.  This is 
 
 Circuit Implementation:
 
-![image](https://github.com/user-attachments/assets/a1424d35-accb-4c4f-b54b-24967bde6f38)
+![image](https://github.com/user-attachments/assets/438246fe-f033-45a6-a170-f115df1a97af)
+
 
 
 Pinout on IC:
 
-![image](https://github.com/user-attachments/assets/83f3a2c1-0c07-47aa-884e-188719bc4aae)
+![image](https://github.com/user-attachments/assets/e4b62f58-4d1d-4dda-ab32-7effe3ad73c0)
+
 
 
 ### Shift Register
