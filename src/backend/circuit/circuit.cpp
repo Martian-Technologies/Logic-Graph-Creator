@@ -2,6 +2,13 @@
 #include "logging/logging.h"
 #include "parsedCircuit.h"
 
+Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
+	circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+	dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
+	dataUpdateEventReceiver.linkFunction("preBlockDataSetConnection", std::bind(&Circuit::addConnectionPort, this, std::placeholders::_1));
+	dataUpdateEventReceiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Circuit::removeConnectionPort, this, std::placeholders::_1));
+}
+
 bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
@@ -113,12 +120,12 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 
 bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit) {
 	if (!parsedCircuit.isValid()) return false;
-	
-	Vector totalOffset(0,0);
+
+	Vector totalOffset(0, 0);
 	// if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
 	if (!customCircuit) {
-	    // this is only relevent for finding offset for given position, generally from mouse position
-	    totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
+		// this is only relevent for finding offset for given position, generally from mouse position
+		totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
 	}
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
@@ -126,7 +133,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 		}
 	}
 	logInfo("all blocks can be placed");
-	
+
 	std::unordered_map<block_id_t, block_id_t> realIds;
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		Position targetPos = block.pos.snap() + totalOffset;
@@ -152,7 +159,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
 		if (!tryCreateConnection(output, input)) {
-			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]","", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
 	return true;
@@ -202,23 +209,17 @@ bool Circuit::tryRemoveConnection(const Position& outputPosition, const Position
 }
 
 bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
-	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
-	const Block* inputBlock = blockContainer.getBlock(inputConnectionEnd.getBlockId());
-	if (!outputBlock || !inputBlock) return false;
-	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
-	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
-	if (!outputOut.second || !inputOut.second) return false;
-	return tryCreateConnection(outputOut.first, inputOut.first);
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	bool out = blockContainer.tryCreateConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
+	sendDifference(difference);
+	return out;
 }
 
 bool Circuit::tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
-	const Block* outputBlock = blockContainer.getBlock(outputConnectionEnd.getBlockId());
-	const Block* inputBlock =  blockContainer.getBlock(inputConnectionEnd.getBlockId());
-	if (!outputBlock || !inputBlock) return false;
-	std::pair<Position, bool> outputOut = outputBlock->getConnectionPosition(outputConnectionEnd.getConnectionId());
-	std::pair<Position, bool> inputOut = inputBlock->getConnectionPosition(inputConnectionEnd.getConnectionId());
-	if (!outputOut.second || !inputOut.second) return false;
-	return tryRemoveConnection(outputOut.first, inputOut.first);
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	bool out = blockContainer.tryRemoveConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
+	sendDifference(difference);
+	return out;
 }
 
 bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
@@ -360,7 +361,7 @@ void Circuit::redo() {
 			blockContainer.tryCreateConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
 			break;
 		case Difference::MOVE_BLOCK:
-		moveModification = std::get<Difference::move_modification_t>(modification.second);
+			moveModification = std::get<Difference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<1>(moveModification), newDifference.get());
 			break;
 		case Difference::SET_DATA:
@@ -378,15 +379,13 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		logError("eventData passed was null", "Circuit");
 		return;
 	}
-	
 	auto data = eventData->cast<std::pair<BlockType, Vector>>();
 	if (!data) {
 		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
 		return;
 	}
-	BlockType type = data->get().first;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	blockContainer.resizeBlockType(type, data->get().second, difference.get());
+	blockContainer.resizeBlockType(data->get().first, data->get().second, difference.get());
 	sendDifference(difference);
 }
 
@@ -395,6 +394,35 @@ void Circuit::setBlockType(BlockType blockType) {
 	blockContainer.getBlockDataManager()->getBlockData(blockType)->setName(getCircuitNameNumber());
 }
 
+void Circuit::addConnectionPort(const DataUpdateEventManager::EventData* eventData) {
+	if (!eventData) {
+		logError("eventData passed was null", "Circuit");
+		return;
+	}
+	auto data = eventData->cast<std::pair<BlockType, connection_end_id_t>>();
+	if (!data) {
+		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		return;
+	}
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.addConnectionPort(data->get().first, data->get().second, difference.get());
+	sendDifference(difference);
+}
+
+void Circuit::removeConnectionPort(const DataUpdateEventManager::EventData* eventData) {
+	if (!eventData) {
+		logError("eventData passed was null", "Circuit");
+		return;
+	}
+	auto data = eventData->cast<std::pair<BlockType, connection_end_id_t>>();
+	if (!data) {
+		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		return;
+	}
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.removeConnectionPort(data->get().first, data->get().second, difference.get());
+	sendDifference(difference);
+}
 
 void Circuit::setCircuitName(const std::string& name) {
 	circuitName = name;

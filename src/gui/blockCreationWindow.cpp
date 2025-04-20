@@ -209,6 +209,9 @@ void BlockCreationWindow::resetMenu() {
 		row->AppendChild(std::move(positionOnBlockY))->SetClass("connection-list-item-on-block-y", true);
 		row->AppendChild(std::move(positionX))->SetClass("connection-list-item-pos-x", true);
 		row->AppendChild(std::move(positionY))->SetClass("connection-list-item-pos-y", true);
+		// remove row button
+		// Rml::Factory::CreateTextNode(row.get(), "-");
+		// other data
 		row->SetClass("connection-list-item", true);
 		row->SetId("ConnectionListItem Id: " + std::to_string(endId));
 		list->AppendChild(std::move(row));
