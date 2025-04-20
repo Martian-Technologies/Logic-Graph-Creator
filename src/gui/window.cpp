@@ -10,15 +10,14 @@
 #include "gui/menuBar/menuManager.h"
 #include "gui/circuitView/simControlsManager.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
 	// Rml::Debugger::Initialise(rmlContext);
 	// Rml::Debugger::SetVisible(true);
-	rmlDocument = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
-	// show rmlUi document
-	rmlDocument->Show();
+	renderer.activateRml(renderInterface);
+	rmlDocument = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
@@ -36,7 +35,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
-
+	
 	// menu bar with file, edit, view ...
 
 	// TabsManager* tabsManager = new TabsManager(document);	
@@ -44,6 +43,9 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager) : sdlWi
 
 	// status of sim
 	// SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);
+
+	// show rmlUi document
+	rmlDocument->Show();
 }
 
 Window::~Window() {

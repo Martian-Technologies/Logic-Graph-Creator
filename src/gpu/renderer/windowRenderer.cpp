@@ -150,8 +150,12 @@ void WindowRenderer::recreateSwapchain() {
 	swapchainRecreationNeeded = false;
 }
 
-void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
+void WindowRenderer::activateRml(RmlRenderInterface& renderInterface) {
 	renderInterface.pointToRenderer(&subrenderer->getRmlRenderer());
+}
+
+void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
+	activateRml(renderInterface);
 	subrenderer->getRmlRenderer().prepareForRmlRender();
 }
 void WindowRenderer::endRml() {

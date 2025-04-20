@@ -23,7 +23,8 @@ public:
 
 public:
 	void resize(std::pair<uint32_t, uint32_t> windowSize);
-	
+
+	void activateRml(RmlRenderInterface& renderInterface);
 	void prepareForRml(RmlRenderInterface& renderInterface);
 	void endRml();
 

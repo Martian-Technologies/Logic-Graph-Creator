@@ -1,7 +1,7 @@
 #include "app.h"
 
 App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
-	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager));
+	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager, rmlRenderInterface));
 }
 
 void App::runLoop() {
