@@ -37,8 +37,8 @@ file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.qrc"
 )
 
-option(GATALITY_BUILD_APP ON)
-option(GATALITY_BUILD_TESTS OFF)
+option(GATALITY_BUILD_APP "Build Gatality App" ON)
+option(GATALITY_BUILD_TESTS "Build Gatality Tests" OFF)
 
 # ======================================= SHARED DEPENDENCY SETUP ========================================
 
