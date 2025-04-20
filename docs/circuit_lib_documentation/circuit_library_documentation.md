@@ -108,13 +108,13 @@ CLR - When input is high the register clears its current output to 0s.  This is 
 (P0 - P7) - The byte to load into the register.  P0 is the least significant bit and P7 is the most significant.
 (Q0 - Q7) - This is the output byte of the register.  Note that Q0 becomes the state of P0 on a rising edge while Qn becomes the state of Pn on the clock egde.
 
-Circuit Implementation:
+#### Circuit Implementation:
 
 ![image](https://github.com/user-attachments/assets/438246fe-f033-45a6-a170-f115df1a97af)
 
 
 
-Pinout on IC:
+#### Pinout on IC:
 
 ![image](https://github.com/user-attachments/assets/e4b62f58-4d1d-4dda-ab32-7effe3ad73c0)
 
