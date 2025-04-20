@@ -15,7 +15,7 @@
 class CircuitViewWidget {
 public:
 	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent, SDL_Window* window, SDL_Renderer* sdlRenderer);
-	~CircuitViewWidget() { parent->RemoveEventListener("keydown", &keybindHandler); }
+	~CircuitViewWidget() { document->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
