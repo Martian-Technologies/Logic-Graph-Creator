@@ -167,7 +167,9 @@ A table outlining which opecode performs which operation is outlined in the tabl
 | Opcode Number | Opcode bits (S3 - S0) | Operation | Explanation |
 | ------------- | ------------- | ------------- | ------------- |
 |  0  | (0000) | Addtion | This performs the operation (R7 - R0) = (P7 - P0) + (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.
-| 1 | (0001) | Equals | This performs the operation (R7 - R0) = (P7 - P0) == (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.  The == sign performs a bitwise (NXOR) or comparison.  For exampke, is (P7 - P0) = (00011100) and (Q7 - Q0) = (01001000) then the output (R7 - R0) will be (10101011).  This is useful to check if bytes are equal since if bytes are equal then the result will be all 1s.
+| 1 | (0001) | Bitewise Equals | This performs the operation (R7 - R0) = (P7 - P0) == (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.  The == sign performs a bitwise (NXOR) or comparison.  For exampke, is (P7 - P0) = (00011100) and (Q7 - Q0) = (01001000) then the output (R7 - R0) will be (10101011).  This is useful to check if bytes are equal since if bytes are equal then the result will be all 1s.
+| 2 | (0010) | Move | This simply sets (R7 - R0) to the input (P7 - P0)
+| 3 | (0011) | Bitwise AND | This performs the operation (R7 - R0) = (P7 - P0) & (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.  This is useful for bitmasking registers within a PC.  An example of this is (P7 - P0) = (11100011) and (Q7 - Q0) = (10011001) results in (R7 - R0) = (10000001).
 
 
 
