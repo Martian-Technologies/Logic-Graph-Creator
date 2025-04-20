@@ -171,6 +171,20 @@ A table outlining which opecode performs which operation is outlined in the tabl
 | 2 | (0010) | Move | This simply sets (R7 - R0) to the input (P7 - P0)
 | 3 | (0011) | Bitwise AND | This performs the operation (R7 - R0) = (P7 - P0) & (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.  This is useful for bitmasking registers within a PC.  An example of this is (P7 - P0) = (11100011) and (Q7 - Q0) = (10011001) results in (R7 - R0) = (10000001).
 
+#### Circuit Implementation
+
+In this image the addition operation is utilized.  As is seen the input (P7 - P0) = (0001 0100) = (20) and (Q7 - Q0) = (0001 1000) = (24).  Therefore the output should be (20 + 24 = 44) = (0010 1100) which as seen in the figure provided.
+
+![image](https://github.com/user-attachments/assets/a8100516-a115-45aa-9041-04bbd4287033)
+
+#### IC Documentation
+
+This is the circuit in IC form with the pinout shown below.
+
+![image](https://github.com/user-attachments/assets/59720cf5-cc96-4b3a-b831-2dcddef5b4ef)
+
+
+
 
 
 
