@@ -181,7 +181,8 @@ In this image the addition operation is utilized.  As is seen the input (P7 - P0
 
 This is the circuit in IC form with the pinout shown below.
 
-![image](https://github.com/user-attachments/assets/42c56c34-dd95-41dd-8cb4-1a6b568f6f17)
+![image](https://github.com/user-attachments/assets/02174750-36a4-4397-b378-072f85c8ae1a)
+
 
 
 
