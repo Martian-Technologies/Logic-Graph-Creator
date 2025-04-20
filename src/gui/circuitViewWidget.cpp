@@ -59,14 +59,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	rendererInterface->linkToWindowRenderer(windowRenderer);
 	
 	// create keybind shortcuts and connect them
-	element->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
-	// keybindHandler.addListener(
-	// 	Rml::Input::KeyIdentifier::KI_D,
-	// 	Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
-	// 	[this]() {
-	// 		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), 0);
-	// 	}
-	// );
+	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,
