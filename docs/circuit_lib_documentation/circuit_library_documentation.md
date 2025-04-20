@@ -101,7 +101,7 @@ Registers are the fastest type of "memory" on a computer.  Obviously it isnt tru
 
 This register only has CLR functionality and loads on a clock ege.  On a rising clock edge the reigster will load in whatever the input is and return it as the output.  This is useful for for computer since it allows for operations to be performed on a clock edge.  One thing to watch out for is ensuring that the clock edge does not trigger too quickly or else unknown behavior may occur.
 
-Pin Usage
+#### Pin Usage
 
 CLK - A RISING edge (Low -> High) triggers the register to read in the current input and hold as its output until the next clock cycle.
 CLR - When input is high the register clears its current output to 0s.  This is useful on startup for ensuring registers do not contain bad data.
@@ -124,7 +124,7 @@ CLR - When input is high the register clears its current output to 0s.  This is 
 
 This compoenent is a special register which acts like a normal register loading in data on a clock pulse but also has the ability to shift the output bits of the register.  This application is useful for things like counting or for serial communication hardware such as UART which transmits one bit at a time between microcontrollers.  This chip has a variety of inputs so a list will be given below of what each input does.
 
-Pin Usage
+#### Pin Usage
 
 CLK - On rising or falling edge triggers either a load, shift or nothing depending on S0 and S1.
 EN - Must be high in order for the register to work correctly
@@ -137,6 +137,38 @@ RI - Set this input to high if a 1 should replace R7 on a right shift.
 NOTE* : if (P7 .. P0) = (00111010) and (S1, S0) = (11) when a clock edge triggers, then (R7 .. R0) -> (00111010)
 
 ![image](https://github.com/user-attachments/assets/2ee9653f-c27f-46b2-a01e-ef3fdb835831)
+
+
+## ALU's
+
+### Overview
+
+ALUs are ICs that take in an input and perform bitwise calculations to generate an output.  ALUs also take in an additional byte to perform mathematical operations.  The different "Select Pins" on the ALU select which operation is performed.  These operations can vary from bitwise logical operations, addition, subtraction, multiplication and others.
+
+### Basic ALU (8-bit)
+
+This is the default ALU.  ** Note : This IC is still a work in progress so additional operations should be added to the ALU.  When operations are added this documentation should be updated! **.  This default ALU currently supports addition, bitwise comparion, bitwise OR, and a move operation.  The operations listed in the table below depend the combination of select pins are enabled.
+
+#### Pin Usage
+
+| Pin Number | Explanation |
+| ---------- | ----------- |
+| (P0 - P7)  | This is the first byte of the input to the ALU with P0 being the least significant bit input and P7 being the most significant bit |
+| (Q0 - Q7)  | This is the second byte of input with Q0 again being the least significant bit |
+| (R0 - R7)  | This is the output byte of the ALU with the operations performed on (P0 - P7) and (Q0 - Q7). |
+| (S0 - S3)  | The select bits for which operation is selected.  Each operation is listed in the table below |
+
+#### Operation Opcodes
+
+The ALU takes in what are known as opcodes through the select bits.  These opcodes decide which operation is output by the ALU.
+
+A table outlining which opecode performs which operation is outlined in the table below.  When these opcodes are updated these new opcodes should be updated here in the library.
+
+| Opcode Number | Opcode bits (S3 - S0) | Operation | Explanation |
+| ------------- | ------------- | ------------- | ------------- |
+|  0  | (0000) | Addtion | This performs the operation (R7 - R0) = (P7 - P0) + (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.
+| 1 | (0001) | Equals | This performs the operation (R7 - R0) = (P7 - P0) == (Q7 - Q0) where (R7 - R0) is the byte represented by bits (R7 - R0) with R7 being the most significant bit and R0 being the last.  The == sign performs a bitwise (NXOR) or comparison.  For exampke, is (P7 - P0) = (00011100) and (Q7 - Q0) = (01001000) then the output (R7 - R0) will be (10101011).  This is useful to check if bytes are equal since if bytes are equal then the result will be all 1s.
+
 
 
 
