@@ -5,8 +5,6 @@
 #include <chrono>
 #include <glm/ext/matrix_float4x4.hpp>
 
-#include "gpu/vulkanBuffer.h"
-
 struct VulkanChunkAllocation;
 struct RmlGeometryAllocation;
 struct RmlTexture;
@@ -18,9 +16,6 @@ public:
 
 	void start();
 	float waitAndComplete();
-
-	inline AllocatedBuffer& getViewDataBuffer() { return viewDataBuffer; }
-	inline VkDescriptorSet& getViewDataDescriptorSet() { return viewDataDescriptorSet; }
 
 	inline VkCommandPool& getCommandPool() { return commandPool; };
 	inline VkCommandBuffer& getMainCommandBuffer() { return mainCommandBuffer; };
@@ -38,9 +33,6 @@ private:
 	VkCommandBuffer mainCommandBuffer;
 	VkSemaphore swapchainSemaphore, renderSemaphore;
 	VkFence renderFence;
-
-	AllocatedBuffer viewDataBuffer; // buffer for storing view matrix which is pointed to by descriptor
-	VkDescriptorSet viewDataDescriptorSet;
 
 	// dynamically changing data
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;

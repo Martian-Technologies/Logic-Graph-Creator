@@ -32,10 +32,6 @@ private:
 	unsigned int numIndices;
 };
 
-struct RmlPushConstants {
-	glm::vec2 translation;
-};
-
 // ============================= RML TEXTURES ===================================
 class RmlTexture {
 public:
@@ -79,15 +75,20 @@ typedef std::variant<RmlDrawInstruction, RmlSetScissorInstruction, RmlEnableScis
 
 // ========================= RML RENDERER ====================================
 
+struct RmlPushConstants {
+	glm::mat4 pixelViewMat;
+	glm::vec2 translation;
+};
+
 class RmlRenderer {
 public:
-	RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout);
+	RmlRenderer(VkRenderPass& renderPass);
 	~RmlRenderer();
 
 	void prepareForRmlRender();
 	void endRmlRender();
 
-	void render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDescriptorSet viewDataSet);
+	void render(VulkanFrameData& frame, VkExtent2D windowExtent);
 	
 public:
 	// -- Rml::RenderInterface --
@@ -105,13 +106,14 @@ private:
 	std::unique_ptr<Pipeline> untexturedPipeline;
 	std::unique_ptr<Pipeline> texturedPipeline;
 
-	// geometry
+	// geometry allocations
 	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
 	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlGeometryAllocation>> geometryAllocations;
 
-	// textures
+	// texture allocations
 	Rml::TextureHandle currentTextureHandle = 1;
 	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlTexture>> textures;
+	
 	// texture descriptor
 	DescriptorAllocator descriptorAllocator;
 	VkDescriptorSetLayout singleImageDescriptorSetLayout;

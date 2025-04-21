@@ -35,8 +35,6 @@ VulkanFrameData::VulkanFrameData() {
 }
 
 VulkanFrameData::~VulkanFrameData() {
-	destroyBuffer(viewDataBuffer);
-	
 	vkDestroyCommandPool(VulkanInstance::get().getDevice(), commandPool, nullptr);
 
 	vkDestroyFence(VulkanInstance::get().getDevice(), renderFence, nullptr);

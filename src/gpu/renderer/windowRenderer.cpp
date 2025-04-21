@@ -1,5 +1,7 @@
 #include "windowRenderer.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
@@ -20,8 +22,12 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	
 	// set up swapchain and subrenderer
 	swapchain = std::make_unique<Swapchain>(surface, windowSize);
-	subrenderer = std::make_unique<WindowSubrendererManager>(swapchain.get(), frames);
-	swapchain->createFramebuffers(subrenderer->getRenderPass());
+	createRenderPass();
+	swapchain->createFramebuffers(renderPass);
+
+	// subrenderers
+	rmlRenderer = std::make_unique<RmlRenderer>(renderPass);
+	chunkRenderer = std::make_unique<VulkanChunkRenderer>(renderPass);
 	
 	// start render loop
 	running = true;
@@ -33,8 +39,8 @@ WindowRenderer::~WindowRenderer() {
 	running = false;
 	if (renderThread.joinable()) renderThread.join();
 
-	// manual deletion (RAII blues)
-	subrenderer.reset();
+	// deletion
+	vkDestroyRenderPass(VulkanInstance::get().getDevice(), renderPass, nullptr);
 }
 
 void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
@@ -81,7 +87,7 @@ void WindowRenderer::renderLoop() {
 
 		// record command buffer
 		vkResetCommandBuffer(frame.getMainCommandBuffer(), 0);
-		subrenderer->renderCommandBuffer(frame, imageIndex);
+		renderToCommandBuffer(frame, imageIndex);
 
 		// start setting up submission
 		VkSubmitInfo submitInfo{};
@@ -139,33 +145,123 @@ void WindowRenderer::renderLoop() {
 	vkDeviceWaitIdle(device);
 }
 
+void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
+	// preparation
+	VkExtent2D windowSize = swapchain->getVkbSwapchain().extent;
+	
+	// start recording
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0; // Optional
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+	if (vkBeginCommandBuffer(frame.getMainCommandBuffer(), &beginInfo) != VK_SUCCESS) {
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	// begin render pass
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
+	renderPassInfo.clearValueCount = 1;
+	VkClearValue clearColor = {0.69f * 1.3478f, 0.69f * 1.3478f, 0.69f * 1.3478f, 1.0f};
+	renderPassInfo.pClearValues = &clearColor;
+	
+	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// do actual rendering...
+	{
+		// viewports
+		std::lock_guard<std::mutex> lock(viewportRenderersMux);
+		for (ViewportRenderInterface* viewportRenderer : viewportRenderInterfaces) {
+			ViewportViewData viewData = viewportRenderer->getViewData();
+			chunkRenderer->render(frame, viewData.viewport, viewData.viewportViewMat, viewportRenderer->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
+		}
+		
+		// rml rendering
+		rmlRenderer->render(frame, windowSize);
+	}
+
+	// end render pass
+	vkCmdEndRenderPass(frame.getMainCommandBuffer());
+	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
+void WindowRenderer::createRenderPass() {
+	// render pass
+	VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	// subpass
+	VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+	// subpass dependency
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	// create pass
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+	
+	if (vkCreateRenderPass(VulkanInstance::get().getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
+	}
+}
+
 void WindowRenderer::recreateSwapchain() {
 	vkDeviceWaitIdle(device);
 	
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 
 	swapchain->recreate(surface, windowSize);
-	swapchain->createFramebuffers(subrenderer->getRenderPass());
+	swapchain->createFramebuffers(renderPass);
 	
 	swapchainRecreationNeeded = false;
 }
 
 void WindowRenderer::activateRml(RmlRenderInterface& renderInterface) {
-	renderInterface.pointToRenderer(&subrenderer->getRmlRenderer());
+	renderInterface.pointToRenderer(rmlRenderer.get());
 }
 
 void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
 	activateRml(renderInterface);
-	subrenderer->getRmlRenderer().prepareForRmlRender();
+	rmlRenderer->prepareForRmlRender();
 }
 void WindowRenderer::endRml() {
-	subrenderer->getRmlRenderer().endRmlRender();
+	rmlRenderer->endRmlRender();
 }
 
 void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
-	subrenderer->registerViewportRenderInterface(renderInterface);
+	std::lock_guard<std::mutex> lock(viewportRenderersMux);
+	viewportRenderInterfaces.insert(renderInterface);
 }
 
 void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
-	subrenderer->deregisterViewportRenderInterface(renderInterface);
+	std::lock_guard<std::mutex> lock(viewportRenderersMux);
+	viewportRenderInterfaces.erase(renderInterface);
 }

@@ -4,7 +4,8 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
 
-#include "gpu/renderer/windowSubrendererManager.h"
+#include "gpu/renderer/subrenderers/vulkanChunkRenderer.h"
+#include "gpu/renderer/viewportRenderInterface.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
 #include "vulkanFrame.h"
@@ -32,6 +33,8 @@ public:
 	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
 
 private:
+	void renderToCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);
+	void createRenderPass();
 	void recreateSwapchain();
 	
 private:
@@ -39,16 +42,22 @@ private:
 	VkDevice device;
 	std::atomic<bool> running = false;
 
+	// size
+	std::pair<uint32_t, uint32_t> windowSize;
+	std::mutex windowSizeMux;
+	
 	// main vulkan
 	VkSurfaceKHR surface;
 	std::unique_ptr<Swapchain> swapchain = nullptr;
 	std::atomic<bool> swapchainRecreationNeeded = false;
-	std::unique_ptr<WindowSubrendererManager> subrenderer = nullptr;
+	VkRenderPass renderPass;
 
-	// size
-	std::pair<uint32_t, uint32_t> windowSize;
-	std::mutex windowSizeMux;
-
+	// subrenderers
+	std::unique_ptr<RmlRenderer> rmlRenderer = nullptr;
+	std::unique_ptr<VulkanChunkRenderer> chunkRenderer = nullptr;
+	std::set<ViewportRenderInterface*> viewportRenderInterfaces;
+	std::mutex viewportRenderersMux;
+	
 	// frames
 	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)
 	int frameNumber = 0;

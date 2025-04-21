@@ -2,12 +2,9 @@
 
 layout( push_constant ) uniform PushConstants
 {
+	mat4 pixelView;
 	vec2 translation;
 } push;
-
-layout (set = 0, binding = 0) uniform ViewData {
-	mat4 pixelView;
-} view;
 
 layout (location = 0) in vec2 inPosition;
 layout (location = 1) in vec4 inColor;
@@ -20,5 +17,5 @@ void main() {
 	fragTexCoord = inTexCoord;
 	fragColor = inColor;
 	
-    gl_Position = view.pixelView * vec4(inPosition + push.translation, 0, 1);
+    gl_Position = push.pixelView * vec4(inPosition + push.translation, 0, 1);
 }

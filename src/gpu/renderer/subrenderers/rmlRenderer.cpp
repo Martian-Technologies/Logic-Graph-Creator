@@ -4,7 +4,9 @@
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
 #include "gpu/vulkanShader.h"
-#include "stb_image.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <stb_image.h>
 
 std::vector<VkVertexInputBindingDescription> RmlVertex::getBindingDescriptions() {
 	std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -78,9 +80,9 @@ RmlTexture::~RmlTexture() {
 
 // ================================= RML RENDERER ==================================================
 
-RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLayout)
-	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }}) {
-	
+RmlRenderer::RmlRenderer(VkRenderPass& renderPass)
+	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f }}) {
+
 	// set up image descriptor
 	DescriptorLayoutBuilder layoutBuilder;
 	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
@@ -101,11 +103,10 @@ RmlRenderer::RmlRenderer(VkRenderPass& renderPass, VkDescriptorSetLayout viewLay
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
 	rmlPipelineInfo.pushConstantSize = sizeof(RmlPushConstants);
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rmlPipelineInfo.descriptorSets.push_back(viewLayout); // descriptor set 0 (view info)
 	untexturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
 	// textured
 	rmlPipelineInfo.fragShader = rmlFragShaderTextured;
-	rmlPipelineInfo.descriptorSets.push_back(singleImageDescriptorSetLayout); // descriptor set 1 (texture image)
+	rmlPipelineInfo.descriptorSets.push_back(singleImageDescriptorSetLayout); // descriptor set 0 (texture image)
 	texturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
 
 	// destroy shaders
@@ -129,7 +130,7 @@ void RmlRenderer::endRmlRender() {
 	renderInstructions = std::move(tempRenderInstructions);
 }
 
-void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDescriptorSet viewDataSet) {
+void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 	VkCommandBuffer cmd = frame.getMainCommandBuffer();
 	
 	// set viewport state
@@ -160,7 +161,7 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 	Pipeline* currentPipeline = untexturedPipeline.get();
 	
 	// set up shared push constants data
-	RmlPushConstants pushConstants{ glm::vec2(0.0f, 0.0f) };
+	RmlPushConstants pushConstants{ glm::ortho(0.0f, (float)extent.width, 0.0f, (float)extent.height), glm::vec2(0.0f, 0.0f) };
 
 	// go through and do render instructions
 	std::lock_guard<std::mutex> lock(rmlInstructionMux);
@@ -181,13 +182,11 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent, VkDesc
 				
 				// bind untextured pipeline
 				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->getHandle());
-				// upload view data descriptor
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->getLayout(), 0, 1, &viewDataSet, 0, nullptr);
 			}
 
 			// bind texture descriptor if needed
 			if (texturedDraw) {
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 1, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 0, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
 			}
 	
 			// upload push constants
