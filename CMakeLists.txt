@@ -63,7 +63,6 @@ if (GATALITY_BUILD_APP)
 		set(SDL_UNIX_CONSOLE_BUILD ON)
 	endif()
 	add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
-	add_subdirectory("${EXTERNAL_DIR}/SDL_image" SYSTEM EXCLUDE_FROM_ALL)
 
 	# STB Image
 	set(GATALITY_STB_IMAGE_LIB_NAME "stb_image")
