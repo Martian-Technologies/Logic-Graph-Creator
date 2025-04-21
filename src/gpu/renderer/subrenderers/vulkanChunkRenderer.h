@@ -73,7 +73,7 @@ public:
 	VulkanChunkRenderer(VkRenderPass& renderPass);
 	~VulkanChunkRenderer();
 	
-	void render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
+	void render(VulkanFrameData& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
 	std::unique_ptr<Pipeline> blockPipeline = nullptr;

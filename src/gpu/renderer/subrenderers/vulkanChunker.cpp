@@ -364,10 +364,6 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 			// get line distance (squared) for moving to horizontal (y) chunk edge
 			f_cord_t verticalTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChangeForVertical * xChangeForVertical);
 
-			if (verticalTravelCost > 50 || horizontalTravelCost > 50) {
-				logInfo("AAAH");
-			}
-
 			moveHorizontal = horizontalTravelCost < verticalTravelCost;
 		}
 

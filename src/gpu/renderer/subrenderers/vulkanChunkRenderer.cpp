@@ -77,20 +77,13 @@ VulkanChunkRenderer::~VulkanChunkRenderer() {
 	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), blockTextureDescriptorSetLayout, nullptr);
 }
 
-void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	frame.getChunkAllocations().insert(frame.getChunkAllocations().begin(), chunks.begin(), chunks.end());
 
 	// shared push constants
 	ChunkPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
-
-	// shared dynamic state
-	VkRect2D scissor{};
-	scissor.offset = {static_cast<int32_t>(viewport.x), static_cast<int32_t>(viewport.y)};
-	scissor.extent = {static_cast<uint32_t>(viewport.width), static_cast<uint32_t>(viewport.height)};
-	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
-	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewport);
         
 	// block drawing pass
 	{
