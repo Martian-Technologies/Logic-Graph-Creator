@@ -27,8 +27,6 @@ public:
 	ViewportViewData getViewData();
 	inline VulkanChunker& getChunker() { return chunker; }
 	
-	void render(VulkanFrameData& frame);
-	
 public:
 	// main flow
 	void setCircuit(Circuit* circuit) override;

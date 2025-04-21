@@ -33,8 +33,6 @@ set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 # Find source files
 file(GLOB_RECURSE PROJECT_SOURCES
 		"${SOURCE_DIR}/*.cpp"
-		"${SOURCE_DIR}/*.ui"
-		"${SOURCE_DIR}/*.qrc"
 )
 
 option(GATALITY_BUILD_APP "Build Gatality App" ON)
