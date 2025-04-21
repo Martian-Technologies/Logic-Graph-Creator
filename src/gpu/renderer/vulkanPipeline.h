@@ -4,6 +4,12 @@
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 
+struct PushConstantDescription {
+	size_t size;
+	size_t offset;
+	VkShaderStageFlags stage;
+};
+
 struct PipelineInformation {
 	VkRenderPass renderPass;
 	VkShaderModule vertShader, fragShader;
@@ -11,7 +17,7 @@ struct PipelineInformation {
 	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
 	VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE;
 
-	std::optional<size_t> pushConstantSize;
+	std::vector<PushConstantDescription> pushConstants;
 	std::vector<VkDescriptorSetLayout> descriptorSets;
 };
 

@@ -103,16 +103,18 @@ Pipeline::Pipeline(const PipelineInformation& info) {
 	pipelineLayoutInfo.setLayoutCount = info.descriptorSets.size();
 	if (!info.descriptorSets.empty()) pipelineLayoutInfo.pSetLayouts = info.descriptorSets.data();
 
-	// push constant (optional)
-	if (info.pushConstantSize.has_value()) {
+	// push constants (optional)
+	std::vector<VkPushConstantRange> pushConstants;
+	for (auto& push : info.pushConstants) {
 		VkPushConstantRange pushConstant{};
-		pushConstant.offset = 0;
-		pushConstant.size = info.pushConstantSize.value();
-		pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+		pushConstant.offset = push.offset;
+		pushConstant.size = push.size;
+		pushConstant.stageFlags = push.stage;
+
+		pushConstants.push_back(pushConstant);
 	}
+	pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+	pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 	
 	// create pipeline layout
 	if (vkCreatePipelineLayout(VulkanInstance::get().getDevice(), &pipelineLayoutInfo, nullptr, &layout) != VK_SUCCESS) {

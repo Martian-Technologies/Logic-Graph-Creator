@@ -101,7 +101,7 @@ RmlRenderer::RmlRenderer(VkRenderPass& renderPass)
 	rmlPipelineInfo.renderPass = renderPass;
 	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
-	rmlPipelineInfo.pushConstantSize = sizeof(RmlPushConstants);
+	rmlPipelineInfo.pushConstants.push_back({sizeof(RmlPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	untexturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
 	// textured

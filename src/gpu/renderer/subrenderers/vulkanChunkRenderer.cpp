@@ -51,7 +51,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	blockPipelineInfo.renderPass = renderPass;
 	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
 	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
-	blockPipelineInfo.pushConstantSize = sizeof(ChunkPushConstants);
+	blockPipelineInfo.pushConstants.push_back({sizeof(ChunkPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
 	blockPipelineInfo.descriptorSets.push_back(blockTextureDescriptorSetLayout);
 	blockPipeline = std::make_unique<Pipeline>(blockPipelineInfo);
 	
@@ -61,7 +61,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	wirePipelineInfo.renderPass = renderPass;
 	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
 	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
-	wirePipelineInfo.pushConstantSize = sizeof(ChunkPushConstants);
+	wirePipelineInfo.pushConstants.push_back({sizeof(ChunkPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
 	wirePipeline = std::make_unique<Pipeline>(wirePipelineInfo);
 
 	// destroy shader modules since we won't be recreating pipelines

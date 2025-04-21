@@ -7,8 +7,7 @@ layout (location = 0) out vec4 outColor;
 
 layout( push_constant ) uniform constants
 {
-	mat4 iMvp;
-	float gridFade;
+	layout(offset = 64) float gridFade;
 } push;
 
 // background constants
