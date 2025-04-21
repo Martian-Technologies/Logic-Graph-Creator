@@ -17,6 +17,14 @@ void DirectoryManager::findDirectories() {
 		return;
 	}
 
+	// check for resources directory relative to executable's parent
+	std::filesystem::path relativeToExecutableParent = getExecutablePath().parent_path().parent_path() / "resources";
+	if (std::filesystem::exists(relativeToExecutableParent)) {
+		resourceDirectory = relativeToExecutableParent;
+		logInfo("Found resource directory at ({})", "", resourceDirectory.string());
+		return;
+	}
+
 	// check relative to macOS bundle
 	std::filesystem::path relativeToBundle = getBundlePath().parent_path() / "resources";
 	if (std::filesystem::exists(relativeToBundle)) {
@@ -29,7 +37,7 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToWorkingDirectory = "resources";
 	if (std::filesystem::exists(relativeToWorkingDirectory)) {
 		resourceDirectory = relativeToWorkingDirectory;
-		logInfo("Found resource directory at ({})", "", resourceDirectory.string());
+		logWarning("Found resource directory strictly relative to working directory, this is probably not intended.", "", resourceDirectory.string());
 		return;
 	}
 	

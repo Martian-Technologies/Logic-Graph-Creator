@@ -8,9 +8,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Build Config
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 if (MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG")
 	# hack to avoid DNDEBUG which removes wires for some reason
@@ -32,9 +29,7 @@ set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 
 # Find source files
 file(GLOB_RECURSE PROJECT_SOURCES
-		"${SOURCE_DIR}/*.cpp"
-		"${SOURCE_DIR}/*.ui"
-		"${SOURCE_DIR}/*.qrc"
+	"${SOURCE_DIR}/*.cpp"
 )
 
 option(GATALITY_BUILD_APP "Build Gatality App" ON)
@@ -62,6 +57,7 @@ if (GATALITY_BUILD_APP)
 	if (GATALITY_BUILD_TESTS) # hack to allow SDL to build without window system on linux
 		set(SDL_UNIX_CONSOLE_BUILD ON)
 	endif()
+	set(SDL_STATIC ON)
 	add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
 
 	# STB Image
