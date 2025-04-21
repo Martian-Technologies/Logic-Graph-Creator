@@ -12,6 +12,7 @@ vec2 positions[6] = vec2[](
 layout( push_constant ) uniform constants
 {
 	mat4 iMvp;
+	float gridFade;
 } push;
 
 layout(location = 0) out vec2 screenCord;

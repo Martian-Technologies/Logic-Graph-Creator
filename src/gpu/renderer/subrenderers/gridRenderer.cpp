@@ -21,9 +21,13 @@ GridRenderer::GridRenderer(VkRenderPass& renderPass) {
 	destroyShaderModule(gridFragShader);
 }
 
-void GridRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix) {
+constexpr float gridFadeOutDistance = 160.0f;
+constexpr float gridFadeOutWidth = 60.0f;
+
+void GridRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix, float viewScale) {
 	// invert the view matrix to get the right coordinates for the grid in the shader
-	GridPushConstants pushConstants { glm::inverse(viewMatrix) };
+	float gridFade = std::clamp(1.0f - ((viewScale - gridFadeOutDistance) * (1.0f / gridFadeOutWidth)), 0.0f, 1.0f);
+	GridPushConstants pushConstants { glm::inverse(viewMatrix), gridFade};
 
 	// bind pipeline
 	vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, gridPipeline->getHandle());

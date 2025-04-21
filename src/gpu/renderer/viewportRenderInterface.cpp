@@ -53,6 +53,8 @@ void ViewportRenderInterface::updateView(ViewManager* viewManager) {
 	FPosition bottomRight = viewManager->getBottomRight();
 	viewData.viewportViewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
 	viewData.viewBounds = { topLeft, bottomRight };
+
+	viewData.viewScale = viewManager->getViewScale();
 }
 
 void ViewportRenderInterface::updateCircuit(DifferenceSharedPtr diff) {

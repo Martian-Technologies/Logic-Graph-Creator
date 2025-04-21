@@ -13,6 +13,7 @@ struct WindowRenderer;
 struct ViewportViewData {
 	glm::mat4 viewportViewMat;
 	std::pair<FPosition, FPosition> viewBounds;
+	float viewScale;
 	VkViewport viewport;
 };
 

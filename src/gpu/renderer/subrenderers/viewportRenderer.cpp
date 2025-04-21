@@ -17,6 +17,6 @@ void ViewportRenderer::render(VulkanFrameData& frame, ViewportRenderInterface* v
 	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
 
 	// render subrenderers
-	gridRenderer.render(frame, viewData.viewportViewMat);
+	gridRenderer.render(frame, viewData.viewportViewMat, viewData.viewScale);
 	chunkRenderer.render(frame, viewData.viewportViewMat, viewport->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
 }
