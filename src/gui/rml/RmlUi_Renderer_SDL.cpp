@@ -31,7 +31,7 @@
 #include <RmlUi/Core/FileInterface.h>
 #include <RmlUi/Core/Types.h>
 
-#include <SDL3_image/SDL_image.h>
+#include <stb_image.h>
 
 static void SetRenderClipRect(SDL_Renderer* renderer, const SDL_Rect* rect)
 {
@@ -120,60 +120,12 @@ void RenderInterface_SDL::SetScissorRegion(Rml::Rectanglei region)
 
 Rml::TextureHandle RenderInterface_SDL::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
-	Rml::FileInterface* file_interface = Rml::GetFileInterface();
-	Rml::FileHandle file_handle = file_interface->Open(source);
-	if (!file_handle)
-		return {};
-
-	file_interface->Seek(file_handle, 0, SEEK_END);
-	size_t buffer_size = file_interface->Tell(file_handle);
-	file_interface->Seek(file_handle, 0, SEEK_SET);
-
-	using Rml::byte;
-	Rml::UniquePtr<byte[]> buffer(new byte[buffer_size]);
-	file_interface->Read(buffer.get(), buffer_size, file_handle);
-	file_interface->Close(file_handle);
-
-	const size_t i_ext = source.rfind('.');
-	Rml::String extension = (i_ext == Rml::String::npos ? Rml::String() : source.substr(i_ext + 1));
-
-	auto CreateSurface = [&]() { return IMG_LoadTyped_IO(SDL_IOFromMem(buffer.get(), int(buffer_size)), 1, extension.c_str()); };
-	auto GetSurfaceFormat = [](SDL_Surface* surface) { return surface->format; };
-	auto ConvertSurface = [](SDL_Surface* surface, SDL_PixelFormat format) { return SDL_ConvertSurface(surface, format); };
-	auto DestroySurface = [](SDL_Surface* surface) { SDL_DestroySurface(surface); };
-
-	SDL_Surface* surface = CreateSurface();
-	if (!surface)
-		return {};
-
-	texture_dimensions = {surface->w, surface->h};
-
-	if (GetSurfaceFormat(surface) != SDL_PIXELFORMAT_RGBA32 && GetSurfaceFormat(surface) != SDL_PIXELFORMAT_BGRA32)
-	{
-		SDL_Surface* converted_surface = ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
-		DestroySurface(surface);
-		if (!converted_surface)
-			return {};
-
-		surface = converted_surface;
-	}
-
-	// Convert colors to premultiplied alpha, which is necessary for correct alpha compositing.
-	const size_t pixels_byte_size = surface->w * surface->h * 4;
-	byte* pixels = static_cast<byte*>(surface->pixels);
-	for (size_t i = 0; i < pixels_byte_size; i += 4)
-	{
-		const byte alpha = pixels[i + 3];
-		for (size_t j = 0; j < 3; ++j)
-			pixels[i + j] = byte(int(pixels[i + j]) * int(alpha) / 255);
-	}
-
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-	texture_dimensions = Rml::Vector2i(surface->w, surface->h);
-	DestroySurface(surface);
-
-	if (texture)
-		SDL_SetTextureBlendMode(texture, blend_mode);
+	int texWidth, texHeight, texChannels;
+	stbi_uc* pixels = stbi_load(source.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+	SDL_UpdateTexture(texture, 0, pixels, texWidth * 4);
+	SDL_SetTextureBlendMode(texture, blend_mode);
+	stbi_image_free(pixels);
 
 	return (Rml::TextureHandle)texture;
 }

@@ -63,8 +63,12 @@ if (GATALITY_BUILD_APP)
 		set(SDL_UNIX_CONSOLE_BUILD ON)
 	endif()
 	add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
-	add_subdirectory("${EXTERNAL_DIR}/SDL_image" SYSTEM EXCLUDE_FROM_ALL)
 
+	# STB Image
+	set(GATALITY_STB_IMAGE_LIB_NAME "stb_image")
+	add_library(${GATALITY_STB_IMAGE_LIB_NAME} INTERFACE)
+	target_include_directories(${GATALITY_STB_IMAGE_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/stb/")
+	
 	# Freetype
 	add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
 	add_library(Freetype::Freetype ALIAS freetype)
@@ -102,11 +106,11 @@ if (GATALITY_BUILD_APP)
 		RmlUi::RmlUi
 		RmlUi::Debugger
 		SDL3::SDL3
-		SDL3_image-static
 		cpplocate::cpplocate
 		VulkanMemoryAllocator
 		glm
 		${GATALITY_JSON_LIB_NAME}
+		${GATALITY_STB_IMAGE_LIB_NAME}
 	)
 
 	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
