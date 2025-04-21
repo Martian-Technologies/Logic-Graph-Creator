@@ -51,7 +51,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	blockPipelineInfo.renderPass = renderPass;
 	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
 	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
-	blockPipelineInfo.pushConstantSize = sizeof(ViewPushConstants);
+	blockPipelineInfo.pushConstantSize = sizeof(ChunkPushConstants);
 	blockPipelineInfo.descriptorSets.push_back(blockTextureDescriptorSetLayout);
 	blockPipeline = std::make_unique<Pipeline>(blockPipelineInfo);
 	
@@ -61,7 +61,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	wirePipelineInfo.renderPass = renderPass;
 	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
 	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
-	wirePipelineInfo.pushConstantSize = sizeof(ViewPushConstants);
+	wirePipelineInfo.pushConstantSize = sizeof(ChunkPushConstants);
 	wirePipeline = std::make_unique<Pipeline>(wirePipelineInfo);
 
 	// destroy shader modules since we won't be recreating pipelines
@@ -82,7 +82,7 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, c
 	frame.getChunkAllocations().insert(frame.getChunkAllocations().begin(), chunks.begin(), chunks.end());
 
 	// shared push constants
-	ViewPushConstants pushConstants{};
+	ChunkPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
 
 	// shared dynamic state
@@ -98,7 +98,7 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, c
 		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
 
 		// bind texture descriptor
 		vkCmdBindDescriptorSets(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 0, 1, &blockTextureDescriptor, 0, nullptr);                
@@ -123,7 +123,7 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, VkViewport& viewport, c
 		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), wirePipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ViewPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.getMainCommandBuffer(), wirePipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
 
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getWireBuffer().has_value()) {

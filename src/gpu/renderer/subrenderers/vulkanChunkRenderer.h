@@ -3,17 +3,12 @@
 
 #include "gpu/renderer/vulkanFrame.h"
 #include "gpu/renderer/vulkanPipeline.h"
-#include "backend/circuit/circuit.h"
 #include "gpu/vulkanDescriptor.h"
 #include "gpu/vulkanImage.h"
 #include "vulkanChunker.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-
-struct ViewPushConstants {
-	glm::mat4 mvp;
-};
 
 struct BlockVertex {
 	glm::vec2 pos;
@@ -67,6 +62,10 @@ struct WireVertex {
 
 		return attributeDescriptions;
 	}
+};
+
+struct ChunkPushConstants {
+	glm::mat4 mvp;
 };
 
 class VulkanChunkRenderer {

@@ -4,7 +4,7 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
 
-#include "gpu/renderer/subrenderers/vulkanChunkRenderer.h"
+#include "gpu/renderer/subrenderers/viewportRenderer.h"
 #include "gpu/renderer/viewportRenderInterface.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
@@ -54,7 +54,9 @@ private:
 
 	// subrenderers
 	std::unique_ptr<RmlRenderer> rmlRenderer = nullptr;
-	std::unique_ptr<VulkanChunkRenderer> chunkRenderer = nullptr;
+	std::unique_ptr<ViewportRenderer> viewportRenderer = nullptr;
+
+	// connected viewport render interfaces
 	std::set<ViewportRenderInterface*> viewportRenderInterfaces;
 	std::mutex viewportRenderersMux;
 	

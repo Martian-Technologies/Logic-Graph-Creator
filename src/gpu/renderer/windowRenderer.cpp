@@ -1,7 +1,5 @@
 #include "windowRenderer.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
@@ -27,7 +25,7 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 
 	// subrenderers
 	rmlRenderer = std::make_unique<RmlRenderer>(renderPass);
-	chunkRenderer = std::make_unique<VulkanChunkRenderer>(renderPass);
+	viewportRenderer = std::make_unique<ViewportRenderer>(renderPass);
 	
 	// start render loop
 	running = true;
@@ -175,9 +173,8 @@ void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imag
 	{
 		// viewports
 		std::lock_guard<std::mutex> lock(viewportRenderersMux);
-		for (ViewportRenderInterface* viewportRenderer : viewportRenderInterfaces) {
-			ViewportViewData viewData = viewportRenderer->getViewData();
-			chunkRenderer->render(frame, viewData.viewport, viewData.viewportViewMat, viewportRenderer->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
+		for (ViewportRenderInterface* viewport : viewportRenderInterfaces) {
+			viewportRenderer->render(frame, viewport);
 		}
 		
 		// rml rendering
