@@ -5,6 +5,7 @@
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/EventListener.h>
 
+
 class MenuManager;
 
 class MenuBarListener : public Rml::EventListener {

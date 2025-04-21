@@ -1,5 +1,6 @@
 #include "menuManager.h"
 #include "gui/menuBar/menuBarListener.h"
+#include "gui/interaction/eventPasser.h"
 
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/ElementUtilities.h>
@@ -8,7 +9,8 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Types.h>
 
-MenuManager::MenuManager(Rml::ElementDocument* context) : context(context) {
+
+MenuManager::MenuManager(Rml::ElementDocument* context, SettingsWindow* settingsWindow) : context(context), settingsWindow(settingsWindow) {
 	Rml::Element* element = context->GetElementById("menu-bar");
 	if(element) Initialize(element);
 }
@@ -21,7 +23,11 @@ void MenuManager::Initialize(Rml::Element* element) {
 
 	for (size_t i = 0; i < items.size(); ++i) {
 		Rml::Element* item = items[i];
-		item->AddEventListener("click", new MenuBarListener(this, static_cast<int>(i)));
+		item->AddEventListener("click", new EventPasser(
+			[this, i](Rml::Event& event) {
+				triggerEvent(i);
+			}
+		));
 	}
 }
 
@@ -32,7 +38,7 @@ void MenuManager::triggerEvent(const int item) {
 
 	switch(item) {
 		case 0: logInfo("0"); break;
-		case 1: logInfo("1"); break;
+		case 1: logInfo("10"); break;
 		case 2: logInfo("2"); break;
 		case 3: logInfo("3"); break;
 		case 4: logInfo("4"); break;
@@ -40,9 +46,14 @@ void MenuManager::triggerEvent(const int item) {
 		case 6: logInfo("6"); break;
 		case 7: logInfo("7"); break;
 		case 8: logInfo("8"); break;
+		case 9: logInfo("9"); break;
 		default: logWarning("mistake with added item src/gui/menuBar/menuManager.cpp"); break;
 		// test for rcsergjwefg
 	}
+}
+
+void MenuManager::App(const int action) {
+	// helloojjgfdgjgj	
 }
 
 void MenuManager::File() {

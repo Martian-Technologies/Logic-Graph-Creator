@@ -6,6 +6,7 @@
 		<link type="text/template" href="templates/menuBar.rml"/>
 		<link type="text/template" href="templates/blockCreation.rml"/>
 		<link type="text/template" href="templates/simulationControlsBar.rml"/>
+		<link type="text/template" href="templates/settingsWindow.rml"/>
 	</head>
 
 	<body>
@@ -45,5 +46,10 @@
 				</div>
 			</div>
 		</div>
+
+		<div id="settings-overlay" class="invisible">
+			<template src="settings-window"></template>
+		</div>
+
 	</body>
 </rml>

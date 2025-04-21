@@ -8,6 +8,7 @@
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuManager.h"
 #include "gui/circuitView/simControlsManager.h"
+#include "gui/settingsWindow/settingsWindow.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), pinchEventId(pinchEventId) {
 	// create SDL renderer
@@ -42,7 +43,6 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, blockCreationMenu);
 
 	// menu bar with file, edit, view ...
-	// MenuManager* menuManager = new MenuManager(document);
 
 	// TabsManager* tabsManager = new TabsManager(document);	
 	// TabsManager* tabsManager = new TabsManager(document);	
@@ -50,6 +50,13 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	// status of sim
 	// SimControlsManager* simControlsManager = new SimControlsManager(document);
 	//terst
+	//
+	//
+
+	SettingsWindow* settingsWindow = new SettingsWindow(document);
+
+
+	MenuManager* menuManager = new MenuManager(document, settingsWindow);
 }
 
 Window::~Window() {

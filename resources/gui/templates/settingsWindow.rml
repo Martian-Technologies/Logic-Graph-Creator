@@ -1,0 +1,12 @@
+<template name="settings-window" content="content">
+	<head>
+		<link type="text/rcss" href="../styles/settingsWindow.rcss"/>
+	</head>
+
+	<body>
+
+		<h1>Settings</h1>
+
+	</body>
+
+</template>
