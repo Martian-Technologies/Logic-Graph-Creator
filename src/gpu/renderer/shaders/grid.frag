@@ -9,7 +9,7 @@ vec3 bgCol = vec3(0.69f * 1.3478f, 0.69f * 1.3478f, 0.69f * 1.3478f);
 float gradientIntensity = 0.1;
 
 vec3 gridCol = vec3(0.89, 0.878, 0.878);
-float gridLineWidth = 0.07;
+float gridLineWidth = 0.1;
 
 float grid(vec2 cord, float spacing) {
 	vec2 lineAA = fwidth(cord * spacing);
