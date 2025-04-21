@@ -14,11 +14,11 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 
 	// upload texture
 	int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
 	blockTexture = createImage(pixels, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 	stbi_image_free(pixels);
-	        
+
 	// create layout
 	DescriptorLayoutBuilder layoutBuilder;
 	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
