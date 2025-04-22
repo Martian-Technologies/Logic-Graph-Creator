@@ -71,7 +71,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 	importedFiles.insert(path);
 	logInfo("Parsing Gatality Circuit File (.cir)", "GatalityParser");
 
-	std::ifstream inputFile(path);
+	std::ifstream inputFile(path, std::ios::in | std::ios::binary);
 	if (!inputFile.is_open()) {
 		logError("Couldn't open file at path: " + path, "GatalityParser");
 		return false;
@@ -164,11 +164,10 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 				inputFile >> cToken >> portCount >> cToken;
 				inputFile >> cToken;
 			}
-			int lineStart;
 			while (true) {
-				lineStart = inputFile.tellg();
-				inputFile >> cToken;
-				if (cToken != '(') break;
+				inputFile >> std::ws;
+				if (inputFile.peek() != '(') break;
+				inputFile.get();
 				connection_end_id_t endId;
 				cord_t vecX, vecY;
 				std::string portName = "";
@@ -179,7 +178,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 				}
 				outParsed->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, portName);
 			}
-			inputFile.seekg(lineStart);
 		} else if (token == "UUID:") {
 			std::string uuid;
 			inputFile >> uuid;
@@ -227,11 +225,10 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 				int numConns;
 				inputFile >> numConns;
 			}
-			int lineStart;
 			while (true) {
-				lineStart = inputFile.tellg();
-				inputFile >> cToken;
-				if (cToken != '(') break;
+				inputFile >> std::ws;
+				if (inputFile.peek() != '(') break;
+				inputFile.get();
 				inputFile >> cToken >> cToken >> cToken >> cToken >> cToken >> cToken >> cToken >> connId >> cToken; // (connId:x)
 				std::string line;
 				std::getline(inputFile, line);
@@ -250,7 +247,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 					});
 				}
 			}
-			inputFile.seekg(lineStart);
 		}
 	}
 	outParsed->setAbsoluteFilePath(path);

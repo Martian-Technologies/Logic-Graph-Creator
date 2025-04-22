@@ -229,24 +229,19 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 	for (auto& pair : blocks) {
 		Block& block = pair.second;
 		if (block.type() != blockType) continue;
-
 		bool isInput = block.isConnectionInput(endId);
+		auto [connectionPosition, success] = block.getConnectionPosition(endId);
+		if (!success) continue;
 		const std::vector<ConnectionEnd>* connections = block.getConnectionContainer().getConnections(endId);
 		if (!connections) continue;
 		for (auto& connectionEnd : *connections) {
-			auto [connectionPosition, success] = block.getConnectionPosition(connectionEnd.getConnectionId());
-			if (!success) continue;
-			const std::vector<ConnectionEnd>* otherConnections = block.getConnectionContainer().getConnections(connectionEnd.getConnectionId());
-			if (!otherConnections) continue;
-			for (auto& otherConnectionEnd : *otherConnections) {
-				Block* otherBlock = getBlock_(otherConnectionEnd.getBlockId());
-				if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(otherConnectionEnd.getConnectionId(), ConnectionEnd(block.id(), connectionEnd.getConnectionId()))) {
-					assert(block.getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(otherBlock->id(), otherConnectionEnd.getConnectionId())));
-					auto [otherPosition, otherSuccess] = otherBlock->getConnectionPosition(otherConnectionEnd.getConnectionId());
-					if (!otherSuccess) continue;
-					if (isInput) difference->addRemovedConnection(otherBlock->getPosition(), otherPosition, block.getPosition(), connectionPosition);
-					else difference->addRemovedConnection(block.getPosition(), connectionPosition, otherBlock->getPosition(), otherPosition);
-				}
+			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
+			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), endId))) {
+				assert(block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd));
+				auto [otherPosition, otherSuccess] = otherBlock->getConnectionPosition(connectionEnd.getConnectionId());
+				if (!otherSuccess) continue;
+				if (isInput) difference->addRemovedConnection(otherBlock->getPosition(), otherPosition, block.getPosition(), connectionPosition);
+				else difference->addRemovedConnection(block.getPosition(), connectionPosition, otherBlock->getPosition(), otherPosition);
 			}
 		}
 	}

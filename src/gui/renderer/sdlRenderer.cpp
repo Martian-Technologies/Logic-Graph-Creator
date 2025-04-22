@@ -1,8 +1,9 @@
-#include <SDL3_image/SDL_image.h>
+#include "sdlRenderer.h"
+
+#include <stb_image.h>
 
 #include "backend/evaluator/logicState.h"
 #include "backend/address.h"
-#include "sdlRenderer.h"
 #include "util/vec2.h"
 
 inline bool SDL_SetRenderDrawColor(SDL_Renderer* renderer, const SDL_Color* color) {
@@ -175,8 +176,12 @@ SdlRenderer::SdlRenderer(SDL_Renderer* sdlRenderer) : sdlRenderer(sdlRenderer), 
 
 void SdlRenderer::initializeTileSet(const std::string& filePath) {
 	if (filePath != "") {
-		tileSet = IMG_LoadTexture(sdlRenderer, filePath.c_str());
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load(filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		tileSet = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+		SDL_UpdateTexture(tileSet, 0, pixels, texWidth * 4);
 		SDL_SetTextureBlendMode(tileSet, SDL_BLENDMODE_BLEND);
+		stbi_image_free(pixels);
 
 		if (!tileSet) {
 			logError("TileSet image could not be loaded from file: {}", "SdlRenderer", filePath);
