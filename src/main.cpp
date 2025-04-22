@@ -1,7 +1,9 @@
+#include <SDL3/SDL_main.h>
+
 #include "computerAPI/directoryManager.h"
 #include "app.h"
 
-int main(int argc, char* argv[]) {
+int SDL_main(int argc, char* argv[]) {
 	try {
 		// Set up directory manager
 		DirectoryManager::findDirectories();
