@@ -159,14 +159,13 @@ if (GATALITY_BUILD_APP)
 		get_filename_component(copied_resource_dir "${copied_resource}" DIRECTORY)
 
 		# Custom command which makes the parent directory and copies the resource
-
-	add_custom_command(
-		TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${RESOURCES_DIR}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources"
-		COMMENT "Copying entire resources directory after build"
-	)
-
+		add_custom_command(
+			OUTPUT "${copied_resource}"
+			COMMAND "${CMAKE_COMMAND}" -E make_directory "${copied_resource_dir}"
+			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${original_resource}" "${copied_resource}"
+			DEPENDS "${original_resource}"
+			COMMENT "Copying resource: ${resource_path_relative}"
+		)
 
 		list(APPEND RESOURCE_FILES_COPIED "${copied_resource}")
 	endforeach()
