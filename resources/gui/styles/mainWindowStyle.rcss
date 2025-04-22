@@ -157,15 +157,16 @@ tabset panels panel {
 /* Settings Window */
 #settings-overlay {
 	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
-	display: flex;
+	top:    10%;
+	left:   10%;
+	width:  80%;
+	height: 80%;
+	background-color: #ff0000; 
+	display: flex !important;
+	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	z-index: 1000; /* higher than anything else */
+	z-index: 1000;
 }
 
 .invisible {

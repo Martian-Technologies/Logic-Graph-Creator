@@ -12,9 +12,9 @@
 	<body>
 		<div id="main-container">
 
-			<!-- <div id="top-container">
+			<div id="top-container">
 				<template src="menuBar"></template>
-			</div> -->
+			</div>
 
 			<div id="middle-container">
 				<div id="left-sidebar-container">
@@ -45,11 +45,10 @@
 					<div id="circuitview-container"> </div>
 				</div>
 			</div>
-		</div>
 
-		<div id="settings-overlay" class="invisible">
-			<template src="settings-window"></template>
+			<div id="settings-overlay" class="invisible">
+				<template src="settings-window"></template>
+			</div>
 		</div>
-
 	</body>
 </rml>

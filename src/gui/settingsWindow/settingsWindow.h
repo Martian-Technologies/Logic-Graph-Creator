@@ -8,7 +8,7 @@ public:
 	SettingsWindow(Rml::ElementDocument* document);
 	~SettingsWindow();
 
-	void setVisibility(bool visiblity);
+	void toggleVisibility();
 	bool getVisibility() const;
 
 private:

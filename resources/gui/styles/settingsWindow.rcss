@@ -1,0 +1,90 @@
+
+
+/* left side */
+#settings-navigation {
+	width: 40%;
+	height: 100%;
+	background-color: #403f3c;
+	overflow: auto;
+	flex-direction: column;
+}
+
+/* top */
+h1 {
+	font-size: 18dp;
+	padding: 10dp;
+}
+
+#settings-search {
+	width: 80%;
+	left: 10%;
+	font-size: 14dp;
+	border-radius: 6dp;
+	border: 1dp;
+	border-color: #ccc;
+	box-sizing: border-box;
+	margin-top: 20dp;
+}
+
+/* mid */
+#navigation-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 4dp;
+	margin-top: 20dp;
+	height: 60%;
+}
+.nav-item {
+	padding: 10dp 12dp;
+	font-size: 14dp;
+	cursor: pointer;
+	border-left: 4dp solid transparent; /* placeholder for blue stripe */
+	transition: background-color 0.2s ease, border-left-color 0.2s ease;
+}
+
+.nav-item:hover {
+	background-color: #4f4f4d; /* light gray on hover */
+	border-left-width: 20px;
+	border-left-color: #0078d4; /* Windows blue */
+}
+
+/* bottom */
+#settings-actions {
+	position: absolute;
+	bottom: 20dp;
+	left: 0;
+	right: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	gap: 12dp;
+	padding: 10dp 0;
+	box-sizing: border-box;
+	background-color: transparent; /* or set a background if needed */
+}
+
+.settings-action-buttons {
+	padding: 8dp 16dp;
+	font-size: 8dp;
+	border-radius: 6dp;
+	border: 1dp;
+	border: #aaa;
+	background-color: #3d3d3d;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.settings-action-buttons:hover {
+	background-color: #4f4f4d;
+}
+
+/* right side */
+#settings-content-panel {
+	width: 60%;
+	height: 100%;
+	background-color:#0f0f0f;
+	overflow: auto;
+}
+
+
+

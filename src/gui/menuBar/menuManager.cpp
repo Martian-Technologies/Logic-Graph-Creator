@@ -1,5 +1,4 @@
 #include "menuManager.h"
-#include "gui/menuBar/menuBarListener.h"
 #include "gui/interaction/eventPasser.h"
 
 #include <RmlUi/Core/Event.h>
@@ -37,8 +36,8 @@ void MenuManager::triggerEvent(const int item) {
 	// menu items from top to bottom represent numbers, i.e. first item in "file" is 0, second is 1, first items in "edit" are file.size + 1
 
 	switch(item) {
-		case 0: logInfo("0"); break;
-		case 1: logInfo("10"); break;
+		case 0: App(0); break;
+		case 1: logInfo("1"); break;
 		case 2: logInfo("2"); break;
 		case 3: logInfo("3"); break;
 		case 4: logInfo("4"); break;
@@ -53,7 +52,10 @@ void MenuManager::triggerEvent(const int item) {
 }
 
 void MenuManager::App(const int action) {
-	// helloojjgfdgjgj	
+	switch(action) {
+		case 0: settingsWindow->toggleVisibility();
+		default: break;
+	}
 }
 
 void MenuManager::File() {
