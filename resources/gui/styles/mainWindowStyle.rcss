@@ -67,6 +67,7 @@ body {
 /* Left Sidebar Styles */
 
 #left-sidebar-container {
+	height: 100%;
 	flex-shrink: 0;
 	flex-basis: 20rem;
 	background-color: #1d1d1d;

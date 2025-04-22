@@ -65,9 +65,17 @@ public:
 
 	// -- setters --
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
+	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
+	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
+	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
+	// Sets up connection containers to have the new end id
+	void addConnectionPort(BlockType blockType, connection_end_id_t endId, Difference* difference);
+	// Remove all connects and set connection containers to not have the end id
+	void removeConnectionPort(BlockType blockType, connection_end_id_t endId, Difference* difference);
 
 	/* ----------- iterators ----------- */
 	// not safe if the container gets modifided (dont worry about it for now)

@@ -6,7 +6,6 @@
 #include "interaction/menuTree.h"
 #include "backend/tools/toolManagerManager.h"
 
-
 class CircuitManager;
 class CircuitViewWidget;
 

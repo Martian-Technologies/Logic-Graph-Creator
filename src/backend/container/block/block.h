@@ -41,8 +41,7 @@ public:
 	}
 	inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) const {
 		auto output = blockDataManager->getConnectionVector(type(), getRotation(), connectionId);
-		if (output.second) return { getPosition() + output.first, true };
-		return { Position(), false };
+		return {output.second ? (getPosition() + output.first) : Position(), output.second};
 	}
 	inline bool isConnectionInput(connection_end_id_t connectionId) const { return blockDataManager->isConnectionInput(type(), connectionId); }
 
