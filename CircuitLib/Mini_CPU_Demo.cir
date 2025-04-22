@@ -1,4 +1,4 @@
-version_5
+version_6
 import "SimpleRegister.cir"
 import "FourBitDecoder.cir"
 import "SimpleALU.cir"

@@ -22,12 +22,13 @@
 				<div id="connection-menu">
 					<div>
 						<div id="connection-list-add">Add</div>
-						<div id="connection-list-remove">Remove</div>
 					</div>
 					<div id="connection-list"></div>
 				</div>
-				<span id="reset-block-creation" class="">Reset</span>
-				<span id="update-block-creation" class="">Update</span>
+				<div>
+					<div id="reset-block-creation" class="">Reset</div>
+					<div id="update-block-creation" class="">Update</div>
+				</div>
 			</div>
 		</div>
 	</body>

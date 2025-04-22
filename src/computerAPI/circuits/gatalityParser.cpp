@@ -71,7 +71,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 	importedFiles.insert(path);
 	logInfo("Parsing Gatality Circuit File (.cir)", "GatalityParser");
 
-	std::ifstream inputFile(path);
+	std::ifstream inputFile(path, std::ios::in | std::ios::binary);
 	if (!inputFile.is_open()) {
 		logError("Couldn't open file at path: " + path, "GatalityParser");
 		return false;
@@ -84,7 +84,9 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 	inputFile >> token;
 
 	unsigned int version;
-	if (token == "version_5") {
+	if (token == "version_6") {
+		version = 6;
+	} else if (token == "version_5") {
 		version = 5;
 	} else if (token == "version_4") {
 		version = 4;
@@ -100,7 +102,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 	std::string blockTypeStr;
 	BlockType blockType;
 	Rotation rotation; // loaded from Rotation type and stored as degrees in ParsedCircuit
-	int numConns;
 
 	while (inputFile >> token) {
 		if (token == "import") {
@@ -156,18 +157,24 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 			outParsed->setWidth(width);
 			outParsed->setHeight(height);
 			outParsed->markAsCustom();
-		} else if (token == "ports") {
+		} else if (token == "ports" || token == "ports:") {
 			outParsed->markAsCustom();
-			unsigned int portCount;
-			inputFile >> cToken >> portCount >> cToken >> cToken;
-			for (unsigned int i = 0; i < portCount; i++) {
+			if (version <= 5) {
+				unsigned int portCount;
+				inputFile >> cToken >> portCount >> cToken;
+				inputFile >> cToken;
+			}
+			while (true) {
+				inputFile >> std::ws;
+				if (inputFile.peek() != '(') break;
+				inputFile.get();
 				connection_end_id_t endId;
 				cord_t vecX, vecY;
 				std::string portName = "";
 				if (version < 5) {
-					inputFile >> cToken >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken;
+					inputFile >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken;
 				} else {
-					inputFile >> cToken >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken >> std::quoted(portName) >> cToken;
+					inputFile >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken >> std::quoted(portName) >> cToken;
 				}
 				outParsed->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, portName);
 			}
@@ -194,7 +201,6 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 			rotation = stringToRotation(token);
 
 			block_id_t currentBlockId = blockId;
-			inputFile >> numConns;
 
 			// Determine if block is a sub-circuit and make sure the conn id count is valid
 			// blockType is set as custom from the stringToBlockType by checking for quotes, this should be improved later
@@ -211,29 +217,33 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 					blockType = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuit->getCircuitId())->getBlockType();
 				}
 				BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(blockType);
-				if (numConns != blockData->getConnectionCount()) {
-					logError("Invalid conn id count for custom block, {} expecting {} for circuit {}", "GatalityParser", numConns, blockData->getConnectionCount(), circuitString);
-				}
 			}
 
 			outParsed->addBlock(blockId, { .pos = FPosition(posX, posY), .rotation = rotation, .type = blockType });
 
-			for (int i = 0; i < numConns; ++i) {
-				inputFile >> token; // (connId:x)
+			if (version <= 5) {
+				int numConns;
+				inputFile >> numConns;
+			}
+			while (true) {
+				inputFile >> std::ws;
+				if (inputFile.peek() != '(') break;
+				inputFile.get();
+				inputFile >> cToken >> cToken >> cToken >> cToken >> cToken >> cToken >> cToken >> connId >> cToken; // (connId:x)
 				std::string line;
 				std::getline(inputFile, line);
 				std::istringstream lineStream(line);
-
 				while (lineStream >> cToken) { // open paren
-					if (!(lineStream >> blockId >> connId >> cToken)) {
+					int otherConnId;
+					if (!(lineStream >> blockId >> otherConnId >> cToken)) {
 						logError("Failed to parse (blockid, connection_id) token", "GatalityParser");
 						break;
 					}
 					outParsed->addConnection({
 						static_cast<block_id_t>(currentBlockId),
-						static_cast<connection_end_id_t>(i),
+						static_cast<connection_end_id_t>(connId),
 						static_cast<block_id_t>(blockId),
-						static_cast<connection_end_id_t>(connId)
+						static_cast<connection_end_id_t>(otherConnId)
 					});
 				}
 			}
@@ -260,7 +270,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 
 	const BlockContainer* blockContainer = circuit->getBlockContainer();
 
-	outputFile << "version_5\n";
+	outputFile << "version_6\n";
 
 	// find all required imports
 	// not ideal but if we loop through from maxBlockId down then we will find all dependencies across every circuit, not just this one
@@ -289,7 +299,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 	if (circuitBlockData) {
 		BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
 		outputFile << "size: " << blockData->getSize().toString() << "\n";
-		outputFile << "ports (" << blockData->getConnectionCount() << "):\n";
+		outputFile << "ports:\n";
 		for (auto pair : blockData->getConnections()) {
 			const Position* position = circuitBlockData->getConnectionIdToPosition(pair.first);
 			block_id_t id;
@@ -320,10 +330,9 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 		const Block& block = itr->second;
 		const Position& pos = block.getPosition();
 
-		const ConnectionContainer& connectionContainer = block.getConnectionContainer();
-		connection_end_id_t connectionNum = connectionContainer.getConnectionCount();
 
 		const BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(block.type());
+		connection_end_id_t connectionNum = blockData->getConnectionCount();
 		std::string blockTypeStr;
 		if (!blockData->isPrimitive()) {
 			circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(block.type());
@@ -335,12 +344,12 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 
 		outputFile << "blockId " << itr->first << ' '
 			<< blockTypeStr << ' ' << pos.x << ' '
-			<< pos.y << ' ' << rotationToString(block.getRotation()) << ' '
-			<< connectionNum << '\n';
-		for (int j = 0; j < connectionNum; ++j) {
-			outputFile << '\t' << "(connId:" << j << ')';
-			const std::vector<ConnectionEnd>& connections = connectionContainer.getConnections(j);
-			for (const ConnectionEnd& conn : connections) {
+			<< pos.y << ' ' << rotationToString(block.getRotation()) << '\n';
+		const ConnectionContainer& connectionContainer = block.getConnectionContainer();
+
+		for (auto& connectionIter : connectionContainer.getConnections()) {
+			outputFile << '\t' << "(connId:" << connectionIter.first << ')';
+			for (const ConnectionEnd& conn : connectionIter.second) {
 				outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
 			}
 			outputFile << '\n';

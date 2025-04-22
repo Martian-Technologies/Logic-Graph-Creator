@@ -23,7 +23,6 @@ BlockCreationWindow::BlockCreationWindow(
 	// reset
 	Rml::Element* resetButton = menu->GetElementById("reset-block-creation");
 	resetButton->AddEventListener("click", new EventPasser(std::bind(&BlockCreationWindow::resetMenu, this)));
-	resetButton->AddEventListener("click", new EventPasser(std::bind(&BlockCreationWindow::resetMenu, this)));
 	// add
 	Rml::Element* addConnection = menu->GetElementById("connection-list-add");
 	addConnection->AddEventListener("click", new EventPasser(std::bind(&BlockCreationWindow::addListItem, this)));
@@ -107,6 +106,23 @@ void BlockCreationWindow::updateFromMenu() {
 	circuit->setCircuitName(name);
 	blockData->setSize(size);
 
+	std::vector<connection_end_id_t> endIdsToRemove;
+	for (auto iter : blockData->getConnections()) {
+		bool found = false;
+		for (auto port : portsData) {
+			if (std::get<0>(port) == iter.first) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			endIdsToRemove.push_back(iter.first);
+		}
+	}
+	for (connection_end_id_t endId : endIdsToRemove) {
+		blockData->removeConnection(endId);
+	}
+	
 	for (auto row : portsData) {
 		connection_end_id_t endId = std::get<0>(row);
 		std::string portName = std::get<1>(row);
@@ -166,8 +182,8 @@ void BlockCreationWindow::resetMenu() {
 		// name
 		Rml::XMLAttributes nameAttributes;
 		nameAttributes["type"] = "text";
-		nameAttributes["maxlength"] = "10";
-		nameAttributes["size"] = "10";
+		nameAttributes["maxlength"] = "5";
+		nameAttributes["size"] = "5";
 		Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
 		Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
 		nameElement->SetValue(connectionName);
@@ -209,9 +225,19 @@ void BlockCreationWindow::resetMenu() {
 		row->AppendChild(std::move(positionOnBlockY))->SetClass("connection-list-item-on-block-y", true);
 		row->AppendChild(std::move(positionX))->SetClass("connection-list-item-pos-x", true);
 		row->AppendChild(std::move(positionY))->SetClass("connection-list-item-pos-y", true);
+		// remove row button
+		Rml::ElementPtr remove = document->CreateElement("div");
+		remove->AppendChild(std::move(document->CreateTextNode("-")));
+		Rml::Element* removePtr = row->AppendChild(std::move(remove));
+		// other data
 		row->SetClass("connection-list-item", true);
 		row->SetId("ConnectionListItem Id: " + std::to_string(endId));
-		list->AppendChild(std::move(row));
+		Rml::Element* rowPtr = list->AppendChild(std::move(row));
+		removePtr->AddEventListener(Rml::EventId::Click, new EventPasser(
+			[this, rowPtr](Rml::Event& event) {
+				list->RemoveChild(rowPtr);
+			}
+		));
 	}
 }
 
@@ -235,8 +261,8 @@ void BlockCreationWindow::addListItem() {
 	// name
 	Rml::XMLAttributes nameAttributes;
 	nameAttributes["type"] = "text";
-	nameAttributes["maxlength"] = "10";
-	nameAttributes["size"] = "10";
+	nameAttributes["maxlength"] = "5";
+	nameAttributes["size"] = "5";
 	Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
 	Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
 	nameElement->SetValue("");
@@ -273,9 +299,19 @@ void BlockCreationWindow::addListItem() {
 	row->AppendChild(std::move(positionOnBlockY))->SetClass("connection-list-item-on-block-y", true);
 	row->AppendChild(std::move(positionX))->SetClass("connection-list-item-pos-x", true);
 	row->AppendChild(std::move(positionY))->SetClass("connection-list-item-pos-y", true);
+	// remove row button
+	Rml::ElementPtr remove = document->CreateElement("div");
+	remove->AppendChild(std::move(document->CreateTextNode("-")));
+	Rml::Element* removePtr = row->AppendChild(std::move(remove));
+	// other data
 	row->SetClass("connection-list-item", true);
 	row->SetId("ConnectionListItem Id: " + std::to_string(endId));
-	list->AppendChild(std::move(row));
+	Rml::Element* rowPtr = list->AppendChild(std::move(row));
+	removePtr->AddEventListener(Rml::EventId::Click, new EventPasser(
+		[this, rowPtr](Rml::Event& event) {
+			list->RemoveChild(rowPtr);
+		}
+	));
 }
 
 void BlockCreationWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree) {

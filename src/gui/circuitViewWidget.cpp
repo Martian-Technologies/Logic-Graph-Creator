@@ -28,7 +28,7 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 		std::string filePath = filePaths[0];
 		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
 		if (id == 0) {
-			logError("Error", "Failed to load circuit file.");
+			logError("Failed to load circuit file.");
 			return;
 		}
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
@@ -39,7 +39,7 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			}
 		}
 	} else {
-		std::cout << "File dialog canceled." << std::endl;
+		logInfo("File dialog canceled.");
 	}
 }
 
@@ -60,13 +60,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 
 	// create keybind shortcuts and connect them
 	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
-	// keybindHandler.addListener(
-	// 	Rml::Input::KeyIdentifier::KI_D,
-	// 	Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
-	// 	[this]() {
-	// 		circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), 0);
-	// 	}
-	// );
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,

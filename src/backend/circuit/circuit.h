@@ -18,10 +18,7 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	inline Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
-		circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
-		dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
-	}
+	Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
 
 	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
@@ -93,6 +90,8 @@ public:
 private:
 	void setBlockType(BlockType blockType);
 	void blockSizeChange(const DataUpdateEventManager::EventData* eventData);
+	void addConnectionPort(const DataUpdateEventManager::EventData* eventData);
+	void removeConnectionPort(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers
 	bool checkMoveCollision(SharedSelection selection, const Vector& movement);

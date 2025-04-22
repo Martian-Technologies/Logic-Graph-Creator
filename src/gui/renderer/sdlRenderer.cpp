@@ -1,8 +1,9 @@
-#include <SDL3_image/SDL_image.h>
+#include "sdlRenderer.h"
+
+#include <stb_image.h>
 
 #include "backend/evaluator/logicState.h"
 #include "backend/address.h"
-#include "sdlRenderer.h"
 #include "util/vec2.h"
 
 inline bool SDL_SetRenderDrawColor(SDL_Renderer* renderer, const SDL_Color* color) {
@@ -175,8 +176,12 @@ SdlRenderer::SdlRenderer(SDL_Renderer* sdlRenderer) : sdlRenderer(sdlRenderer), 
 
 void SdlRenderer::initializeTileSet(const std::string& filePath) {
 	if (filePath != "") {
-		tileSet = IMG_LoadTexture(sdlRenderer, filePath.c_str());
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load(filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		tileSet = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+		SDL_UpdateTexture(tileSet, 0, pixels, texWidth * 4);
 		SDL_SetTextureBlendMode(tileSet, SDL_BLENDMODE_BLEND);
+		stbi_image_free(pixels);
 
 		if (!tileSet) {
 			logError("TileSet image could not be loaded from file: {}", "SdlRenderer", filePath);
@@ -295,14 +300,16 @@ void SdlRenderer::render() {
 		// render connections
 		for (unsigned int i = 0; i < blocks.size(); i++) {
 			logic_state_t state = blockStates[i];
-			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
+			for (auto& connectionIter : blocks[i]->getConnectionContainer().getConnections()) {
 				// continue if input, we only want outputs
-				if (blocks[i]->isConnectionInput(id)) continue;
+				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
-				Position pos = blocks[i]->getConnectionPosition(id).first;
-				for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
-					const Block* other = circuit->getBlockContainer()->getBlock(connectionIter.getBlockId());
-					Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
+				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
+				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				if (!connections) continue;
+				for (auto otherConnectionIter : *connections) {
+					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
+					Position otherPos = other->getConnectionPosition(otherConnectionIter.getConnectionId()).first;
 					if (
 						(pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
 						(pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
@@ -355,14 +362,16 @@ void SdlRenderer::render() {
 
 		// render connections
 		for (unsigned int i = 0; i < blocks.size(); i++) {
-			for (connection_end_id_t id = 0; id < blocks[i]->getConnectionContainer().getConnectionCount(); id++) {
+			for (auto& connectionIter : blocks[i]->getConnectionContainer().getConnections()) {
 				// continue if input, we only want outputs
-				if (blocks[i]->isConnectionInput(id)) continue;
+				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
-				Position pos = blocks[i]->getConnectionPosition(id).first;
-				for (auto connectionIter : blocks[i]->getConnectionContainer().getConnections(id)) {
-					const Block* other = circuit->getBlockContainer()->getBlock(connectionIter.getBlockId());
-					Position otherPos = other->getConnectionPosition(connectionIter.getConnectionId()).first;
+				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
+				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				if (!connections) continue;
+				for (auto otherConnectionIter : *connections) {
+					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
+					Position otherPos = other->getConnectionPosition(otherConnectionIter.getConnectionId()).first;
 					if (
 						(pos.x + 2 > topLeftBound.x || otherPos.x + 2 > topLeftBound.x) &&
 						(pos.y + 2 > topLeftBound.y || otherPos.y + 2 > topLeftBound.y) &&
