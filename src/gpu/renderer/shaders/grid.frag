@@ -18,21 +18,22 @@ float gradientIntensity = 0.1;
 vec3 gridCol = vec3(0.89, 0.878, 0.878);
 vec3 bigGridCol = vec3(0.8, 0.8, 0.8);
 float gridLineWidth = 0.1;
+float bigGridLineWidth = 0.7;
 
 // thank you magic function from article
-float grid(vec2 cord, float spacing) {
+float grid(vec2 cord, float spacing, float width) {
 	vec2 lineAA = fwidth(cord * spacing);
 	vec2 lineUV = 1.0 - abs(fract(cord * spacing) * 2.0 - 1.0);
-	vec2 line2 = smoothstep(gridLineWidth * spacing + lineAA, gridLineWidth * spacing - lineAA, lineUV);
+	vec2 line2 = smoothstep(width * spacing + lineAA, width * spacing - lineAA, lineUV);
 	return mix(line2.x, 1.0, line2.y);
 }
 
 void main() {
-	float smallGrid = grid(worldCord, 1.0) * push.gridFade;
-	float bigGrid = grid(worldCord, 1.0/10.0) * push.gridFade;
-		
+	float smallGrid = grid(worldCord, 1.0, gridLineWidth) * push.gridFade;
+	float bigGrid = grid(worldCord, 1.0/10.0, mix(gridLineWidth, bigGridLineWidth, 1 - push.gridFade));
+	
 	vec3 col = mix(bgCol, gridCol, smallGrid);
-	col = mix(col, bigGridCol, bigGrid);
+	col = mix(col, mix(bigGridCol, gridCol, 1 - push.gridFade), bigGrid);
 	col *= (1.0 - length(screenCord)*gradientIntensity); // gradient
 	
 	outColor = vec4(col, 1.0f);

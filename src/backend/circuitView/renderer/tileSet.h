@@ -13,7 +13,7 @@ public:
 	inline Vec2Int getTopLeftPixel(int index, logic_state_t state) const { return Vec2Int(index * cellPixelSize.x, static_cast<unsigned char>(state) * cellPixelSize.y); }
 
 	inline Vec2 getCellUVSize() const { return cellUVSize; }
-	inline Vec2 getTopLeftUV(int index, bool state) const { return Vec2(index * cellUVSize.x, static_cast<unsigned char>(state) * cellUVSize.y); }
+	inline Vec2 getTopLeftUV(int index, int state) const { return Vec2(index * cellUVSize.x, static_cast<unsigned int>(state) * cellUVSize.y); }
 
 private:
 	Vec2Int cellPixelSize;
