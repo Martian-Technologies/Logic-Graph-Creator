@@ -32,17 +32,28 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			Vec2 uvOrigin = blockTileSet.getTopLeftUV(block.second.blockType + 1, 0);
 			Vec2 uvSize = blockTileSet.getCellUVSize();
 
-			glm::vec2 topLeftUV = {uvOrigin.x, uvOrigin.y};
-			glm::vec2 topRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y};
-			glm::vec2 bottomLeftUV = {uvOrigin.x, uvOrigin.y + uvSize.y};
-			glm::vec2 bottomRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y};
+			// glm::vec2 topLeftUV = {uvOrigin.x, uvOrigin.y};
+			// glm::vec2 topRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y};
+			// glm::vec2 bottomRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y};
+			// glm::vec2 bottomLeftUV = {uvOrigin.x, uvOrigin.y + uvSize.y};
+
+			// top left, top right, bottom right, bottom left
+			std::array<glm::vec2, 4> uvs = {
+				glm::vec2(uvOrigin.x, uvOrigin.y),
+				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y),
+				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y),
+				glm::vec2(uvOrigin.x, uvOrigin.y + uvSize.y)
+			};
+
+			// literally rotate uvs
+			std::rotate(uvs.begin(), uvs.end() - block.second.rotation, uvs.end());
 			
-			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, bottomRightUV};
-			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, bottomLeftUV};
-			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, topLeftUV};
-			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, topLeftUV};
-			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, topRightUV};
-			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, bottomRightUV};
+			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, uvs[2]};
+			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, uvs[3]};
+			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, uvs[0]};
+			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, uvs[0]};
+			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, uvs[1]};
+			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, uvs[2]};
 			blockVertices.push_back(v1);
 			blockVertices.push_back(v2);
 			blockVertices.push_back(v3);
