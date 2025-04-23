@@ -9,7 +9,9 @@ class ParsedCircuitLoader {
 public:
 	ParsedCircuitLoader(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : circuitFileManager(circuitFileManager), circuitManager(circuitManager) {}
 
-	BlockType loadParsedCircuit(SharedParsedCircuit parsedCircuit) { return circuitFileManager->loadParsedCircuit(parsedCircuit); }
+	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit, bool setSavePath) {
+        return circuitFileManager->loadParsedCircuit(parsedCircuit, setSavePath);
+    }
 
 protected:
 	CircuitManager* circuitManager;

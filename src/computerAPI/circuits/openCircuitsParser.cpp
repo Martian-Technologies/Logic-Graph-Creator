@@ -522,8 +522,9 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 				fillParsedBlock(pc, comp.first, block, &itr->second.components);
 			}
 		}
-		icD_to_blockType[icRef] = loadParsedCircuit(pc);
-		};
+        circuit_id_t id = loadParsedCircuit(pc, false);
+		icD_to_blockType[icRef] = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
+    };
 
 	for (const std::pair<int, OpenCircuitsBlockInfo*>& p : filteredBlocks) {
 		OpenCircuitsBlockInfo* block = p.second;

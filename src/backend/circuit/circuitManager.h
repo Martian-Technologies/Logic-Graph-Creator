@@ -25,12 +25,12 @@ public:
 		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}
-	inline SharedCircuit getCircuit(std::string uuid) {
+	inline SharedCircuit getCircuit(const std::string& uuid) {
 		auto iter = UUIDToCircuits.find(uuid);
 		if (iter == UUIDToCircuits.end()) return nullptr;
 		return iter->second;
 	}
-	inline const SharedCircuit getCircuit(std::string uuid) const {
+	inline const SharedCircuit getCircuit(const std::string& uuid) const {
 		auto iter = UUIDToCircuits.find(uuid);
 		if (iter == UUIDToCircuits.end()) return nullptr;
 		return iter->second;
@@ -166,6 +166,7 @@ public:
 	inline iterator end() { return circuits.end(); }
 	inline const_iterator begin() const { return circuits.begin(); }
 	inline const_iterator end() const { return circuits.end(); }
+    inline int getCircuitCount() const { return circuits.size(); }
 
 	void connectListener(void* object, CircuitDiffListenerFunction func) {
 		for (auto& [id, circuit] : circuits) {

@@ -12,14 +12,19 @@ public:
 		FileData(const FileData&) = delete;
 		FileData& operator==(const FileData&) = delete;
 		std::string fileLocation;
+        std::unordered_map<circuit_id_t, unsigned long long> circuitLastSaved;
 		std::unordered_set<circuit_id_t> circuitIds;
 	};
 
 	CircuitFileManager(CircuitManager* circuitManager);
 
-	circuit_id_t loadFromFile(const std::string& path);
-	bool saveToFile(const std::string& path, circuit_id_t circuitId);
-	bool saveCircuit(circuit_id_t circuitId);
+    std::vector<circuit_id_t> loadFromFile(const std::string& path);
+    bool saveToFile(const std::string& path, circuit_id_t circuitId);
+    bool saveCircuit(circuit_id_t circuitId);
+    bool saveAllDependencies(circuit_id_t circuitId);
+
+    bool saveAsMultiCircuitFile(const std::unordered_set<circuit_id_t>& circuits, const std::string& fileLocation);
+    bool saveAsNewProject(const std::unordered_set<circuit_id_t>& circuits, const std::string& fileLocationPrefix);
 
 	void setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation);
 	
@@ -30,13 +35,18 @@ public:
 	}
 
 private:
-	BlockType loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
+	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit, bool setSavePath) {
 		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
-		if (!parsedCircuit->isValid()) return BlockType::NONE;
+		if (!parsedCircuit->isValid()) {
+            return 0;
+        }
 		circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
-		setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
-		if (id == 0) return BlockType::NONE;
-		return circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
+        if (setSavePath) {
+            setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
+        }
+        //circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType()
+
+		return id; // 0 if circuit creation failed
 	}
 
 	CircuitManager* circuitManager;
