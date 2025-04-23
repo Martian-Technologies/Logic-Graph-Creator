@@ -35,13 +35,13 @@ public:
 	}
 
 private:
-	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit, bool setSavePath) {
+	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
 		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
 		if (!parsedCircuit->isValid()) {
             return 0;
         }
 		circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
-        if (setSavePath) {
+        if (parsedCircuit->getAbsoluteFilePath() != "") {
             setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
         }
         //circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType()

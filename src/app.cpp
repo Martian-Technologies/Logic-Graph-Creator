@@ -45,7 +45,12 @@ void App::runLoop() {
 				std::cout << file << "\n";
 				for (Window& window : windows) {
 					std::shared_ptr<CircuitViewWidget> circuitViewWidget = window.getCircuitViewWidget();
-					circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(file);
+					std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(file);
+					if (ids.empty()) {
+						logError("Error", "Failed to load circuit file.");
+						return;
+					}
+					circuit_id_t id = ids.back();
 					if (id == 0) {
 						logError("Error", "Failed to load circuit file.");
 						return;

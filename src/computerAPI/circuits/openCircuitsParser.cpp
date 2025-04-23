@@ -5,6 +5,12 @@
 
 #include "circuitFileManager.h"
 
+std::vector<circuit_id_t> OpenCircuitsParser::load(const std::string& path) {
+	SharedParsedCircuit out;
+	parse(path, out);
+	return {loadParsedCircuit(out)};
+}
+
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit) {
 	logInfo("Parsing Open Circuits File (.circuit)", "OpenCircuitsParser");
 
@@ -522,7 +528,7 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 				fillParsedBlock(pc, comp.first, block, &itr->second.components);
 			}
 		}
-        circuit_id_t id = loadParsedCircuit(pc, false);
+        circuit_id_t id = loadParsedCircuit(pc);
 		icD_to_blockType[icRef] = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
     };
 

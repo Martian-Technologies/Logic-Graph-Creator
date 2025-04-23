@@ -13,18 +13,18 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 
         std::vector<circuit_id_t> circuits = parser.load(path);
 		if (circuits.empty()) {
-			logError("No circuits were parsed from the save file from {}", "CircuitFileManager", path);
+			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
 		}
 		return circuits;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
         SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		OpenCircuitsParser parser(this, circuitManager);
-		if (!parser.parse(path, parsedCircuit)) {
-			logError("Failed to parse file", "CircuitFileManager");
-			return {};
+		std::vector<circuit_id_t> circuits = parser.load(path);
+		if (circuits.empty()) {
+			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
 		}
-        return {loadParsedCircuit(parsedCircuit, false)};
+		return circuits;
 	} else {
 		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
 	}
@@ -65,11 +65,11 @@ bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
 }
 
 bool CircuitFileManager::saveAllDependencies(circuit_id_t circuitId) {
-    const BlockContainer* bc = circuitManager->getCircuit(circuitId)->getBlockContainer();
-    const CircuitBlockDataManager* cbd = circuitManager->getCircuitBlockDataManager();
-    for (const std::pair<block_id_t, Block>& p: *bc){
+    const BlockContainer* blockContainer = circuitManager->getCircuit(circuitId)->getBlockContainer();
+    const CircuitBlockDataManager* circuitBlockDataManager = circuitManager->getCircuitBlockDataManager();
+    for (const std::pair<block_id_t, Block>& iter: *blockContainer){
         // could check if it primitive first but shouldn't need to
-        circuit_id_t id = cbd->getCircuitId(p.second.type());
+        circuit_id_t id = circuitBlockDataManager->getCircuitId(iter.second.type());
         if (id != 0) {
             if (!saveCircuit(id)) {
                 logWarning("Failed to save subcircuit: {}", "CircuitFileManager", id);

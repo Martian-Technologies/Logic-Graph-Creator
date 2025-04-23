@@ -8,9 +8,12 @@
 class ParsedCircuitLoader {
 public:
 	ParsedCircuitLoader(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : circuitFileManager(circuitFileManager), circuitManager(circuitManager) {}
+	virtual ~ParsedCircuitLoader() {}
 
-	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit, bool setSavePath) {
-        return circuitFileManager->loadParsedCircuit(parsedCircuit, setSavePath);
+	virtual std::vector<circuit_id_t> load(const std::string& path) = 0;
+
+	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
+        return circuitFileManager->loadParsedCircuit(parsedCircuit);
     }
 
 protected:
