@@ -9,21 +9,21 @@ Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, Dat
 	dataUpdateEventReceiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Circuit::removeConnectionPort, this, std::placeholders::_1));
 }
 
-bool Circuit::tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType) {
+bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryRemoveBlock(const Position& position) {
+bool Circuit::tryRemoveBlock(Position position) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveBlock(position, difference.get());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& position) {
+bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, difference.get());
 	assert(out != difference->empty());
@@ -31,7 +31,7 @@ bool Circuit::tryMoveBlock(const Position& positionOfBlock, const Position& posi
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(SharedSelection selection, const Vector& movement) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
 	if (checkMoveCollision(selection, movement)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	moveBlocks(selection, movement, difference.get());
@@ -39,7 +39,7 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, const Vector& movement) {
 	return true;
 }
 
-void Circuit::moveBlocks(SharedSelection selection, const Vector& movement, Difference* difference) {
+void Circuit::moveBlocks(SharedSelection selection, Vector movement, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -55,7 +55,7 @@ void Circuit::moveBlocks(SharedSelection selection, const Vector& movement, Diff
 	}
 }
 
-bool Circuit::checkMoveCollision(SharedSelection selection, const Vector& movement) {
+bool Circuit::checkMoveCollision(SharedSelection selection, Vector movement) {
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -118,7 +118,7 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 	return false;
 }
 
-bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const Position& position, bool customCircuit) {
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit) {
 	if (!parsedCircuit.isValid()) return false;
 
 	Vector totalOffset(0, 0);
@@ -165,7 +165,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, const P
 	return true;
 }
 
-bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, const Position& position) {
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position) {
 	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (blockContainer.checkCollision(block.position + totalOffset, block.rotation, block.blockType)) {
@@ -187,21 +187,21 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, cons
 	return true;
 }
 
-bool Circuit::trySetBlockData(const Position& positionOfBlock, block_data_t data) {
+bool Circuit::trySetBlockData(Position positionOfBlock, block_data_t data) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.trySetBlockData(positionOfBlock, data, difference.get());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryCreateConnection(const Position& outputPosition, const Position& inputPosition) {
+bool Circuit::tryCreateConnection(Position outputPosition, Position inputPosition) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputPosition, inputPosition, difference.get());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryRemoveConnection(const Position& outputPosition, const Position& inputPosition) {
+bool Circuit::tryRemoveConnection(Position outputPosition, Position inputPosition) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputPosition, inputPosition, difference.get());
 	sendDifference(difference);

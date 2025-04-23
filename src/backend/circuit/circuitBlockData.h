@@ -24,7 +24,7 @@ public:
 	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const { return connectionIdNames.get(endId); }
 	inline const connection_end_id_t* getConnectionNameToId(const std::string& name) const { return connectionIdNames.get(name); }
 
-	inline void setConnectionIdPosition(connection_end_id_t endId, const Position& name) {
+	inline void setConnectionIdPosition(connection_end_id_t endId, Position name) {
 		connectionIdPosition.set(endId, name);
 		dataUpdateEventManager->sendEvent(
 			"circuitBlockDataConnectionPositionSet",
@@ -34,7 +34,7 @@ public:
 	inline const Position* getConnectionIdToPosition(connection_end_id_t endId) const {
 		return connectionIdPosition.get(endId);
 	}
-	inline const connection_end_id_t* getConnectionPositionToId(const Position& name) const {
+	inline const connection_end_id_t* getConnectionPositionToId(Position name) const {
 		return connectionIdPosition.get(name);
 	}
 

@@ -127,7 +127,7 @@ public:
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
 		blockData->setPath("Custom");
-		blockData->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
+		blockData->setSize(parsedCircuit->getSize());
 
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(id, blockType);

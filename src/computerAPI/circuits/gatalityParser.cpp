@@ -154,8 +154,7 @@ bool GatalityParser::load(const std::string& path, SharedParsedCircuit outParsed
 		} else if (token == "size:") {
 			unsigned int width, height;
 			inputFile >> cToken >> width >> cToken >> height >> cToken;
-			outParsed->setWidth(width);
-			outParsed->setHeight(height);
+			outParsed->setSize(Vector(width, height));
 			outParsed->markAsCustom();
 		} else if (token == "ports" || token == "ports:") {
 			outParsed->markAsCustom();
@@ -328,7 +327,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData) {
 
 	for (auto itr = blockContainer->begin(); itr != blockContainer->end(); ++itr) {
 		const Block& block = itr->second;
-		const Position& pos = block.getPosition();
+		Position pos = block.getPosition();
 
 
 		const BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(block.type());

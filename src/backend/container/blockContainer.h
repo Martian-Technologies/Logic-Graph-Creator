@@ -16,18 +16,18 @@ public:
 	inline void setBlockType(BlockType type) { if (getBlockTypeCount(type) == 0) selfBlockType = type; }
 
 	/* ----------- collision ----------- */
-	inline bool checkCollision(const Position& position) const { return getCell(position); }
-	bool checkCollision(const Position& positionSmall, const Position& positionLarge) const;
-	bool checkCollision(const Position& position, Rotation rotation, BlockType blockType) const;
+	inline bool checkCollision(Position position) const { return getCell(position); }
+	bool checkCollision(Position positionSmall, Position positionLarge) const;
+	bool checkCollision(Position position, Rotation rotation, BlockType blockType) const;
 
 	/* ----------- blocks ----------- */
 	// -- getters --
 	// Gets the cell at that position. Returns nullptr the cell is empty
-	inline const Cell* getCell(const Position& position) const { return grid.get(position); }
+	inline const Cell* getCell(Position position) const { return grid.get(position); }
 	// Gets the number of cells in the BlockContainer
 	inline unsigned int getCellCount() const { return grid.size(); }
 	// Gets the block that has a cell at that position. Returns nullptr the cell is empty
-	inline const Block* getBlock(const Position& position) const;
+	inline const Block* getBlock(Position position) const;
 	// Gets the block that has a id. Returns nullptr if no block has the id
 	inline const Block* getBlock(block_id_t blockId) const;
 	// Gets the number of blocks in the BlockContainer
@@ -37,41 +37,41 @@ public:
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryInsertBlock(const Position& position, Rotation rotation, BlockType blockType, Difference* difference);
+	bool tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference);
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryRemoveBlock(const Position& position, Difference* difference);
+	bool tryRemoveBlock(Position position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryMoveBlock(const Position& positionOfBlock, const Position& position, Difference* difference);
+	bool tryMoveBlock(Position positionOfBlock, Position position, Difference* difference);
 	// moves blocks until they 
-	void resizeBlockType(BlockType blockType, const Vector& size, Difference* difference);
+	void resizeBlockType(BlockType blockType, Vector size, Difference* difference);
 
 	/* ----------- block data ----------- */
 	// // Gets the data from a block at position. Returns 0 if no block is found. 
-	// block_data_t getBlockData(const Position& positionOfBlock) const;
+	// block_data_t getBlockData(Position positionOfBlock) const;
 
 	// Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
-	bool trySetBlockData(const Position& positionOfBlock, block_data_t data, Difference* difference);
+	bool trySetBlockData(Position positionOfBlock, block_data_t data, Difference* difference);
 	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
 	template<class T, unsigned int index>
-	bool trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference);
+	bool trySetBlockDataValue(Position positionOfBlock, T value, Difference* difference);
 
 	/* ----------- connections ----------- */
 	// -- getters --
-	bool connectionExists(const Position& outputPosition, const Position& inputPosition) const;
-	const std::vector<ConnectionEnd>* getInputConnections(const Position& position) const;
-	const std::vector<ConnectionEnd>* getOutputConnections(const Position& position) const;
-	const std::optional<ConnectionEnd> getInputConnectionEnd(const Position& position) const;
-	const std::optional<ConnectionEnd> getOutputConnectionEnd(const Position& position) const;
+	bool connectionExists(Position outputPosition, Position inputPosition) const;
+	const std::vector<ConnectionEnd>* getInputConnections(Position position) const;
+	const std::vector<ConnectionEnd>* getOutputConnections(Position position) const;
+	const std::optional<ConnectionEnd> getInputConnectionEnd(Position position) const;
+	const std::optional<ConnectionEnd> getOutputConnectionEnd(Position position) const;
 
 	// -- setters --
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryCreateConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
+	bool tryCreateConnection(Position outputPosition, Position inputPosition, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryRemoveConnection(const Position& outputPosition, const Position& inputPosition, Difference* difference);
+	bool tryRemoveConnection(Position outputPosition, Position inputPosition, Difference* difference);
 	// Sets up connection containers to have the new end id
 	void addConnectionPort(BlockType blockType, connection_end_id_t endId, Difference* difference);
 	// Remove all connects and set connection containers to not have the end id
@@ -91,13 +91,13 @@ public:
 	DifferenceSharedPtr getCreationDifferenceShared() const;
 
 private:
-	inline Block* getBlock_(const Position& position);
+	inline Block* getBlock_(Position position);
 	inline Block* getBlock_(block_id_t blockId);
-	inline Cell* getCell(const Position& position) { return grid.get(position); }
-	inline void insertCell(const Position& position, Cell cell) { grid.insert(position, cell); }
-	inline void removeCell(const Position& position) { grid.remove(position); }
-	void placeBlockCells(block_id_t id, const Position& position, const Vector& size);
-	void placeBlockCells(const Position& position, Rotation rotation, BlockType type, block_id_t blockId);
+	inline Cell* getCell(Position position) { return grid.get(position); }
+	inline void insertCell(Position position, Cell cell) { grid.insert(position, cell); }
+	inline void removeCell(Position position) { grid.remove(position); }
+	void placeBlockCells(block_id_t id, Position position, Vector size);
+	void placeBlockCells(Position position, Rotation rotation, BlockType type, block_id_t blockId);
 	void placeBlockCells(const Block* block);
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }
@@ -110,12 +110,12 @@ private:
 	std::vector<unsigned int> blockTypeCounts;
 };
 
-inline Block* BlockContainer::getBlock_(const Position& position) {
+inline Block* BlockContainer::getBlock_(Position position) {
 	const Cell* cell = grid.get(position);
 	return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
 }
 
-inline const Block* BlockContainer::getBlock(const Position& position) const {
+inline const Block* BlockContainer::getBlock(Position position) const {
 	const Cell* cell = grid.get(position);
 	return cell == nullptr ? nullptr : &(blocks.find(cell->getBlockId())->second);
 }
@@ -131,7 +131,7 @@ inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
 }
 
 template<class T, unsigned int index>
-bool BlockContainer::trySetBlockDataValue(const Position& positionOfBlock, T value, Difference* difference) {
+bool BlockContainer::trySetBlockDataValue(Position positionOfBlock, T value, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
 	block_data_t oldData = block->getRawData();

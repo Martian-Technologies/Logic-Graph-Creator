@@ -1,7 +1,7 @@
 #include "parsedCircuit.h"
 #include "circuit.h"
 
-void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id, const std::string& portName) {
+void ParsedCircuit::addConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t id, const std::string& portName) {
 	ports.emplace_back(isInput, connectionEndId, positionOnBlock, id, portName);
 }
 
