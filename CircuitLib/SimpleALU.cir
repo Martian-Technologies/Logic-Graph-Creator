@@ -3,7 +3,6 @@ import "EightBitAdder.cir"
 import "FourBitDecoder.cir"
 Circuit: "SimpleALU"
 UUID: 42751bb6-bce4-4cba-b021-bfbed525735f
-
 size: <6, 16>
 ports (28):
 	(IN, 0, 12, <0, 0>, "P0")
