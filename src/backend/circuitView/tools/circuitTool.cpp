@@ -1,5 +1,18 @@
 #include "circuitTool.h"
 
+bool CircuitTool::sendEvent(const Event* event) {
+	auto events = registeredEvents;
+	for (const auto& pair : events) {
+		if (pair.first == event->getName()) {
+			auto func = eventRegister->getEventFunction(pair.first, pair.second);
+			if (func != std::nullopt) {
+				if ((*func)(event)) return true;
+			}
+		}
+	}
+	return false;
+}
+
 void CircuitTool::registerFunction(std::string eventName, EventFunction function) {
 	registeredEvents.emplace_back(eventName, eventRegister->registerFunction(eventName, function));
 }
@@ -21,7 +34,12 @@ void CircuitTool::unregisterFunctions() {
 	registeredEvents.clear();
 }
 
+void CircuitTool::setStatusbar(const std::string& text) {
+	eventRegister->doEvent(EventWithValue<std::string>("status bar changed", text));
+}
+
 void CircuitTool::activate() {
+	setStatusbar("");
 	registerFunction("pointer enter view", std::bind(&CircuitTool::enterBlockView, this, std::placeholders::_1));
 	registerFunction("pointer exit view", std::bind(&CircuitTool::exitBlockView, this, std::placeholders::_1));
 	registerFunction("Pointer Move", std::bind(&CircuitTool::pointerMove, this, std::placeholders::_1));

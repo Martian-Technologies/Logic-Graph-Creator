@@ -18,11 +18,14 @@ public:
 	inline virtual std::vector<std::string> getModes() const { return {}; }
 	inline virtual std::string getPath() const { return "NONE"; }
 	inline virtual unsigned int getStackId() const { return 0; }
+	bool sendEvent(const Event* event);
 
 protected:
 	void registerFunction(std::string eventName, EventFunction function);
 	void unregisterFunction(std::string eventName);
 	void unregisterFunctions();
+	
+	void setStatusbar(const std::string& text);
 	
 	virtual void reset() { elementCreator.clear(); }
 	virtual void activate();

@@ -48,6 +48,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// create circuitView
 	renderer = std::make_unique<SdlRenderer>(sdlRenderer);
 	circuitView = std::make_unique<CircuitView>(renderer.get());
+	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
+		auto eventData = event->cast2<std::string>();
+		if (eventData) setStatusBar(eventData->get());
+		return false;
+	});
 
 	int w = parent->GetClientWidth();
 	int h = parent->GetClientHeight();
@@ -228,40 +233,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			// }
 		}
 	));
-
-
-
-	// connect buttons and actions
-	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
-	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
-	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
-
-	// connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitSelector) {
-	// 		backend->linkCircuitViewWithCircuit(this->circuitView.get(), this->circuitSelector->itemData(index).value<int>());
-	// 		logInfo("CircuitViewWidget linked to new circuit view: {}", "", this->circuitSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend) {
-	// 		backend->createCircuit();
-	// 	}
-	// });
-	// connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->evaluatorSelector) {
-	// 		backend->linkCircuitViewWithEvaluator(this->circuitView.get(), this->evaluatorSelector->itemData(index).value<int>(), Address());
-	// 		logInfo("CircuitViewWidget linked to evalutor: {}", "", this->evaluatorSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitView->getCircuit()) {
-	// 		backend->createEvaluator(this->circuitView->getCircuit()->getCircuitId());
-	// 	}
-	// });
 }
 
 void CircuitViewWidget::render() {
@@ -295,6 +266,11 @@ void CircuitViewWidget::setSimSpeed(double speed) {
 		circuitView->getEvaluator()->setTickrate(std::round(speed * 60));
 }
 
+void CircuitViewWidget::setStatusBar(const std::string& text) {
+	Rml::Element* statusBar = parent->GetElementById("status-bar");
+	statusBar->SetInnerRML(text);
+}
+
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
@@ -322,7 +298,6 @@ void CircuitViewWidget::load() {
 	filter[1].pattern = "*.circiut";
 	SDL_ShowOpenFileDialog(LoadCallback, this, window, filter, 0, nullptr, true);
 }
-
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
 	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());
