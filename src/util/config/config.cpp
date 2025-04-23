@@ -1,68 +1,19 @@
-#include <cctype>
-#include <fstream>
-#include <assert.h>
-#include <iomanip>
-
 #include "config.h"
-#include "multiTypeMap.h"
-#include "gui/circuitView/renderer/color.h"
-
-#define CONFIG_PATH "../resources/config.toml"
-#define CONFIG_DEFAULT_PATH "config.toml"
+#include "backend/circuitView/renderer/color.h"
 
 
-/* ------------ FORM TYPE ------------
-	DROPDOWN,
-	SLIDER,
-	CHECKBOX,
-	USERINPUT,
-	COLOR,
-	HEADER,
-	FILEPATH
+#define USER_CONFIG "resources/config.toml"
+#define BASE_CONFIG "baseConfig.toml"
 
-@INFO
-	Only edit this with graphical data information, 
-		- if something is a HEADER, it should be preceded with the name of the header
-		- for setting types, please enter the name of how the items would be gotten from util/config/config.h
-		- do not remove any prexisting "graphic data", only rearrange if necessary
-			- if you believe it is more important to the user, please do put it more towards the top of the header
-*/
-const std::vector<std::string> general[32] = {
-	{"General", "HEADER"},
-	{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },  
+const std::vector<std::vector<std::string>> general = {
+	{ "General", "HEADER" },
+		{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },  
 	{ "Files", "HEADER" }, 
 		{ "general.files.save_path", "DIRPATH" },
 		{ "general.files.open_path", "FILEPATH" }, 
-		{}, 
-		{}, 
-		{}, 
-	{}, 
-	{}, 
-	{},
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{},
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{},
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
 };
 
-const std::vector<std::string> appearance[32] = {
+const std::vector<std::vector<std::string>> appearance = {
 	{ "Blocks", "HEADER" },
 		{ "appearance.blocks.and", "COLOR" },
 		{ "appearance.blocks.or", "COLOR" },
@@ -82,22 +33,9 @@ const std::vector<std::string> appearance[32] = {
 	{ "Text", "HEADER" }, 
 		{ "appearance.text.font_size", "USERINPUT" }, 
 		{ "appearance.text.font_family", "USERINPUT"}, 
-		{},
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{}, 
-	{},
-	{}, 
-	{}, 
-	{}, 
-	{}
 };
 
-const std::string keybind[32] = {
+const std::vector<std::string> keybind = {
 	"H_Blocks",
 		"keybind.blocks.and",
 		"keybind.blocks.or",
@@ -119,80 +57,96 @@ const std::string keybind[32] = {
 	"H_Selection",
 	"H_Interactive",
 		"keybind.interactive.state_changer",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	""
 };
 
-
-// -------------------- DON'T EDIT --------------------
-
-const std::vector<std::string>* Settings::getGraphicsData(const std::string formType) {
-	if (formType == "General") return &general[0]; 
-	else if (formType == "Appearance") return &appearance[0]; 
-
-	return nullptr;
-}
-
-const std::string* Settings::getGraphicsKeybind() {
-	return &keybind[0];
-}
+// ------------------- DONT EDIT BELLOW -------------------
 
 MultiTypeMap CONFIG_SETTINGS; 
 
-void Settings::createConfig() {
-    std::ifstream file("resources/config.toml");
-	
-    // opens file, if fails to open file, grabs default file(will be added later)
-    // if (!defaultConfig) file.open(CONFIG_PATH);
-    // else file.open(CONFIG_DEFAULT_PATH);
-    // 
-    // if (!defaultConfig && !file.is_open()) file.open(CONFIG_DEFAULT_PATH); 
-    // if (!file.is_open()) assert("Error: failed to open /src/gui/preferences/config.toml");  // TODO: change later for better safety
-	
-	// parses file to establish mappings
-	
+const std::vector<std::vector<std::string>>& Settings::getGraphicsData(const std::string formType) {
+	if (formType == "General") return general; 
+	else if (formType == "Appearance") return appearance; 
 
-    std::string prefix;
-    std::string line;
-    while (std::getline(file, line)) {
-		if (line.empty() || line[0] == '#') continue;
-        if (line[0] == '[') {
-            prefix = line.substr(1, line.size() - 2);
-            continue;
-        }
+	return general; // default return vec
+}
 
-		size_t pos = line.find('=') - 1;
-		if (pos == std::string::npos) continue; 
+const std::vector<std::string>& Settings::getKeybindGraphicsData() {
+	return keybind;
+}
 
-		while (line[pos-1] == ' ' || line[pos-1] == '\t') pos--; // gets value before '='
-        std::string fullKey = prefix + '.' + line.substr(0, pos);
+void Settings::serializeData() {
+	std::ifstream file(USER_CONFIG);
+	if (!file) {
+		logWarning("user config not found");
+	}
 
-		pos = line.find('=');
-		while (line[pos] == ' ' || line[pos] == '=' || line[pos] == '\t') pos++; // gets value after '=' 
-        std::string value = line.substr(pos);
-		value = value.substr(0, value.rfind("\""));
+	// TODO: read arrays and fix file errors
 
-		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set<Color>(fullKey, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
-		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set<bool>(fullKey, 1);
-		else if (value == "false" || value == "False") CONFIG_SETTINGS.set<bool>(fullKey, 0);
-		else										   CONFIG_SETTINGS.set<std::string>(fullKey, value.substr(1, value.size())); 
+	// removes white spaces from word
 
-		//logInfo(fullKey + "|" + value);
-    }
+	auto trim = [](std::string& word) -> std::string& {
+		auto start = std::find_if(word.begin(), word.end(), [](unsigned char c) {
+			return !std::isspace(c);
+		});
+
+		auto end = std::find_if(word.rbegin(), word.rend(), [](unsigned char c) {
+			return !std::isspace(c);
+		}).base(); 
+
+		if (start >= end) {
+			word.clear();
+		} else {
+			word = word.substr(std::distance(word.begin(), start), std::distance(start, end));
+		}
+
+		return word;
+	};
+
+
+
+	int lineNumber = 0;
+	std::string prefix;
+	std::string line;
+
+	while (std::getline(file, line)) {
+		trim(line);
+		if (line.empty() || line[0] == '#') continue; 
+		if (line[0] == '[') {
+			prefix = "";
+			for (int i = 1; i < line.size(); i++) {
+				if (line[i] == ']') break;
+				prefix += line[i];
+			}
+			continue;
+		}
+
+		size_t equality = line.find('=');
+
+		// ----- Gets Key -----
+		std::string key = line.substr(0, equality);
+		trim(key);
+
+		// ----- Gets Value -----
+		int end = line.size();
+		for (int i = 0; i < end - 1; i++) {
+			if (line[i] == ' ' && line[i + 1] == '#') end = i;
+		}
+		std::string value = line.substr(equality + 1, end);
+		trim(value);
+
+		if (value.substr(1,2) == "0x") 				   CONFIG_SETTINGS.set<Color>(prefix + '.' + key, Color(std::stoi(value.substr(3,2), nullptr, 16)/255.0f, std::stoi(value.substr(5,2), nullptr, 16)/255.0f, std::stoi(value.substr(7,2), nullptr, 16)/255.0f));
+		else if (value == "true"  || value == "True")  CONFIG_SETTINGS.set<bool>(prefix + '.' + key, 1);
+		else if (value == "false" || value == "False") CONFIG_SETTINGS.set<bool>(prefix + '.' + key, 0);
+		else										   CONFIG_SETTINGS.set<std::string>(prefix + '.' + key, value.substr(1, value.size() - 2)); 
+
+		lineNumber++;
+	}
 
 	file.close();
 }
 
-void Settings::saveSettings() {
+
+void Settings::deserializeDate() {
 	std::ofstream file("resources/config.toml", std::ios::trunc);
 	std::string value;
 
@@ -271,6 +225,5 @@ void Settings::saveSettings() {
 }
 
 MultiTypeMap& Settings::getConfig() { return CONFIG_SETTINGS; }
-
 
 

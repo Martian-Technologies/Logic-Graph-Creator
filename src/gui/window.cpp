@@ -9,6 +9,7 @@
 #include "gui/menuBar/menuManager.h"
 #include "gui/circuitView/simControlsManager.h"
 #include "gui/settingsWindow/settingsWindow.h"
+#include "util/config/config.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), pinchEventId(pinchEventId) {
 	// create SDL renderer
@@ -57,6 +58,11 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 
 
 	MenuManager* menuManager = new MenuManager(document, settingsWindow);
+
+	// create CONFIG
+	Settings::serializeData();
+
+	logInfo(Settings::get<std::string>("keybind.interactive.state_changer").value());
 }
 
 Window::~Window() {

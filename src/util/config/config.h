@@ -2,16 +2,16 @@
 #define CONFIG_H
 
 #include "multiTypeMap.h"
+#include <exception>
 
 namespace Settings {
-	void createConfig();
-	void saveSettings();
-	MultiTypeMap& getConfig();	
+	void serializeData();   // enter data 
+	void deserializeDate(); // save data
+	MultiTypeMap& getConfig();
 
-	
-	const std::vector<std::string>* getGraphicsData(const std::string formType);
-	const std::string* getGraphicsKeybind();
-	
+	const std::vector<std::vector<std::string>>& getGraphicsData(const std::string formType);
+	const std::vector<std::string>& getKeybindGraphicsData();
+
 	template<typename T>
 	std::optional<T> get(const std::string& key);
 	template<typename T>
@@ -20,7 +20,11 @@ namespace Settings {
 
 template<typename T>
 std::optional<T> Settings::get(const std::string& key) {
-	return getConfig().get<T>(key);
+	try {
+		return getConfig().get<T>(key);
+	} catch (std::exception e) {
+		return std::nullopt;
+	}
 }
 
 template<typename T>
