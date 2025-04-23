@@ -6,8 +6,10 @@
 	<body>
 
 		<div id="settings-navigation">
-			<h1>Settings</h1>
-			<input type="text" id="settings-search" placeholder="Find a setting" />
+			<div id="navigation-top-container">
+				<h1>Settings</h1>
+				<input type="text" id="settings-search" />
+			</div>
 			<div id="navigation-panel">
 				<div class="nav-item">System</div>
 				<div class="nav-item">Bluetooth & devices</div>
@@ -19,6 +21,8 @@
 				<button class="settings-action-buttons">Cancel</button>
 			</div>
 		</div>
+
+		
 
 		<div id="settings-content-panel">
 
