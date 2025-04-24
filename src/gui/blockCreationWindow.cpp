@@ -169,7 +169,7 @@ void BlockCreationWindow::resetMenu() {
 	for (auto& iter : conncections) {
 		connection_end_id_t endId = iter.first;
 		bool isInputBool = iter.second.second;
-		const Vector& positionOnBlock = iter.second.first;
+		Vector positionOnBlock = iter.second.first;
 		const std::string* connectionNamePtr = circuitBlockData->getConnectionIdToName(endId);
 		std::string connectionName;
 		if (connectionNamePtr) {

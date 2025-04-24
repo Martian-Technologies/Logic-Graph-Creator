@@ -11,10 +11,10 @@ public:
 	Sparse2d();
 	Sparse2d(const Sparse2d& other);
 	Sparse2d<T>& operator=(const Sparse2d<T>& other)
-	T* get(const Position& position);
-	const T* get(const Position& position) const;
-	void insert(const Position& position, const T& value);
-	void remove(const Position& position)
+	T* get(Position position);
+	const T* get(Position position) const;
+	void insert(Position position, const T& value);
+	void remove(Position position)
 }
 */
 
@@ -27,12 +27,12 @@ using Sparse2d = Sparse2dArray<T>;
 template <class T>
 class Sparse2dArray {
 public:
-	inline T* get(const Position& position);
-	inline const T* get(const Position& position) const;
+	inline T* get(Position position);
+	inline const T* get(Position position) const;
 	inline unsigned int size() const { return data.size(); }
 
-	inline void insert(const Position& position, const T& value);
-	inline void remove(const Position& position);
+	inline void insert(Position position, const T& value);
+	inline void remove(Position position);
 
 private:
 	std::unordered_map<Position, T> data;
@@ -42,7 +42,7 @@ private:
 };
 
 template<class T>
-T* Sparse2dArray<T>::get(const Position& position) {
+T* Sparse2dArray<T>::get(Position position) {
 	iterator iter = data.find(position);
 	if (iter == data.end()) {
 		return nullptr;
@@ -52,7 +52,7 @@ T* Sparse2dArray<T>::get(const Position& position) {
 }
 
 template<class T>
-const T* Sparse2dArray<T>::get(const Position& position) const {
+const T* Sparse2dArray<T>::get(Position position) const {
 	const_iterator iter = data.find(position);
 	if (iter == data.end()) {
 		return nullptr;
@@ -62,7 +62,7 @@ const T* Sparse2dArray<T>::get(const Position& position) const {
 }
 
 template<class T>
-void Sparse2dArray<T>::insert(const Position& position, const T& value) {
+void Sparse2dArray<T>::insert(Position position, const T& value) {
 	iterator iter = data.find(position);
 	if (iter == data.end()) {
 		data.insert(std::make_pair(position, value));
@@ -72,7 +72,7 @@ void Sparse2dArray<T>::insert(const Position& position, const T& value) {
 }
 
 template<class T>
-void Sparse2dArray<T>::remove(const Position& position) {
+void Sparse2dArray<T>::remove(Position position) {
 	iterator iter = data.find(position);
 	if (iter != data.end())
 		data.erase(iter);

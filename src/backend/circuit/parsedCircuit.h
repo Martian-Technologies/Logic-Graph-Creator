@@ -38,7 +38,7 @@ public:
 		std::string portName;
 	};
 
-	void addConnectionPort(bool isInput, connection_end_id_t connectionEndId, const Vector& positionOnBlock, block_id_t id, const std::string& portName);
+	void addConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t id, const std::string& portName);
 	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
 
 
@@ -64,28 +64,25 @@ public:
 	void setUUID(const std::string& uuid) { this->uuid = uuid; }
 	const std::string& getUUID() const { return uuid; }
 
-	block_size_t getWidth() const { return width; }
-	block_size_t getHeight() const { return height; }
-	void setWidth(block_size_t width) { this->width = width; }
-	void setHeight(block_size_t height) { this->height = height; }
+	Vector getSize() const { return size; }
+	void setSize(Vector size) { this->size = size; valid = false; }
 
 	void markAsCustom() { isCustomBlock = true; }
 	bool isCustom() const { return isCustomBlock; }
 	bool isValid() const { return valid; }
-	const Vector& getMinPos() const { return minPos; }
+	Vector getMinPos() const { return minPos; }
 
 private:
 	Vector minPos = Vector(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
 	Vector maxPos = Vector(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()); // TODO: delete this because I think it is unused
 
-	std::string absoluteFilePath, relativeFilePath;
+	std::string absoluteFilePath;
 	std::string uuid;
 	std::string name;
 
 	// If this represents a custom block:
 	bool isCustomBlock;
-	block_size_t width = 0;
-	block_size_t height = 0;
+	Vector size;
 
 	std::vector<ConnectionPort> ports; // connection id is the index in the vector
 
@@ -109,6 +106,7 @@ private:
 	};
 
 	void validate();
+	bool validateBlockData();
 	bool validateBlockTypes();
 	bool setBlockPositionsInt();
 	bool handleInvalidConnections();

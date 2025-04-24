@@ -56,10 +56,15 @@ bool Window::recieveEvent(SDL_Event& event) {
 	if (sdlWindow.isThisMyEvent(event)) {
 		if (event.type == SDL_EVENT_DROP_FILE) {
 			std::string file = event.drop.data;
-			circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(file);
+			std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(file);
+			if (ids.empty()) {
+				logError("Error", "Failed to load circuit file.");
+				return true;
+			}
+			circuit_id_t id = ids.back();
 			if (id == 0) {
 				logError("Error", "Failed to load circuit file.");
-				return false;
+				return true;
 			}
 			circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 			for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {

@@ -91,19 +91,19 @@ public:
 		return blockData[type-1].getSize(rotation);
 	}
 
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Vector vector) const noexcept {
 		if (!blockExists(type)) return {0, false};
 		return blockData[type-1].getInputConnectionId(vector);
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Vector vector) const noexcept {
 		if (!blockExists(type)) return {0, false};
 		return blockData[type-1].getOutputConnectionId(vector);
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
 		if (!blockExists(type)) return {0, false};
 		return blockData[type-1].getInputConnectionId(vector, rotation);
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
 		if (!blockExists(type)) return {0, false};
 		return blockData[type-1].getOutputConnectionId(vector, rotation);
 	}
@@ -121,9 +121,17 @@ public:
 		if (!blockExists(type)) return 0;
 		return blockData[type-1].getConnectionCount();
 	}
+	inline bool connectionExists(BlockType type, connection_end_id_t connectionId) const noexcept {
+		if (!blockExists(type)) return false;
+		return blockData[type-1].connectionExists(connectionId);
+	}
 	inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
 		return blockData[type-1].isConnectionInput(connectionId);
+	}
+	inline bool isConnectionOutput(BlockType type, connection_end_id_t connectionId) const noexcept {
+		if (!blockExists(type)) return false;
+		return blockData[type-1].isConnectionOutput(connectionId);
 	}
 
 private:

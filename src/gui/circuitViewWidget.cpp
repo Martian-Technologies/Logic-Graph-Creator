@@ -26,11 +26,12 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
 	if (filePaths && filePaths[0]) {
 		std::string filePath = filePaths[0];
-		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
-		if (id == 0) {
+		std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(filePath);
+		if (ids.empty()) {
 			logError("Failed to load circuit file.");
 			return;
 		}
+		circuit_id_t id = ids.back();
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 		for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
 			if (iter.second->getCircuitId(Address()) == id) {
