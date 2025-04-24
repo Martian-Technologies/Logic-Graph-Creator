@@ -1,6 +1,7 @@
 #ifndef vulkanChunker_h
 #define vulkanChunker_h
 
+#include "backend/address.h"
 #include "backend/circuit/circuit.h"
 #include "gpu/vulkanBuffer.h"
 
@@ -41,6 +42,7 @@ struct BlockVertex {
 
 struct WireVertex {
 	glm::vec2 pos;
+	uint32_t stateIndex;
 
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -52,12 +54,17 @@ struct WireVertex {
     }
 
 	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(WireVertex, pos);
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 1;
+		attributeDescriptions[0].format = VK_FORMAT_R32_UINT;
+		attributeDescriptions[0].offset = offsetof(WireVertex, stateIndex);
 
 		return attributeDescriptions;
 	}
@@ -112,7 +119,12 @@ private:
 
 	std::optional<AllocatedBuffer> wireBuffer;
 	uint32_t numWireVertices;
+
+	std::optional<AllocatedBuffer> stateBuffer;
+	std::vector<Address> relativeAdresses;
 };
+
+// ====================================================================================================================
 
 class ChunkChain {
 public:

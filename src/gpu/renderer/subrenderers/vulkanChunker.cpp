@@ -22,6 +22,9 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
 	
+	// Maps "state position" to a position in the address list so that multiple objects can index the same array
+	std::unordered_map<Position, size_t> posToAddressIdx;
+
 	// Generate block vertices
 	if (blocks.size() > 0) {
 		std::vector<BlockVertex> blockVertices;
@@ -31,17 +34,12 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			Vec2 uvOrigin = blockTileSet.getTopLeftUV(block.second.blockType + 1, 0);
 			Vec2 uvSize = blockTileSet.getCellUVSize();
 
-			// glm::vec2 topLeftUV = {uvOrigin.x, uvOrigin.y};
-			// glm::vec2 topRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y};
-			// glm::vec2 bottomRightUV = {uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y};
-			// glm::vec2 bottomLeftUV = {uvOrigin.x, uvOrigin.y + uvSize.y};
-
 			// top left, top right, bottom right, bottom left
 			std::array<glm::vec2, 4> uvs = {
-				glm::vec2(uvOrigin.x, uvOrigin.y),
-				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y),
-				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y),
-				glm::vec2(uvOrigin.x, uvOrigin.y + uvSize.y)
+				glm::vec2(uvOrigin.x, uvOrigin.y), // top left
+				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y), // top right
+				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y), // bottom right
+				glm::vec2(uvOrigin.x, uvOrigin.y + uvSize.y) // bottom left
 			};
 
 			// literally rotate uvs
@@ -59,6 +57,10 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			blockVertices.push_back(v4);
 			blockVertices.push_back(v5);
 			blockVertices.push_back(v6);
+
+			// blocks are added to state array
+			posToAddressIdx[blockPosition] = relativeAdresses.size();
+			relativeAdresses.push_back(blockPosition);
 		}
 		
 		// upload block vertices
@@ -68,13 +70,28 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
-	
 	// Generate wire vertices
 	if (wires.size() > 0) {
 		std::vector<WireVertex> wireVertices;
 		wireVertices.reserve(wires.size() * 6);
 		for (const auto& wire : wires) {
 
+			// get wire's index in state buffer
+			size_t stateIdx;
+			auto itr = posToAddressIdx.find(wire.first.first);
+			// check if wire state position is already in the state array
+			if (itr != posToAddressIdx.end()) {
+				stateIdx = itr->second;
+			}
+			else {
+				// add address to state buffer
+				stateIdx = relativeAdresses.size();
+				posToAddressIdx[wire.first.first] = stateIdx;
+				// TODO get position address for wires in sub blocks
+				relativeAdresses.push_back(wire.first.first);
+			}
+
+			// generate vertices
 			constexpr float WIRE_WIDTH = 0.03f;
 			
 			// get normalized direction
@@ -90,18 +107,18 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 
 			// first triangle
 			vertexPos = wire.second.start + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 			vertexPos = wire.second.start - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 			vertexPos = wire.second.end + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 			// second triangle
 			vertexPos = wire.second.start - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 			vertexPos = wire.second.end - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 			vertexPos = wire.second.end + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y));
+			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
 		}
 		
 		// upload wire vertices
@@ -110,11 +127,18 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
+
+	// Create state buffer
+	size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
+	stateBuffer = createBuffer(stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::LOW);
+	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), defaultStates.data(), stateBuffer->allocation, 0, stateBufferSize);
 }
 
 VulkanChunkAllocation::~VulkanChunkAllocation() {
 	if (blockBuffer.has_value()) destroyBuffer(blockBuffer.value());
 	if (wireBuffer.has_value()) destroyBuffer(wireBuffer.value());
+	if (wireBuffer.has_value()) destroyBuffer(stateBuffer.value());
 }
 
 // ChunkChain
