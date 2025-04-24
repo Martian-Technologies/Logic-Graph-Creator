@@ -31,8 +31,8 @@ const std::vector<std::vector<std::string>> appearance = {
 		{ "appearance.wires.generic", "COLOR" }, 
 		{ "appearance.wires.testing", "COLOR"}, 
 	{ "Text", "HEADER" }, 
-		{ "appearance.text.font_size", "USERINPUT" }, 
-		{ "appearance.text.font_family", "USERINPUT"}, 
+		{ "appearance.text.font_size", "USER_INT" }, 
+		{ "appearance.text.font_family", "USER_INT"}, 
 };
 
 const std::vector<std::string> keybind = {

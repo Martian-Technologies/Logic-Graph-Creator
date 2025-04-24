@@ -1,10 +1,14 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
+#include "contentManager.h"
 
 #include <RmlUi/Core/Element.h>
 
 SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) {
 	context = document->GetElementById("settings-overlay");
+
+	ContentManager* cm = new ContentManager(document);
+
 	toggleVisibility();
 	Initialize();
 }
@@ -13,6 +17,7 @@ SettingsWindow::~SettingsWindow() {}
 
 void SettingsWindow::Initialize() {
 	logInfo("initializing settingls");
+
 /*
 look
 	Rml::Element* closeButton = context->GetElementById("settings-close-button");

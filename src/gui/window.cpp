@@ -54,15 +54,13 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	//
 	//
 
+	Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(document);
 
 
 	MenuManager* menuManager = new MenuManager(document, settingsWindow);
 
 	// create CONFIG
-	Settings::serializeData();
-
-	logInfo(Settings::get<std::string>("keybind.interactive.state_changer").value());
 }
 
 Window::~Window() {
