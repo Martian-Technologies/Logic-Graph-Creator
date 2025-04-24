@@ -14,7 +14,7 @@ bool SingleConnectTool::makeConnection(const Event* event) {
 		if (!circuit->getBlockContainer()->getOutputConnectionEnd(lastPointerPosition).has_value()) {
 			return false;
 		}
-		
+
 		clicked = true;
 		clickPosition = lastPointerPosition;
 		updateElements();
@@ -42,7 +42,7 @@ void SingleConnectTool::updateElements() {
 	elementCreator.clear();
 
 	if (!(circuit && pointerInView)) return;
-	
+
 	if (clicked) {
 		bool valid = circuit->getBlockContainer()->getInputConnectionEnd(lastPointerPosition).has_value();
 
