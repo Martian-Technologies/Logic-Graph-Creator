@@ -14,7 +14,7 @@ public:
 	block_id_t getBlockId() const { return blockId; }
 	connection_end_id_t getConnectionId() const { return connectionId; }
 
-	bool operator==(const ConnectionEnd& other) const { return other.connectionId == connectionId && other.blockId == blockId; }
+	bool operator==(ConnectionEnd other) const { return other.connectionId == connectionId && other.blockId == blockId; }
 
 private:
 	void setBlockId(block_id_t id) { blockId = id; }
@@ -22,6 +22,15 @@ private:
 
 	block_id_t blockId;
 	connection_end_id_t connectionId;
+};
+
+template<>
+struct std::hash<ConnectionEnd> {
+	inline std::size_t operator()(ConnectionEnd connectionEnd) const noexcept {
+		std::size_t a = std::hash<connection_end_id_t> {}(connectionEnd.getConnectionId());
+		std::size_t b = std::hash<block_id_t> {}(connectionEnd.getBlockId());
+		return a ^ (b << 32);
+	}
 };
 
 

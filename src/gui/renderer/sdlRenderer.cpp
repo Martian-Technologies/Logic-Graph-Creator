@@ -305,7 +305,7 @@ void SdlRenderer::render() {
 				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
 				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
-				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				const std::unordered_set<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
 				if (!connections) continue;
 				for (auto otherConnectionIter : *connections) {
 					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
@@ -367,7 +367,7 @@ void SdlRenderer::render() {
 				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
 				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
-				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				const std::unordered_set<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
 				if (!connections) continue;
 				for (auto otherConnectionIter : *connections) {
 					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());

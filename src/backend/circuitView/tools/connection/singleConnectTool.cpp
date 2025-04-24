@@ -29,8 +29,15 @@ bool SingleConnectTool::cancelConnection(const Event* event) {
 }
 
 void SingleConnectTool::updateElements() {
+	if (clicked) {
+		setStatusbar("Left click to set connection input. Remake a connection to remove it.");
+	} else {
+		setStatusbar("Left click to set connection output. Remake a connection to remove it.");
+	}
+
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+
 	if (!(circuit && pointerInView)) return;
 	
 	if (clicked) {

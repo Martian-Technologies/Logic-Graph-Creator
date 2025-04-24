@@ -58,18 +58,18 @@ public:
 	/* ----------- connections ----------- */
 	// -- getters --
 	bool connectionExists(Position outputPosition, Position inputPosition) const;
-	const std::vector<ConnectionEnd>* getInputConnections(Position position) const;
-	const std::vector<ConnectionEnd>* getOutputConnections(Position position) const;
+	const std::unordered_set<ConnectionEnd>* getInputConnections(Position position) const;
+	const std::unordered_set<ConnectionEnd>* getOutputConnections(Position position) const;
 	const std::optional<ConnectionEnd> getInputConnectionEnd(Position position) const;
 	const std::optional<ConnectionEnd> getOutputConnectionEnd(Position position) const;
 
 	// -- setters --
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
+	bool tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd, Difference* difference);
 	// Trys to creates a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryCreateConnection(Position outputPosition, Position inputPosition, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd, Difference* difference);
+	bool tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd, Difference* difference);
 	// Trys to remove a connection. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveConnection(Position outputPosition, Position inputPosition, Difference* difference);
 	// Sets up connection containers to have the new end id
