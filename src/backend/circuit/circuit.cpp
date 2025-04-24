@@ -208,14 +208,14 @@ bool Circuit::tryRemoveConnection(Position outputPosition, Position inputPositio
 	return out;
 }
 
-bool Circuit::tryCreateConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+bool Circuit::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryRemoveConnection(const ConnectionEnd& outputConnectionEnd, const ConnectionEnd& inputConnectionEnd) {
+bool Circuit::tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
 	sendDifference(difference);

@@ -66,5 +66,6 @@ void TensorConnectTool::updateElements() {
 	if (!activeOutputSelectionHelper->isFinished()) return;
 	elementCreator.addSelectionElement(SelectionObjectElement(activeOutputSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::ARROWS));
 	if (!activeInputSelectionHelper->isFinished()) return;
+	setStatusBar("Press E to confirm connection.");
 	elementCreator.addSelectionElement(SelectionObjectElement(activeInputSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::ARROWS));
 }

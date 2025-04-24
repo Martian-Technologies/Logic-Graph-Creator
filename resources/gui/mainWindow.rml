@@ -42,7 +42,11 @@
 					<!-- <div id="simulation-controls-container">
 						<template src="sim-controls"></template>
 					</div> -->
-					<div id="circuitview-container"> </div>
+					<div id="circuitview-container">
+						<div id="status-bar-centering">
+							<div id="status-bar"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

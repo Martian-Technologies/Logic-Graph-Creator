@@ -32,9 +32,9 @@ bool AreaCreationTool::click(const Event* event) {
 			)
 		);
 	} else {
-		updateElements();
 		hasOrigin = true;
 		originPosition = lastPointerPosition;
+		updateElements();
 	}
 
 	return true;
@@ -53,6 +53,11 @@ bool AreaCreationTool::unclick(const Event* event) {
 void AreaCreationTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+	if (hasOrigin) {
+		setStatusBar("Left click to select second corner. Right click to cancel.");
+	} else {
+		setStatusBar("Left click to select the origin.");
+	}
 	if (!pointerInView) {
 		if (hasOrigin) {
 			elementCreator.addSelectionElement(SelectionElement(originPosition));

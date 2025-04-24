@@ -1,6 +1,15 @@
 #include "logicToucher.h"
 #include "backend/circuitView/circuitView.h"
 
+void LogicToucher::activate() {
+	CircuitTool::activate();
+	registerFunction("Tool Primary Activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
+	registerFunction("tool primary deactivate", std::bind(&LogicToucher::unpress, this, std::placeholders::_1));
+	registerFunction("Pointer Move", std::bind(&LogicToucher::pointerMove, this, std::placeholders::_1));
+	setStatusBar("Left click to toggle the state of a block");
+}
+
+
 bool LogicToucher::press(const Event* event) {
 	if (!circuit || !evaluatorStateInterface) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();

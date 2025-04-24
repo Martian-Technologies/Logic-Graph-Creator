@@ -48,6 +48,12 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// create circuitView
 	rendererInterface = std::make_unique<ViewportRenderInterface>(element);
 	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
+	
+	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
+		auto eventData = event->cast2<std::string>();
+		if (eventData) setStatusBar(eventData->get());
+		return false;
+	});
 
 	// set initial view
 	int w = element->GetClientWidth();
@@ -208,40 +214,27 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			}
 		}
 	));
-
-
-
-	// connect buttons and actions
-	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
-	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
-	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
-
-	// connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitSelector) {
-	// 		backend->linkCircuitViewWithCircuit(this->circuitView.get(), this->circuitSelector->itemData(index).value<int>());
-	// 		logInfo("CircuitViewWidget linked to new circuit view: {}", "", this->circuitSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend) {
-	// 		backend->createCircuit();
-	// 	}
-	// });
-	// connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->evaluatorSelector) {
-	// 		backend->linkCircuitViewWithEvaluator(this->circuitView.get(), this->evaluatorSelector->itemData(index).value<int>(), Address());
-	// 		logInfo("CircuitViewWidget linked to evalutor: {}", "", this->evaluatorSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitView->getCircuit()) {
-	// 		backend->createEvaluator(this->circuitView->getCircuit()->getCircuitId());
-	// 	}
-	// });
+	
+	element->AddEventListener("pinch", new EventPasser(
+		[this](Rml::Event& event) {
+			float delta = event.GetParameter<float>("delta", 0);
+			logInfo(delta);
+			if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta) * 50))) event.StopPropagation();
+			// if (mouseControls) {
+			// } else {
+			// 	if (event.GetParameter<int>("shift_key", 0)) {
+			// 		// do zoom
+			// 		if (circuitView->getEventRegister().doEvent(DeltaEvent("view zoom", (float)(delta.y) / 100.f))) event.StopPropagation();
+			// 	} else {
+			// 		if (circuitView->getEventRegister().doEvent(DeltaXYEvent(
+			// 			"view pan",
+			// 			delta.x / getPixelsWidth() * circuitView->getViewManager().getViewWidth(),
+			// 			delta.y / getPixelsHeight() * circuitView->getViewManager().getViewHeight()
+			// 		))) event.StopPropagation();
+			// 	}
+			// }
+		}
+	));
 }
 
 void CircuitViewWidget::setSimState(bool state) {
@@ -257,6 +250,11 @@ void CircuitViewWidget::simUseSpeed(bool state) {
 void CircuitViewWidget::setSimSpeed(double speed) {
 	if (circuitView->getEvaluator())
 		circuitView->getEvaluator()->setTickrate(std::round(speed * 60));
+}
+
+void CircuitViewWidget::setStatusBar(const std::string& text) {
+	Rml::Element* statusBar = element->GetElementById("status-bar");
+	statusBar->SetInnerRML(text);
 }
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.

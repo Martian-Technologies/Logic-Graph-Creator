@@ -286,7 +286,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 
 		for (auto& connectionIter : connectionContainer.getConnections()) {
 			outputFile << '\t' << "(connId:" << connectionIter.first << ')';
-			for (const ConnectionEnd& conn : connectionIter.second) {
+			for (ConnectionEnd conn : connectionIter.second) {
 				outputFile << " (" << conn.getBlockId() << ' ' << conn.getConnectionId() << ')';
 			}
 			outputFile << '\n';
