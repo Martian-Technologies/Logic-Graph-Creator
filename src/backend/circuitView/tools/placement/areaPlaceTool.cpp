@@ -52,15 +52,15 @@ void AreaPlaceTool::updateElements() {
 		if (pointerInView) {
 			elementCreator.addSelectionElement(SelectionElement(lastPointerPosition));
 		}
-		setStatusbar("Select first corner. Left click to place. Right click to remove.");
+		setStatusBar("Select first corner. Left click to place. Right click to remove.");
 		break;
 	case 'p':
 		elementCreator.addSelectionElement(SelectionElement(clickPosition, lastPointerPosition));
-		setStatusbar("Select second corner. Left click to place. Right click to cancel.");
+		setStatusBar("Select second corner. Left click to place. Right click to cancel.");
 		break;
 	case 'r':
 		elementCreator.addSelectionElement(SelectionElement(clickPosition, lastPointerPosition, true));
-		setStatusbar("Select second corner. Left click to remove. Right click to cancel.");
+		setStatusBar("Select second corner. Left click to remove. Right click to cancel.");
 		break;
 	}
 }

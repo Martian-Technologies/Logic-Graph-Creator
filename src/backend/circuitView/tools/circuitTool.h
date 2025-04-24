@@ -25,7 +25,7 @@ protected:
 	void unregisterFunction(std::string eventName);
 	void unregisterFunctions();
 	
-	void setStatusbar(const std::string& text);
+	void setStatusBar(const std::string& text);
 	
 	virtual void reset() { elementCreator.clear(); }
 	virtual void activate();

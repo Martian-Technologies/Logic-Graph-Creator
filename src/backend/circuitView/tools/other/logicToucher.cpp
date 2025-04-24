@@ -6,7 +6,7 @@ void LogicToucher::activate() {
 	registerFunction("Tool Primary Activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
 	registerFunction("tool primary deactivate", std::bind(&LogicToucher::unpress, this, std::placeholders::_1));
 	registerFunction("Pointer Move", std::bind(&LogicToucher::pointerMove, this, std::placeholders::_1));
-	setStatusbar("Left click to toggle the state of a block");
+	setStatusBar("Left click to toggle the state of a block");
 }
 
 

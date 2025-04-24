@@ -67,16 +67,27 @@ body {
 
 /* Status Bar */ 
 
-#status-bar {
-	text-align: center;
-	display: inline-block;
+#status-bar-centering {
 	color: black;
+	display: inline-block;
 	position: absolute;
 	bottom: 50px;
 	width: 100%;
 	text-align: center;
 }
 
+#status-bar {
+	display: inline-block;
+	text-align: center;
+	background-color: #ffffff73;
+	font-size: 16dp;
+	border-radius: 0.3em;
+	padding: 0.2em;
+}
+
+#status-bar:empty {
+	display: none;
+}
 
 #simulation-controls-container {
 	background-color: #0b0b0b;

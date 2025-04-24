@@ -54,9 +54,9 @@ void AreaCreationTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	if (hasOrigin) {
-		setStatusbar("Left click to select second corner. Right click to cancel.");
+		setStatusBar("Left click to select second corner. Right click to cancel.");
 	} else {
-		setStatusbar("Left click to select the origin.");
+		setStatusBar("Left click to select the origin.");
 	}
 	if (!pointerInView) {
 		if (hasOrigin) {

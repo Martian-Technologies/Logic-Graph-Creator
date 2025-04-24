@@ -8,7 +8,7 @@ void SinglePlaceTool::activate() {
 	registerFunction("Tool Secondary Activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("tool secondary deactivate", std::bind(&SinglePlaceTool::stopDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("Pointer Move", std::bind(&SinglePlaceTool::pointerMove, this, std::placeholders::_1));
-	setStatusbar("Left Click to Place. Right Click to Remove.");
+	setStatusBar("Left Click to Place. Right Click to Remove.");
 }
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {

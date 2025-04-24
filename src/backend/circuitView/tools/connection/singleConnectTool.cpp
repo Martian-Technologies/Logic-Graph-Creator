@@ -8,14 +8,16 @@ bool SingleConnectTool::makeConnection(const Event* event) {
 			circuit->tryCreateConnection(clickPosition, lastPointerPosition);
 		}
 		reset();
+		updateElements();
 		return true;
 	} else {
 		if (!circuit->getBlockContainer()->getOutputConnectionEnd(lastPointerPosition).has_value()) {
 			return false;
 		}
-
+		
 		clicked = true;
 		clickPosition = lastPointerPosition;
+		updateElements();
 		return true;
 	}
 }
@@ -23,6 +25,7 @@ bool SingleConnectTool::makeConnection(const Event* event) {
 bool SingleConnectTool::cancelConnection(const Event* event) {
 	if (clicked) {
 		reset();
+		updateElements();
 		return true;
 	}
 	return false;
@@ -30,9 +33,9 @@ bool SingleConnectTool::cancelConnection(const Event* event) {
 
 void SingleConnectTool::updateElements() {
 	if (clicked) {
-		setStatusbar("Left click to set connection input. Remake a connection to remove it.");
+		setStatusBar("Left click to set the connection end. Remake a connection to remove it.");
 	} else {
-		setStatusbar("Left click to set connection output. Remake a connection to remove it.");
+		setStatusBar("Left click to set the connection start. Remake a connection to remove it.");
 	}
 
 	if (!elementCreator.isSetup()) return;

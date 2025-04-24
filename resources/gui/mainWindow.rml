@@ -42,7 +42,9 @@
 						<template src="sim-controls"></template>
 					</div> -->
 					<div id="circuitview-container">
-						<div id="status-bar">some text that is long</div>
+						<div id="status-bar-centering">
+							<div id="status-bar">some text that is long</div>
+						</div>
 					</div>
 				</div>
 			</div>
