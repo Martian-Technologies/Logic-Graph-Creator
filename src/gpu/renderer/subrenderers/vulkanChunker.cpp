@@ -1,6 +1,5 @@
 #include "vulkanChunker.h"
 
-#include "vulkanChunkRenderer.h"
 #include "gpu/vulkanInstance.h"
 #include "backend/circuitView/renderer/tileSet.h"
 

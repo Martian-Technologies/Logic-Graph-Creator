@@ -4,9 +4,66 @@
 #include "backend/circuit/circuit.h"
 #include "gpu/vulkanBuffer.h"
 
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float3.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
+// ====================================================================================================================
+
+struct BlockVertex {
+	glm::vec2 pos;
+	glm::vec2 tex;
+
+	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = sizeof(BlockVertex);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescriptions;
+    }
+
+	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(BlockVertex, pos);
+
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(BlockVertex, tex);
+
+		return attributeDescriptions;
+	}
+};
+
+struct WireVertex {
+	glm::vec2 pos;
+
+	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = sizeof(WireVertex);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescriptions;
+    }
+
+	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(WireVertex, pos);
+
+		return attributeDescriptions;
+	}
+};
+
+// ====================================================================================================================
 // TODO - not sure if this should be stored, maybe it would be faster to just
 // query from blockContainer sometimes. We also don't have to store the width
 // and height
@@ -43,7 +100,7 @@ public:
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
 	inline uint32_t getNumBlockVertices() const { return numBlockVertices; }
-
+	
 	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
 	inline uint32_t getNumWireVertices() const { return numWireVertices; }
 
@@ -77,6 +134,8 @@ private:
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> currentlyAllocating;
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // gay baby jail (deleted chunks mid allocation go here)
 };
+
+// ====================================================================================================================
 
 class VulkanChunker {
 public:
