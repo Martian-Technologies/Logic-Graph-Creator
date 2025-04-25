@@ -84,6 +84,7 @@ struct RenderedBlock {
 struct RenderedWire {
 	FPosition start;
 	FPosition end;
+	Address relativeStateAddress;
 };
 
 struct WireHash {

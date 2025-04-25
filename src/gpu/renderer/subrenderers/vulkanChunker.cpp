@@ -86,9 +86,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 			else {
 				// add address to state buffer
 				stateIdx = relativeAdresses.size();
+				relativeAdresses.push_back(wire.second.relativeStateAddress);
 				posToAddressIdx[wire.first.first] = stateIdx;
-				// TODO get position address for wires in sub blocks
-				relativeAdresses.push_back(wire.first.first);
 			}
 
 			// generate vertices
@@ -253,8 +252,8 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
 			// TODO - technically removing connections could use a faster algorithm since it doesn't need to know the input/output points of each chunk
-			Rotation outputRotation = circuit->getBlockContainer()->getBlock(outputBlockPosition)->getRotation();
-			Rotation inputRotation = circuit->getBlockContainer()->getBlock(inputBlockPosition)->getRotation();
+			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getBlocksForUpdating()[outputBlockPosition].rotation;
+			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getBlocksForUpdating()[inputBlockPosition].rotation;
 			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, false, chunksToUpdate);
 			
 			break;
@@ -263,8 +262,8 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
 
-			Rotation outputRotation = circuit->getBlockContainer()->getBlock(outputBlockPosition)->getRotation();
-			Rotation inputRotation = circuit->getBlockContainer()->getBlock(inputBlockPosition)->getRotation();
+			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getBlocksForUpdating()[outputBlockPosition].rotation;
+			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getBlocksForUpdating()[inputBlockPosition].rotation;
 			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, true, chunksToUpdate);
 			
 			break;
@@ -346,6 +345,10 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 	
 	// honestly it's a little jank and it may break if the offsets leave the block far enough
 	// and it won't work at all for curved wires, we will prob redesign system for that
+
+	// get state address for connection
+	Address relativeAddress;
+	relativeAddress = start; // TODO - use actual address
 	
 	// chunk positions
 	Position currentChunk = getChunk(start);
@@ -401,16 +404,23 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 			moveHorizontal = horizontalTravelCost < verticalTravelCost;
 		}
 
+		// update connection
+		f_cord_t newX = currentX;
+		f_cord_t newY = currentY;
+		if (moveHorizontal) {
+			newX += dstToNextChunkBorderX;
+			newY += yChangeForHorizontal;
+		}
+		else {
+			newX += xChangeForVertical;
+			newY += dstToNextChunkBorderY;
+		}
+		if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}, relativeAddress};
+		else chunks[currentChunk].getWiresForUpdating().erase({start, end});
+		chunksToUpdate.insert(currentChunk);	
+		
 		// move in the desired direction
 		if (moveHorizontal) {
-			// get next position and connect chunk
-			f_cord_t newX = currentX + dstToNextChunkBorderX;
-			f_cord_t newY = currentY + yChangeForHorizontal;
-
-			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
-			else chunks[currentChunk].getWiresForUpdating().erase({start, end});
-			chunksToUpdate.insert(currentChunk);
-
 			// update positions
 			currentX = newX;
 			currentY = newY;
@@ -421,14 +431,6 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 			currentChunk.x += CHUNK_SIZE * dirX;
 				
 		} else {
-			// get next position and connect chunk
-			f_cord_t newX = currentX + xChangeForVertical;
-			f_cord_t newY = currentY + dstToNextChunkBorderY;
-
-			if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {newX, newY}};
-			else chunks[currentChunk].getWiresForUpdating().erase({start, end});
-			chunksToUpdate.insert(currentChunk);
-
 			// update positions
 			currentX = newX;
 			currentY = newY;
@@ -441,7 +443,7 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 	}
 
 	// connect last chunk
-	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {endX, endY}};
+	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {endX, endY}, relativeAddress};
 	else chunks[currentChunk].getWiresForUpdating().erase({start, end});
 	chunksToUpdate.insert(currentChunk);
 }
