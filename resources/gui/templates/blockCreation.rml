@@ -21,9 +21,15 @@
 				</div>
 				<div id="connection-menu">
 					<div>
-						<div id="connection-list-add">Add</div>
+						Inputs<br />
+						<div id="connection-list-add-input">Add Output</div>
 					</div>
-					<div id="connection-list"></div>
+					<div id="connection-list-input"></div>
+					<div>
+						Outputs<br />
+						<div id="connection-list-add-output">Add Input</div>
+					</div>
+					<div id="connection-list-output"></div>
 				</div>
 				<div>
 					<div id="reset-block-creation" class="">Reset</div>

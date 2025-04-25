@@ -35,7 +35,7 @@
 	padding: 0.1em 0.1em;
 }
 
-#connection-list {
+#connection-list-output, #connection-list-input {
 	display: block;
 	background-color: #151515;
 	border-radius: 0.1em;
@@ -76,19 +76,4 @@
 
 .number-long {
 	width: 4rem
-}
-
-input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    background-color: #5a6262;
-    border: 1px;
-    border-radius: 3px;
-    color: #f0f0f0;
-    margin-right: 8px;
-}
-
-input[type="checkbox"]:checked {
-    background-color: #8fbc8f;
-    border-color: #a9d1a9; 
 }
