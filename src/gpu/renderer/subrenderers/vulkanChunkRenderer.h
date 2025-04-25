@@ -24,10 +24,13 @@ private:
 
 	// descriptors and textures
 	DescriptorAllocator descriptorAllocator;
+	// block texture
 	VkDescriptorSetLayout blockTextureDescriptorSetLayout;
 	VkDescriptorSet blockTextureDescriptor;
 	VkSampler blockTextureSampler;
 	AllocatedImage blockTexture;
+	// state buffer
+	VkDescriptorSetLayout stateBufferDescriptorSetLayout;
 };
 
 #endif
