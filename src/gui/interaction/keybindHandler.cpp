@@ -16,12 +16,6 @@ void KeybindHandler::ProcessEvent(Rml::Event& event) {
 
 void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, int modifier, ListenerFunction listenerFunction) {
 	unsigned int keyCombined = key << 8;
-#ifdef __APPLE__
-	if (modifier & Rml::Input::KeyModifier::KM_CTRL) {
-		modifier ^= Rml::Input::KeyModifier::KM_CTRL;
-		modifier |= Rml::Input::KeyModifier::KM_META;
-	}
-#endif
 	keyCombined += modifier;
 	listenerFunctions.emplace(keyCombined, listenerFunction);
 }
