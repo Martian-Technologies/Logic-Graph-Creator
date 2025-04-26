@@ -7,112 +7,112 @@ blockId 51 LIGHT 17 7 ZERO
 	(connId:0) (30 1)
 blockId 50 AND 2 10 ZERO
 	(connId:0) (47 0)
-	(connId:1) (46 1) (44 1) (42 1) (40 1) (49 1) (38 1) (36 1) (34 1)
+	(connId:1) (34 1) (36 1) (40 1) (42 1) (38 1) (49 1) (44 1) (46 1)
 blockId 49 TRISTATE_BUFFER 6 2 ZERO
 	(connId:0) (17 0)
 	(connId:2) (10 0)
 	(connId:1) (50 1)
 blockId 48 JUNCTION 12 7 ZERO
-	(connId:1) (30 0)
 	(connId:0) (18 2) (34 2)
+	(connId:1) (30 0)
 blockId 47 SWITCH 0 10 ZERO
-	(connId:0) (12 0) (50 0)
+	(connId:0) (50 0) (12 0)
 blockId 46 TRISTATE_BUFFER 6 0 ZERO
 	(connId:0) (32 0)
-	(connId:1) (50 1)
 	(connId:2) (11 0)
+	(connId:1) (50 1)
 blockId 45 JUNCTION 12 6 ZERO
-	(connId:1) (5 0)
 	(connId:0) (19 2) (36 2)
+	(connId:1) (5 0)
 blockId 44 TRISTATE_BUFFER 6 4 ZERO
 	(connId:0) (29 0)
 	(connId:2) (9 0)
 	(connId:1) (50 1)
 blockId 43 OR 14 0 ZERO
-	(connId:1) (27 0) (31 0)
 	(connId:0) (11 1)
+	(connId:1) (31 0) (27 0)
 blockId 42 TRISTATE_BUFFER 6 6 ZERO
 	(connId:0) (26 0)
 	(connId:2) (8 0)
 	(connId:1) (50 1)
 blockId 41 OR 14 1 ZERO
-	(connId:1) (24 0) (28 0)
 	(connId:0) (10 1)
+	(connId:1) (28 0) (24 0)
 blockId 40 TRISTATE_BUFFER 6 8 ZERO
 	(connId:0) (16 0)
 	(connId:2) (7 0)
 	(connId:1) (50 1)
 blockId 39 OR 14 2 ZERO
-	(connId:1) (22 0) (25 0)
 	(connId:0) (9 1)
+	(connId:1) (25 0) (22 0)
 blockId 38 TRISTATE_BUFFER 6 10 ZERO
 	(connId:0) (15 0)
 	(connId:2) (6 0)
 	(connId:1) (50 1)
 blockId 37 OR 14 3 ZERO
-	(connId:1) (4 0) (23 0)
 	(connId:0) (8 1)
+	(connId:1) (23 0) (4 0)
 blockId 36 TRISTATE_BUFFER 6 12 ZERO
 	(connId:0) (14 0)
 	(connId:2) (45 0)
 	(connId:1) (50 1)
 blockId 35 OR 14 4 ZERO
-	(connId:1) (3 0) (21 0)
 	(connId:0) (7 1)
+	(connId:1) (21 0) (3 0)
 blockId 34 TRISTATE_BUFFER 6 14 ZERO
 	(connId:0) (13 0)
 	(connId:2) (48 0)
 	(connId:1) (50 1)
 blockId 33 OR 14 5 ZERO
-	(connId:1) (2 0) (20 0)
 	(connId:0) (6 1)
+	(connId:1) (20 0) (2 0)
 blockId 32 SWITCH 3 0 ZERO
 	(connId:0) (46 0)
 blockId 31 TRISTATE_BUFFER 10 0 ZERO
-	(connId:0) (43 1)
 	(connId:1) (12 1)
 	(connId:2) (11 0)
+	(connId:0) (43 1)
 blockId 30 OR 14 7 ZERO
-	(connId:1) (51 0) (18 0)
+	(connId:1) (18 0) (51 0)
 	(connId:0) (48 1)
 blockId 29 SWITCH 3 2 ZERO
 	(connId:0) (44 0)
 blockId 28 TRISTATE_BUFFER 10 2 ZERO
-	(connId:0) (41 1)
 	(connId:1) (12 1)
 	(connId:2) (10 0)
+	(connId:0) (41 1)
 blockId 27 LIGHT 17 0 ZERO
 	(connId:0) (43 1)
 blockId 26 SWITCH 3 3 ZERO
 	(connId:0) (42 0)
 blockId 25 TRISTATE_BUFFER 10 4 ZERO
-	(connId:0) (39 1)
 	(connId:1) (12 1)
 	(connId:2) (9 0)
+	(connId:0) (39 1)
 blockId 24 LIGHT 17 1 ZERO
 	(connId:0) (41 1)
 blockId 23 TRISTATE_BUFFER 10 6 ZERO
-	(connId:0) (37 1)
 	(connId:1) (12 1)
 	(connId:2) (8 0)
+	(connId:0) (37 1)
 blockId 22 LIGHT 17 2 ZERO
 	(connId:0) (39 1)
 blockId 21 TRISTATE_BUFFER 10 8 ZERO
-	(connId:0) (35 1)
 	(connId:1) (12 1)
 	(connId:2) (7 0)
+	(connId:0) (35 1)
 blockId 20 TRISTATE_BUFFER 10 10 ZERO
-	(connId:0) (33 1)
 	(connId:1) (12 1)
 	(connId:2) (6 0)
+	(connId:0) (33 1)
 blockId 19 TRISTATE_BUFFER 10 12 ZERO
 	(connId:0) (5 1)
 	(connId:1) (12 1)
 	(connId:2) (45 0)
 blockId 18 TRISTATE_BUFFER 10 14 ZERO
-	(connId:0) (30 1)
 	(connId:1) (12 1)
 	(connId:2) (48 0)
+	(connId:0) (30 1)
 blockId 17 SWITCH 3 1 ZERO
 	(connId:0) (49 0)
 blockId 16 SWITCH 3 4 ZERO
@@ -124,7 +124,7 @@ blockId 14 SWITCH 3 6 ZERO
 blockId 13 SWITCH 3 7 ZERO
 	(connId:0) (34 0)
 blockId 12 NAND 4 12 ZERO
-	(connId:1) (28 1) (25 1) (21 1) (31 1) (20 1) (19 1) (23 1) (18 1)
+	(connId:1) (18 1) (23 1) (19 1) (20 1) (31 1) (21 1) (25 1) (28 1)
 	(connId:0) (47 0)
 blockId 11 JUNCTION 12 0 ZERO
 	(connId:1) (43 0)
@@ -145,7 +145,7 @@ blockId 6 JUNCTION 12 5 ZERO
 	(connId:1) (33 0)
 	(connId:0) (20 2) (38 2)
 blockId 5 OR 14 6 ZERO
-	(connId:1) (1 0) (19 0)
+	(connId:1) (19 0) (1 0)
 	(connId:0) (45 1)
 blockId 4 LIGHT 17 3 ZERO
 	(connId:0) (37 1)

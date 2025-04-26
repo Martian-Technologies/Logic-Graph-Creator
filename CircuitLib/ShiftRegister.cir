@@ -1,332 +1,332 @@
-version_5
+version_6
 Circuit: "ShiftReg"
 UUID: 4c1db4db-d14f-4e8c-8361-53b21ec09fd8
 size: <3, 14>
-ports (22):
-	(IN, 0, 85, <0, 0>, "CLK")
-	(IN, 1, 105, <0, 1>, "CLR")
-	(IN, 2, 73, <0, 2>, "P0")
-	(IN, 3, 74, <0, 3>, "P1")
-	(IN, 4, 75, <0, 4>, "P2")
-	(IN, 5, 76, <0, 5>, "P3")
-	(IN, 6, 77, <0, 6>, "P4")
-	(IN, 7, 78, <0, 7>, "P5")
-	(IN, 8, 79, <0, 8>, "P6")
-	(IN, 9, 80, <0, 9>, "P7")
-	(IN, 10, 81, <0, 10>, "S0")
-	(IN, 11, 82, <0, 11>, "S1")
-	(IN, 12, 106, <0, 12>, "RI")
-	(IN, 13, 107, <0, 13>, "LI")
-	(OUT, 14, 87, <2, 2>, "Q0")
-	(OUT, 15, 88, <2, 3>, "Q1")
-	(OUT, 16, 89, <2, 4>, "Q2")
-	(OUT, 17, 90, <2, 5>, "Q3")
-	(OUT, 18, 91, <2, 6>, "Q4")
-	(OUT, 19, 92, <2, 7>, "Q5")
-	(OUT, 20, 93, <2, 8>, "Q6")
-	(OUT, 21, 94, <2, 9>, "Q7")
-blockId 1 NAND 14 6 ZERO 2
-	(connId:0) (59 1) (108 1)
-	(connId:1) (5 0)
-blockId 2 AND 7 0 ZERO 2
-	(connId:0) (55 1) (83 1) (84 1)
-	(connId:1) (57 0)
-blockId 3 NAND 14 7 ZERO 2
-	(connId:0) (97 1) (108 1)
-	(connId:1) (7 0)
-blockId 4 AND 8 0 ZERO 2
-	(connId:0) (51 1) (81 0) (84 1)
-	(connId:1) (57 0)
-blockId 5 NAND 15 6 ZERO 2
-	(connId:0) (1 1) (7 1)
-	(connId:1) (18 0) (12 0) (30 0) (7 0) (89 0)
-blockId 6 AND 9 0 ZERO 2
-	(connId:0) (82 0) (83 1) (106 0)
-	(connId:1) (57 0)
-blockId 7 NAND 15 7 ZERO 2
-	(connId:0) (3 1) (5 1) (109 1)
-	(connId:1) (5 0)
-blockId 8 AND 10 0 ZERO 2
-	(connId:0) (73 0) (81 0) (82 0)
-	(connId:1) (57 0)
-blockId 9 NAND 14 9 ZERO 2
-	(connId:0) (60 1) (108 1)
-	(connId:1) (13 0)
-blockId 10 AND 7 3 ZERO 2
-	(connId:0) (51 1) (83 1) (84 1)
-	(connId:1) (58 0)
-blockId 11 NAND 14 10 ZERO 2
-	(connId:0) (98 1) (108 1)
-	(connId:1) (15 0)
-blockId 12 AND 8 3 ZERO 2
-	(connId:0) (5 1) (81 0) (84 1)
-	(connId:1) (58 0)
-blockId 13 NAND 15 9 ZERO 2
-	(connId:0) (9 1) (15 1)
-	(connId:1) (26 0) (20 0) (38 0) (15 0) (90 0)
-blockId 14 AND 9 3 ZERO 2
-	(connId:0) (55 1) (82 0) (83 1)
-	(connId:1) (58 0)
-blockId 15 NAND 15 10 ZERO 2
-	(connId:0) (11 1) (13 1) (109 1)
-	(connId:1) (13 0)
-blockId 16 AND 10 3 ZERO 2
-	(connId:0) (74 0) (81 0) (82 0)
-	(connId:1) (58 0)
-blockId 17 NAND 14 12 ZERO 2
-	(connId:0) (61 1) (108 1)
-	(connId:1) (21 0)
-blockId 18 AND 7 6 ZERO 2
-	(connId:0) (5 1) (83 1) (84 1)
-	(connId:1) (59 0)
-blockId 19 NAND 14 13 ZERO 2
-	(connId:0) (99 1) (108 1)
-	(connId:1) (23 0)
-blockId 20 AND 8 6 ZERO 2
-	(connId:0) (13 1) (81 0) (84 1)
-	(connId:1) (59 0)
-blockId 21 NAND 15 12 ZERO 2
-	(connId:0) (17 1) (23 1)
-	(connId:1) (34 0) (28 0) (46 0) (23 0) (91 0)
-blockId 22 AND 9 6 ZERO 2
-	(connId:0) (51 1) (82 0) (83 1)
-	(connId:1) (59 0)
-blockId 23 NAND 15 13 ZERO 2
-	(connId:0) (19 1) (21 1) (109 1)
-	(connId:1) (21 0)
-blockId 24 AND 10 6 ZERO 2
-	(connId:0) (75 0) (81 0) (82 0)
-	(connId:1) (59 0)
-blockId 25 NAND 14 15 ZERO 2
-	(connId:0) (62 1) (108 1)
-	(connId:1) (29 0)
-blockId 26 AND 7 9 ZERO 2
-	(connId:0) (13 1) (83 1) (84 1)
-	(connId:1) (60 0)
-blockId 27 NAND 14 16 ZERO 2
-	(connId:0) (100 1) (108 1)
-	(connId:1) (31 0)
-blockId 28 AND 8 9 ZERO 2
-	(connId:0) (21 1) (81 0) (84 1)
-	(connId:1) (60 0)
-blockId 29 NAND 15 15 ZERO 2
-	(connId:0) (25 1) (31 1)
-	(connId:1) (42 0) (36 0) (67 0) (31 0) (92 0)
-blockId 30 AND 9 9 ZERO 2
-	(connId:0) (5 1) (82 0) (83 1)
-	(connId:1) (60 0)
-blockId 31 NAND 15 16 ZERO 2
-	(connId:0) (27 1) (29 1) (109 1)
-	(connId:1) (29 0)
-blockId 32 AND 10 9 ZERO 2
-	(connId:0) (76 0) (81 0) (82 0)
-	(connId:1) (60 0)
-blockId 33 NAND 14 18 ZERO 2
-	(connId:0) (63 1) (108 1)
-	(connId:1) (37 0)
-blockId 34 AND 7 12 ZERO 2
-	(connId:0) (21 1) (83 1) (84 1)
-	(connId:1) (61 0)
-blockId 35 NAND 14 19 ZERO 2
-	(connId:0) (101 1) (108 1)
-	(connId:1) (39 0)
-blockId 36 AND 8 12 ZERO 2
-	(connId:0) (29 1) (81 0) (84 1)
-	(connId:1) (61 0)
-blockId 37 NAND 15 18 ZERO 2
-	(connId:0) (33 1) (39 1)
-	(connId:1) (65 0) (44 0) (71 0) (39 0) (93 0)
-blockId 38 AND 9 12 ZERO 2
-	(connId:0) (13 1) (82 0) (83 1)
-	(connId:1) (61 0)
-blockId 39 NAND 15 19 ZERO 2
-	(connId:0) (35 1) (37 1) (109 1)
-	(connId:1) (37 0)
-blockId 40 AND 10 12 ZERO 2
-	(connId:0) (77 0) (81 0) (82 0)
-	(connId:1) (61 0)
-blockId 41 NAND 14 21 ZERO 2
-	(connId:0) (64 1) (108 1)
-	(connId:1) (45 0)
-blockId 42 AND 7 15 ZERO 2
-	(connId:0) (29 1) (83 1) (84 1)
-	(connId:1) (62 0)
-blockId 43 NAND 14 22 ZERO 2
-	(connId:0) (102 1) (108 1)
-	(connId:1) (47 0)
-blockId 44 AND 8 15 ZERO 2
-	(connId:0) (37 1) (81 0) (84 1)
-	(connId:1) (62 0)
-blockId 45 NAND 15 21 ZERO 2
-	(connId:0) (41 1) (47 1)
-	(connId:1) (69 0) (66 0) (47 0) (94 0)
-blockId 46 AND 9 15 ZERO 2
-	(connId:0) (21 1) (82 0) (83 1)
-	(connId:1) (62 0)
-blockId 47 NAND 15 22 ZERO 2
-	(connId:0) (43 1) (45 1) (109 1)
-	(connId:1) (45 0)
-blockId 48 AND 10 15 ZERO 2
-	(connId:0) (78 0) (81 0) (82 0)
-	(connId:1) (62 0)
-blockId 49 NAND 14 3 ZERO 2
-	(connId:0) (58 1) (108 1)
-	(connId:1) (51 0)
-blockId 50 NAND 14 4 ZERO 2
-	(connId:0) (96 1) (108 1)
-	(connId:1) (52 0)
-blockId 51 NAND 15 3 ZERO 2
-	(connId:0) (49 1) (52 1)
-	(connId:1) (10 0) (4 0) (22 0) (52 0) (88 0)
-blockId 52 NAND 15 4 ZERO 2
-	(connId:0) (50 1) (51 1) (109 1)
-	(connId:1) (51 0)
-blockId 53 NAND 14 0 ZERO 2
-	(connId:0) (57 1) (108 1)
-	(connId:1) (55 0)
-blockId 54 NAND 14 1 ZERO 2
-	(connId:0) (95 1) (108 1)
-	(connId:1) (56 0)
-blockId 55 NAND 15 0 ZERO 2
-	(connId:0) (53 1) (56 1)
-	(connId:1) (2 0) (14 0) (56 0) (87 0)
-blockId 56 NAND 15 1 ZERO 2
-	(connId:0) (54 1) (55 1) (109 1)
-	(connId:1) (55 0)
-blockId 57 OR 12 0 ZERO 2
-	(connId:0) (2 1) (4 1) (6 1) (8 1)
-	(connId:1) (53 0) (95 0)
-blockId 58 OR 12 3 ZERO 2
-	(connId:0) (10 1) (12 1) (14 1) (16 1)
-	(connId:1) (49 0) (96 0)
-blockId 59 OR 12 6 ZERO 2
-	(connId:0) (18 1) (20 1) (22 1) (24 1)
-	(connId:1) (1 0) (97 0)
-blockId 60 OR 12 9 ZERO 2
-	(connId:0) (26 1) (28 1) (30 1) (32 1)
-	(connId:1) (9 0) (98 0)
-blockId 61 OR 12 12 ZERO 2
-	(connId:0) (34 1) (36 1) (38 1) (40 1)
-	(connId:1) (17 0) (99 0)
-blockId 62 OR 12 15 ZERO 2
-	(connId:0) (42 1) (44 1) (46 1) (48 1)
-	(connId:1) (25 0) (100 0)
-blockId 63 OR 12 18 ZERO 2
-	(connId:0) (65 1) (66 1) (67 1) (68 1)
-	(connId:1) (33 0) (101 0)
-blockId 64 OR 12 21 ZERO 2
-	(connId:0) (69 1) (70 1) (71 1) (72 1)
-	(connId:1) (41 0) (102 0)
-blockId 65 AND 7 18 ZERO 2
-	(connId:0) (37 1) (83 1) (84 1)
-	(connId:1) (63 0)
-blockId 66 AND 8 18 ZERO 2
-	(connId:0) (45 1) (81 0) (84 1)
-	(connId:1) (63 0)
-blockId 67 AND 9 18 ZERO 2
-	(connId:0) (29 1) (82 0) (83 1)
-	(connId:1) (63 0)
-blockId 68 AND 10 18 ZERO 2
-	(connId:0) (79 0) (81 0) (82 0)
-	(connId:1) (63 0)
-blockId 69 AND 7 21 ZERO 2
-	(connId:0) (45 1) (83 1) (84 1)
-	(connId:1) (64 0)
-blockId 70 AND 8 21 ZERO 2
-	(connId:0) (81 0) (84 1) (107 0)
-	(connId:1) (64 0)
-blockId 71 AND 9 21 ZERO 2
-	(connId:0) (37 1) (82 0) (83 1)
-	(connId:1) (64 0)
-blockId 72 AND 10 21 ZERO 2
-	(connId:0) (80 0) (81 0) (82 0)
-	(connId:1) (64 0)
-blockId 73 SWITCH 3 4 ZERO 1
-	(connId:0) (8 0)
-blockId 74 SWITCH 3 5 ZERO 1
-	(connId:0) (16 0)
-blockId 75 SWITCH 3 6 ZERO 1
-	(connId:0) (24 0)
-blockId 76 SWITCH 3 7 ZERO 1
-	(connId:0) (32 0)
-blockId 77 SWITCH 3 8 ZERO 1
-	(connId:0) (40 0)
-blockId 78 SWITCH 3 9 ZERO 1
-	(connId:0) (48 0)
-blockId 79 SWITCH 3 10 ZERO 1
-	(connId:0) (68 0)
-blockId 80 SWITCH 3 11 ZERO 1
-	(connId:0) (72 0)
-blockId 81 SWITCH 3 14 ZERO 1
-	(connId:0) (83 0) (72 0) (68 0) (48 0) (40 0) (32 0) (24 0) (16 0) (8 0) (70 0) (66 0) (44 0) (36 0) (28 0) (20 0) (12 0) (4 0)
-blockId 82 SWITCH 3 15 ZERO 1
-	(connId:0) (84 0) (72 0) (68 0) (48 0) (40 0) (32 0) (24 0) (16 0) (8 0) (71 0) (67 0) (46 0) (38 0) (30 0) (22 0) (14 0) (6 0)
-blockId 83 NAND 4 14 ZERO 2
-	(connId:0) (81 0)
-	(connId:1) (71 0) (67 0) (46 0) (38 0) (30 0) (22 0) (14 0) (6 0) (69 0) (65 0) (42 0) (34 0) (26 0) (18 0) (10 0) (2 0)
-blockId 84 NAND 4 15 ZERO 2
-	(connId:0) (82 0)
-	(connId:1) (70 0) (66 0) (44 0) (36 0) (28 0) (20 0) (12 0) (4 0) (69 0) (65 0) (42 0) (34 0) (26 0) (18 0) (10 0) (2 0)
-blockId 85 SWITCH 0 0 ZERO 1
-	(connId:0) (108 0) (86 0)
-blockId 86 NAND 1 0 ZERO 2
-	(connId:0) (85 0)
+ports:
+	(OUT, 21, 16, <2, 9>, "Q7")
+	(OUT, 20, 17, <2, 8>, "Q6")
+	(OUT, 19, 18, <2, 7>, "Q5")
+	(OUT, 18, 19, <2, 6>, "Q4")
+	(OUT, 17, 20, <2, 5>, "Q3")
+	(OUT, 16, 21, <2, 4>, "Q2")
+	(OUT, 15, 22, <2, 3>, "Q1")
+	(OUT, 14, 23, <2, 2>, "Q0")
+	(IN, 13, 3, <0, 13>, "LI")
+	(IN, 12, 4, <0, 12>, "RI")
+	(IN, 11, 28, <0, 11>, "S1")
+	(IN, 10, 29, <0, 10>, "S0")
+	(IN, 9, 30, <0, 9>, "P7")
+	(IN, 8, 31, <0, 8>, "P6")
+	(IN, 7, 32, <0, 7>, "P5")
+	(IN, 6, 33, <0, 6>, "P4")
+	(IN, 5, 34, <0, 5>, "P3")
+	(IN, 4, 35, <0, 4>, "P2")
+	(IN, 3, 36, <0, 3>, "P1")
+	(IN, 2, 37, <0, 2>, "P0")
+	(IN, 1, 5, <0, 1>, "CLR")
+	(IN, 0, 25, <0, 0>, "CLK")
+blockId 109 NAND 14 6 ZERO
+	(connId:0) (2 1) (51 1)
+	(connId:1) (105 0)
+blockId 108 AND 7 0 ZERO
+	(connId:0) (26 1) (27 1) (55 1)
+	(connId:1) (53 0)
+blockId 107 NAND 14 7 ZERO
+	(connId:0) (2 1) (13 1)
 	(connId:1) (103 0)
-blockId 87 LIGHT 19 4 ZERO 1
-	(connId:0) (55 1)
-blockId 88 LIGHT 19 5 ZERO 1
-	(connId:0) (51 1)
-blockId 89 LIGHT 19 6 ZERO 1
-	(connId:0) (5 1)
-blockId 90 LIGHT 19 7 ZERO 1
-	(connId:0) (13 1)
-blockId 91 LIGHT 19 8 ZERO 1
-	(connId:0) (21 1)
-blockId 92 LIGHT 19 9 ZERO 1
-	(connId:0) (29 1)
-blockId 93 LIGHT 19 10 ZERO 1
-	(connId:0) (37 1)
-blockId 94 LIGHT 19 11 ZERO 1
-	(connId:0) (45 1)
-blockId 95 NAND 13 0 ZERO 2
-	(connId:0) (57 1)
-	(connId:1) (54 0)
-blockId 96 NAND 13 3 ZERO 2
-	(connId:0) (58 1)
+blockId 106 AND 8 0 ZERO
+	(connId:0) (26 1) (29 0) (59 1)
+	(connId:1) (53 0)
+blockId 105 NAND 15 6 ZERO
+	(connId:1) (21 0) (80 0) (103 0) (98 0) (92 0)
+	(connId:0) (103 1) (109 1)
+blockId 104 AND 9 0 ZERO
+	(connId:0) (4 0) (27 1) (28 0)
+	(connId:1) (53 0)
+blockId 103 NAND 15 7 ZERO
+	(connId:1) (105 0)
+	(connId:0) (1 1) (105 1) (107 1)
+blockId 102 AND 10 0 ZERO
+	(connId:0) (28 0) (29 0) (37 0)
+	(connId:1) (53 0)
+blockId 101 NAND 14 9 ZERO
+	(connId:0) (2 1) (50 1)
+	(connId:1) (97 0)
+blockId 100 AND 7 3 ZERO
+	(connId:0) (26 1) (27 1) (59 1)
+	(connId:1) (52 0)
+blockId 99 NAND 14 10 ZERO
+	(connId:0) (2 1) (12 1)
+	(connId:1) (95 0)
+blockId 98 AND 8 3 ZERO
+	(connId:1) (52 0)
+	(connId:0) (26 1) (29 0) (105 1)
+blockId 97 NAND 15 9 ZERO
+	(connId:1) (72 0) (20 0) (95 0) (90 0) (84 0)
+	(connId:0) (95 1) (101 1)
+blockId 96 AND 9 3 ZERO
+	(connId:0) (27 1) (28 0) (55 1)
+	(connId:1) (52 0)
+blockId 95 NAND 15 10 ZERO
+	(connId:1) (97 0)
+	(connId:0) (1 1) (97 1) (99 1)
+blockId 94 AND 10 3 ZERO
+	(connId:0) (28 0) (29 0) (36 0)
+	(connId:1) (52 0)
+blockId 93 NAND 14 12 ZERO
+	(connId:0) (2 1) (49 1)
+	(connId:1) (89 0)
+blockId 92 AND 7 6 ZERO
+	(connId:1) (51 0)
+	(connId:0) (26 1) (27 1) (105 1)
+blockId 91 NAND 14 13 ZERO
+	(connId:0) (2 1) (11 1)
+	(connId:1) (87 0)
+blockId 90 AND 8 6 ZERO
+	(connId:1) (51 0)
+	(connId:0) (26 1) (29 0) (97 1)
+blockId 89 NAND 15 12 ZERO
+	(connId:1) (19 0) (64 0) (87 0) (82 0) (76 0)
+	(connId:0) (87 1) (93 1)
+blockId 88 AND 9 6 ZERO
+	(connId:0) (27 1) (28 0) (59 1)
+	(connId:1) (51 0)
+blockId 87 NAND 15 13 ZERO
+	(connId:1) (89 0)
+	(connId:0) (89 1) (1 1) (91 1)
+blockId 86 AND 10 6 ZERO
+	(connId:0) (28 0) (29 0) (35 0)
+	(connId:1) (51 0)
+blockId 85 NAND 14 15 ZERO
+	(connId:0) (2 1) (48 1)
+	(connId:1) (81 0)
+blockId 84 AND 7 9 ZERO
 	(connId:1) (50 0)
-blockId 97 NAND 13 6 ZERO 2
-	(connId:0) (59 1)
-	(connId:1) (3 0)
-blockId 98 NAND 13 9 ZERO 2
-	(connId:0) (60 1)
-	(connId:1) (11 0)
-blockId 99 NAND 13 12 ZERO 2
-	(connId:0) (61 1)
-	(connId:1) (19 0)
-blockId 100 NAND 13 15 ZERO 2
-	(connId:0) (62 1)
-	(connId:1) (27 0)
-blockId 101 NAND 13 18 ZERO 2
-	(connId:0) (63 1)
-	(connId:1) (35 0)
-blockId 102 NAND 13 21 ZERO 2
-	(connId:0) (64 1)
-	(connId:1) (43 0)
-blockId 103 NAND 2 0 ZERO 2
-	(connId:0) (86 1)
-	(connId:1) (104 0)
-blockId 104 NAND 3 0 ZERO 2
-	(connId:0) (103 1)
-	(connId:1) (108 0)
-blockId 105 SWITCH 3 2 ZERO 1
-	(connId:0) (109 0)
-blockId 106 SWITCH 3 17 ZERO 1
-	(connId:0) (6 0)
-blockId 107 SWITCH 3 18 ZERO 1
+	(connId:0) (26 1) (27 1) (97 1)
+blockId 83 NAND 14 16 ZERO
+	(connId:0) (2 1) (10 1)
+	(connId:1) (79 0)
+blockId 82 AND 8 9 ZERO
+	(connId:1) (50 0)
+	(connId:0) (26 1) (29 0) (89 1)
+blockId 81 NAND 15 15 ZERO
+	(connId:1) (79 0) (74 0) (18 0) (43 0) (68 0)
+	(connId:0) (79 1) (85 1)
+blockId 80 AND 9 9 ZERO
+	(connId:1) (50 0)
+	(connId:0) (27 1) (28 0) (105 1)
+blockId 79 NAND 15 16 ZERO
+	(connId:1) (81 0)
+	(connId:0) (1 1) (81 1) (83 1)
+blockId 78 AND 10 9 ZERO
+	(connId:0) (28 0) (29 0) (34 0)
+	(connId:1) (50 0)
+blockId 77 NAND 14 18 ZERO
+	(connId:0) (2 1) (47 1)
+	(connId:1) (73 0)
+blockId 76 AND 7 12 ZERO
+	(connId:1) (49 0)
+	(connId:0) (26 1) (27 1) (89 1)
+blockId 75 NAND 14 19 ZERO
+	(connId:0) (2 1) (9 1)
+	(connId:1) (71 0)
+blockId 74 AND 8 12 ZERO
+	(connId:1) (49 0)
+	(connId:0) (29 0) (26 1) (81 1)
+blockId 73 NAND 15 18 ZERO
+	(connId:1) (17 0) (39 0) (71 0) (66 0) (45 0)
+	(connId:0) (71 1) (77 1)
+blockId 72 AND 9 12 ZERO
+	(connId:1) (49 0)
+	(connId:0) (27 1) (28 0) (97 1)
+blockId 71 NAND 15 19 ZERO
+	(connId:1) (73 0)
+	(connId:0) (1 1) (73 1) (75 1)
+blockId 70 AND 10 12 ZERO
+	(connId:0) (29 0) (28 0) (33 0)
+	(connId:1) (49 0)
+blockId 69 NAND 14 21 ZERO
+	(connId:0) (2 1) (46 1)
+	(connId:1) (65 0)
+blockId 68 AND 7 15 ZERO
+	(connId:1) (48 0)
+	(connId:0) (27 1) (26 1) (81 1)
+blockId 67 NAND 14 22 ZERO
+	(connId:0) (2 1) (8 1)
+	(connId:1) (63 0)
+blockId 66 AND 8 15 ZERO
+	(connId:1) (48 0)
+	(connId:0) (26 1) (29 0) (73 1)
+blockId 65 NAND 15 21 ZERO
+	(connId:1) (63 0) (44 0) (16 0) (41 0)
+	(connId:0) (63 1) (69 1)
+blockId 64 AND 9 15 ZERO
+	(connId:1) (48 0)
+	(connId:0) (27 1) (28 0) (89 1)
+blockId 63 NAND 15 22 ZERO
+	(connId:1) (65 0)
+	(connId:0) (1 1) (65 1) (67 1)
+blockId 62 AND 10 15 ZERO
+	(connId:0) (28 0) (29 0) (32 0)
+	(connId:1) (48 0)
+blockId 61 NAND 14 3 ZERO
+	(connId:0) (2 1) (52 1)
+	(connId:1) (59 0)
+blockId 60 NAND 14 4 ZERO
+	(connId:0) (2 1) (14 1)
+	(connId:1) (58 0)
+blockId 59 NAND 15 3 ZERO
+	(connId:1) (22 0) (58 0) (88 0) (106 0) (100 0)
+	(connId:0) (58 1) (61 1)
+blockId 58 NAND 15 4 ZERO
+	(connId:1) (59 0)
+	(connId:0) (1 1) (59 1) (60 1)
+blockId 57 NAND 14 0 ZERO
+	(connId:0) (2 1) (53 1)
+	(connId:1) (55 0)
+blockId 56 NAND 14 1 ZERO
+	(connId:0) (2 1) (15 1)
+	(connId:1) (54 0)
+blockId 55 NAND 15 0 ZERO
+	(connId:1) (54 0) (96 0) (23 0) (108 0)
+	(connId:0) (54 1) (57 1)
+blockId 54 NAND 15 1 ZERO
+	(connId:1) (55 0)
+	(connId:0) (55 1) (1 1) (56 1)
+blockId 53 OR 12 0 ZERO
+	(connId:1) (15 0) (57 0)
+	(connId:0) (102 1) (104 1) (106 1) (108 1)
+blockId 52 OR 12 3 ZERO
+	(connId:1) (14 0) (61 0)
+	(connId:0) (94 1) (96 1) (98 1) (100 1)
+blockId 51 OR 12 6 ZERO
+	(connId:1) (13 0) (109 0)
+	(connId:0) (86 1) (88 1) (90 1) (92 1)
+blockId 50 OR 12 9 ZERO
+	(connId:1) (12 0) (101 0)
+	(connId:0) (78 1) (80 1) (82 1) (84 1)
+blockId 49 OR 12 12 ZERO
+	(connId:1) (11 0) (93 0)
+	(connId:0) (70 1) (72 1) (74 1) (76 1)
+blockId 48 OR 12 15 ZERO
+	(connId:1) (10 0) (85 0)
+	(connId:0) (62 1) (64 1) (66 1) (68 1)
+blockId 47 OR 12 18 ZERO
+	(connId:0) (42 1) (43 1) (44 1) (45 1)
+	(connId:1) (9 0) (77 0)
+blockId 46 OR 12 21 ZERO
+	(connId:0) (38 1) (39 1) (40 1) (41 1)
+	(connId:1) (8 0) (69 0)
+blockId 45 AND 7 18 ZERO
+	(connId:1) (47 0)
+	(connId:0) (26 1) (27 1) (73 1)
+blockId 44 AND 8 18 ZERO
+	(connId:1) (47 0)
+	(connId:0) (26 1) (29 0) (65 1)
+blockId 43 AND 9 18 ZERO
+	(connId:1) (47 0)
+	(connId:0) (27 1) (28 0) (81 1)
+blockId 42 AND 10 18 ZERO
+	(connId:0) (28 0) (29 0) (31 0)
+	(connId:1) (47 0)
+blockId 41 AND 7 21 ZERO
+	(connId:1) (46 0)
+	(connId:0) (26 1) (27 1) (65 1)
+blockId 40 AND 8 21 ZERO
+	(connId:0) (3 0) (26 1) (29 0)
+	(connId:1) (46 0)
+blockId 39 AND 9 21 ZERO
+	(connId:1) (46 0)
+	(connId:0) (27 1) (28 0) (73 1)
+blockId 38 AND 10 21 ZERO
+	(connId:0) (28 0) (29 0) (30 0)
+	(connId:1) (46 0)
+blockId 37 SWITCH 3 4 ZERO
+	(connId:0) (102 0)
+blockId 36 SWITCH 3 5 ZERO
+	(connId:0) (94 0)
+blockId 35 SWITCH 3 6 ZERO
+	(connId:0) (86 0)
+blockId 34 SWITCH 3 7 ZERO
+	(connId:0) (78 0)
+blockId 33 SWITCH 3 8 ZERO
 	(connId:0) (70 0)
-blockId 108 XNOR 4 0 ZERO 2
-	(connId:0) (85 0) (104 1)
-	(connId:1) (43 0) (41 0) (35 0) (33 0) (27 0) (25 0) (19 0) (17 0) (11 0) (9 0) (3 0) (1 0) (50 0) (49 0) (54 0) (53 0)
-blockId 109 NOR 4 2 ZERO 2
-	(connId:0) (105 0)
-	(connId:1) (47 0) (39 0) (31 0) (23 0) (15 0) (7 0) (52 0) (56 0)
+blockId 32 SWITCH 3 9 ZERO
+	(connId:0) (62 0)
+blockId 31 SWITCH 3 10 ZERO
+	(connId:0) (42 0)
+blockId 30 SWITCH 3 11 ZERO
+	(connId:0) (38 0)
+blockId 29 SWITCH 3 14 ZERO
+	(connId:0) (106 0) (98 0) (82 0) (74 0) (66 0) (90 0) (44 0) (102 0) (94 0) (78 0) (70 0) (27 0) (38 0) (86 0) (40 0) (62 0) (42 0)
+blockId 28 SWITCH 3 15 ZERO
+	(connId:0) (104 0) (96 0) (80 0) (64 0) (43 0) (102 0) (62 0) (39 0) (94 0) (78 0) (72 0) (26 0) (70 0) (86 0) (88 0) (42 0) (38 0)
+blockId 27 NAND 4 14 ZERO
+	(connId:1) (100 0) (92 0) (84 0) (76 0) (68 0) (45 0) (104 0) (64 0) (41 0) (96 0) (88 0) (80 0) (108 0) (39 0) (72 0) (43 0)
+	(connId:0) (29 0)
+blockId 26 NAND 4 15 ZERO
+	(connId:1) (108 0) (100 0) (92 0) (84 0) (76 0) (68 0) (45 0) (98 0) (44 0) (90 0) (82 0) (66 0) (41 0) (74 0) (106 0) (40 0)
+	(connId:0) (28 0)
+blockId 25 SWITCH 0 0 ZERO
+	(connId:0) (24 0) (2 0)
+blockId 24 NAND 1 0 ZERO
+	(connId:1) (7 0)
+	(connId:0) (25 0)
+blockId 23 LIGHT 19 4 ZERO
+	(connId:0) (55 1)
+blockId 22 LIGHT 19 5 ZERO
+	(connId:0) (59 1)
+blockId 21 LIGHT 19 6 ZERO
+	(connId:0) (105 1)
+blockId 20 LIGHT 19 7 ZERO
+	(connId:0) (97 1)
+blockId 19 LIGHT 19 8 ZERO
+	(connId:0) (89 1)
+blockId 18 LIGHT 19 9 ZERO
+	(connId:0) (81 1)
+blockId 17 LIGHT 19 10 ZERO
+	(connId:0) (73 1)
+blockId 16 LIGHT 19 11 ZERO
+	(connId:0) (65 1)
+blockId 15 NAND 13 0 ZERO
+	(connId:1) (56 0)
+	(connId:0) (53 1)
+blockId 14 NAND 13 3 ZERO
+	(connId:1) (60 0)
+	(connId:0) (52 1)
+blockId 13 NAND 13 6 ZERO
+	(connId:1) (107 0)
+	(connId:0) (51 1)
+blockId 12 NAND 13 9 ZERO
+	(connId:1) (99 0)
+	(connId:0) (50 1)
+blockId 11 NAND 13 12 ZERO
+	(connId:1) (91 0)
+	(connId:0) (49 1)
+blockId 10 NAND 13 15 ZERO
+	(connId:1) (83 0)
+	(connId:0) (48 1)
+blockId 9 NAND 13 18 ZERO
+	(connId:1) (75 0)
+	(connId:0) (47 1)
+blockId 8 NAND 13 21 ZERO
+	(connId:1) (67 0)
+	(connId:0) (46 1)
+blockId 7 NAND 2 0 ZERO
+	(connId:1) (6 0)
+	(connId:0) (24 1)
+blockId 6 NAND 3 0 ZERO
+	(connId:1) (2 0)
+	(connId:0) (7 1)
+blockId 5 SWITCH 3 2 ZERO
+	(connId:0) (1 0)
+blockId 4 SWITCH 3 17 ZERO
+	(connId:0) (104 0)
+blockId 3 SWITCH 3 18 ZERO
+	(connId:0) (40 0)
+blockId 2 XNOR 4 0 ZERO
+	(connId:1) (57 0) (56 0) (109 0) (101 0) (93 0) (61 0) (107 0) (85 0) (60 0) (83 0) (75 0) (91 0) (69 0) (99 0) (77 0) (67 0)
+	(connId:0) (6 1) (25 0)
+blockId 1 NOR 4 2 ZERO
+	(connId:1) (58 0) (103 0) (95 0) (54 0) (87 0) (79 0) (71 0) (63 0)
+	(connId:0) (5 0)
