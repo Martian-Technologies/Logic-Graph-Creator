@@ -1,12 +1,13 @@
 #include "keybindHandler.h"
 
 void KeybindHandler::ProcessEvent(Rml::Event& event) {
-	unsigned int key = event.GetParameter<unsigned int>("key_identifier", 0) << 7;
+	unsigned int key = event.GetParameter<unsigned int>("key_identifier", 0) << 8;
 	key += event.GetParameter<int>("alt_key", 0) * Rml::Input::KeyModifier::KM_ALT;
+	key += event.GetParameter<int>("meta_key", 0) * Rml::Input::KeyModifier::KM_META;
 	key += event.GetParameter<int>("ctrl_key", 0) * Rml::Input::KeyModifier::KM_CTRL;
 	key += event.GetParameter<int>("shift_key", 0) * Rml::Input::KeyModifier::KM_SHIFT;
-	
-	for (auto[iter, iterEnd] = listenerFunctions.equal_range(key); iter != iterEnd; ++iter) {
+
+	for (auto [iter, iterEnd] = listenerFunctions.equal_range(key); iter != iterEnd; ++iter) {
 		iter->second();
 	}
 
@@ -14,7 +15,13 @@ void KeybindHandler::ProcessEvent(Rml::Event& event) {
 }
 
 void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, int modifier, ListenerFunction listenerFunction) {
-	unsigned int keyCombined = key << 7;
+	unsigned int keyCombined = key << 8;
+#ifdef __APPLE__
+	if (modifier & Rml::Input::KeyModifier::KM_CTRL) {
+		modifier ^= Rml::Input::KeyModifier::KM_CTRL;
+		modifier |= Rml::Input::KeyModifier::KM_META;
+	}
+#endif
 	keyCombined += modifier;
 	listenerFunctions.emplace(keyCombined, listenerFunction);
 }
