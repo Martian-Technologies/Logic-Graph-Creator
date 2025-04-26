@@ -81,6 +81,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("save"); save(); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_S,
+		Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT,
+		[this]() { logInfo("save"); asSave(); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_O,
 		Rml::Input::KeyModifier::KM_CTRL,
 		[this]() { logInfo("load"); load(); }
@@ -273,7 +278,6 @@ void CircuitViewWidget::setStatusBar(const std::string& text) {
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
-	logInfo("Trying to save Circuit");
 	if (fileManager && circuitView->getCircuit()) {
 		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
 		if (!fileManager->saveCircuit(circuitId)) {
@@ -283,6 +287,15 @@ void CircuitViewWidget::save() {
 			filter.pattern = "*.cir";
 			SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 		}
+	}
+}
+
+void CircuitViewWidget::asSave() {
+	if (fileManager && circuitView->getCircuit()) {
+		static SDL_DialogFileFilter filter;
+		filter.name = "Circuit Files";
+		filter.pattern = "*.cir";
+		SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 	}
 }
 

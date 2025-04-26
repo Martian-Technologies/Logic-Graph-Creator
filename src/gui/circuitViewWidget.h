@@ -28,6 +28,7 @@ public:
 	void render();
 	void load();
 	void save();
+	void asSave();
 
 private:
 	// utility functions
