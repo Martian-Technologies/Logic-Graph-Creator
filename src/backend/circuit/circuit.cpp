@@ -297,36 +297,37 @@ void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection 
 void Circuit::undo() {
 	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
-	DifferenceSharedPtr difference = undoSystem.undoDifference();
-	Difference::block_modification_t blockModification;
-	Difference::connection_modification_t connectionModification;
-	Difference::move_modification_t moveModification;
-	Difference::data_modification_t dataModification;
-	const std::vector<Difference::Modification>& modifications = difference->getModifications();
+	const MinimalDifference* difference = undoSystem.undoDifference();
+	if (!difference) return;
+	MinimalDifference::block_modification_t blockModification;
+	MinimalDifference::connection_modification_t connectionModification;
+	MinimalDifference::move_modification_t moveModification;
+	MinimalDifference::data_modification_t dataModification;
+	const std::vector<MinimalDifference::Modification>& modifications = difference->getModifications();
 	for (unsigned int i = modifications.size(); i > 0; --i) {
-		const Difference::Modification& modification = modifications[i - 1];
+		const MinimalDifference::Modification& modification = modifications[i - 1];
 		switch (modification.first) {
-		case Difference::PLACE_BLOCK:
-			blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());
+		case MinimalDifference::PLACE_BLOCK:
+			blockContainer.tryRemoveBlock(std::get<0>(std::get<MinimalDifference::block_modification_t>(modification.second)), newDifference.get());
 			break;
-		case Difference::REMOVED_BLOCK:
-			blockModification = std::get<Difference::block_modification_t>(modification.second);
+		case MinimalDifference::REMOVED_BLOCK:
+			blockModification = std::get<MinimalDifference::block_modification_t>(modification.second);
 			blockContainer.tryInsertBlock(std::get<0>(blockModification), std::get<1>(blockModification), std::get<2>(blockModification), newDifference.get());
 			break;
-		case Difference::CREATED_CONNECTION:
-			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryRemoveConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
+		case MinimalDifference::CREATED_CONNECTION:
+			connectionModification = std::get<MinimalDifference::connection_modification_t>(modification.second);
+			blockContainer.tryRemoveConnection(connectionModification.first, connectionModification.second, newDifference.get());
 			break;
-		case Difference::REMOVED_CONNECTION:
-			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryCreateConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
+		case MinimalDifference::REMOVED_CONNECTION:
+			connectionModification = std::get<MinimalDifference::connection_modification_t>(modification.second);
+			blockContainer.tryCreateConnection(connectionModification.first, connectionModification.second, newDifference.get());
 			break;
-		case Difference::MOVE_BLOCK:
-			moveModification = std::get<Difference::move_modification_t>(modification.second);
+		case MinimalDifference::MOVE_BLOCK:
+			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<1>(moveModification), std::get<0>(moveModification), newDifference.get());
 			break;
-		case Difference::SET_DATA:
-			dataModification = std::get<Difference::data_modification_t>(modification.second);
+		case MinimalDifference::SET_DATA:
+			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
 			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<2>(dataModification), newDifference.get());
 			break;
 		}
@@ -338,34 +339,35 @@ void Circuit::undo() {
 void Circuit::redo() {
 	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
-	DifferenceSharedPtr difference = undoSystem.redoDifference();
-	Difference::block_modification_t blockModification;
-	Difference::connection_modification_t connectionModification;
-	Difference::move_modification_t moveModification;
-	Difference::data_modification_t dataModification;
+	const MinimalDifference* difference = undoSystem.redoDifference();
+	if (!difference) return;
+	MinimalDifference::block_modification_t blockModification;
+	MinimalDifference::connection_modification_t connectionModification;
+	MinimalDifference::move_modification_t moveModification;
+	MinimalDifference::data_modification_t dataModification;
 	for (auto modification : difference->getModifications()) {
 		switch (modification.first) {
-		case Difference::REMOVED_BLOCK:
-			blockContainer.tryRemoveBlock(std::get<0>(std::get<Difference::block_modification_t>(modification.second)), newDifference.get());
+		case MinimalDifference::REMOVED_BLOCK:
+			blockContainer.tryRemoveBlock(std::get<0>(std::get<MinimalDifference::block_modification_t>(modification.second)), newDifference.get());
 			break;
-		case Difference::PLACE_BLOCK:
-			blockModification = std::get<Difference::block_modification_t>(modification.second);
+		case MinimalDifference::PLACE_BLOCK:
+			blockModification = std::get<MinimalDifference::block_modification_t>(modification.second);
 			blockContainer.tryInsertBlock(std::get<0>(blockModification), std::get<1>(blockModification), std::get<2>(blockModification), newDifference.get());
 			break;
-		case Difference::REMOVED_CONNECTION:
-			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryRemoveConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
+		case MinimalDifference::REMOVED_CONNECTION:
+			connectionModification = std::get<MinimalDifference::connection_modification_t>(modification.second);
+			blockContainer.tryRemoveConnection(connectionModification.first, connectionModification.second, newDifference.get());
 			break;
-		case Difference::CREATED_CONNECTION:
-			connectionModification = std::get<Difference::connection_modification_t>(modification.second);
-			blockContainer.tryCreateConnection(std::get<1>(connectionModification), std::get<3>(connectionModification), newDifference.get());
+		case MinimalDifference::CREATED_CONNECTION:
+			connectionModification = std::get<MinimalDifference::connection_modification_t>(modification.second);
+			blockContainer.tryCreateConnection(connectionModification.first, connectionModification.second, newDifference.get());
 			break;
-		case Difference::MOVE_BLOCK:
-			moveModification = std::get<Difference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<1>(moveModification), newDifference.get());
+		case MinimalDifference::MOVE_BLOCK:
+			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
+			blockContainer.tryMoveBlock(moveModification.first, moveModification.second, newDifference.get());
 			break;
-		case Difference::SET_DATA:
-			dataModification = std::get<Difference::data_modification_t>(modification.second);
+		case MinimalDifference::SET_DATA:
+			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
 			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<1>(dataModification), newDifference.get());
 			break;
 		}
