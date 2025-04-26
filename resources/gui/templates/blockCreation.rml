@@ -22,12 +22,12 @@
 				<div id="connection-menu">
 					<div>
 						Inputs<br />
-						<div id="connection-list-add-input">Add Output</div>
+						<div id="connection-list-add-input">Add Input</div>
 					</div>
 					<div id="connection-list-input"></div>
 					<div>
 						Outputs<br />
-						<div id="connection-list-add-output">Add Input</div>
+						<div id="connection-list-add-output">Add Output</div>
 					</div>
 					<div id="connection-list-output"></div>
 				</div>

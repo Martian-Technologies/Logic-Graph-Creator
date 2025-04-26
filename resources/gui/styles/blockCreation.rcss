@@ -58,12 +58,16 @@
 	margin: 0 0.1em;
 }
 
-.connection-list-item div {
+.connection-list-item button {
 	padding: 0em 0.2em;
 	border-radius: 0.4em;
 	background-color: #525252;
 	display: inline-block;
 	margin: 0 0.1em;
+}
+
+.connection-list-item button:active {
+	background-color: #606060;
 }
 
 .name {

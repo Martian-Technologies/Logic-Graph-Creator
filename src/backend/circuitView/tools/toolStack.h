@@ -8,10 +8,12 @@
 #include "circuitTool.h"
 
 class CircuitView;
+class ToolManager;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView) : eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolStackInterface(this) {
+	inline ToolStack(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView, ToolManager* toolManager) :
+		eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("Pointer Move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
@@ -28,6 +30,7 @@ public:
 	void clearTools();
 	void popAbove(CircuitTool* toolNotToPop);
 	bool empty() const { return toolStack.empty(); }
+	void switchToStack(int stack);
 
 	SharedCircuitTool getCurrentNonHelperTool() const;
 	SharedCircuitTool getCurrentTool() const;
@@ -63,6 +66,8 @@ private:
 
 	bool isActive = false;
 	std::vector<SharedCircuitTool> toolStack;
+
+	ToolManager* toolManager;
 };
 
 #endif /* toolStack_h */

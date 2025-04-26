@@ -11,6 +11,7 @@ public:
 	void pushTool(std::shared_ptr<CircuitTool> newTool, bool resetTool = true);
 	void popAbove(CircuitTool* toolNotToPop);
 	void popTool();
+	void switchToStack(int stack);
 
 private:
 	ToolStack* toolStack;

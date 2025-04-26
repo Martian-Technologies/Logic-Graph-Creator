@@ -12,3 +12,7 @@ void ToolStackInterface::popAbove(CircuitTool* toolNotToPop) {
 void ToolStackInterface::popTool() {
 	toolStack->popTool();
 }
+
+void ToolStackInterface::switchToStack(int stack) {
+	toolStack->switchToStack(stack);
+}

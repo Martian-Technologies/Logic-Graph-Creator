@@ -8,14 +8,14 @@ class CircuitView;
 class ToolManager {
 public:
 	inline ToolManager(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView) :
-		toolStacks { ToolStack(eventRegister, renderer, circuitView), ToolStack(eventRegister, renderer, circuitView), ToolStack(eventRegister, renderer, circuitView) } {
+		toolStacks { ToolStack(eventRegister, renderer, circuitView, this), ToolStack(eventRegister, renderer, circuitView, this), ToolStack(eventRegister, renderer, circuitView, this) } {
 		toolStacks[activeToolStack].activate();
 	}
 
 	void selectStack(int stack);
 	int getStack() const { return activeToolStack; }
 	void selectBlock(BlockType blockType);
-	void selectTool(SharedCircuitTool tool);
+	SharedCircuitTool selectTool(SharedCircuitTool tool);
 
 	void setMode(std::string mode);
 

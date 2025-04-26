@@ -8,6 +8,7 @@ std::map<std::string, std::unique_ptr<ToolManagerManager::BaseToolTypeMaker>> To
 #include "backend/circuitView/tools/selection/selectionMakerTool.h"
 #include "backend/circuitView/tools/other/pasteTool.h"
 #include "backend/circuitView/tools/other/logicToucher.h"
+#include "backend/circuitView/tools/other/portSelector.h"
 
 ToolManagerManager::ToolManagerManager(std::set<CircuitView*>* circuitViews, DataUpdateEventManager* dataUpdateEventManager) : circuitViews(circuitViews), dataUpdateEventManager(dataUpdateEventManager) {
 	ToolManagerManager::registerTool<ConnectionTool>();
@@ -16,4 +17,5 @@ ToolManagerManager::ToolManagerManager(std::set<CircuitView*>* circuitViews, Dat
 	ToolManagerManager::registerTool<SelectionMakerTool>();
 	ToolManagerManager::registerTool<PasteTool>();
 	ToolManagerManager::registerTool<LogicToucher>();
+	// ToolManagerManager::registerTool<PortSelector>(); // dont register the tool because it does not go in the menu
 }

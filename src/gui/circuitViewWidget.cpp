@@ -1,4 +1,3 @@
-#include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuitView/circuitView.h"
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
