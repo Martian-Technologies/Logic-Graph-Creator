@@ -617,7 +617,7 @@ void SdlRenderer::renderConnection(FPosition aPos, FPosition bPos, FVector aCont
 	// sdlRenderer->drawPath(myPath);
 }
 
-const float edgeDis = 0.48f;
+const float edgeDis = 0.42f;
 const float sideShift = 0.25f;
 
 void SdlRenderer::renderConnection(Position aPos, const Block* a, Position bPos, const Block* b, logic_state_t state) {

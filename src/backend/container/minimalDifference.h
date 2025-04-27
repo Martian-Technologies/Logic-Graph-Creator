@@ -13,9 +13,7 @@ public:
 		Difference::connection_modification_t connectionModification;
 		Difference::move_modification_t moveModification;
 		Difference::data_modification_t dataModification;
-		const std::vector<Difference::Modification>& modifications = difference->getModifications();
-		for (unsigned int i = modifications.size(); i > 0; --i) {
-			const Difference::Modification& modification = modifications[i - 1];
+		for (const auto& modification : difference->getModifications()) {
 			switch (modification.first) {
 			case Difference::PLACE_BLOCK:
 				blockModification = std::get<Difference::block_modification_t>(modification.second);
