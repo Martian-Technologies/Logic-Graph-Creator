@@ -1,0 +1,73 @@
+version_6
+import "DFF"
+Circuit: "DFF_Reg8"
+UUID: bc1df4f5-ca15-4399-98f3-e72c0fe0a16a
+size: <1, 1>
+ports:
+blockId 29 LIGHT 59 49 ZERO
+	(connId:0) (12 2)
+blockId 28 LIGHT 59 48 ZERO
+	(connId:0) (11 2)
+blockId 27 LIGHT 59 47 ZERO
+	(connId:0) (10 2)
+blockId 26 LIGHT 59 46 ZERO
+	(connId:0) (9 2)
+blockId 25 LIGHT 59 45 ZERO
+	(connId:0) (8 2)
+blockId 23 LIGHT 59 43 ZERO
+	(connId:0) (6 2)
+blockId 22 LIGHT 59 42 ZERO
+	(connId:0) (1 2)
+blockId 21 SWITCH 54 51 ZERO
+	(connId:0) (6 1) (7 1) (8 1) (9 1) (10 1) (11 1) (1 1) (12 1)
+blockId 20 SWITCH 54 49 ZERO
+	(connId:0) (12 0)
+blockId 19 SWITCH 54 48 ZERO
+	(connId:0) (11 0)
+blockId 18 SWITCH 54 47 ZERO
+	(connId:0) (10 0)
+blockId 17 SWITCH 54 46 ZERO
+	(connId:0) (9 0)
+blockId 16 SWITCH 54 45 ZERO
+	(connId:0) (8 0)
+blockId 15 SWITCH 54 44 ZERO
+	(connId:0) (7 0)
+blockId 14 SWITCH 54 43 ZERO
+	(connId:0) (6 0)
+blockId 13 SWITCH 54 42 ZERO
+	(connId:0) (1 0)
+blockId 11 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 54 ZERO
+	(connId:2) (28 0)
+	(connId:1) (21 0)
+	(connId:0) (19 0)
+blockId 10 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 52 ZERO
+	(connId:2) (27 0)
+	(connId:1) (21 0)
+	(connId:0) (18 0)
+blockId 9 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 50 ZERO
+	(connId:2) (26 0)
+	(connId:1) (21 0)
+	(connId:0) (17 0)
+blockId 8 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 48 ZERO
+	(connId:2) (25 0)
+	(connId:1) (21 0)
+	(connId:0) (16 0)
+blockId 7 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 46 ZERO
+	(connId:2) (24 0)
+	(connId:1) (21 0)
+	(connId:0) (15 0)
+blockId 6 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 44 ZERO
+	(connId:2) (23 0)
+	(connId:1) (21 0)
+	(connId:0) (14 0)
+blockId 12 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 56 ZERO
+	(connId:2) (29 0)
+	(connId:1) (21 0)
+	(connId:0) (20 0)
+blockId 24 LIGHT 59 44 ZERO
+	(connId:0) (7 2)
+blockId 1 "d76f150e-28ee-48a3-8703-92b89613a0ed" 56 42 ZERO
+	(connId:0) (13 0)
+	(connId:1) (21 0)
+	(connId:2) (22 0)
+	(connId:3)

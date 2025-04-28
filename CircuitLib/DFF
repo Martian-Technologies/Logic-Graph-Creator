@@ -1,0 +1,40 @@
+version_6
+Circuit: "circuit1"
+UUID: d76f150e-28ee-48a3-8703-92b89613a0ed
+size: <1, 1>
+ports:
+blockId 10752 LIGHT 60 43 ZERO
+	(connId:0) (10662 1)
+blockId 10751 LIGHT 60 42 ZERO
+	(connId:0) (10661 1)
+blockId 10750 SWITCH 54 43 ZERO
+	(connId:0) (10678 0) (10664 0)
+blockId 10749 SWITCH 54 42 ZERO
+	(connId:0) (10685 0) (10684 0) (10679 0) (10678 0)
+blockId 10685 NOR 58 42 ZERO
+	(connId:1) (10661 0)
+	(connId:0) (10749 0) (10681 1)
+blockId 10684 NOR 58 43 ZERO
+	(connId:1) (10662 0)
+	(connId:0) (10749 0) (10680 1)
+blockId 10681 NAND 57 42 ZERO
+	(connId:1) (10685 0) (10680 0)
+	(connId:0) (10680 1) (10678 1)
+blockId 10680 NAND 57 43 ZERO
+	(connId:1) (10684 0) (10681 0)
+	(connId:0) (10681 1) (10679 1)
+blockId 10679 NAND 56 43 ZERO
+	(connId:0) (10749 0) (10664 1)
+	(connId:1) (10680 0)
+blockId 10678 NAND 56 42 ZERO
+	(connId:0) (10750 0) (10749 0)
+	(connId:1) (10681 0)
+blockId 10664 NOR 55 43 ZERO
+	(connId:1) (10679 0)
+	(connId:0) (10750 0)
+blockId 10662 NOR 59 43 ZERO
+	(connId:1) (10752 0) (10661 0)
+	(connId:0) (10684 1) (10661 1)
+blockId 10661 NOR 59 42 ZERO
+	(connId:0) (10685 1) (10662 1)
+	(connId:1) (10751 0) (10662 0)
