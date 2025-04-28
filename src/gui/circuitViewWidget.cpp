@@ -141,7 +141,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	parent->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
-			logInfo("Clicked: {}", "", circuitView->getViewManager().getPointerPosition().snap().toString());
 			if (button == 0) { // left
 				if (event.GetParameter<int>("alt_key", 0)) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
