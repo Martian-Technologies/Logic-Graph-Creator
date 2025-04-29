@@ -129,6 +129,37 @@ void BlockCreationWindow::updateFromMenu() {
 		return;
 	}
 
+	// check that data is good
+	if (size.hasZeros()) {
+		logWarning("Can't update block data. Size of block cant be less than 1 currently is {}.", "BlockCreationWindow", size.toString());
+		return;
+	}
+
+	std::unordered_set<Vector> inPortPositionsOnBlock;
+	std::unordered_set<Vector> outPortPositionsOnBlock;
+	for (auto row : portsData) {
+		connection_end_id_t endId = std::get<0>(row);
+		bool portIsInput = std::get<2>(row);
+		Vector portPositionOnBlock = std::get<3>(row);
+		if (!portPositionOnBlock.widthInSize(size)) {
+			logWarning("Can't update block data. Port position {} is not on the block {}.", "BlockCreationWindow", portPositionOnBlock.toString(), size.toString());
+			return;
+		}
+		if (portIsInput) {
+			if (inPortPositionsOnBlock.contains(portPositionOnBlock)) {
+				logWarning("Can't update block data. Port position {} is already used.", "BlockCreationWindow", portPositionOnBlock.toString());
+				return;
+			}
+			inPortPositionsOnBlock.emplace(portPositionOnBlock);
+		} else {
+			if (outPortPositionsOnBlock.contains(portPositionOnBlock)) {
+				logWarning("Can't update block data. Port position {} is already used.", "BlockCreationWindow", portPositionOnBlock.toString());
+				return;
+			}
+			outPortPositionsOnBlock.emplace(portPositionOnBlock);
+		}
+	}
+
 	// set all data at end
 	circuit->setCircuitName(name);
 	blockData->setSize(size);
@@ -164,7 +195,7 @@ void BlockCreationWindow::updateFromMenu() {
 		else blockData->setConnectionOutput(portPositionOnBlock, endId);
 		if (!(portName.empty())) blockData->setConnectionIdName(endId, portName);
 		blockData->setConnectionIdName(endId, portName);
-		
+
 		circuitBlockData->setConnectionIdPosition(endId, portBlockPosition);
 	}
 }
@@ -210,8 +241,8 @@ void BlockCreationWindow::resetMenu() {
 		// name
 		Rml::XMLAttributes nameAttributes;
 		nameAttributes["type"] = "text";
-		nameAttributes["maxlength"] = "5";
-		nameAttributes["size"] = "5";
+		nameAttributes["maxlength"] = "7";
+		nameAttributes["size"] = "7";
 		Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
 		Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
 		nameElement->SetValue(connectionName);
