@@ -145,11 +145,11 @@ public:
 		for (const ParsedCircuit::ConnectionPort& port : ports) {
 			if (port.isInput) blockData->setConnectionInput(port.positionOnBlock, port.connectionEndId);
 			else blockData->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
+			if (!port.portName.empty()) {
+				blockData->setConnectionIdName(port.connectionEndId, port.portName);
+			}
 			if (port.block != 0) {
 				circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
-			}
-			if (!port.portName.empty()) {
-				circuitBlockData->setConnectionIdName(port.connectionEndId, port.portName);
 			}
 	    }
 

@@ -162,9 +162,9 @@ void BlockCreationWindow::updateFromMenu() {
 
 		if (portIsInput) blockData->setConnectionInput(portPositionOnBlock, endId);
 		else blockData->setConnectionOutput(portPositionOnBlock, endId);
-
-		if (!(portName.empty())) circuitBlockData->setConnectionIdName(endId, portName);
-		circuitBlockData->setConnectionIdName(endId, portName);
+		if (!(portName.empty())) blockData->setConnectionIdName(endId, portName);
+		blockData->setConnectionIdName(endId, portName);
+		
 		circuitBlockData->setConnectionIdPosition(endId, portBlockPosition);
 	}
 }
@@ -198,7 +198,7 @@ void BlockCreationWindow::resetMenu() {
 		connection_end_id_t endId = iter.first;
 		bool isInputBool = iter.second.second;
 		Vector positionOnBlock = iter.second.first;
-		const std::string* connectionNamePtr = circuitBlockData->getConnectionIdToName(endId);
+		const std::string* connectionNamePtr = blockData->getConnectionIdToName(endId);
 		std::string connectionName;
 		if (connectionNamePtr) {
 			connectionName = *connectionNamePtr;

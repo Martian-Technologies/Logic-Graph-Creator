@@ -2,9 +2,9 @@
 #define circuitBlockData_h
 
 #include "backend/container/block/connectionEnd.h"
-#include "backend/position/position.h"
-#include "util/bidirectionalMap.h"
+#include "util/bidirectionalMultiSecondKeyMap.h"
 #include "backend/dataUpdateEventManager.h"
+#include "backend/position/position.h"
 #include "circuit.h"
 
 class CircuitBlockData {
@@ -14,18 +14,8 @@ public:
 	inline void setBlockType(BlockType blockType) { this->blockType = blockType; }
 	inline BlockType getBlockType() const { return blockType; }
 
-	inline void setConnectionIdName(connection_end_id_t endId, const std::string& name) {
-		connectionIdNames.set(endId, name);
-		dataUpdateEventManager->sendEvent(
-			"circuitBlockDataConnectionNameSet",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
-		);
-	}
-	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const { return connectionIdNames.get(endId); }
-	inline const connection_end_id_t* getConnectionNameToId(const std::string& name) const { return connectionIdNames.get(name); }
-
-	inline void setConnectionIdPosition(connection_end_id_t endId, Position name) {
-		connectionIdPosition.set(endId, name);
+	inline void setConnectionIdPosition(connection_end_id_t endId, Position position) {
+		connectionIdPosition.set(endId, position);
 		dataUpdateEventManager->sendEvent(
 			"circuitBlockDataConnectionPositionSet",
 			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId })
@@ -34,13 +24,12 @@ public:
 	inline const Position* getConnectionIdToPosition(connection_end_id_t endId) const {
 		return connectionIdPosition.get(endId);
 	}
-	inline const connection_end_id_t* getConnectionPositionToId(Position name) const {
-		return connectionIdPosition.get(name);
+	inline const BidirectionalMultiSecondKeyMap<connection_end_id_t, Position>::constIteratorPairT2 getConnectionPositionToId(Position position) const {
+		return connectionIdPosition.get(position);
 	}
 
 private:
-	BidirectionalMap<connection_end_id_t, Position> connectionIdPosition;
-	BidirectionalMap<connection_end_id_t, std::string> connectionIdNames;
+	BidirectionalMultiSecondKeyMap<connection_end_id_t, Position> connectionIdPosition;
 	DataUpdateEventManager* dataUpdateEventManager;
 	BlockType blockType;
 	circuit_id_t id;
