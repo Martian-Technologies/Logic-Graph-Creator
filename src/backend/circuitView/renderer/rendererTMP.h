@@ -6,31 +6,31 @@
 class RendererTMP : public Renderer {
 public:
 	// main flow
-	void setCircuit(Circuit* circuit) override {};
-	void setEvaluator(Evaluator* evaluator) override {};
-	void setAddress(const Address& address) override {};
+	void setCircuit(Circuit* circuit) override { };
+	void setEvaluator(Evaluator* evaluator) override { };
+	void setAddress(const Address& address) override { };
 
-	void updateView(ViewManager* viewManager) override {};
-	void updateCircuit(DifferenceSharedPtr diff) override {};
+	void updateView(ViewManager* viewManager) override { };
+	void updateCircuit(DifferenceSharedPtr diff) override { };
 
-	float getLastFrameTimeMs() const override {};
+	float getLastFrameTimeMs() const override { };
 
 private:
 	// elements
-	ElementID addSelectionElement(const SelectionObjectElement& selection) override {};
-	ElementID addSelectionElement(const SelectionElement& selection) override {};
-	void removeSelectionElement(ElementID selection) override {};
+	ElementID addSelectionElement(const SelectionObjectElement& selection) override { };
+	ElementID addSelectionElement(const SelectionElement& selection) override { };
+	void removeSelectionElement(ElementID selection) override { };
 
-	ElementID addBlockPreview(const BlockPreview& blockPreview) override {};
-	void removeBlockPreview(ElementID blockPreview) override {};
+	ElementID addBlockPreview(const BlockPreview& blockPreview) override { };
+	void removeBlockPreview(ElementID blockPreview) override { };
 
-	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override {};
-	void removeConnectionPreview(ElementID connectionPreview) override {};
+	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override { };
+	void removeConnectionPreview(ElementID connectionPreview) override { };
 
-	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override {};
-	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override {};
+	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override { };
+	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override { };
 
-	void spawnConfetti(FPosition start) override {};
+	void spawnConfetti(FPosition start) override { };
 };
 
 #endif /* rendererTMP_h */

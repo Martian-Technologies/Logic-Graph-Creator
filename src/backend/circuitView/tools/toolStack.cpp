@@ -5,7 +5,7 @@
 void ToolStack::activate() {
 	isActive = true;
 	if (!toolStack.empty()) {
-		if (pointerInView) { 
+		if (pointerInView) {
 			PositionEvent event("Stack Updating Position", lastPointerFPosition);
 			toolStack.back()->enterBlockView(&event);
 		} else {

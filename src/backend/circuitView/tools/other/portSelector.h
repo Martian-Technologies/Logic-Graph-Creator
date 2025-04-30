@@ -15,7 +15,7 @@ public:
 	typedef std::function<void(Position)> OnSelectFunction;
 	inline void setPort(connection_end_id_t endId, OnSelectFunction function) { if (!circuit) return; type = circuit->getBlockType(); this->endId = endId; onSelectFunction = function; }
 
-	inline void reset() override final { type = BlockType::NONE; elementCreator.clear(); setStatusBar("");	}
+	inline void reset() override final { type = BlockType::NONE; elementCreator.clear(); setStatusBar(""); }
 	bool press(const Event* event);
 
 private:

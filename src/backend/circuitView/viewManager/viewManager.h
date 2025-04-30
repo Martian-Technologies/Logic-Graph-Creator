@@ -15,7 +15,7 @@ public:
 	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
 
 	// setters
-	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); } 
+	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); }
 	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
 
 	// getters
@@ -48,7 +48,7 @@ private:
 	bool pointerEnterView(const Event* event);
 	bool pointerExitView(const Event* event);
 private:
-	
+
 	// pointer
 	bool anchored = false;
 	bool pointerActive = false;

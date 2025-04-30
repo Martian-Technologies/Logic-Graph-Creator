@@ -25,16 +25,16 @@ protected:
 	void registerFunction(std::string eventName, EventFunction function);
 	void unregisterFunction(std::string eventName);
 	void unregisterFunctions();
-	
+
 	void setStatusBar(const std::string& text);
-	
+
 	virtual void reset() { elementCreator.clear(); }
 	virtual void activate();
 	virtual void deactivate() { unregisterFunctions(); }
-	
+
 	virtual void setMode(std::string toolMode) { }
-	
-	virtual void updateElements() {}
+
+	virtual void updateElements() { }
 
 	bool pointerInView = false;
 	FPosition lastPointerFPosition;

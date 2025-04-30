@@ -26,8 +26,9 @@ public:
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
 	void setCircuitName(const std::string& name);
-
+	
 	inline unsigned long long getEditCount() const { return editCount; }
+	void addEdit() { editCount ++; }
 
 	/* ----------- listener ----------- */
 	// subject to change

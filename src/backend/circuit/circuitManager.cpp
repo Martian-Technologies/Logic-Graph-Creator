@@ -12,7 +12,7 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 	}
 
 	setupBlockData(id);
-	
+
 	auto evaluatorId = evaluatorManager->createNewEvaluator(*this, id);
 	SharedEvaluator eval = evaluatorManager->getEvaluator(evaluatorId);
 	eval->setPause(false);
@@ -21,3 +21,21 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 
 	return id;
 }
+
+CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
+	dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager),
+	circuitBlockDataManager(dataUpdateEventManager), evaluatorManager(evaluatorManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+	dataUpdateEventReceiver.linkFunction("postBlockSizeChange", [this](const DataUpdateEventManager::EventData* eventData) {
+		linkedFunctionForUpdates<Vector>(eventData);
+	});
+	dataUpdateEventReceiver.linkFunction("blockDataRemoveConnection", [this](const DataUpdateEventManager::EventData* eventData) {
+		linkedFunctionForUpdates<connection_end_id_t>(eventData);
+	});
+	dataUpdateEventReceiver.linkFunction("blockDataSetConnection", [this](const DataUpdateEventManager::EventData* eventData) {
+		linkedFunctionForUpdates<connection_end_id_t>(eventData);
+	});
+	dataUpdateEventReceiver.linkFunction("blockDataConnectionNameSet", [this](const DataUpdateEventManager::EventData* eventData) {
+		linkedFunctionForUpdates<Vector>(eventData);
+	});
+}
+

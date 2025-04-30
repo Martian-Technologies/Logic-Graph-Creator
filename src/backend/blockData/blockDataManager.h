@@ -47,9 +47,9 @@ public:
 	}
 
 	inline BlockType addBlock() noexcept {
-		blockData.emplace_back((BlockType)(blockData.size()+1), dataUpdateEventManager);
+		blockData.emplace_back((BlockType)(blockData.size() + 1), dataUpdateEventManager);
 		sendBlockDataUpdate();
-		return (BlockType) blockData.size();
+		return (BlockType)blockData.size();
 	}
 
 	inline BlockType getBlockType(const std::string& blockPath) const {
@@ -63,75 +63,75 @@ public:
 
 	inline void sendBlockDataUpdate() { dataUpdateEventManager->sendEvent("blockDataUpdate"); }
 
-	inline const BlockData* getBlockData(BlockType type) const noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
-	inline BlockData* getBlockData(BlockType type) noexcept { if (!blockExists(type)) return nullptr; return &blockData[type-1]; }
+	inline const BlockData* getBlockData(BlockType type) const noexcept { if (!blockExists(type)) return nullptr; return &blockData[type - 1]; }
+	inline BlockData* getBlockData(BlockType type) noexcept { if (!blockExists(type)) return nullptr; return &blockData[type - 1]; }
 
 	inline unsigned int maxBlockId() const noexcept { return blockData.size(); }
 	inline bool blockExists(BlockType type) const noexcept { return type != BlockType::NONE && type <= blockData.size(); }
 	inline bool isPlaceable(BlockType type) const noexcept {
 		if (!blockExists(type)) return false;
-		return blockData[type-1].isPlaceable();
+		return blockData[type - 1].isPlaceable();
 	}
-	
+
 	inline std::string getName(BlockType type) const noexcept {
 		if (!blockExists(type)) return "None" + std::to_string(type);
-		return blockData[type-1].getName();
+		return blockData[type - 1].getName();
 	}
 	inline std::string getPath(BlockType type) const noexcept {
 		if (!blockExists(type)) return "Path To None";
-		return blockData[type-1].getPath();
+		return blockData[type - 1].getPath();
 	}
 
 	inline Vector getBlockSize(BlockType type) const noexcept {
 		if (!blockExists(type)) return Vector();
-		return blockData[type-1].getSize();
+		return blockData[type - 1].getSize();
 	}
 	inline Vector getBlockSize(BlockType type, Rotation rotation) const noexcept {
 		if (!blockExists(type)) return Vector();
-		return blockData[type-1].getSize(rotation);
+		return blockData[type - 1].getSize(rotation);
 	}
 
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Vector vector) const noexcept {
-		if (!blockExists(type)) return {0, false};
-		return blockData[type-1].getInputConnectionId(vector);
+		if (!blockExists(type)) return { 0, false };
+		return blockData[type - 1].getInputConnectionId(vector);
 	}
 	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Vector vector) const noexcept {
-		if (!blockExists(type)) return {0, false};
-		return blockData[type-1].getOutputConnectionId(vector);
+		if (!blockExists(type)) return { 0, false };
+		return blockData[type - 1].getOutputConnectionId(vector);
 	}
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
-		if (!blockExists(type)) return {0, false};
-		return blockData[type-1].getInputConnectionId(vector, rotation);
+		if (!blockExists(type)) return { 0, false };
+		return blockData[type - 1].getInputConnectionId(vector, rotation);
 	}
 	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
-		if (!blockExists(type)) return {0, false};
-		return blockData[type-1].getOutputConnectionId(vector, rotation);
+		if (!blockExists(type)) return { 0, false };
+		return blockData[type - 1].getOutputConnectionId(vector, rotation);
 	}
 
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
-		if (!blockExists(type)) return {Vector(), false};
-		return blockData[type-1].getConnectionVector(connectionId);
+		if (!blockExists(type)) return { Vector(), false };
+		return blockData[type - 1].getConnectionVector(connectionId);
 	}
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, Rotation rotation, connection_end_id_t connectionId) const noexcept {
-		if (!blockExists(type)) return {Vector(), false};
-		return blockData[type-1].getConnectionVector(connectionId, rotation);
+		if (!blockExists(type)) return { Vector(), false };
+		return blockData[type - 1].getConnectionVector(connectionId, rotation);
 	}
 
 	inline connection_end_id_t getConnectionCount(BlockType type) const noexcept {
 		if (!blockExists(type)) return 0;
-		return blockData[type-1].getConnectionCount();
+		return blockData[type - 1].getConnectionCount();
 	}
 	inline bool connectionExists(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
-		return blockData[type-1].connectionExists(connectionId);
+		return blockData[type - 1].connectionExists(connectionId);
 	}
 	inline bool isConnectionInput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
-		return blockData[type-1].isConnectionInput(connectionId);
+		return blockData[type - 1].isConnectionInput(connectionId);
 	}
 	inline bool isConnectionOutput(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return false;
-		return blockData[type-1].isConnectionOutput(connectionId);
+		return blockData[type - 1].isConnectionOutput(connectionId);
 	}
 
 private:

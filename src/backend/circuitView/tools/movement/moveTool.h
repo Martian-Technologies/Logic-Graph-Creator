@@ -10,7 +10,7 @@ public:
 	void activate() override final;
 
 	inline std::vector<std::string> getModes() { return { }; }
-	static inline std::vector<std::string> getModes_() { return {  "Area", "Tensor" }; }
+	static inline std::vector<std::string> getModes_() { return { "Area", "Tensor" }; }
 	static inline std::string getPath_() { return "placement/move"; }
 	inline std::vector<std::string> getModes() const override final { return getModes_(); }
 	inline std::string getPath() const override final { return getPath_(); }
