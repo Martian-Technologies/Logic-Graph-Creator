@@ -293,6 +293,8 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 
 			// remove block from original chunk
 			curBlocksForUpdating.erase(itr);
+
+			// TODO - move connections
 			
 			break;
 		}

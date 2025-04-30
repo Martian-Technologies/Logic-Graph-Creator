@@ -5,9 +5,7 @@
 #include <chrono>
 #include <glm/ext/matrix_float4x4.hpp>
 
-struct VulkanChunkAllocation;
-struct RmlGeometryAllocation;
-struct RmlTexture;
+#include "util/lifetimeExtender.h"
 
 class VulkanFrameData {
 public:
@@ -22,23 +20,20 @@ public:
 	inline VkSemaphore& getSwapchainSemaphore() { return swapchainSemaphore; };
 	inline VkSemaphore& getRenderSemaphore() { return renderSemaphore; }
 	inline VkFence& getRenderFence() { return renderFence; };
-	
-	inline std::vector<std::shared_ptr<VulkanChunkAllocation>>& getChunkAllocations() { return chunkAllocations; }
-	inline std::vector<std::shared_ptr<RmlGeometryAllocation>>& getRmlAllocations() { return rmlAllocations; }
-	inline std::vector<std::shared_ptr<RmlGeometryAllocation>>& getRmlTextures() { return rmlTextures; }
+	inline LifetimeExtender& getFrameLifetime() { return frameLifetime; };
 	
 private:
-	// mostly static data
+	// mostly static core data
 	VkCommandPool commandPool;
 	VkCommandBuffer mainCommandBuffer;
 	VkSemaphore swapchainSemaphore, renderSemaphore;
 	VkFence renderFence;
 
-	// dynamically changing data
+	// lifetime extender to be used by subrenderers which want to put objects "on" the frame
+	LifetimeExtender frameLifetime;
+
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> chunkAllocations;
-	std::vector<std::shared_ptr<RmlGeometryAllocation>> rmlAllocations;
-	std::vector<std::shared_ptr<RmlGeometryAllocation>> rmlTextures;
+	
 };
 
 #endif

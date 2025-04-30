@@ -32,7 +32,7 @@ SdlWindow::~SdlWindow() {
 }
 
 bool SdlWindow::isThisMyEvent(const SDL_Event& event) {
-	if (event.type == 2050) return true;
+	if (event.type == 2050) return true; // the fuck is this? - jack quay jamison
 	return SDL_GetWindowFromEvent(&event) == handle;
 }
 

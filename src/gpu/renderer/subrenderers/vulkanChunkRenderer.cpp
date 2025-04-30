@@ -89,7 +89,9 @@ VulkanChunkRenderer::~VulkanChunkRenderer() {
 
 void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
-	frame.getChunkAllocations().insert(frame.getChunkAllocations().begin(), chunks.begin(), chunks.end());
+	for (auto& chunk : chunks) {
+		frame.getFrameLifetime().push(chunk);
+	}
 
 	// shared push constants
 	ChunkPushConstants pushConstants{};

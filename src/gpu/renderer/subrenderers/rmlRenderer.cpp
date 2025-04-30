@@ -171,7 +171,7 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 			const RmlDrawInstruction& renderInstruction = std::get<RmlDrawInstruction>(instruction);
 
 			// Add geometry we are going to use to the frame
-			frame.getRmlAllocations().push_back(renderInstruction.geometry);
+			frame.getFrameLifetime().push(renderInstruction.geometry);
 			
 			// update pipeline if needed
 			bool texturedDraw = renderInstruction.texture != nullptr;
@@ -187,6 +187,9 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 			// bind texture descriptor if needed
 			if (texturedDraw) {
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 0, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
+
+				// Add texture we are going to use to the frame
+				frame.getFrameLifetime().push(renderInstruction.texture);
 			}
 	
 			// upload push constants
