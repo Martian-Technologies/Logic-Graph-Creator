@@ -276,7 +276,7 @@ void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection 
 
 	// Dimensional Selection
 	SharedDimensionalSelection outputDimensionalSelection = selectionCast<DimensionalSelection>(outputSelection);
-	SharedDimensionalSelection inputDimensionalSelection = selectionCast<DimensionalSelection>(outputSelection);
+	SharedDimensionalSelection inputDimensionalSelection = selectionCast<DimensionalSelection>(inputSelection);
 	if (outputDimensionalSelection && inputDimensionalSelection) {
 		if (outputDimensionalSelection->size() == 1) {
 			for (dimensional_selection_size_t i = inputDimensionalSelection->size(); i > 0; i--) {

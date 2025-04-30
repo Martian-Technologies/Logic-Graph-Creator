@@ -117,6 +117,10 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Q,
+		[this]() { logInfo("Tool Invert Mode"); circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_N,
 		Rml::Input::KeyModifier::KM_CTRL,
 		[this]() {
