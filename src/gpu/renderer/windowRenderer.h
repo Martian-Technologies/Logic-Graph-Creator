@@ -4,14 +4,12 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
 
+#include "frameManager.h"
 #include "gpu/renderer/subrenderers/viewportRenderer.h"
 #include "gpu/renderer/viewportRenderInterface.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
-#include "vulkanFrame.h"
 #include "vulkanSwapchain.h"
-
-constexpr unsigned int FRAMES_IN_FLIGHT = 1;
 
 class WindowRenderer {
 public:
@@ -33,7 +31,7 @@ public:
 	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
 
 private:
-	void renderToCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex);
+	void renderToCommandBuffer(Frame& frame, uint32_t imageIndex);
 	void createRenderPass();
 	void recreateSwapchain();
 	
@@ -59,11 +57,8 @@ private:
 	// connected viewport render interfaces
 	std::set<ViewportRenderInterface*> viewportRenderInterfaces;
 	std::mutex viewportRenderersMux;
-	
-	// frames
-	std::vector<VulkanFrameData> frames; // TODO - (this should be a std array once we have proper RAII)
-	int frameNumber = 0;
-	inline VulkanFrameData& getCurrentFrame(int offset = 0) { return frames[(frameNumber + offset) % FRAMES_IN_FLIGHT]; };
+
+	std::unique_ptr<FrameManager> frames;
 
 	// render loop
 	std::thread renderThread;

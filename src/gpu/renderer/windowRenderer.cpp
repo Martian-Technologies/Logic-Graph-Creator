@@ -12,11 +12,7 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
 	// get window size
 	windowSize = sdlWindow->getSize();
 	
-	// set up frames
-	frames.reserve(FRAMES_IN_FLIGHT);
-	for (int i = 0; i < FRAMES_IN_FLIGHT; ++i) {
-		frames.emplace_back();
-	}
+	frames = std::make_unique<FrameManager>();
 	
 	// set up swapchain and subrenderer
 	swapchain = std::make_unique<Swapchain>(surface, windowSize);
@@ -51,10 +47,10 @@ void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
 
 void WindowRenderer::renderLoop() {
 	while(running) {
-		VulkanFrameData& frame = getCurrentFrame();
+		Frame& frame = frames->getCurrentFrame();
 
 		// wait for frame completion
-		frame.waitAndComplete();
+		frames->waitForCurrentFrameCompletion();
 		
 		// recreate swapchain if needed
 		if (swapchainRecreationNeeded) {
@@ -65,7 +61,7 @@ void WindowRenderer::renderLoop() {
 		// try to start rendering the frame
 		// get next swapchain image to render to (or fail and try again)
 		uint32_t imageIndex;
-		VkResult imageGetResult = vkAcquireNextImageKHR(device, swapchain->getVkbSwapchain().swapchain, UINT64_MAX, frame.getSwapchainSemaphore(), VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(device, swapchain->getVkbSwapchain().swapchain, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
 			// if the swapchain is not ideal, try again but recreate it this time (this happens in normal operation)
 			swapchainRecreationNeeded = true;
@@ -77,14 +73,14 @@ void WindowRenderer::renderLoop() {
 		}
 		
 		// tell frame that it has started
-		frame.start();
+		frames->startCurrentFrame();
 
 		// get queues
 		VkQueue& graphicsQueue = VulkanInstance::get().getGraphicsQueue().queue;
 		VkQueue& presentQueue = VulkanInstance::get().getPresentQueue().queue;
 
 		// record command buffer
-		vkResetCommandBuffer(frame.getMainCommandBuffer(), 0);
+		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
 		renderToCommandBuffer(frame, imageIndex);
 
 		// start setting up submission
@@ -92,7 +88,7 @@ void WindowRenderer::renderLoop() {
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 		// wait semaphore
-		VkSemaphore waitSemaphores[] = { frame.getSwapchainSemaphore() };
+		VkSemaphore waitSemaphores[] = { frame.swapchainSemaphore };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
@@ -100,17 +96,17 @@ void WindowRenderer::renderLoop() {
 		
 		// command buffers
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &frame.getMainCommandBuffer();
+		submitInfo.pCommandBuffers = &frame.mainCommandBuffer;
 
 		// signal semaphores
-		VkSemaphore signalSemaphores[] = { frame.getRenderSemaphore() };
+		VkSemaphore signalSemaphores[] = { frame.renderSemaphore };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
 		{
 			std::lock_guard<std::mutex> lock(VulkanInstance::get().getGraphicsSubmitMux());
-			if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.getRenderFence()) != VK_SUCCESS) {
+			if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
 				throwFatalError("failed to submit draw command buffer!");
 			}
 		}
@@ -137,13 +133,13 @@ void WindowRenderer::renderLoop() {
 		}
 
 		//increase the number of frames drawn
-		++frameNumber;
+		frames->incrementFrame();
 	}
 
 	vkDeviceWaitIdle(device);
 }
 
-void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imageIndex) {
+void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
 	// preparation
 	VkExtent2D windowSize = swapchain->getVkbSwapchain().extent;
 	
@@ -152,7 +148,7 @@ void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imag
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
-	if (vkBeginCommandBuffer(frame.getMainCommandBuffer(), &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(frame.mainCommandBuffer, &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 
@@ -165,7 +161,7 @@ void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imag
 	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
 	renderPassInfo.clearValueCount = 0;
 	
-	vkCmdBeginRenderPass(frame.getMainCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	// do actual rendering...
 	{
@@ -180,8 +176,8 @@ void WindowRenderer::renderToCommandBuffer(VulkanFrameData& frame, uint32_t imag
 	}
 
 	// end render pass
-	vkCmdEndRenderPass(frame.getMainCommandBuffer());
-	if (vkEndCommandBuffer(frame.getMainCommandBuffer()) != VK_SUCCESS) {
+	vkCmdEndRenderPass(frame.mainCommandBuffer);
+	if (vkEndCommandBuffer(frame.mainCommandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }

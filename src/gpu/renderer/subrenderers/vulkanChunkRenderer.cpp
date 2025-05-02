@@ -87,10 +87,10 @@ VulkanChunkRenderer::~VulkanChunkRenderer() {
 	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), stateBufferDescriptorSetLayout, nullptr);
 }
 
-void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
-		frame.getFrameLifetime().push(chunk);
+		frame.lifetime.push(chunk);
 	}
 
 	// shared push constants
@@ -100,13 +100,13 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMa
 	// block drawing pass
 	{
 		// bind render pipeline
-		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getHandle());
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.mainCommandBuffer, blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
 
 		// bind texture descriptor
-		vkCmdBindDescriptorSets(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 1, 1, &blockTextureDescriptor, 0, nullptr);
+		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 1, 1, &blockTextureDescriptor, 0, nullptr);
         
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {
@@ -114,10 +114,10 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMa
 				// bind vertex buffers
 				VkBuffer vertexBuffers[] = { chunk->getBlockBuffer()->buffer };
 				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
+				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 				// draw
-				vkCmdDraw(frame.getMainCommandBuffer(), static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
+				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
 			}
 		}
 	}
@@ -125,10 +125,10 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMa
 	// wire drawing pass
 	{
 		// bind render pipeline
-		vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getHandle());
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.getMainCommandBuffer(), wirePipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
+		vkCmdPushConstants(frame.mainCommandBuffer, wirePipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
 
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getWireBuffer().has_value()) {
@@ -136,10 +136,10 @@ void VulkanChunkRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMa
 				// bind vertex buffers
 				VkBuffer vertexBuffers[] = { chunk->getWireBuffer()->buffer };
 				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(frame.getMainCommandBuffer(), 0, 1, vertexBuffers, offsets);
+				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 				// draw
-				vkCmdDraw(frame.getMainCommandBuffer(), static_cast<uint32_t>(chunk->getNumWireVertices()), 1, 0, 0);
+				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumWireVertices()), 1, 0, 0);
 			}
 		}
 	}

@@ -25,17 +25,17 @@ GridRenderer::GridRenderer(VkRenderPass& renderPass) {
 constexpr float gridFadeOutDistance = 160.0f;
 constexpr float gridFadeOutWidth = 60.0f;
 
-void GridRenderer::render(VulkanFrameData& frame, const glm::mat4& viewMatrix, float viewScale) {
+void GridRenderer::render(Frame& frame, const glm::mat4& viewMatrix, float viewScale) {
 	float gridFade = std::clamp(1.0f - ((viewScale - gridFadeOutDistance) * (1.0f / gridFadeOutWidth)), 0.0f, 1.0f);
 	// invert the view matrix to get the right coordinates for the grid in the shader
 	GridPushConstants pushConstants { glm::inverse(viewMatrix), gridFade};
 
 	// bind pipeline
-	vkCmdBindPipeline(frame.getMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, gridPipeline->getHandle());
+	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gridPipeline->getHandle());
 		
 	// bind push constants
-	vkCmdPushConstants(frame.getMainCommandBuffer(), gridPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, iMvpOffset, gridFadeOffset, &pushConstants.iMvp);
-	vkCmdPushConstants(frame.getMainCommandBuffer(), gridPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, gridFadeOffset, sizeof(float), &pushConstants.gridFade);
+	vkCmdPushConstants(frame.mainCommandBuffer, gridPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, iMvpOffset, gridFadeOffset, &pushConstants.iMvp);
+	vkCmdPushConstants(frame.mainCommandBuffer, gridPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, gridFadeOffset, sizeof(float), &pushConstants.gridFade);
 
-	vkCmdDraw(frame.getMainCommandBuffer(), 6, 1, 0, 0);
+	vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 }

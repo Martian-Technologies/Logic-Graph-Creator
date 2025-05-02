@@ -1,8 +1,8 @@
-#include "vulkanFrame.h"
+#include "frameManager.h"
 
 #include "gpu/vulkanInstance.h"
 
-VulkanFrameData::VulkanFrameData() {
+Frame::Frame() {
 	// command pool
 	VkCommandPoolCreateInfo commandPoolInfo = {};
 	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -10,7 +10,6 @@ VulkanFrameData::VulkanFrameData() {
 	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	commandPoolInfo.queueFamilyIndex = VulkanInstance::get().getGraphicsQueue().index;
 	vkCreateCommandPool(VulkanInstance::get().getDevice(), &commandPoolInfo, nullptr, &commandPool);
-
 	// allocate the default command buffer that we will use for rendering
 	VkCommandBufferAllocateInfo commandBufferInfo = {};
 	commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -34,7 +33,7 @@ VulkanFrameData::VulkanFrameData() {
 	vkCreateSemaphore(VulkanInstance::get().getDevice(), &semaphoreInfo, nullptr, &renderSemaphore);
 }
 
-VulkanFrameData::~VulkanFrameData() {
+Frame::~Frame() {
 	vkDestroyCommandPool(VulkanInstance::get().getDevice(), commandPool, nullptr);
 
 	vkDestroyFence(VulkanInstance::get().getDevice(), renderFence, nullptr);
@@ -42,23 +41,29 @@ VulkanFrameData::~VulkanFrameData() {
 	vkDestroySemaphore(VulkanInstance::get().getDevice(), swapchainSemaphore, nullptr);
 }
 
-void VulkanFrameData::start() {
-	// reset render fence (we are actually rendering this frame)
-	vkResetFences(VulkanInstance::get().getDevice(), 1, &renderFence);
-	
-	// update start time
-	lastStartTime = std::chrono::system_clock::now();
+void FrameManager::incrementFrame() {
+	++frameNumber;
+	frameIndex = frameNumber % frames.size();
 }
 
-float VulkanFrameData::waitAndComplete() {
+float FrameManager::waitForCurrentFrameCompletion() {
 	// wait until current frame has finished rendering
-	vkWaitForFences(VulkanInstance::get().getDevice(), 1, &renderFence, VK_TRUE, UINT64_MAX);
+	vkWaitForFences(VulkanInstance::get().getDevice(), 1, &frames[frameIndex].renderFence, VK_TRUE, UINT64_MAX);
 
 	// update frame time with newest frame completion
-	float time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastStartTime).count();
+	float time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - frames[frameIndex].lastStartTime).count();
 		
 	// clear used allocations
-	frameLifetime.flush();
+	frames[frameIndex].lifetime.flush();
 
 	return time;
 }
+
+void FrameManager::startCurrentFrame() {
+	// reset render fence (we are actually rendering this frame)
+	vkResetFences(VulkanInstance::get().getDevice(), 1, &frames[frameIndex].renderFence);
+	
+	// update start time
+	frames[frameIndex].lastStartTime = std::chrono::system_clock::now();
+}
+

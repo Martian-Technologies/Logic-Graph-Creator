@@ -1,7 +1,7 @@
 #ifndef vulkanChunkRenderer_h
 #define vulkanChunkRenderer_h
 
-#include "gpu/renderer/vulkanFrame.h"
+#include "gpu/renderer/frameManager.h"
 #include "gpu/renderer/vulkanPipeline.h"
 #include "gpu/vulkanDescriptor.h"
 #include "gpu/vulkanImage.h"
@@ -16,7 +16,7 @@ public:
 	VulkanChunkRenderer(VkRenderPass& renderPass);
 	~VulkanChunkRenderer();
 	
-	void render(VulkanFrameData& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
+	void render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
 	std::unique_ptr<Pipeline> blockPipeline = nullptr;

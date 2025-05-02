@@ -5,16 +5,16 @@ ViewportRenderer::ViewportRenderer(VkRenderPass renderPass)
 	
 }
 
-void ViewportRenderer::render(VulkanFrameData& frame, ViewportRenderInterface* viewport) {
+void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 	// get view data
 	ViewportViewData viewData = viewport->getViewData();
 
 	// set dynamic state
-	vkCmdSetViewport(frame.getMainCommandBuffer(), 0, 1, &viewData.viewport);
+	vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewData.viewport);
 	VkRect2D scissor{};
 	scissor.offset = {static_cast<int32_t>(viewData.viewport.x), static_cast<int32_t>(viewData.viewport.y)};
 	scissor.extent = {static_cast<uint32_t>(viewData.viewport.width), static_cast<uint32_t>(viewData.viewport.height)};
-	vkCmdSetScissor(frame.getMainCommandBuffer(), 0, 1, &scissor);
+	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
 
 	// render subrenderers
 	gridRenderer.render(frame, viewData.viewportViewMat, viewData.viewScale);

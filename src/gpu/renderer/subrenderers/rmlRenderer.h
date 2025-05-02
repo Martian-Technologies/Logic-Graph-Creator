@@ -9,7 +9,7 @@
 #include "gpu/vulkanBuffer.h"
 #include "gpu/vulkanImage.h"
 #include "gpu/renderer/vulkanPipeline.h"
-#include "gpu/renderer/vulkanFrame.h"
+#include "gpu/renderer/frameManager.h"
 
 // =========================== RML GEOMETRY =================================
 
@@ -88,7 +88,7 @@ public:
 	void prepareForRmlRender();
 	void endRmlRender();
 
-	void render(VulkanFrameData& frame, VkExtent2D windowExtent);
+	void render(Frame& frame, VkExtent2D windowExtent);
 	
 public:
 	// -- Rml::RenderInterface --

@@ -130,8 +130,8 @@ void RmlRenderer::endRmlRender() {
 	renderInstructions = std::move(tempRenderInstructions);
 }
 
-void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
-	VkCommandBuffer cmd = frame.getMainCommandBuffer();
+void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
+	VkCommandBuffer cmd = frame.mainCommandBuffer;
 	
 	// set viewport state
 	VkExtent2D& extent = windowExtent;
@@ -171,7 +171,7 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 			const RmlDrawInstruction& renderInstruction = std::get<RmlDrawInstruction>(instruction);
 
 			// Add geometry we are going to use to the frame
-			frame.getFrameLifetime().push(renderInstruction.geometry);
+			frame.lifetime.push(renderInstruction.geometry);
 			
 			// update pipeline if needed
 			bool texturedDraw = renderInstruction.texture != nullptr;
@@ -189,7 +189,7 @@ void RmlRenderer::render(VulkanFrameData& frame, VkExtent2D windowExtent) {
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 0, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
 
 				// Add texture we are going to use to the frame
-				frame.getFrameLifetime().push(renderInstruction.texture);
+				frame.lifetime.push(renderInstruction.texture);
 			}
 	
 			// upload push constants

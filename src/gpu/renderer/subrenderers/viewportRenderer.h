@@ -4,13 +4,13 @@
 #include "gpu/renderer/subrenderers/gridRenderer.h"
 #include "gpu/renderer/subrenderers/vulkanChunkRenderer.h"
 #include "gpu/renderer/viewportRenderInterface.h"
-#include "gpu/renderer/vulkanFrame.h"
+#include "gpu/renderer/frameManager.h"
 
 class ViewportRenderer {
 public:
 	ViewportRenderer(VkRenderPass renderPass);
 
-	void render(VulkanFrameData& frame, ViewportRenderInterface* viewport);
+	void render(Frame& frame, ViewportRenderInterface* viewport);
 
 private:
 	GridRenderer gridRenderer;
