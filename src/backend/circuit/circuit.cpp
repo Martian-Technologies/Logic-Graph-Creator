@@ -75,6 +75,28 @@ bool Circuit::checkMoveCollision(SharedSelection selection, Vector movement) {
 	return false;
 }
 
+void Circuit::setType(SharedSelection selection, BlockType type) {
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	setType(selection, type, difference.get());
+	sendDifference(difference);
+}
+
+void Circuit::setType(SharedSelection selection, BlockType type, Difference* difference) {
+	// Cell Selection
+	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+	if (cellSelection) {
+		blockContainer.trySetType(cellSelection->getPosition(), type, difference);
+	}
+
+	// Dimensional Selection
+	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+	if (dimensionalSelection) {
+		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
+			setType(dimensionalSelection->getSelection(i - 1), type, difference);
+		}
+	}
+}
+
 void Circuit::tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType) {
 	if (cellA.x > cellB.x) std::swap(cellA.x, cellB.x);
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);

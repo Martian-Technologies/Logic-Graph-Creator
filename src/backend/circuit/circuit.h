@@ -46,8 +46,10 @@ public:
 	bool tryRemoveBlock(Position position);
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(Position positionOfBlock, Position position);
-	// Trys to move a blocks. Wont move any if one cant move. Returns if successful.
+	// Trys to move blocks. Wont move any if one cant move. Returns if successful.
 	bool tryMoveBlocks(SharedSelection selection, Vector movement);
+	// Sets the type of blocks. Will set as many of the blocks as possible.
+	void setType(SharedSelection selection, BlockType type);
 
 	void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
 	void tryRemoveOverArea(Position cellA, Position cellB);
@@ -97,6 +99,7 @@ private:
 	// helpers
 	bool checkMoveCollision(SharedSelection selection, Vector movement);
 	void moveBlocks(SharedSelection selection, Vector movement, Difference* difference);
+	void setType(SharedSelection selection, BlockType type, Difference* difference);
 
 	void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
 	void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);

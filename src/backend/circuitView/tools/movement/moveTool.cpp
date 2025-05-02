@@ -63,6 +63,7 @@ void MoveTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	if (!activeSelectionHelper->isFinished()) return;
+	setStatusBar("Left click to move the selected blocks.");
 	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 	if (pointerInView) {
 		elementCreator.addSelectionElement(SelectionObjectElement(

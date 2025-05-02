@@ -98,11 +98,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_V,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection/paste tool"); }
+		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_I,
-		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("interactive/state changer"); }
+		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
