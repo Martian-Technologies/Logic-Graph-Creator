@@ -18,7 +18,8 @@ Position getChunk(Position in) {
 
 TileSetInfo blockTileSet(256, 15, 4);
 
-VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires) {
+VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires, VkDescriptorSet stateBufferDescriptorSet)
+	: stateBufferDescriptorSet(stateBufferDescriptorSet) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
 	
@@ -143,10 +144,10 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // ChunkChain
 // =========================================================================================================
 
-void ChunkChain::updateAllocation() {
+void ChunkChain::updateAllocation(GrowableDescriptorAllocator& descriptorAllocator, VkDescriptorSetLayout stateBufferLayout) {
 	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
-		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(blocks, wires);
+		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(blocks, wires, descriptorAllocator.allocate(stateBufferLayout));
 		// replace currently allocating data
 		if (currentlyAllocating.has_value()) {
 			gbJail.push_back(currentlyAllocating.value());
@@ -305,7 +306,7 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 
 	// reallocate all modified chunks
 	for (const Position& chunk : chunksToUpdate) {
-		chunks[chunk].updateAllocation();
+		chunks[chunk].updateAllocation(descriptorAllocator, stateBufferLayout);
 	}
 }
 
@@ -448,6 +449,18 @@ void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRot
 	if (add) chunks[currentChunk].getWiresForUpdating()[{start, end}] = {{currentX, currentY}, {endX, endY}, relativeAddress};
 	else chunks[currentChunk].getWiresForUpdating().erase({start, end});
 	chunksToUpdate.insert(currentChunk);
+}
+
+VulkanChunker::VulkanChunker()
+	: descriptorAllocator(100, {{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1.0f}}) {
+
+	DescriptorLayoutBuilder stateBufferBuilder;
+	stateBufferBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+	stateBufferLayout = stateBufferBuilder.build(VK_SHADER_STAGE_VERTEX_BIT);
+}
+
+VulkanChunker::~VulkanChunker() {
+	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), stateBufferLayout, nullptr);
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {

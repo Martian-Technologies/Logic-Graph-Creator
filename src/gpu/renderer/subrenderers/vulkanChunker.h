@@ -1,12 +1,13 @@
 #ifndef vulkanChunker_h
 #define vulkanChunker_h
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 #include "backend/address.h"
 #include "backend/circuit/circuit.h"
 #include "gpu/vulkanBuffer.h"
-
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include "gpu/vulkanDescriptor.h"
 
 // ====================================================================================================================
 
@@ -103,7 +104,7 @@ typedef std::unordered_map<std::pair<Position, Position>, RenderedWire, WireHash
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires);
+	VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires, VkDescriptorSet stateBufferDescriptorSet);
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
@@ -111,6 +112,9 @@ public:
 	
 	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
 	inline uint32_t getNumWireVertices() const { return numWireVertices; }
+
+	inline const std::optional<AllocatedBuffer>& getStateBuffer() const { return stateBuffer; }
+	inline VkDescriptorSet getStateBufferDescriptorSet() const { return stateBufferDescriptorSet; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -122,6 +126,8 @@ private:
 	uint32_t numWireVertices;
 
 	std::optional<AllocatedBuffer> stateBuffer;
+	VkDescriptorSet stateBufferDescriptorSet;
+	
 	std::vector<Address> relativeAdresses;
 };
 
@@ -131,7 +137,7 @@ class ChunkChain {
 public:
 	inline RenderedBlocks& getBlocksForUpdating() { allocationDirty = true; return blocks; }
 	inline RenderedWires& getWiresForUpdating() { allocationDirty = true; return wires; }
-	void updateAllocation();
+	void updateAllocation(GrowableDescriptorAllocator& descriptorAllocator, VkDescriptorSetLayout stateBufferLayout);
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
 	
@@ -152,6 +158,9 @@ private:
 
 class VulkanChunker {
 public:
+	VulkanChunker();
+	~VulkanChunker();
+	
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
 	
@@ -165,6 +174,9 @@ private:
 	
 private:
 	Circuit* circuit = nullptr;
+
+	GrowableDescriptorAllocator descriptorAllocator;
+	VkDescriptorSetLayout stateBufferLayout;
 
 	std::unordered_map<Position, ChunkChain> chunks;
 	std::mutex mux; // sync can be relaxed in the future
