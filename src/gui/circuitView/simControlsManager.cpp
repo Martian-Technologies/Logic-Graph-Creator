@@ -34,7 +34,7 @@ void SimControlsManager::Initialize() {
 			if (keyIdentifier == Rml::Input::KI_RETURN) {
 				setTPS(event.GetCurrentElement());
 			
-				// event.StopPropagation();
+				// event.StopPropagation(); // sets width to amount of info added
 			}
 		}
 	));

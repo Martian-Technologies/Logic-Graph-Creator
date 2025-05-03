@@ -11,21 +11,9 @@ public:
 	void setForm();
 
 private:
-	/*
-	enum FORM_TYPE {
-		HEADER,
-		USER_INT,
-		USER_STRING,
-		DROPDOWN,
-		COLOR,
-		FILE_PATH,
-		DIR_PATH,
-		KEYBIND
-	};
-	*/
 
 	void Initialize();
-	void generateForm(const std::string& formType);
+	void generateForm(const std::string& formType, const std::string& name);
 
 	Rml::Element* contentPanel;
 };

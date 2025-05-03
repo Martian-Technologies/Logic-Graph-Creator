@@ -5,15 +5,15 @@
 #define USER_CONFIG "resources/config.toml"
 #define BASE_CONFIG "baseConfig.toml"
 
-const std::vector<std::vector<std::string>> general = {
-	{ "General", "HEADER" },
-		{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },  
+const std::vector<std::vector<std::string>> general = {  
 	{ "Files", "HEADER" }, 
 		{ "general.files.save_path", "DIRPATH" },
 		{ "general.files.open_path", "FILEPATH" }, 
 };
 
 const std::vector<std::vector<std::string>> appearance = {
+	{ "General", "HEADER" },
+		{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },
 	{ "Blocks", "HEADER" },
 		{ "appearance.blocks.and", "COLOR" },
 		{ "appearance.blocks.or", "COLOR" },

@@ -6,7 +6,7 @@
 		<link type="text/template" href="templates/menuBar.rml"/>
 		<link type="text/template" href="templates/blockCreation.rml"/>
 		<link type="text/template" href="templates/simulationControlsBar.rml"/>
-		<link type="text/template" href="templates/settingsWindow.rml"/>
+		<link type="text/template" href="templates/settingsWindow/settingsWindow.rml"/>
 	</head>
 
 	<body>

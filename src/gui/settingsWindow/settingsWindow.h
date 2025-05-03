@@ -14,8 +14,11 @@ public:
 private:
 
 	void Initialize();
+	void connectGroupListeners(); // creates listeners for changing content-panels information
+	void connectWindowOptions(); // creates listeners for saving, reseting, or canceling the settings info
 
 	Rml::Element* context;
+	Rml::Element* activeNav;
 	bool visible;
 
 };

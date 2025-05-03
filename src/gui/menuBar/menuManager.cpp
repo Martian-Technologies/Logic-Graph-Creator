@@ -15,10 +15,8 @@ MenuManager::MenuManager(Rml::ElementDocument* context, SettingsWindow* settings
 }
 
 void MenuManager::Initialize(Rml::Element* element) {
-	Rml::ElementList items;
-    Rml::ElementUtilities::GetElementsByClassName(items, element, "menu-item"); // idk 
-
-	logInfo("linking");
+	Rml::ElementList items; // janky way to list all elements, dont ask how i did it
+    Rml::ElementUtilities::GetElementsByClassName(items, element, "menu-item"); // gets all elements in the parent 
 
 	for (size_t i = 0; i < items.size(); ++i) {
 		Rml::Element* item = items[i];

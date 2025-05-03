@@ -18,6 +18,9 @@ SettingsWindow::~SettingsWindow() {}
 void SettingsWindow::Initialize() {
 	logInfo("initializing settingls");
 
+	connectGroupListeners();
+	connectWindowOptions();
+
 /*
 look
 	Rml::Element* closeButton = context->GetElementById("settings-close-button");
@@ -28,6 +31,65 @@ look
 		}
 	));
 */
+}
+
+void SettingsWindow::connectGroupListeners() {
+	Rml::ElementList items;
+	Rml::ElementUtilities::GetElementsByClassName(items, context->GetElementById("navigation-panel"), "nav-item");
+
+	for (size_t i = 0; i < items.size(); i++) {
+		Rml::Element* element = items[i];
+		if (i==0) {
+			activeNav = element;
+			element->SetClass("active-nav", true);
+		}
+
+		logInfo(element->GetId());
+		element->AddEventListener("click", new EventPasser(
+			[this](Rml::Event& event) {
+				Rml::Element* current = event.GetCurrentElement();
+
+				activeNav->SetClass("active-nav", false);
+				activeNav = current;
+				activeNav->SetClass("active-nav", true);
+
+				std::string loadFile = current->GetId().substr(4) + ".rml";
+				logInfo(loadFile);
+			}
+		));
+	}
+
+}
+
+void SettingsWindow::connectWindowOptions() {
+	Rml::Element* settingsActions = context->GetElementById("setting-actions");
+
+	// Save
+	Rml::Element* saveButton = settingsActions->GetElementById("settings-save-button");
+
+	saveButton->AddEventListener("click", new EventPasser(
+		[this](Rml::Event& event) {
+			logInfo("saved");
+		}
+	));
+
+	// Default
+	Rml::Element* defaultButton = settingsActions->GetElementById("settings-default-button");
+
+	defaultButton->AddEventListener("click", new EventPasser(
+		[this](Rml::Event& event) {
+			logInfo("default");
+		}
+	));
+
+	// Cancel
+	Rml::Element* closeButton = settingsActions->GetElementById("settings-close-button");
+
+	closeButton->AddEventListener("click", new EventPasser(
+		[this](Rml::Event& event) {
+			logInfo("closed");
+		}
+	));
 }
 
 void SettingsWindow::toggleVisibility() {
