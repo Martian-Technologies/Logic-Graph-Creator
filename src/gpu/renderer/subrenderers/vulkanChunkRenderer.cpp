@@ -104,7 +104,7 @@ void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, cons
 		
 		// bind push constants
 		vkCmdPushConstants(frame.mainCommandBuffer, blockPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
-
+		
 		// bind texture descriptor
 		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 1, 1, &blockTextureDescriptor, 0, nullptr);
         

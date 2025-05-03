@@ -25,12 +25,13 @@ private:
     std::vector<VkWriteDescriptorSet> writes;
 };
 
+
+struct PoolSizeRatio {
+	VkDescriptorType type;
+	float ratio;
+};
+
 class DescriptorAllocator {
-public:
-	struct PoolSizeRatio {
-		VkDescriptorType type;
-		float ratio;
-    };
 public:
 	DescriptorAllocator(uint32_t maxSets, const std::vector<PoolSizeRatio>& poolRatios);
 	~DescriptorAllocator();
@@ -40,6 +41,24 @@ public:
 
 private:
 	VkDescriptorPool pool;
+};
+
+class GrowableDescriptorAllocator {
+public:
+	GrowableDescriptorAllocator(uint32_t initialSets, const std::vector<PoolSizeRatio>& poolRatios);
+	~GrowableDescriptorAllocator();
+
+	VkDescriptorSet allocate(VkDescriptorSetLayout layout);
+
+private:
+	VkDescriptorPool getPool();
+	VkDescriptorPool createPool(uint32_t setCount, std::span<PoolSizeRatio> poolRatios);
+
+private:
+	std::vector<PoolSizeRatio> ratios;
+	uint32_t setsPerPool;
+	std::vector<VkDescriptorPool> fullPools;
+	std::vector<VkDescriptorPool> readyPools;
 };
 
 #endif
