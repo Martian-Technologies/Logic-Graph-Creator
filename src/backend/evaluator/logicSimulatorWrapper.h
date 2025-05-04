@@ -1,9 +1,8 @@
 #ifndef logicSimulatorWrapper_h
 #define logicSimulatorWrapper_h
 
+#include "gate.h"
 #include "logicSimulator.h"
-
-typedef unsigned int wrapper_gate_id_t;
 
 class LogicSimulatorWrapper {
 public:

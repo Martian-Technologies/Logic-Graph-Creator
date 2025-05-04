@@ -29,7 +29,7 @@ void EvalWindow::updateList() {
 	menuTree.setPaths(paths);
 }
 
-void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree) {
+void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode& addressTree) {
 	auto& branches = addressTree.getBranchs();
 	if (branches.empty()) {
 		paths.push_back(path);

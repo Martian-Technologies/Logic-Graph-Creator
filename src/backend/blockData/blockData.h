@@ -197,6 +197,13 @@ public:
 	const std::unordered_map<connection_end_id_t, std::pair<Vector, bool>>& getConnections() const noexcept {
 		return connections;
 	}
+	const std::vector<connection_end_id_t> getConnectionIds() const noexcept {
+		std::vector<connection_end_id_t> connectionIds;
+		for (auto& pair : connections) {
+			connectionIds.push_back(pair.first);
+		}
+		return connectionIds;
+	}
 
 	inline void setConnectionIdName(connection_end_id_t endId, const std::string& name) {
 		connectionIdNames.set(endId, name);

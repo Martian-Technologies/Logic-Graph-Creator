@@ -18,12 +18,7 @@ class DataUpdateEventManager;
 
 class Evaluator {
 public:
-	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData;
-	struct EvaluatorGate {
-		wrapper_gate_id_t gateId;
-		BlockType blockType;
-		Rotation rotation;
-	};
+	typedef std::pair<BlockType, connection_end_id_t> CircuitIOUpdateData;
 
 	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
@@ -47,9 +42,8 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
-	void removeCircuitIO(const DataUpdateEventManager::EventData* data);
 
-	const AddressTreeNode<EvaluatorGate>& getAddressTree() const { return addressTree; }
+	const AddressTreeNode& getAddressTree() const { return addressTree; }
 
 private:
 
@@ -58,16 +52,22 @@ private:
 	bool usingTickrate;
 	unsigned long long targetTickrate;
 	LogicSimulatorWrapper logicSimulatorWrapper;
-	AddressTreeNode<EvaluatorGate> addressTree;
+	AddressTreeNode addressTree;
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode& addressTree, DiffCache& diffCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
-	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, Vector offset, bool trackInput);
+	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode& addressTree, const Address& address, Vector offset, bool trackInput);
+	void removeCircuitIOExternal(const DataUpdateEventManager::EventData* data);
+	void removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId);
+	void registerConnectionIOExternal(const DataUpdateEventManager::EventData* data);
+	void registerConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
+	void linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
+	void unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
 };
 
-GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC);
+GateType circuitToEvaluatorGatetype(BlockType blockType);
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;
 

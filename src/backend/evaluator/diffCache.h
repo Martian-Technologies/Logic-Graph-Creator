@@ -13,9 +13,9 @@ public:
         if (it != cache.end()) {
             return it->second;
         }
-        auto circuit = circuitManager.getCircuit(circuitId);
+        SharedCircuit circuit = circuitManager.getCircuit(circuitId);
         if (circuit) {
-            auto difference = std::make_shared<Difference>(circuit->getBlockContainer()->getCreationDifference());
+            std::shared_ptr<Difference> difference = std::make_shared<Difference>(circuit->getBlockContainer()->getCreationDifference());
             cache[circuitId] = difference;
             return difference;
         }

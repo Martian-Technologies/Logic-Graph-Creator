@@ -4,6 +4,9 @@
 #include "logicState.h"
 #include "gateType.h"
 #include "backend/container/block/blockDefs.h"
+#include "backend/position/position.h"
+
+typedef unsigned int wrapper_gate_id_t;
 
 struct GateConnection {
 	block_id_t gateId;
@@ -100,6 +103,31 @@ struct Gate {
 	size_t getOutputGroupCount() const {
 		return outputGroups.size();
 	}
+};
+
+struct EvaluatorGate {
+	wrapper_gate_id_t gateId;
+	BlockType blockType;
+	Rotation rotation;
+};
+
+template<>
+struct std::hash<EvaluatorGate> {
+	size_t operator()(const EvaluatorGate& eg) const {
+		return eg.gateId;
+	}
+};
+
+template<>
+struct std::equal_to<EvaluatorGate> {
+	bool operator()(const EvaluatorGate& lhs, const EvaluatorGate& rhs) const {
+		return lhs.gateId == rhs.gateId;
+	}
+};
+
+struct EvaluatorIOJunction {
+	wrapper_gate_id_t junctionId;
+	bool isFloating;
 };
 
 #endif // gate_h
