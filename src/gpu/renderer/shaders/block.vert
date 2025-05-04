@@ -22,7 +22,7 @@ void main() {
 	uint val = states[(gl_VertexIndex / vertsPerBlock) / statesPerWord];
 	uint state = (val >> ((gl_VertexIndex % statesPerWord) * 8)) & 0xFFu;
 	// offset uv by state
-	tex = inTex + (state * 0.25);
+	tex = inTex + vec2(0.0, state * 0.25);
 	
 	gl_Position = push.mvp * vec4(inPosition, 0.0, 1.0);
 }

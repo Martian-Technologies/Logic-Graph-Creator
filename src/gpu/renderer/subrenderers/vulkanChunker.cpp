@@ -131,14 +131,19 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 	// Create state buffer
 	size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
 	stateBuffer = createBuffer(stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-	std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::LOW);
+	std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::HIGH);
 	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), defaultStates.data(), stateBuffer->allocation, 0, stateBufferSize);
+
+	// Write state buffer descriptor set
+	DescriptorWriter stateBufferDescriptorWriter;
+	stateBufferDescriptorWriter.writeBuffer(0, stateBuffer->buffer, stateBufferSize, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+	stateBufferDescriptorWriter.updateSet(VulkanInstance::get().getDevice(), stateBufferDescriptorSet);
 }
 
 VulkanChunkAllocation::~VulkanChunkAllocation() {
 	if (blockBuffer.has_value()) destroyBuffer(blockBuffer.value());
 	if (wireBuffer.has_value()) destroyBuffer(wireBuffer.value());
-	if (wireBuffer.has_value()) destroyBuffer(stateBuffer.value());
+	if (stateBuffer.has_value()) destroyBuffer(stateBuffer.value());
 }
 
 // ChunkChain

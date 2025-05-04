@@ -116,6 +116,9 @@ void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, cons
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
+				// bind state buffer descriptor
+				vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 0, 1, &chunk->getStateBufferDescriptorSet(), 0, nullptr);
+
 				// draw
 				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
 			}
@@ -138,6 +141,9 @@ void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, cons
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
+				// bind descriptor set
+				vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getLayout(), 0, 1, &chunk->getStateBufferDescriptorSet(), 0, nullptr);
+				
 				// draw
 				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumWireVertices()), 1, 0, 0);
 			}

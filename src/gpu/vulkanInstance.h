@@ -78,12 +78,13 @@ private:
 //
 // VULKAN IMPROVEMENTS -
 // - [x] VkBootstrap
+// - [ ] Volk dynamic loader
 // - [ ] Switch from singleton to top down design
 // - [ ] Pooled async resource uploading
 // - [ ] Standardization of subrenderer params and input, better way for subrenderer to communicate and put data on the "frame", growable descriptor pool
 // - [ ] Fix validation layers on mac, and weird resize messages on x11
 // - [ ] Check macro
-// - [ ] Use dynamic rendering and other QOL extensions to simplify code
+// - [ ] Use dynamic rendering, push descriptors and other QOL extensions to simplify code
 // - [ ] Don't draw directly to swapchain
 
 #endif

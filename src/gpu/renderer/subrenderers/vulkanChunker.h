@@ -114,7 +114,7 @@ public:
 	inline uint32_t getNumWireVertices() const { return numWireVertices; }
 
 	inline const std::optional<AllocatedBuffer>& getStateBuffer() const { return stateBuffer; }
-	inline VkDescriptorSet getStateBufferDescriptorSet() const { return stateBufferDescriptorSet; }
+	inline VkDescriptorSet& getStateBufferDescriptorSet() { return stateBufferDescriptorSet; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
