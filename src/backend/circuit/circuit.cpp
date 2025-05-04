@@ -32,47 +32,36 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 }
 
 bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
-	if (checkMoveCollision(selection, movement)) return false;
+	if (movement == Vector(0)) return true;
+	std::unordered_set<Position> positions;
+	std::unordered_set<const Block*> blocks;
+	flattenSelection(selection, positions);
+	for (auto iter = positions.begin(); iter != positions.end(); ++iter) {
+		const Block* block = blockContainer.getBlock(*iter);
+		if (block) {
+			if (!positions.contains(*iter + movement) && blockContainer.checkCollision(*iter + movement)) return false;
+			if (blocks.contains(block)) continue;
+			blocks.insert(block);
+		}
+	}
+
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	moveBlocks(selection, movement, difference.get());
+	while (blocks.size() > 0) {
+		for (auto iter = blocks.begin(); iter != blocks.end(); ++iter) {
+			const Block* block = *iter;
+			if (!blockContainer.checkCollision(block->getPosition() + movement, block->getRotation(), block->type())) {
+				blockContainer.tryMoveBlock(block->getPosition(), block->getPosition() + movement, difference.get());
+				iter = blocks.erase(iter);
+				if (iter == blocks.end()) break;
+			}
+		}
+	}
+
+	// // finding tmp pos to move everything to
+	// if (checkMoveCollision(selection, movement)) return false;
+	// moveBlocks(selection, movement, difference.get());
 	sendDifference(difference);
 	return true;
-}
-
-void Circuit::moveBlocks(SharedSelection selection, Vector movement, Difference* difference) {
-	// Cell Selection
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
-	if (cellSelection) {
-		blockContainer.tryMoveBlock(cellSelection->getPosition(), cellSelection->getPosition() + movement, difference);
-	}
-
-	// Dimensional Selection
-	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
-	if (dimensionalSelection) {
-		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			moveBlocks(dimensionalSelection->getSelection(i - 1), movement, difference);
-		}
-	}
-}
-
-bool Circuit::checkMoveCollision(SharedSelection selection, Vector movement) {
-	// Cell Selection
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
-	if (cellSelection) {
-		if (blockContainer.checkCollision(cellSelection->getPosition())) {
-			return blockContainer.checkCollision(cellSelection->getPosition() + movement);
-		}
-		return false;
-	}
-
-	// Dimensional Selection
-	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
-	if (dimensionalSelection) {
-		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			if (checkMoveCollision(dimensionalSelection->getSelection(i - 1), movement)) return true;
-		}
-	}
-	return false;
 }
 
 void Circuit::setType(SharedSelection selection, BlockType type) {
