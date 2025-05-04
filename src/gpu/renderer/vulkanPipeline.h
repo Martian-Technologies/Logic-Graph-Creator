@@ -1,7 +1,7 @@
 #ifndef vulkanPipeline_h
 #define vulkanPipeline_h
 
-#include <vulkan/vulkan.h>
+#include <volk.h>
 #include <glm/glm.hpp>
 
 struct PushConstantDescription {

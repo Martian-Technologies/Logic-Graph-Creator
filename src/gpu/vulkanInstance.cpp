@@ -14,6 +14,11 @@ VulkanInstance::VulkanInstance() {
 	// Set singleton (kind of goofy)
 	singleton = this;
 
+	// Initialize volk loader
+	if (volkInitialize() != VK_SUCCESS) {
+		throwFatalError("Failed to find Vulkan loader, Gatality requires Vulkan. Please make sure that your graphics drivers are installed and up to date.");
+	}
+
 	// Start creating vulkan instance
 	vkb::InstanceBuilder instanceBuilder(vkGetInstanceProcAddr);
 	
@@ -38,6 +43,9 @@ VulkanInstance::VulkanInstance() {
 	auto instanceRet = instanceBuilder.build();	
 	if (!instanceRet) { throwFatalError("Failed to create Vulkan instance. Error: " + instanceRet.error().message()); }
 	instance = instanceRet.value();
+
+	// Load instance functions
+	volkLoadInstance(instance);
 }
 
 VulkanInstance::~VulkanInstance() {
@@ -53,10 +61,17 @@ VulkanInstance::~VulkanInstance() {
 }
 
 void VulkanInstance::createAllocator() {
+	// function pointers from volk for VMA to use
+	const auto vulkanFunctions = VmaVulkanFunctions{
+		.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+		.vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+	};
+	
 	VmaAllocatorCreateInfo allocatorInfo = {};
     allocatorInfo.physicalDevice = physicalDevice.value();
     allocatorInfo.device = device.value().device;
     allocatorInfo.instance = instance;
+	allocatorInfo.pVulkanFunctions = &vulkanFunctions;
 	
 	VmaAllocator alloc;
     if (vmaCreateAllocator(&allocatorInfo, &alloc) != VK_SUCCESS) { throwFatalError("Could not create Vulkan VMA allocator.");}
@@ -92,6 +107,7 @@ void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
 		// Select physical device
 		vkb::PhysicalDeviceSelector physicalDeviceSelector(instance);
 		physicalDeviceSelector.set_surface(surfaceForPresenting);
+		physicalDeviceSelector.add_required_extension("VK_KHR_push_descriptor");
 		auto physicalDeviceRet = physicalDeviceSelector.select();
 		if (!physicalDeviceRet) { throwFatalError("Could not select Vulkan physical device. Error: " + physicalDeviceRet.error().message()); }
 		physicalDevice = physicalDeviceRet.value().physical_device;
@@ -101,6 +117,9 @@ void VulkanInstance::ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting) {
 		auto deviceRet = deviceBuilder.build();
 		if (!deviceRet) { throwFatalError("Could not create Vulkan device. Error: " + deviceRet.error().message()); }
 		device = deviceRet.value();
+
+		// Load device functions
+		volkLoadDevice(device.value());
 
 		// Get queues
 		graphicsQueue = { device->get_queue(vkb::QueueType::graphics).value(),

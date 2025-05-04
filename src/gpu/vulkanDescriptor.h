@@ -1,7 +1,7 @@
 #ifndef vulkanDescriptor_h
 #define vulkanDescriptor_h
 
-#include <vulkan/vulkan.h>
+#include <volk.h>
 
 class DescriptorLayoutBuilder {
 public:

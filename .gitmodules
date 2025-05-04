@@ -22,3 +22,6 @@
 [submodule "vk-bootstrap"]
 	path = external/vk-bootstrap
 	url = https://github.com/charles-lunarg/vk-bootstrap.git
+[submodule "volk"]
+	path = external/volk
+	url = https://github.com/zeux/volk.git

@@ -3,7 +3,7 @@
 
 #include <RmlUi/Core/Element.h>
 #include <glm/ext/matrix_float4x4.hpp>
-#include <vulkan/vulkan.h>
+#include <volk.h>
 
 #include "backend/circuitView/renderer/renderer.h"
 #include "gpu/renderer/subrenderers/vulkanChunker.h"

@@ -1,7 +1,7 @@
 #ifndef vulkanImage_h
 #define vulkanImage_h
 
-#include <vulkan/vulkan.h>
+#include <volk.h>
 #include <vk_mem_alloc.h>
 
 struct AllocatedImage {

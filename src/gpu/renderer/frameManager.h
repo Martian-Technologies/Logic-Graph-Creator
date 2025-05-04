@@ -1,7 +1,7 @@
 #ifndef frameManager_h
 #define frameManager_h
 
-#include <vulkan/vulkan.h>
+#include <volk.h>
 #include <chrono>
 
 #include "util/lifetimeExtender.h"
