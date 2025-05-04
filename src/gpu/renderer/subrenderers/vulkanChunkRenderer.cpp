@@ -41,7 +41,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	// create layout and descriptor set
 	DescriptorLayoutBuilder stateBufferBuilder;
 	stateBufferBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-	stateBufferDescriptorSetLayout = stateBufferBuilder.build(VK_SHADER_STAGE_VERTEX_BIT);
+	stateBufferDescriptorSetLayout = stateBufferBuilder.build(VK_SHADER_STAGE_VERTEX_BIT, VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR);
 
 	// ==================== PIPELINE setup =================================================
 	
@@ -116,8 +116,16 @@ void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, cons
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
-				// bind state buffer descriptor
-				vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 0, 1, &chunk->getStateBufferDescriptorSet(), 0, nullptr);
+				// Write state buffer descriptor
+				VkWriteDescriptorSet stateBufferDescriptorWrite = {
+					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+					.dstSet = 0,
+					.dstBinding = 0,
+					.descriptorCount = 1,
+					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+					.pBufferInfo = &chunk->getStateDescriptorBufferInfo()
+				};
+				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline->getLayout(), 0, 1, &stateBufferDescriptorWrite);
 
 				// draw
 				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
@@ -141,8 +149,16 @@ void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, cons
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(frame.mainCommandBuffer, 0, 1, vertexBuffers, offsets);
 
-				// bind descriptor set
-				vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getLayout(), 0, 1, &chunk->getStateBufferDescriptorSet(), 0, nullptr);
+				// Write state buffer descriptor
+				VkWriteDescriptorSet stateBufferDescriptorWrite = {
+					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+					.dstSet = 0,
+					.dstBinding = 0,
+					.descriptorCount = 1,
+					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+					.pBufferInfo = &chunk->getStateDescriptorBufferInfo()
+				};
+				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline->getLayout(), 0, 1, &stateBufferDescriptorWrite);
 				
 				// draw
 				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumWireVertices()), 1, 0, 0);
