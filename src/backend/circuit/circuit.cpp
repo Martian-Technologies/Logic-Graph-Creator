@@ -390,16 +390,19 @@ void Circuit::redo() {
 void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData) {
 	if (!eventData) {
 		logError("eventData passed was null", "Circuit");
+		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}
 	auto data = eventData->cast<std::pair<BlockType, Vector>>();
 	if (!data) {
 		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.resizeBlockType(data->get().first, data->get().second, difference.get());
 	sendDifference(difference);
+	undoSystem.addBlocker(); // cant undo after changing block size!
 }
 
 void Circuit::setBlockType(BlockType blockType) {
