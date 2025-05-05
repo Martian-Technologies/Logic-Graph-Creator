@@ -8,7 +8,7 @@
 
 class AddressTreeNode {
 public:
-	AddressTreeNode(circuit_id_t contId, Rotation rotation, DataUpdateEventManager* dataUpdateEventManager, bool isRoot) : containerId(contId), rotation(rotation), dataUpdateEventManager(dataUpdateEventManager), isRoot(isRoot) { }
+	AddressTreeNode(circuit_id_t contId, Rotation rotation, DataUpdateEventManager* dataUpdateEventManager, bool isRoot) : containerId(contId), rotation(rotation), dataUpdateEventManager(dataUpdateEventManager), isRoot(isRoot) {}
 
 	inline void addValue(Position position, EvaluatorGate value);
 	inline void addValue(const Address& address, EvaluatorGate value);
@@ -24,8 +24,7 @@ public:
 	inline void removeValue(Position position, circuit_id_t targetParentContainerId) {
 		if (containerId == targetParentContainerId) {
 			removeValue(position);
-		}
-		else {
+		} else {
 			for (auto& [pos, branch] : branches) {
 				branch.removeValue(position, targetParentContainerId);
 			}
@@ -151,8 +150,7 @@ inline std::vector<Address> AddressTreeNode::addValue(Position position, circuit
 	if (containerId == targetParentContainerId) {
 		addValue(position, value);
 		addresses.push_back(Address(position));
-	}
-	else {
+	} else {
 		for (auto& [pos, branch] : branches) {
 			std::vector<Address> newAddresses = branch.addValue(position, targetParentContainerId, value);
 			for (Address& address : newAddresses) {
@@ -186,8 +184,7 @@ inline std::vector<Address> AddressTreeNode::makeBranch(Position position, circu
 	if (containerId == targetParentContainerId) {
 		makeBranch(position, newContainerId, rotation);
 		addresses.push_back(Address(position));
-	}
-	else {
+	} else {
 		for (auto& [pos, branch] : branches) {
 			std::vector<Address> newAddresses = branch.makeBranch(position, targetParentContainerId, newContainerId, rotation);
 			for (Address& address : newAddresses) {

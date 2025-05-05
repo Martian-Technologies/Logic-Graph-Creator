@@ -53,7 +53,7 @@ private:
 	evaluator_id_t getNewEvaluatorId() { return ++lastId; }
 
 	DataUpdateEventManager* dataUpdateEventManager;
-	
+
 	evaluator_id_t lastId = 0;
 	std::map<evaluator_id_t, SharedEvaluator> evaluators;
 };

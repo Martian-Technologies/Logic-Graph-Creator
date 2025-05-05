@@ -14,7 +14,7 @@ LogicSimulator::LogicSimulator()
 	rollingAvgIndex(0),
 	targetTickrate(40 * 60),
 	isRealistic(true) {
-rollingAvg.resize(rollingAvgLength, 0);
+	rollingAvg.resize(rollingAvgLength, 0);
 	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
 	tickrateMonitorThread = std::thread(&LogicSimulator::tickrateMonitor, this);
 }
@@ -286,8 +286,7 @@ void LogicSimulator::computeJunctionStates(Gate& gate) {
 		}
 		if (state == logic_state_t::FLOATING) {
 			state = inputState;
-		}
-		else if (state != inputState) {
+		} else if (state != inputState) {
 			state = logic_state_t::UNDEFINED;
 			break;
 		}
@@ -320,8 +319,7 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 		}
 		if (hasBadInput) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
-		}
-		else {
+		} else {
 			gate.setNewState(logic_state_t::HIGH, isRealistic);
 		}
 		return;
@@ -345,8 +343,7 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 		}
 		if (hasBadInput) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
-		}
-		else {
+		} else {
 			gate.setNewState(logic_state_t::LOW, isRealistic);
 		}
 		return;
@@ -389,8 +386,7 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 		}
 		if (hasBadInput) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
-		}
-		else {
+		} else {
 			gate.setNewState(logic_state_t::LOW, isRealistic);
 		}
 		return;
@@ -417,8 +413,7 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 		}
 		if (hasBadInput) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
-		}
-		else {
+		} else {
 			gate.setNewState(logic_state_t::HIGH, isRealistic);
 		}
 		return;
@@ -486,11 +481,9 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 				return;
 			}
 			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].group];
-		}
-		else if (controlState == logic_state_t::LOW) {
+		} else if (controlState == logic_state_t::LOW) {
 			gate.statesB[0] = logic_state_t::FLOATING;
-		}
-		else {
+		} else {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
 		}
 		return;
@@ -510,11 +503,9 @@ void LogicSimulator::computeGateStates(Gate& gate, bool isRealistic) {
 				return;
 			}
 			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].group];
-		}
-		else if (controlState == logic_state_t::HIGH) {
+		} else if (controlState == logic_state_t::HIGH) {
 			gate.statesB[0] = logic_state_t::FLOATING;
-		}
-		else {
+		} else {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
 		}
 		return;
@@ -637,7 +628,7 @@ void LogicSimulator::simulationLoop() {
 				simulationCv.wait(lock,
 					[this]() {
 						return proceedFlag.load(std::memory_order_acquire) ||
-							   !running.load(std::memory_order_acquire);
+							!running.load(std::memory_order_acquire);
 					}
 				);
 			}

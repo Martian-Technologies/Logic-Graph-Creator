@@ -6,7 +6,7 @@
 
 class EvaluatorStateInterface {
 public:
-	EvaluatorStateInterface() : evaluator(nullptr) { }
+	EvaluatorStateInterface() : evaluator(nullptr) {}
 	EvaluatorStateInterface(Evaluator* evaluator) : evaluator(evaluator) {}
 
 	inline long long int getRealTickrate() const {

@@ -1,6 +1,6 @@
 #include "logicSimulatorWrapper.h"
 
-LogicSimulatorWrapper::LogicSimulatorWrapper(): logicSimulator() {
+LogicSimulatorWrapper::LogicSimulatorWrapper() : logicSimulator() {
 	logicSimulator.initialize();
 }
 
@@ -111,11 +111,11 @@ void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t ou
 		logicSimulator.connectGates(sourceGateId, outputGroup, targetGateId, inputGroup);
 		if (sourceIsJunction) {
 			JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
-			sourceJunctionGate.externalOutputs.push_back({targetGateId, inputGroup});
+			sourceJunctionGate.externalOutputs.push_back({ targetGateId, inputGroup });
 		}
 		if (targetIsJunction) {
 			JunctionGate& targetJunctionGate = getJunctionGate(targetGate);
-			targetJunctionGate.externalInputs.push_back({sourceGateId, outputGroup});
+			targetJunctionGate.externalInputs.push_back({ sourceGateId, outputGroup });
 		}
 	}
 }
@@ -141,8 +141,7 @@ void LogicSimulatorWrapper::disconnectGates(wrapper_gate_id_t sourceGate, size_t
 		sourceJunctionGate.junctionOutputs.erase(std::remove(sourceJunctionGate.junctionOutputs.begin(), sourceJunctionGate.junctionOutputs.end(), targetGate), sourceJunctionGate.junctionOutputs.end());
 		targetJunctionGate.junctionInputs.erase(std::remove(targetJunctionGate.junctionInputs.begin(), targetJunctionGate.junctionInputs.end(), sourceGate), targetJunctionGate.junctionInputs.end());
 		recreateJunctions(allJunctionGateIdsToRemake);
-	}
-	else {
+	} else {
 		logicSimulator.disconnectGates(sourceGateId, outputGroup, targetGateId, inputGroup);
 		if (sourceIsJunction) {
 			JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
@@ -313,8 +312,7 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 				outputs.push_back({ *wrapperId, static_cast<int>(output.second) });
 			}
 		}
-	}
-	else {
+	} else {
 		const simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
 		const Gate& gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getOutputGroupCount(); ++i) {
@@ -330,10 +328,10 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 }
 
 std::optional<wrapper_gate_id_t> LogicSimulatorWrapper::simToWrap(simulator_gate_id_t simId) const {
-    auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
-                           [simId](const std::optional<simulator_gate_id_t>& v) {
-                               return v && *v == simId;
-                           });
-    if (it == wrapperToSimulatorGateIdMap.end()) return std::nullopt;
-    return static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it));
+	auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
+						   [simId](const std::optional<simulator_gate_id_t>& v) {
+							   return v && *v == simId;
+						   });
+	if (it == wrapperToSimulatorGateIdMap.end()) return std::nullopt;
+	return static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it));
 }

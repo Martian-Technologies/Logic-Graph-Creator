@@ -109,12 +109,10 @@ struct Gate {
 			logic_state_t currentState = statesA[0];
 			if (currentState == logic_state_t::UNDEFINED || currentState == state) {
 				statesB[0] = state;
-			}
-			else {
+			} else {
 				statesB[0] = logic_state_t::UNDEFINED;
 			}
-		}
-		else {
+		} else {
 			statesB[0] = state;
 		}
 	}
@@ -124,12 +122,10 @@ struct Gate {
 			logic_state_t currentState = statesA[idx];
 			if (currentState == logic_state_t::UNDEFINED) {
 				statesB[idx] = state;
-			}
-			else {
+			} else {
 				statesB[idx] = logic_state_t::UNDEFINED;
 			}
-		}
-		else {
+		} else {
 			statesB[idx] = state;
 		}
 	}
