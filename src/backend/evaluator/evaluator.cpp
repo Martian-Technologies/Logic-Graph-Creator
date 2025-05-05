@@ -605,16 +605,41 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 		return;
 	}
 	auto connectionIO = branch.getConnectionIO(connectionId);
-	const auto blockId = connectionPoint.second.first;
-	const auto groupIndex = connectionPoint.second.second;
+	auto blockId = connectionPoint.second.first;
+	auto groupIndex = connectionPoint.second.second;
 	const auto junctionId = connectionIO.junctionId;
 	if (isInput) {
+		const GateType gateType = logicSimulatorWrapper.getGateType(blockId);
+		// if it is a switch, buttor, or tick button, we need to know
+		const bool isInput = (gateType == GateType::DEFAULT_RETURN_CURRENTSTATE || gateType == GateType::TICK_INPUT);
+		if (isInput) {
+			const auto outputs = logicSimulatorWrapper.get1x1GateOutputs(blockId);
+			logicSimulatorWrapper.deleteGate(blockId);
+			blockId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
+			for (const auto& output : outputs) {
+				logicSimulatorWrapper.connectGates(blockId, 0, output.first, output.second);
+			}
+		}
 		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
-	} else {
+	}
+	else {
+		const GateType gateType = logicSimulatorWrapper.getGateType(blockId);
+		const bool isOutput = (gateType == GateType::COPYINPUT);
+		if (isOutput) {
+			const auto inputs = logicSimulatorWrapper.get1x1GateInputs(blockId);
+			logicSimulatorWrapper.deleteGate(blockId);
+			blockId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
+			for (const auto& input : inputs) {
+				logicSimulatorWrapper.connectGates(input.first, input.second, blockId, 0);
+			}
+		}
 		logicSimulatorWrapper.connectGates(junctionId, 0, blockId, groupIndex);
 	}
 	connectionIO.isFloating = false;
-	connectionIO.outputTarget = connectionPoint.second;
+	connectionIO.outputTarget = {
+		blockId,
+		groupIndex
+	};
 	branch.addConnectionIO(connectionId, connectionIO);
 }
 
