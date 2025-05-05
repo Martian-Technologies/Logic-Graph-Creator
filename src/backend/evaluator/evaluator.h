@@ -45,6 +45,8 @@ public:
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
 
 	const AddressTreeNode& getAddressTree() const { return addressTree; }
+	void setIsRealistic(bool isRealistic) { logicSimulatorWrapper.setIsRealistic(isRealistic); }
+	bool getIsRealistic() const { return logicSimulatorWrapper.getIsRealistic(); }
 
 private:
 

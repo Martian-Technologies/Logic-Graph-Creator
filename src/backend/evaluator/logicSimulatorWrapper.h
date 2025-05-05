@@ -41,6 +41,12 @@ public:
 	const simulator_gate_id_t getSimulatorGateId(wrapper_gate_id_t gateId) const {
 		return wrapperToSimulatorGateIdMap.at(gateId).value();
 	}
+	void setIsRealistic(bool isRealistic) {
+		logicSimulator.setIsRealistic(isRealistic);
+	}
+	bool getIsRealistic() const {
+		return logicSimulator.getIsRealistic();
+	}
 
 private:
 	struct JunctionGate {
