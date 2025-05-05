@@ -109,6 +109,14 @@ public:
 		return connectionIds;
 	}
 	inline bool isNodeRoot() const { return isRoot; }
+	const Position* getPositionOfGateById(wrapper_gate_id_t gateId) const {
+		for (auto& [position, value] : values) {
+			if (value.gateId == gateId) {
+				return &position;
+			}
+		}
+		return nullptr;
+	}
 
 private:
 	std::unordered_map<Position, EvaluatorGate> values;
