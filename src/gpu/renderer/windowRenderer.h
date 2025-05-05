@@ -4,12 +4,13 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <thread>
 
-#include "frameManager.h"
-#include "gpu/renderer/subrenderers/viewportRenderer.h"
-#include "gpu/renderer/viewportRenderInterface.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
-#include "vulkanSwapchain.h"
+
+#include "gpu/renderer/frameManager.h"
+#include "gpu/renderer/viewport/viewportRenderer.h"
+#include "gpu/renderer/viewportRenderInterface.h"
+#include "gpu/abstractions/vulkanSwapchain.h"
 
 class WindowRenderer {
 public:

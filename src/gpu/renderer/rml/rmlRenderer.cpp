@@ -1,9 +1,9 @@
 #include "rmlRenderer.h"
 
-#include "gpu/vulkanInstance.h"
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
-#include "gpu/vulkanShader.h"
+#include "gpu/vulkanInstance.h"
+#include "gpu/abstractions/vulkanShader.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_image.h>

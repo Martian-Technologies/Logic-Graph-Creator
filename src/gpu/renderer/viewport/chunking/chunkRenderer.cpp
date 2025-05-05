@@ -1,13 +1,14 @@
-#include "vulkanChunkRenderer.h"
+#include "chunkRenderer.h"
 
-#include "gpu/vulkanShader.h"
+
+#include "gpu/vulkanInstance.h"
+#include "gpu/abstractions/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
-#include "gpu/vulkanInstance.h"
 
 #include <stb_image.h>
 
-VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
+ChunkRenderer::ChunkRenderer(VkRenderPass& renderPass)
 	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 0.5f}, { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 0.5f}}) {
 
 	// ==================== TEXTURE setup =================================================
@@ -79,7 +80,7 @@ VulkanChunkRenderer::VulkanChunkRenderer(VkRenderPass& renderPass)
 	destroyShaderModule(wireFragShader);
 }
 
-VulkanChunkRenderer::~VulkanChunkRenderer() {
+ChunkRenderer::~ChunkRenderer() {
 	destroyImage(blockTexture);
 	vkDestroySampler(VulkanInstance::get().getDevice(), blockTextureSampler, nullptr);
 	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), blockTextureDescriptorSetLayout, nullptr);
@@ -87,7 +88,7 @@ VulkanChunkRenderer::~VulkanChunkRenderer() {
 	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), stateBufferDescriptorSetLayout, nullptr);
 }
 
-void VulkanChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);

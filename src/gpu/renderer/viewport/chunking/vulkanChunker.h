@@ -6,8 +6,8 @@
 
 #include "backend/address.h"
 #include "backend/circuit/circuit.h"
-#include "gpu/vulkanBuffer.h"
-#include "gpu/vulkanDescriptor.h"
+#include "gpu/abstractions/vulkanBuffer.h"
+#include "gpu/abstractions/vulkanDescriptor.h"
 
 // ====================================================================================================================
 

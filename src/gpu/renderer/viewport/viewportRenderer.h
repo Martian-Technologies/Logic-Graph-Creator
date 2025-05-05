@@ -1,8 +1,8 @@
 #ifndef viewportRenderer_h
 #define viewportRenderer_h
 
-#include "gpu/renderer/subrenderers/gridRenderer.h"
-#include "gpu/renderer/subrenderers/vulkanChunkRenderer.h"
+#include "gpu/renderer/viewport/gridRenderer.h"
+#include "gpu/renderer/viewport/chunking/chunkRenderer.h"
 #include "gpu/renderer/viewportRenderInterface.h"
 #include "gpu/renderer/frameManager.h"
 
@@ -14,7 +14,7 @@ public:
 
 private:
 	GridRenderer gridRenderer;
-	VulkanChunkRenderer chunkRenderer;
+	ChunkRenderer chunkRenderer;
 };
 
 #endif

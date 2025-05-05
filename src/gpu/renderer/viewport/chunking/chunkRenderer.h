@@ -1,20 +1,20 @@
-#ifndef vulkanChunkRenderer_h
-#define vulkanChunkRenderer_h
+#ifndef chunkRenderer_h
+#define chunkRenderer_h
 
 #include "gpu/renderer/frameManager.h"
-#include "gpu/renderer/vulkanPipeline.h"
-#include "gpu/vulkanDescriptor.h"
-#include "gpu/vulkanImage.h"
+#include "gpu/abstractions/vulkanPipeline.h"
+#include "gpu/abstractions/vulkanDescriptor.h"
+#include "gpu/abstractions/vulkanImage.h"
 #include "vulkanChunker.h"
 
 struct ChunkPushConstants {
 	glm::mat4 mvp;
 };
 
-class VulkanChunkRenderer {
+class ChunkRenderer {
 public:
-	VulkanChunkRenderer(VkRenderPass& renderPass);
-	~VulkanChunkRenderer();
+	ChunkRenderer(VkRenderPass& renderPass);
+	~ChunkRenderer();
 	
 	void render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 

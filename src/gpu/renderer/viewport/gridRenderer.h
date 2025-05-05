@@ -2,7 +2,7 @@
 #define gridRenderer_h
 
 #include "gpu/renderer/frameManager.h"
-#include "gpu/renderer/vulkanPipeline.h"
+#include "gpu/abstractions/vulkanPipeline.h"
 
 struct GridPushConstants {
 	glm::mat4 iMvp;

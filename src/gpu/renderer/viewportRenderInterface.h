@@ -6,7 +6,7 @@
 #include <volk.h>
 
 #include "backend/circuitView/renderer/renderer.h"
-#include "gpu/renderer/subrenderers/vulkanChunker.h"
+#include "gpu/renderer/viewport/chunking/vulkanChunker.h"
 
 struct WindowRenderer;
 

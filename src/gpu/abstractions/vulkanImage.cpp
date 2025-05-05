@@ -1,6 +1,6 @@
 #include "vulkanImage.h"
 
-#include "gpu/vulkanBuffer.h"
+#include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/vulkanInstance.h"
 
 AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {

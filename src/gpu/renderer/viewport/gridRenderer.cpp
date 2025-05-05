@@ -2,7 +2,7 @@
 
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
-#include "gpu/vulkanShader.h"
+#include "gpu/abstractions/vulkanShader.h"
 
 GridRenderer::GridRenderer(VkRenderPass& renderPass) {
 	// create shaders

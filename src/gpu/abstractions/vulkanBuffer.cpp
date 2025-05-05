@@ -1,6 +1,6 @@
 #include "vulkanBuffer.h"
 
-#include "vulkanInstance.h"
+#include "gpu/vulkanInstance.h"
 
 AllocatedBuffer createBuffer(size_t allocSize, VkBufferUsageFlags usage, VmaAllocationCreateFlags flags) {
 	// allocate buffer
