@@ -42,6 +42,8 @@ public:
 	bool tryRemoveBlock(Position position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryMoveBlock(Position positionOfBlock, Position position, Difference* difference);
+	// Trys to set the type of a block. Returns if successful. Pass a Difference* to read the what changes were made.
+	bool trySetType(Position positionOfBlock, BlockType type, Difference* difference);
 	// moves blocks until they 
 	void resizeBlockType(BlockType blockType, Vector size, Difference* difference);
 

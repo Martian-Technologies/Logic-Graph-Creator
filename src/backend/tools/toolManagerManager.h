@@ -8,7 +8,7 @@ public:
 	ToolManagerManager(std::set<CircuitView*>* circuitViews, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline void setBlock(BlockType blockType) {
-		setTool("placement/placement");
+		setTool("placement");
 		for (auto view : *circuitViews) {
 			view->getToolManager().selectBlock(blockType);
 		}

@@ -26,6 +26,9 @@ struct Vector {
 	inline bool operator==(Vector other) const noexcept { return dx == other.dx && dy == other.dy; }
 	inline bool operator!=(Vector other) const noexcept { return !operator==(other); }
 
+	inline bool hasZeros() const noexcept { return !(dx && dy); }
+	inline bool widthInSize(Vector size) const noexcept { return dx < size.dx && dy < size.dy; }
+
 	inline cord_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
 	inline f_cord_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
 	inline f_cord_t length() const noexcept { return sqrt(lengthSquared()); }

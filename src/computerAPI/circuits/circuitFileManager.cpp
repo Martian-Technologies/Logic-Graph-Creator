@@ -129,7 +129,7 @@ void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::s
 		if (iter->second.circuitIds.contains(circuitId)) return;
 	}
 	iter->second.circuitIds.emplace(circuitId);
-    iter->second.circuitLastSaved[circuitId] = circuitManager->getCircuit(circuitId)->getEditCount();
+    iter->second.circuitLastSaved[circuitId] = 0;
 	
     std::map<circuit_id_t, std::string>::iterator iter2 = circuitIdToFilePath.find(circuitId);
 	if (iter2 != circuitIdToFilePath.end()) {

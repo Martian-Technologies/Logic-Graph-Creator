@@ -23,7 +23,7 @@ public:
 	typedef std::pair<ModificationType, std::variant<block_modification_t, move_modification_t, connection_modification_t, data_modification_t>> Modification;
 
 	inline bool empty() const { return modifications.empty(); }
-	inline const std::vector<Modification>& getModifications() { return modifications; }
+	inline const std::vector<Modification>& getModifications() const { return modifications; }
 
 private:
 	void addRemovedBlock(Position position, Rotation rotation, BlockType type) { modifications.push_back({ REMOVED_BLOCK, std::make_tuple(position, rotation, type) }); }

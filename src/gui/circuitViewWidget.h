@@ -30,6 +30,7 @@ public:
 	
 	void load();
 	void save();
+	void asSave();
 
 private:
 	// utility functions

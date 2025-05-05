@@ -251,7 +251,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 				logError("Could not find position for connection: {}", "GatalityParser", pair.first);
 				id = 0;
 			}
-			const std::string* namePtr = circuitBlockData->getConnectionIdToName(pair.first);
+			const std::string* namePtr = blockData->getConnectionIdToName(pair.first);
 			std::string name;
 			if (namePtr) {
 				name = *namePtr;

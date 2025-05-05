@@ -1,9 +1,10 @@
 #ifndef blockData_h
 #define blockData_h
 
+#include "util/bidirectionalMultiSecondKeyMap.h"
+#include "backend/container/block/connectionEnd.h"
 #include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
-#include "backend/container/block/connectionEnd.h"
 
 class BlockData {
 	friend class BlockDataManager;
@@ -197,6 +198,18 @@ public:
 		return connections;
 	}
 
+	inline void setConnectionIdName(connection_end_id_t endId, const std::string& name) {
+		connectionIdNames.set(endId, name);
+		dataUpdateEventManager->sendEvent(
+			"blockDataConnectionNameSet",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+		);
+	}
+	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const {
+		return connectionIdNames.get(endId);
+	}
+
+
 private:
 	BlockType blockType;
 	bool defaultData = true;
@@ -207,6 +220,7 @@ private:
 	Vector blockSize = Vector(1);
 	connection_end_id_t inputConnectionCount = 0;
 	std::unordered_map<connection_end_id_t, std::pair<Vector, bool>> connections;
+	BidirectionalMultiSecondKeyMap<connection_end_id_t, std::string> connectionIdNames;
 	DataUpdateEventManager* dataUpdateEventManager;
 };
 

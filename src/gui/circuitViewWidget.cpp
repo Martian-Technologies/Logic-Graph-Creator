@@ -1,4 +1,3 @@
-#include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuitView/circuitView.h"
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
@@ -83,6 +82,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("save"); save(); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_S,
+		Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT,
+		[this]() { logInfo("save"); asSave(); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_O,
 		Rml::Input::KeyModifier::KM_CTRL,
 		[this]() { logInfo("load"); load(); }
@@ -95,11 +99,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_V,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection/paste tool"); }
+		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_I,
-		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("interactive/state changer"); }
+		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
@@ -112,6 +116,10 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_E,
 		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Q,
+		[this]() { logInfo("Tool Invert Mode"); circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_N,
@@ -138,7 +146,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	document->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
-			logInfo("Clicked: {}", "", circuitView->getViewManager().getPointerPosition().snap().toString());
 			if (button == 0) { // left
 				if (event.GetParameter<int>("alt_key", 0)) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
@@ -260,7 +267,6 @@ void CircuitViewWidget::setStatusBar(const std::string& text) {
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
-	logInfo("Trying to save Circuit");
 	if (fileManager && circuitView->getCircuit()) {
 		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
 		if (!fileManager->saveCircuit(circuitId)) {
@@ -270,6 +276,15 @@ void CircuitViewWidget::save() {
 			filter.pattern = "*.cir";
 			SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 		}
+	}
+}
+
+void CircuitViewWidget::asSave() {
+	if (fileManager && circuitView->getCircuit()) {
+		static SDL_DialogFileFilter filter;
+		filter.name = "Circuit Files";
+		filter.pattern = "*.cir";
+		SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 	}
 }
 

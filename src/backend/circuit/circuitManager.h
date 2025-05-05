@@ -11,9 +11,7 @@ class EvaluatorManager;
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
-		dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager) , evaluatorManager(evaluatorManager) { }
-
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager);
 	// Circuit
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
@@ -145,11 +143,11 @@ public:
 		for (const ParsedCircuit::ConnectionPort& port : ports) {
 			if (port.isInput) blockData->setConnectionInput(port.positionOnBlock, port.connectionEndId);
 			else blockData->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
+			if (!port.portName.empty()) {
+				blockData->setConnectionIdName(port.connectionEndId, port.portName);
+			}
 			if (port.block != 0) {
 				circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
-			}
-			if (!port.portName.empty()) {
-				circuitBlockData->setConnectionIdName(port.connectionEndId, port.portName);
 			}
 	    }
 
@@ -180,11 +178,21 @@ public:
 		}
 	}
 
+	template<class T>
+	void linkedFunctionForUpdates(const DataUpdateEventManager::EventData* eventData) {
+		auto eventWithData = eventData->cast<std::pair<BlockType, T>>();
+		if (!eventWithData) return;
+		SharedCircuit circuit = getCircuit(circuitBlockDataManager.getCircuitId(eventWithData->get().first));
+		if (!circuit) return;
+		circuit->addEdit();
+	}
+
 private:
 	circuit_id_t getNewCircuitId() { return ++lastId; }
 
 	BlockDataManager blockDataManager;
 	CircuitBlockDataManager circuitBlockDataManager;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	DataUpdateEventManager* dataUpdateEventManager;
 	EvaluatorManager* evaluatorManager;
 

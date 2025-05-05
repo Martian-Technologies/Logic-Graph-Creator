@@ -24,12 +24,13 @@ public:
 	void resetMenu();
 
 private:
-	void addListItem();
+	void addListItem(bool isInput);
 	void updateSelected(std::string string);
 	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree);
 
 	Rml::ElementDocument* document;
-	Rml::Element* list;
+	Rml::Element* outputList;
+	Rml::Element* inputList;
 	Rml::Element* menu;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;

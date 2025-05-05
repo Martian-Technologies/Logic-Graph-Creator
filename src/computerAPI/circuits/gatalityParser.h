@@ -13,7 +13,6 @@ public:
     std::vector<circuit_id_t> loadCompressed(const std::string& path, std::ifstream& input);
     bool save(const CircuitFileManager::FileData& fileData, bool compress);
 
-    void buildTypeDictionary(const CircuitFileManager::FileData& fileData, std::unordered_map<std::string, int>& typeDict);
 private:
 	std::unordered_set<std::string> importedFiles;
 };

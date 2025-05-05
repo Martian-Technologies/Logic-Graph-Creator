@@ -32,7 +32,7 @@
 #include <RmlUi/Core/StringUtilities.h>
 #include <RmlUi/Core/SystemInterface.h>
 #include <RmlUi/Core/Element.h>
-// #include "gui/sdl/SDL_gesture.h"
+ // #include "gui/sdl/SDL_gesture.h"
 
 RmlSystemInterface::RmlSystemInterface()
 {
@@ -147,15 +147,9 @@ void RmlSystemInterface::ActivateKeyboard(Rml::Vector2f caret_position, float li
 {
 	if (window)
 	{
-#if SDL_MAJOR_VERSION >= 3
-		const SDL_Rect rect = {int(caret_position.x), int(caret_position.y), 1, int(line_height)};
+		const SDL_Rect rect = { int(caret_position.x), int(caret_position.y), 1, int(line_height) };
 		SDL_SetTextInputArea(window, &rect, 0);
 		SDL_StartTextInput(window);
-#else
-		(void)caret_position;
-		(void)line_height;
-		SDL_StartTextInput();
-#endif
 	}
 }
 
@@ -163,19 +157,15 @@ void RmlSystemInterface::DeactivateKeyboard()
 {
 	if (window)
 	{
-#if SDL_MAJOR_VERSION >= 3
 		SDL_StopTextInput(window);
-#else
-		SDL_StopTextInput();
-#endif
 	}
 }
 
 bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Event& ev, float windowScalingSize)
 {
 #if SDL_MAJOR_VERSION >= 3
-	#define RMLSDL_WINDOW_EVENTS_BEGIN
-	#define RMLSDL_WINDOW_EVENTS_END
+#define RMLSDL_WINDOW_EVENTS_BEGIN
+#define RMLSDL_WINDOW_EVENTS_END
 	auto GetKey = [](const SDL_Event& event) { return event.key.key; };
 	constexpr auto event_mouse_motion = SDL_EVENT_MOUSE_MOTION;
 	constexpr auto event_mouse_down = SDL_EVENT_MOUSE_BUTTON_DOWN;
@@ -191,12 +181,12 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	constexpr auto rmlsdl_false = false;
 #else
 	(void)window;
-	#define RMLSDL_WINDOW_EVENTS_BEGIN \
+#define RMLSDL_WINDOW_EVENTS_BEGIN \
 	case SDL_WINDOWEVENT:              \
 	{                                  \
 		switch (ev.window.event)       \
 		{
-	#define RMLSDL_WINDOW_EVENTS_END \
+#define RMLSDL_WINDOW_EVENTS_END \
 		}                            \
 		}                            \
 		break;
@@ -215,12 +205,30 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 #endif
 
 	bool result = true;
-
-	switch (ev.type)
-	{
+	switch (ev.type) {
+		// case event_gesture:
+		// {
+		// 	Gesture_MultiGestureEvent *mgesture = (Gesture_MultiGestureEvent *)&ev;
+		// 	//Rotation detected
+		// 	if( SDL_fabs( mgesture->dTheta ) > 3.14 / 180.0 )
+		// 	{
+		// 		// touchLocation.x = mgesture->x * gScreenRect.w;
+		// 		// touchLocation.y = mgesture->y * gScreenRect.h;
+		// 		// currentTexture = &gRotateTexture;
+		// 	}
+		// 	//Pinch detected
+		// 	else if( SDL_fabs( mgesture->dDist ) > 0.002 ) {
+		// 		// logInfo(mgesture->dDist);
+		// 		Rml::Dictionary dict;
+		// 		dict["delta"] = mgesture->dDist;
+		// 		context->GetHoverElement()->DispatchEvent(pinchEventId, dict);
+		// 		// mgesture->dDist
+		// 	}
+		// }
+		// break;
 	case event_mouse_motion:
 	{
-		result = context->ProcessMouseMove(int(ev.motion.x*windowScalingSize), int(ev.motion.y*windowScalingSize), GetKeyModifierState());
+		result = context->ProcessMouseMove(int(ev.motion.x * windowScalingSize), int(ev.motion.y * windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_mouse_down:
@@ -237,7 +245,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	break;
 	case event_mouse_wheel:
 	{
-		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x*windowScalingSize, -ev.wheel.y*windowScalingSize), GetKeyModifierState());
+		result = context->ProcessMouseWheel(Rml::Vector2f(-ev.wheel.x * windowScalingSize, -ev.wheel.y * windowScalingSize), GetKeyModifierState());
 	}
 	break;
 	case event_key_down:
@@ -258,7 +266,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	}
 	break;
 
-		RMLSDL_WINDOW_EVENTS_BEGIN
+	RMLSDL_WINDOW_EVENTS_BEGIN
 
 	case event_window_size_changed:
 	{
@@ -281,7 +289,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	break;
 #endif
 
-		RMLSDL_WINDOW_EVENTS_END
+	RMLSDL_WINDOW_EVENTS_END
 
 	default: break;
 	}
@@ -289,8 +297,7 @@ bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Window* window, SDL_Ev
 	return result;
 }
 
-Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
-{
+Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey) {
 #if SDL_MAJOR_VERSION >= 3
 	constexpr auto key_a = SDLK_A;
 	constexpr auto key_b = SDLK_B;
@@ -352,8 +359,7 @@ Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
 #endif
 
 	// clang-format off
-	switch (sdlkey)
-	{
+	switch (sdlkey) {
 	case SDLK_UNKNOWN:      return Rml::Input::KI_UNKNOWN;
 	case SDLK_ESCAPE:       return Rml::Input::KI_ESCAPE;
 	case SDLK_SPACE:        return Rml::Input::KI_SPACE;
@@ -463,10 +469,10 @@ Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
 	case SDLK_RALT:         return Rml::Input::KI_RMENU;
 	case SDLK_LGUI:         return Rml::Input::KI_LMETA;
 	case SDLK_RGUI:         return Rml::Input::KI_RMETA;
-	/*
-	case SDLK_LSUPER:       return Rml::Input::KI_LWIN;
-	case SDLK_RSUPER:       return Rml::Input::KI_RWIN;
-	*/
+		/*
+		case SDLK_LSUPER:       return Rml::Input::KI_LWIN;
+		case SDLK_RSUPER:       return Rml::Input::KI_RWIN;
+		*/
 	default: break;
 	}
 	// clang-format on
@@ -474,10 +480,8 @@ Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
 	return Rml::Input::KI_UNKNOWN;
 }
 
-int RmlSDL::ConvertMouseButton(int button)
-{
-	switch (button)
-	{
+int RmlSDL::ConvertMouseButton(int button) {
+	switch (button) {
 	case SDL_BUTTON_LEFT: return 0;
 	case SDL_BUTTON_RIGHT: return 1;
 	case SDL_BUTTON_MIDDLE: return 2;
@@ -485,28 +489,28 @@ int RmlSDL::ConvertMouseButton(int button)
 	}
 }
 
-int RmlSDL::GetKeyModifierState()
-{
+int RmlSDL::GetKeyModifierState() {
 	SDL_Keymod sdl_mods = SDL_GetModState();
 
-#if SDL_MAJOR_VERSION >= 3
+#ifdef __APPLE__
+	constexpr auto mod_ctrl = SDL_KMOD_GUI;
+	constexpr auto mod_gui = SDL_KMOD_CTRL;
+#else
 	constexpr auto mod_ctrl = SDL_KMOD_CTRL;
+	constexpr auto mod_gui = SDL_KMOD_GUI;
+#endif
 	constexpr auto mod_shift = SDL_KMOD_SHIFT;
 	constexpr auto mod_alt = SDL_KMOD_ALT;
 	constexpr auto mod_num = SDL_KMOD_NUM;
 	constexpr auto mod_caps = SDL_KMOD_CAPS;
-#else
-	constexpr auto mod_ctrl = KMOD_CTRL;
-	constexpr auto mod_shift = KMOD_SHIFT;
-	constexpr auto mod_alt = KMOD_ALT;
-	constexpr auto mod_num = KMOD_NUM;
-	constexpr auto mod_caps = KMOD_CAPS;
-#endif
 
 	int retval = 0;
 
 	if (sdl_mods & mod_ctrl)
 		retval |= Rml::Input::KM_CTRL;
+
+	if (sdl_mods & mod_gui)
+		retval |= Rml::Input::KM_META;
 
 	if (sdl_mods & mod_shift)
 		retval |= Rml::Input::KM_SHIFT;
@@ -516,6 +520,7 @@ int RmlSDL::GetKeyModifierState()
 
 	if (sdl_mods & mod_num)
 		retval |= Rml::Input::KM_NUMLOCK;
+
 
 	if (sdl_mods & mod_caps)
 		retval |= Rml::Input::KM_CAPSLOCK;

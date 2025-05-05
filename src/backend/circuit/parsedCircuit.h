@@ -11,26 +11,26 @@ class ParsedCircuit {
 	friend class CircuitValidator;
 public:
 	struct BlockData {
-	    FPosition pos; // will be validated into integer values
-	    Rotation rotation; // todo: make into integer value to generalize the rotation
-	    BlockType type;
+		FPosition pos; // will be validated into integer values
+		Rotation rotation; // todo: make into integer value to generalize the rotation
+		BlockType type;
 	};
 
 	struct ConnectionData {
-	    block_id_t outputBlockId;
-	    connection_end_id_t outputId;
-	    block_id_t inputBlockId;
-	    connection_end_id_t inputId;
+		block_id_t outputBlockId;
+		connection_end_id_t outputId;
+		block_id_t inputBlockId;
+		connection_end_id_t inputId;
 
-	    bool operator==(const ConnectionData& other) const {
-	        return outputId == other.outputId && inputId == other.inputId &&
-	               outputBlockId == other.outputBlockId && inputBlockId == other.inputBlockId;
-	    }
+		bool operator==(const ConnectionData& other) const {
+			return outputId == other.outputId && inputId == other.inputId &&
+				outputBlockId == other.outputBlockId && inputBlockId == other.inputBlockId;
+		}
 	};
 
 	struct ConnectionPort {
 		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block, const std::string& portName) :
-			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block), portName(portName) {}
+			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block), portName(portName) { }
 		bool isInput;
 		connection_end_id_t connectionEndId;
 		Vector positionOnBlock;
@@ -46,9 +46,9 @@ public:
 	void addConnection(const ConnectionData& conn);
 
 	const BlockData* getBlock(block_id_t id) const {
-	    auto itr = blocks.find(id);
-	    if (itr != blocks.end()) return &itr->second;
-	    return nullptr;
+		auto itr = blocks.find(id);
+		if (itr != blocks.end()) return &itr->second;
+		return nullptr;
 	}
 	const std::unordered_map<block_id_t, BlockData>& getBlocks() const { return blocks; }
 	const std::vector<ConnectionData>& getConns() const { return connections; }
@@ -88,7 +88,7 @@ private:
 
 	std::unordered_map<block_id_t, BlockData> blocks;
 	std::vector<ConnectionData> connections;
-	
+
 	bool valid = true;
 };
 
@@ -99,10 +99,10 @@ public:
 	CircuitValidator(ParsedCircuit& parsedCircuit, BlockDataManager* blockDataManager) : parsedCircuit(parsedCircuit), blockDataManager(blockDataManager) { validate(); }
 private:
 	struct ConnectionHash {
-	    size_t operator()(const ParsedCircuit::ConnectionData& p) const {
-	        return std::hash<block_id_t>()(p.outputId) ^ std::hash<block_id_t>()(p.inputId) ^
-	               std::hash<connection_end_id_t>()(p.outputBlockId) ^ std::hash<connection_end_id_t>()(p.inputBlockId);
-	    }
+		size_t operator()(const ParsedCircuit::ConnectionData& p) const {
+			return std::hash<block_id_t>()(p.outputId) ^ std::hash<block_id_t>()(p.inputId) ^
+				std::hash<connection_end_id_t>()(p.outputBlockId) ^ std::hash<connection_end_id_t>()(p.inputBlockId);
+		}
 	};
 
 	void validate();
@@ -115,15 +115,15 @@ private:
 	bool handleUnpositionedBlocks();
 
 	bool isIntegerPosition(const FPosition& pos) const {
-	    return pos.x == std::floor(pos.x) && pos.y == std::floor(pos.y);
+		return pos.x == std::floor(pos.x) && pos.y == std::floor(pos.y);
 	}
 	block_id_t generateNewBlockId() const {
-	    block_id_t id = 0;
-	    // slow
-	    while (parsedCircuit.blocks.find(id) != parsedCircuit.blocks.end()){
-	        ++id;
-	    }
-	    return id;
+		block_id_t id = 0;
+		// slow
+		while (parsedCircuit.blocks.find(id) != parsedCircuit.blocks.end()) {
+			++id;
+		}
+		return id;
 	}
 
 	BlockDataManager* blockDataManager;

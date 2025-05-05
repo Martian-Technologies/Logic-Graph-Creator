@@ -1,6 +1,5 @@
 #include <cassert>
 
-#include "util/emptyVector.h"
 #include "blockContainer.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
@@ -70,6 +69,29 @@ bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, D
 	removeBlockCells(block);
 	block->setPosition(position + (block->getPosition() - positionOfBlock));
 	placeBlockCells(block);
+	return true;
+}
+
+bool BlockContainer::trySetType(Position positionOfBlock, BlockType type, Difference* difference) {
+	if (type == selfBlockType) return false;
+	Block* oldBlock = getBlock_(positionOfBlock);
+	if (!oldBlock) return false;
+	if (oldBlock->type() == type) return true;
+	Position pos = oldBlock->getPosition();
+	Rotation rot = oldBlock->getRotation();
+	std::unordered_map<connection_end_id_t, std::unordered_set<ConnectionEnd>> connections = oldBlock->getConnectionContainer().getConnections();
+	tryRemoveBlock(positionOfBlock, difference);
+	tryInsertBlock(pos, rot, type, difference);
+	Block* newBlock = getBlock_(pos);
+	if (!newBlock) return false;
+	for (auto iter : connections) {
+		ConnectionEnd end1(newBlock->id(), iter.first);
+		bool isInput = blockDataManager->isConnectionInput(type, iter.first);
+		for (auto iter2 : iter.second) {
+			if (isInput) tryCreateConnection(iter2, end1, difference);
+			else tryCreateConnection(end1, iter2, difference);
+		}
+	}
 	return true;
 }
 
