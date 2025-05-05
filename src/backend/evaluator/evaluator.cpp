@@ -401,7 +401,6 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 	const wrapper_gate_id_t blockId = gate->gateId;
 	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
 	logicSimulatorWrapper.setState(blockId, 0, state); // TODO: 0 temp
-	debugPrint(blockId);
 	lock.unlock();
 }
 
@@ -601,7 +600,6 @@ const Position* Evaluator::getConnectionTargetPosition(AddressTreeNode& branch, 
 }
 
 void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
-	logInfo("linkConnectionIO: connectionId = " + std::to_string(connectionId));
 	EvaluatorIOJunction* connectionIO = branch.getConnectionIO(connectionId);
 	if (!connectionIO) {
 		logError("linkConnectionIO: connectionId does not exist");
@@ -616,7 +614,6 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 		logError("linkConnectionIO: position is null");
 		return;
 	}
-	logInfo("linkConnectionIO: position = " + position->toString());
 	const std::pair<bool, std::pair<wrapper_gate_id_t, int>> connectionPoint = getConnectionAtPosition(branch, *position, blockContainerCache, isInput);
 	if (!connectionPoint.first) return;
 	wrapper_gate_id_t blockId = connectionPoint.second.first;
@@ -624,17 +621,11 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 	wrapper_gate_id_t junctionId = connectionIO->junctionId;
 	GateType originalGateType = logicSimulatorWrapper.getGateType(blockId);
 	// print inputs and outputs
-	debugPrint(blockId);
 	if (isInput) {
 		// if it is a switch, buttor, or tick button, we need to replace with a junction
 		const bool needToReplace = (originalGateType == GateType::DEFAULT_RETURN_CURRENTSTATE || originalGateType == GateType::TICK_INPUT);
 		if (needToReplace) {
-			logInfo("linkConnectionIO: need to replace input block with junction");
 			std::vector<std::pair<wrapper_gate_id_t, int>> outputs = logicSimulatorWrapper.get1x1GateOutputs(blockId);
-			// print all outputs
-			for (const std::pair<wrapper_gate_id_t, int> output : outputs) {
-				logInfo("Output: " + std::to_string(output.first) + " " + std::to_string(output.second));
-			}
 			logicSimulatorWrapper.deleteGate(blockId);
 			blockId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
 			for (const std::pair<wrapper_gate_id_t, int> output : outputs) {
@@ -646,12 +637,7 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 	else {
 		const bool needToReplace = (originalGateType == GateType::COPYINPUT);
 		if (needToReplace) {
-			logInfo("linkConnectionIO: need to replace output block with junction");
 			const std::vector<std::pair<wrapper_gate_id_t, int>> inputs = logicSimulatorWrapper.get1x1GateInputs(blockId);
-			// print all inputs
-			for (const std::pair<wrapper_gate_id_t, int> input : inputs) {
-				logInfo("linkConnectionIO: input = " + std::to_string(input.first) + " " + std::to_string(input.second));
-			}
 			logicSimulatorWrapper.deleteGate(blockId);
 			blockId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
 			for (const std::pair<wrapper_gate_id_t, int> input : inputs) {
@@ -660,7 +646,6 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 		}
 		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
 	}
-	debugPrint(blockId);
 	connectionIO->isFloating = false;
 	connectionIO->outputTarget = {
 		blockId,
@@ -670,14 +655,12 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 }
 
 void Evaluator::unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
-	logInfo("unlinkConnectionIO: connectionId = " + std::to_string(connectionId));
 	EvaluatorIOJunction* connectionIO = branch.getConnectionIO(connectionId);
 	if (!connectionIO) {
 		logError("unlinkConnectionIO: connectionId does not exist");
 		return;
 	}
 	if (connectionIO->isFloating) {
-		logInfo("unlinkConnectionIO: connectionId is already floating");
 		return;
 	}
 	const bool isInput = isIOanInput(connectionId, branch);
