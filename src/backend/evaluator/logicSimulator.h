@@ -26,12 +26,12 @@ public:
 
 	void disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
 
-	GateType getGateType(simulator_gate_id_t gate) const {
-		return gates[gate].type;
+	const GateType getGateType(simulator_gate_id_t gate) const {
+		return gates.at(gate).type;
 	}
 
-	Gate getGate(simulator_gate_id_t gate) const {
-		return gates[gate];
+	const Gate& getGate(simulator_gate_id_t gate) const {
+		return gates.at(gate);
 	}
 
 	void decomissionGate(simulator_gate_id_t gate);

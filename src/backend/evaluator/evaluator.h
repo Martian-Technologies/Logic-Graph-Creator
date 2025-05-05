@@ -38,6 +38,7 @@ public:
 	bool getBoolState(const Address& address);
 	void setState(const Address& address, logic_state_t state);
 	void setState(const Address& address, bool state) { setState(address, fromBool(state)); }
+	void debugPrint(wrapper_gate_id_t blockId);
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses);
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);

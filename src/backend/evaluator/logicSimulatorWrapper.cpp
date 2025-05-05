@@ -44,16 +44,16 @@ void LogicSimulatorWrapper::deleteGate(wrapper_gate_id_t gateId) {
 		return;
 	}
 	if (allJunctionGateIds.contains(gateId)) {
-		auto& junctionGate = getJunctionGate(gateId);
+		JunctionGate& junctionGate = getJunctionGate(gateId);
 		std::vector<wrapper_gate_id_t> allJunctionGateIdsToRemake = findConnectedJunctionGates(junctionGate);
 		allJunctionGateIdsToRemake.erase(std::remove(allJunctionGateIdsToRemake.begin(), allJunctionGateIdsToRemake.end(), gateId), allJunctionGateIdsToRemake.end());
 		logicSimulator.decomissionGate(junctionGate.junctionGateId);
 		for (wrapper_gate_id_t input : junctionGate.junctionInputs) {
-			auto& inputJunctionGate = getJunctionGate(input);
+			JunctionGate& inputJunctionGate = getJunctionGate(input);
 			inputJunctionGate.junctionOutputs.erase(std::remove(inputJunctionGate.junctionOutputs.begin(), inputJunctionGate.junctionOutputs.end(), gateId), inputJunctionGate.junctionOutputs.end());
 		}
 		for (wrapper_gate_id_t output : junctionGate.junctionOutputs) {
-			auto& outputJunctionGate = getJunctionGate(output);
+			JunctionGate& outputJunctionGate = getJunctionGate(output);
 			outputJunctionGate.junctionInputs.erase(std::remove(outputJunctionGate.junctionInputs.begin(), outputJunctionGate.junctionInputs.end(), gateId), outputJunctionGate.junctionInputs.end());
 		}
 		junctionGates.erase(std::remove_if(junctionGates.begin(), junctionGates.end(), [gateId](const JunctionGate& bg) {
@@ -63,7 +63,7 @@ void LogicSimulatorWrapper::deleteGate(wrapper_gate_id_t gateId) {
 		allJunctionGateIds.erase(gateId);
 		recreateJunctions(allJunctionGateIdsToRemake);
 	} else {
-		auto gate = wrapperToSimulatorGateIdMap.at(gateId);
+		std::optional<simulator_gate_id_t> gate = wrapperToSimulatorGateIdMap.at(gateId);
 		if (!gate.has_value()) {
 			logError("Trying to delete a gate that does not exist: {}", "", static_cast<int>(gateId));
 			return;
@@ -83,8 +83,8 @@ void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t ou
 	simulator_gate_id_t sourceGateId = wrapperToSimulatorGateIdMap.at(sourceGate).value();
 	simulator_gate_id_t targetGateId = wrapperToSimulatorGateIdMap.at(targetGate).value();
 	if (sourceIsJunction && targetIsJunction) {
-		auto& sourceJunctionGate = getJunctionGate(sourceGate);
-		auto& targetJunctionGate = getJunctionGate(targetGate);
+		JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
+		JunctionGate& targetJunctionGate = getJunctionGate(targetGate);
 		if (sourceJunctionGate.junctionGateId != targetJunctionGate.junctionGateId) {
 			simulator_gate_id_t sourceJunctionGateId = sourceJunctionGate.junctionGateId;
 			simulator_gate_id_t targetJunctionGateId = targetJunctionGate.junctionGateId;
@@ -92,11 +92,11 @@ void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t ou
 			std::vector<wrapper_gate_id_t> connectedJunctionGatesIds = findConnectedJunctionGates(targetJunctionGate);
 			for (wrapper_gate_id_t connectedJunctionGateId : connectedJunctionGatesIds) {
 				JunctionGate& connectedJunctionGate = getJunctionGate(connectedJunctionGateId);
-				for (auto& input : connectedJunctionGate.externalInputs) {
+				for (std::pair<simulator_gate_id_t, size_t> input : connectedJunctionGate.externalInputs) {
 					logicSimulator.disconnectGates(input.first, input.second, targetJunctionGateId, 0);
 					logicSimulator.connectGates(input.first, input.second, sourceJunctionGateId, 0);
 				}
-				for (auto& output : connectedJunctionGate.externalOutputs) {
+				for (std::pair<simulator_gate_id_t, size_t> output : connectedJunctionGate.externalOutputs) {
 					logicSimulator.disconnectGates(targetJunctionGateId, 0, output.first, output.second);
 					logicSimulator.connectGates(sourceJunctionGateId, 0, output.first, output.second);
 				}
@@ -110,11 +110,11 @@ void LogicSimulatorWrapper::connectGates(wrapper_gate_id_t sourceGate, size_t ou
 	} else {
 		logicSimulator.connectGates(sourceGateId, outputGroup, targetGateId, inputGroup);
 		if (sourceIsJunction) {
-			auto& sourceJunctionGate = getJunctionGate(sourceGate);
+			JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
 			sourceJunctionGate.externalOutputs.push_back({targetGateId, inputGroup});
 		}
 		if (targetIsJunction) {
-			auto& targetJunctionGate = getJunctionGate(targetGate);
+			JunctionGate& targetJunctionGate = getJunctionGate(targetGate);
 			targetJunctionGate.externalInputs.push_back({sourceGateId, outputGroup});
 		}
 	}
@@ -130,8 +130,8 @@ void LogicSimulatorWrapper::disconnectGates(wrapper_gate_id_t sourceGate, size_t
 	bool sourceIsJunction = allJunctionGateIds.contains(sourceGate);
 	bool targetIsJunction = allJunctionGateIds.contains(targetGate);
 	if (sourceIsJunction && targetIsJunction) {
-		auto& sourceJunctionGate = getJunctionGate(sourceGate);
-		auto& targetJunctionGate = getJunctionGate(targetGate);
+		JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
+		JunctionGate& targetJunctionGate = getJunctionGate(targetGate);
 		if (sourceJunctionGate.junctionGateId != targetJunctionGate.junctionGateId) {
 			logError("Trying to disconnect two different junction gates: {} {}", "", sourceGate, targetGate);
 			return;
@@ -145,14 +145,14 @@ void LogicSimulatorWrapper::disconnectGates(wrapper_gate_id_t sourceGate, size_t
 	else {
 		logicSimulator.disconnectGates(sourceGateId, outputGroup, targetGateId, inputGroup);
 		if (sourceIsJunction) {
-			auto& sourceJunctionGate = getJunctionGate(sourceGate);
+			JunctionGate& sourceJunctionGate = getJunctionGate(sourceGate);
 			sourceJunctionGate.externalOutputs.erase(std::remove_if(sourceJunctionGate.externalOutputs.begin(), sourceJunctionGate.externalOutputs.end(),
 				[targetGateId, inputGroup](const std::pair<simulator_gate_id_t, size_t>& output) {
 					return output.first == targetGateId && output.second == inputGroup;
 				}), sourceJunctionGate.externalOutputs.end());
 		}
 		if (targetIsJunction) {
-			auto& targetJunctionGate = getJunctionGate(targetGate);
+			JunctionGate& targetJunctionGate = getJunctionGate(targetGate);
 			targetJunctionGate.externalInputs.erase(std::remove_if(targetJunctionGate.externalInputs.begin(), targetJunctionGate.externalInputs.end(),
 				[sourceGateId, outputGroup](const std::pair<simulator_gate_id_t, size_t>& input) {
 					return input.first == sourceGateId && input.second == outputGroup;
@@ -202,7 +202,7 @@ std::vector<wrapper_gate_id_t> LogicSimulatorWrapper::findConnectedJunctionGates
 	}
 	std::vector<wrapper_gate_id_t> connectedJunctionGates;
 	connectedJunctionGates.reserve(visited.size());
-	for (const auto& gateId : visited) {
+	for (const wrapper_gate_id_t gateId : visited) {
 		connectedJunctionGates.push_back(gateId);
 	}
 	return connectedJunctionGates;
@@ -216,12 +216,12 @@ void LogicSimulatorWrapper::signalToProceed() {
 				wrapperToSimulatorGateIdMap[i] = gateMap[wrapperToSimulatorGateIdMap[i].value()];
 			}
 		}
-		for (auto& junctionGate : junctionGates) {
+		for (JunctionGate& junctionGate : junctionGates) {
 			junctionGate.junctionGateId = gateMap[junctionGate.junctionGateId];
-			for (auto& input : junctionGate.externalInputs) {
+			for (std::pair<simulator_gate_id_t, size_t> input : junctionGate.externalInputs) {
 				input.first = gateMap[input.first];
 			}
-			for (auto& output : junctionGate.externalOutputs) {
+			for (std::pair<simulator_gate_id_t, size_t> output : junctionGate.externalOutputs) {
 				output.first = gateMap[output.first];
 			}
 		}
@@ -230,16 +230,16 @@ void LogicSimulatorWrapper::signalToProceed() {
 }
 
 void LogicSimulatorWrapper::debugPrintJunctionGates() {
-	for (const auto& junctionGate : junctionGates) {
+	for (const JunctionGate& junctionGate : junctionGates) {
 		std::cout << "Junction Gate ID: " << junctionGate.gateId << std::endl;
 		std::cout << "Junction Gate ID Simulator: " << junctionGate.junctionGateId << std::endl;
 		std::cout << "Junction Inputs: ";
-		for (const auto& input : junctionGate.junctionInputs) {
+		for (const wrapper_gate_id_t input : junctionGate.junctionInputs) {
 			std::cout << input << " ";
 		}
 		std::cout << std::endl;
 		std::cout << "Junction Outputs: ";
-		for (const auto& output : junctionGate.junctionOutputs) {
+		for (const wrapper_gate_id_t output : junctionGate.junctionOutputs) {
 			std::cout << output << " ";
 		}
 		std::cout << std::endl;
@@ -257,10 +257,10 @@ void LogicSimulatorWrapper::recreateJunctions(std::vector<wrapper_gate_id_t>& al
 		std::vector<wrapper_gate_id_t> connectedJunctionGatesIds = findConnectedJunctionGates(junctionGate);
 		for (wrapper_gate_id_t connectedJunctionGateId : connectedJunctionGatesIds) {
 			JunctionGate& connectedJunctionGate = getJunctionGate(connectedJunctionGateId);
-			for (auto& input : connectedJunctionGate.externalInputs) {
+			for (std::pair<simulator_gate_id_t, size_t> input : connectedJunctionGate.externalInputs) {
 				logicSimulator.connectGates(input.first, input.second, junctionGateIdSimulator, 0);
 			}
-			for (auto& output : connectedJunctionGate.externalOutputs) {
+			for (std::pair<simulator_gate_id_t, size_t> output : connectedJunctionGate.externalOutputs) {
 				logicSimulator.connectGates(junctionGateIdSimulator, 0, output.first, output.second);
 			}
 			allJunctionGateIdsToRemake.erase(std::remove(allJunctionGateIdsToRemake.begin(), allJunctionGateIdsToRemake.end(), connectedJunctionGateId), allJunctionGateIdsToRemake.end());
@@ -274,29 +274,19 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 	std::vector<std::pair<wrapper_gate_id_t, int>> inputs;
 	// check if this is a junction
 	if (allJunctionGateIds.contains(gateId)) {
-		auto& junctionGate = getJunctionGate(gateId);
-		for (const auto& input : junctionGate.junctionInputs) {
+		JunctionGate& junctionGate = getJunctionGate(gateId);
+		for (const wrapper_gate_id_t input : junctionGate.junctionInputs) {
 			inputs.push_back({ input, 0 });
 		}
-		for (const auto& input : junctionGate.externalInputs) {
-			// find the wrapper gate id of the input
-			auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
-				[input](const std::optional<simulator_gate_id_t>& id) {
-					return id.has_value() && id.value() == input.first;
-				});
-			if (it != wrapperToSimulatorGateIdMap.end()) {
-				inputs.push_back({ static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it)), static_cast<int>(input.second) });
-			}
-			else {
-				logError("Input gate not found in wrapperToSimulatorGateIdMap: {}", "", input.first);
-			}
+		for (const std::pair<simulator_gate_id_t, size_t> input : junctionGate.externalInputs) {
+			inputs.push_back({ getWrapperIdFromSimId(input.first), static_cast<int>(input.second) });
 		}
 	} else {
 		simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
-		auto gateObj = logicSimulator.getGate(gate);
+		const Gate& gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getInputGroupCount(); ++i) {
-			for (const auto& input : gateObj.inputGroups[i]) {
-				inputs.push_back({ wrapperToSimulatorGateIdMap[input.gateId].value(), static_cast<int>(input.group) });
+			for (const GateConnection input : gateObj.inputGroups.at(i)) {
+				inputs.push_back({ getWrapperIdFromSimId(input.gateId), static_cast<int>(input.group) });
 			}
 		}
 	}
@@ -307,32 +297,36 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 	std::vector<std::pair<wrapper_gate_id_t, int>> outputs;
 	// check if this is a junction
 	if (allJunctionGateIds.contains(gateId)) {
-		auto& junctionGate = getJunctionGate(gateId);
-		for (const auto& output : junctionGate.junctionOutputs) {
+		const JunctionGate& junctionGate = getJunctionGate(gateId);
+		for (const wrapper_gate_id_t output : junctionGate.junctionOutputs) {
 			outputs.push_back({ output, 0 });
 		}
-		for (const auto& output : junctionGate.externalOutputs) {
-			// find the wrapper gate id of the output
-			auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
-				[output](const std::optional<simulator_gate_id_t>& id) {
-					return id.has_value() && id.value() == output.first;
-				});
-			if (it != wrapperToSimulatorGateIdMap.end()) {
-				outputs.push_back({ static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it)), static_cast<int>(output.second) });
-			}
-			else {
-				logError("Output gate not found in wrapperToSimulatorGateIdMap: {}", "", output.first);
-			}
+		for (const std::pair<simulator_gate_id_t, size_t> output : junctionGate.externalOutputs) {
+			outputs.push_back({ getWrapperIdFromSimId(output.first), static_cast<int>(output.second) });
 		}
-		}
+	}
 	else {
-		simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
-		auto gateObj = logicSimulator.getGate(gate);
+		const simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
+		const Gate& gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getOutputGroupCount(); ++i) {
-			for (const auto& output : gateObj.outputGroups[i]) {
-				outputs.push_back({ wrapperToSimulatorGateIdMap[output.gateId].value(), static_cast<int>(output.group) });
+			for (const GateConnection output : gateObj.outputGroups[i]) {
+				outputs.push_back({ getWrapperIdFromSimId(output.gateId), static_cast<int>(output.group) });
 			}
 		}
 	}
 	return outputs;
+}
+
+const wrapper_gate_id_t LogicSimulatorWrapper::getWrapperIdFromSimId(simulator_gate_id_t simId) const {
+	auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
+		[simId](const std::optional<simulator_gate_id_t>& id) {
+			return id.has_value() && id.value() == simId;
+		});
+	if (it != wrapperToSimulatorGateIdMap.end()) {
+		return static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it));
+	}
+	else {
+		logError("Sim ID not found in wrapperToSimulatorGateIdMap: {}", "", simId);
+		return 0;
+	}
 }

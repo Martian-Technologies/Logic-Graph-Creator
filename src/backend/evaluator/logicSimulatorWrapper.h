@@ -35,6 +35,12 @@ public:
 	GateType getGateType(wrapper_gate_id_t gateId) const {
 		return logicSimulator.getGateType(wrapperToSimulatorGateIdMap.at(gateId).value());
 	}
+	const Gate& getGate(wrapper_gate_id_t gateId) const {
+		return logicSimulator.getGate(wrapperToSimulatorGateIdMap.at(gateId).value());
+	}
+	const simulator_gate_id_t getSimulatorGateId(wrapper_gate_id_t gateId) const {
+		return wrapperToSimulatorGateIdMap.at(gateId).value();
+	}
 
 private:
 	struct JunctionGate {
@@ -63,6 +69,7 @@ private:
 	void recreateJunctions(std::vector<wrapper_gate_id_t>& allJunctionGateIdsToRemake);
 
 	void debugPrintJunctionGates();
+	const wrapper_gate_id_t getWrapperIdFromSimId(simulator_gate_id_t simId) const;
 };
 
 #endif // logicSimulatorWrapper_h
