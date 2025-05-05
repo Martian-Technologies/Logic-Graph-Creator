@@ -178,7 +178,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			const Vector inputOffset = inputPosition - inputBlockPosition;
 			const std::vector<Address>& outputAddresses = addressTree.getPositions(containerId, outputBlockPosition);
 			const std::vector<Address>& inputAddresses = addressTree.getPositions(containerId, inputBlockPosition);
-			for (int i = 0; i < outputAddresses.size(); i++) {
+			for (size_t i = 0; i < outputAddresses.size(); i++) {
 				const Address& outputAddress = outputAddresses.at(i);
 				const Address& inputAddress = inputAddresses.at(i);
 				std::pair<wrapper_gate_id_t, int> outputPoint = getConnectionPoint(addressTree, outputAddress, outputOffset, false);
@@ -194,7 +194,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			const Vector inputOffset = inputPosition - inputBlockPosition;
 			const std::vector<Address>& outputAddresses = addressTree.getPositions(containerId, outputBlockPosition);
 			const std::vector<Address>& inputAddresses = addressTree.getPositions(containerId, inputBlockPosition);
-			for (int i = 0; i < outputAddresses.size(); i++) {
+			for (size_t i = 0; i < outputAddresses.size(); i++) {
 				const Address& outputAddress = outputAddresses[i];
 				const Address& inputAddress = inputAddresses[i];
 				std::pair<wrapper_gate_id_t, int> outputPoint = getConnectionPoint(addressTree, outputAddress, outputOffset, false);
@@ -258,7 +258,6 @@ int Evaluator::getGroupIndex(const EvaluatorGate& gate, Vector offset, bool trac
 	if (trackInput) {
 		std::pair<connection_end_id_t, bool> idData = blockData->getInputConnectionId(offset, gate.rotation);
 		if (!idData.second) return 0;
-		int groupIndex = 0;
 		for (connection_end_id_t i = 0; i < idData.first; i++) {
 			groupIndex += blockData->isConnectionInput(i);
 		}
@@ -266,7 +265,6 @@ int Evaluator::getGroupIndex(const EvaluatorGate& gate, Vector offset, bool trac
 	} else {
 		std::pair<connection_end_id_t, bool> idData = blockData->getOutputConnectionId(offset, gate.rotation);
 		if (!idData.second) return 0;
-		int groupIndex = 0;
 		for (connection_end_id_t i = 0; i < idData.first; i++) {
 			groupIndex += blockData->isConnectionOutput(i);
 		}
@@ -401,6 +399,7 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 	const wrapper_gate_id_t blockId = gate->gateId;
 	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
 	logicSimulatorWrapper.setState(blockId, 0, state); // TODO: 0 temp
+	debugPrint(blockId);
 	lock.unlock();
 }
 
@@ -468,7 +467,8 @@ void Evaluator::registerConnectionIO(AddressTreeNode& branch, connection_end_id_
 				junctionId,
 				true,
 				{0, 0},
-				GateType::NONE
+				GateType::NONE,
+				BlockType::NONE,
 			}
 		);
 	}
