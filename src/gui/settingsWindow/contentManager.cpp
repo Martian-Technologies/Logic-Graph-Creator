@@ -36,6 +36,21 @@ void ContentManager::generateForm(const std::string& tabType, const std::string&
 	if (tabType == "HEADER") itemName = name;
 	else itemName = name.substr(name.rfind('.') + 1);
 
+
+	Rml::ElementPtr newClr = Rml::Factory::InstanceElement(
+		contentPanel,
+		"div",
+		name,
+		Rml::XMLAttributes()
+	);
+	newClr->SetAttribute("class", "content-item user-int-option");
+	newClr->SetInnerRML(
+		"<div class=\"label\">" + itemName + "</div>\n<input type=\"text\" />"
+	);
+
+	contentPanel->AppendChild(std::move(newClr));
+
+	/*
 	if (tabType == "HEADER") {
 	} else if (tabType == "USER_INT") {
 	} else if (tabType == "USER_STRING") {
@@ -59,4 +74,5 @@ void ContentManager::generateForm(const std::string& tabType, const std::string&
 	} else {
 		logWarning("not a type, please contact abearnmountain on github for additional support");
 	}
+		*/
 }

@@ -46,15 +46,15 @@ h1 {
 }
 
 .nav-item:hover {
-	background-color: #4f4f4d; /* light gray on hover */
+	background-color: #4f4f4d;
 	border-left-width: 20px;
-	border-left-color: #0078d4; /* Windows blue */
+	border-left-color: #0078d4;
 }
 
 #navigation-panel.active-nav {
-	background-color: #ff0000; /* light gray on hover */
+	background-color: #ff0000; 
 	border-left-width: 20px;
-	border-left-color: #0078d4; /* Windows blue */
+	border-left-color: #0078d4;
 }
 
 /* bottom */
@@ -89,20 +89,24 @@ h1 {
 /* right side */
 #settings-content-panel {
 	width: 60%;
-	height: 100%;
 	background-color:#0f0f0f;
-	overflow: auto;
+	display: flex;    
+	flex-direction: column; 
+	overflow-y: auto;
 }
+
 
 .content-item {
-	padding-bottom: 10px; 
-	margin-bottom: 10px; 
 	position: relative;
-}
+	display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    gap: 1rem;
+    min-width: auto;
 
-.content-item:last-child {
-	padding-bottom: 0;
-	margin-bottom: 0;
+	border: 2px solid;
+	border-color: red;
 }
 
 .border-line {
@@ -114,34 +118,35 @@ h1 {
 	background-color: #ccc;
 }
 
+/* header */
 .header-option {
 	padding: 10px;	
 }
 
 /* User Int */
 .user-int-option {
-    display: flex;
-	padding-bottom: 0.5rem;
-	align-items: center;     
-    justify-content: space-between; 
+
+
 }
 
-.user-int-option div {
+.user-int-option .label {
     color: #e2e8f0;
-    margin-right: 1rem;
-    flex: 1; 
-    min-width: 8rem;
+    flex: 0 0 120px; 
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-int-option input {
-    width: 8rem;
+    flex: 0 0 12rem; /* Fixed width for inputs */
     padding: 0.5rem;
-	border-radius: 0.375rem;  
-	background-color: #4a5568;
-	color: #ffffff; 
-	border: 1px;
-	border-color: #718096;
+    border-radius: 0.375rem;
+    background-color: #4a5568;
+    color: #ffffff;
+    border: 1px solid #718096;
+    margin-left: auto; /* Push input to right */
 }
+
 
 
 /* User String */

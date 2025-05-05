@@ -1,6 +1,7 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
 #include "contentManager.h"
+#include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
 
@@ -8,6 +9,7 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 	context = document->GetElementById("settings-overlay");
 
 	ContentManager* cm = new ContentManager(document);
+	SearchBar* sb = new SearchBar(document);
 
 	toggleVisibility();
 	Initialize();
@@ -16,21 +18,8 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 SettingsWindow::~SettingsWindow() {}
 
 void SettingsWindow::Initialize() {
-	logInfo("initializing settingls");
-
 	connectGroupListeners();
 	connectWindowOptions();
-
-/*
-look
-	Rml::Element* closeButton = context->GetElementById("settings-close-button");
-
-	closeButton->AddEventListener("click", new EventPasser(
-		[this](Rml::Event& event) {
-			toggleVisibility();
-		}
-	));
-*/
 }
 
 void SettingsWindow::connectGroupListeners() {
@@ -44,7 +33,6 @@ void SettingsWindow::connectGroupListeners() {
 			element->SetClass("active-nav", true);
 		}
 
-		logInfo(element->GetId());
 		element->AddEventListener("click", new EventPasser(
 			[this](Rml::Event& event) {
 				Rml::Element* current = event.GetCurrentElement();
