@@ -39,11 +39,17 @@ scrollbarvertical {
 	padding: 0.1em 0.1em;
 }
 
+#connection-list-output-headers, #connection-list-input-headers {
+	display: block;
+	background-color: #151515;
+	border-radius: 0.3em 0.3em 0.1em 0.1em;
+	margin: 0.15em 0.15em 0 0.15em;
+}
 #connection-list-output, #connection-list-input {
 	display: block;
 	background-color: #151515;
 	border-radius: 0.1em;
-	margin: 0.15em 0.15em;
+	margin: 0 0.15em 0.15em 0.15em;
 	min-height: 3rem;
 }
 

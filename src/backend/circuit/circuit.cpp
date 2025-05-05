@@ -150,19 +150,19 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 		Position targetPos = block.pos.snap() + totalOffset;
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
-			logError("Failed to insert block while inserting block.");
+			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
 		}
 	}
 
 	for (const auto& conn : parsedCircuit.getConns()) {
-		const ParsedCircuit::BlockData* b = parsedCircuit.getBlock(conn.outputBlockId);
-		if (!b) {
-			logError("Could not get block from parsed circuit while inserting block.");
-			break;
+		const ParsedCircuit::BlockData* parsedBlock = parsedCircuit.getBlock(conn.outputBlockId);
+		if (!parsedBlock) {
+			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
+			continue;
 		}
-		if (blockContainer.getBlockDataManager()->isConnectionInput(b->type, conn.outputId)) {
+		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputId)) {
 			// skip inputs
 			continue;
 		}
@@ -170,7 +170,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
 		if (!tryCreateConnection(output, input)) {
-			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
 	return true;
