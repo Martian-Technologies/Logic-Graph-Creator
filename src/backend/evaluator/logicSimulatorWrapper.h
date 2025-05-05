@@ -33,7 +33,7 @@ public:
 	std::vector<std::pair<wrapper_gate_id_t, int>> get1x1GateInputs(wrapper_gate_id_t gateId);
 	std::vector<std::pair<wrapper_gate_id_t, int>> get1x1GateOutputs(wrapper_gate_id_t gateId);
 	GateType getGateType(wrapper_gate_id_t gateId) const {
-		return logicSimulator.getGateType(gateId);
+		return logicSimulator.getGateType(wrapperToSimulatorGateIdMap.at(gateId).value());
 	}
 
 private:

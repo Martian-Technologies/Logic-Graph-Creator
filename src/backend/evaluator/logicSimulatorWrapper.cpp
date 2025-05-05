@@ -279,7 +279,17 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 			inputs.push_back({ input, 0 });
 		}
 		for (const auto& input : junctionGate.externalInputs) {
-			inputs.push_back({ input.first, static_cast<int>(input.second) });
+			// find the wrapper gate id of the input
+			auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
+				[input](const std::optional<simulator_gate_id_t>& id) {
+					return id.has_value() && id.value() == input.first;
+				});
+			if (it != wrapperToSimulatorGateIdMap.end()) {
+				inputs.push_back({ static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it)), static_cast<int>(input.second) });
+			}
+			else {
+				logError("Input gate not found in wrapperToSimulatorGateIdMap: {}", "", input.first);
+			}
 		}
 	} else {
 		simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
@@ -302,9 +312,20 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 			outputs.push_back({ output, 0 });
 		}
 		for (const auto& output : junctionGate.externalOutputs) {
-			outputs.push_back({ output.first, static_cast<int>(output.second) });
+			// find the wrapper gate id of the output
+			auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
+				[output](const std::optional<simulator_gate_id_t>& id) {
+					return id.has_value() && id.value() == output.first;
+				});
+			if (it != wrapperToSimulatorGateIdMap.end()) {
+				outputs.push_back({ static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it)), static_cast<int>(output.second) });
+			}
+			else {
+				logError("Output gate not found in wrapperToSimulatorGateIdMap: {}", "", output.first);
+			}
 		}
-	} else {
+		}
+	else {
 		simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
 		auto gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getOutputGroupCount(); ++i) {

@@ -129,6 +129,7 @@ struct EvaluatorIOJunction {
 	wrapper_gate_id_t junctionId;
 	bool isFloating;
 	std::pair<wrapper_gate_id_t, int> outputTarget;
+	GateType originalTargetGateType;
 };
 
 #endif // gate_h

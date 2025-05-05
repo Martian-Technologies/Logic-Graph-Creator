@@ -430,7 +430,8 @@ void Evaluator::registerConnectionIO(AddressTreeNode& branch, connection_end_id_
 		branch.addConnectionIO(connectionId, EvaluatorIOJunction{
 				junctionId,
 				true,
-				{0, 0}
+				{0, 0},
+				GateType::NONE
 			}
 		);
 	}
@@ -608,10 +609,11 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 	auto blockId = connectionPoint.second.first;
 	auto groupIndex = connectionPoint.second.second;
 	const auto junctionId = connectionIO.junctionId;
+	GateType originalGateType = GateType::NONE;
 	if (isInput) {
-		const GateType gateType = logicSimulatorWrapper.getGateType(blockId);
+		originalGateType = logicSimulatorWrapper.getGateType(blockId);
 		// if it is a switch, buttor, or tick button, we need to know
-		const bool isInput = (gateType == GateType::DEFAULT_RETURN_CURRENTSTATE || gateType == GateType::TICK_INPUT);
+		const bool isInput = (originalGateType == GateType::DEFAULT_RETURN_CURRENTSTATE || originalGateType == GateType::TICK_INPUT);
 		if (isInput) {
 			const auto outputs = logicSimulatorWrapper.get1x1GateOutputs(blockId);
 			logicSimulatorWrapper.deleteGate(blockId);
@@ -620,11 +622,11 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 				logicSimulatorWrapper.connectGates(blockId, 0, output.first, output.second);
 			}
 		}
-		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
+		logicSimulatorWrapper.connectGates(junctionId, 0, blockId, groupIndex);
 	}
 	else {
-		const GateType gateType = logicSimulatorWrapper.getGateType(blockId);
-		const bool isOutput = (gateType == GateType::COPYINPUT);
+		originalGateType = logicSimulatorWrapper.getGateType(blockId);
+		const bool isOutput = (originalGateType == GateType::COPYINPUT);
 		if (isOutput) {
 			const auto inputs = logicSimulatorWrapper.get1x1GateInputs(blockId);
 			logicSimulatorWrapper.deleteGate(blockId);
@@ -633,13 +635,14 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 				logicSimulatorWrapper.connectGates(input.first, input.second, blockId, 0);
 			}
 		}
-		logicSimulatorWrapper.connectGates(junctionId, 0, blockId, groupIndex);
+		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
 	}
 	connectionIO.isFloating = false;
 	connectionIO.outputTarget = {
 		blockId,
 		groupIndex
 	};
+	connectionIO.originalTargetGateType = originalGateType;
 	branch.addConnectionIO(connectionId, connectionIO);
 }
 
@@ -655,15 +658,42 @@ void Evaluator::unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t 
 	}
 	const bool isInput = isIOanInput(connectionId, branch);
 	auto connectionIO = branch.getConnectionIO(connectionId);
-	const auto blockId = connectionIO.outputTarget.first;
+	auto blockId = connectionIO.outputTarget.first;
 	const auto groupIndex = connectionIO.outputTarget.second;
 	const auto junctionId = connectionIO.junctionId;
+	GateType originalGateType = connectionIO.originalTargetGateType;
 	if (isInput) {
-		logicSimulatorWrapper.disconnectGates(blockId, groupIndex, junctionId, 0);
-	} else {
 		logicSimulatorWrapper.disconnectGates(junctionId, 0, blockId, groupIndex);
+		if (originalGateType == GateType::DEFAULT_RETURN_CURRENTSTATE || originalGateType == GateType::TICK_INPUT) {
+			const auto inputs = logicSimulatorWrapper.get1x1GateInputs(blockId);
+			if (inputs.size() == 0) {
+				const auto outputs = logicSimulatorWrapper.get1x1GateOutputs(blockId);
+				logicSimulatorWrapper.deleteGate(blockId);
+				blockId = logicSimulatorWrapper.createGate(originalGateType, true);
+				for (const auto& output : outputs) {
+					logicSimulatorWrapper.connectGates(blockId, 0, output.first, output.second);
+				}
+				originalGateType = GateType::NONE;
+			}
+		}
+	}
+	else {
+		logicSimulatorWrapper.disconnectGates(blockId, groupIndex, junctionId, 0);
+		if (originalGateType == GateType::COPYINPUT) {
+			const auto outputs = logicSimulatorWrapper.get1x1GateOutputs(blockId);
+			if (outputs.size() == 0){
+				const auto inputs = logicSimulatorWrapper.get1x1GateInputs(blockId);
+				logicSimulatorWrapper.deleteGate(blockId);
+				blockId = logicSimulatorWrapper.createGate(originalGateType, true);
+				for (const auto& input : inputs) {
+					logicSimulatorWrapper.connectGates(input.first, input.second, blockId, 0);
+				}
+				originalGateType = GateType::NONE;
+			}
+		}
 	}
 	connectionIO.isFloating = true;
 	connectionIO.outputTarget = { 0, 0 };
+	connectionIO.originalTargetGateType = originalGateType;
 	branch.addConnectionIO(connectionId, connectionIO);
 }
