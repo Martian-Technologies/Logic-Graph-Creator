@@ -97,8 +97,6 @@ private:
 	void removeConnectionPort(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers
-	bool checkMoveCollision(SharedSelection selection, Vector movement);
-	void moveBlocks(SharedSelection selection, Vector movement, Difference* difference);
 	void setType(SharedSelection selection, BlockType type, Difference* difference);
 
 	void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
@@ -109,6 +107,7 @@ private:
 
 	void sendDifference(DifferenceSharedPtr difference) {
 		if (difference->empty()) return;
+		logInfo(difference->getModifications().size());
 		editCount++;
 		if (!midUndo) undoSystem.addDifference(difference);
 		for (auto pair : listenerFunctions) pair.second(difference, circuitId);

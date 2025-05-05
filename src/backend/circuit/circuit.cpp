@@ -32,47 +32,36 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 }
 
 bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
-	if (checkMoveCollision(selection, movement)) return false;
+	if (movement == Vector(0)) return true;
+	std::unordered_set<Position> positions;
+	std::unordered_set<const Block*> blocks;
+	flattenSelection(selection, positions);
+	for (auto iter = positions.begin(); iter != positions.end(); ++iter) {
+		const Block* block = blockContainer.getBlock(*iter);
+		if (block) {
+			if (!positions.contains(*iter + movement) && blockContainer.checkCollision(*iter + movement)) return false;
+			if (blocks.contains(block)) continue;
+			blocks.insert(block);
+		}
+	}
+
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	moveBlocks(selection, movement, difference.get());
+	while (blocks.size() > 0) {
+		for (auto iter = blocks.begin(); iter != blocks.end(); ++iter) {
+			const Block* block = *iter;
+			if (!blockContainer.checkCollision(block->getPosition() + movement, block->getRotation(), block->type())) {
+				blockContainer.tryMoveBlock(block->getPosition(), block->getPosition() + movement, difference.get());
+				iter = blocks.erase(iter);
+				if (iter == blocks.end()) break;
+			}
+		}
+	}
+
+	// // finding tmp pos to move everything to
+	// if (checkMoveCollision(selection, movement)) return false;
+	// moveBlocks(selection, movement, difference.get());
 	sendDifference(difference);
 	return true;
-}
-
-void Circuit::moveBlocks(SharedSelection selection, Vector movement, Difference* difference) {
-	// Cell Selection
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
-	if (cellSelection) {
-		blockContainer.tryMoveBlock(cellSelection->getPosition(), cellSelection->getPosition() + movement, difference);
-	}
-
-	// Dimensional Selection
-	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
-	if (dimensionalSelection) {
-		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			moveBlocks(dimensionalSelection->getSelection(i - 1), movement, difference);
-		}
-	}
-}
-
-bool Circuit::checkMoveCollision(SharedSelection selection, Vector movement) {
-	// Cell Selection
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
-	if (cellSelection) {
-		if (blockContainer.checkCollision(cellSelection->getPosition())) {
-			return blockContainer.checkCollision(cellSelection->getPosition() + movement);
-		}
-		return false;
-	}
-
-	// Dimensional Selection
-	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
-	if (dimensionalSelection) {
-		for (dimensional_selection_size_t i = dimensionalSelection->size(); i > 0; i--) {
-			if (checkMoveCollision(dimensionalSelection->getSelection(i - 1), movement)) return true;
-		}
-	}
-	return false;
 }
 
 void Circuit::setType(SharedSelection selection, BlockType type) {
@@ -161,19 +150,19 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 		Position targetPos = block.pos.snap() + totalOffset;
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
-			logError("Failed to insert block while inserting block.");
+			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
 		}
 	}
 
 	for (const auto& conn : parsedCircuit.getConns()) {
-		const ParsedCircuit::BlockData* b = parsedCircuit.getBlock(conn.outputBlockId);
-		if (!b) {
-			logError("Could not get block from parsed circuit while inserting block.");
-			break;
+		const ParsedCircuit::BlockData* parsedBlock = parsedCircuit.getBlock(conn.outputBlockId);
+		if (!parsedBlock) {
+			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
+			continue;
 		}
-		if (blockContainer.getBlockDataManager()->isConnectionInput(b->type, conn.outputId)) {
+		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputId)) {
 			// skip inputs
 			continue;
 		}
@@ -181,7 +170,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
 		if (!tryCreateConnection(output, input)) {
-			logWarning("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
 	return true;
@@ -317,10 +306,10 @@ void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection 
 }
 
 void Circuit::undo() {
-	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
 	const MinimalDifference* difference = undoSystem.undoDifference();
 	if (!difference) return;
+	startUndo();
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
@@ -359,10 +348,10 @@ void Circuit::undo() {
 }
 
 void Circuit::redo() {
-	startUndo();
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
 	const MinimalDifference* difference = undoSystem.redoDifference();
 	if (!difference) return;
+	startUndo();
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
@@ -401,16 +390,19 @@ void Circuit::redo() {
 void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData) {
 	if (!eventData) {
 		logError("eventData passed was null", "Circuit");
+		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}
 	auto data = eventData->cast<std::pair<BlockType, Vector>>();
 	if (!data) {
 		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.resizeBlockType(data->get().first, data->get().second, difference.get());
 	sendDifference(difference);
+	undoSystem.addBlocker(); // cant undo after changing block size!
 }
 
 void Circuit::setBlockType(BlockType blockType) {

@@ -24,11 +24,13 @@
 						Inputs<br />
 						<div id="connection-list-add-input">Add Input</div>
 					</div>
+					<div id="connection-list-input-headers">Name, X/Y on block, X/Y in world</div>
 					<div id="connection-list-input"></div>
 					<div>
 						Outputs<br />
 						<div id="connection-list-add-output">Add Output</div>
 					</div>
+					<div id="connection-list-output-headers">Name, X/Y on block, X/Y in world<</div>
 					<div id="connection-list-output"></div>
 				</div>
 				<div>

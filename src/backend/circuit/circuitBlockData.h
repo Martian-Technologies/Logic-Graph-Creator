@@ -14,6 +14,16 @@ public:
 	inline void setBlockType(BlockType blockType) { this->blockType = blockType; }
 	inline BlockType getBlockType() const { return blockType; }
 
+	inline void removeConnectionIdPosition(connection_end_id_t endId) {
+		const Position* posPtr = connectionIdPosition.get(endId);
+		if (!posPtr) return;
+		Position pos = *posPtr;
+		connectionIdPosition.remove(endId);
+		dataUpdateEventManager->sendEvent(
+			"circuitBlockDataConnectionPositionRemove",
+			DataUpdateEventManager::EventDataWithValue<std::tuple<BlockType, connection_end_id_t, Position>>({ blockType, endId, pos })
+		);
+	}
 	inline void setConnectionIdPosition(connection_end_id_t endId, Position position) {
 		connectionIdPosition.set(endId, position);
 		dataUpdateEventManager->sendEvent(
