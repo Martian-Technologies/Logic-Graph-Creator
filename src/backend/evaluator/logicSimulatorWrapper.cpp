@@ -279,14 +279,20 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 			inputs.push_back({ input, 0 });
 		}
 		for (const std::pair<simulator_gate_id_t, size_t> input : junctionGate.externalInputs) {
-			inputs.push_back({ getWrapperIdFromSimId(input.first), static_cast<int>(input.second) });
+			std::optional<wrapper_gate_id_t> wrapperId = simToWrap(input.first);
+			if (wrapperId) {
+				inputs.push_back({ *wrapperId, static_cast<int>(input.second) });
+			}
 		}
 	} else {
 		simulator_gate_id_t gate = wrapperToSimulatorGateIdMap.at(gateId).value();
 		const Gate& gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getInputGroupCount(); ++i) {
 			for (const GateConnection input : gateObj.inputGroups.at(i)) {
-				inputs.push_back({ getWrapperIdFromSimId(input.gateId), static_cast<int>(input.group) });
+				std::optional<wrapper_gate_id_t> wrapperId = simToWrap(input.gateId);
+				if (wrapperId) {
+					inputs.push_back({ *wrapperId, static_cast<int>(input.group) });
+				}
 			}
 		}
 	}
@@ -302,7 +308,10 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 			outputs.push_back({ output, 0 });
 		}
 		for (const std::pair<simulator_gate_id_t, size_t> output : junctionGate.externalOutputs) {
-			outputs.push_back({ getWrapperIdFromSimId(output.first), static_cast<int>(output.second) });
+			std::optional<wrapper_gate_id_t> wrapperId = simToWrap(output.first);
+			if (wrapperId) {
+				outputs.push_back({ *wrapperId, static_cast<int>(output.second) });
+			}
 		}
 	}
 	else {
@@ -310,23 +319,21 @@ std::vector<std::pair<wrapper_gate_id_t, int>> LogicSimulatorWrapper::get1x1Gate
 		const Gate& gateObj = logicSimulator.getGate(gate);
 		for (size_t i = 0; i < gateObj.getOutputGroupCount(); ++i) {
 			for (const GateConnection output : gateObj.outputGroups[i]) {
-				outputs.push_back({ getWrapperIdFromSimId(output.gateId), static_cast<int>(output.group) });
+				std::optional<wrapper_gate_id_t> wrapperId = simToWrap(output.gateId);
+				if (wrapperId) {
+					outputs.push_back({ *wrapperId, static_cast<int>(output.group) });
+				}
 			}
 		}
 	}
 	return outputs;
 }
 
-const wrapper_gate_id_t LogicSimulatorWrapper::getWrapperIdFromSimId(simulator_gate_id_t simId) const {
-	auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
-		[simId](const std::optional<simulator_gate_id_t>& id) {
-			return id.has_value() && id.value() == simId;
-		});
-	if (it != wrapperToSimulatorGateIdMap.end()) {
-		return static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it));
-	}
-	else {
-		logError("Sim ID not found in wrapperToSimulatorGateIdMap: {}", "", simId);
-		return 0;
-	}
+std::optional<wrapper_gate_id_t> LogicSimulatorWrapper::simToWrap(simulator_gate_id_t simId) const {
+    auto it = std::find_if(wrapperToSimulatorGateIdMap.begin(), wrapperToSimulatorGateIdMap.end(),
+                           [simId](const std::optional<simulator_gate_id_t>& v) {
+                               return v && *v == simId;
+                           });
+    if (it == wrapperToSimulatorGateIdMap.end()) return std::nullopt;
+    return static_cast<wrapper_gate_id_t>(std::distance(wrapperToSimulatorGateIdMap.begin(), it));
 }

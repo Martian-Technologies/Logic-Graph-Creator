@@ -60,28 +60,28 @@ simulator_gate_id_t LogicSimulator::addGate(const GateType gateType, bool allowS
 void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
 								 simulator_gate_id_t targetGate, size_t inputGroup) {
 	if (sourceGate < 0 || sourceGate >= gates.size()) {
-		logError("connectGates: sourceGate index out of range", "Simulator");
+		logWarning("connectGates: sourceGate index out of range", "Simulator");
 		return;
 	}
 	if (!gates[sourceGate].isValid()) {
-		logError("connectGates: sourceGate is invalid", "Simulator");
+		logWarning("connectGates: sourceGate is invalid", "Simulator");
 		return;
 	}
 	if (targetGate < 0 || targetGate >= gates.size()) {
-		logError("connectGates: targetGate index out of range", "Simulator");
+		logWarning("connectGates: targetGate index out of range", "Simulator");
 		return;
 	}
 	if (!gates[targetGate].isValid()) {
-		logError("connectGates: targetGate is invalid", "Simulator");
+		logWarning("connectGates: targetGate is invalid", "Simulator");
 		return;
 	}
 
 	if (outputGroup >= gates[sourceGate].getOutputGroupCount()) {
-		logError("connectGates: outputGroup index out of range", "Simulator");
+		logWarning("connectGates: outputGroup index out of range", "Simulator");
 		return;
 	}
 	if (inputGroup >= gates[targetGate].getInputGroupCount()) {
-		logError("connectGates: inputGroup index out of range", "Simulator");
+		logWarning("connectGates: inputGroup index out of range", "Simulator");
 		return;
 	}
 
@@ -103,11 +103,11 @@ void LogicSimulator::connectGates(simulator_gate_id_t sourceGate, size_t outputG
 void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup,
 	simulator_gate_id_t targetGate, size_t inputGroup) {
 	if (sourceGate < 0 || sourceGate >= gates.size() || !gates[sourceGate].isValid()) {
-		logError("disconnectGates: sourceGate index out of range or invalid", "Simulator");
+		logWarning("disconnectGates: sourceGate index out of range or invalid", "Simulator");
 		return;
 	}
 	if (targetGate < 0 || targetGate >= gates.size() || !gates[targetGate].isValid()) {
-		logError("disconnectGates: targetGate index out of range or invalid", "Simulator");
+		logWarning("disconnectGates: targetGate index out of range or invalid", "Simulator");
 		return;
 	}
 
@@ -155,7 +155,7 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 
 void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
-		logError("decomissionGate: gate index out of range or already decommissioned", "Simulator");
+		logWarning("decomissionGate: gate index out of range or already decommissioned", "Simulator");
 		return;
 	}
 
@@ -219,7 +219,7 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 
 void LogicSimulator::changeGateType(simulator_gate_id_t gate, const GateType newType) {
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
-		logError("changeGateType: gate index out of range or invalid", "Simulator");
+		logWarning("changeGateType: gate index out of range or invalid", "Simulator");
 		return;
 	}
 	if (gates[gate].type == newType) {
@@ -534,12 +534,12 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 
 void LogicSimulator::setState(simulator_gate_id_t gate, size_t outputGroup, logic_state_t state) {
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
-		logError("setState: gate index out of range or invalid", "Simulator");
+		logWarning("setState: gate index out of range or invalid", "Simulator");
 		return;
 	}
 
 	if (outputGroup >= gates[gate].getOutputGroupCount()) {
-		logError("setState: outputGroup index out of range", "Simulator");
+		logWarning("setState: outputGroup index out of range", "Simulator");
 		return;
 	}
 
@@ -554,12 +554,12 @@ void LogicSimulator::clearGates() {
 
 logic_state_t LogicSimulator::getState(simulator_gate_id_t gate, size_t outputGroup) const {
 	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
-		logError("getState: gate index out of range or invalid", "Simulator");
+		logWarning("getState: gate index out of range or invalid", "Simulator");
 		return logic_state_t::UNDEFINED;
 	}
 
 	if (outputGroup >= gates[gate].getOutputGroupCount()) {
-		logError("getState: outputGroup index out of range", "Simulator");
+		logWarning("getState: outputGroup index out of range", "Simulator");
 		return logic_state_t::UNDEFINED;
 	}
 

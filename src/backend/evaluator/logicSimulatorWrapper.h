@@ -69,7 +69,7 @@ private:
 	void recreateJunctions(std::vector<wrapper_gate_id_t>& allJunctionGateIdsToRemake);
 
 	void debugPrintJunctionGates();
-	const wrapper_gate_id_t getWrapperIdFromSimId(simulator_gate_id_t simId) const;
+	std::optional<wrapper_gate_id_t> simToWrap(simulator_gate_id_t simId) const;
 };
 
 #endif // logicSimulatorWrapper_h
