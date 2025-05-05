@@ -57,7 +57,7 @@ private:
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
 	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode& addressTree, DiffCache& diffCache, BlockContainerCache& bcCache, bool insideIC);
-	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
+	int getGroupIndex(const EvaluatorGate& gate, Vector offset, bool trackInput);
 	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode& addressTree, const Address& address, Vector offset, bool trackInput);
 	void removeCircuitIOExternal(const DataUpdateEventManager::EventData* data);
 	void removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
@@ -68,7 +68,7 @@ private:
 	void unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
 
 	std::pair<bool, std::pair<wrapper_gate_id_t, int>> getConnectionAtPosition(AddressTreeNode& branch, const Position& position, BlockContainerCache& blockContainerCache, bool trackInput);
-	bool isIOanInput(connection_end_id_t connectionId, AddressTreeNode& branch);
+	bool isIOanInput(connection_end_id_t connectionId, AddressTreeNode& branch) const;
 
 	const Position* getConnectionTargetPosition(AddressTreeNode& branch, connection_end_id_t connectionId) const;
 };

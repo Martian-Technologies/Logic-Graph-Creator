@@ -38,16 +38,12 @@ public:
 		dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 	}
 
-	inline EvaluatorGate getValue(Position position) const { return values.at(position); }
-	inline EvaluatorGate getValue(Position position, EvaluatorGate defaultValue) const {
+	inline const EvaluatorGate* getValue(Position position) const {
 		auto it = values.find(position);
-		if (it == values.end()) {
-			return defaultValue;
-		}
-		return it->second;
+		if (it == values.end()) return nullptr;
+		return &(it->second);
 	}
-	inline EvaluatorGate getValue(const Address& address) const { return getParentBranch(address)->getValue(address.getPosition(address.size() - 1)); }
-	inline EvaluatorGate getValue(const Address& address, EvaluatorGate defaultValue) const { return getParentBranch(address)->getValue(address.getPosition(address.size() - 1), defaultValue); }
+	inline const EvaluatorGate* getValue(const Address& address) const { return getParentBranch(address)->getValue(address.getPosition(address.size() - 1)); }
 	inline std::vector<EvaluatorGate> getAllValues() const;
 	inline std::vector<EvaluatorIOJunction> getAllIOs() const;
 
@@ -83,13 +79,21 @@ public:
 	inline void addConnectionIO(connection_end_id_t connectionId, EvaluatorIOJunction value) {
 		connectionIOs[connectionId] = value;
 	}
-	inline EvaluatorIOJunction getConnectionIO(connection_end_id_t connectionId) const {
+	inline const EvaluatorIOJunction* getConnectionIO(connection_end_id_t connectionId) const {
 		auto it = connectionIOs.find(connectionId);
 		if (it == connectionIOs.end()) {
 			logError("AddressTree::getConnectionIO: connectionId not found");
-			return EvaluatorIOJunction();
+			return nullptr;
 		}
-		return it->second;
+		return &(it->second);
+	}
+	inline EvaluatorIOJunction* getConnectionIO(connection_end_id_t connectionId) {
+		auto it = connectionIOs.find(connectionId);
+		if (it == connectionIOs.end()) {
+			logError("AddressTree::getConnectionIO: connectionId not found");
+			return nullptr;
+		}
+		return &(it->second);
 	}
 	inline bool hasConnectionIO(connection_end_id_t connectionId) const {
 		return connectionIOs.find(connectionId) != connectionIOs.end();
