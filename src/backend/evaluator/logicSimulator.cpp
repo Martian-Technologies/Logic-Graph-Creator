@@ -145,8 +145,8 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 	}
 	auto& outputs = gates[sourceGate].outputGroups[outputGroup];
 	auto it2 = std::find_if(outputs.begin(), outputs.end(),
-		[targetGate, inputGroup](const std::pair<simulator_gate_id_t, size_t>& conn) {
-			return conn.first == targetGate && conn.second == inputGroup;
+		[targetGate, inputGroup](const GateConnection& conn) {
+			return conn.gateId == targetGate && conn.group == inputGroup;
 		});
 	if (it2 != outputs.end()) {
 		outputs.erase(it2);
@@ -174,8 +174,8 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 
 				outputList.erase(
 					std::remove_if(outputList.begin(), outputList.end(),
-						[gate, groupIdx](const std::pair<simulator_gate_id_t, size_t>& conn) {
-							return conn.first == gate && conn.second == groupIdx;
+						[gate, groupIdx](const GateConnection& conn) {
+							return conn.gateId == gate && conn.group == groupIdx;
 						}),
 					outputList.end()
 				);
