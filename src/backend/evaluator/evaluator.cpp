@@ -642,9 +642,9 @@ void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t co
 		branch.setValue(*position, gate);
 	}
 	if (isInput) {
-		logicSimulatorWrapper.disconnectGates(junctionId, 0, blockId, groupIndex);
+		logicSimulatorWrapper.connectGates(junctionId, 0, blockId, groupIndex);
 	} else {
-		logicSimulatorWrapper.disconnectGates(blockId, groupIndex, junctionId, 0);
+		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
 	}
 	connectionIO->isFloating = false;
 	connectionIO->outputTarget = {
