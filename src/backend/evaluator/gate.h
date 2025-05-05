@@ -103,6 +103,36 @@ struct Gate {
 	size_t getOutputGroupCount() const {
 		return outputGroups.size();
 	}
+
+	void setNewState(logic_state_t state, bool isRealistic) {
+		if (isRealistic) {
+			logic_state_t currentState = statesA[0];
+			if (currentState == logic_state_t::UNDEFINED || currentState == state) {
+				statesB[0] = state;
+			}
+			else {
+				statesB[0] = logic_state_t::UNDEFINED;
+			}
+		}
+		else {
+			statesB[0] = state;
+		}
+	}
+
+	void setNewState(int idx, logic_state_t state, bool isRealistic) {
+		if (isRealistic) {
+			logic_state_t currentState = statesA[idx];
+			if (currentState == logic_state_t::UNDEFINED) {
+				statesB[idx] = state;
+			}
+			else {
+				statesB[idx] = logic_state_t::UNDEFINED;
+			}
+		}
+		else {
+			statesB[idx] = state;
+		}
+	}
 };
 
 struct EvaluatorGate {

@@ -65,6 +65,13 @@ public:
 		return std::shared_lock<std::shared_mutex>(simulationMutex);
 	}
 
+	void setIsRealistic(bool isRealistic) {
+		this->isRealistic.store(isRealistic, std::memory_order_release);
+	}
+	bool getIsRealistic() const {
+		return isRealistic.load(std::memory_order_acquire);
+	}
+
 private:
 	std::vector<Gate> gates;
 	int numDecomissioned;
@@ -83,6 +90,7 @@ private:
 	std::atomic<long long int> realTickrate;
 	std::atomic<unsigned long long int> targetTickrate;
 	std::atomic<int64_t> nextTick_us;
+	std::atomic<bool> isRealistic;
 
 	mutable std::shared_mutex simulationMutex;
 	std::mutex simulationMutex2;
@@ -93,7 +101,7 @@ private:
 	void simulationLoop();
 	void tickrateMonitor();
 
-	void computeGateStates(Gate& gate);
+	void computeGateStates(Gate& gate, bool isRealistic);
 	void computeJunctionStates(Gate& gate);
 };
 
