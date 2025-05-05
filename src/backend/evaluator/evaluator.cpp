@@ -11,8 +11,10 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	const SharedCircuit circuit = circuitManager.getCircuit(circuitId);
 	const BlockContainer* blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
+	receiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Evaluator::unlinkCircuitIOExternal, this, std::placeholders::_1));
 	receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIOExternal, this, std::placeholders::_1));
 	receiver.linkFunction("blockDataSetConnection", std::bind(&Evaluator::registerConnectionIOExternal, this, std::placeholders::_1));
+	receiver.linkFunction("circuitBlockDataConnectionPositionSet", std::bind(&Evaluator::registerConnectionIOExternal, this, std::placeholders::_1));
 
 	makeEdit(std::make_shared<Difference>(difference), circuitId);
 
@@ -61,12 +63,13 @@ long long int Evaluator::getRealTickrate() const {
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerId) {
 	DiffCache diffCache(circuitManager);
+	BlockContainerCache bcCache(circuitManager);
 	std::unique_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationUniqueLock();
-	makeEditInPlace(difference, containerId, addressTree, diffCache, false);
+	makeEditInPlace(difference, containerId, addressTree, diffCache, bcCache, false);
 	lock.unlock();
 }
 
-void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode& addressTree, DiffCache& diffCache, bool insideIC) {
+void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode& addressTree, DiffCache& diffCache, BlockContainerCache& bcCache, bool insideIC) {
 	const std::vector<Difference::Modification> modifications = difference->getModifications();
 	bool deletedBlocks = false;
 	std::unordered_set<Address> addressesThatGotUnlinked;
@@ -88,7 +91,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 						const auto branch = addressTree.getParentBranch(address);
 						const auto IOs = branch->getAllConnectionIOs();
 						for (const auto& io : IOs) {
-							unlinkConnectionIO(*branch, io.first);
+							unlinkConnectionIO(*branch, io.first, bcCache);
 						}
 						addressesThatGotUnlinked.insert(addressChopped);
 						addressesToRelink.insert(addressChopped);
@@ -157,9 +160,9 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 						logError("makeEditInPlace: branch is null");
 						break;
 					}
-					makeEditInPlace(integratedDifference, integratedCircuitId, *branch, diffCache, true);
+					makeEditInPlace(integratedDifference, integratedCircuitId, *branch, diffCache, bcCache, true);
 					for (const auto& connectionId : connectionIds) {
-						registerConnectionIO(*branch, connectionId);
+						registerConnectionIO(*branch, connectionId, bcCache);
 					}
 				}
 			}
@@ -210,7 +213,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 						const auto branch = addressTree.getParentBranch(address);
 						const auto IOs = branch->getAllConnectionIOs();
 						for (const auto& io : IOs) {
-							unlinkConnectionIO(*branch, io.first);
+							unlinkConnectionIO(*branch, io.first, bcCache);
 						}
 						addressesThatGotUnlinked.insert(addressChopped);
 						addressesToRelink.insert(addressChopped);
@@ -227,7 +230,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		const auto branch = addressTree.getBranch(address);
 		const auto IOs = branch->getAllConnectionIOs();
 		for (const auto& io : IOs) {
-			linkConnectionIO(*branch, io.first);
+			linkConnectionIO(*branch, io.first, bcCache);
 		}
 	}
 }
@@ -412,25 +415,55 @@ void Evaluator::registerConnectionIOExternal(const DataUpdateEventManager::Event
 	}
 	const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
 	const std::vector<AddressTreeNode*> branches = addressTree.getBranches(integratedCircuitId);
+	BlockContainerCache blockContainerCache = BlockContainerCache(circuitManager);
 	for (auto& branch : branches) {
 		if (!(branch->isNodeRoot())){
-			registerConnectionIO(*branch, connectionId);
+			registerConnectionIO(*branch, connectionId, blockContainerCache);
 		}
 	}
 }
 
-void Evaluator::registerConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId) {
+void Evaluator::registerConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
 	const bool exists = branch.hasConnectionIO(connectionId);
-	if (exists) {
+	if (!exists) {
+		const wrapper_gate_id_t junctionId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
+		branch.addConnectionIO(connectionId, EvaluatorIOJunction{
+				junctionId,
+				true,
+				{0, 0}
+			}
+		);
+	}
+	linkConnectionIO(branch, connectionId, blockContainerCache);
+}
+
+void Evaluator::unlinkCircuitIOExternal(const DataUpdateEventManager::EventData* data) {
+	const DataUpdateEventManager::EventDataWithValue<CircuitIOUpdateData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<CircuitIOUpdateData>*>(data);
+	if (eventData == nullptr) {
+		logError("removeCircuitIO: eventData is null");
 		return;
 	}
-	const wrapper_gate_id_t junctionId = logicSimulatorWrapper.createGate(GateType::JUNCTION, true);
-	branch.addConnectionIO(connectionId, EvaluatorIOJunction{
-			junctionId,
-			true
+	const std::pair<BlockType, connection_end_id_t> dataValue = eventData->get();
+	const BlockType blockType = dataValue.first;
+	const connection_end_id_t connectionId = dataValue.second;
+	const auto blockData = circuitManager.getBlockDataManager()->getBlockData(blockType);
+
+	if (blockData == nullptr) {
+		logError("removeCircuitIO: blockData is null");
+		return;
+	}
+	if (blockData->isDefaultData()) {
+		logWarning("removeCircuitIO: blockData is default data");
+		return;
+	}
+	const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
+	const std::vector<AddressTreeNode*> branches = addressTree.getBranches(integratedCircuitId);
+	BlockContainerCache blockContainerCache = BlockContainerCache(circuitManager);
+	for (auto& branch : branches) {
+		if (!(branch->isNodeRoot())){
+			unlinkConnectionIO(*branch, connectionId, blockContainerCache);
 		}
-	);
-	linkConnectionIO(branch, connectionId);
+	}
 }
 
 void Evaluator::removeCircuitIOExternal(const DataUpdateEventManager::EventData* data) {
@@ -454,30 +487,158 @@ void Evaluator::removeCircuitIOExternal(const DataUpdateEventManager::EventData*
 	}
 	const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
 	const std::vector<AddressTreeNode*> branches = addressTree.getBranches(integratedCircuitId);
+	BlockContainerCache blockContainerCache = BlockContainerCache(circuitManager);
 	for (auto& branch : branches) {
 		if (!(branch->isNodeRoot())){
-			removeCircuitIO(*branch, connectionId);
+			removeCircuitIO(*branch, connectionId, blockContainerCache);
 		}
 	}
 }
 
-void Evaluator::removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId) {
+void Evaluator::removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
 	const bool exists = branch.hasConnectionIO(connectionId);
 	if (!exists) {
 		logError("removeCircuitIO: connectionId does not exist");
 		return;
 	}
-	unlinkConnectionIO(branch, connectionId);
+	unlinkConnectionIO(branch, connectionId, blockContainerCache);
 	const EvaluatorIOJunction connectionIO = branch.getConnectionIO(connectionId);
 	const wrapper_gate_id_t blockId = connectionIO.junctionId;
 	logicSimulatorWrapper.deleteGate(blockId);
 	branch.removeConnectionIO(connectionId);
 }
 
-void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId) {
-	logInfo("linkConnectionIO: connectionId = " + std::to_string(connectionId));
+bool Evaluator::isIOanInput(connection_end_id_t connectionId, AddressTreeNode& branch) {
+	const BlockType blockType = circuitManager.getCircuitBlockDataManager()->getCircuitBlockData(branch.getContainerId())->getBlockType();
+	const BlockData* blockData = circuitManager.getBlockDataManager()->getBlockData(blockType);
+	if (blockData == nullptr) {
+		logError("isIOanInput: blockData is null");
+		return false;
+	}
+	return blockData->isConnectionInput(connectionId);
 }
 
-void Evaluator::unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId) {
+std::pair<bool, std::pair<wrapper_gate_id_t, int>> Evaluator::getConnectionAtPosition(AddressTreeNode& branch, const Position& position, BlockContainerCache& blockContainerCache, bool trackInput) {
+	const BlockContainer* blockContainer = blockContainerCache.getBlockContainer(branch.getContainerId());
+	const Block* block = blockContainer->getBlock(position);
+	if (block == nullptr) {
+		return { false, {0, 0} };
+	}
+	const Position blockPosition = block->getPosition();
+	const Rotation blockRotation = block->getRotation();
+	const Vector offset = position - blockPosition;
+	// getConnectionPoint
+	const Address addr = Address(blockPosition);
+	if (branch.hasValue(blockPosition)) {
+		const EvaluatorGate gate = branch.getValue(blockPosition);
+		const int groupIndex = getGroupIndex(gate, offset, trackInput);
+		return {true, { gate.gateId, groupIndex }};
+	}
+	// check for custom circuits here
+	if (!branch.hasBranch(addr)) {
+		return { false, {0, 0} };
+	}
+	const auto integratedCircuitBranch = branch.getBranch(addr);
+	const circuit_id_t integratedCircuitId = branch.getContainerId();
+	const auto integratedCircuit = circuitManager.getCircuit(integratedCircuitId);
+	const BlockDataManager* blockDataManager = circuitManager.getBlockDataManager();
+	const CircuitBlockDataManager* circuitBlockDataManager = circuitManager.getCircuitBlockDataManager();
+	const CircuitBlockData* integratedCircuitBlockData = circuitBlockDataManager->getCircuitBlockData(integratedCircuitId);
+	if (integratedCircuitBlockData == nullptr) {
+		logError("getConnectionPoint: integratedCircuitBlockData is null");
+		return {false, {0, 0}};
+	}
+	const BlockData* blockData = blockDataManager->getBlockData(integratedCircuitBlockData->getBlockType());
+	if (blockData == nullptr) {
+		logError("getConnectionPoint: blockData is null");
+		return {false, {0, 0}};
+	}
+	connection_end_id_t connectionId = 0;
+	if (trackInput) {
+		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, integratedCircuitBranch->getRotation());
+		if (inputConnectionIdData.second) {
+			connectionId = inputConnectionIdData.first;
+		}
+		else {
+			logError("getConnectionPoint: input connection id not found");
+			return {false, {0, 0}};
+		}
+	}
+	else {
+		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, integratedCircuitBranch->getRotation());
+		if (outputConnectionIdData.second) {
+			connectionId = outputConnectionIdData.first;
+		}
+		else {
+			logError("getConnectionPoint: output connection id not found");
+			return {false, {0, 0}};
+		}
+	}
+	const Position* connectionPosition = integratedCircuitBlockData->getConnectionIdToPosition(connectionId);
+	if (connectionPosition == nullptr) {
+		logError("getConnectionPoint: connection position is null");
+		return {false, {0, 0}};
+	}
+	return {true, {integratedCircuitBranch->getConnectionIO(connectionId).junctionId, 0}};
+}
+
+const Position* Evaluator::getConnectionTargetPosition(AddressTreeNode& branch, connection_end_id_t connectionId) const {
+	return circuitManager.getCircuitBlockDataManager()->getCircuitBlockData(branch.getContainerId())->getConnectionIdToPosition(connectionId);
+}
+
+void Evaluator::linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
+	logInfo("linkConnectionIO: connectionId = " + std::to_string(connectionId));
+	if (!branch.hasConnectionIO(connectionId)) {
+		logError("linkConnectionIO: connectionId does not exist");
+		return;
+	}
+	if (!branch.getConnectionIO(connectionId).isFloating) {
+		unlinkConnectionIO(branch, connectionId, blockContainerCache);
+	}
+	const bool isInput = isIOanInput(connectionId, branch);
+	const Position* position = getConnectionTargetPosition(branch, connectionId);
+	if (position == nullptr) {
+		return;
+	}
+	const std::pair<bool, std::pair<wrapper_gate_id_t, int>> connectionPoint = getConnectionAtPosition(branch, *position, blockContainerCache, isInput);
+	if (!connectionPoint.first) {
+		return;
+	}
+	auto connectionIO = branch.getConnectionIO(connectionId);
+	const auto blockId = connectionPoint.second.first;
+	const auto groupIndex = connectionPoint.second.second;
+	const auto junctionId = connectionIO.junctionId;
+	if (isInput) {
+		logicSimulatorWrapper.connectGates(blockId, groupIndex, junctionId, 0);
+	} else {
+		logicSimulatorWrapper.connectGates(junctionId, 0, blockId, groupIndex);
+	}
+	connectionIO.isFloating = false;
+	connectionIO.outputTarget = connectionPoint.second;
+	branch.addConnectionIO(connectionId, connectionIO);
+}
+
+void Evaluator::unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache) {
 	logInfo("unlinkConnectionIO: connectionId = " + std::to_string(connectionId));
+	if (!branch.hasConnectionIO(connectionId)) {
+		logError("unlinkConnectionIO: connectionId does not exist");
+		return;
+	}
+	if (branch.getConnectionIO(connectionId).isFloating) {
+		logInfo("unlinkConnectionIO: connectionId is already floating");
+		return;
+	}
+	const bool isInput = isIOanInput(connectionId, branch);
+	auto connectionIO = branch.getConnectionIO(connectionId);
+	const auto blockId = connectionIO.outputTarget.first;
+	const auto groupIndex = connectionIO.outputTarget.second;
+	const auto junctionId = connectionIO.junctionId;
+	if (isInput) {
+		logicSimulatorWrapper.disconnectGates(blockId, groupIndex, junctionId, 0);
+	} else {
+		logicSimulatorWrapper.disconnectGates(junctionId, 0, blockId, groupIndex);
+	}
+	connectionIO.isFloating = true;
+	connectionIO.outputTarget = { 0, 0 };
+	branch.addConnectionIO(connectionId, connectionIO);
 }

@@ -128,6 +128,7 @@ struct std::equal_to<EvaluatorGate> {
 struct EvaluatorIOJunction {
 	wrapper_gate_id_t junctionId;
 	bool isFloating;
+	std::pair<wrapper_gate_id_t, int> outputTarget;
 };
 
 #endif // gate_h

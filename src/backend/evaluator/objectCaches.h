@@ -27,4 +27,25 @@ private:
     CircuitManager& circuitManager;
 };
 
+class BlockContainerCache {
+public:
+    BlockContainerCache(CircuitManager& circuitManager) : circuitManager(circuitManager) {}
+    inline const BlockContainer* getBlockContainer(circuit_id_t circuitId) {
+        auto it = cache.find(circuitId);
+        if (it != cache.end()) {
+            return it->second;
+        }
+        SharedCircuit circuit = circuitManager.getCircuit(circuitId);
+        if (circuit) {
+            const BlockContainer* blockContainer = circuit->getBlockContainer();
+            cache[circuitId] = blockContainer;
+            return blockContainer;
+        }
+        return nullptr;
+    }
+private:
+    std::unordered_map<circuit_id_t, const BlockContainer*> cache;
+    CircuitManager& circuitManager;
+};
+
 #endif // diffCache_h

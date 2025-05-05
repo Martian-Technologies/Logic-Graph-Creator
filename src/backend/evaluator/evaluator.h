@@ -10,7 +10,7 @@
 #include "addressTree.h"
 #include "backend/address.h"
 #include "logicState.h"
-#include "diffCache.h"
+#include "objectCaches.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -56,15 +56,21 @@ private:
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode& addressTree, DiffCache& diffCache, bool insideIC);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode& addressTree, DiffCache& diffCache, BlockContainerCache& bcCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
 	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode& addressTree, const Address& address, Vector offset, bool trackInput);
 	void removeCircuitIOExternal(const DataUpdateEventManager::EventData* data);
-	void removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId);
+	void removeCircuitIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
 	void registerConnectionIOExternal(const DataUpdateEventManager::EventData* data);
-	void registerConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
-	void linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
-	void unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId);
+	void unlinkCircuitIOExternal(const DataUpdateEventManager::EventData* data);
+	void registerConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
+	void linkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
+	void unlinkConnectionIO(AddressTreeNode& branch, connection_end_id_t connectionId, BlockContainerCache& blockContainerCache);
+
+	std::pair<bool, std::pair<wrapper_gate_id_t, int>> getConnectionAtPosition(AddressTreeNode& branch, const Position& position, BlockContainerCache& blockContainerCache, bool trackInput);
+	bool isIOanInput(connection_end_id_t connectionId, AddressTreeNode& branch);
+
+	const Position* getConnectionTargetPosition(AddressTreeNode& branch, connection_end_id_t connectionId) const;
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType);
