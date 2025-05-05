@@ -10,12 +10,12 @@ typedef unsigned int wrapper_gate_id_t;
 
 struct GateConnection {
 	block_id_t gateId;
-	size_t outputGroup;
+	size_t group;
 
-	GateConnection(block_id_t id = -1, size_t group = 0) : gateId(id), outputGroup(group) {}
+	GateConnection(block_id_t id = -1, size_t group = 0) : gateId(id), group(group) {}
 
 	bool operator==(const GateConnection& other) const {
-		return gateId == other.gateId && outputGroup == other.outputGroup;
+		return gateId == other.gateId && group == other.group;
 	}
 
 	bool operator!=(const GateConnection& other) const {
@@ -65,7 +65,7 @@ struct Gate {
 	GateType type;
 
 	std::vector<std::vector<GateConnection>> inputGroups;
-	std::vector<std::vector<std::pair<block_id_t, size_t>>> outputGroups;
+	std::vector<std::vector<GateConnection>> outputGroups;
 
 	Gate(GateType gateType = GateType::NONE) : type(gateType) {
 		const GateTypeConfig& config = getGateTypeConfig(gateType);

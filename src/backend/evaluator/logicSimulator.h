@@ -20,17 +20,24 @@ public:
 	~LogicSimulator();
 	void initialize();
 
-	simulator_gate_id_t addGate(const GateType& gateType, bool allowSubstituteDecomissioned = true);
+	simulator_gate_id_t addGate(const GateType gateType, bool allowSubstituteDecomissioned = true);
 
 	void connectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
 
 	void disconnectGates(simulator_gate_id_t sourceGate, size_t outputGroup, simulator_gate_id_t targetGate, size_t inputGroup);
 
+	GateType getGateType(simulator_gate_id_t gate) const {
+		return gates[gate].type;
+	}
+
+	Gate getGate(simulator_gate_id_t gate) const {
+		return gates[gate];
+	}
+
 	void decomissionGate(simulator_gate_id_t gate);
 	std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> compressGates();
 
-	void computeNextState();
-	void swapStates();
+	void changeGateType(simulator_gate_id_t gate, const GateType newType);
 
 	std::vector<std::vector<logic_state_t>> getCurrentState() const;
 	void clearGates();

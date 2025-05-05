@@ -42,7 +42,7 @@ void LogicSimulator::initialize() {
 	}
 }
 
-simulator_gate_id_t LogicSimulator::addGate(const GateType& gateType, bool allowSubstituteDecomissioned) {
+simulator_gate_id_t LogicSimulator::addGate(const GateType gateType, bool allowSubstituteDecomissioned) {
 	if (allowSubstituteDecomissioned && numDecomissioned > 0) {
 		for (size_t i = 0; i < gates.size(); ++i) {
 			if (gates[i].type == GateType::NONE) {
@@ -138,7 +138,7 @@ void LogicSimulator::disconnectGates(simulator_gate_id_t sourceGate, size_t outp
 	auto& inputs = gates[targetGate].inputGroups[inputGroup];
 	auto it = std::find_if(inputs.begin(), inputs.end(),
 		[&connection](const GateConnection& conn) {
-			return conn.gateId == connection.gateId && conn.outputGroup == connection.outputGroup;
+			return conn.gateId == connection.gateId && conn.group == connection.group;
 		});
 	if (it != inputs.end()) {
 		inputs.erase(it);
@@ -164,7 +164,7 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 
 		for (auto& inputConn : inputGroup) {
 			simulator_gate_id_t inputGate = inputConn.gateId;
-			size_t outputGroup = inputConn.outputGroup;
+			size_t outputGroup = inputConn.group;
 
 			if (inputGate < 0 || inputGate >= gates.size() || !gates[inputGate].isValid())
 				continue;
@@ -188,8 +188,8 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 		auto& outputGroup = gates[gate].outputGroups[outGroupIdx];
 
 		for (const auto& connection : outputGroup) {
-			simulator_gate_id_t outputGate = connection.first;
-			size_t inputGroupIdx = connection.second;
+			simulator_gate_id_t outputGate = connection.gateId;
+			size_t inputGroupIdx = connection.group;
 
 			if (outputGate < 0 || outputGate >= gates.size() || !gates[outputGate].isValid())
 				continue;
@@ -215,6 +215,22 @@ void LogicSimulator::decomissionGate(simulator_gate_id_t gate) {
 	gates[gate].inputGroups.clear();
 	gates[gate].outputGroups.clear();
 	++numDecomissioned;
+}
+
+void LogicSimulator::changeGateType(simulator_gate_id_t gate, const GateType newType) {
+	if (gate < 0 || gate >= gates.size() || !gates[gate].isValid()) {
+		logError("changeGateType: gate index out of range or invalid", "Simulator");
+		return;
+	}
+	if (gates[gate].type == newType) {
+		return;
+	}
+	// resize input/output groups to match new type
+	gates[gate].inputGroups.resize(getGateTypeConfig(newType).inputGroupCount);
+	gates[gate].outputGroups.resize(getGateTypeConfig(newType).outputGroupCount);
+	gates[gate].type = newType;
+	gates[gate].statesA.resize(getGateTypeConfig(newType).outputGroupCount, logic_state_t::LOW);
+	gates[gate].statesB.resize(getGateTypeConfig(newType).outputGroupCount, logic_state_t::LOW);
 }
 
 std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::compressGates() {
@@ -245,7 +261,7 @@ std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::com
 
 		for (auto& group : gate.outputGroups) {
 			for (auto& outputConn : group) {
-				outputConn.first = gateMap[outputConn.first];
+				outputConn.gateId = gateMap[outputConn.gateId];
 			}
 		}
 	}
@@ -259,7 +275,7 @@ std::unordered_map<simulator_gate_id_t, simulator_gate_id_t> LogicSimulator::com
 void LogicSimulator::computeJunctionStates(Gate& gate) {
 	logic_state_t state = logic_state_t::FLOATING;
 	for (const auto& conn : gate.inputGroups[0]) {
-		logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+		logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 		if (inputState == logic_state_t::FLOATING) {
 			continue;
 		}
@@ -289,7 +305,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 		}
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::LOW) {
 				gate.statesB[0] = logic_state_t::LOW;
 				return;
@@ -314,7 +330,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	{
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::HIGH) {
 				gate.statesB[0] = logic_state_t::HIGH;
 				return;
@@ -338,7 +354,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	{
 		bool hasHighInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::HIGH) {
 				hasHighInput = !hasHighInput;
 			}
@@ -358,7 +374,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 	{
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::LOW) {
 				gate.statesB[0] = logic_state_t::HIGH;
 				return;
@@ -386,7 +402,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 		}
 		bool hasBadInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::HIGH) {
 				gate.statesB[0] = logic_state_t::LOW;
 				return;
@@ -414,7 +430,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 		}
 		bool hasHighInput = false;
 		for (const auto& conn : gate.inputGroups[0]) {
-			logic_state_t inputState = gates[conn.gateId].statesA[conn.outputGroup];
+			logic_state_t inputState = gates[conn.gateId].statesA[conn.group];
 			if (inputState == logic_state_t::HIGH) {
 				hasHighInput = !hasHighInput;
 			}
@@ -451,7 +467,7 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
 			return;
 		}
-		gate.statesB[0] = gates[gate.inputGroups[0][0].gateId].statesA[gate.inputGroups[0][0].outputGroup];
+		gate.statesB[0] = gates[gate.inputGroups[0][0].gateId].statesA[gate.inputGroups[0][0].group];
 		return;
 	}
 	case GateType::TRISTATE_BUFFER:
@@ -462,13 +478,13 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
 			return;
 		}
-		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].outputGroup];
+		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].group];
 		if (controlState == logic_state_t::HIGH) {
 			if (dataGroup.size() == 0) {
 				gate.statesB[0] = logic_state_t::UNDEFINED;
 				return;
 			}
-			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].outputGroup];
+			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].group];
 		}
 		else if (controlState == logic_state_t::LOW) {
 			gate.statesB[0] = logic_state_t::FLOATING;
@@ -486,13 +502,13 @@ void LogicSimulator::computeGateStates(Gate& gate) {
 			gate.statesB[0] = logic_state_t::UNDEFINED;
 			return;
 		}
-		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].outputGroup];
+		logic_state_t controlState = gates[controlGroup[0].gateId].statesA[controlGroup[0].group];
 		if (controlState == logic_state_t::LOW) {
 			if (dataGroup.size() == 0) {
 				gate.statesB[0] = logic_state_t::UNDEFINED;
 				return;
 			}
-			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].outputGroup];
+			gate.statesB[0] = gates[dataGroup[0].gateId].statesA[dataGroup[0].group];
 		}
 		else if (controlState == logic_state_t::HIGH) {
 			gate.statesB[0] = logic_state_t::FLOATING;
