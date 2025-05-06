@@ -2,13 +2,14 @@
 #define CONTENT_MANAGER_H
 
 #include <RmlUi/Core.h>
+#include "util/config/config.h"
 
 class ContentManager {
 public:
 	ContentManager(Rml::Element* document);
 	~ContentManager();
 
-	void setForm();
+	void setForm(const std::vector<std::string>& formList, const std::string& type);
 
 private:
 

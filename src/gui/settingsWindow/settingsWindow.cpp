@@ -18,11 +18,11 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 SettingsWindow::~SettingsWindow() {}
 
 void SettingsWindow::Initialize() {
-	connectGroupListeners();
+	connectCategoryListeners();
 	connectWindowOptions();
 }
 
-void SettingsWindow::connectGroupListeners() {
+void SettingsWindow::connectCategoryListeners() {
 	Rml::ElementList items;
 	Rml::ElementUtilities::GetElementsByClassName(items, context->GetElementById("navigation-panel"), "nav-item");
 

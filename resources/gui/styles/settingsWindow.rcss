@@ -1,20 +1,18 @@
-
-
-/* left side */
+/* ---------- NAVIGATION(LEFT) ---------- */
 #settings-navigation {
 	width: 40%;
 	height: 100%;
 	background-color: #403f3c;
-	overflow: auto;
+	display: flex;
 	flex-direction: column;
 }
 
-/* top */
+/* search */
 #navigation-top-container {
 	height: 20%;
 }
 
-h1 {
+#navigation-top-container h1 {
 	font-size: 18dp;
 	padding: 10dp;
 }
@@ -30,13 +28,14 @@ h1 {
 	margin-top: 20dp;
 }
 
-/* mid */
+/* nav panel */
 #navigation-panel {
 	display: flex;
 	flex-direction: column;
 	gap: 4dp;
 	margin-top: 20dp;
 	height: 70%;
+	width: 100%;
 }
 
 .nav-item {
@@ -47,69 +46,80 @@ h1 {
 
 .nav-item:hover {
 	background-color: #4f4f4d;
+}
+
+#navigation-panel .active-nav {
+	background-color: #3d3d3c; 
 	border-left-width: 20px;
 	border-left-color: #0078d4;
 }
 
-#navigation-panel.active-nav {
-	background-color: #ff0000; 
-	border-left-width: 20px;
-	border-left-color: #0078d4;
-}
-
-/* bottom */
-#settings-actions {
-	width: 100%;
-	height: 10%;
-	display: flex;
-	margin-left: auto;
-	margin-right: auto;
-	box-sizing: border-box;
-	background-color: transparent; /* or set a background if needed */
+/* action buttons */
+#setting-actions {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 10px;
+    width: 100%;
+    margin-top: auto; 
 }
 
 .settings-action-buttons {
-	padding: 8dp 16dp;
-	font-size: 8dp;
-	border-radius: 6dp;
-	border: 1dp;
-	border: #aaa;
-	background-color: #3d3d3d;
-	cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 80px; 
+    text-align: center;
 }
 
-.settings-action-buttons:hover {
-	background-color: #4f4f4d;
-}
-
-
-
-
-
-/* right side */
+/* ---------- CONTENT(RIGHT) ---------- */
 #settings-content-panel {
-	width: 60%;
-	background-color:#0f0f0f;
-	display: flex;    
-	flex-direction: column; 
-	overflow-y: auto;
+    width: 60%;
+    height: 100%;
+    background-color: #0f0f0f;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow-y: auto;
+	flex: 1;
 }
 
-
-.content-item {
-	position: relative;
-	display: flex;
+.user-int-option {
+    min-width: 48vw; /* settings is 80% window size, content panel is 60%, so 100% width is (.6)(.8) = .48vw */
+    display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    gap: 1rem;
-    min-width: auto;
-
-	border: 2px solid;
-	border-color: red;
+    box-sizing: border-box;
+    padding: 0.5rem 0;
+	justify-content: space-between;
 }
 
-.border-line {
+#settings-content-panel .user-int-option .label {
+    color: #e2e8f0;
+    min-width: 6rem;
+    max-width: 9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	margin-left: 2rem;
+}
+
+#settings-content-panel .user-int-option input {
+    min-width: 3rem; /* Minimum reasonable width */
+	width: 7rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: #4a5568;
+    color: #ffffff;
+	margin-right: 2rem;
+}
+
+/* line between content */
+#settings-content-panel .border-line {
 	position: absolute;
 	bottom: 0;
 	left: 15%;
@@ -118,60 +128,8 @@ h1 {
 	background-color: #ccc;
 }
 
-/* header */
-.header-option {
-	padding: 10px;	
+#settings-content-panel .header-label {
+	font-size: 3rem;
+	margin-left: 1rem;
 }
-
-/* User Int */
-.user-int-option {
-
-
-}
-
-.user-int-option .label {
-    color: #e2e8f0;
-    flex: 0 0 120px; 
-    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.user-int-option input {
-    flex: 0 0 12rem; /* Fixed width for inputs */
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    background-color: #4a5568;
-    color: #ffffff;
-    border: 1px solid #718096;
-    margin-left: auto; /* Push input to right */
-}
-
-
-
-/* User String */
-.user-string-option {
-
-}
-
-.dropdown-option {
-
-}
-
-.color-option {
-
-}
-
-.file-path-option {
-
-}
-
-.dir-path-option {
-
-}
-
-.keybind-option {
-
-}
-
 
