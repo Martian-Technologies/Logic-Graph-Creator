@@ -17,7 +17,7 @@ float gradientIntensity = 0.1;
 // grid constants
 vec3 gridCol = vec3(0.89, 0.878, 0.878);
 vec3 bigGridCol = vec3(0.8, 0.8, 0.8);
-float gridLineWidth = 0.1;
+float gridLineWidth = 0.13;
 float bigGridLineWidth = 0.7;
 
 // thank you magic function from article
