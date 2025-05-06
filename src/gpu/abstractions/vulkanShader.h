@@ -1,9 +1,9 @@
 #ifndef vulkanShader_h
 #define vulkanShader_h
 
-#include <volk.h>
+#include "gpu/vulkanDevice.h"
 
-VkShaderModule createShaderModule(std::vector<char> byteCode);
-void destroyShaderModule(VkShaderModule shader);
+VkShaderModule createShaderModule(VkDevice device, std::vector<char> byteCode);
+void destroyShaderModule(VkDevice device, VkShaderModule shader);
 
 #endif

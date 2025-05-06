@@ -1,17 +1,17 @@
 #ifndef frameManager_h
 #define frameManager_h
 
-#include <volk.h>
-#include <chrono>
-
 #include "util/lifetimeExtender.h"
+#include "gpu/vulkanDevice.h"
+
+#include <chrono>
 
 constexpr unsigned int FRAMES_IN_FLIGHT = 1;
 
 struct Frame {
 public:
-	Frame();
-	~Frame();
+	void init(VulkanDevice* device);
+	void cleanup();
 
 public:
 	VkCommandPool commandPool;
@@ -21,10 +21,15 @@ public:
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
 
 	LifetimeExtender lifetime;
+
+	VulkanDevice* device;
 };
 
 class FrameManager {
 public:
+	void init(VulkanDevice* device);
+	void cleanup();
+	
 	void incrementFrame();
 	float waitForCurrentFrameCompletion();
 	void startCurrentFrame();

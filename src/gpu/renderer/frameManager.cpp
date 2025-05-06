@@ -1,15 +1,15 @@
 #include "frameManager.h"
 
-#include "gpu/vulkanInstance.h"
-
-Frame::Frame() {
+void Frame::init(VulkanDevice* device) {
+	this->device = device;
+	
 	// command pool
 	VkCommandPoolCreateInfo commandPoolInfo = {};
 	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolInfo.pNext = nullptr;
 	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	commandPoolInfo.queueFamilyIndex = VulkanInstance::get().getGraphicsQueue().index;
-	vkCreateCommandPool(VulkanInstance::get().getDevice(), &commandPoolInfo, nullptr, &commandPool);
+	commandPoolInfo.queueFamilyIndex = device->getGraphicsQueueIndex();
+	vkCreateCommandPool(device->getDevice(), &commandPoolInfo, nullptr, &commandPool);
 	// allocate the default command buffer that we will use for rendering
 	VkCommandBufferAllocateInfo commandBufferInfo = {};
 	commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -17,7 +17,7 @@ Frame::Frame() {
 	commandBufferInfo.commandPool = commandPool;
 	commandBufferInfo.commandBufferCount = 1;
 	commandBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	vkAllocateCommandBuffers(VulkanInstance::get().getDevice(), &commandBufferInfo, &mainCommandBuffer);
+	vkAllocateCommandBuffers(device->getDevice(), &commandBufferInfo, &mainCommandBuffer);
 
 	// sync structures
 	VkFenceCreateInfo fenceInfo = {};
@@ -28,17 +28,29 @@ Frame::Frame() {
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	semaphoreInfo.pNext = nullptr;
 	semaphoreInfo.flags = 0;
-	vkCreateFence(VulkanInstance::get().getDevice(), &fenceInfo, nullptr, &renderFence);
-	vkCreateSemaphore(VulkanInstance::get().getDevice(), &semaphoreInfo, nullptr, &swapchainSemaphore);
-	vkCreateSemaphore(VulkanInstance::get().getDevice(), &semaphoreInfo, nullptr, &renderSemaphore);
+	vkCreateFence(device->getDevice(), &fenceInfo, nullptr, &renderFence);
+	vkCreateSemaphore(device->getDevice(), &semaphoreInfo, nullptr, &swapchainSemaphore);
+	vkCreateSemaphore(device->getDevice(), &semaphoreInfo, nullptr, &renderSemaphore);
 }
 
-Frame::~Frame() {
-	vkDestroyCommandPool(VulkanInstance::get().getDevice(), commandPool, nullptr);
+void Frame::cleanup() {
+	vkDestroyCommandPool(device->getDevice(), commandPool, nullptr);
 
-	vkDestroyFence(VulkanInstance::get().getDevice(), renderFence, nullptr);
-	vkDestroySemaphore(VulkanInstance::get().getDevice(), renderSemaphore, nullptr);
-	vkDestroySemaphore(VulkanInstance::get().getDevice(), swapchainSemaphore, nullptr);
+	vkDestroyFence(device->getDevice(), renderFence, nullptr);
+	vkDestroySemaphore(device->getDevice(), renderSemaphore, nullptr);
+	vkDestroySemaphore(device->getDevice(), swapchainSemaphore, nullptr);
+}
+
+void FrameManager::init(VulkanDevice* device) {
+	for (Frame& frame : frames) {
+		frame.init(device);
+	}
+}
+
+void FrameManager::cleanup() {
+	for (Frame& frame : frames) {
+		frame.cleanup();
+	}
 }
 
 void FrameManager::incrementFrame() {
@@ -48,7 +60,7 @@ void FrameManager::incrementFrame() {
 
 float FrameManager::waitForCurrentFrameCompletion() {
 	// wait until current frame has finished rendering
-	vkWaitForFences(VulkanInstance::get().getDevice(), 1, &frames[frameIndex].renderFence, VK_TRUE, UINT64_MAX);
+	vkWaitForFences(frames[frameIndex].device->getDevice(), 1, &frames[frameIndex].renderFence, VK_TRUE, UINT64_MAX);
 
 	// update frame time with newest frame completion
 	float time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - frames[frameIndex].lastStartTime).count();
@@ -61,7 +73,7 @@ float FrameManager::waitForCurrentFrameCompletion() {
 
 void FrameManager::startCurrentFrame() {
 	// reset render fence (we are actually rendering this frame)
-	vkResetFences(VulkanInstance::get().getDevice(), 1, &frames[frameIndex].renderFence);
+	vkResetFences(frames[frameIndex].device->getDevice(), 1, &frames[frameIndex].renderFence);
 	
 	// update start time
 	frames[frameIndex].lastStartTime = std::chrono::system_clock::now();

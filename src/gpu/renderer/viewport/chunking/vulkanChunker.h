@@ -104,7 +104,7 @@ typedef std::unordered_map<std::pair<Position, Position>, RenderedWire, WireHash
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires);
+	VulkanChunkAllocation(VulkanDevice* device, RenderedBlocks& blocks, RenderedWires& wires);
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
@@ -137,7 +137,7 @@ class ChunkChain {
 public:
 	inline RenderedBlocks& getBlocksForUpdating() { allocationDirty = true; return blocks; }
 	inline RenderedWires& getWiresForUpdating() { allocationDirty = true; return wires; }
-	void updateAllocation();
+	void updateAllocation(VulkanDevice* device);
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
 	
@@ -158,6 +158,8 @@ private:
 
 class VulkanChunker {
 public:
+	VulkanChunker(VulkanDevice* device);
+	
 	void setCircuit(Circuit* circuit);
 	void updateCircuit(DifferenceSharedPtr diff);
 	
@@ -170,10 +172,12 @@ private:
 	FVector getInputOffset(Rotation rotation);
 	
 private:
-	Circuit* circuit = nullptr;
-
 	std::unordered_map<Position, ChunkChain> chunks;
 	std::mutex mux; // sync can be relaxed in the future
+
+	// refs
+	Circuit* circuit = nullptr;
+	VulkanDevice* device = nullptr;
 };
 
 #endif

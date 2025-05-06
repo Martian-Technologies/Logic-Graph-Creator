@@ -1,6 +1,5 @@
 #include "vulkanChunker.h"
 
-#include "gpu/vulkanInstance.h"
 #include "backend/circuitView/renderer/tileSet.h"
 
 const int CHUNK_SIZE = 25;
@@ -18,7 +17,7 @@ Position getChunk(Position in) {
 
 TileSetInfo blockTileSet(256, 15, 4);
 
-VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWires& wires)
+VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlocks& blocks, RenderedWires& wires)
 {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
@@ -67,8 +66,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		// upload block vertices
 		numBlockVertices = blockVertices.size();
 		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
-		blockBuffer = createBuffer(blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
+		blockBuffer = createBuffer(device, blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		vmaCopyMemoryToAllocation(device->getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
 	// Generate wire vertices
@@ -124,15 +123,15 @@ VulkanChunkAllocation::VulkanChunkAllocation(RenderedBlocks& blocks, RenderedWir
 		// upload wire vertices
 		numWireVertices = wireVertices.size();
 		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
-		wireBuffer = createBuffer(wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
+		wireBuffer = createBuffer(device, wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		vmaCopyMemoryToAllocation(device->getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
 	// Create state buffer
 	size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
-	stateBuffer = createBuffer(stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	stateBuffer = createBuffer(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 	std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::HIGH);
-	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), defaultStates.data(), stateBuffer->allocation, 0, stateBufferSize);
+	vmaCopyMemoryToAllocation(device->getAllocator(), defaultStates.data(), stateBuffer->allocation, 0, stateBufferSize);
 	// create descriptor buffer description
 	stateDescriptorBufferInfo = {
 		.buffer = stateBuffer->buffer,
@@ -150,10 +149,10 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // ChunkChain
 // =========================================================================================================
 
-void ChunkChain::updateAllocation() {
+void ChunkChain::updateAllocation(VulkanDevice* device) {
 	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
-		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(blocks, wires);
+		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(device, blocks, wires);
 		// replace currently allocating data
 		if (currentlyAllocating.has_value()) {
 			gbJail.push_back(currentlyAllocating.value());
@@ -201,6 +200,11 @@ void ChunkChain::annihilateOrphanGBs() {
 
 // VulkanChunker
 // =========================================================================================================
+
+VulkanChunker::VulkanChunker(VulkanDevice* device)
+	: device(device) {
+	
+}
 
 void VulkanChunker::setCircuit(Circuit* circuit) {
 	std::lock_guard<std::mutex> lock(mux);
@@ -312,7 +316,7 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 
 	// reallocate all modified chunks
 	for (const Position& chunk : chunksToUpdate) {
-		chunks[chunk].updateAllocation();
+		chunks[chunk].updateAllocation(device);
 	}
 }
 

@@ -1,7 +1,7 @@
 #ifndef vulkanPipeline_h
 #define vulkanPipeline_h
 
-#include <volk.h>
+#include "gpu/vulkanDevice.h"
 #include <glm/glm.hpp>
 
 struct PushConstantDescription {
@@ -23,8 +23,8 @@ struct PipelineInformation {
 
 class Pipeline {
 public:
-	Pipeline(const PipelineInformation& info);
-	~Pipeline();
+	void init(VulkanDevice* device, const PipelineInformation& info);
+	void cleanup();
 
 	inline VkPipeline getHandle() { return handle; }
 	inline VkPipelineLayout getLayout() { return layout; }
@@ -32,6 +32,8 @@ public:
 private:
 	VkPipeline handle;
     VkPipelineLayout layout;
+
+	VulkanDevice* device;
 };
 
 #endif

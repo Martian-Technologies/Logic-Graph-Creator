@@ -10,7 +10,7 @@
 #include "gui/menuBar/menuManager.h"
 #include "gui/circuitView/simControlsManager.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface) : sdlWindow("Gatality"), renderer(&sdlWindow), backend(backend), circuitFileManager(circuitFileManager) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) : sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager) {
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
 

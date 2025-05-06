@@ -13,24 +13,28 @@ struct ChunkPushConstants {
 
 class ChunkRenderer {
 public:
-	ChunkRenderer(VkRenderPass& renderPass);
-	~ChunkRenderer();
+	void init(VulkanDevice* device, VkRenderPass& renderPass);
+	void cleanup();
 	
 	void render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
-	std::unique_ptr<Pipeline> blockPipeline = nullptr;
-	std::unique_ptr<Pipeline> wirePipeline = nullptr;
+	Pipeline blockPipeline;
+	Pipeline wirePipeline;
 
-	// descriptors and textures
 	DescriptorAllocator descriptorAllocator;
-	// block texture
+
+	// block texture and descriptor
 	VkDescriptorSetLayout blockTextureDescriptorSetLayout;
 	VkDescriptorSet blockTextureDescriptor;
 	VkSampler blockTextureSampler;
 	AllocatedImage blockTexture;
-	// state buffer
+	
+	// state buffer descriptor layout
 	VkDescriptorSetLayout stateBufferDescriptorSetLayout;
+
+	// refs
+	VulkanDevice* device;
 };
 
 #endif

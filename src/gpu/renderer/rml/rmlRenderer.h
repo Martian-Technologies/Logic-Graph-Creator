@@ -20,7 +20,7 @@ struct RmlVertex : Rml::Vertex {
 
 class RmlGeometryAllocation {
 public:
-	RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
+	RmlGeometryAllocation(VulkanDevice* device, Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
 	~RmlGeometryAllocation();
 
 	inline AllocatedBuffer& getVertexBuffer() { return vertexBuffer; }
@@ -30,12 +30,14 @@ public:
 private:
 	AllocatedBuffer vertexBuffer, indexBuffer;
 	unsigned int numIndices;
+
+	VulkanDevice* device;
 };
 
 // ============================= RML TEXTURES ===================================
 class RmlTexture {
 public:
-	RmlTexture(void* data, VkExtent3D size, VkDescriptorSet myDescriptor);
+	RmlTexture(VulkanDevice* device, void* data, VkExtent3D size, VkDescriptorSet myDescriptor);
 	~RmlTexture();
 
 	inline VkDescriptorSet& getDescriptor() { return descriptor; }
@@ -44,6 +46,8 @@ private:
 	AllocatedImage image;
 	VkSampler sampler;
 	VkDescriptorSet descriptor;
+
+	VulkanDevice* device;
 };
 
 // =========================== RML INSTRUCTIONS =================================
@@ -82,8 +86,8 @@ struct RmlPushConstants {
 
 class RmlRenderer {
 public:
-	RmlRenderer(VkRenderPass& renderPass);
-	~RmlRenderer();
+	void init(VulkanDevice* device, VkRenderPass& renderPass);
+	void cleanup();
 
 	void prepareForRmlRender();
 	void endRmlRender();
@@ -103,8 +107,9 @@ public:
 	void EnableScissorRegion(bool enable);
 	void SetScissorRegion(Rml::Rectanglei region);
 private:
-	std::unique_ptr<Pipeline> untexturedPipeline;
-	std::unique_ptr<Pipeline> texturedPipeline;
+	// pipelines
+	Pipeline untexturedPipeline;
+	Pipeline texturedPipeline;
 
 	// geometry allocations
 	Rml::CompiledGeometryHandle currentGeometryHandle = 1;
@@ -122,6 +127,9 @@ private:
 	std::vector<RmlRenderInstruction> renderInstructions;
 	std::vector<RmlRenderInstruction> tempRenderInstructions;
 	std::mutex rmlInstructionMux;
+
+	// refs
+	VulkanDevice* device;
 };
 
 #endif

@@ -18,7 +18,7 @@
 
 class Window {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface);
+	Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
 	~Window();
 
 	// no copy

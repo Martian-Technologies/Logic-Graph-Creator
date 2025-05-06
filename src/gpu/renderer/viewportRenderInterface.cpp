@@ -4,8 +4,8 @@
 
 #include "gpu/renderer/windowRenderer.h"
 
-ViewportRenderInterface::ViewportRenderInterface(Rml::Element* element)
-	: element(element) {
+ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element)
+	: element(element), chunker(device) {
 }
 
 ViewportRenderInterface::~ViewportRenderInterface() {

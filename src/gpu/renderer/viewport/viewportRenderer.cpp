@@ -1,8 +1,13 @@
 #include "viewportRenderer.h"
 
-ViewportRenderer::ViewportRenderer(VkRenderPass renderPass)
-	: gridRenderer(renderPass), chunkRenderer(renderPass) {
-	
+void ViewportRenderer::init(VulkanDevice* device, VkRenderPass renderPass) {
+	gridRenderer.init(device, renderPass);
+	chunkRenderer.init(device, renderPass);
+}
+
+void ViewportRenderer::cleanup() {
+	gridRenderer.cleanup();
+	chunkRenderer.cleanup();
 }
 
 void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {

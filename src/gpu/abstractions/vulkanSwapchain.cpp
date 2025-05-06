@@ -1,17 +1,26 @@
 #include "vulkanSwapchain.h"
 
-Swapchain::Swapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
+void Swapchain::init(VulkanDevice* device, VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
+	this->device = device;
+	
 	createSwapchain(surface, size, false);
 }
 
-Swapchain::~Swapchain() {
+void Swapchain::cleanup() {
 	destroyFramebuffers();
 	vkb::destroy_swapchain(swapchain);
+
+	imageViews.clear();
+}
+
+void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
+	destroyFramebuffers();
+	createSwapchain(surface, size, true);
 }
 
 void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld) {
 	// Create swapchain
-	vkb::SwapchainBuilder swapchainBuilder(VulkanInstance::get().getVkbDevice(), surface);
+	vkb::SwapchainBuilder swapchainBuilder(device->getDevice(), surface);
 	swapchainBuilder.set_desired_extent(size.first, size.second);
 	swapchainBuilder.set_desired_format({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
 	if (useOld) swapchainBuilder.set_old_swapchain(swapchain);
@@ -29,15 +38,10 @@ void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32
 	imageViews = imageViewRet.value();
 }
 
-void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
-	destroyFramebuffers();
-	createSwapchain(surface, size, true);
-}
-
 // Destroy Frame buffers and image views
 void Swapchain::destroyFramebuffers() {
 	for (VkFramebuffer framebuffer : framebuffers) {
-        vkDestroyFramebuffer(VulkanInstance::get().getDevice(), framebuffer, nullptr);
+        vkDestroyFramebuffer(device->getDevice(), framebuffer, nullptr);
     }
 	framebuffers.clear();
 	swapchain.destroy_image_views(imageViews);
@@ -61,7 +65,7 @@ void Swapchain::createFramebuffers(const VkRenderPass renderPass) {
 		framebufferInfo.height = swapchain.extent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(VulkanInstance::get().getDevice(), &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(device->getDevice(), &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}

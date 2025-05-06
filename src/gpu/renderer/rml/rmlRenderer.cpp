@@ -2,7 +2,6 @@
 
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
-#include "gpu/vulkanInstance.h"
 #include "gpu/abstractions/vulkanShader.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,16 +37,18 @@ std::vector<VkVertexInputAttributeDescription> RmlVertex::getAttributeDescriptio
 	return attributeDescriptions;
 }
 
-RmlGeometryAllocation::RmlGeometryAllocation(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) {
+RmlGeometryAllocation::RmlGeometryAllocation(VulkanDevice* device, Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices)
+	: device(device) {
+
 	size_t vertexBufferSize = vertices.size() * sizeof(RmlVertex);
 	size_t indexBufferSize = indices.size() * sizeof(int);
 	numIndices = indices.size();
-;
-	vertexBuffer = createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-	indexBuffer = createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 
-	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
-	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), indices.data(), indexBuffer.allocation, 0, indexBufferSize);
+	vertexBuffer = createBuffer(device, vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	indexBuffer = createBuffer(device, indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+
+	vmaCopyMemoryToAllocation(device->getAllocator(), vertices.data(), vertexBuffer.allocation, 0, vertexBufferSize);
+	vmaCopyMemoryToAllocation(device->getAllocator(), indices.data(), indexBuffer.allocation, 0, indexBufferSize);
 }
 
 RmlGeometryAllocation::~RmlGeometryAllocation() {
@@ -55,43 +56,46 @@ RmlGeometryAllocation::~RmlGeometryAllocation() {
 	destroyBuffer(vertexBuffer);
 }
 
-RmlTexture::RmlTexture(void* data, VkExtent3D size, VkDescriptorSet myDescriptor) {
+RmlTexture::RmlTexture(VulkanDevice* device, void* data, VkExtent3D size, VkDescriptorSet myDescriptor)
+	: device(device) {
 	// create image
-	image = createImage(data, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+	image = createImage(device, data, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 
 	// create image sampler
 	VkSamplerCreateInfo samplerInfo{};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	samplerInfo.minFilter = VK_FILTER_LINEAR;
 	samplerInfo.magFilter = VK_FILTER_LINEAR;
-	vkCreateSampler(VulkanInstance::get().getDevice(), &samplerInfo, nullptr, &sampler);
+	vkCreateSampler(device->getDevice(), &samplerInfo, nullptr, &sampler);
 
 	// update image descriptor
 	descriptor = myDescriptor;
 	DescriptorWriter writer;
 	writer.writeImage(0, image.imageView, sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-	writer.updateSet(VulkanInstance::get().getDevice(), descriptor);
+	writer.updateSet(device->getDevice(), descriptor);
 }
 
 RmlTexture::~RmlTexture() {
-	vkDestroySampler(VulkanInstance::get().getDevice(), sampler, nullptr);
+	vkDestroySampler(device->getDevice(), sampler, nullptr);
 	destroyImage(image);
 }
 
 // ================================= RML RENDERER ==================================================
 
-RmlRenderer::RmlRenderer(VkRenderPass& renderPass)
-	: descriptorAllocator(100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f }}) {
-
+void RmlRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
+	
+	this->device = device;
+	descriptorAllocator.init(device, 100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f }});
+	
 	// set up image descriptor
 	DescriptorLayoutBuilder layoutBuilder;
 	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-	singleImageDescriptorSetLayout = layoutBuilder.build(VK_SHADER_STAGE_FRAGMENT_BIT);
+	singleImageDescriptorSetLayout = layoutBuilder.build(device->getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT);
 	
 	// load shaders
-	VkShaderModule rmlVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.vert.spv"));
-	VkShaderModule rmlFragShaderUntextured = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
-	VkShaderModule rmlFragShaderTextured = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rmlTextured.frag.spv"));
+	VkShaderModule rmlVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.vert.spv"));
+	VkShaderModule rmlFragShaderUntextured = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rml.frag.spv"));
+	VkShaderModule rmlFragShaderTextured = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/rmlTextured.frag.spv"));
 
 	// set up pipelines
 	// untextured
@@ -103,20 +107,25 @@ RmlRenderer::RmlRenderer(VkRenderPass& renderPass)
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
 	rmlPipelineInfo.pushConstants.push_back({sizeof(RmlPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	untexturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+	untexturedPipeline.init(device, rmlPipelineInfo);
 	// textured
 	rmlPipelineInfo.fragShader = rmlFragShaderTextured;
 	rmlPipelineInfo.descriptorSets.push_back(singleImageDescriptorSetLayout); // descriptor set 0 (texture image)
-	texturedPipeline = std::make_unique<Pipeline>(rmlPipelineInfo);
+	texturedPipeline.init(device, rmlPipelineInfo);
 
 	// destroy shaders
-	destroyShaderModule(rmlVertShader);
-	destroyShaderModule(rmlFragShaderUntextured);
-	destroyShaderModule(rmlFragShaderTextured);
+	destroyShaderModule(device->getDevice(), rmlVertShader);
+	destroyShaderModule(device->getDevice(), rmlFragShaderUntextured);
+	destroyShaderModule(device->getDevice(), rmlFragShaderTextured);
 }
 
-RmlRenderer::~RmlRenderer() {
-	vkDestroyDescriptorSetLayout(VulkanInstance::get().getDevice(), singleImageDescriptorSetLayout, nullptr);
+void RmlRenderer::cleanup() {
+	vkDestroyDescriptorSetLayout(device->getDevice(), singleImageDescriptorSetLayout, nullptr);
+
+	texturedPipeline.cleanup();
+	untexturedPipeline.cleanup();
+
+	descriptorAllocator.cleanup();
 }
 
 void RmlRenderer::prepareForRmlRender() {
@@ -158,7 +167,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 
 	// bind untextured pipeline by default
 	bool pipelineRebindNeeded = true;
-	Pipeline* currentPipeline = untexturedPipeline.get();
+	Pipeline* currentPipeline = &untexturedPipeline;
 	
 	// set up shared push constants data
 	RmlPushConstants pushConstants{ glm::ortho(0.0f, (float)extent.width, 0.0f, (float)extent.height), glm::vec2(0.0f, 0.0f) };
@@ -175,7 +184,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 			
 			// update pipeline if needed
 			bool texturedDraw = renderInstruction.texture != nullptr;
-			Pipeline* newPipeline = texturedDraw ? texturedPipeline.get() : untexturedPipeline.get();
+			Pipeline* newPipeline = texturedDraw ? &texturedPipeline : &untexturedPipeline;
 			if (newPipeline != currentPipeline || pipelineRebindNeeded) {
 				currentPipeline = newPipeline;
 				pipelineRebindNeeded = false;
@@ -186,7 +195,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 
 			// bind texture descriptor if needed
 			if (texturedDraw) {
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline->getLayout(), 0, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, texturedPipeline.getLayout(), 0, 1, &renderInstruction.texture->getDescriptor(), 0, nullptr);
 
 				// Add texture we are going to use to the frame
 				frame.lifetime.push(renderInstruction.texture);
@@ -236,7 +245,7 @@ Rml::CompiledGeometryHandle RmlRenderer::CompileGeometry(Rml::Span<const Rml::Ve
 	// get and increment handle
 	Rml::CompiledGeometryHandle newHandle = currentGeometryHandle++;
 	// alocate new geometry
-	geometryAllocations[newHandle] = std::make_shared<RmlGeometryAllocation>(vertices, indices);
+	geometryAllocations[newHandle] = std::make_shared<RmlGeometryAllocation>(device, vertices, indices);
 	
 	return newHandle;
 }
@@ -275,7 +284,7 @@ Rml::TextureHandle RmlRenderer::LoadTexture(Rml::Vector2i& texture_dimensions, c
 
 	// allocate new texture
 	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
-    textures[newHandle] = std::make_shared<RmlTexture>(pixels, size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
+    textures[newHandle] = std::make_shared<RmlTexture>(device, pixels, size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
 	
 	// free pixels
 	stbi_image_free(pixels);
@@ -291,7 +300,7 @@ Rml::TextureHandle RmlRenderer::GenerateTexture(Rml::Span<const Rml::byte> sourc
 	size.width = source_dimensions.x;
 	size.height = source_dimensions.y;
 	size.depth = 1;
-	textures[newHandle] = std::make_shared<RmlTexture>((void*)source.data(), size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
+	textures[newHandle] = std::make_shared<RmlTexture>(device, (void*)source.data(), size, descriptorAllocator.allocate(singleImageDescriptorSetLayout));
 	
 	return newHandle;
 }

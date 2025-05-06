@@ -8,7 +8,8 @@
 
 class ViewportRenderer {
 public:
-	ViewportRenderer(VkRenderPass renderPass);
+	void init(VulkanDevice* device, VkRenderPass renderPass);
+	void cleanup();
 
 	void render(Frame& frame, ViewportRenderInterface* viewport);
 

@@ -11,12 +11,13 @@ struct GridPushConstants {
 
 class GridRenderer {
 public:
-	GridRenderer(VkRenderPass& renderPass);
+	void init(VulkanDevice* device, VkRenderPass& renderPass);
+	void cleanup();
 
 	void render(Frame& frame, const glm::mat4& viewMatrix, float viewScale);
 
 private:
-	std::unique_ptr<Pipeline> gridPipeline = nullptr;
+	Pipeline pipeline;
 
 	// push constant data
 	size_t iMvpOffset = 0;

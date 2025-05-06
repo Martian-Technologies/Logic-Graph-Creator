@@ -1,12 +1,12 @@
 #ifndef vulkanDescriptor_h
 #define vulkanDescriptor_h
 
-#include <volk.h>
+#include "gpu/vulkanDevice.h"
 
 class DescriptorLayoutBuilder {
 public:
 	void addBinding(uint32_t bindingIndex, VkDescriptorType type);
-	VkDescriptorSetLayout build(VkShaderStageFlags shaderStages, VkDescriptorSetLayoutCreateFlags flags = 0);
+	VkDescriptorSetLayout build(VkDevice device, VkShaderStageFlags shaderStages, VkDescriptorSetLayoutCreateFlags flags = 0);
 	
 private:
 	std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -33,20 +33,21 @@ struct PoolSizeRatio {
 
 class DescriptorAllocator {
 public:
-	DescriptorAllocator(uint32_t maxSets, const std::vector<PoolSizeRatio>& poolRatios);
-	~DescriptorAllocator();
+	void init(VulkanDevice* device, uint32_t maxSets, const std::vector<PoolSizeRatio>& poolRatios);
+	void cleanup();
 
 	void clearDescriptors();
 	VkDescriptorSet allocate(VkDescriptorSetLayout layout);
 
 private:
 	VkDescriptorPool pool;
+	VulkanDevice* device;
 };
 
 class GrowableDescriptorAllocator {
 public:
-	GrowableDescriptorAllocator(uint32_t initialSets, const std::vector<PoolSizeRatio>& poolRatios);
-	~GrowableDescriptorAllocator();
+	void init(VulkanDevice* device, uint32_t initialSets, const std::vector<PoolSizeRatio>& poolRatios);
+	void cleanup();
 
 	VkDescriptorSet allocate(VkDescriptorSetLayout layout);
 
@@ -59,6 +60,8 @@ private:
 	uint32_t setsPerPool;
 	std::vector<VkDescriptorPool> fullPools;
 	std::vector<VkDescriptorPool> readyPools;
+
+	VulkanDevice* device;
 };
 
 #endif

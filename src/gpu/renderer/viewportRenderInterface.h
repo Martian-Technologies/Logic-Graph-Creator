@@ -3,7 +3,6 @@
 
 #include <RmlUi/Core/Element.h>
 #include <glm/ext/matrix_float4x4.hpp>
-#include <volk.h>
 
 #include "backend/circuitView/renderer/renderer.h"
 #include "gpu/renderer/viewport/chunking/vulkanChunker.h"
@@ -19,7 +18,7 @@ struct ViewportViewData {
 
 class ViewportRenderInterface : public Renderer {
 public:
-	ViewportRenderInterface(Rml::Element* element);
+	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element);
 	~ViewportRenderInterface();
 
 	void linkToWindowRenderer(WindowRenderer* windowRenderer);

@@ -1,27 +1,27 @@
 #include "windowRenderer.h"
 
-WindowRenderer::WindowRenderer(SdlWindow* sdlWindow)
+#include "gpu/vulkanInstance.h"
+
+WindowRenderer::WindowRenderer(SdlWindow* sdlWindow, VulkanInstance* instance)
 	: sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
 
 	// create surface and use it to make sure a vulkan device has been created
-	surface = sdlWindow->createVkSurface(VulkanInstance::get().getInstance());
-	VulkanInstance::get().ensureDeviceCreation(surface);
-	device = VulkanInstance::get().getDevice();
+	surface = sdlWindow->createVkSurface(instance->getVkbInstance());
+	device = instance->createOrGetDevice(surface);
 
-	// get window size
-	windowSize = sdlWindow->getSize();
-	
-	frames = std::make_unique<FrameManager>();
+	// initialize frames
+	frames.init(device);
 	
 	// set up swapchain and subrenderer
-	swapchain = std::make_unique<Swapchain>(surface, windowSize);
+	windowSize = sdlWindow->getSize();
+	swapchain.init(device, surface, windowSize);
 	createRenderPass();
-	swapchain->createFramebuffers(renderPass);
+	swapchain.createFramebuffers(renderPass);
 
 	// subrenderers
-	rmlRenderer = std::make_unique<RmlRenderer>(renderPass);
-	viewportRenderer = std::make_unique<ViewportRenderer>(renderPass);
+	rmlRenderer.init(device, renderPass);
+	viewportRenderer.init(device, renderPass);
 	
 	// start render loop
 	running = true;
@@ -33,8 +33,17 @@ WindowRenderer::~WindowRenderer() {
 	running = false;
 	if (renderThread.joinable()) renderThread.join();
 
-	// deletion
-	vkDestroyRenderPass(VulkanInstance::get().getDevice(), renderPass, nullptr);
+	// start by deleting render pass
+	vkDestroyRenderPass(device->getDevice(), renderPass, nullptr);
+	// now the swapchain can be deleted
+	swapchain.cleanup();
+	// now the frames are free!
+	frames.cleanup();
+
+	// delete rml renderer
+	rmlRenderer.cleanup();
+	// delete viewport renderer
+	viewportRenderer.cleanup();
 }
 
 void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
@@ -47,10 +56,10 @@ void WindowRenderer::resize(std::pair<uint32_t, uint32_t> windowSize) {
 
 void WindowRenderer::renderLoop() {
 	while(running) {
-		Frame& frame = frames->getCurrentFrame();
+		Frame& frame = frames.getCurrentFrame();
 
 		// wait for frame completion
-		frames->waitForCurrentFrameCompletion();
+		frames.waitForCurrentFrameCompletion();
 		
 		// recreate swapchain if needed
 		if (swapchainRecreationNeeded) {
@@ -61,7 +70,7 @@ void WindowRenderer::renderLoop() {
 		// try to start rendering the frame
 		// get next swapchain image to render to (or fail and try again)
 		uint32_t imageIndex;
-		VkResult imageGetResult = vkAcquireNextImageKHR(device, swapchain->getVkbSwapchain().swapchain, UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult imageGetResult = vkAcquireNextImageKHR(device->getDevice(), swapchain.getSwapchain(), UINT64_MAX, frame.swapchainSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
 			// if the swapchain is not ideal, try again but recreate it this time (this happens in normal operation)
 			swapchainRecreationNeeded = true;
@@ -73,17 +82,13 @@ void WindowRenderer::renderLoop() {
 		}
 		
 		// tell frame that it has started
-		frames->startCurrentFrame();
-
-		// get queues
-		VkQueue& graphicsQueue = VulkanInstance::get().getGraphicsQueue().queue;
-		VkQueue& presentQueue = VulkanInstance::get().getPresentQueue().queue;
+		frames.startCurrentFrame();
 
 		// record command buffer
 		vkResetCommandBuffer(frame.mainCommandBuffer, 0);
 		renderToCommandBuffer(frame, imageIndex);
 
-		// start setting up submission
+		// start setting up graphics submission ====================================================
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -104,44 +109,39 @@ void WindowRenderer::renderLoop() {
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
-		{
-			std::lock_guard<std::mutex> lock(VulkanInstance::get().getGraphicsSubmitMux());
-			if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, frame.renderFence) != VK_SUCCESS) {
-				throwFatalError("failed to submit draw command buffer!");
-			}
+		if (device->submitGraphicsQueue(&submitInfo, frame.renderFence) != VK_SUCCESS){
+			logError("failed to submit draw command buffer!");
 		}
 		
-		// present
+		// start setting up present submission =====================================================
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = signalSemaphores;
-		VkSwapchainKHR swapchains[] = { swapchain->getVkbSwapchain().swapchain };
+		VkSwapchainKHR swapchains[] = { swapchain.getSwapchain() };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapchains;
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // unused
-		{
-			std::lock_guard<std::mutex> lock(VulkanInstance::get().getPresentSubmitMux());
-			
-			VkResult imagePresentResult = vkQueuePresentKHR(presentQueue, &presentInfo);
-			if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imagePresentResult == VK_SUBOPTIMAL_KHR) {
-				swapchainRecreationNeeded = true;
-			} else if (imagePresentResult != VK_SUCCESS) {
-				logError("failed to present swap chain image!");
-			}
+
+		// submit to present queue
+		VkResult imagePresentResult = device->submitPresent(&presentInfo);
+		if (imagePresentResult == VK_ERROR_OUT_OF_DATE_KHR || imagePresentResult == VK_SUBOPTIMAL_KHR) {
+			swapchainRecreationNeeded = true;
+		} else if (imagePresentResult != VK_SUCCESS) {
+			logError("failed to present swap chain image!");
 		}
 
 		//increase the number of frames drawn
-		frames->incrementFrame();
+		frames.incrementFrame();
 	}
 
-	vkDeviceWaitIdle(device);
+	vkDeviceWaitIdle(device->getDevice());
 }
 
 void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
 	// preparation
-	VkExtent2D windowSize = swapchain->getVkbSwapchain().extent;
+	VkExtent2D windowSize = swapchain.getSwapchain().extent;
 	
 	// start recording
 	VkCommandBufferBeginInfo beginInfo{};
@@ -156,9 +156,9 @@ void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = renderPass;
-	renderPassInfo.framebuffer = swapchain->getFramebuffers()[imageIndex];
+	renderPassInfo.framebuffer = swapchain.getFramebuffers()[imageIndex];
 	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = swapchain->getVkbSwapchain().extent;
+	renderPassInfo.renderArea.extent = swapchain.getSwapchain().extent;
 	renderPassInfo.clearValueCount = 0;
 	
 	vkCmdBeginRenderPass(frame.mainCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -168,11 +168,11 @@ void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
 		// viewports
 		std::lock_guard<std::mutex> lock(viewportRenderersMux);
 		for (ViewportRenderInterface* viewport : viewportRenderInterfaces) {
-			viewportRenderer->render(frame, viewport);
+			viewportRenderer.render(frame, viewport);
 		}
 		
 		// rml rendering
-		rmlRenderer->render(frame, windowSize);
+		rmlRenderer.render(frame, windowSize);
 	}
 
 	// end render pass
@@ -185,7 +185,7 @@ void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
 void WindowRenderer::createRenderPass() {
 	// render pass
 	VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = swapchain->getVkbSwapchain().image_format;
+	colorAttachment.format = swapchain.getSwapchain().image_format;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -219,32 +219,32 @@ void WindowRenderer::createRenderPass() {
 	renderPassInfo.dependencyCount = 1;
 	renderPassInfo.pDependencies = &dependency;
 	
-	if (vkCreateRenderPass(VulkanInstance::get().getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(device->getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");
 	}
 }
 
 void WindowRenderer::recreateSwapchain() {
-	vkDeviceWaitIdle(device);
+	vkDeviceWaitIdle(device->getDevice());
 	
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 
-	swapchain->recreate(surface, windowSize);
-	swapchain->createFramebuffers(renderPass);
+	swapchain.recreate(surface, windowSize);
+	swapchain.createFramebuffers(renderPass);
 	
 	swapchainRecreationNeeded = false;
 }
 
 void WindowRenderer::activateRml(RmlRenderInterface& renderInterface) {
-	renderInterface.pointToRenderer(rmlRenderer.get());
+	renderInterface.pointToRenderer(&rmlRenderer);
 }
 
 void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
 	activateRml(renderInterface);
-	rmlRenderer->prepareForRmlRender();
+	rmlRenderer.prepareForRmlRender();
 }
 void WindowRenderer::endRml() {
-	rmlRenderer->endRmlRender();
+	rmlRenderer.endRmlRender();
 }
 
 void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {

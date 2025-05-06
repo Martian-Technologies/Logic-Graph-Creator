@@ -1,8 +1,7 @@
 #ifndef vulkanImage_h
 #define vulkanImage_h
 
-#include <volk.h>
-#include <vk_mem_alloc.h>
+#include "gpu/vulkanDevice.h"
 
 struct AllocatedImage {
     VkImage image;
@@ -12,10 +11,12 @@ struct AllocatedImage {
     VkFormat imageFormat;
 	VkImageAspectFlags aspect;
 	uint32_t mipLevels;
+
+	VulkanDevice* device;
 };
 
-AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-AllocatedImage createImage(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+AllocatedImage createImage(VulkanDevice* device, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+AllocatedImage createImage(VulkanDevice* device, void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
 void destroyImage(AllocatedImage& image);
 
 bool transitionImageLayout(VkCommandBuffer cmd, AllocatedImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);

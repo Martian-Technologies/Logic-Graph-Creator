@@ -1,13 +1,13 @@
 #include "vulkanPipeline.h"
 
-#include "gpu/vulkanInstance.h"
-
 const std::vector<VkDynamicState> dynamicStates = {
 	VK_DYNAMIC_STATE_VIEWPORT,
 	VK_DYNAMIC_STATE_SCISSOR
 };
 
-Pipeline::Pipeline(const PipelineInformation& info) {
+void Pipeline::init(VulkanDevice* device, const PipelineInformation& info) {
+	this->device = device;
+	
 	// shader stages
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -117,7 +117,7 @@ Pipeline::Pipeline(const PipelineInformation& info) {
 	pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 	
 	// create pipeline layout
-	if (vkCreatePipelineLayout(VulkanInstance::get().getDevice(), &pipelineLayoutInfo, nullptr, &layout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(device->getDevice(), &pipelineLayoutInfo, nullptr, &layout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -140,12 +140,12 @@ Pipeline::Pipeline(const PipelineInformation& info) {
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // unused
 	pipelineInfo.basePipelineIndex = -1; // unused
 
-	if (vkCreateGraphicsPipelines(VulkanInstance::get().getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &handle) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(device->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &handle) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 };
 
-Pipeline::~Pipeline() {
-	vkDestroyPipeline(VulkanInstance::get().getDevice(), handle, nullptr);
-	vkDestroyPipelineLayout(VulkanInstance::get().getDevice(), layout, nullptr);
+void Pipeline::cleanup() {
+	vkDestroyPipeline(device->getDevice(), handle, nullptr);
+	vkDestroyPipelineLayout(device->getDevice(), layout, nullptr);
 }

@@ -4,10 +4,10 @@
 #include "computerAPI/directoryManager.h"
 #include "gpu/abstractions/vulkanShader.h"
 
-GridRenderer::GridRenderer(VkRenderPass& renderPass) {
+void GridRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	// create shaders
-	VkShaderModule gridVertShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/grid.vert.spv"));
-	VkShaderModule gridFragShader = createShaderModule(readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/grid.frag.spv"));
+	VkShaderModule gridVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/grid.vert.spv"));
+	VkShaderModule gridFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/grid.frag.spv"));
 
 	// create pipeline
 	PipelineInformation gridPipelineInfo{};
@@ -16,10 +16,14 @@ GridRenderer::GridRenderer(VkRenderPass& renderPass) {
 	gridPipelineInfo.renderPass = renderPass;
 	gridPipelineInfo.pushConstants.push_back({gridFadeOffset, iMvpOffset, VK_SHADER_STAGE_VERTEX_BIT});
 	gridPipelineInfo.pushConstants.push_back({sizeof(float), gridFadeOffset, VK_SHADER_STAGE_FRAGMENT_BIT});
-	gridPipeline = std::make_unique<Pipeline>(gridPipelineInfo);
+	pipeline.init(device, gridPipelineInfo);
 
-	destroyShaderModule(gridVertShader);
-	destroyShaderModule(gridFragShader);
+	destroyShaderModule(device->getDevice(), gridVertShader);
+	destroyShaderModule(device->getDevice(), gridFragShader);
+}
+
+void GridRenderer::cleanup() {
+	pipeline.cleanup();
 }
 
 constexpr float gridFadeOutDistance = 160.0f;
@@ -31,11 +35,11 @@ void GridRenderer::render(Frame& frame, const glm::mat4& viewMatrix, float viewS
 	GridPushConstants pushConstants { glm::inverse(viewMatrix), gridFade};
 
 	// bind pipeline
-	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gridPipeline->getHandle());
+	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getHandle());
 		
 	// bind push constants
-	vkCmdPushConstants(frame.mainCommandBuffer, gridPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, iMvpOffset, gridFadeOffset, &pushConstants.iMvp);
-	vkCmdPushConstants(frame.mainCommandBuffer, gridPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, gridFadeOffset, sizeof(float), &pushConstants.gridFade);
+	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.getLayout(), VK_SHADER_STAGE_VERTEX_BIT, iMvpOffset, gridFadeOffset, &pushConstants.iMvp);
+	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, gridFadeOffset, sizeof(float), &pushConstants.gridFade);
 
 	vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 }

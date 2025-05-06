@@ -14,7 +14,7 @@
 
 class WindowRenderer {
 public:
-	WindowRenderer(SdlWindow* sdlWindow);
+	WindowRenderer(SdlWindow* sdlWindow, VulkanInstance* instance);
 	~WindowRenderer();
 
 	// no copy
@@ -31,39 +31,41 @@ public:
 	void registerViewportRenderInterface(ViewportRenderInterface* renderInterface);
 	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
 
+	inline VulkanDevice* getDevice() { return device; }
+
 private:
 	void renderToCommandBuffer(Frame& frame, uint32_t imageIndex);
 	void createRenderPass();
 	void recreateSwapchain();
 	
 private:
-	SdlWindow* sdlWindow;
-	VkDevice device;
-	std::atomic<bool> running = false;
-
-	// size
+	// screen
+	Swapchain swapchain;
+	std::atomic<bool> swapchainRecreationNeeded = false;
 	std::pair<uint32_t, uint32_t> windowSize;
 	std::mutex windowSizeMux;
 	
 	// main vulkan
 	VkSurfaceKHR surface;
-	std::unique_ptr<Swapchain> swapchain = nullptr;
-	std::atomic<bool> swapchainRecreationNeeded = false;
 	VkRenderPass renderPass;
 
 	// subrenderers
-	std::unique_ptr<RmlRenderer> rmlRenderer = nullptr;
-	std::unique_ptr<ViewportRenderer> viewportRenderer = nullptr;
+	RmlRenderer rmlRenderer;
+	ViewportRenderer viewportRenderer;
+
+	// render loop
+	FrameManager frames;
+	std::thread renderThread;
+	std::atomic<bool> running = false;
+	void renderLoop();
 
 	// connected viewport render interfaces
 	std::set<ViewportRenderInterface*> viewportRenderInterfaces;
 	std::mutex viewportRenderersMux;
 
-	std::unique_ptr<FrameManager> frames;
-
-	// render loop
-	std::thread renderThread;
-	void renderLoop();
+	// handles
+	SdlWindow* sdlWindow;
+	VulkanDevice* device;
 };
 
 #endif

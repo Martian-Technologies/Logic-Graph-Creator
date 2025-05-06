@@ -3,56 +3,21 @@
 
 #include <volk.h>
 #include <VkBootstrap.h>
-#include <vk_mem_alloc.h>
 
-struct QueueInfo {
-	VkQueue queue;
-	uint32_t index;
-};
+#include "vulkanDevice.h"
 
 class VulkanInstance {
-private:
-	static VulkanInstance* singleton;
-public:
-	static inline VulkanInstance& get() { return *singleton; }
 public:
 	VulkanInstance();
 	~VulkanInstance();
 
-	void ensureDeviceCreation(VkSurfaceKHR surfaceForPresenting);
-	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
+	VulkanDevice* createOrGetDevice(VkSurfaceKHR surfaceForPresenting);
 
-public:
-	// getters
-	inline VkInstance& getInstance() { return instance.instance; }
-	inline VmaAllocator& getAllocator() { return allocator.value(); }
-	inline vkb::Device& getVkbDevice() { return device.value(); }
-	inline VkDevice& getDevice() { return device.value().device; }
-	inline QueueInfo& getGraphicsQueue() { return graphicsQueue.value(); }
-	inline std::mutex& getGraphicsSubmitMux() { return graphicsSubmitMux; }
-	inline QueueInfo& getPresentQueue() { return presentQueue.value(); }
-	inline std::mutex& getPresentSubmitMux() { return presentSubmitMux; }
+	inline vkb::Instance getVkbInstance() { return instance; };
 
-private:
-	void createAllocator();
-	void initializeImmediateSubmission();
-	
 private:
 	vkb::Instance instance;
-	std::optional<VkPhysicalDevice> physicalDevice;
-	std::optional<vkb::Device> device;
-	std::optional<VmaAllocator> allocator;
-
-	// Queues
-	std::optional<QueueInfo> graphicsQueue;
-	std::mutex graphicsSubmitMux;
-	std::optional<QueueInfo> presentQueue;
-	std::mutex presentSubmitMux;
-
-	// Immediate submission
-    VkFence immediateFence;
-    VkCommandBuffer immediateCommandBuffer;
-    VkCommandPool immediateCommandPool;
+	std::optional<VulkanDevice> device;
 };
 
 // Vulkan Renderer Design Notes
@@ -78,8 +43,8 @@ private:
 //
 // VULKAN IMPROVEMENTS -
 // - [x] VkBootstrap
-// - [ ] Volk dynamic loader
-// - [ ] Switch from singleton to top down design
+// - [x] Switch from singleton to top down design
+// - [x] Volk dynamic loader
 // - [ ] Pooled async resource uploading
 // - [ ] Standardization of subrenderer params and input, better way for subrenderer to communicate and put data on the "frame", growable descriptor pool
 // - [ ] Fix validation layers on mac, and weird resize messages on x11

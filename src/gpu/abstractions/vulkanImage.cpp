@@ -3,9 +3,10 @@
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/vulkanInstance.h"
 
-AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
+AllocatedImage createImage(VulkanDevice* device, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 	// Image create info
 	AllocatedImage newImage;
+	newImage.device = device;
 	newImage.imageFormat = format;
 	newImage.imageExtent = size;
 	// calculate mipmapping levels
@@ -32,7 +33,7 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
 	VmaAllocationCreateInfo vmaAllocInfo = {};
 	vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 	vmaAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	VkResult result = vmaCreateImage(VulkanInstance::get().getAllocator(), &imageInfo, &vmaAllocInfo, &newImage.image, &newImage.allocation, nullptr);
+	VkResult result = vmaCreateImage(device->getAllocator(), &imageInfo, &vmaAllocInfo, &newImage.image, &newImage.allocation, nullptr);
 	if(result != VK_SUCCESS) {
 		throwFatalError("Could not allocate vulkan image");
 	}
@@ -59,22 +60,22 @@ AllocatedImage createImage(VkExtent3D size, VkFormat format, VkImageUsageFlags u
     imageViewInfo.subresourceRange.layerCount = 1;
     imageViewInfo.subresourceRange.aspectMask = newImage.aspect;
 
-	vkCreateImageView(VulkanInstance::get().getDevice(), &imageViewInfo, nullptr, &newImage.imageView); // TOLOG
+	vkCreateImageView(device->getDevice(), &imageViewInfo, nullptr, &newImage.imageView); // TOLOG
 
 	return newImage;
 }
 
-AllocatedImage createImage(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
+AllocatedImage createImage(VulkanDevice* device, void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 	// upload data to staging upload buffer
 	size_t dataSize = size.depth * size.height * size.width * 4; // each pixel is 4 bytes (8bit channels RGBA)
-	AllocatedBuffer uploadBuffer = createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-	vmaCopyMemoryToAllocation(VulkanInstance::get().getAllocator(), data, uploadBuffer.allocation, 0, dataSize);
+	AllocatedBuffer uploadBuffer = createBuffer(device, dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	vmaCopyMemoryToAllocation(device->getAllocator(), data, uploadBuffer.allocation, 0, dataSize);
 
 	// create image
-	AllocatedImage newImage = createImage(size, format, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped); // not exactly sure why we need transfer src but tutorial says so
+	AllocatedImage newImage = createImage(device, size, format, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped); // not exactly sure why we need transfer src but tutorial says so
 
 	// submit copy from staging to real
-	VulkanInstance::get().immediateSubmit([&](VkCommandBuffer cmd) {
+	device->immediateSubmit([&](VkCommandBuffer cmd) {
 		transitionImageLayout(cmd, newImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkBufferImageCopy copyRegion = {};
@@ -100,8 +101,8 @@ AllocatedImage createImage(void* data, VkExtent3D size, VkFormat format, VkImage
 }
 
 void destroyImage(AllocatedImage& image) {
-	vkDestroyImageView(VulkanInstance::get().getDevice(), image.imageView, nullptr);
-    vmaDestroyImage(VulkanInstance::get().getAllocator(), image.image, image.allocation);
+	vkDestroyImageView(image.device->getDevice(), image.imageView, nullptr);
+    vmaDestroyImage(image.device->getAllocator(), image.image, image.allocation);
 }
 
 bool transitionImageLayout(VkCommandBuffer cmd, AllocatedImage& image, VkImageLayout oldLayout, VkImageLayout newLayout) {
