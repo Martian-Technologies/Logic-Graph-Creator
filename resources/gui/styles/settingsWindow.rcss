@@ -1,11 +1,21 @@
+/*
+Nord Color Pallete: 
+#2e3440
+#3b4252
+#434c5e
+#4c566a
+*/
+
+
 /* ---------- NAVIGATION(LEFT) ---------- */
 #settings-navigation {
-	width: 40%;
+	width: 30%;
 	height: 100%;
 	background-color: #403f3c;
 	display: flex;
 	flex-direction: column;
 }
+
 
 /* search */
 #navigation-top-container {
@@ -13,8 +23,8 @@
 }
 
 #navigation-top-container h1 {
+	margin-top: 10rem;
 	font-size: 18dp;
-	padding: 10dp;
 }
 
 #settings-search {
@@ -79,7 +89,7 @@
 
 /* ---------- CONTENT(RIGHT) ---------- */
 #settings-content-panel {
-    width: 60%;
+    width: 70%;
     height: 100%;
     background-color: #0f0f0f;
     display: flex;
@@ -89,8 +99,8 @@
 	flex: 1;
 }
 
-.user-int-option {
-    min-width: 48vw; /* settings is 80% window size, content panel is 60%, so 100% width is (.6)(.8) = .48vw */
+#settings-content-panel .content-item {
+    min-width: 56vw; /* settings is 80% window size, content panel is 60%, so 100% width is (.7)(.8) = .56vw */
     display: flex;
     align-items: center;
     box-sizing: border-box;
@@ -105,7 +115,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-	margin-left: 2rem;
+	margin-left: 1.5rem;
 }
 
 #settings-content-panel .user-int-option input {
@@ -115,7 +125,7 @@
     border-radius: 0.375rem;
     background-color: #4a5568;
     color: #ffffff;
-	margin-right: 2rem;
+	margin-right: 1.5rem;
 }
 
 /* line between content */
@@ -128,8 +138,16 @@
 	background-color: #ccc;
 }
 
-#settings-content-panel .header-label {
-	font-size: 3rem;
-	margin-left: 1rem;
+#settings-content-panel .header-option {
+    min-width: 48vw; /* settings is 80% window size, content panel is 60%, so 100% width is (.6)(.8) = .48vw */
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0.5rem 0;
+	justify-content: space-between;
 }
 
+#settings-content-panel .header-label {
+	font-size: 3rem;
+	margin-left: .75rem;
+}

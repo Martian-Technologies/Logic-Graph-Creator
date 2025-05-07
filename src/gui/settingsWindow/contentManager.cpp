@@ -68,7 +68,7 @@ void ContentManager::generateForm(const std::string& tabType, const std::string&
 			name,
 			Rml::XMLAttributes()
 		);
-		newForm->SetAttribute("class", "header");
+		newForm->SetAttribute("class", "header-option");
 		newForm->SetInnerRML(
 			"<div class=\"header-label\">" + itemName + "</div>"
 		);
