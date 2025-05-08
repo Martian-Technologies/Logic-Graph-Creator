@@ -19,6 +19,7 @@ Rml::TextureHandle RmlRenderInterface::GenerateTexture(Rml::Span<const Rml::byte
 	return currentRenderer->GenerateTexture(source, source_dimensions);
 }
 void RmlRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle) {
+	if (currentRenderer == nullptr) return;
 	currentRenderer->ReleaseTexture(texture_handle);
 }
 

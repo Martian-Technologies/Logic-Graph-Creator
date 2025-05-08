@@ -8,6 +8,9 @@ class RmlInstance {
 public:
 	RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface* renderInterface);
 	~RmlInstance();
+
+private:
+	RmlRenderInterface* renderInterface;
 };
 
 #endif

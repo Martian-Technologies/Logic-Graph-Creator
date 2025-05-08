@@ -4,7 +4,9 @@
 
 #include "computerAPI/directoryManager.h"
 
-RmlInstance::RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface* renderInterface) {
+RmlInstance::RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface* renderInterface)
+	: renderInterface(renderInterface) {
+  
 	logInfo("Initializing RmlUI...");
 
 	Rml::SetSystemInterface(systemInterface);
@@ -19,5 +21,6 @@ RmlInstance::RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface
 
 RmlInstance::~RmlInstance() {
 	logInfo("Shutting down RmlUI...");
+	renderInterface->pointToRenderer(nullptr);
 	Rml::Shutdown();
 }

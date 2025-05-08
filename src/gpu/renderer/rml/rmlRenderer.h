@@ -117,7 +117,7 @@ private:
 
 	// texture allocations
 	Rml::TextureHandle currentTextureHandle = 1;
-	std::unordered_map<Rml::CompiledGeometryHandle, std::shared_ptr<RmlTexture>> textures;
+	std::unordered_map<Rml::TextureHandle, std::shared_ptr<RmlTexture>> textures;
 	
 	// texture descriptor
 	DescriptorAllocator descriptorAllocator;
