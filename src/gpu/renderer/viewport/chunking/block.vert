@@ -20,7 +20,7 @@ const int statesPerWord = 4;
 void main() {
 	// extract state from states array
 	uint val = states[(gl_VertexIndex / vertsPerBlock) / statesPerWord];
-	uint state = (val >> ((gl_VertexIndex % statesPerWord) * 8)) & 0xFFu;
+	uint state = (val >> (((gl_VertexIndex / vertsPerBlock) % statesPerWord) * 8)) & 0xFFu;
 	// offset uv by state
 	tex = inTex + vec2(0.0, state * 0.25);
 	
