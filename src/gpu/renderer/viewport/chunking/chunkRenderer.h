@@ -1,6 +1,7 @@
 #ifndef chunkRenderer_h
 #define chunkRenderer_h
 
+#include "backend/evaluator/evaluator.h"
 #include "gpu/renderer/frameManager.h"
 #include "gpu/abstractions/vulkanPipeline.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
@@ -16,7 +17,7 @@ public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);
 	void cleanup();
 	
-	void render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
+	void render(Frame& frame, const glm::mat4& viewMatrix, Evaluator* evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
 	Pipeline blockPipeline;

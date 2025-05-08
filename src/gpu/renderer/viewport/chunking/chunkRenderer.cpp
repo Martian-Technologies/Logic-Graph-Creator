@@ -1,6 +1,7 @@
 #include "chunkRenderer.h"
 
 
+#include "backend/evaluator/logicState.h"
 #include "gpu/vulkanInstance.h"
 #include "gpu/abstractions/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
@@ -98,7 +99,7 @@ void ChunkRenderer::cleanup() {
 	wirePipeline.cleanup();
 }
 
-void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, Evaluator* evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);
@@ -112,6 +113,13 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std:
 	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 		if (chunk->getStateBuffer().has_value()) {
 			chunk->getStateBuffer()->incrementBufferFrame();
+
+			std::vector<logic_state_t> states(chunk->getRelativeAddresses().size());
+			if (evaluator != nullptr) {
+				states = evaluator->getBulkStates(chunk->getRelativeAddresses());
+			}
+			
+			vmaCopyMemoryToAllocation(device->getAllocator(), states.data(), chunk->getStateBuffer()->getCurrentBuffer().allocation, 0, states.size());
 		}
 	}
 	

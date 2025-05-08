@@ -107,7 +107,7 @@ private:
 
 	void sendDifference(DifferenceSharedPtr difference) {
 		if (difference->empty()) return;
-		logInfo(difference->getModifications().size());
+		// logInfo(difference->getModifications().size());
 		editCount++;
 		if (!midUndo) undoSystem.addDifference(difference);
 		for (auto pair : listenerFunctions) pair.second(difference, circuitId);

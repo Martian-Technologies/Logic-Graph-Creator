@@ -30,7 +30,8 @@ void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 }
 
 void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
-	
+	// TODO - this needs sync
+	this->evaluator = evaluator;
 }
 
 void ViewportRenderInterface::setAddress(const Address& address) {

@@ -25,6 +25,7 @@ public:
 	
 	ViewportViewData getViewData();
 	inline VulkanChunker& getChunker() { return chunker; }
+	inline Evaluator* getEvaluator() { return evaluator; }
 	
 public:
 	// main flow
@@ -58,6 +59,7 @@ private:
 	// From the UI Side
 	WindowRenderer* linkedWindowRenderer = nullptr;
 	Rml::Element* element;
+	Evaluator* evaluator = nullptr;
 
 	// Vulkan
 	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view

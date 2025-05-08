@@ -116,6 +116,8 @@ public:
 
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
+	inline std::vector<Address>& getRelativeAddresses() { return relativeAdresses; }
+
 	inline bool isAllocationComplete() const { return true; }
 	
 private:

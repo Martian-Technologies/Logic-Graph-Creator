@@ -23,5 +23,5 @@ void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 
 	// render subrenderers
 	gridRenderer.render(frame, viewData.viewportViewMat, viewData.viewScale);
-	chunkRenderer.render(frame, viewData.viewportViewMat, viewport->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
+	chunkRenderer.render(frame, viewData.viewportViewMat, viewport->getEvaluator(), viewport->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
 }
