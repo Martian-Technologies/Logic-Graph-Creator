@@ -14,7 +14,6 @@ enum ACTIVE_CATEGORIES {
 class SearchBar {
 public:
 	SearchBar(Rml::Element* document);
-	~SearchBar();
 
 	inline void setActiveCategory(const ACTIVE_CATEGORIES category) { activeCategory = category; }
 

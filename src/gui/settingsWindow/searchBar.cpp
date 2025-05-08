@@ -7,10 +7,6 @@ SearchBar::SearchBar(Rml::Element* document) : context(document), activeCategory
 	Initialize();
 }
 
-SearchBar::~SearchBar() {
-
-}
-
 void SearchBar::Initialize() {
 	Rml::Element* search = context->GetElementById("settings-search");
 
@@ -25,8 +21,6 @@ void SearchBar::Initialize() {
 		}
 	)); 
 }
-
-
 
 void SearchBar::queryContext(const std::string& text) {
 	if (activeCategory == ACTIVE_CATEGORIES::GENERAL) {

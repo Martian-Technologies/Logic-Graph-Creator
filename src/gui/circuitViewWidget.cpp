@@ -109,17 +109,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_N,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() {
-			logInfo("New Circuit");
-			circuit_id_t id = circuitView->getBackend()->createCircuit();
-			circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
-			for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
-				if (iter.second->getCircuitId(Address()) == id) {
-					circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
-					return;
-				}
-			}
-		}
+		[this]() { logInfo("New Circuit"); newCircuit(); }
 	);
 
 	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
@@ -292,6 +282,17 @@ void CircuitViewWidget::simUseSpeed(bool state) {
 void CircuitViewWidget::setSimSpeed(double speed) {
 	if (circuitView->getEvaluator())
 		circuitView->getEvaluator()->setTickrate(std::round(speed * 60));
+}
+
+void CircuitViewWidget::newCircuit() {
+	circuit_id_t id = circuitView->getBackend()->createCircuit();
+	circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
+	for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
+		if (iter.second->getCircuitId(Address()) == id) {
+			circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
+			return;
+		}
+	}
 }
 
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.

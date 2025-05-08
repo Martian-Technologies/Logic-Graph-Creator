@@ -7,15 +7,10 @@ ContentManager::ContentManager(Rml::Element* document) {
 	Initialize();
 }
 
-ContentManager::~ContentManager() {
-	
-}
-
 void ContentManager::Initialize() {
-
 	std::vector<std::vector<std::string>> general = Settings::getGraphicsData("General");
 	std::vector<std::vector<std::string>> appearance = Settings::getGraphicsData("Appearance");
-	std::vector<std::string> keybinds = Settings::getKeybindGraphicsData(); // onlya 1d vector, special func for it
+	std::vector<std::string> keybinds = Settings::getKeybindGraphicsData(); // only a 1d vector, special func for it
 
 	// for (int i = 0; i < general.size(); i++) {
 	// 	generateForm(general[i][1]);
@@ -32,7 +27,6 @@ void ContentManager::Initialize() {
 }
 
 void ContentManager::setForm(const std::vector<std::string>& formList, const std::string& type) {
-
 	if (type == "general") {
 		std::vector<std::vector<std::string>> list = Settings::getGraphicsData("General");
 
@@ -54,7 +48,9 @@ void ContentManager::setForm(const std::vector<std::string>& formList, const std
 	}
 }
 
-void ContentManager::generateForm(const std::string& tabType, const std::string& name) {
+void ContentManager::generateForm(const std::string& tabType, std::string name) {
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
 	Rml::ElementPtr newForm;
 	std::string itemName;
 	if (tabType == "HEADER") itemName = name;

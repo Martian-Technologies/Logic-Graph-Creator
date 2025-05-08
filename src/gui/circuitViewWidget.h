@@ -25,6 +25,7 @@ public:
 	void setSimSpeed(double speed);
 
 	void render();
+	void newCircuit();
 	void load();
 	void save();
 

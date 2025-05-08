@@ -15,8 +15,6 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 	Initialize();
 }
 
-SettingsWindow::~SettingsWindow() {}
-
 void SettingsWindow::Initialize() {
 	connectCategoryListeners();
 	connectWindowOptions();

@@ -162,9 +162,6 @@ tabset panels panel {
 	left:   10%;
 	width:  80%;
 	height: 80%;
-	background-color: #ff0000; 
-	display: flex; /* do not remove, doesnt work without it */
-	flex-direction: row;
 	align-items: center;
 	justify-content: center;
 	z-index: 1000;
