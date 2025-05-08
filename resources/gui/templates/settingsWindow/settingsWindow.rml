@@ -9,7 +9,7 @@
 			<div id="settings-navigation">
 				<div id="navigation-top-container">
 					<h1>Settings</h1>
-					<input id="settings-search" type="text" />
+					<!-- <input id="settings-search" type="text" /> -->
 				</div>
 				<div id="navigation-panel">
 					<div class="nav-item" id="nav-general">General</div>
@@ -17,9 +17,9 @@
 					<div class="nav-item" id="nav-keybind">Keybind</div>
 				</div>
 				<div id="setting-actions">
-					<button class="settings-action-buttons" id="settings-save-button">Save</button>
-					<button class="settings-action-buttons" id="settings-default-button">Default</button>
-					<button class="settings-action-buttons" id="settings-close-button">Cancel</button>
+					<button class="settings-action" id="settings-reset">Reset</button>
+					<button class="settings-action" id="settings-apply">Apply</button>
+					<button class="settings-action" id="settings-cancel">Cancel</button>
 				</div>
 			</div>
 

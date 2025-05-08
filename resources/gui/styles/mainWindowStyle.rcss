@@ -55,9 +55,9 @@ body {
 }
 
 #center-container {
-    flex: 1;  /* Takes available space between sidebars */
-    display: flex;
-    flex-direction: column;  /* Stacks children vertically */
+	flex: 1;  /* Takes available space between sidebars */
+	display: flex;
+	flex-direction: column;  /* Stacks children vertically */
 }
 
 #simulation-controls-container {
@@ -158,7 +158,7 @@ tabset panels panel {
 /* Settings Window */
 #settings-overlay {
 	position: absolute;
-	top:    10%;
+	top:	10%;
 	left:   10%;
 	width:  80%;
 	height: 80%;
