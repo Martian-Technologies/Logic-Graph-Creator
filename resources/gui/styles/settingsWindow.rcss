@@ -83,10 +83,8 @@ Nord Color Pallete:
 .settings-action {
 	padding: 8dp 16dp;
 	border-radius: 4dp;
-	border: none;
 	font-size: 16dp;
 	font-weight: 500;
-	transition: all 0.2s ease;
 	min-width: 80dp; 
 	text-align: center;
 }
@@ -118,7 +116,6 @@ Nord Color Pallete:
 	max-width: 9rem;
 	white-space: nowrap;
 	overflow: hidden;
-	text-overflow: ellipsis;
 	margin-left: 1.5rem;
 }
 
