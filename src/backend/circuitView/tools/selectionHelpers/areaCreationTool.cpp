@@ -25,16 +25,16 @@ bool AreaCreationTool::click(const Event* event) {
 				std::make_shared<ProjectionSelection>(
 					originPosition,
 					Vector(signum(lastPointerPosition.x - originPosition.x), 0),
-					Abs(lastPointerPosition.x - originPosition.x)+1
+					Abs(lastPointerPosition.x - originPosition.x) + 1
 				),
 				Vector(0, signum(lastPointerPosition.y - originPosition.y)),
-				Abs(lastPointerPosition.y - originPosition.y)+1
+				Abs(lastPointerPosition.y - originPosition.y) + 1
 			)
 		);
 	} else {
-		updateElements();
 		hasOrigin = true;
 		originPosition = lastPointerPosition;
+		updateElements();
 	}
 
 	return true;
@@ -53,6 +53,11 @@ bool AreaCreationTool::unclick(const Event* event) {
 void AreaCreationTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+	if (hasOrigin) {
+		setStatusBar("Left click to select second corner. Right click to cancel.");
+	} else {
+		setStatusBar("Left click to select the origin.");
+	}
 	if (!pointerInView) {
 		if (hasOrigin) {
 			elementCreator.addSelectionElement(SelectionElement(originPosition));

@@ -1,194 +1,194 @@
-version_5
+version_6
 Circuit: "EightBitAdder"
 UUID: e58dcb50-e495-4348-991e-b035f973d1b8
 size: <3, 16>
-ports (25):
-	(IN, 0, 2, <0, 0>, "P0")
-	(IN, 1, 4, <0, 1>, "P1")
-	(IN, 2, 6, <0, 2>, "P2")
-	(IN, 3, 8, <0, 3>, "P3")
-	(IN, 4, 9, <0, 4>, "P4")
-	(IN, 5, 11, <0, 5>, "P5")
-	(IN, 6, 13, <0, 6>, "P6")
-	(IN, 7, 15, <0, 7>, "P7")
-	(IN, 8, 17, <0, 8>, "Q0")
-	(IN, 9, 19, <0, 9>, "Q1")
-	(IN, 10, 20, <0, 10>, "Q2")
-	(IN, 11, 21, <0, 11>, "Q3")
-	(IN, 12, 22, <0, 12>, "Q4")
-	(IN, 13, 23, <0, 13>, "Q5")
-	(IN, 14, 24, <0, 14>, "Q6")
-	(IN, 15, 25, <0, 15>, "Q7")
-	(OUT, 16, 56, <2, 0>, "R0")
-	(OUT, 17, 57, <2, 1>, "R1")
-	(OUT, 18, 58, <2, 2>, "R2")
-	(OUT, 19, 59, <2, 3>, "R3")
-	(OUT, 20, 60, <2, 4>, "R4")
-	(OUT, 21, 61, <2, 5>, "R5")
-	(OUT, 22, 62, <2, 6>, "R6")
-	(OUT, 23, 63, <2, 7>, "R7")
-	(OUT, 24, 18, <2, 8>, "R8")
-blockId 1 XOR 9 5 ZERO 2
-	(connId:0) (2 0) (17 0)
-	(connId:1) (56 0)
-blockId 2 SWITCH 0 0 ZERO 1
-	(connId:0) (26 0) (1 0)
-blockId 3 XOR 9 6 ZERO 2
-	(connId:0) (4 0) (19 0) (48 1)
-	(connId:1) (57 0)
-blockId 4 SWITCH 0 1 ZERO 1
-	(connId:0) (27 0) (34 0) (3 0)
-blockId 5 XOR 9 7 ZERO 2
-	(connId:0) (6 0) (20 0) (49 1)
-	(connId:1) (58 0)
-blockId 6 SWITCH 0 2 ZERO 1
-	(connId:0) (28 0) (35 0) (5 0)
-blockId 7 XOR 9 8 ZERO 2
-	(connId:0) (8 0) (21 0) (50 1)
-	(connId:1) (59 0)
-blockId 8 SWITCH 0 3 ZERO 1
-	(connId:0) (29 0) (36 0) (7 0)
-blockId 9 SWITCH 0 4 ZERO 1
-	(connId:0) (30 0) (37 0) (10 0)
-blockId 10 XOR 9 9 ZERO 2
-	(connId:0) (9 0) (22 0) (51 1)
-	(connId:1) (60 0)
-blockId 11 SWITCH 0 5 ZERO 1
-	(connId:0) (31 0) (38 0) (12 0)
-blockId 12 XOR 9 10 ZERO 2
-	(connId:0) (11 0) (23 0) (52 1)
-	(connId:1) (61 0)
-blockId 13 SWITCH 0 6 ZERO 1
-	(connId:0) (32 0) (39 0) (14 0)
-blockId 14 XOR 9 11 ZERO 2
-	(connId:0) (13 0) (24 0) (53 1)
-	(connId:1) (62 0)
-blockId 15 SWITCH 0 7 ZERO 1
-	(connId:0) (33 0) (40 0) (16 0)
-blockId 16 XOR 9 12 ZERO 2
-	(connId:0) (15 0) (25 0) (54 1)
-	(connId:1) (63 0)
-blockId 17 SWITCH 0 10 ZERO 1
-	(connId:0) (26 0) (1 0)
-blockId 18 LIGHT 13 13 ZERO 1
-	(connId:0) (55 1)
-blockId 19 SWITCH 0 11 ZERO 1
-	(connId:0) (27 0) (41 0) (3 0)
-blockId 20 SWITCH 0 12 ZERO 1
-	(connId:0) (28 0) (42 0) (5 0)
-blockId 21 SWITCH 0 13 ZERO 1
-	(connId:0) (29 0) (43 0) (7 0)
-blockId 22 SWITCH 0 14 ZERO 1
-	(connId:0) (30 0) (44 0) (10 0)
-blockId 23 SWITCH 0 15 ZERO 1
-	(connId:0) (31 0) (45 0) (12 0)
-blockId 24 SWITCH 0 16 ZERO 1
-	(connId:0) (32 0) (46 0) (14 0)
-blockId 25 SWITCH 0 17 ZERO 1
-	(connId:0) (33 0) (47 0) (16 0)
-blockId 26 AND 3 5 ZERO 2
-	(connId:0) (2 0) (17 0)
-	(connId:1) (48 0)
-blockId 27 AND 3 6 ZERO 2
-	(connId:0) (4 0) (19 0)
-	(connId:1) (49 0)
-blockId 28 AND 3 7 ZERO 2
-	(connId:0) (6 0) (20 0)
-	(connId:1) (50 0)
-blockId 29 AND 3 8 ZERO 2
-	(connId:0) (8 0) (21 0)
-	(connId:1) (51 0)
-blockId 30 AND 3 9 ZERO 2
-	(connId:0) (9 0) (22 0)
-	(connId:1) (52 0)
-blockId 31 AND 3 10 ZERO 2
-	(connId:0) (11 0) (23 0)
-	(connId:1) (53 0)
-blockId 32 AND 3 11 ZERO 2
-	(connId:0) (13 0) (24 0)
-	(connId:1) (54 0)
-blockId 33 AND 3 12 ZERO 2
-	(connId:0) (15 0) (25 0)
-	(connId:1) (55 0)
-blockId 34 AND 4 6 ZERO 2
-	(connId:0) (4 0) (48 1)
-	(connId:1) (49 0)
-blockId 35 AND 4 7 ZERO 2
-	(connId:0) (6 0) (49 1)
-	(connId:1) (50 0)
-blockId 36 AND 4 8 ZERO 2
-	(connId:0) (8 0) (50 1)
-	(connId:1) (51 0)
-blockId 37 AND 4 9 ZERO 2
-	(connId:0) (9 0) (51 1)
-	(connId:1) (52 0)
-blockId 38 AND 4 10 ZERO 2
-	(connId:0) (11 0) (52 1)
-	(connId:1) (53 0)
-blockId 39 AND 4 11 ZERO 2
-	(connId:0) (13 0) (53 1)
-	(connId:1) (54 0)
-blockId 40 AND 4 12 ZERO 2
-	(connId:0) (15 0) (54 1)
-	(connId:1) (55 0)
-blockId 41 AND 5 6 ZERO 2
-	(connId:0) (19 0) (48 1)
-	(connId:1) (49 0)
-blockId 42 AND 5 7 ZERO 2
-	(connId:0) (20 0) (49 1)
-	(connId:1) (50 0)
-blockId 43 AND 5 8 ZERO 2
-	(connId:0) (21 0) (50 1)
-	(connId:1) (51 0)
-blockId 44 AND 5 9 ZERO 2
-	(connId:0) (22 0) (51 1)
-	(connId:1) (52 0)
-blockId 45 AND 5 10 ZERO 2
-	(connId:0) (23 0) (52 1)
-	(connId:1) (53 0)
-blockId 46 AND 5 11 ZERO 2
-	(connId:0) (24 0) (53 1)
-	(connId:1) (54 0)
-blockId 47 AND 5 12 ZERO 2
-	(connId:0) (25 0) (54 1)
-	(connId:1) (55 0)
-blockId 48 OR 6 5 ZERO 2
-	(connId:0) (26 1)
-	(connId:1) (34 0) (41 0) (3 0)
-blockId 49 OR 6 6 ZERO 2
-	(connId:0) (27 1) (34 1) (41 1)
-	(connId:1) (35 0) (42 0) (5 0)
-blockId 50 OR 6 7 ZERO 2
-	(connId:0) (28 1) (35 1) (42 1)
-	(connId:1) (36 0) (43 0) (7 0)
-blockId 51 OR 6 8 ZERO 2
-	(connId:0) (29 1) (36 1) (43 1)
-	(connId:1) (37 0) (44 0) (10 0)
-blockId 52 OR 6 9 ZERO 2
-	(connId:0) (30 1) (37 1) (44 1)
-	(connId:1) (38 0) (45 0) (12 0)
-blockId 53 OR 6 10 ZERO 2
-	(connId:0) (31 1) (38 1) (45 1)
-	(connId:1) (39 0) (46 0) (14 0)
-blockId 54 OR 6 11 ZERO 2
-	(connId:0) (32 1) (39 1) (46 1)
-	(connId:1) (40 0) (47 0) (16 0)
-blockId 55 OR 6 12 ZERO 2
-	(connId:0) (33 1) (40 1) (47 1)
-	(connId:1) (18 0)
-blockId 56 LIGHT 13 5 ZERO 1
-	(connId:0) (1 1)
-blockId 57 LIGHT 13 6 ZERO 1
-	(connId:0) (3 1)
-blockId 58 LIGHT 13 7 ZERO 1
-	(connId:0) (5 1)
-blockId 59 LIGHT 13 8 ZERO 1
-	(connId:0) (7 1)
-blockId 60 LIGHT 13 9 ZERO 1
-	(connId:0) (10 1)
-blockId 61 LIGHT 13 10 ZERO 1
-	(connId:0) (12 1)
-blockId 62 LIGHT 13 11 ZERO 1
-	(connId:0) (14 1)
-blockId 63 LIGHT 13 12 ZERO 1
-	(connId:0) (16 1)
+ports:
+	(OUT, 24, 46, <2, 8>, "R8")
+	(OUT, 23, 1, <2, 7>, "R7")
+	(OUT, 22, 2, <2, 6>, "R6")
+	(OUT, 21, 3, <2, 5>, "R5")
+	(OUT, 20, 4, <2, 4>, "R4")
+	(OUT, 19, 5, <2, 3>, "R3")
+	(OUT, 18, 6, <2, 2>, "R2")
+	(OUT, 17, 7, <2, 1>, "R1")
+	(OUT, 16, 8, <2, 0>, "R0")
+	(IN, 15, 39, <0, 15>, "Q7")
+	(IN, 14, 40, <0, 14>, "Q6")
+	(IN, 13, 41, <0, 13>, "Q5")
+	(IN, 12, 42, <0, 12>, "Q4")
+	(IN, 11, 43, <0, 11>, "Q3")
+	(IN, 10, 44, <0, 10>, "Q2")
+	(IN, 9, 45, <0, 9>, "Q1")
+	(IN, 8, 47, <0, 8>, "Q0")
+	(IN, 7, 49, <0, 7>, "P7")
+	(IN, 6, 51, <0, 6>, "P6")
+	(IN, 5, 53, <0, 5>, "P5")
+	(IN, 4, 55, <0, 4>, "P4")
+	(IN, 3, 56, <0, 3>, "P3")
+	(IN, 2, 58, <0, 2>, "P2")
+	(IN, 1, 60, <0, 1>, "P1")
+	(IN, 0, 62, <0, 0>, "P0")
+blockId 63 XOR 9 5 ZERO
+	(connId:0) (47 0) (62 0)
+	(connId:1) (8 0)
+blockId 62 SWITCH 0 0 ZERO
+	(connId:0) (63 0) (38 0)
+blockId 61 XOR 9 6 ZERO
+	(connId:0) (16 1) (45 0) (60 0)
+	(connId:1) (7 0)
+blockId 60 SWITCH 0 1 ZERO
+	(connId:0) (61 0) (30 0) (37 0)
+blockId 59 XOR 9 7 ZERO
+	(connId:0) (15 1) (44 0) (58 0)
+	(connId:1) (6 0)
+blockId 58 SWITCH 0 2 ZERO
+	(connId:0) (59 0) (29 0) (36 0)
+blockId 57 XOR 9 8 ZERO
+	(connId:0) (14 1) (43 0) (56 0)
+	(connId:1) (5 0)
+blockId 56 SWITCH 0 3 ZERO
+	(connId:0) (57 0) (28 0) (35 0)
+blockId 55 SWITCH 0 4 ZERO
+	(connId:0) (27 0) (54 0) (34 0)
+blockId 54 XOR 9 9 ZERO
+	(connId:1) (4 0)
+	(connId:0) (13 1) (42 0) (55 0)
+blockId 53 SWITCH 0 5 ZERO
+	(connId:0) (52 0) (26 0) (33 0)
+blockId 52 XOR 9 10 ZERO
+	(connId:1) (3 0)
+	(connId:0) (41 0) (12 1) (53 0)
+blockId 51 SWITCH 0 6 ZERO
+	(connId:0) (50 0) (25 0) (32 0)
+blockId 50 XOR 9 11 ZERO
+	(connId:1) (2 0)
+	(connId:0) (11 1) (40 0) (51 0)
+blockId 49 SWITCH 0 7 ZERO
+	(connId:0) (48 0) (24 0) (31 0)
+blockId 48 XOR 9 12 ZERO
+	(connId:1) (1 0)
+	(connId:0) (10 1) (39 0) (49 0)
+blockId 47 SWITCH 0 10 ZERO
+	(connId:0) (63 0) (38 0)
+blockId 46 LIGHT 13 13 ZERO
+	(connId:0) (9 1)
+blockId 45 SWITCH 0 11 ZERO
+	(connId:0) (61 0) (23 0) (37 0)
+blockId 44 SWITCH 0 12 ZERO
+	(connId:0) (59 0) (22 0) (36 0)
+blockId 43 SWITCH 0 13 ZERO
+	(connId:0) (57 0) (21 0) (35 0)
+blockId 42 SWITCH 0 14 ZERO
+	(connId:0) (20 0) (54 0) (34 0)
+blockId 41 SWITCH 0 15 ZERO
+	(connId:0) (52 0) (19 0) (33 0)
+blockId 40 SWITCH 0 16 ZERO
+	(connId:0) (50 0) (18 0) (32 0)
+blockId 39 SWITCH 0 17 ZERO
+	(connId:0) (48 0) (17 0) (31 0)
+blockId 38 AND 3 5 ZERO
+	(connId:1) (16 0)
+	(connId:0) (47 0) (62 0)
+blockId 37 AND 3 6 ZERO
+	(connId:1) (15 0)
+	(connId:0) (45 0) (60 0)
+blockId 36 AND 3 7 ZERO
+	(connId:1) (14 0)
+	(connId:0) (44 0) (58 0)
+blockId 35 AND 3 8 ZERO
+	(connId:1) (13 0)
+	(connId:0) (43 0) (56 0)
+blockId 34 AND 3 9 ZERO
+	(connId:1) (12 0)
+	(connId:0) (42 0) (55 0)
+blockId 33 AND 3 10 ZERO
+	(connId:1) (11 0)
+	(connId:0) (41 0) (53 0)
+blockId 32 AND 3 11 ZERO
+	(connId:1) (10 0)
+	(connId:0) (40 0) (51 0)
+blockId 31 AND 3 12 ZERO
+	(connId:1) (9 0)
+	(connId:0) (39 0) (49 0)
+blockId 30 AND 4 6 ZERO
+	(connId:1) (15 0)
+	(connId:0) (16 1) (60 0)
+blockId 29 AND 4 7 ZERO
+	(connId:1) (14 0)
+	(connId:0) (15 1) (58 0)
+blockId 28 AND 4 8 ZERO
+	(connId:1) (13 0)
+	(connId:0) (14 1) (56 0)
+blockId 27 AND 4 9 ZERO
+	(connId:1) (12 0)
+	(connId:0) (13 1) (55 0)
+blockId 26 AND 4 10 ZERO
+	(connId:1) (11 0)
+	(connId:0) (12 1) (53 0)
+blockId 25 AND 4 11 ZERO
+	(connId:1) (10 0)
+	(connId:0) (11 1) (51 0)
+blockId 24 AND 4 12 ZERO
+	(connId:1) (9 0)
+	(connId:0) (10 1) (49 0)
+blockId 23 AND 5 6 ZERO
+	(connId:1) (15 0)
+	(connId:0) (16 1) (45 0)
+blockId 22 AND 5 7 ZERO
+	(connId:1) (14 0)
+	(connId:0) (15 1) (44 0)
+blockId 21 AND 5 8 ZERO
+	(connId:1) (13 0)
+	(connId:0) (14 1) (43 0)
+blockId 20 AND 5 9 ZERO
+	(connId:1) (12 0)
+	(connId:0) (13 1) (42 0)
+blockId 19 AND 5 10 ZERO
+	(connId:1) (11 0)
+	(connId:0) (12 1) (41 0)
+blockId 18 AND 5 11 ZERO
+	(connId:1) (10 0)
+	(connId:0) (11 1) (40 0)
+blockId 17 AND 5 12 ZERO
+	(connId:1) (9 0)
+	(connId:0) (10 1) (39 0)
+blockId 16 OR 6 5 ZERO
+	(connId:1) (61 0) (23 0) (30 0)
+	(connId:0) (38 1)
+blockId 15 OR 6 6 ZERO
+	(connId:1) (22 0) (59 0) (29 0)
+	(connId:0) (23 1) (30 1) (37 1)
+blockId 14 OR 6 7 ZERO
+	(connId:1) (57 0) (21 0) (28 0)
+	(connId:0) (22 1) (29 1) (36 1)
+blockId 13 OR 6 8 ZERO
+	(connId:1) (54 0) (20 0) (27 0)
+	(connId:0) (21 1) (28 1) (35 1)
+blockId 12 OR 6 9 ZERO
+	(connId:1) (52 0) (19 0) (26 0)
+	(connId:0) (20 1) (27 1) (34 1)
+blockId 11 OR 6 10 ZERO
+	(connId:1) (18 0) (50 0) (25 0)
+	(connId:0) (19 1) (26 1) (33 1)
+blockId 10 OR 6 11 ZERO
+	(connId:1) (48 0) (17 0) (24 0)
+	(connId:0) (18 1) (25 1) (32 1)
+blockId 9 OR 6 12 ZERO
+	(connId:1) (46 0)
+	(connId:0) (17 1) (24 1) (31 1)
+blockId 8 LIGHT 13 5 ZERO
+	(connId:0) (63 1)
+blockId 7 LIGHT 13 6 ZERO
+	(connId:0) (61 1)
+blockId 6 LIGHT 13 7 ZERO
+	(connId:0) (59 1)
+blockId 5 LIGHT 13 8 ZERO
+	(connId:0) (57 1)
+blockId 4 LIGHT 13 9 ZERO
+	(connId:0) (54 1)
+blockId 3 LIGHT 13 10 ZERO
+	(connId:0) (52 1)
+blockId 2 LIGHT 13 11 ZERO
+	(connId:0) (50 1)
+blockId 1 LIGHT 13 12 ZERO
+	(connId:0) (48 1)

@@ -23,11 +23,13 @@ public:
 	void setSimState(bool state);
 	void simUseSpeed(bool state);
 	void setSimSpeed(double speed);
+	void setStatusBar(const std::string& text = "");
 
 	void render();
 	void newCircuit();
 	void load();
 	void save();
+	void asSave();
 
 private:
 	// utility functions

@@ -2,6 +2,7 @@
 #define evaluatorStateInterface_h
 
 #include "evaluator.h"
+#include "util/emptyVector.h"
 
 class EvaluatorStateInterface {
 public:

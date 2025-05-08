@@ -305,7 +305,7 @@ void SdlRenderer::render() {
 				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
 				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
-				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				const std::unordered_set<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
 				if (!connections) continue;
 				for (auto otherConnectionIter : *connections) {
 					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
@@ -367,7 +367,7 @@ void SdlRenderer::render() {
 				if (blocks[i]->isConnectionInput(connectionIter.first)) continue;
 
 				Position pos = blocks[i]->getConnectionPosition(connectionIter.first).first;
-				const std::vector<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
+				const std::unordered_set<ConnectionEnd>* connections = blocks[i]->getConnectionContainer().getConnections(connectionIter.first);
 				if (!connections) continue;
 				for (auto otherConnectionIter : *connections) {
 					const Block* other = circuit->getBlockContainer()->getBlock(otherConnectionIter.getBlockId());
@@ -617,7 +617,7 @@ void SdlRenderer::renderConnection(FPosition aPos, FPosition bPos, FVector aCont
 	// sdlRenderer->drawPath(myPath);
 }
 
-const float edgeDis = 0.48f;
+const float edgeDis = 0.42f;
 const float sideShift = 0.25f;
 
 void SdlRenderer::renderConnection(Position aPos, const Block* a, Position bPos, const Block* b, logic_state_t state) {

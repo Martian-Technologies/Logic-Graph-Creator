@@ -2,6 +2,7 @@
 	display: block;
 	height: 100%;
 	width: 100%;
+	overflow-y: auto;
 }
 
 #block-creation-form {
@@ -9,9 +10,12 @@
 	flex-direction: column;
 	background-color: #2e2e2e;
 	border-radius: 0.3em;
-	margin: 0.6em 0.3em;
+	margin: 0.6em 0.3em 3em 0.3em;
 	padding: 0.2em;
-	height: 100%;
+}
+
+scrollbarvertical {
+	width: 0;
 }
 
 #block-creation-form input {
@@ -33,14 +37,19 @@
 	border-radius: 0.3em;
 	margin: 0.3em 0.1em;
 	padding: 0.1em 0.1em;
-	overflow-y: auto;
 }
 
-#connection-list {
+#connection-list-output-headers, #connection-list-input-headers {
+	display: block;
+	background-color: #151515;
+	border-radius: 0.3em 0.3em 0.1em 0.1em;
+	margin: 0.15em 0.15em 0 0.15em;
+}
+#connection-list-output, #connection-list-input {
 	display: block;
 	background-color: #151515;
 	border-radius: 0.1em;
-	margin: 0.15em 0.15em;
+	margin: 0 0.15em 0.15em 0.15em;
 	min-height: 3rem;
 }
 
@@ -59,12 +68,16 @@
 	margin: 0 0.1em;
 }
 
-.connection-list-item div {
+.connection-list-item button {
 	padding: 0em 0.2em;
 	border-radius: 0.4em;
 	background-color: #525252;
 	display: inline-block;
 	margin: 0 0.1em;
+}
+
+.connection-list-item button:active {
+	background-color: #606060;
 }
 
 .name {

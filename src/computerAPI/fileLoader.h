@@ -6,4 +6,4 @@
 // TODO - not sure if this should be an optional, and be the responsibility of the caller to throw
 std::vector<char> readFileAsBytes(const std::filesystem::path& path);
 
-#endif
+#endif /* fileLoader_h */

@@ -30,9 +30,9 @@ typedef std::shared_ptr<const DimensionalSelection> SharedDimensionalSelection;
 // ---------------- Cell Selection ----------------
 class CellSelection : public Selection {
 public:
-	inline CellSelection(const Position& position) : position(position) { }
+	inline CellSelection(Position position) : position(position) { }
 
-	inline const Position& getPosition() const { return position; }
+	inline Position getPosition() const { return position; }
 
 private:
 	Position position;
@@ -40,9 +40,9 @@ private:
 typedef std::shared_ptr<const CellSelection> SharedCellSelection;
 
 // ---------------- Shift Selection ----------------
-SharedSelection shiftSelection(SharedSelection selection, const Vector& shift);
+SharedSelection shiftSelection(SharedSelection selection, Vector shift);
 class ShiftSelection : public DimensionalSelection {
-	friend SharedSelection shiftSelection(SharedSelection selection, const Vector& shift);
+	friend SharedSelection shiftSelection(SharedSelection selection, Vector shift);
 public:
 	SharedSelection getSelection(dimensional_selection_size_t index) const override {
 		return shiftSelection(dimensionalSelection->getSelection(index), shift);
@@ -50,7 +50,7 @@ public:
 	dimensional_selection_size_t size() const override { return dimensionalSelection->size(); }
 
 private:
-	ShiftSelection(SharedDimensionalSelection dimensionalSelection, const Vector& shift) : dimensionalSelection(dimensionalSelection), shift(shift) { }
+	ShiftSelection(SharedDimensionalSelection dimensionalSelection, Vector shift) : dimensionalSelection(dimensionalSelection), shift(shift) { }
 
 	SharedDimensionalSelection dimensionalSelection;
 	Vector shift;
@@ -58,7 +58,7 @@ private:
 typedef std::shared_ptr<const ShiftSelection> SharedShiftSelection;
 
 // used to safely shift a selection
-inline SharedSelection shiftSelection(SharedSelection selection, const Vector& shift) {
+inline SharedSelection shiftSelection(SharedSelection selection, Vector shift) {
 	if (shift.dx == 0 && shift.dy == 0) return selection;
 	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
 	if (dimensionalSelection) {
@@ -78,9 +78,9 @@ inline SharedSelection shiftSelection(SharedSelection selection, const Vector& s
 // ---------------- Projection Selection ----------------
 class ProjectionSelection : public DimensionalSelection {
 public:
-	inline ProjectionSelection(const Position& position, const Vector& step, dimensional_selection_size_t count) :
+	inline ProjectionSelection(Position position, Vector step, dimensional_selection_size_t count) :
 		selection(std::make_shared<CellSelection>(position)), step(step), count(count) { }
-	inline ProjectionSelection(SharedSelection selection, const Vector& step, dimensional_selection_size_t count) :
+	inline ProjectionSelection(SharedSelection selection, Vector step, dimensional_selection_size_t count) :
 		selection(selection), step(step), count(count) { }
 
 	inline SharedSelection getSelection(dimensional_selection_size_t index) const override {
@@ -89,7 +89,7 @@ public:
 
 	inline dimensional_selection_size_t size() const override { return count; }
 
-	inline const Vector& getStep() const { return step; }
+	inline Vector getStep() const { return step; }
 
 private:
 	SharedSelection selection;

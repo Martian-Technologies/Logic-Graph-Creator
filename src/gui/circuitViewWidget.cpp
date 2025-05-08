@@ -1,4 +1,3 @@
-#include "backend/circuitView/tools/other/previewPlacementTool.h"
 #include "backend/circuitView/circuitView.h"
 #include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
@@ -26,11 +25,12 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
 	if (filePaths && filePaths[0]) {
 		std::string filePath = filePaths[0];
-		circuit_id_t id = circuitViewWidget->getFileManager()->loadFromFile(filePath);
-		if (id == 0) {
+		std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(filePath);
+		if (ids.empty()) {
 			logError("Failed to load circuit file.");
 			return;
 		}
+		circuit_id_t id = ids.back();
 		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 		for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
 			if (iter.second->getCircuitId(Address()) == id) {
@@ -47,6 +47,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// create circuitView
 	renderer = std::make_unique<SdlRenderer>(sdlRenderer);
 	circuitView = std::make_unique<CircuitView>(renderer.get());
+	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
+		auto eventData = event->cast2<std::string>();
+		if (eventData) setStatusBar(eventData->get());
+		return false;
+	});
 
 	int w = parent->GetClientWidth();
 	int h = parent->GetClientHeight();
@@ -76,6 +81,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("save"); save(); }
 	);
 	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_S,
+		Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT,
+		[this]() { logInfo("save"); asSave(); }
+	);
+	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_O,
 		Rml::Input::KeyModifier::KM_CTRL,
 		[this]() { logInfo("load"); load(); }
@@ -88,11 +98,11 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_V,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection/paste tool"); }
+		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_I,
-		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("interactive/state changer"); }
+		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
@@ -105,6 +115,10 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_E,
 		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
+	);
+	keybindHandler.addListener(
+		Rml::Input::KeyIdentifier::KI_Q,
+		[this]() { logInfo("Tool Invert Mode"); circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_N,
@@ -121,7 +135,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	parent->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
 		[this](Rml::Event& event) {
 			int button = event.GetParameter<int>("button", 0);
-			logInfo("Clicked: {}", "", circuitView->getViewManager().getPointerPosition().snap().toString());
 			if (button == 0) { // left
 				if (event.GetParameter<int>("alt_key", 0)) {
 					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
@@ -217,40 +230,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			// }
 		}
 	));
-
-
-
-	// connect buttons and actions
-	// connect(ui->StartSim, &QPushButton::clicked, this, &CircuitViewWidget::setSimState);
-	// connect(ui->UseSpeed, &QCheckBox::checkStateChanged, this, &CircuitViewWidget::simUseSpeed);
-	// connect(ui->Speed, &QDoubleSpinBox::valueChanged, this, &CircuitViewWidget::setSimSpeed);
-
-	// connect(circuitSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitSelector) {
-	// 		backend->linkCircuitViewWithCircuit(this->circuitView.get(), this->circuitSelector->itemData(index).value<int>());
-	// 		logInfo("CircuitViewWidget linked to new circuit view: {}", "", this->circuitSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewCircuitButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend) {
-	// 		backend->createCircuit();
-	// 	}
-	// });
-	// connect(evaluatorSelector, &QComboBox::currentIndexChanged, this, [&](int index) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->evaluatorSelector) {
-	// 		backend->linkCircuitViewWithEvaluator(this->circuitView.get(), this->evaluatorSelector->itemData(index).value<int>(), Address());
-	// 		logInfo("CircuitViewWidget linked to evalutor: {}", "", this->evaluatorSelector->itemData(index).value<int>());
-	// 	}
-	// });
-	// connect(ui->NewEvaluatorButton, &QToolButton::clicked, this, [&](bool pressed) {
-	// 	Backend* backend = this->circuitView->getBackend();
-	// 	if (backend && this->circuitView->getCircuit()) {
-	// 		backend->createEvaluator(this->circuitView->getCircuit()->getCircuitId());
-	// 	}
-	// });
 }
 
 void CircuitViewWidget::render() {
@@ -295,10 +274,14 @@ void CircuitViewWidget::newCircuit() {
 	}
 }
 
+void CircuitViewWidget::setStatusBar(const std::string& text) {
+	Rml::Element* statusBar = parent->GetElementById("status-bar");
+	statusBar->SetInnerRML(text);
+}
+
 // save current circuit view widget we are viewing. Right now only works if it is the only widget in application.
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
-	logInfo("Trying to save Circuit");
 	if (fileManager && circuitView->getCircuit()) {
 		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
 		if (!fileManager->saveCircuit(circuitId)) {
@@ -308,6 +291,15 @@ void CircuitViewWidget::save() {
 			filter.pattern = "*.cir";
 			SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 		}
+	}
+}
+
+void CircuitViewWidget::asSave() {
+	if (fileManager && circuitView->getCircuit()) {
+		static SDL_DialogFileFilter filter;
+		filter.name = "Circuit Files";
+		filter.pattern = "*.cir";
+		SDL_ShowSaveFileDialog(SaveCallback, this, window, &filter, 0, nullptr);
 	}
 }
 
@@ -322,7 +314,6 @@ void CircuitViewWidget::load() {
 	filter[1].pattern = "*.circiut";
 	SDL_ShowOpenFileDialog(LoadCallback, this, window, filter, 0, nullptr, true);
 }
-
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
 	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());

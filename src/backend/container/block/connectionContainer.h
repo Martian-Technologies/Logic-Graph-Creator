@@ -13,22 +13,22 @@ public:
 
 	// inline connection_end_id_t getConnectionCount() const { return connections.size(); }
 
-	inline const std::unordered_map<connection_end_id_t, std::vector<ConnectionEnd>>& getConnections() const { return connections; }
+	inline const std::unordered_map<connection_end_id_t, std::unordered_set<ConnectionEnd>>& getConnections() const { return connections; }
 
 	// returns null if no connection made to that port (even if the port exist)
-	inline const std::vector<ConnectionEnd>* getConnections(connection_end_id_t thisEndId) const {
+	inline const std::unordered_set<ConnectionEnd>* getConnections(connection_end_id_t thisEndId) const {
 		auto iter = connections.find(thisEndId);
 		if (iter == connections.end()) return nullptr;
 		return &(iter->second);
 	}
 
-	bool hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const;
+	bool hasConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) const;
 
 private:
-	bool tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
-	bool tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd);
+	bool tryMakeConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd);
+	bool tryRemoveConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd);
 
-	std::unordered_map<connection_end_id_t, std::vector<ConnectionEnd>> connections;
+	std::unordered_map<connection_end_id_t, std::unordered_set<ConnectionEnd>> connections;
 };
 
 #endif /* connectionContainer_h */

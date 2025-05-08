@@ -1,172 +1,174 @@
-version_2
+version_6
 Circuit: "SixteenToOneMUX"
 UUID: aaed00b2-d838-4b5a-b2f8-c25ffdea9b31
-blockId 101 SWITCH -8 14 ZERO 1
-	(connId:0) (85 0)
-blockId 37 AND -4 -1 ZERO 2
-	(connId:0) (69 1) (72 1) (70 1) (71 1)
-	(connId:1) (77 1)
-blockId 102 SWITCH -8 15 ZERO 1
-	(connId:0) (86 0)
-blockId 38 AND -4 0 ZERO 2
-	(connId:0) (73 0) (72 1) (70 1) (71 1)
-	(connId:1) (78 1)
-blockId 103 SWITCH -8 16 ZERO 1
-	(connId:0) (87 0)
-blockId 39 AND -4 1 ZERO 2
-	(connId:0) (69 1) (72 1) (74 0) (71 1)
-	(connId:1) (79 1)
-blockId 104 SWITCH -8 17 ZERO 1
-	(connId:0) (88 0)
-blockId 40 AND -4 2 ZERO 2
-	(connId:0) (73 0) (72 1) (74 0) (71 1)
-	(connId:1) (80 1)
-blockId 105 SWITCH -8 18 ZERO 1
-	(connId:0) (89 0)
-blockId 41 AND -4 3 ZERO 2
-	(connId:0) (69 1) (72 1) (70 1) (75 0)
-	(connId:1) (81 1)
-blockId 106 SWITCH -8 19 ZERO 1
-	(connId:0) (90 0)
-blockId 42 AND -4 4 ZERO 2
-	(connId:0) (73 0) (72 1) (70 1) (75 0)
-	(connId:1) (82 1)
-blockId 107 SWITCH -8 20 ZERO 1
-	(connId:0) (91 0)
-blockId 43 AND -4 5 ZERO 2
-	(connId:0) (69 1) (72 1) (74 0) (75 0)
-	(connId:1) (83 1)
-blockId 108 SWITCH -8 21 ZERO 1
-	(connId:0) (92 0)
-blockId 44 AND -4 6 ZERO 2
-	(connId:0) (73 0) (72 1) (74 0) (75 0)
-	(connId:1) (84 1)
-blockId 45 AND -4 7 ZERO 2
-	(connId:0) (69 1) (76 0) (70 1) (71 1)
-	(connId:1) (85 1)
-blockId 46 AND -4 8 ZERO 2
-	(connId:0) (73 0) (76 0) (70 1) (71 1)
-	(connId:1) (86 1)
-blockId 47 AND -4 9 ZERO 2
-	(connId:0) (69 1) (76 0) (74 0) (71 1)
-	(connId:1) (87 1)
-blockId 48 AND -4 10 ZERO 2
-	(connId:0) (73 0) (76 0) (74 0) (71 1)
-	(connId:1) (88 1)
-blockId 49 AND -4 14 ZERO 2
-	(connId:0) (73 0) (76 0) (74 0) (75 0)
-	(connId:1) (92 1)
-blockId 50 AND -4 13 ZERO 2
-	(connId:0) (69 1) (76 0) (74 0) (75 0)
-	(connId:1) (91 1)
-blockId 51 AND -4 12 ZERO 2
-	(connId:0) (73 0) (76 0) (70 1) (75 0)
-	(connId:1) (90 1)
-blockId 52 AND -4 11 ZERO 2
-	(connId:0) (69 1) (76 0) (70 1) (75 0)
-	(connId:1) (89 1)
-blockId 69 NAND -7 -1 ZERO 2
-	(connId:0) (73 0)
-	(connId:1) (37 0) (39 0) (41 0) (43 0) (45 0) (47 0) (50 0) (52 0)
-blockId 70 NAND -7 0 ZERO 2
-	(connId:0) (74 0)
-	(connId:1) (37 0) (38 0) (41 0) (42 0) (45 0) (46 0) (51 0) (52 0)
-blockId 71 NAND -7 1 ZERO 2
-	(connId:0) (75 0)
-	(connId:1) (37 0) (38 0) (39 0) (40 0) (45 0) (46 0) (47 0) (48 0)
-blockId 72 NAND -7 2 ZERO 2
-	(connId:0) (76 0)
-	(connId:1) (37 0) (38 0) (39 0) (40 0) (41 0) (42 0) (43 0) (44 0)
-blockId 73 SWITCH -8 -1 ZERO 1
-	(connId:0) (38 0) (40 0) (42 0) (44 0) (46 0) (48 0) (49 0) (51 0) (69 0)
-blockId 74 SWITCH -8 0 ZERO 1
-	(connId:0) (39 0) (40 0) (43 0) (44 0) (47 0) (48 0) (49 0) (50 0) (70 0)
-blockId 75 SWITCH -8 1 ZERO 1
-	(connId:0) (41 0) (42 0) (43 0) (44 0) (49 0) (50 0) (51 0) (52 0) (71 0)
-blockId 76 SWITCH -8 2 ZERO 1
-	(connId:0) (45 0) (46 0) (47 0) (48 0) (49 0) (50 0) (51 0) (52 0) (72 0)
-blockId 77 TRISTATE_BUFFER -2 4 ZERO 3
-	(connId:0) (93 0)
-	(connId:1) (37 1)
-	(connId:2) (117 0)
-blockId 78 TRISTATE_BUFFER -2 6 ZERO 3
-	(connId:0) (94 0)
-	(connId:1) (38 1)
-	(connId:2) (117 0)
-blockId 79 TRISTATE_BUFFER -2 8 ZERO 3
-	(connId:0) (95 0)
-	(connId:1) (39 1)
-	(connId:2) (117 0)
-blockId 80 TRISTATE_BUFFER -2 10 ZERO 3
-	(connId:0) (96 0)
-	(connId:1) (40 1)
-	(connId:2) (117 0)
-blockId 81 TRISTATE_BUFFER -2 12 ZERO 3
-	(connId:0) (97 0)
-	(connId:1) (41 1)
-	(connId:2) (117 0)
-blockId 82 TRISTATE_BUFFER -2 14 ZERO 3
-	(connId:0) (98 0)
-	(connId:1) (42 1)
-	(connId:2) (117 0)
-blockId 83 TRISTATE_BUFFER -2 16 ZERO 3
-	(connId:0) (99 0)
+size: <1, 1>
+ports:
+blockId 58 SWITCH 0 15 ZERO
+	(connId:0) (55 0)
+blockId 57 SWITCH 0 16 ZERO
+	(connId:0) (50 0)
+blockId 56 AND 4 1 ZERO
+	(connId:0) (22 0) (23 1) (24 1) (25 1)
+	(connId:1) (17 1)
+blockId 55 TRISTATE_BUFFER 6 21 ZERO
+	(connId:2) (2 0)
+	(connId:1) (34 1)
+	(connId:0) (58 0)
+blockId 54 SWITCH 0 21 ZERO
+	(connId:0) (35 0)
+blockId 53 SWITCH 0 18 ZERO
+	(connId:0) (41 0)
+blockId 52 SWITCH 0 17 ZERO
+	(connId:0) (46 0)
+blockId 51 AND 4 2 ZERO
+	(connId:0) (21 0) (23 1) (24 1) (26 1)
+	(connId:1) (16 1)
+blockId 50 TRISTATE_BUFFER 6 23 ZERO
+	(connId:2) (2 0)
+	(connId:1) (33 1)
+	(connId:0) (57 0)
+blockId 49 SWITCH 0 22 ZERO
+	(connId:0) (11 0)
+blockId 48 SWITCH 0 19 ZERO
+	(connId:0) (39 0)
+blockId 47 AND 4 3 ZERO
+	(connId:0) (21 0) (22 0) (23 1) (24 1)
+	(connId:1) (15 1)
+blockId 46 TRISTATE_BUFFER 6 25 ZERO
+	(connId:2) (2 0)
+	(connId:1) (32 1)
+	(connId:0) (52 0)
+blockId 45 SWITCH 0 20 ZERO
+	(connId:0) (37 0)
+blockId 44 AND 4 0 ZERO
+	(connId:0) (23 1) (24 1) (25 1) (26 1)
+	(connId:1) (18 1)
+blockId 43 TRISTATE_BUFFER 6 19 ZERO
+	(connId:0) (3 0)
+	(connId:2) (2 0)
+	(connId:1) (36 1)
+blockId 42 AND 4 4 ZERO
+	(connId:0) (20 0) (23 1) (25 1) (26 1)
+	(connId:1) (14 1)
+blockId 41 TRISTATE_BUFFER 6 27 ZERO
+	(connId:2) (2 0)
+	(connId:1) (31 1)
+	(connId:0) (53 0)
+blockId 40 AND 4 5 ZERO
+	(connId:0) (20 0) (22 0) (23 1) (25 1)
+	(connId:1) (13 1)
+blockId 39 TRISTATE_BUFFER 6 29 ZERO
+	(connId:2) (2 0)
+	(connId:1) (27 1)
+	(connId:0) (48 0)
+blockId 38 AND 4 6 ZERO
+	(connId:0) (20 0) (21 0) (23 1) (26 1)
+	(connId:1) (12 1)
+blockId 37 TRISTATE_BUFFER 6 31 ZERO
+	(connId:2) (2 0)
+	(connId:1) (28 1)
+	(connId:0) (45 0)
+blockId 36 AND 4 7 ZERO
+	(connId:0) (20 0) (21 0) (22 0) (23 1)
 	(connId:1) (43 1)
-	(connId:2) (117 0)
-blockId 84 TRISTATE_BUFFER -2 18 ZERO 3
-	(connId:0) (100 0)
-	(connId:1) (44 1)
-	(connId:2) (117 0)
-blockId 85 TRISTATE_BUFFER -2 20 ZERO 3
-	(connId:0) (101 0)
-	(connId:1) (45 1)
-	(connId:2) (117 0)
-blockId 86 TRISTATE_BUFFER -2 22 ZERO 3
-	(connId:0) (102 0)
-	(connId:1) (46 1)
-	(connId:2) (117 0)
-blockId 87 TRISTATE_BUFFER -2 24 ZERO 3
-	(connId:0) (103 0)
-	(connId:1) (47 1)
-	(connId:2) (117 0)
-blockId 88 TRISTATE_BUFFER -2 26 ZERO 3
-	(connId:0) (104 0)
-	(connId:1) (48 1)
-	(connId:2) (117 0)
-blockId 89 TRISTATE_BUFFER -2 28 ZERO 3
-	(connId:0) (105 0)
-	(connId:1) (52 1)
-	(connId:2) (117 0)
-blockId 90 TRISTATE_BUFFER -2 30 ZERO 3
-	(connId:0) (106 0)
-	(connId:1) (51 1)
-	(connId:2) (117 0)
-blockId 91 TRISTATE_BUFFER -2 32 ZERO 3
-	(connId:0) (107 0)
+blockId 35 TRISTATE_BUFFER 6 33 ZERO
+	(connId:2) (2 0)
+	(connId:1) (29 1)
+	(connId:0) (54 0)
+blockId 34 AND 4 8 ZERO
+	(connId:0) (19 0) (24 1) (25 1) (26 1)
+	(connId:1) (55 1)
+blockId 33 AND 4 9 ZERO
+	(connId:0) (19 0) (22 0) (24 1) (25 1)
 	(connId:1) (50 1)
-	(connId:2) (117 0)
-blockId 92 TRISTATE_BUFFER -2 34 ZERO 3
-	(connId:0) (108 0)
-	(connId:1) (49 1)
-	(connId:2) (117 0)
-blockId 93 SWITCH -8 6 ZERO 1
-	(connId:0) (77 0)
-blockId 94 SWITCH -8 7 ZERO 1
-	(connId:0) (78 0)
-blockId 95 SWITCH -8 8 ZERO 1
-	(connId:0) (79 0)
-blockId 96 SWITCH -8 9 ZERO 1
-	(connId:0) (80 0)
-blockId 97 SWITCH -8 10 ZERO 1
-	(connId:0) (81 0)
-blockId 98 SWITCH -8 11 ZERO 1
-	(connId:0) (82 0)
-blockId 99 SWITCH -8 12 ZERO 1
-	(connId:0) (83 0)
-blockId 100 SWITCH -8 13 ZERO 1
-	(connId:0) (84 0)
-blockId 117 JUNCTION 1 16 ZERO 2
-	(connId:0) (92 2) (91 2) (90 2) (89 2) (88 2) (87 2) (86 2) (85 2) (84 2) (83 2) (82 2) (81 2) (80 2) (79 2) (78 2) (77 2)
-	(connId:1) (118 0)
-blockId 118 LIGHT 3 16 ZERO 1
-	(connId:0) (117 1)
+blockId 32 AND 4 10 ZERO
+	(connId:0) (19 0) (21 0) (24 1) (26 1)
+	(connId:1) (46 1)
+blockId 31 AND 4 11 ZERO
+	(connId:0) (19 0) (21 0) (22 0) (24 1)
+	(connId:1) (41 1)
+blockId 30 AND 4 15 ZERO
+	(connId:0) (19 0) (20 0) (21 0) (22 0)
+	(connId:1) (11 1)
+blockId 29 AND 4 14 ZERO
+	(connId:0) (19 0) (20 0) (21 0) (26 1)
+	(connId:1) (35 1)
+blockId 28 AND 4 13 ZERO
+	(connId:0) (19 0) (20 0) (22 0) (25 1)
+	(connId:1) (37 1)
+blockId 27 AND 4 12 ZERO
+	(connId:0) (19 0) (20 0) (25 1) (26 1)
+	(connId:1) (39 1)
+blockId 26 NAND 1 0 ZERO
+	(connId:0) (22 0)
+	(connId:1) (32 0) (27 0) (38 0) (42 0) (29 0) (51 0) (34 0) (44 0)
+blockId 25 NAND 1 1 ZERO
+	(connId:0) (21 0)
+	(connId:1) (27 0) (28 0) (40 0) (42 0) (56 0) (34 0) (33 0) (44 0)
+blockId 24 NAND 1 2 ZERO
+	(connId:0) (20 0)
+	(connId:1) (31 0) (32 0) (47 0) (51 0) (56 0) (34 0) (33 0) (44 0)
+blockId 23 NAND 1 3 ZERO
+	(connId:0) (19 0)
+	(connId:1) (38 0) (42 0) (36 0) (47 0) (40 0) (51 0) (56 0) (44 0)
+blockId 22 SWITCH 0 0 ZERO
+	(connId:0) (26 0) (28 0) (30 0) (31 0) (33 0) (40 0) (47 0) (36 0) (56 0)
+blockId 21 SWITCH 0 1 ZERO
+	(connId:0) (30 0) (31 0) (38 0) (32 0) (25 0) (47 0) (36 0) (29 0) (51 0)
+blockId 20 SWITCH 0 2 ZERO
+	(connId:0) (24 0) (28 0) (36 0) (27 0) (38 0) (30 0) (29 0) (40 0) (42 0)
+blockId 19 SWITCH 0 3 ZERO
+	(connId:0) (27 0) (28 0) (29 0) (30 0) (31 0) (32 0) (33 0) (23 0) (34 0)
+blockId 18 TRISTATE_BUFFER 6 5 ZERO
+	(connId:0) (10 0)
+	(connId:2) (2 0)
+	(connId:1) (44 1)
+blockId 17 TRISTATE_BUFFER 6 7 ZERO
+	(connId:0) (9 0)
+	(connId:2) (2 0)
+	(connId:1) (56 1)
+blockId 16 TRISTATE_BUFFER 6 9 ZERO
+	(connId:0) (8 0)
+	(connId:2) (2 0)
+	(connId:1) (51 1)
+blockId 15 TRISTATE_BUFFER 6 11 ZERO
+	(connId:0) (7 0)
+	(connId:2) (2 0)
+	(connId:1) (47 1)
+blockId 14 TRISTATE_BUFFER 6 13 ZERO
+	(connId:0) (6 0)
+	(connId:2) (2 0)
+	(connId:1) (42 1)
+blockId 13 TRISTATE_BUFFER 6 15 ZERO
+	(connId:0) (5 0)
+	(connId:2) (2 0)
+	(connId:1) (40 1)
+blockId 12 TRISTATE_BUFFER 6 17 ZERO
+	(connId:0) (4 0)
+	(connId:2) (2 0)
+	(connId:1) (38 1)
+blockId 11 TRISTATE_BUFFER 6 35 ZERO
+	(connId:2) (2 0)
+	(connId:1) (30 1)
+	(connId:0) (49 0)
+blockId 10 SWITCH 0 7 ZERO
+	(connId:0) (18 0)
+blockId 9 SWITCH 0 8 ZERO
+	(connId:0) (17 0)
+blockId 8 SWITCH 0 9 ZERO
+	(connId:0) (16 0)
+blockId 7 SWITCH 0 10 ZERO
+	(connId:0) (15 0)
+blockId 6 SWITCH 0 11 ZERO
+	(connId:0) (14 0)
+blockId 5 SWITCH 0 12 ZERO
+	(connId:0) (13 0)
+blockId 4 SWITCH 0 13 ZERO
+	(connId:0) (12 0)
+blockId 3 SWITCH 0 14 ZERO
+	(connId:0) (43 0)
+blockId 2 JUNCTION 9 17 ZERO
+	(connId:1) (1 0)
+	(connId:0) (11 2) (55 2) (43 2) (35 2) (12 2) (46 2) (13 2) (37 2) (14 2) (15 2) (39 2) (16 2) (50 2) (17 2) (41 2) (18 2)
+blockId 1 LIGHT 11 17 ZERO
+	(connId:0) (2 1)

@@ -8,6 +8,7 @@ void SinglePlaceTool::activate() {
 	registerFunction("Tool Secondary Activate", std::bind(&SinglePlaceTool::startDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("tool secondary deactivate", std::bind(&SinglePlaceTool::stopDeleteBlocks, this, std::placeholders::_1));
 	registerFunction("Pointer Move", std::bind(&SinglePlaceTool::pointerMove, this, std::placeholders::_1));
+	setStatusBar("Left Click to Place. Right Click to Remove.");
 }
 
 bool SinglePlaceTool::startPlaceBlock(const Event* event) {
@@ -127,11 +128,11 @@ bool SinglePlaceTool::pointerMove(const Event* event) {
 void SinglePlaceTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
-	
+
 	if (!pointerInView) return;
 	if (selectedBlock != BlockType::NONE) {
 		if (!circuit) return;
-		Vector size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(selectedBlock, rotation)-Vector(1);
+		Vector size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(selectedBlock, rotation) - Vector(1);
 		bool cantPlace = circuit->getBlockContainer()->checkCollision(lastPointerPosition, rotation, selectedBlock);
 		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, lastPointerPosition + size, cantPlace));
 		elementCreator.addBlockPreview(BlockPreview(selectedBlock, lastPointerPosition, rotation));
