@@ -11,7 +11,6 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 	ContentManager* cm = new ContentManager(document);
 	SearchBar* sb = new SearchBar(document);
 
-	toggleVisibility();
 	Initialize();
 }
 
@@ -26,7 +25,7 @@ void SettingsWindow::connectCategoryListeners() {
 
 	for (size_t i = 0; i < items.size(); i++) {
 		Rml::Element* element = items[i];
-		if (i==0) {
+		if (i == 0) {
 			activeNav = element;
 			element->SetClass("active-nav", true);
 		}

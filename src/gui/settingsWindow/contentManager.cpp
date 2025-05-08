@@ -16,7 +16,7 @@ void ContentManager::Initialize() {
 	// 	generateForm(general[i][1]);
 	// 	logInfo(general[i][0]);
 	// }
-	
+
 	for (int i = 0; i < appearance.size(); i++) {
 		generateForm(appearance[i][1], appearance[i][0]);
 	}
@@ -39,7 +39,7 @@ void ContentManager::setForm(const std::vector<std::string>& formList, const std
 		}
 	} else if (type == "appearance") {
 		std::vector<std::vector<std::string>> appearance = Settings::getGraphicsData("Appearance");
-		
+
 	} else if (type == "keybind") {
 		std::vector<std::string> keybinds = Settings::getKeybindGraphicsData();
 
@@ -59,7 +59,7 @@ void ContentManager::generateForm(const std::string& tabType, std::string name) 
 	// creates forms
 	if (tabType == "HEADER") {
 		newForm = Rml::Factory::InstanceElement(
-			contentPanel, 
+			contentPanel,
 			"div",
 			name,
 			Rml::XMLAttributes()

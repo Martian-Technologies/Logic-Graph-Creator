@@ -1,5 +1,5 @@
-#ifndef CONTENT_MANAGER_H
-#define CONTENT_MANAGER_H
+#ifndef contentManager_h
+#define contentManager_h
 
 #include <RmlUi/Core.h>
 #include "util/config/config.h"
@@ -18,4 +18,4 @@ private:
 	Rml::Element* contentPanel;
 };
 
-#endif
+#endif /* contentManager_h */

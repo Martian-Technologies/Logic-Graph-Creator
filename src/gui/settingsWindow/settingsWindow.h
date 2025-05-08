@@ -3,6 +3,7 @@
 
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
+
 class SettingsWindow {
 public:
 	SettingsWindow(Rml::ElementDocument* document);

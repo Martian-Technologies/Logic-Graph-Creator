@@ -1,5 +1,5 @@
-#ifndef SEARCH_BAR_H
-#define SEARCH_BAR_H 
+#ifndef searchBar_h
+#define searchBar_h
 
 #include <RmlUi/Core.h>
 
@@ -28,10 +28,10 @@ private:
 
 	void renderGroups(const std::vector<std::string>& tmp); // queries groups for specific items
 	void resetGroups(); // brings all settings back to original form
-	
+
 
 	Rml::Element* context;
 	ACTIVE_CATEGORIES activeCategory; // should always start as general
 };
 
-#endif
+#endif /* searchBar_h */
