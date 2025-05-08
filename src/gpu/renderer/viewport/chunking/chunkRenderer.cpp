@@ -107,7 +107,14 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std:
 	// shared push constants
 	ChunkPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
-        
+
+	// fill state buffers
+	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
+		if (chunk->getStateBuffer().has_value()) {
+			chunk->getStateBuffer()->incrementBufferFrame();
+		}
+	}
+	
 	// block drawing pass
 	{
 		// bind render pipeline
@@ -134,7 +141,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std:
 					.dstBinding = 0,
 					.descriptorCount = 1,
 					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-					.pBufferInfo = &chunk->getStateDescriptorBufferInfo()
+					.pBufferInfo = &chunk->getStateBuffer()->getCurrentBufferInfo()
 				};
 				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 0, 1, &stateBufferDescriptorWrite);
 
@@ -167,7 +174,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std:
 					.dstBinding = 0,
 					.descriptorCount = 1,
 					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-					.pBufferInfo = &chunk->getStateDescriptorBufferInfo()
+					.pBufferInfo = &chunk->getStateBuffer()->getCurrentBufferInfo()
 				};
 				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline.getLayout(), 0, 1, &stateBufferDescriptorWrite);
 				

@@ -8,6 +8,7 @@
 #include "backend/circuit/circuit.h"
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
+#include "gpu/helper/nBuffer.h"
 
 // ====================================================================================================================
 
@@ -113,8 +114,7 @@ public:
 	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
 	inline uint32_t getNumWireVertices() const { return numWireVertices; }
 
-	inline const std::optional<AllocatedBuffer>& getStateBuffer() const { return stateBuffer; }
-	inline VkDescriptorBufferInfo& getStateDescriptorBufferInfo() { return stateDescriptorBufferInfo; }
+	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -125,7 +125,7 @@ private:
 	std::optional<AllocatedBuffer> wireBuffer;
 	uint32_t numWireVertices;
 
-	std::optional<AllocatedBuffer> stateBuffer;
+	std::optional<NBuffer> stateBuffer;
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
 	
 	std::vector<Address> relativeAdresses;

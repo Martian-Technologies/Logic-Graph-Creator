@@ -127,23 +127,19 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		vmaCopyMemoryToAllocation(device->getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
-	// Create state buffer
-	size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
-	stateBuffer = createBuffer(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-	std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::HIGH);
-	vmaCopyMemoryToAllocation(device->getAllocator(), defaultStates.data(), stateBuffer->allocation, 0, stateBufferSize);
-	// create descriptor buffer description
-	stateDescriptorBufferInfo = {
-		.buffer = stateBuffer->buffer,
-		.offset = 0,
-		.range = stateBufferSize
-	};
+	if (!relativeAdresses.empty()) {
+		// Create state buffer
+		size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
+		stateBuffer.emplace();
+		stateBuffer->init(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::HIGH);
+	}
 }
 
 VulkanChunkAllocation::~VulkanChunkAllocation() {
 	if (blockBuffer.has_value()) destroyBuffer(blockBuffer.value());
 	if (wireBuffer.has_value()) destroyBuffer(wireBuffer.value());
-	if (stateBuffer.has_value()) destroyBuffer(stateBuffer.value());
+	if (stateBuffer.has_value()) stateBuffer->cleanup();
 }
 
 // ChunkChain
