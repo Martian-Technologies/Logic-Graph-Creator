@@ -38,4 +38,3 @@ CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, E
 		linkedFunctionForUpdates<Vector>(eventData);
 	});
 }
-
