@@ -1,5 +1,5 @@
 #block-creation-view {
-    display: block;
+	display: block;
 	height: 100%;
 	width: 100%;
 	overflow-y: auto;
@@ -90,4 +90,19 @@ scrollbarvertical {
 
 .number-long {
 	width: 4rem
+}
+
+input[type="checkbox"] {
+	width: 16dp;
+	height: 16dp;
+	background-color: #5a6262;
+	border: 1dp;
+	border-radius: 3dp;
+	color: #f0f0f0;
+	margin-right: 8dp;
+}
+
+input[type="checkbox"]:checked {
+	background-color: #8fbc8f;
+	border-color: #a9d1a9; 
 }

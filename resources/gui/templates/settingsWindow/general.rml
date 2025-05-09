@@ -1,0 +1,21 @@
+<template name="settings-appearance" content="content">
+	<head>
+		<link type="text/rcss" href="../styles/settingsWindow.rcss"/>
+	</head>
+
+	<body>
+
+		<div class="content-item user-int-option">
+			<div class="label">Font Size</div>
+			<input type="text" />
+			<div class="border-line" />
+		</div>
+		<div class="content-item user-int-option">
+			<div class="label">Test</div>
+			<input type="text" />
+		</div>
+
+
+	</body>
+
+</template>

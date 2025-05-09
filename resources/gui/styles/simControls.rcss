@@ -1,48 +1,48 @@
 #status-area {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    padding: 2px;
-    height: 24px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8dp;
+	padding: 2dp;
+	height: 24dp;
 }
 
 #toggle-simulation {
-    background-color: #333;
-    color: #fff;
-    padding: 2px 8px;
-    height: 20px;
+	background-color: #333;
+	color: #fff;
+	padding: 2dp 8dp;
+	height: 20dp;
 }
 
 #limit-speed {
-    margin: 0;
+	margin: 0;
 }
 
 #tps-input {
-    background-color: #252525;
-    color: #fff;
-    height: 18px;
-    width: 60px;
+	background-color: #252525;
+	color: #fff;
+	height: 18dp;
+	width: 60dp;
 } 
 
 input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    background-color: #5a6262; /* Unchecked background */
-    border: 1px; /* Unchecked border */
-    border-radius: 3px;
-    color: #f0f0f0; /* Color for potential checkmark (if using text-based) */
-    cursor: pointer;
-    margin-right: 8px;
+	width: 16dp;
+	height: 16dp;
+	background-color: #5a6262; /* Unchecked background */
+	border: 1dp; /* Unchecked border */
+	border-radius: 3dp;
+	color: #f0f0f0; /* Color for potential checkmark (if using text-based) */
+	cursor: pointer;
+	margin-right: 8dp;
 
 }
 
 input[type="checkbox"]:checked {
-    background-color: #8fbc8f;
-    border-color: #a9d1a9; 
+	background-color: #8fbc8f;
+	border-color: #a9d1a9; 
 }
 
 
 #tps-input:focus {
-    border-color: #8fbc8f; /* Highlight on focus */
+	border-color: #8fbc8f; /* Highlight on focus */
 }

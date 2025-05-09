@@ -4,11 +4,11 @@
 #include <RmlUi/Debugger.h>
 
 #include "computerAPI/directoryManager.h"
-#include "gui/interaction/menuTree.h"
-#include "gui/interaction/menuTreeListener.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "gui/menuBar/menuManager.h"
+#include "gui/menuBar/menuBar.h"
 #include "gui/circuitView/simControlsManager.h"
+#include "gui/settingsWindow/settingsWindow.h"
+#include "util/config/config.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) : sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager) {
 	// create rmlUi context
@@ -31,13 +31,10 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRend
 	Rml::Element* modeTreeParent = rmlDocument->GetElementById("mode-selection-tree");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, itemTreeParent, modeTreeParent);
 
-	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
-	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
-	
-	// menu bar with file, edit, view ...
+	Settings::serializeData();
+	SettingsWindow* settingsWindow = new SettingsWindow(rmlDocument);
 
-	// TabsManager* tabsManager = new TabsManager(document);	
-	// TabsManager* tabsManager = new TabsManager(document);	
+	MenuBar* menuBar = new MenuBar(rmlDocument, settingsWindow, this);
 
 	// status of sim
 	// SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);

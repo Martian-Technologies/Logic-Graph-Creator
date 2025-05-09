@@ -6,15 +6,15 @@
 		<link type="text/template" href="templates/menuBar.rml"/>
 		<link type="text/template" href="templates/blockCreation.rml"/>
 		<link type="text/template" href="templates/simulationControlsBar.rml"/>
-		<link type="text/template" href="templates/blockCreation.rml"/>
+		<link type="text/template" href="templates/settingsWindow/settingsWindow.rml"/>
 	</head>
 
 	<body>
 		<div id="main-container">
 
-			<!-- <div id="top-container">
+			<div id="top-container">
 				<template src="menuBar"></template>
-			</div> -->
+			</div>
 
 			<div id="middle-container">
 				<div id="left-sidebar-container">
@@ -48,6 +48,10 @@
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<div id="settings-overlay" class="invisible">
+				<template src="settings-window"></template>
 			</div>
 		</div>
 	</body>

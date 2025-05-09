@@ -55,9 +55,9 @@ body {
 }
 
 #center-container {
-    flex: 1;  /* Takes available space between sidebars */
-    display: flex;
-    flex-direction: column;  /* Stacks children vertically */
+	flex: 1;  /* Takes available space between sidebars */
+	display: flex;
+	flex-direction: column;  /* Stacks children vertically */
 }
 
 #circuitview-container {
@@ -168,4 +168,21 @@ tabset panels panel {
 	display: block;
 	width: 100%;
 	height: 100%;
+}
+
+
+/* Settings Window */
+#settings-overlay {
+	position: absolute;
+	top:	10%;
+	left:   10%;
+	width:  80%;
+	height: 80%;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.invisible {
+	display: none;
 }

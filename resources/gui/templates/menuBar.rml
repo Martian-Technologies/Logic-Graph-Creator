@@ -6,33 +6,21 @@
 	<body>
 
 		<div id="menu-bar" class="menu-bar">
+
+			<div class="menu" id="menu-app">
+				<div class="menu-title">Gatality</div>
+				<div class="dropdown">
+					<button class="menu-item" id="setting">Setting</button>
+				</div>
+			</div>
+
 			<!-- File -->	
 			<div class="menu" id="menu-file">
 				<div class="menu-title">File</div>
 				<div class="dropdown">
-					<div class="menu-item" id="file-new">New</div>
-					<div class="menu-item" id="file-open">Open</div>
-					<div class="menu-item" id="file-save">Save</div>
-				</div>
-			</div>
-
-			<!-- Edit -->
-			<div class="menu" id="menu-edit">
-				<div class="menu-title">Edit</div>
-				<div class="dropdown">
-					<div class="menu-item" id="edit-new">New</div>
-					<div class="menu-item" id="edit-open">Open</div>
-					<div class="menu-item" id="edit-save">Save</div>
-				</div>
-			</div>
-
-			<!-- View -->
-			<div class="menu" id="menu-view">
-				<div class="menu-title">View</div>
-				<div class="dropdown">
-					<div class="menu-item" id="view-new">New</div>
-					<div class="menu-item" id="view-open">Open</div>
-					<div class="menu-item" id="view-save">Save</div>
+					<button class="menu-item" id="file-new">New</button>
+					<button class="menu-item" id="file-open">Open</button>
+					<button class="menu-item" id="file-save">Save</button>
 				</div>
 			</div>
 		</div>

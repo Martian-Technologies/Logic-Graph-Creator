@@ -27,7 +27,8 @@ public:
 	void setStatusBar(const std::string& text = "");
 
 	void handleResize();
-	
+
+	void newCircuit();
 	void load();
 	void save();
 	void asSave();
