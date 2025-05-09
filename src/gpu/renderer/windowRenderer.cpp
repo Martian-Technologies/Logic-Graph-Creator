@@ -136,7 +136,7 @@ void WindowRenderer::renderLoop() {
 		frames.incrementFrame();
 	}
 
-	vkDeviceWaitIdle(device->getDevice());
+	device->waitIdle();
 }
 
 void WindowRenderer::renderToCommandBuffer(Frame& frame, uint32_t imageIndex) {
@@ -225,7 +225,7 @@ void WindowRenderer::createRenderPass() {
 }
 
 void WindowRenderer::recreateSwapchain() {
-	vkDeviceWaitIdle(device->getDevice());
+	device->waitIdle();
 	
 	std::lock_guard<std::mutex> lock(windowSizeMux);
 

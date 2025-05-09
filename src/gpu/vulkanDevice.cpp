@@ -37,13 +37,19 @@ VulkanDevice::VulkanDevice(VulkanInstance* instance, VkSurfaceKHR surfaceForPres
 }
 
 VulkanDevice::~VulkanDevice() {
-	vkDeviceWaitIdle(device);
+	waitIdle();
 	
 	vmaDestroyAllocator(vmaAllocator);
 	
 	vkDestroyFence(device, immediateFence, nullptr);
 	vkDestroyCommandPool(device, immediateCommandPool, nullptr);
 	vkb::destroy_device(device);
+}
+
+void VulkanDevice::waitIdle() {
+	std::lock_guard<std::mutex> lock(graphicsSubmitMux);
+	std::lock_guard<std::mutex> lock2(presentSubmitMux);
+	vkDeviceWaitIdle(device);
 }
 
 VkResult VulkanDevice::submitGraphicsQueue(VkSubmitInfo* submitInfo, VkFence fence) {

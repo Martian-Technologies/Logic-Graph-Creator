@@ -17,6 +17,7 @@ public:
 	VulkanDevice(VulkanInstance* instance, VkSurfaceKHR surfaceForPresenting);
 	~VulkanDevice();
 
+	void waitIdle();
 	VkResult submitGraphicsQueue(VkSubmitInfo* submitInfo, VkFence fence);
 	VkResult submitPresent(VkPresentInfoKHR* presentInfo);
 	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
