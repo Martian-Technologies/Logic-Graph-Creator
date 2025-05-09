@@ -23,4 +23,4 @@ private:
 	static std::filesystem::path configDirectory;
 };
 
-#endif
+#endif /* directoryManager_h */

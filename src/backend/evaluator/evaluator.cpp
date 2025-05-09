@@ -215,7 +215,7 @@ int Evaluator::getGroupIndex(EvaluatorGate gate, const Vector offset, bool track
 	}
 }
 
-std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput) {
+std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, Vector offset, bool trackInput) {
 	if (addressTree.hasValue(address)) {
 		const EvaluatorGate gate = addressTree.getValue(address);
 		const int groupIndex = getGroupIndex(gate, offset, trackInput);

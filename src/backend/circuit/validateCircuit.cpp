@@ -4,6 +4,7 @@
 void CircuitValidator::validate() {
 	bool isValid = true;
 
+	isValid = isValid && validateBlockData();
 	isValid = isValid && validateBlockTypes();
 	isValid = isValid && setBlockPositionsInt();
 	isValid = isValid && handleInvalidConnections();
@@ -11,6 +12,19 @@ void CircuitValidator::validate() {
 	isValid = isValid && handleUnpositionedBlocks();
 
 	parsedCircuit.valid = isValid;
+}
+
+bool CircuitValidator::validateBlockData() {
+	Vector size = parsedCircuit.getSize();
+	if (parsedCircuit.getSize().dx == 0)
+		size.dx = 1;
+	if (parsedCircuit.getSize().dy == 0)
+		size.dy = 1;
+	for (auto& port : parsedCircuit.getConnectionPorts()) {
+		size.extentToFit(port.positionOnBlock);
+	}
+	parsedCircuit.setSize(size);
+	return true;
 }
 
 bool CircuitValidator::validateBlockTypes() {

@@ -219,7 +219,7 @@ void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
 	}
 
 	// reallocate all modified chunks
-	for (const Position& chunk : chunksToUpdate) {
+	for (Position chunk : chunksToUpdate) {
 		chunks[chunk].updateAllocation();
 	}
 }

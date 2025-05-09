@@ -92,29 +92,50 @@ bool TensorCreationTool::confirm(const Event* event) {
 	return false;
 }
 
+std::string formatOrdinal(int n) {
+	std::string suffix = "th";
+	if (n % 10 == 1 and n % 100 != 11) suffix = "st";
+	else if (n % 10 == 2 and n % 100 != 12) suffix = "nd";
+	else if (n % 10 == 3 and n % 100 != 13) suffix = "rd";
+	return std::to_string(n) + suffix;
+}
+
 void TensorCreationTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
+
 	if (!pointerInView) {
-		if (tensorStage != -1) {
-			if (tensorStage % 2 == 1) {
-				elementCreator.addSelectionElement(SelectionObjectElement(
-					std::make_shared<ProjectionSelection>(selection, step, 2),
-					SelectionObjectElement::RenderMode::ARROWS
-				));
-			} else {
-				elementCreator.addSelectionElement(SelectionObjectElement(
-					selection, SelectionObjectElement::RenderMode::ARROWS
-				));
-			}
+		if (tensorStage == -1) {
+			setStatusBar("Left click to select the origin of tensor.");
+		} else if (tensorStage % 2 == 0) {
+			if (followingSelection) setStatusBar(
+				"Left click to specify the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor (" +
+				std::to_string(tensorStage / 2 + 1) + "/" + std::to_string(selectionToFollow.size()) + ")."
+			);
+			else setStatusBar("Left click to specify the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor. Press E to complete tensor.");
+			elementCreator.addSelectionElement(SelectionObjectElement(
+				selection, SelectionObjectElement::RenderMode::ARROWS
+			));
+		} else {
+			setStatusBar("Left click to specify the range of the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor (2)");
+			elementCreator.addSelectionElement(SelectionObjectElement(
+				std::make_shared<ProjectionSelection>(selection, step, 2),
+				SelectionObjectElement::RenderMode::ARROWS
+			));
 		}
 		return;
 	};
 
 	SharedSelection displaySelection;
 	if (tensorStage == -1) {
+		setStatusBar("Left click to select the origin of tensor.");
 		displaySelection = std::make_shared<CellSelection>(lastPointerPosition);
 	} else if (tensorStage % 2 == 0) { // step
+		if (followingSelection) setStatusBar(
+			"Left click to specify the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor (" +
+			std::to_string(tensorStage / 2 + 1) + "/" + std::to_string(selectionToFollow.size()) + ")."
+		);
+		else setStatusBar("Left click to specify the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor. Press E to complete tensor.");
 		step = lastPointerPosition - originPosition;
 		if (step.manhattenlength() == 0) {
 			displaySelection = std::make_shared<ProjectionSelection>(selection, Vector(), 1);
@@ -132,6 +153,7 @@ void TensorCreationTool::updateElements() {
 		float dis = step.length();
 		float length = lastPointerFPosition.lengthAlongProjectToVec(originPosition.free() + FVector(0.5f, 0.5f), step.free());
 		int count = Abs(round(length / dis)) + 1;
+		setStatusBar("Specify the range of the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor (" + std::to_string(count) + ")");
 		displaySelection = std::make_shared<ProjectionSelection>(selection, (length > 0) ? step : step * -1, count);
 	}
 	elementCreator.addSelectionElement(SelectionObjectElement(displaySelection, SelectionObjectElement::RenderMode::ARROWS));

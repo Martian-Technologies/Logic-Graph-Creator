@@ -1,0 +1,133 @@
+version_6
+import "FourBitDecoder.cir"
+import "16Regs.cir"
+Circuit: "CPU"
+UUID: a8172326-4ac6-46f0-9420-4e8895a384aa
+size: <1, 1>
+ports:
+blockId 68 SWITCH -7 32 ZERO
+	(connId:0) (65 0)
+blockId 67 SWITCH 5 31 ZERO
+	(connId:0) (66 0)
+blockId 66 OR 8 31 ZERO
+	(connId:1) (65 0)
+	(connId:0) (67 0)
+blockId 65 AND 10 32 ZERO
+	(connId:1) (1 36)
+	(connId:0) (68 0) (66 1)
+blockId 62 JUNCTION 10 31 ZERO
+	(connId:1) (1 35)
+	(connId:0) (54 2)
+blockId 49 TRISTATE_BUFFER -5 7 ZERO
+	(connId:2) (57 0)
+	(connId:0) (5 0)
+	(connId:1) (27 5)
+blockId 47 TRISTATE_BUFFER -5 5 ZERO
+	(connId:2) (55 0)
+	(connId:0) (3 0)
+	(connId:1) (27 5)
+blockId 25 SWITCH -7 1 ZERO
+	(connId:0) (27 1)
+blockId 23 SWITCH -7 3 ZERO
+	(connId:0) (27 3)
+blockId 61 JUNCTION 10 30 ZERO
+	(connId:1) (1 34)
+	(connId:0) (53 2)
+blockId 14 SWITCH -7 18 ZERO
+	(connId:0) (1 27)
+blockId 60 JUNCTION 10 29 ZERO
+	(connId:1) (1 33)
+	(connId:0) (52 2)
+blockId 13 SWITCH -7 17 ZERO
+	(connId:0) (1 26)
+blockId 58 JUNCTION 10 27 ZERO
+	(connId:1) (1 31)
+	(connId:0) (50 2)
+blockId 11 SWITCH -7 15 ZERO
+	(connId:0) (1 24)
+blockId 57 JUNCTION 10 26 ZERO
+	(connId:1) (1 30)
+	(connId:0) (49 2)
+blockId 10 SWITCH -7 13 ZERO
+	(connId:0) (54 0) (1 23)
+blockId 56 JUNCTION 10 25 ZERO
+	(connId:1) (1 29)
+	(connId:0) (48 2)
+blockId 9 SWITCH -7 12 ZERO
+	(connId:0) (53 0) (1 22)
+blockId 55 JUNCTION 10 24 ZERO
+	(connId:1) (1 28)
+	(connId:0) (47 2)
+blockId 8 SWITCH -7 11 ZERO
+	(connId:0) (52 0) (1 21)
+blockId 54 TRISTATE_BUFFER -4 13 ZERO
+	(connId:2) (62 0)
+	(connId:0) (10 0)
+	(connId:1) (27 5)
+blockId 7 SWITCH -7 10 ZERO
+	(connId:0) (51 0) (1 20)
+blockId 52 TRISTATE_BUFFER -4 11 ZERO
+	(connId:2) (60 0)
+	(connId:0) (8 0)
+	(connId:1) (27 5)
+blockId 5 SWITCH -7 7 ZERO
+	(connId:0) (49 0) (1 18)
+blockId 27 "c5ea9727-1e28-4082-ba17-e2f44dffe631" -4 -12 ZERO
+	(connId:5) (47 1) (48 1) (49 1) (50 1) (51 1) (52 1) (53 1) (54 1)
+	(connId:0) (26 0)
+	(connId:1) (25 0)
+	(connId:2) (24 0)
+	(connId:3) (23 0)
+blockId 51 TRISTATE_BUFFER -5 10 ZERO
+	(connId:2) (59 0)
+	(connId:0) (7 0)
+	(connId:1) (27 5)
+blockId 4 SWITCH -7 6 ZERO
+	(connId:0) (48 0) (1 17)
+blockId 26 SWITCH -7 0 ZERO
+	(connId:0) (27 0)
+blockId 50 TRISTATE_BUFFER -4 8 ZERO
+	(connId:2) (58 0)
+	(connId:0) (6 0)
+	(connId:1) (27 5)
+blockId 3 SWITCH -7 5 ZERO
+	(connId:0) (47 0) (1 3)
+blockId 53 TRISTATE_BUFFER -5 12 ZERO
+	(connId:2) (61 0)
+	(connId:0) (9 0)
+	(connId:1) (27 5)
+blockId 6 SWITCH -7 8 ZERO
+	(connId:0) (50 0) (1 19)
+blockId 59 JUNCTION 10 28 ZERO
+	(connId:1) (1 32)
+	(connId:0) (51 2)
+blockId 12 SWITCH -7 16 ZERO
+	(connId:0) (1 25)
+blockId 24 SWITCH -7 2 ZERO
+	(connId:0) (27 2)
+blockId 48 TRISTATE_BUFFER -4 6 ZERO
+	(connId:2) (56 0)
+	(connId:0) (4 0)
+	(connId:1) (27 5)
+blockId 1 "50c566a0-4bdb-40fc-bc6c-525ef105ec77" 12 12 ZERO
+	(connId:36) (65 1)
+	(connId:28) (55 1)
+	(connId:29) (56 1)
+	(connId:30) (57 1)
+	(connId:31) (58 1)
+	(connId:32) (59 1)
+	(connId:33) (60 1)
+	(connId:34) (61 1)
+	(connId:35) (62 1)
+	(connId:24) (11 0)
+	(connId:3) (3 0)
+	(connId:26) (13 0)
+	(connId:27) (14 0)
+	(connId:25) (12 0)
+	(connId:17) (4 0)
+	(connId:18) (5 0)
+	(connId:19) (6 0)
+	(connId:20) (7 0)
+	(connId:21) (8 0)
+	(connId:22) (9 0)
+	(connId:23) (10 0)

@@ -10,12 +10,12 @@ public:
 	void readState(const Address& addr) const;
 
 protected:
-    void SetUp() override;
-    void TearDown() override;
+	void SetUp() override;
+	void TearDown() override;
 	Backend backend;
-    SharedCircuit circuit;
-    SharedEvaluator evaluator;
-    int i;
+	SharedCircuit circuit;
+	SharedEvaluator evaluator;
+	int i;
 };
 
 #endif /* evaulatorTests_h */

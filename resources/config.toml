@@ -26,8 +26,8 @@ generic = "0xff4eec"
 testing = "0x6affdb"
 
 [appearance.text]
-font_size = "12px"
-font_family = "12px"
+font_size = "12dp"
+font_family = "12dp"
 
 # -------------------- Keybinds --------------------
 [keybind.blocks]

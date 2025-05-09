@@ -2,14 +2,14 @@
 #include "backend/circuitView/events/customEvents.h"
 
 void ViewManager::setUpEvents(EventRegister& eventRegister) {
-		eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
-		eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
-		eventRegister.registerFunction("View Attach Anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("View Dettach Anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
-		eventRegister.registerFunction("Pointer Move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
-		eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
-	}
+	eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
+	eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
+	eventRegister.registerFunction("View Attach Anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
+	eventRegister.registerFunction("View Dettach Anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
+	eventRegister.registerFunction("Pointer Move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
+	eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
+	eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
+}
 
 bool ViewManager::zoom(const Event* event) {
 	const DeltaEvent* deltaEvent = event->cast<DeltaEvent>();
@@ -55,9 +55,9 @@ bool ViewManager::pointerMove(const Event* event) {
 	if (!pointerActive) return false;
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
 	if (!positionEvent) return false;
-	
+
 	pointerViewPosition = gridToView(positionEvent->getFPosition());
-	
+
 	if (anchored) {
 		FVector delta = pointerPosition - positionEvent->getFPosition();
 		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos

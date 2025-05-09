@@ -32,9 +32,9 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 			if (!pair.second) continue;
 			Position connectionPosition = block->getPosition() + pair.first;
 			bool isInput = blockData->isConnectionInput(iter.first);
-			const std::vector<ConnectionEnd>* otherConnections = block->getConnectionContainer().getConnections(iter.first);
+			const std::unordered_set<ConnectionEnd>* otherConnections = block->getConnectionContainer().getConnections(iter.first);
 			if (!otherConnections) continue;
-			for (const ConnectionEnd& connectionEnd : *otherConnections) {
+			for (ConnectionEnd connectionEnd : *otherConnections) {
 				const Block* otherBlock = blockContainer->getBlock(connectionEnd.getBlockId());
 				if (!otherBlock) continue;
 				bool skipConnection = true;

@@ -40,8 +40,8 @@ void DirectoryManager::findDirectories() {
 		logWarning("Found resource directory strictly relative to working directory, this is probably not intended.", "", resourceDirectory.string());
 		return;
 	}
-	
-	
+
+
 	logFatalError("Could not find resource directory. Make sure you are executing the program from the top of the source tree.");
 }
 

@@ -29,6 +29,6 @@ void BlockPlacementTool::setMode(std::string toolMode) {
 			return;
 		}
 		activePlacementTool = newActivePlacementTool;
-		toolStackInterface->popAbove(this);	
+		toolStackInterface->popAbove(this);
 	}
 }

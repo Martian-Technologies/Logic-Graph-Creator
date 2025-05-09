@@ -30,6 +30,9 @@ class CircuitFileManager;
 class OpenCircuitsParser : public ParsedCircuitLoader {
 public:
 	OpenCircuitsParser(CircuitFileManager* circuitFileManager, CircuitManager* cm) : ParsedCircuitLoader(circuitFileManager, cm) { }
+
+	std::vector<circuit_id_t> load(const std::string& path);
+
 	bool parse(const std::string& path, SharedParsedCircuit outParsedCircuit);
 	void parseOpenCircuitsJson();
 

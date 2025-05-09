@@ -5,7 +5,7 @@ DataUpdateEventManager::DataUpdateEventReceiver::DataUpdateEventReceiver(DataUpd
 }
 
 DataUpdateEventManager::DataUpdateEventReceiver::DataUpdateEventReceiver(const DataUpdateEventReceiver& other) : eventManager(other.eventManager) {
-	if (eventManager) eventManager->dataUpdateEventReceivers.emplace(this); 
+	if (eventManager) eventManager->dataUpdateEventReceivers.emplace(this);
 }
 
 DataUpdateEventManager::DataUpdateEventReceiver& DataUpdateEventManager::DataUpdateEventReceiver::operator=(const DataUpdateEventReceiver& other) {

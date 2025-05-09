@@ -1,7 +1,7 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
 #include "contentManager.h"
-#include "searchBar.h"
+// #include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
 
@@ -9,13 +9,10 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 	context = document->GetElementById("settings-overlay");
 
 	ContentManager* cm = new ContentManager(document);
-	SearchBar* sb = new SearchBar(document);
+	// SearchBar* sb = new SearchBar(document);
 
-	toggleVisibility();
 	Initialize();
 }
-
-SettingsWindow::~SettingsWindow() {}
 
 void SettingsWindow::Initialize() {
 	connectCategoryListeners();
@@ -28,7 +25,7 @@ void SettingsWindow::connectCategoryListeners() {
 
 	for (size_t i = 0; i < items.size(); i++) {
 		Rml::Element* element = items[i];
-		if (i==0) {
+		if (i == 0) {
 			activeNav = element;
 			element->SetClass("active-nav", true);
 		}
@@ -53,8 +50,7 @@ void SettingsWindow::connectWindowOptions() {
 	Rml::Element* settingsActions = context->GetElementById("setting-actions");
 
 	// Save
-	Rml::Element* saveButton = settingsActions->GetElementById("settings-save-button");
-
+	Rml::Element* saveButton = settingsActions->GetElementById("settings-apply");
 	saveButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("saved");
@@ -62,8 +58,7 @@ void SettingsWindow::connectWindowOptions() {
 	));
 
 	// Default
-	Rml::Element* defaultButton = settingsActions->GetElementById("settings-default-button");
-
+	Rml::Element* defaultButton = settingsActions->GetElementById("settings-reset");
 	defaultButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("default");
@@ -71,8 +66,7 @@ void SettingsWindow::connectWindowOptions() {
 	));
 
 	// Cancel
-	Rml::Element* closeButton = settingsActions->GetElementById("settings-close-button");
-
+	Rml::Element* closeButton = settingsActions->GetElementById("settings-cancel");
 	closeButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("closed");

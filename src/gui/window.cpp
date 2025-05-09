@@ -6,7 +6,7 @@
 
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/RmlUi_Platform_SDL.h"
-#include "gui/menuBar/menuManager.h"
+#include "gui/menuBar/menuBar.h"
 #include "gui/circuitView/simControlsManager.h"
 #include "gui/settingsWindow/settingsWindow.h"
 #include "util/config/config.h"
@@ -43,22 +43,10 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	Rml::Element* blockCreationMenu = document->GetElementById("block-creation-form");
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, blockCreationMenu);
 
-	// menu bar with file, edit, view ...
-
-	// TabsManager* tabsManager = new TabsManager(document);	
-	// TabsManager* tabsManager = new TabsManager(document);	
-
-	// status of sim
-	// SimControlsManager* simControlsManager = new SimControlsManager(document);
-	//terst
-	//
-	//
-
 	Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(document);
 
-
-	MenuManager* menuManager = new MenuManager(document, settingsWindow);
+	MenuBar* menuBar = new MenuBar(document, settingsWindow, this);
 
 	// create CONFIG
 }

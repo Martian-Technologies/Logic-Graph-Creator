@@ -35,7 +35,7 @@ void PasteTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
 	elementCreator.clear();
 	if (!pointerInView) return;
-	
+
 	SharedCopiedBlocks copiedBlocks = circuitView->getBackend()->getClipboard();
 	if (!copiedBlocks) return;
 

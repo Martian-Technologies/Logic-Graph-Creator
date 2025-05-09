@@ -5,18 +5,18 @@
 #include "backend/circuit/circuitManager.h"
 #include "backend/evaluator/evaluatorManager.h"
 
-class CircuitTest: public ::testing::Test {
+class CircuitTest : public ::testing::Test {
 public:
-	CircuitTest() : evaluatorManager(&dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager) {}
+	CircuitTest() : evaluatorManager(&dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager) { }
 
 protected:
-    void SetUp() override;
-    void TearDown() override;
+	void SetUp() override;
+	void TearDown() override;
 	DataUpdateEventManager dataUpdateEventManager;
 	EvaluatorManager evaluatorManager;
 	CircuitManager circuitManager;
-    SharedCircuit circuit = nullptr;
-    int i;
+	SharedCircuit circuit = nullptr;
+	int i;
 };
 
 #endif /* circuitTests_h */

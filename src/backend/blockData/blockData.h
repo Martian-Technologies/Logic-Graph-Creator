@@ -1,9 +1,10 @@
 #ifndef blockData_h
 #define blockData_h
 
+#include "util/bidirectionalMultiSecondKeyMap.h"
+#include "backend/container/block/connectionEnd.h"
 #include "backend/dataUpdateEventManager.h"
 #include "backend/position/position.h"
-#include "backend/container/block/connectionEnd.h"
 
 class BlockData {
 	friend class BlockDataManager;
@@ -37,7 +38,7 @@ public:
 	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; sendBlockDataUpdate(); }
 	inline bool isPrimitive() const noexcept { return primitive; }
 
-	inline void setSize(const Vector& size) noexcept {
+	inline void setSize(Vector size) noexcept {
 		if (getSize() == size) return;
 		dataUpdateEventManager->sendEvent(
 			"preBlockSizeChange",
@@ -50,7 +51,7 @@ public:
 		);
 		sendBlockDataUpdate();
 	}
-	inline const Vector& getSize() const noexcept { return blockSize; }
+	inline Vector getSize() const noexcept { return blockSize; }
 	inline Vector getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
 
 	inline BlockType getBlockType() const { return blockType; }
@@ -80,7 +81,7 @@ public:
 		);
 		sendBlockDataUpdate();
 	}
-	inline void setConnectionInput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
+	inline void setConnectionInput(Vector vector, connection_end_id_t connectionEndId) noexcept {
 		dataUpdateEventManager->sendEvent(
 			"preBlockDataSetConnection",
 			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
@@ -94,7 +95,7 @@ public:
 		sendBlockDataUpdate();
 	}
 	// trys to set a connection output in the block. Returns success.
-	inline void setConnectionOutput(const Vector& vector, connection_end_id_t connectionEndId) noexcept {
+	inline void setConnectionOutput(Vector vector, connection_end_id_t connectionEndId) noexcept {
 		dataUpdateEventManager->sendEvent(
 			"preBlockDataSetConnection",
 			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
@@ -107,7 +108,7 @@ public:
 		sendBlockDataUpdate();
 	}
 
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector) const noexcept {
 		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
 		for (auto& pair : connections) {
 			if (pair.second.first == vector && pair.second.second)
@@ -115,7 +116,7 @@ public:
 		}
 		return { 0, false };
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Vector& vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector) const noexcept {
 		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
 		for (auto& pair : connections) {
 			if (pair.second.first == vector && !pair.second.second)
@@ -123,7 +124,7 @@ public:
 		}
 		return { 0, false };
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(const Vector& vector, Rotation rotation) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector, Rotation rotation) const noexcept {
 		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
@@ -136,7 +137,7 @@ public:
 		}
 		return { 0, false };
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(const Vector& vector, Rotation rotation) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector, Rotation rotation) const noexcept {
 		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
@@ -197,6 +198,18 @@ public:
 		return connections;
 	}
 
+	inline void setConnectionIdName(connection_end_id_t endId, const std::string& name) {
+		connectionIdNames.set(endId, name);
+		dataUpdateEventManager->sendEvent(
+			"blockDataConnectionNameSet",
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+		);
+	}
+	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const {
+		return connectionIdNames.get(endId);
+	}
+
+
 private:
 	BlockType blockType;
 	bool defaultData = true;
@@ -207,6 +220,7 @@ private:
 	Vector blockSize = Vector(1);
 	connection_end_id_t inputConnectionCount = 0;
 	std::unordered_map<connection_end_id_t, std::pair<Vector, bool>> connections;
+	BidirectionalMultiSecondKeyMap<connection_end_id_t, std::string> connectionIdNames;
 	DataUpdateEventManager* dataUpdateEventManager;
 };
 

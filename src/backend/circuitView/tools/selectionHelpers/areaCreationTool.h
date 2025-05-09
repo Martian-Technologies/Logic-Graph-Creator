@@ -12,7 +12,7 @@ public:
 
 	bool click(const Event* event);
 	bool unclick(const Event* event);
-	
+
 private:
 	Position originPosition;
 	bool hasOrigin = false;;

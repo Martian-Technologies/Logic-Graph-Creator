@@ -11,7 +11,7 @@ public:
 	void activate() override final;
 
 	static inline std::vector<std::string> getModes_() { return { "Single", "Area" }; }
-	static inline std::string getPath_() { return "placement/placement"; }
+	static inline std::string getPath_() { return "placement"; }
 	inline std::vector<std::string> getModes() const override final { return getModes_(); }
 	inline std::string getPath() const override final { return getPath_(); }
 	void setMode(std::string toolMode) override final;

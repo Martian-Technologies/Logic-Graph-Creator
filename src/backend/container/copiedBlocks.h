@@ -20,8 +20,8 @@ public:
 
 	const std::vector<CopiedBlockData> getCopiedBlocks() const { return blocks; }
 	const std::vector<std::pair<Position, Position>> getCopiedConnections() const { return connections; }
-	const Position& getMinPosition() { return minPosition; }
-	const Position& getMaxPosition() { return maxPosition; }
+	Position getMinPosition() { return minPosition; }
+	Position getMaxPosition() { return maxPosition; }
 
 private:
 	

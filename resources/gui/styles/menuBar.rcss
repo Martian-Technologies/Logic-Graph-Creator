@@ -10,9 +10,9 @@
 }
 
 .menu-title {
-	padding: 4px 4px;
+	padding: 4dp 4dp;
 	text-align: center;
-    line-height: 1.5em;
+	line-height: 1.5em;
 }
 
 .dropdown {
@@ -30,8 +30,8 @@
 }
 
 .menu-item {
-	padding: 2px 4px;
-    margin: 1px 0;   
+	padding: 2dp 4dp;
+	margin: 1dp 0;   
 	width: 100%;
 	box-sizing: border-box;
 }

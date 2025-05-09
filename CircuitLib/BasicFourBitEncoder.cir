@@ -1,55 +1,56 @@
-version_4
+version_6
 Circuit: "Circuit"
 UUID: dd17e273-6706-42c8-9558-8218f7428388
-blockId 1 SWITCH 0 1 ZERO 1
-	(connId:0)
-blockId 2 SWITCH 0 2 ZERO 1
-	(connId:0) (17 0)
-blockId 3 SWITCH 0 3 ZERO 1
-	(connId:0) (18 0)
-blockId 4 SWITCH 0 4 ZERO 1
-	(connId:0) (17 0) (18 0)
-blockId 5 SWITCH 0 5 ZERO 1
-	(connId:0) (19 0)
-blockId 6 SWITCH 0 6 ZERO 1
-	(connId:0) (17 0) (19 0)
-blockId 7 SWITCH 0 7 ZERO 1
-	(connId:0) (18 0) (19 0)
-blockId 8 SWITCH 0 8 ZERO 1
-	(connId:0) (17 0) (18 0) (19 0)
-blockId 9 SWITCH 0 9 ZERO 1
-	(connId:0) (20 0)
-blockId 10 SWITCH 0 10 ZERO 1
-	(connId:0) (17 0) (20 0)
-blockId 11 SWITCH 0 11 ZERO 1
-	(connId:0) (18 0) (20 0)
-blockId 12 SWITCH 0 12 ZERO 1
-	(connId:0) (17 0) (18 0) (20 0)
-blockId 13 SWITCH 0 13 ZERO 1
-	(connId:0) (19 0) (20 0)
-blockId 14 SWITCH 0 14 ZERO 1
-	(connId:0) (17 0) (19 0) (20 0)
-blockId 15 SWITCH 0 15 ZERO 1
-	(connId:0) (18 0) (19 0) (20 0)
-blockId 16 SWITCH 0 16 ZERO 1
-	(connId:0) (17 0) (18 0) (19 0) (20 0)
-blockId 17 OR 6 6 ZERO 2
-	(connId:0) (16 0) (14 0) (12 0) (10 0) (8 0) (6 0) (4 0) (2 0)
-	(connId:1) (21 0)
-blockId 18 OR 6 7 ZERO 2
-	(connId:0) (16 0) (15 0) (12 0) (11 0) (8 0) (7 0) (4 0) (3 0)
-	(connId:1) (22 0)
-blockId 19 OR 6 8 ZERO 2
-	(connId:0) (16 0) (15 0) (14 0) (13 0) (8 0) (7 0) (6 0) (5 0)
-	(connId:1) (23 0)
-blockId 20 OR 6 9 ZERO 2
-	(connId:0) (16 0) (15 0) (14 0) (13 0) (12 0) (11 0) (10 0) (9 0)
-	(connId:1) (24 0)
-blockId 21 LIGHT 9 6 ZERO 1
-	(connId:0) (17 1)
-blockId 22 LIGHT 9 7 ZERO 1
-	(connId:0) (18 1)
-blockId 23 LIGHT 9 8 ZERO 1
-	(connId:0) (19 1)
-blockId 24 LIGHT 9 9 ZERO 1
-	(connId:0) (20 1)
+size: <1, 1>
+ports:
+blockId 24 SWITCH 0 0 ZERO
+blockId 23 SWITCH 0 1 ZERO
+	(connId:0) (8 0)
+blockId 22 SWITCH 0 2 ZERO
+	(connId:0) (7 0)
+blockId 21 SWITCH 0 3 ZERO
+	(connId:0) (7 0) (8 0)
+blockId 20 SWITCH 0 4 ZERO
+	(connId:0) (6 0)
+blockId 19 SWITCH 0 5 ZERO
+	(connId:0) (6 0) (8 0)
+blockId 18 SWITCH 0 6 ZERO
+	(connId:0) (6 0) (7 0)
+blockId 17 SWITCH 0 7 ZERO
+	(connId:0) (6 0) (7 0) (8 0)
+blockId 16 SWITCH 0 8 ZERO
+	(connId:0) (5 0)
+blockId 15 SWITCH 0 9 ZERO
+	(connId:0) (5 0) (8 0)
+blockId 14 SWITCH 0 10 ZERO
+	(connId:0) (5 0) (7 0)
+blockId 13 SWITCH 0 11 ZERO
+	(connId:0) (5 0) (7 0) (8 0)
+blockId 12 SWITCH 0 12 ZERO
+	(connId:0) (5 0) (6 0)
+blockId 11 SWITCH 0 13 ZERO
+	(connId:0) (5 0) (6 0) (8 0)
+blockId 10 SWITCH 0 14 ZERO
+	(connId:0) (5 0) (6 0) (7 0)
+blockId 9 SWITCH 0 15 ZERO
+	(connId:0) (5 0) (6 0) (7 0) (8 0)
+blockId 8 OR 6 5 ZERO
+	(connId:1) (4 0)
+	(connId:0) (9 0) (11 0) (13 0) (15 0) (17 0) (19 0) (21 0) (23 0)
+blockId 7 OR 6 6 ZERO
+	(connId:1) (3 0)
+	(connId:0) (9 0) (13 0) (14 0) (18 0) (10 0) (21 0) (17 0) (22 0)
+blockId 6 OR 6 7 ZERO
+	(connId:1) (2 0)
+	(connId:0) (10 0) (11 0) (12 0) (17 0) (18 0) (19 0) (9 0) (20 0)
+blockId 5 OR 6 8 ZERO
+	(connId:1) (1 0)
+	(connId:0) (9 0) (10 0) (11 0) (12 0) (13 0) (14 0) (15 0) (16 0)
+blockId 4 LIGHT 9 5 ZERO
+	(connId:0) (8 1)
+blockId 3 LIGHT 9 6 ZERO
+	(connId:0) (7 1)
+blockId 2 LIGHT 9 7 ZERO
+	(connId:0) (6 1)
+blockId 1 LIGHT 9 8 ZERO
+	(connId:0) (5 1)

@@ -17,9 +17,9 @@ public:
 	bool click(const Event* event);
 	bool unclick(const Event* event = nullptr);
 	bool confirm(const Event* event);
-	
+
 private:
-	SharedSelection selection; 
+	SharedSelection selection;
 	Position originPosition;
 	Vector step;
 	int tensorStage = -1;

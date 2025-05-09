@@ -1,65 +1,65 @@
-version_5
+version_6
 Circuit: "TenPulseCircuit"
 UUID: 4b9d9242-88e0-4fbb-aa7b-73a0b37ef254
 size: <1, 1>
-ports (1):
-	(OUT, 0, 11, <0, 0>, "Out")
-blockId 1 AND 0 0 ZERO 2
+ports:
+	(OUT, 0, 10, <0, 0>, "Out")
+blockId 20 AND 9 0 ZERO
+	(connId:0) (9 1)
+	(connId:1) (19 0)
+blockId 19 AND 10 0 ZERO
+	(connId:1) (18 0)
+	(connId:0) (20 1)
+blockId 18 AND 11 0 ZERO
+	(connId:1) (17 0)
+	(connId:0) (19 1)
+blockId 17 AND 12 0 ZERO
+	(connId:1) (16 0)
+	(connId:0) (18 1)
+blockId 16 AND 13 0 ZERO
+	(connId:1) (15 0)
+	(connId:0) (17 1)
+blockId 15 AND 14 0 ZERO
+	(connId:1) (14 0)
+	(connId:0) (16 1)
+blockId 14 AND 15 0 ZERO
+	(connId:1) (13 0)
+	(connId:0) (15 1)
+blockId 13 AND 16 0 ZERO
+	(connId:1) (12 0)
+	(connId:0) (14 1)
+blockId 12 AND 17 0 ZERO
+	(connId:1) (11 0)
+	(connId:0) (13 1)
+blockId 11 NOR 18 0 ZERO
+	(connId:1) (1 0) (10 0)
 	(connId:0) (12 1)
-	(connId:1) (2 0)
-blockId 2 AND 1 0 ZERO 2
-	(connId:0) (1 1)
-	(connId:1) (3 0)
-blockId 3 AND 2 0 ZERO 2
-	(connId:0) (2 1)
-	(connId:1) (4 0)
-blockId 4 AND 3 0 ZERO 2
-	(connId:0) (3 1)
-	(connId:1) (5 0)
-blockId 5 AND 4 0 ZERO 2
-	(connId:0) (4 1)
-	(connId:1) (6 0)
-blockId 6 AND 5 0 ZERO 2
-	(connId:0) (5 1)
-	(connId:1) (7 0)
-blockId 7 AND 6 0 ZERO 2
-	(connId:0) (6 1)
-	(connId:1) (8 0)
-blockId 8 AND 7 0 ZERO 2
+blockId 10 LIGHT 19 0 ZERO
+	(connId:0) (11 1)
+blockId 9 AND 8 0 ZERO
+	(connId:0) (8 1)
+	(connId:1) (20 0)
+blockId 8 AND 7 0 ZERO
 	(connId:0) (7 1)
 	(connId:1) (9 0)
-blockId 9 AND 8 0 ZERO 2
-	(connId:0) (8 1)
-	(connId:1) (10 0)
-blockId 10 NOR 9 0 ZERO 2
-	(connId:0) (9 1)
-	(connId:1) (11 0) (20 0)
-blockId 11 LIGHT 10 0 ZERO 1
-	(connId:0) (10 1)
-blockId 12 AND -1 0 ZERO 2
-	(connId:0) (13 1)
-	(connId:1) (1 0)
-blockId 13 AND -2 0 ZERO 2
-	(connId:0) (14 1)
-	(connId:1) (12 0)
-blockId 14 AND -3 0 ZERO 2
-	(connId:0) (15 1)
-	(connId:1) (13 0)
-blockId 15 AND -4 0 ZERO 2
-	(connId:0) (16 1)
-	(connId:1) (14 0)
-blockId 16 AND -5 0 ZERO 2
-	(connId:0) (17 1)
-	(connId:1) (15 0)
-blockId 17 AND -6 0 ZERO 2
-	(connId:0) (18 1)
-	(connId:1) (16 0)
-blockId 18 AND -7 0 ZERO 2
-	(connId:0) (19 1)
-	(connId:1) (17 0)
-blockId 19 AND -8 0 ZERO 2
-	(connId:0) (20 1)
-	(connId:1) (18 0)
-blockId 20 AND -9 0 ZERO 2
-	(connId:0) (10 1)
-	(connId:1) (19 0)
+blockId 7 AND 6 0 ZERO
+	(connId:0) (6 1)
+	(connId:1) (8 0)
+blockId 6 AND 5 0 ZERO
+	(connId:0) (5 1)
+	(connId:1) (7 0)
+blockId 5 AND 4 0 ZERO
+	(connId:0) (4 1)
+	(connId:1) (6 0)
+blockId 4 AND 3 0 ZERO
+	(connId:0) (3 1)
+	(connId:1) (5 0)
+blockId 3 AND 2 0 ZERO
+	(connId:0) (2 1)
+	(connId:1) (4 0)
+blockId 2 AND 1 0 ZERO
+	(connId:0) (1 1)
+	(connId:1) (3 0)
+blockId 1 AND 0 0 ZERO
+	(connId:1) (2 0)
+	(connId:0) (11 1)

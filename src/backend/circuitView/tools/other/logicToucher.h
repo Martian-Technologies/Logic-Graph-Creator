@@ -5,15 +5,9 @@
 
 class LogicToucher : public CircuitTool {
 public:
-	void activate() override final {
-		CircuitTool::activate();
-		registerFunction("Tool Primary Activate", std::bind(&LogicToucher::press, this, std::placeholders::_1));
-		registerFunction("tool primary deactivate", std::bind(&LogicToucher::unpress, this, std::placeholders::_1));
-		registerFunction("Pointer Move", std::bind(&LogicToucher::pointerMove, this, std::placeholders::_1));
-	}
-
+	void activate() override final;
 	static inline std::vector<std::string> getModes_() { return {}; }
-	static inline std::string getPath_() { return "interactive/state changer"; }
+	static inline std::string getPath_() { return "state changer"; }
 	inline std::string getPath() const override final { return getPath_(); }
 	inline unsigned int getStackId() const override final { return 1; }
 

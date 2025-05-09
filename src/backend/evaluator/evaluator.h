@@ -64,7 +64,7 @@ private:
 
 	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
 	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
-	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, const Vector& offset, bool trackInput);
+	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, Vector offset, bool trackInput);
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC);

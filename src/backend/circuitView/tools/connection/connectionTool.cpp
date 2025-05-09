@@ -26,6 +26,6 @@ void ConnectionTool::setMode(std::string toolMode) {
 			return;
 		}
 		activeConnectionTool = newActiveConnectionTool;
-		toolStackInterface->popAbove(this);	
+		toolStackInterface->popAbove(this);
 	}
 }

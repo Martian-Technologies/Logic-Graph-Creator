@@ -16,6 +16,7 @@ void TensorConnectTool::activate() {
 	CircuitTool::activate();
 	// registerFunction("Tool Primary Activate", std::bind(&TensorConnectTool::click, this, std::placeholders::_1));
 	registerFunction("Tool Secondary Activate", std::bind(&TensorConnectTool::unclick, this, std::placeholders::_1));
+	registerFunction("Tool Invert Mode", std::bind(&TensorConnectTool::invertMode, this, std::placeholders::_1));
 	registerFunction("Confirm", std::bind(&TensorConnectTool::confirm, this, std::placeholders::_1));
 	if (placingOutout && activeOutputSelectionHelper->isFinished()) {
 		placingOutout = false;
@@ -54,9 +55,17 @@ bool TensorConnectTool::unclick(const Event* event) {
 bool TensorConnectTool::confirm(const Event* event) {
 	if (!circuit) return false;
 	if (!sameSelectionShape(activeOutputSelectionHelper->getSelection(), activeInputSelectionHelper->getSelection())) return false;
-	circuit->tryCreateConnection(activeOutputSelectionHelper->getSelection(), activeInputSelectionHelper->getSelection());
+	if (doingDisconnect) circuit->tryRemoveConnection(activeOutputSelectionHelper->getSelection(), activeInputSelectionHelper->getSelection());
+	else circuit->tryCreateConnection(activeOutputSelectionHelper->getSelection(), activeInputSelectionHelper->getSelection());
 	reset();
 	toolStackInterface->pushTool(activeOutputSelectionHelper, false);
+	return true;
+}
+
+bool TensorConnectTool::invertMode(const Event* event) {
+	if (!circuit) return false;
+	doingDisconnect = !doingDisconnect;
+	updateElements();
 	return true;
 }
 
@@ -66,5 +75,7 @@ void TensorConnectTool::updateElements() {
 	if (!activeOutputSelectionHelper->isFinished()) return;
 	elementCreator.addSelectionElement(SelectionObjectElement(activeOutputSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::ARROWS));
 	if (!activeInputSelectionHelper->isFinished()) return;
+	if (doingDisconnect) setStatusBar("Press E to confirm disconnection.");
+	else setStatusBar("Press E to confirm connection.");
 	elementCreator.addSelectionElement(SelectionObjectElement(activeInputSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::ARROWS));
 }

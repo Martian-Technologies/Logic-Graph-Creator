@@ -11,9 +11,7 @@ class EvaluatorManager;
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
-		dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager) , evaluatorManager(evaluatorManager) { }
-
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager);
 	// Circuit
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
@@ -25,12 +23,12 @@ public:
 		if (iter == circuits.end()) return nullptr;
 		return iter->second;
 	}
-	inline SharedCircuit getCircuit(std::string uuid) {
+	inline SharedCircuit getCircuit(const std::string& uuid) {
 		auto iter = UUIDToCircuits.find(uuid);
 		if (iter == UUIDToCircuits.end()) return nullptr;
 		return iter->second;
 	}
-	inline const SharedCircuit getCircuit(std::string uuid) const {
+	inline const SharedCircuit getCircuit(const std::string& uuid) const {
 		auto iter = UUIDToCircuits.find(uuid);
 		if (iter == UUIDToCircuits.end()) return nullptr;
 		return iter->second;
@@ -73,7 +71,7 @@ public:
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
 		blockData->setPath("Custom");
-		blockData->setSize(Vector(2, 1));
+		blockData->setSize(Vector(1));
 
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
@@ -127,7 +125,7 @@ public:
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
 		blockData->setPath("Custom");
-		blockData->setSize(Vector(parsedCircuit->getWidth(), parsedCircuit->getHeight()));
+		blockData->setSize(parsedCircuit->getSize());
 
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(id, blockType);
@@ -145,11 +143,11 @@ public:
 		for (const ParsedCircuit::ConnectionPort& port : ports) {
 			if (port.isInput) blockData->setConnectionInput(port.positionOnBlock, port.connectionEndId);
 			else blockData->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
+			if (!port.portName.empty()) {
+				blockData->setConnectionIdName(port.connectionEndId, port.portName);
+			}
 			if (port.block != 0) {
 				circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
-			}
-			if (!port.portName.empty()) {
-				circuitBlockData->setConnectionIdName(port.connectionEndId, port.portName);
 			}
 	    }
 
@@ -166,6 +164,7 @@ public:
 	inline iterator end() { return circuits.end(); }
 	inline const_iterator begin() const { return circuits.begin(); }
 	inline const_iterator end() const { return circuits.end(); }
+    inline int getCircuitCount() const { return circuits.size(); }
 
 	void connectListener(void* object, CircuitDiffListenerFunction func) {
 		for (auto& [id, circuit] : circuits) {
@@ -179,11 +178,21 @@ public:
 		}
 	}
 
+	template<class T>
+	void linkedFunctionForUpdates(const DataUpdateEventManager::EventData* eventData) {
+		auto eventWithData = eventData->cast<std::pair<BlockType, T>>();
+		if (!eventWithData) return;
+		SharedCircuit circuit = getCircuit(circuitBlockDataManager.getCircuitId(eventWithData->get().first));
+		if (!circuit) return;
+		circuit->addEdit();
+	}
+
 private:
 	circuit_id_t getNewCircuitId() { return ++lastId; }
 
 	BlockDataManager blockDataManager;
 	CircuitBlockDataManager circuitBlockDataManager;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	DataUpdateEventManager* dataUpdateEventManager;
 	EvaluatorManager* evaluatorManager;
 

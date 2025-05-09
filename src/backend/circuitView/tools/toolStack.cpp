@@ -1,9 +1,11 @@
 #include "toolStack.h"
 
+#include "toolManager.h"
+
 void ToolStack::activate() {
 	isActive = true;
 	if (!toolStack.empty()) {
-		if (pointerInView) { 
+		if (pointerInView) {
 			PositionEvent event("Stack Updating Position", lastPointerFPosition);
 			toolStack.back()->enterBlockView(&event);
 		} else {
@@ -114,6 +116,10 @@ void ToolStack::popAbove(CircuitTool* toolNotToPop) {
 		toolStack.back()->exitBlockView(&event);
 	}
 	if (isActive) toolStack.back()->activate();
+}
+
+void ToolStack::switchToStack(int stack) {
+	toolManager->selectStack(stack);
 }
 
 void ToolStack::setCircuit(Circuit* circuit) {

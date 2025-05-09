@@ -3,36 +3,29 @@
 #include "connectionContainer.h"
 #include "block.h"
 
-bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
-	connections[thisEndId].push_back(otherConnectionEnd);
+bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) {
+	connections[thisEndId].emplace(otherConnectionEnd);
 	return true;
 }
 
-bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) {
+bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) {
 	auto iter = connections.find(thisEndId);
 	if (iter == connections.end()) return false;
-	// get the connections vector corresponding with the end id
-	auto& connectionsVec = iter->second;
-	// if connectionsVec is empty 
-	// if (connectionsVec.empty()) return false; // cant happen while we are not having empty vectors
-	// it is the last connectionEnd in the vec
-	if (otherConnectionEnd == connectionsVec.back()) {
-		connectionsVec.pop_back();
-		if (connectionsVec.empty()) {
-			connections.erase(iter);
-		}
-		return true;
+	// get the connections set corresponding with the end id
+	auto& connectionsSet = iter->second;
+	// if connectionsSet is empty 
+	// if (connectionsSet.empty()) return false; // cant happen while we are not having empty vectors
+	auto iter2 = connectionsSet.find(otherConnectionEnd);
+	if (iter2 == connectionsSet.end()) {
+		return false;
 	}
-	// find a remove the end
-	auto iter2 = std::find(connectionsVec.begin(), --connectionsVec.end(), otherConnectionEnd);
-	if (iter2 == --connectionsVec.end()) return false;
-	*iter2 = connectionsVec.back();
-	connectionsVec.pop_back();
+	connectionsSet.erase(iter2);
 	return true;
+
 }
 
-bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, const ConnectionEnd& otherConnectionEnd) const {
+bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) const {
 	auto iter = connections.find(thisEndId);
-	return iter != connections.end() && contains(iter->second.begin(), iter->second.end(), otherConnectionEnd);
+	return iter != connections.end() && iter->second.contains(otherConnectionEnd);
 }
 

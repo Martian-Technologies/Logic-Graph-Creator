@@ -1,103 +1,96 @@
-version_5
+version_6
 import "ShiftRegister.cir"
 import "TenPulseClock.cir"
 Circuit: "UART_TX"
 UUID: 45270b21-42b5-4b16-bf5c-4c59b1a11a2c
 size: <3, 8>
-ports (9):
-	(IN, 0, 5, <0, 0>, "P0")
-	(OUT, 8, 15, <2, 0>, "TX")
-	(IN, 1, 6, <0, 1>, "P1")
-	(IN, 2, 7, <0, 2>, "P2")
-	(IN, 3, 8, <0, 3>, "P3")
-	(IN, 4, 1, <0, 4>, "P4")
-	(IN, 5, 9, <0, 5>, "P5")
-	(IN, 6, 10, <0, 6>, "P6")
-	(IN, 7, 3, <0, 7>, "Send")
-blockId 1 SWITCH 8 7 ZERO 1
-	(connId:0) (2 7)
-blockId 2 "4c1db4db-d14f-4e8c-8361-53b21ec09fd8" 11 0 ZERO 22
-	(connId:0) (25 0)
-	(connId:1) (23 1)
-	(connId:2) (27 1)
-	(connId:3) (5 0)
-	(connId:4) (6 0)
-	(connId:5) (7 0)
-	(connId:6) (8 0)
-	(connId:7) (1 0)
-	(connId:8) (9 0)
-	(connId:9) (10 0)
-	(connId:10) (12 1)
-	(connId:11) (24 1)
-	(connId:12) (13 1)
-	(connId:13) (14 1)
-	(connId:14) (15 0) (24 0)
-	(connId:15) (16 0) (24 0)
-	(connId:16) (17 0) (24 0)
-	(connId:17) (18 0) (24 0)
-	(connId:18) (19 0) (24 0)
-	(connId:19) (20 0) (24 0)
-	(connId:20) (21 0) (24 0)
-	(connId:21) (22 0) (24 0)
-blockId 3 BUTTON 6 11 ZERO 1
+ports:
+	(IN, 7, 26, <0, 7>, "Send")
+	(IN, 6, 19, <0, 6>, "P6")
+	(IN, 5, 20, <0, 5>, "P5")
+	(IN, 4, 28, <0, 4>, "P4")
+	(IN, 2, 22, <0, 2>, "P2")
+	(IN, 1, 23, <0, 1>, "P1")
+	(IN, 3, 21, <0, 3>, "P3")
+	(OUT, 8, 14, <2, 0>, "TX")
+	(IN, 0, 24, <0, 0>, "P0")
+blockId 28 SWITCH 8 7 ZERO
+	(connId:0) (27 7)
+blockId 27 "4c1db4db-d14f-4e8c-8361-53b21ec09fd8" 11 0 ZERO
+	(connId:2) (2 1)
 	(connId:0) (4 0)
-blockId 4 NOR 7 11 ZERO 2
-	(connId:0) (3 0)
-	(connId:1) (24 0)
-blockId 5 SWITCH 8 3 ZERO 1
-	(connId:0) (2 3)
-blockId 6 SWITCH 8 4 ZERO 1
-	(connId:0) (2 4)
-blockId 7 SWITCH 8 5 ZERO 1
-	(connId:0) (2 5)
-blockId 8 SWITCH 8 6 ZERO 1
-	(connId:0) (2 6)
-blockId 9 SWITCH 8 8 ZERO 1
-	(connId:0) (2 8)
-blockId 10 SWITCH 8 9 ZERO 1
-	(connId:0) (2 9)
-blockId 11 AND 7 10 ZERO 2
-	(connId:0)
-	(connId:1) (12 0)
-blockId 12 NOR 8 10 ZERO 2
-	(connId:0) (11 1)
-	(connId:1) (2 10)
-blockId 13 AND 8 12 ZERO 2
-	(connId:0)
-	(connId:1) (2 12)
-blockId 14 AND 8 13 ZERO 2
-	(connId:0)
-	(connId:1) (2 13)
-blockId 15 LIGHT 15 2 ZERO 1
-	(connId:0) (2 14)
-blockId 16 LIGHT 15 3 ZERO 1
-	(connId:0) (2 15)
-blockId 17 LIGHT 15 4 ZERO 1
-	(connId:0) (2 16)
-blockId 18 LIGHT 15 5 ZERO 1
-	(connId:0) (2 17)
-blockId 19 LIGHT 15 6 ZERO 1
-	(connId:0) (2 18)
-blockId 20 LIGHT 15 7 ZERO 1
-	(connId:0) (2 19)
-blockId 21 LIGHT 15 8 ZERO 1
-	(connId:0) (2 20)
-blockId 22 LIGHT 15 9 ZERO 1
-	(connId:0) (2 21)
-blockId 23 AND 8 1 ZERO 2
-	(connId:0)
-	(connId:1) (2 1)
-blockId 24 NOR 8 11 ZERO 2
-	(connId:0) (2 14) (2 15) (2 16) (2 17) (2 18) (2 19) (2 20) (2 21) (4 1)
-	(connId:1) (2 11)
-blockId 25 "4b9d9242-88e0-4fbb-aa7b-73a0b37ef254" 8 0 ZERO 1
-	(connId:0) (2 0)
-blockId 26 AND 7 2 ZERO 2
-	(connId:0)
-	(connId:1) (27 0)
-blockId 27 NAND 8 2 ZERO 2
-	(connId:0) (26 1)
-	(connId:1) (2 2)
-blockId 28 AND 0 5 ZERO 2
-	(connId:0)
-	(connId:1)
+	(connId:11) (5 1)
+	(connId:1) (6 1)
+	(connId:13) (15 1)
+	(connId:12) (16 1)
+	(connId:10) (17 1)
+	(connId:9) (19 0)
+	(connId:8) (20 0)
+	(connId:6) (21 0)
+	(connId:5) (22 0)
+	(connId:21) (5 0) (7 0)
+	(connId:20) (5 0) (8 0)
+	(connId:19) (5 0) (9 0)
+	(connId:16) (5 0) (12 0)
+	(connId:4) (23 0)
+	(connId:15) (5 0) (13 0)
+	(connId:3) (24 0)
+	(connId:14) (5 0) (14 0)
+	(connId:17) (5 0) (11 0)
+	(connId:18) (5 0) (10 0)
+	(connId:7) (28 0)
+blockId 26 BUTTON 6 11 ZERO
+	(connId:0) (25 0)
+blockId 25 NOR 7 11 ZERO
+	(connId:1) (5 0)
+	(connId:0) (26 0)
+blockId 24 SWITCH 8 3 ZERO
+	(connId:0) (27 3)
+blockId 23 SWITCH 8 4 ZERO
+	(connId:0) (27 4)
+blockId 22 SWITCH 8 5 ZERO
+	(connId:0) (27 5)
+blockId 21 SWITCH 8 6 ZERO
+	(connId:0) (27 6)
+blockId 20 SWITCH 8 8 ZERO
+	(connId:0) (27 8)
+blockId 19 SWITCH 8 9 ZERO
+	(connId:0) (27 9)
+blockId 18 AND 7 10 ZERO
+	(connId:1) (17 0)
+blockId 17 NOR 8 10 ZERO
+	(connId:1) (27 10)
+	(connId:0) (18 1)
+blockId 16 AND 8 12 ZERO
+	(connId:1) (27 12)
+blockId 15 AND 8 13 ZERO
+	(connId:1) (27 13)
+blockId 14 LIGHT 15 2 ZERO
+	(connId:0) (27 14)
+blockId 13 LIGHT 15 3 ZERO
+	(connId:0) (27 15)
+blockId 12 LIGHT 15 4 ZERO
+	(connId:0) (27 16)
+blockId 11 LIGHT 15 5 ZERO
+	(connId:0) (27 17)
+blockId 10 LIGHT 15 6 ZERO
+	(connId:0) (27 18)
+blockId 9 LIGHT 15 7 ZERO
+	(connId:0) (27 19)
+blockId 8 LIGHT 15 8 ZERO
+	(connId:0) (27 20)
+blockId 7 LIGHT 15 9 ZERO
+	(connId:0) (27 21)
+blockId 6 AND 8 1 ZERO
+	(connId:1) (27 1)
+blockId 5 NOR 8 11 ZERO
+	(connId:1) (27 11)
+	(connId:0) (27 21) (27 20) (27 19) (27 18) (27 17) (27 16) (25 1) (27 15) (27 14)
+blockId 4 "4b9d9242-88e0-4fbb-aa7b-73a0b37ef254" 8 0 ZERO
+	(connId:0) (27 0)
+blockId 3 AND 7 2 ZERO
+	(connId:1) (2 0)
+blockId 2 NAND 8 2 ZERO
+	(connId:1) (27 2)
+	(connId:0) (3 1)
+blockId 1 AND 0 5 ZERO
