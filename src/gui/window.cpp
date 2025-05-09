@@ -31,6 +31,9 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRend
 	Rml::Element* modeTreeParent = rmlDocument->GetElementById("mode-selection-tree");
 	selectorWindow.emplace(backend->getBlockDataManager(), backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, itemTreeParent, modeTreeParent);
 
+	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
+	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
+
 	Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(rmlDocument);
 
