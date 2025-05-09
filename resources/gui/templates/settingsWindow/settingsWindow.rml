@@ -1,6 +1,7 @@
 <template name="settings-window" content="content">
 	<head>
 		<link type="text/rcss" href="../../styles/settingsWindow.rcss"/>
+		<link type="text/template" href="./colorPicker.rml"/>
 	</head>
 
 	<body>
@@ -28,6 +29,9 @@
 			<!-- Content here created by "src/gui/settingsWindow/contentManager.h" -->
 		</div>
 
+		<div id="color-popup">
+				<template src="color-picker"></template>
+		</div>
 	</body>
 
 </template>

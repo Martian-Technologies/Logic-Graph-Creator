@@ -23,7 +23,7 @@ void ContentManager::Initialize() {
 	// }
 	
 	for (int i = 0; i < appearance.size(); i++) {
-		generateForm(appearance[i][1], appearance[i][0]);
+		// generateForm(appearance[i][1], appearance[i][0]);
 	}
 
 	// for (int i = 0; i < keybinds.size(); i++) {

@@ -1,0 +1,171 @@
+<template name="color-picker" content="content">
+	<head>
+		<link type="text/rcss" href="../../../styles/colorPicker.rcss"/>
+	</head>
+
+	<body>
+
+		<div class="color-container">
+			<div id="row-1" class="hexagons-row rank-1">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-2" class="hexagons-row rank-2">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-3" class="hexagons-row rank-3">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-4" class="hexagons-row rank-4">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-5" class="hexagons-row rank-5">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-6" class="hexagons-row rank-6">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-7" class="hexagons-row rank-7">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-8" class="hexagons-row rank-6">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-9" class="hexagons-row rank-5">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-10" class="hexagons-row rank-4">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-11" class="hexagons-row rank-3">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-12" class="hexagons-row rank-2">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+			<div id="row-13" class="hexagons-row rank-1">
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
+			</div>
+		</div>
+		
+		<div class="selector">
+			<input type="text">
+			<button>Click</button>
+		</div>
+
+	</body>
+
+</template>
