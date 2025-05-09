@@ -1,5 +1,6 @@
 #include "circuitFileManager.h"
 
+#include "computerAPI/circuits/logisimParser.h"
 #include "openCircuitsParser.h"
 #include "gatalityParser.h"
 #include "util/uuid.h"
@@ -10,20 +11,33 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
 		// our gatality file parser function
 		GatalityParser parser(this, circuitManager);
-
         std::vector<circuit_id_t> circuits = parser.load(path);
+
 		if (circuits.empty()) {
-			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
+			logWarning("No circuits loaded from {}. This may be an error", "CircuitFileManager", path);
 		}
+
 		return circuits;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
         SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		OpenCircuitsParser parser(this, circuitManager);
 		std::vector<circuit_id_t> circuits = parser.load(path);
+
 		if (circuits.empty()) {
-			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
+			logWarning("No circuits loaded from {}. This may be an error", "CircuitFileManager", path);
 		}
+
+		return circuits;
+	} else if (path.size() >= 5 && path.substr(path.size() - 5) == ".circ"){
+		// logisim(-evolution) support
+		LogisimParser parser(this, circuitManager);
+		std::vector<circuit_id_t> circuits = parser.load(path);
+
+		if (circuits.empty()) {
+			logWarning("No circuits loadede from {}. This may be an error", "LogisimParser", path);
+		}
+
 		return circuits;
 	} else {
 		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
