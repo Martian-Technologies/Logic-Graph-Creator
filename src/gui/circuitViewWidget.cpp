@@ -133,20 +133,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	));
 
-	document->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
-		[this](Rml::Event& event) {
-			int button = event.GetParameter<int>("button", 0);
-			if (button == 0) { // left
-				if (event.GetParameter<int>("alt_key", 0)) {
-					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
-				}
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
-			} else if (button == 1) { // right
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
-			}
-		}
-	));
-
 	Rml::Element* root = document->GetElementById("main-container");
 	root->AddEventListener(Rml::EventId::Mouseup, new EventPasser(
 		[this](Rml::Event& event) {
@@ -166,6 +152,20 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			if (insideWindow(point)) { // inside the widget
 				Vec2 viewPos = pixelsToView(point);
 				circuitView->getEventRegister().doEvent(PositionEvent("Pointer Move", circuitView->getViewManager().viewToGrid(viewPos)));
+			}
+		}
+	));
+
+	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
+		[this](Rml::Event& event) {
+			int button = event.GetParameter<int>("button", 0);
+			if (button == 0) { // left
+				if (event.GetParameter<int>("alt_key", 0)) {
+					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
+				}
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
+			} else if (button == 1) { // right
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
 			}
 		}
 	));
