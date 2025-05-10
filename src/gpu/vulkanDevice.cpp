@@ -47,22 +47,23 @@ VulkanDevice::~VulkanDevice() {
 }
 
 void VulkanDevice::waitIdle() {
-	std::lock_guard<std::mutex> lock(graphicsSubmitMux);
-	std::lock_guard<std::mutex> lock2(presentSubmitMux);
+	std::lock_guard<std::mutex> lock(queueMux);
 	vkDeviceWaitIdle(device);
 }
 
 VkResult VulkanDevice::submitGraphicsQueue(VkSubmitInfo* submitInfo, VkFence fence) {
-	std::lock_guard<std::mutex> lock(graphicsSubmitMux);
+	std::lock_guard<std::mutex> lock(queueMux);
 	return vkQueueSubmit(graphicsQueue.queue, 1, submitInfo, fence);
 }
 
 VkResult VulkanDevice::submitPresent(VkPresentInfoKHR* presentInfo) {
-	std::lock_guard<std::mutex> lock(presentSubmitMux);
+	std::lock_guard<std::mutex> lock(queueMux);
 	return vkQueuePresentKHR(presentQueue.queue, presentInfo);
 }
 
 void VulkanDevice::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function) {
+	std::lock_guard<std::mutex> immediateLock(immediateSubmitMux);
+	
 	// set up
 	vkResetFences(device, 1, &immediateFence);
 	vkResetCommandBuffer(immediateCommandBuffer, 0);
@@ -84,7 +85,7 @@ void VulkanDevice::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& fu
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &immediateCommandBuffer;
 	{
-		std::lock_guard<std::mutex> lock(graphicsSubmitMux);
+		std::lock_guard<std::mutex> submitLock(queueMux);
 		if (vkQueueSubmit(graphicsQueue.queue, 1, &submitInfo, immediateFence) != VK_SUCCESS) {
 			throwFatalError("failed to submit draw command buffer!");
 		}

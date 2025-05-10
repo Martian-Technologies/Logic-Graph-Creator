@@ -43,14 +43,14 @@ private:
 
 	// Queues
 	QueueInfo graphicsQueue;
-	std::mutex graphicsSubmitMux;
 	QueueInfo presentQueue;
-	std::mutex presentSubmitMux;
+	std::mutex queueMux;
 
 	// Immediate submission system
 	VkFence immediateFence;
     VkCommandBuffer immediateCommandBuffer;
     VkCommandPool immediateCommandPool;
+	std::mutex immediateSubmitMux;
 };
 
 #endif
