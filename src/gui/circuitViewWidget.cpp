@@ -127,12 +127,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { logInfo("New Circuit"); newCircuit(); }
 	);
 
-	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
-		[this](Rml::Event& event) {
-			doResize = true;
-		}
-	));
-
 	Rml::Element* root = document->GetElementById("main-container");
 	root->AddEventListener(Rml::EventId::Mouseup, new EventPasser(
 		[this](Rml::Event& event) {

@@ -12,7 +12,7 @@
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) : sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager) {
 	// create rmlUi context
-	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
+	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 
 	renderer.activateRml(renderInterface);
 	rmlDocument = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
@@ -80,6 +80,8 @@ bool Window::recieveEvent(SDL_Event& event) {
 		// let renderer know we if resized the window
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
 			renderer.resize({event.window.data1, event.window.data2});
+			rmlContext->Update();
+			circuitViewWidget->handleResize();
 		}
 
 		return true;
@@ -89,8 +91,6 @@ bool Window::recieveEvent(SDL_Event& event) {
 
 void Window::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
-
-	circuitViewWidget->handleResize();
 	
 	renderer.prepareForRml(renderInterface);
 	rmlContext->Render();

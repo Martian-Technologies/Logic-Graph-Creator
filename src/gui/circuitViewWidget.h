@@ -49,7 +49,6 @@ private:
 	Rml::Element* element;
 	SDL_Window* window;
 	KeybindHandler keybindHandler;
-	bool doResize = false;
 
 	// settings (temp)
 	bool mouseControls = false;
