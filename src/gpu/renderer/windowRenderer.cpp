@@ -74,7 +74,8 @@ void WindowRenderer::renderLoop() {
 		if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR || imageGetResult == VK_SUBOPTIMAL_KHR) {
 			// if the swapchain is not ideal, try again but recreate it this time (this happens in normal operation)
 			swapchainRecreationNeeded = true;
-			continue;
+			
+			if (imageGetResult == VK_ERROR_OUT_OF_DATE_KHR) continue;
 		} else if (imageGetResult != VK_SUCCESS) {
 			// if the error was even worse (one could say exceptional), we log an error and pray
 			logError("failed to acquire swap chain image!");

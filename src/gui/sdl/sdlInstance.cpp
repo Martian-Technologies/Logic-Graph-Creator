@@ -11,7 +11,7 @@ SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
 
 #if defined(unix) && !(defined(__APPLE__) || defined(__MACH__))
-	// If we have wayland, enable wayland for SDL (thanks Riley J. Beckett (nathanial))
+	// If we have wayland, enable wayland for SDL (thanks Riley J. Beckett (nathanial b))
 	int numberOfVideoDrivers = SDL_GetNumVideoDrivers();
 	for (int i = 0; i < numberOfVideoDrivers; i++) {
 		if (std::string(SDL_GetVideoDriver(i)) == "wayland") {
