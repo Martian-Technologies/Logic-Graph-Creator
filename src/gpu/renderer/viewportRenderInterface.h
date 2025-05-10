@@ -24,6 +24,7 @@ public:
 	void linkToWindowRenderer(WindowRenderer* windowRenderer);
 	
 	ViewportViewData getViewData();
+	inline bool hasCircuit() { return circuitIsNotNullptr; }
 	inline VulkanChunker& getChunker() { return chunker; }
 	inline Evaluator* getEvaluator() { return evaluator; }
 	
@@ -57,9 +58,10 @@ private:
 
 private:
 	// From the UI Side
-	WindowRenderer* linkedWindowRenderer = nullptr;
 	Rml::Element* element;
+	WindowRenderer* linkedWindowRenderer = nullptr;
 	Evaluator* evaluator = nullptr;
+	std::atomic<bool> circuitIsNotNullptr = false;
 
 	// Vulkan
 	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view

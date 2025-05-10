@@ -7,6 +7,7 @@
 struct GridPushConstants {
 	glm::mat4 iMvp;
 	float gridFade;
+	float hasCircuitVisibility;
 };
 
 class GridRenderer {
@@ -14,7 +15,7 @@ public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);
 	void cleanup();
 
-	void render(Frame& frame, const glm::mat4& viewMatrix, float viewScale);
+	void render(Frame& frame, const glm::mat4& viewMatrix, float viewScale, bool hasCircuit);
 
 private:
 	Pipeline pipeline;

@@ -26,6 +26,7 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 // ====================================== INTERFACE ==========================================
 
 void ViewportRenderInterface::setCircuit(Circuit* circuit) {
+	circuitIsNotNullptr = circuit != nullptr;
 	chunker.setCircuit(circuit);
 }
 

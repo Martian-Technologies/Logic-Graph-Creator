@@ -8,6 +8,7 @@ layout (location = 0) out vec4 outColor;
 layout( push_constant ) uniform constants
 {
 	layout(offset = 64) float gridFade;
+	float hasCircuitVisibility;
 } push;
 
 // background constants
@@ -36,6 +37,6 @@ void main() {
 	col = mix(col, mix(bigGridCol, gridCol, 1 - push.gridFade), bigGrid);
 	col *= (1.0 - length(screenCord)*gradientIntensity); // gradient
 	
-	outColor = vec4(col, 1.0f);
+	outColor = vec4(col * mix(0.6f, 1.0f, push.hasCircuitVisibility), 1.0f);
 }
 
