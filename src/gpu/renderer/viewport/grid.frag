@@ -34,7 +34,8 @@ void main() {
 	float bigGrid = grid(worldCord, 1.0/10.0, mix(gridLineWidth, bigGridLineWidth, 1 - push.gridFade));
 	
 	vec3 col = mix(bgCol, gridCol, smallGrid);
-	col = mix(col, mix(bigGridCol, gridCol, 1 - push.gridFade), bigGrid);
+	col = mix(col, mix(bgCol, gridCol, bigGrid), 1 - push.gridFade);
+	// col = mix(col, mix(bigGridCol, gridCol, 1 - push.gridFade), bigGrid);
 	col *= (1.0 - length(screenCord)*gradientIntensity); // gradient
 	
 	outColor = vec4(col * mix(0.6f, 1.0f, push.hasCircuitVisibility), 1.0f);
