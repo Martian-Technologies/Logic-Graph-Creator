@@ -79,10 +79,12 @@ private:
 	void loadCircuit(const std::vector<std::string>& circuitChunk); // loads xml "<circuit name=...>"
 	void loadAppearance(); // loads xml <appear> block
 	void loadWire(); // loads xml "<wire from=... to=... />"
-	void loadComp(); // loads xml "<comp from=... to=...> ... </comp>"
+	bool loadComp(const std::vector<std::string>& componentChunk, BlockType& blockType, Rotation& rotation); // loads xml "<comp from=... to=...> ... </comp>"
 
 	std::unordered_set<std::string> importedFiles;	
 	std::unordered_map<std::string, BlockType> blockReference = {
+		{ "Pin", BlockType::SWITCH },   // TODO: custom block should have this changed to chip in
+		{ "PinOut", BlockType::LIGHT }, // TODO: this is chip out
 		{ "AND Gate", BlockType::AND },
 		{ "OR Gate", BlockType::OR },
 		{ "NOT Gate", BlockType::NAND },

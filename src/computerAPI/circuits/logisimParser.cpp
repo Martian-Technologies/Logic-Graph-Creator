@@ -1,6 +1,7 @@
 #include "logisimParser.h"
 #include "backend/circuit/circuit.h"
 #include "backend/circuit/parsedCircuit.h"
+#include <RmlUi/Core/Log.h>
 #include <fstream>
 #include <string>
 
@@ -48,7 +49,7 @@ std::vector<circuit_id_t> LogisimParser::load(const std::string& path) {
 
 		// finds circuit, else hops over trash
 		if (!parsingCircuit && token.substr(1, 7) == "circuit") {
-			size_t namePos = token.find("name=\"") + 6;
+			int namePos = token.find("name=\"") + 6;
 			circuitName = token.substr(namePos, token.find("\"", namePos) - namePos);
 
 			parsingCircuit = true;
@@ -79,14 +80,30 @@ std::vector<circuit_id_t> LogisimParser::load(const std::string& path) {
 	return circuitIds;
 }
 
-void loadCircuit();
 
-void loadWire() {
+void LogisimParser::loadCircuit(const std::vector<std::string>& circuitChunk) {
+
+}
+
+void LogisimParser::loadWire() {
 	
 }
 
-void loadComp() {
+bool LogisimParser::loadComp(const std::vector<std::string>& componentChunk, BlockType& blockType, Rotation& rotation) {
+	// getting blocktype
+	int libPos = componentChunk[0].find("lib=") + 4;
+	int libType = std::stoi(componentChunk[0].substr(libPos, componentChunk[0].find("\"", libPos) - libPos));
+	int gatePos = componentChunk[0].find("name=\"") + 6;
+	std::string gate = componentChunk[0].substr(gatePos, componentChunk[0].find("\"", gatePos) - gatePos);
+
+	if (libType > 1) {
+		logWarning("doesnt support lib " + std::to_string(libType), "LogisimParser");
+		return false;
+	}
 	
+	blockType = blockReference.find(gate)->second; 
+
+	return true;
 }
 
 
