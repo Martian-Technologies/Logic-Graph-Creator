@@ -120,7 +120,7 @@ Nord Color Pallete:
 }
 
 #settings-content-panel .user-int-option input {
-	min-width: 3rem; /* Minimum reasonable width */
+	min-width: 3rem; 
 	width: 7rem;
 	padding: 0.5rem;
 	border-radius: 0.375rem;

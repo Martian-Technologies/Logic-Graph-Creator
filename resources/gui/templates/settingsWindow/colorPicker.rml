@@ -162,7 +162,6 @@
 		</div>
 		
 		<div class="selector">
-			<input type="text">
 			<button>Click</button>
 		</div>
 

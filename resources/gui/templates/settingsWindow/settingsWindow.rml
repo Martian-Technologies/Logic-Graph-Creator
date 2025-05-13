@@ -30,7 +30,7 @@
 		</div>
 
 		<div id="color-popup">
-				<template src="color-picker"></template>
+			<template src="color-picker"></template>
 		</div>
 	</body>
 

@@ -1,60 +1,64 @@
 
-
+/*
+* Size of enclusion
+* width: 25rem 
+* height: 20rem
+*/
 .color-container {
-	width: 100%;
 	height: 70%;
 	background-color: #ffffff;
 
-	border: 2px solid;
+	border: 2px;
 	border-color: #00ff00;
 }
 
 .selector {
-	width: 100%;
 	height: 30%;
 
-	border: 2px solid;
-	border-color: #00ff00;
+	border: 2px;
+	border-color: #0000ff;
 }
 
 
 .hexagons-row {
 	display: flex;
 	flex-direction: row;
-	margin-bottom: -.25rem; /* Adjust vertical overlap */
 }
 
-#color-container .rank-1 {
+.rank-1 {
 	margin-left: 3.9rem;
-	margin-top: 0.75rem;
 }
 
-#color-container .rank-2 {
+.rank-2 {
 	margin-left: 3.25rem;
-	margin-top: 0.75rem;
+	margin-bottom: -0.5rem; 
 }
 
-#color-container .rank-3 {
+.rank-3 {
 	margin-left: 2.6rem;
-	margin-top: .75rem;
+	margin-bottom: -0.5rem; 
 }
 
-#color-container .rank-4 {
+.rank-4 {
 	margin-left: 1.95rem;
-	margin-top: .75rem;
+	margin-bottom: -0.5rem; 
 }
-#color-container .rank-5 {
+.rank-5 {
 	margin-left: 1.3rem;
-	margin-top: .75rem;
+	margin-bottom: -0.5rem; 
 }
 
-#color-container .rank-6 {
+.rank-6 {
 	margin-left: 0.65rem;
-	margin-top: .75rem;
+	margin-bottom: -0.5rem; 
 }
 
-#color-container .rank-7 {
-	margin-top: .75rem;
+.rank-7 {
+	margin-bottom: -0.5rem; 
+}
+
+#row-1 {
+	margin-bottom: -0.5rem; 
 }
 
 
@@ -72,15 +76,12 @@
 	width: 0;
 	height: 0;
 	border-left-width: 0.65rem;  /* 50% of 1.3rem */
-	border-left-style: solid;
 	border-left-color: transparent;
 
 	border-right-width: 0.65rem;
-	border-right-style: solid;
 	border-right-color: transparent;
 
 	border-bottom-width: 0.45rem; /* 30% of height */
-	border-bottom-style: solid;
 	border-bottom-color: red;
 
 	position: absolute;
@@ -102,15 +103,12 @@
 	width: 0;
 	height: 0;
 	border-left-width: 0.65rem;
-	border-left-style: solid;
 	border-left-color: transparent;
 
 	border-right-width: 0.65rem;
-	border-right-style: solid;
 	border-right-color: transparent;
 
 	border-top-width: 0.45rem;
-	border-top-style: solid;
 	border-top-color: red;
 
 	position: absolute;
@@ -131,4 +129,158 @@
 	border-top-color: #00ff00;
 }
 
+/* ---------- DAM COLORING ---------- */
 
+.hexagon .color-1-top  { border-bottom-color: #013366; }
+.hexagon .color-1-mid  { background-color:    #013366; }
+.hexagon .color-1-bot  { border-top-color:    #013366; }
+.hexagon .color-2-top  { border-bottom-color: #336699; }
+.hexagon .color-2-mid  { background-color:    #336699; }
+.hexagon .color-2-bot  { border-top-color:    #336699; }
+.hexagon .color-3-top  { border-bottom-color: #3366cc; }
+.hexagon .color-3-mid  { background-color:    #3366cc; }
+.hexagon .color-3-bot  { border-top-color:    #3366cc; }
+.hexagon .color-4-top  { border-bottom-color: #013399; }
+.hexagon .color-4-mid  { background-color:    #013399; }
+.hexagon .color-4-bot  { border-top-color:    #013399; }
+.hexagon .color-5-top  { border-bottom-color: #000099; }
+.hexagon .color-5-mid  { background-color:    #000099; }
+.hexagon .color-5-bot  { border-top-color:    #000099; }
+.hexagon .color-6-top  { border-bottom-color: #0000cc; }
+.hexagon .color-6-mid  { background-color:    #0000cc; }
+.hexagon .color-6-bot  { border-top-color:    #0000cc; }
+.hexagon .color-7-top  { border-bottom-color: #000066; }
+.hexagon .color-7-mid  { background-color:    #000066; }
+.hexagon .color-7-bot  { border-top-color:    #000066; }
+
+
+/*
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+
+
+.hexagon .color-2-top  { border-bottom-color: #; }
+.hexagon .color-2-mid  { background-color:    #; }
+.hexagon .color-2-bot  { border-top-color:    #; }
+*/

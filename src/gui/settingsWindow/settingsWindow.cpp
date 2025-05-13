@@ -1,6 +1,7 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
 #include "contentManager.h"
+#include "gui/settingsWindow/optionTemplates/colorPicker.h"
 // #include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
@@ -10,7 +11,7 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) 
 
 	ContentManager* cm = new ContentManager(document);
 	// SearchBar* sb = new SearchBar(document);
-
+	ColorPicker* cpicker = new ColorPicker(document);
 	Initialize();
 }
 
@@ -50,7 +51,7 @@ void SettingsWindow::connectWindowOptions() {
 	Rml::Element* settingsActions = context->GetElementById("setting-actions");
 
 	// Save
-	Rml::Element* saveButton = settingsActions->GetElementById("settings-apply");
+	Rml::Element* saveButton = settingsActions->GetElementById("settings-save-button");
 	saveButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("saved");
@@ -58,7 +59,7 @@ void SettingsWindow::connectWindowOptions() {
 	));
 
 	// Default
-	Rml::Element* defaultButton = settingsActions->GetElementById("settings-reset");
+	Rml::Element* defaultButton = settingsActions->GetElementById("settings-default-button");
 	defaultButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("default");
@@ -66,7 +67,7 @@ void SettingsWindow::connectWindowOptions() {
 	));
 
 	// Cancel
-	Rml::Element* closeButton = settingsActions->GetElementById("settings-cancel");
+	Rml::Element* closeButton = settingsActions->GetElementById("settings-close-button");
 	closeButton->AddEventListener("click", new EventPasser(
 		[this](Rml::Event& event) {
 			logInfo("closed");

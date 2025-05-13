@@ -45,6 +45,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 
 	Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(document);
+	settingsWindow->toggleVisibility();
 
 	MenuBar* menuBar = new MenuBar(document, settingsWindow, this);
 
