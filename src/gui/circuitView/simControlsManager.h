@@ -5,21 +5,27 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include "backend/dataUpdateEventManager.h"
+
+class CircuitViewWidget;
+
 class SimControlsManager {
 public:
-	SimControlsManager(Rml::ElementDocument* document);
-	~SimControlsManager();
+	SimControlsManager(Rml::ElementDocument* document, std::shared_ptr<CircuitViewWidget> circuitViewWidget, DataUpdateEventManager* dataUpdateEventManager);
+	void update();
 
-	const Rml::String getTPS() const { return dynamic_cast<Rml::ElementFormControlTextArea*>(statusArea->GetElementById("tps-input"))->GetValue(); }
 private:
-	void Initialize();
 	void toggleSimulation();
 	void limitSpeed();
-	void setTPS(Rml::Element* element);
+	void setTPS();
 
-	Rml::Element* statusArea;
-	bool toggleSim;
-	bool limitSimSpeed;
+	bool doSetTPS = false;
+
+	Rml::Element* toggleSimElement;
+	Rml::Element* limitSpeedElement;
+	Rml::Element* tpsInputElement;
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 };
 
 #endif /* simControlsManager_h */

@@ -4,7 +4,6 @@
 #include "backend/blockData/blockDataManager.h"
 #include "backend/tools/toolManagerManager.h"
 #include "interaction/menuTree.h"
-#include "backend/tools/toolManagerManager.h"
 
 class CircuitManager;
 class CircuitViewWidget;

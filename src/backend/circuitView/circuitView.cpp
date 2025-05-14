@@ -22,6 +22,8 @@ void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 	evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 	toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
 	this->evaluator = evaluator;
+
+	if (dataUpdateEventManager) dataUpdateEventManager->sendEvent("circuitViewChangeEvaluator");
 }
 
 void CircuitView::setCircuit(SharedCircuit circuit) {

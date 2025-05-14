@@ -245,6 +245,19 @@ void CircuitViewWidget::render() {
 		renderer->resize(w, h);
 		renderer->reposition(x, y);
 	}
+	Evaluator* evaluator = circuitView->getEvaluator();
+	std::string tpsText = "Real tps: N/A";
+	if (evaluator) {
+		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
+	}
+	Rml::Element* realTpsDisplay = parent->GetElementById("real-tps-display");
+	Rml::Element* realTpsDisplayElement = realTpsDisplay->GetChild(0);
+	if (!realTpsDisplayElement)
+		realTpsDisplayElement = realTpsDisplay->AppendChild(std::move(realTpsDisplay->GetOwnerDocument()->CreateTextNode("")));
+	Rml::ElementText* realTpsDisplayText = rmlui_dynamic_cast<Rml::ElementText*>(realTpsDisplayElement);
+	if (realTpsDisplayText->GetText() != tpsText) {
+		realTpsDisplayText->SetText(tpsText);
+	}
 	renderer->render();
 }
 
