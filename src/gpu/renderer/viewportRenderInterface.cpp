@@ -30,8 +30,7 @@ void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	chunker.setCircuit(circuit);
 }
 
-void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
-	// TODO - this needs sync
+void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 	this->evaluator = evaluator;
 }
 

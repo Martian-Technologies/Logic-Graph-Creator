@@ -99,7 +99,7 @@ void ChunkRenderer::cleanup() {
 	wirePipeline.cleanup();
 }
 
-void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, Evaluator* evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);

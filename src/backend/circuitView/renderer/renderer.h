@@ -80,7 +80,7 @@ class Renderer {
 public:
 	// main flow
 	virtual void setCircuit(Circuit* circuit) = 0;
-	virtual void setEvaluator(Evaluator* evaluator) = 0;
+	virtual void setEvaluator(std::shared_ptr<Evaluator> evaluator) = 0;
 	virtual void setAddress(const Address& address) = 0;
 
 	virtual void updateView(ViewManager* viewManager) = 0;

@@ -26,12 +26,12 @@ public:
 	ViewportViewData getViewData();
 	inline bool hasCircuit() { return circuitIsNotNullptr; }
 	inline VulkanChunker& getChunker() { return chunker; }
-	inline Evaluator* getEvaluator() { return evaluator; }
+	inline std::shared_ptr<Evaluator> getEvaluator() { return evaluator; }
 	
 public:
 	// main flow
 	void setCircuit(Circuit* circuit) override;
-	void setEvaluator(Evaluator* evaluator) override;
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator) override;
 	void setAddress(const Address& address) override;
 
 	void updateView(ViewManager* viewManager) override;
@@ -60,7 +60,7 @@ private:
 	// From the UI Side
 	Rml::Element* element;
 	WindowRenderer* linkedWindowRenderer = nullptr;
-	Evaluator* evaluator = nullptr;
+	std::atomic<std::shared_ptr<Evaluator>> evaluator = nullptr;
 	std::atomic<bool> circuitIsNotNullptr = false;
 
 	// Vulkan

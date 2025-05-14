@@ -18,7 +18,7 @@ void CircuitView::setBackend(Backend* backend) {
 }
 
 void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-	renderer->setEvaluator(evaluator.get());
+	renderer->setEvaluator(evaluator);
 	evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 	toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
 	this->evaluator = evaluator;

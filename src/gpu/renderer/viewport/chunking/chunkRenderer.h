@@ -17,7 +17,7 @@ public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);
 	void cleanup();
 	
-	void render(Frame& frame, const glm::mat4& viewMatrix, Evaluator* evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
+	void render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks);
 
 private:
 	Pipeline blockPipeline;
