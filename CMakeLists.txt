@@ -20,7 +20,9 @@ endif()
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Gatality)
+project(Gatality VERSION 0.6.0)
+
+
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -155,7 +157,11 @@ if (GATALITY_BUILD_APP)
 
 	foreach(resource_path_relative IN LISTS RESOURCE_FILES)
 		set(original_resource "${RESOURCES_DIR}/${resource_path_relative}")
-		set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
+		if(APPLE)
+			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/${resource_path_relative}")
+		else()
+			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
+		endif()
 		get_filename_component(copied_resource_dir "${copied_resource}" DIRECTORY)
 
 		# Custom command which makes the parent directory and copies the resource
@@ -174,7 +180,11 @@ if (GATALITY_BUILD_APP)
 	add_dependencies(${PROJECT_NAME} copy-resources)
 
 	# ===================================== SHADER COMPILATION =========================================
-	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
+	if(APPLE)
+		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/shaders")
+	else()
+		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
+	endif()
 	file(GLOB_RECURSE SHADER_SOURCE_FILES
 		"${SOURCE_DIR}/*.vert"
 		"${SOURCE_DIR}/*.frag"
@@ -199,7 +209,23 @@ if (GATALITY_BUILD_APP)
 	
 	add_custom_target(compile-shaders DEPENDS ${SHADER_PRODUCTS})
 	add_dependencies(${PROJECT_NAME} compile-shaders)
-	
+
+	if (APPLE)
+		set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+		set(DIRS ${CMAKE_BINARY_DIR})
+		
+		install(TARGETS ${PROJECT_NAME}
+			BUNDLE DESTINATION . COMPONENT Runtime
+			RUNTIME DESTINATION bin COMPONENT Runtime
+		)
+		
+		install(CODE "include(BundleUtilities)
+		fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\" \"\" \"${DIRS}\")")
+		
+		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-MacOS")
+		set(CPACK_GENERATOR "DragNDrop")
+		include(CPack)
+	endif()
 endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
