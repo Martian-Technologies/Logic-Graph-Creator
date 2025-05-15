@@ -19,7 +19,6 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 
 		return circuits;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
-        SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		OpenCircuitsParser parser(this, circuitManager);
 		std::vector<circuit_id_t> circuits = parser.load(path);

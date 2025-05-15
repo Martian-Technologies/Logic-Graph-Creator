@@ -1,5 +1,5 @@
-#ifndef LOGISIM_PARSER_H
-#define LOGISIM_PARSER_H
+#ifndef logisimParser_h
+#define logisimParser_h
 
 /* parses LOGISIM's .circ files */
 /* ONLY SUPPORTS IMPORT RIGHT NOW, NO EXPORTING AVAILABLE */
@@ -55,8 +55,6 @@ Format: "<comp lib="0" loc="(60,300)" name="Pin">"
 	uint8_t lib; // not required but could be helpful 
 	// all values where | <a name="*" | appears
 	std::string label; 
-	
-	
 };
 
 // wires a - b, should cut otu intermediates
@@ -68,14 +66,12 @@ struct XMLWire {
 
 class LogisimParser : public ParsedCircuitLoader {
 public:
-	
     LogisimParser(CircuitFileManager* circuitFileManager, CircuitManager* circuitManager) : ParsedCircuitLoader(circuitFileManager, circuitManager) {}
 
 	std::vector<circuit_id_t> load(const std::string& path) override;
     bool save(const CircuitFileManager::FileData& fileData, bool compress);
 
 private:
-
 	void loadCircuit(const std::vector<std::string>& circuitChunk); // loads xml "<circuit name=...>"
 	void loadAppearance(); // loads xml <appear> block
 	void loadWire(); // loads xml "<wire from=... to=... />"
@@ -91,4 +87,4 @@ private:
 		{ "NAND Gate", BlockType::NAND }
 	};
 };
-#endif
+#endif /* logisimParser_h */

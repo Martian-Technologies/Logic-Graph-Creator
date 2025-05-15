@@ -1,9 +1,9 @@
 #include "logisimParser.h"
+
+#include <RmlUi/Core/Log.h>
+
 #include "backend/circuit/circuit.h"
 #include "backend/circuit/parsedCircuit.h"
-#include <RmlUi/Core/Log.h>
-#include <fstream>
-#include <string>
 
 
 std::vector<circuit_id_t> LogisimParser::load(const std::string& path) {
