@@ -4,6 +4,14 @@ void Swapchain::init(VulkanDevice* device, VkSurfaceKHR surface, std::pair<uint3
 	this->device = device;
 	
 	createSwapchain(surface, size, false);
+
+	// create image semaphores
+	VkSemaphoreCreateInfo semaphoreInfo = {};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	imageSemaphores.resize(swapchain.image_count);
+	for (uint32_t i = 0; i < swapchain.image_count; ++i) {
+		vkCreateSemaphore(device->getDevice(), &semaphoreInfo, nullptr, &imageSemaphores[i]);
+	}
 }
 
 void Swapchain::cleanup() {
@@ -11,6 +19,10 @@ void Swapchain::cleanup() {
 	vkb::destroy_swapchain(swapchain);
 
 	imageViews.clear();
+
+	for (uint32_t i = 0; i < swapchain.image_count; ++i) {
+		vkDestroySemaphore(device->getDevice(), imageSemaphores[i], nullptr);
+	}
 }
 
 void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size) {
@@ -30,7 +42,7 @@ void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32
 	if (!swapchainRet)
 		throwFatalError("Could not create vulkan swapchain. Error: " + swapchainRet.error().message());
 	if (useOld)
-		vkb::destroy_swapchain(swapchain);
+		vkb::destroy_swapchain(swapchain); 
 	swapchain = swapchainRet.value();
 
 	// Get image views

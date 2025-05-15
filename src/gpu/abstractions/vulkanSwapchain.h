@@ -13,6 +13,7 @@ public:
 
 	inline vkb::Swapchain& getSwapchain() { return swapchain; }
 	inline std::vector<VkFramebuffer>& getFramebuffers() { return framebuffers; }
+	inline std::vector<VkSemaphore>& getImageSemaphores() { return imageSemaphores; }
 
 private:
 	void createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld);
@@ -22,6 +23,7 @@ private:
 	vkb::Swapchain swapchain;
 	std::vector<VkFramebuffer> framebuffers;
 	std::vector<VkImageView> imageViews;
+	std::vector<VkSemaphore> imageSemaphores;
 
 	VulkanDevice* device;
 };

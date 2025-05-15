@@ -105,13 +105,14 @@ void WindowRenderer::renderLoop() {
 		submitInfo.pCommandBuffers = &frame.mainCommandBuffer;
 
 		// signal semaphores
-		VkSemaphore signalSemaphores[] = { frame.renderSemaphore };
+		VkSemaphore signalSemaphores[] = { swapchain.getImageSemaphores()[imageIndex] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		// submit to queue
 		if (device->submitGraphicsQueue(&submitInfo, frame.renderFence) != VK_SUCCESS){
 			logError("failed to submit draw command buffer!");
+			
 		}
 		
 		// start setting up present submission =====================================================

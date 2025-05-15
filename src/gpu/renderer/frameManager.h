@@ -16,7 +16,7 @@ public:
 public:
 	VkCommandPool commandPool;
 	VkCommandBuffer mainCommandBuffer;
-	VkSemaphore swapchainSemaphore, renderSemaphore;
+	VkSemaphore swapchainSemaphore;
 	VkFence renderFence;
 	std::chrono::time_point<std::chrono::system_clock> lastStartTime;
 

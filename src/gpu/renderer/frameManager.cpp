@@ -31,14 +31,12 @@ void Frame::init(VulkanDevice* device) {
 	semaphoreInfo.flags = 0;
 	vkCreateFence(device->getDevice(), &fenceInfo, nullptr, &renderFence);
 	vkCreateSemaphore(device->getDevice(), &semaphoreInfo, nullptr, &swapchainSemaphore);
-	vkCreateSemaphore(device->getDevice(), &semaphoreInfo, nullptr, &renderSemaphore);
 }
 
 void Frame::cleanup() {
 	vkDestroyCommandPool(device->getDevice(), commandPool, nullptr);
 
 	vkDestroyFence(device->getDevice(), renderFence, nullptr);
-	vkDestroySemaphore(device->getDevice(), renderSemaphore, nullptr);
 	vkDestroySemaphore(device->getDevice(), swapchainSemaphore, nullptr);
 }
 
