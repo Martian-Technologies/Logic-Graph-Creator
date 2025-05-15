@@ -6,7 +6,6 @@
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
 #include "gui/menuBar/menuBar.h"
-#include "gui/circuitView/simControlsManager.h"
 #include "gui/settingsWindow/settingsWindow.h"
 #include "util/config/config.h"
 
@@ -33,6 +32,8 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRend
 
 	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
+	
+	simControlsManager.emplace(rmlDocument, circuitViewWidget, backend->getDataUpdateEventManager());
 
 	Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(rmlDocument);

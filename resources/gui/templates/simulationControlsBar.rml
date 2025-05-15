@@ -5,11 +5,13 @@
 	</head>
 
 	<body>
-		
-		<div id="status-area">
-			<button id="toggle-simulation-option">Toggle Simulation</button>
-			<input id="limit-speed-checkbox" type="checkbox" /> 
-			<textarea id="tps-input" rows="1" cols="15" placeholder="40.00tps"></textarea>
+		<div id="sim-controls-area">
+			<div id="sim-controls-buttons">
+				<button id="toggle-simulation">Toggle Simulation</button>
+				<input id="limit-speed-checkbox" type="checkbox" /> 
+				<pre><textarea id="tps-input" rows="1" cols="10" maxlength="7"></textarea></pre>
+			</div>
+			<div id="real-tps-display"></div>
 		</div>
 	</body>
 	

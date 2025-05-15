@@ -15,6 +15,7 @@
 #include "evalWindow.h"
 #include "blockCreationWindow.h"
 #include "circuitViewWidget.h"
+#include "gui/circuitView/simControlsManager.h"
 
 class Window {
 public:
@@ -50,7 +51,8 @@ private:
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
 	std::optional<BlockCreationWindow> blockCreationWindow;
-	
+	std::optional<SimControlsManager> simControlsManager;
+
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	
 	Rml::Context* rmlContext;

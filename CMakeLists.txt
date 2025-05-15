@@ -20,7 +20,9 @@ endif()
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Gatality)
+project(Gatality VERSION 0.6.0)
+
+
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -33,6 +35,7 @@ file(GLOB_RECURSE PROJECT_SOURCES
 )
 
 option(GATALITY_BUILD_APP "Build Gatality App" ON)
+option(GATALITY_DISTRIBUTE_APP "Distribute App" OFF)
 option(GATALITY_BUILD_TESTS "Build Gatality Tests" OFF)
 
 # ======================================= SHARED DEPENDENCY SETUP ========================================
@@ -125,29 +128,31 @@ if (GATALITY_BUILD_APP)
 
 	# Platform specific business after add_executable
 	if(APPLE) # MacOS
+		# set(CMAKE_MACOSX_BUNDLE YES)
+
 		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 
 		# Bundle Properties 
-		set_target_properties(${PROJECT_NAME} PROPERTIES
-			MACOSX_BUNDLE TRUE
-			# indentification
-			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
-			MACOSX_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
-			# version info
-			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
-			MACOSX_BUNDLE_INFO_VERSION "6.0"
-			# Dev Region
-			MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
-			# Doc Types that macos can handle
-			MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
-			# Application category
-			MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
-			MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
-		)
-		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
+		# set_target_properties(${PROJECT_NAME} PROPERTIES
+		# 	MACOSX_BUNDLE TRUE
+		# 	# indentification
+		# 	MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
+		# 	MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
+		# 	MACOSX_BUNDLE_NAME "Gatality"
+		# 	MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
+		# 	# version info
+		# 	MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+		# 	MACOSX_BUNDLE_VERSION "${PROJECT_VERSION}"
+		# 	MACOSX_BUNDLE_INFO_VERSION "6.0"
+		# 	# Dev Region
+		# 	MACOSX_BUNDLE_DEVELOPMENT_REGION "English"
+		# 	# Doc Types that macos can handle
+		# 	MACOSX_BUNDLE_DOCUMENT_TYPES "json;JSON File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.json;txt;Text File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.txt;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.cir;circuit;Circuit File;Editor;${MACOSX_BUNDLE_GUI_IDENTIFIER}.circuit;"
+		# 	# Application category
+		# 	MACOSX_BUNDLE_INFO_STRING "Logic Gate Sandbox Application"
+		# 	MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+		# )
+		# set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "")
 	elseif (WIN32) # Windows
 		if (CMAKE_BUILD_TYPE MATCHES Release) # If release build
 			# Set WIN32_EXECUTABLE (Disables Console)
@@ -164,7 +169,11 @@ if (GATALITY_BUILD_APP)
 
 	foreach(resource_path_relative IN LISTS RESOURCE_FILES)
 		set(original_resource "${RESOURCES_DIR}/${resource_path_relative}")
-		set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
+		if(APPLE)
+			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/${resource_path_relative}")
+		else()
+			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
+		endif()
 		get_filename_component(copied_resource_dir "${copied_resource}" DIRECTORY)
 
 		# Custom command which makes the parent directory and copies the resource
@@ -183,7 +192,11 @@ if (GATALITY_BUILD_APP)
 	add_dependencies(${PROJECT_NAME} copy-resources)
 
 	# ===================================== SHADER COMPILATION =========================================
-	set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
+	if(APPLE)
+		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/shaders")
+	else()
+		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
+	endif()
 	file(GLOB_RECURSE SHADER_SOURCE_FILES
 		"${SOURCE_DIR}/*.vert"
 		"${SOURCE_DIR}/*.frag"
@@ -208,7 +221,56 @@ if (GATALITY_BUILD_APP)
 	
 	add_custom_target(compile-shaders DEPENDS ${SHADER_PRODUCTS})
 	add_dependencies(${PROJECT_NAME} compile-shaders)
-	
+
+	if (APPLE AND GATALITY_DISTRIBUTE_APP)
+		set(TEAM_ID "" CACHE STRING "The development team ID for code signing")
+		execute_process(
+			COMMAND bash -c "security find-identity -v -p codesigning | grep 'Developer ID Application' | sed -n 's/.*(\\(.*\\)).*/\\1/p'"
+			OUTPUT_VARIABLE TEAM_ID
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+		if(TEAM_ID STREQUAL "")
+			message("If you are trying distribute this build you need a Developer ID Application. If not ignore this.")
+		else()
+			message("Found TEAM_ID")
+			set(XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Manual")
+			set(XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${TEAM_ID})
+			set(XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application")
+			set(XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED TRUE)
+
+			set(CMAKE_MACOSX_BUNDLE YES)
+			set_target_properties(${PROJECT_NAME} PROPERTIES
+				XCODE_ATTRIBUTE_CODE_SIGN_STYLE ${XCODE_ATTRIBUTE_CODE_SIGN_STYLE}
+				XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${XCODE_ATTRIBUTE_DEVELOPMENT_TEAM}
+				XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ${XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY}
+				XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED ${XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED}
+				XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp=http://timestamp.apple.com/ts01  --options=runtime,library"
+				XCODE_ATTRIBUTE_CODE_SIGN_INJECT_BASE_ENTITLEMENTS "NO"
+				MACOSX_BUNDLE TRUE
+			)
+
+			set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+			set(DIRS ${CMAKE_BINARY_DIR})
+			
+			install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION ".")
+
+			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-MacOS")
+
+			install(CODE "
+				include(BundleUtilities)
+				fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\" \"\" \"${DIRS}\")
+				execute_process(COMMAND codesign --force --deep --sign ${TEAM_ID} \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\")
+				execute_process(COMMAND codesign --verify --verbose=2 \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\")
+				message(\"To sign the .dgm run\")
+				message(\"codesign --force --verbose=2 --sign $(security find-identity -v -p codesigning | grep 'Developer ID Application' | sed -n 's/.*(\\\\(.*\\\\)).*/\\\\1/p') '${CMAKE_CURRENT_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}.dmg'\")
+				message(\"To verify the .dgm is signed run\")
+				message(\"codesign --verify --verbose=2 '${CMAKE_CURRENT_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}.dmg'\")
+			")
+
+			set(CPACK_GENERATOR "DragNDrop")
+			include(CPack)
+		endif()
+	endif()
 endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================

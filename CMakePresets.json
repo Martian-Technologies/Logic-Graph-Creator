@@ -25,6 +25,16 @@
 			}
 		},
 		{
+			"name": "distribute",
+			"displayName": "Distribute",
+			"binaryDir": "build-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"GATALITY_BUILD_APP": "ON",
+				"GATALITY_DISTRIBUTE_APP": "ON"
+			}
+		},
+		{
 			"name": "tests",
 			"displayName": "Tests",
 			"binaryDir": "build-tests",
@@ -48,6 +58,13 @@
 			"displayName": "Build Release",
 			"configurePreset": "release",
 			"configuration": "Release",
+			"jobs": 8
+		},
+		{
+			"name": "distribute",
+			"displayName": "Build Distribute",
+			"configurePreset": "distribute",
+			"configuration": "Distribute",
 			"jobs": 8
 		},
 		{
@@ -79,11 +96,11 @@
 			"steps": [
 				{
 					"type": "configure",
-					"name": "release"
+					"name": "distribute"
 				},
 				{
 					"type": "build",
-					"name": "release"
+					"name": "distribute"
 				}
 			]
 		}

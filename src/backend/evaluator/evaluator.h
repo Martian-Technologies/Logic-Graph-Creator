@@ -32,10 +32,13 @@ public:
 
 	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address)->getContainerId(); }
 
-	void setPause(bool pause);
 	void reset();
+	void setPause(bool pause);
+	bool isPause() const { return paused; }
 	void setTickrate(unsigned long long tickrate);
+	unsigned long long getTickrate() const { return targetTickrate; }
 	void setUseTickrate(bool useTickrate);
+	bool getUseTickrate() const { return usingTickrate; }
 	long long int getRealTickrate() const;
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
