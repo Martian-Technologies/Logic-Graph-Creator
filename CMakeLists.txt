@@ -35,6 +35,7 @@ file(GLOB_RECURSE PROJECT_SOURCES
 )
 
 option(GATALITY_BUILD_APP "Build Gatality App" ON)
+option(GATALITY_DISTRIBUTE_APP "Distribute App" OFF)
 option(GATALITY_BUILD_TESTS "Build Gatality Tests" OFF)
 
 # ======================================= SHARED DEPENDENCY SETUP ========================================
@@ -212,7 +213,7 @@ if (GATALITY_BUILD_APP)
 	add_custom_target(compile-shaders DEPENDS ${SHADER_PRODUCTS})
 	add_dependencies(${PROJECT_NAME} compile-shaders)
 
-	if (APPLE)
+	if (APPLE AND GATALITY_DISTRIBUTE_APP)
 		set(TEAM_ID "" CACHE STRING "The development team ID for code signing")
 		execute_process(
 			COMMAND bash -c "security find-identity -v -p codesigning | grep 'Developer ID Application' | sed -n 's/.*(\\(.*\\)).*/\\1/p'"
