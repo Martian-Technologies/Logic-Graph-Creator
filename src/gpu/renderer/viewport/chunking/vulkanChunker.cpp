@@ -262,6 +262,10 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getBlocksForUpdating()[outputBlockPosition].rotation;
 			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getBlocksForUpdating()[inputBlockPosition].rotation;
 			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, false, chunksToUpdate);
+
+			// remove from block connection registry
+			blockToConnections[inputBlockPosition].erase({outputPosition, inputPosition});
+			blockToConnections[outputBlockPosition].erase({outputPosition, inputPosition});
 			
 			break;
 		}
@@ -272,6 +276,10 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getBlocksForUpdating()[outputBlockPosition].rotation;
 			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getBlocksForUpdating()[inputBlockPosition].rotation;
 			updateChunksOverConnection(outputPosition, outputRotation, inputPosition, inputRotation, true, chunksToUpdate);
+
+			// add to block connection registry
+			blockToConnections[inputBlockPosition][{outputPosition, inputPosition}] = {outputBlockPosition, true};
+			blockToConnections[outputBlockPosition][{outputPosition, inputPosition}] = {inputBlockPosition, false};
 			
 			break;
 		}
@@ -280,6 +288,8 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
 			if (curPosition == newPosition) continue;
 
+			// MOVE BLOCK
+			
 			// get chunk
 			Position curChunk = getChunk(curPosition);
 			Position newChunk = getChunk(newPosition);
@@ -301,7 +311,52 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			// remove block from original chunk
 			curBlocksForUpdating.erase(itr);
 
-			// TODO - move connections
+			// MOVE CONNECTIONS
+			Rotation rotation = chunks[getChunk(newPosition)].getBlocksForUpdating()[newPosition].rotation;
+			Vector moveVector = newPosition - curPosition;
+
+			// Move all input connections
+			for (const auto& end : blockToConnections[curPosition]) {
+				if (end.second.otherBlock != curPosition) {
+					Rotation otherRotation = chunks[getChunk(end.second.otherBlock)].getBlocksForUpdating()[end.second.otherBlock].rotation;
+				
+					// remove old wire
+					blockToConnections[end.second.otherBlock].erase(end.first); // remove other's entry
+					if (end.second.isInput) { updateChunksOverConnection(end.first.first, otherRotation, end.first.second, rotation, false, chunksToUpdate); }
+					else { updateChunksOverConnection(end.first.first, rotation, end.first.second, otherRotation, false, chunksToUpdate); }
+				
+					// calculate new wire
+					std::pair<Position, Position> newConnection;
+					if (end.second.isInput) { newConnection = {end.first.first, end.first.second + moveVector}; }
+					else { newConnection = {end.first.first + moveVector, end.first.second}; }
+
+					// add new wire to registry
+					blockToConnections[newPosition][newConnection] = { end.second.otherBlock, end.second.isInput };
+					blockToConnections[end.second.otherBlock][newConnection] = { newPosition, !end.second.isInput };
+
+					// add new wire to chunks
+					if (end.second.isInput) { updateChunksOverConnection(newConnection.first, otherRotation, newConnection.second, rotation, true, chunksToUpdate); }
+					else { updateChunksOverConnection(newConnection.first, rotation, newConnection.second, otherRotation, true, chunksToUpdate); }
+				}
+				else {
+					// if we are a self connection
+
+					// remove old wire (we don't need to remove from registry, because we do that for ourselves later)
+					updateChunksOverConnection(end.first.first, rotation, end.first.second, rotation, false, chunksToUpdate);
+
+					// calculate new wire
+					std::pair<Position, Position> newConnection = { end.first.first + moveVector, end.first.second + moveVector };
+
+					// add new wire to registry
+					blockToConnections[newPosition][newConnection] = { newPosition, end.second.isInput };
+
+					// add new wire to chunks
+					updateChunksOverConnection(newConnection.first, rotation, newConnection.second, rotation, true, chunksToUpdate);
+				}
+				
+				
+			}
+			blockToConnections.erase(curPosition); // remove all of our old entries
 			
 			break;
 		}

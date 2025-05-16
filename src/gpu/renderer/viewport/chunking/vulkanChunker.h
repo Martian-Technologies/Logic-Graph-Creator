@@ -158,6 +158,11 @@ private:
 
 // ====================================================================================================================
 
+struct ChunkerConnectionEnd {
+	Position otherBlock;
+	bool isInput;
+};
+
 class VulkanChunker {
 public:
 	VulkanChunker(VulkanDevice* device);
@@ -175,6 +180,7 @@ private:
 	
 private:
 	std::unordered_map<Position, ChunkChain> chunks;
+	std::unordered_map<Position, std::unordered_map<std::pair<Position, Position>, ChunkerConnectionEnd, WireHash>> blockToConnections;
 	std::mutex mux; // sync can be relaxed in the future
 
 	// refs
