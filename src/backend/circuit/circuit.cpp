@@ -31,9 +31,10 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation amountToRotate) {
 	if (movement == Vector(0)) return true;
-	Rotation amountToRotate = Rotation::ZERO;
+	Position selectionOrigin = getSelectionOrigin(selection);
+	Position newSelectionOrigin = selectionOrigin + movement;
 	std::unordered_set<Position> positions;
 	std::unordered_set<const Block*> blocks;
 	flattenSelection(selection, positions);
@@ -41,7 +42,15 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
 		const Block* block = blockContainer.getBlock(*iter);
 		if (block) {
 			if (blocks.contains(block)) continue;
-			if (!positions.contains(*iter + movement) && blockContainer.checkCollision(*iter + movement, addRotations(block->getRotation(), amountToRotate), block->type(), block->id())) return false;
+			if (
+				// !positions.contains(newSelectionOrigin + rotateVector(*iter - selectionOrigin, amountToRotate)) &&
+				blockContainer.checkCollision(
+					newSelectionOrigin + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
+					addRotations(block->getRotation(), amountToRotate),
+					block->type(),
+					block->id()
+				)
+			) return false;
 			blocks.insert(block);
 		}
 	}
@@ -50,7 +59,12 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
 	while (blocks.size() > 0) {
 		for (auto iter = blocks.begin(); iter != blocks.end(); ++iter) {
 			const Block* block = *iter;
-			if (blockContainer.tryMoveBlock(block->getPosition(), block->getPosition() + movement, amountToRotate, difference.get())) {
+			if (blockContainer.tryMoveBlock(
+				block->getPosition(),
+				newSelectionOrigin + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
+				amountToRotate,
+				difference.get())
+			) {
 				iter = blocks.erase(iter);
 				if (iter == blocks.end()) break;
 			}

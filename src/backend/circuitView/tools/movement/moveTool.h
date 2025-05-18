@@ -18,11 +18,14 @@ public:
 
 	void updateElements() override final;
 
+	bool rotateCW(const Event* event);
+	bool rotateCCW(const Event* event);
 	bool click(const Event* event);
 	bool unclick(const Event* event);
 
 private:
 	std::string mode = "None";
+	Rotation amountToRotate = Rotation::ZERO;
 	SharedSelectionHelperTool activeSelectionHelper = nullptr;
 };
 

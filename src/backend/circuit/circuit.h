@@ -47,7 +47,7 @@ public:
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(Position positionOfBlock, Position position);
 	// Trys to move blocks. Wont move any if one cant move. Returns if successful.
-	bool tryMoveBlocks(SharedSelection selection, Vector movement);
+	bool tryMoveBlocks(SharedSelection selection, Vector movement, Rotation amountToRotate);
 	// Sets the type of blocks. Will set as many of the blocks as possible.
 	void setType(SharedSelection selection, BlockType type);
 
