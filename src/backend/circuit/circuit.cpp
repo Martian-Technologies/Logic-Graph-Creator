@@ -25,7 +25,7 @@ bool Circuit::tryRemoveBlock(Position position) {
 
 bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, difference.get());
+	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, Rotation::ZERO, difference.get());
 	assert(out != difference->empty());
 	sendDifference(difference);
 	return out;
@@ -33,14 +33,15 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 
 bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
 	if (movement == Vector(0)) return true;
+	Rotation amountToRotate = Rotation::ZERO;
 	std::unordered_set<Position> positions;
 	std::unordered_set<const Block*> blocks;
 	flattenSelection(selection, positions);
 	for (auto iter = positions.begin(); iter != positions.end(); ++iter) {
 		const Block* block = blockContainer.getBlock(*iter);
 		if (block) {
-			if (!positions.contains(*iter + movement) && blockContainer.checkCollision(*iter + movement)) return false;
 			if (blocks.contains(block)) continue;
+			if (!positions.contains(*iter + movement) && blockContainer.checkCollision(*iter + movement, addRotations(block->getRotation(), amountToRotate), block->type(), block->id())) return false;
 			blocks.insert(block);
 		}
 	}
@@ -49,8 +50,7 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement) {
 	while (blocks.size() > 0) {
 		for (auto iter = blocks.begin(); iter != blocks.end(); ++iter) {
 			const Block* block = *iter;
-			if (!blockContainer.checkCollision(block->getPosition() + movement, block->getRotation(), block->type())) {
-				blockContainer.tryMoveBlock(block->getPosition(), block->getPosition() + movement, difference.get());
+			if (blockContainer.tryMoveBlock(block->getPosition(), block->getPosition() + movement, amountToRotate, difference.get())) {
 				iter = blocks.erase(iter);
 				if (iter == blocks.end()) break;
 			}
@@ -335,7 +335,7 @@ void Circuit::undo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<1>(moveModification), std::get<0>(moveModification), newDifference.get());
+			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), std::get<1>(moveModification), newDifference.get());
 			break;
 		case MinimalDifference::SET_DATA:
 			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
@@ -375,7 +375,7 @@ void Circuit::redo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(moveModification.first, moveModification.second, newDifference.get());
+			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), std::get<3>(moveModification), newDifference.get());
 			break;
 		case MinimalDifference::SET_DATA:
 			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);

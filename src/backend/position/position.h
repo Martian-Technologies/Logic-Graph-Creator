@@ -323,6 +323,12 @@ inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
 	if (rotation == Rotation::ZERO) return Rotation::TWO_SEVENTY;
 	return (Rotation)((int)rotation - 1);
 }
+inline constexpr Rotation addRotations(Rotation rotationA, Rotation rotationB) {
+	char output = rotationA + rotationB;
+	if ((char)output > (char)Rotation::TWO_SEVENTY)
+		output -= 4;
+	return (Rotation)output;
+}
 inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 - (char)rotation) * (char)rotation); }
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
 inline Vector rotateVectorWithArea(Vector vector, Vector size, Rotation rotationAmount) {

@@ -18,7 +18,9 @@ public:
 	/* ----------- collision ----------- */
 	inline bool checkCollision(Position position) const { return getCell(position); }
 	bool checkCollision(Position positionSmall, Position positionLarge) const;
+	bool checkCollision(Position positionSmall, Position positionLarge, block_id_t idToIgnore) const;
 	bool checkCollision(Position position, Rotation rotation, BlockType blockType) const;
+	bool checkCollision(Position position, Rotation rotation, BlockType blockType, block_id_t idToIgnore) const;
 
 	/* ----------- blocks ----------- */
 	// -- getters --
@@ -41,7 +43,7 @@ public:
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveBlock(Position position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryMoveBlock(Position positionOfBlock, Position position, Difference* difference);
+	bool tryMoveBlock(Position positionOfBlock, Position position, Rotation amountToRotate, Difference* difference);
 	// Trys to set the type of a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool trySetType(Position positionOfBlock, BlockType type, Difference* difference);
 	// moves blocks until they 

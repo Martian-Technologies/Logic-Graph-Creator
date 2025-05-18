@@ -155,7 +155,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 		}
 		case Difference::MOVE_BLOCK:
 		{
-			const auto& [curPosition, newPosition] = std::get<Difference::move_modification_t>(modificationData);
+			const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
 			addressTree.moveData(containerId, curPosition, newPosition);
 			break;
 		}
