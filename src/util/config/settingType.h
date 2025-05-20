@@ -1,15 +1,25 @@
-#ifndef multiTypeMap_h
-#define multiTypeMap_h
+#ifndef settingMap_h
+#define settingMap_h
 
 #include <any>
 #include <unordered_map>
 #include <string>
 #include <optional>
 
-class MultiTypeMap {
+class SettingMap {
 public:
+	enum SettingType {
+		STRING,
+		INT,
+		KEYBIND
+	}
 
-    MultiTypeMap() {}
+    SettingMap() {}
+
+	template<typename T>
+	void registerName(std::string name, SettingType type) {
+		mappings[name].first = type;
+	}
 
     // -- Getters --
 	template<typename T>
@@ -35,8 +45,17 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, std::any> mappings;
+	class SettingEntry {
+	public:
+		SettingEntry(SettingType type) {
+
+		}
+
+	private:
+		SettingType type;
+	}
+
+    std::unordered_map<std::string, std::pair<SettingType, std::any>> mappings;
 };
 
-
-#endif /* multiTypeMap_h */
+#endif /* settingMap_h */
