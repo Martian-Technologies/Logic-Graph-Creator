@@ -84,5 +84,3 @@ bool Backend::linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_i
 	}
 	return false;
 }
-
-
