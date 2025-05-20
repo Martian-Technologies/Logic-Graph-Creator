@@ -5,7 +5,7 @@
 #include "gpu/renderer/frameManager.h"
 #include "gpu/abstractions/vulkanPipeline.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
-#include "gpu/abstractions/vulkanImage.h"
+#include "gpu/renderer/viewport/blockTextureManager.h"
 #include "vulkanChunker.h"
 
 struct ChunkPushConstants {
@@ -22,14 +22,6 @@ public:
 private:
 	Pipeline blockPipeline;
 	Pipeline wirePipeline;
-
-	DescriptorAllocator descriptorAllocator;
-
-	// block texture and descriptor
-	VkDescriptorSetLayout blockTextureDescriptorSetLayout;
-	VkDescriptorSet blockTextureDescriptor;
-	VkSampler blockTextureSampler;
-	AllocatedImage blockTexture;
 	
 	// state buffer descriptor layout
 	VkDescriptorSetLayout stateBufferDescriptorSetLayout;

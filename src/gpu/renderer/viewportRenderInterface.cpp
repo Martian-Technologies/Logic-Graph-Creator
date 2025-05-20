@@ -31,6 +31,7 @@ void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 }
 
 void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+	std::lock_guard<std::mutex> lock(evaluatorMux);
 	this->evaluator = evaluator;
 }
 
@@ -79,11 +80,32 @@ void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
 }
 
 ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPreview) {
-	return 0;
+	std::lock_guard<std::mutex> lock(blockPreviewMux);
+	
+	ElementID newElement = ++currentElementID;
+
+	blockPreviews[newElement] = blockPreview;
+	
+	return newElement;
 }
 
 void ViewportRenderInterface::removeBlockPreview(ElementID blockPreview) {
-	
+	std::lock_guard<std::mutex> lock(blockPreviewMux);
+
+	blockPreviews.erase(blockPreview);
+}
+
+std::vector<BlockPreview> ViewportRenderInterface::getBlockPreviews() {
+	std::lock_guard<std::mutex> lock(blockPreviewMux);
+
+	std::vector<BlockPreview> returnBlockPreviews;
+	returnBlockPreviews.reserve(blockPreviews.size());
+
+	for (const auto& preview : blockPreviews) {
+		returnBlockPreviews.push_back(preview.second);
+	}
+
+	return returnBlockPreviews;
 }
 
 ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview& connectionPreview) {

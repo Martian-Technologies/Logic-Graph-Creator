@@ -14,8 +14,8 @@ void GridRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	gridPipelineInfo.vertShader = gridVertShader;
 	gridPipelineInfo.fragShader = gridFragShader;
 	gridPipelineInfo.renderPass = renderPass;
-	gridPipelineInfo.pushConstants.push_back({gridFadeOffset, iMvpOffset, VK_SHADER_STAGE_VERTEX_BIT});
-	gridPipelineInfo.pushConstants.push_back({sizeof(GridPushConstants) - gridFadeOffset, gridFadeOffset, VK_SHADER_STAGE_FRAGMENT_BIT});
+	gridPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, gridFadeOffset});
+	gridPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(GridPushConstants) - gridFadeOffset});
 	pipeline.init(device, gridPipelineInfo);
 
 	destroyShaderModule(device->getDevice(), gridVertShader);
@@ -39,8 +39,7 @@ void GridRenderer::render(Frame& frame, const glm::mat4& viewMatrix, float viewS
 	vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getHandle());
 		
 	// bind push constants
-	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.getLayout(), VK_SHADER_STAGE_VERTEX_BIT, iMvpOffset, gridFadeOffset, &pushConstants.iMvp);
-	vkCmdPushConstants(frame.mainCommandBuffer, pipeline.getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, gridFadeOffset, sizeof(GridPushConstants) - gridFadeOffset, &pushConstants.gridFade);
+	pipeline.cmdPushConstants(frame.mainCommandBuffer, &pushConstants);
 
 	vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 }

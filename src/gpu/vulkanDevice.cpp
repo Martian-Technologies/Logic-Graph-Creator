@@ -1,6 +1,7 @@
 #include "vulkanDevice.h"
 
 #include "vulkanInstance.h"
+#include "gpu/renderer/viewport/blockTextureManager.h"
 
 VulkanDevice::VulkanDevice(VulkanInstance* instance, VkSurfaceKHR surfaceForPresenting)
 	: instance(instance) {
@@ -34,11 +35,16 @@ VulkanDevice::VulkanDevice(VulkanInstance* instance, VkSurfaceKHR surfaceForPres
 
 	// Initialize immediate submission
 	initializeImmediateSubmission();
+
+	// Set up texture manager
+	blockTextureManager = std::make_unique<BlockTextureManager>();
+	blockTextureManager->init(this);
 }
 
 VulkanDevice::~VulkanDevice() {
 	waitIdle();
-	
+
+	blockTextureManager->cleanup();
 	vmaDestroyAllocator(vmaAllocator);
 	
 	vkDestroyFence(device, immediateFence, nullptr);

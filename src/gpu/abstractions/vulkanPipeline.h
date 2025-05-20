@@ -5,9 +5,8 @@
 #include <glm/glm.hpp>
 
 struct PushConstantDescription {
-	size_t size;
-	size_t offset;
 	VkShaderStageFlags stage;
+	size_t size;
 };
 
 struct PipelineInformation {
@@ -26,6 +25,8 @@ public:
 	void init(VulkanDevice* device, const PipelineInformation& info);
 	void cleanup();
 
+	void cmdPushConstants(VkCommandBuffer commandBuffer, void* data);
+
 	inline VkPipeline getHandle() { return handle; }
 	inline VkPipelineLayout getLayout() { return layout; }
 	
@@ -33,6 +34,8 @@ private:
 	VkPipeline handle;
     VkPipelineLayout layout;
 
+	std::vector<VkPushConstantRange> pushConstants;
+	
 	VulkanDevice* device;
 };
 

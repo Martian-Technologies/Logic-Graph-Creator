@@ -6,6 +6,7 @@
 #include <vk_mem_alloc.h>
 
 struct VulkanInstance;
+struct BlockTextureManager;
 
 struct QueueInfo {
 	VkQueue queue;
@@ -17,6 +18,7 @@ public:
 	VulkanDevice(VulkanInstance* instance, VkSurfaceKHR surfaceForPresenting);
 	~VulkanDevice();
 
+	// queue submission functions
 	void waitIdle();
 	VkResult submitGraphicsQueue(VkSubmitInfo* submitInfo, VkFence fence);
 	VkResult submitPresent(VkPresentInfoKHR* presentInfo);
@@ -25,10 +27,10 @@ public:
 	inline uint32_t getGraphicsQueueIndex() { return graphicsQueue.index; }
 	inline uint32_t getPresentQueueIndex() { return presentQueue.index; }
 
-	// queue submission functions
-
 	inline vkb::Device& getDevice() { return device; }
 	inline VmaAllocator getAllocator() { return vmaAllocator; }
+
+	inline BlockTextureManager* getBlockTextureManager() { return blockTextureManager.get(); }
 	
 private:
 	void createAllocator();
@@ -51,6 +53,9 @@ private:
     VkCommandBuffer immediateCommandBuffer;
     VkCommandPool immediateCommandPool;
 	std::mutex immediateSubmitMux;
+
+	// Texture
+	std::unique_ptr<BlockTextureManager> blockTextureManager;
 };
 
 #endif

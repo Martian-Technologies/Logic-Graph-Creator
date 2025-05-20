@@ -1,45 +1,14 @@
 #include "chunkRenderer.h"
 
-
 #include "backend/evaluator/logicState.h"
 #include "gpu/vulkanInstance.h"
 #include "gpu/abstractions/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
 
-#include <stb_image.h>
-
 void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	this->device = device;
-	descriptorAllocator.init(device, 100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f}});
 	
-	// ==================== TEXTURE setup =================================================
-
-	// upload texture
-	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
-	blockTexture = createImage(device, pixels, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
-	stbi_image_free(pixels);
-
-	// create layout and descriptor set
-	DescriptorLayoutBuilder textureLayoutBuilder;
-	textureLayoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-	blockTextureDescriptorSetLayout = textureLayoutBuilder.build(device->getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT);
-	blockTextureDescriptor = descriptorAllocator.allocate(blockTextureDescriptorSetLayout);
-
-	// create sampler
-	VkSamplerCreateInfo samplerInfo{};
-	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	samplerInfo.minFilter = VK_FILTER_LINEAR;
-	samplerInfo.magFilter = VK_FILTER_LINEAR;
-	vkCreateSampler(device->getDevice(), &samplerInfo, nullptr, &blockTextureSampler);
-
-	// write descriptor
-	DescriptorWriter textureWriter;
-	textureWriter.writeImage(0, blockTexture.imageView, blockTextureSampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-	textureWriter.updateSet(device->getDevice(), blockTextureDescriptor);
-
 	// ==================== STATE BUFFER setup =============================================
 	// create layout and descriptor set
 	DescriptorLayoutBuilder stateBufferBuilder;
@@ -60,9 +29,9 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	blockPipelineInfo.renderPass = renderPass;
 	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
 	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
-	blockPipelineInfo.pushConstants.push_back({sizeof(ChunkPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
+	blockPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ChunkPushConstants)});
 	blockPipelineInfo.descriptorSets.push_back(stateBufferDescriptorSetLayout);
-	blockPipelineInfo.descriptorSets.push_back(blockTextureDescriptorSetLayout);
+	blockPipelineInfo.descriptorSets.push_back(device->getBlockTextureManager()->getDescriptorLayout());
 	blockPipeline.init(device, blockPipelineInfo);
 	
 	PipelineInformation wirePipelineInfo{};
@@ -71,7 +40,7 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	wirePipelineInfo.renderPass = renderPass;
 	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
 	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
-	wirePipelineInfo.pushConstants.push_back({sizeof(ChunkPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
+	wirePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ChunkPushConstants)});
 	wirePipelineInfo.descriptorSets.push_back(stateBufferDescriptorSetLayout);
 	wirePipeline.init(device, wirePipelineInfo);
 
@@ -83,16 +52,9 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 }
 
 void ChunkRenderer::cleanup() {
-	// destroy image
-	destroyImage(blockTexture);
-	vkDestroySampler(device->getDevice(), blockTextureSampler, nullptr);
-	vkDestroyDescriptorSetLayout(device->getDevice(), blockTextureDescriptorSetLayout, nullptr);
-
+	
 	// destroy state buffer layout
 	vkDestroyDescriptorSetLayout(device->getDevice(), stateBufferDescriptorSetLayout, nullptr);
-
-	// destroy descriptor allocator
-	descriptorAllocator.cleanup();
 
 	// destroy pipelines
 	blockPipeline.cleanup();
@@ -129,10 +91,10 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.mainCommandBuffer, blockPipeline.getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
+		blockPipeline.cmdPushConstants(frame.mainCommandBuffer, &pushConstants);
 		
 		// bind texture descriptor
-		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &blockTextureDescriptor, 0, nullptr);
+		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &device->getBlockTextureManager()->getTexture().descriptor, 0, nullptr);
         
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {
@@ -165,7 +127,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline.getHandle());
 		
 		// bind push constants
-		vkCmdPushConstants(frame.mainCommandBuffer, wirePipeline.getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ChunkPushConstants), &pushConstants);
+		wirePipeline.cmdPushConstants(frame.mainCommandBuffer, &pushConstants);
 
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getWireBuffer().has_value()) {

@@ -105,7 +105,7 @@ void RmlRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	rmlPipelineInfo.renderPass = renderPass;
 	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
-	rmlPipelineInfo.pushConstants.push_back({sizeof(RmlPushConstants), 0, VK_SHADER_STAGE_VERTEX_BIT});
+	rmlPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(RmlPushConstants)});
 	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	untexturedPipeline.init(device, rmlPipelineInfo);
 	// textured
@@ -203,7 +203,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 	
 			// upload push constants
 			pushConstants.translation = renderInstruction.translation;
-			vkCmdPushConstants(cmd, currentPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(RmlPushConstants), &pushConstants);
+			currentPipeline->cmdPushConstants(cmd, &pushConstants);
 
 			// bind vertex buffer
 			VkBuffer vertexBuffers[] = { renderInstruction.geometry->getVertexBuffer().buffer };

@@ -1,7 +1,5 @@
 #include "vulkanChunker.h"
 
-#include "backend/circuitView/renderer/tileSet.h"
-
 const int CHUNK_SIZE = 25;
 cord_t getChunk(cord_t in) {
 	return std::floor( (float)in / (float)CHUNK_SIZE ) * (int)CHUNK_SIZE;
@@ -12,10 +10,10 @@ Position getChunk(Position in) {
 	return in;
 }
 
+#include "gpu/renderer/viewport/blockTextureManager.h"
+
 // VulkanChunkAllocation
 // =========================================================================================================
-
-TileSetInfo blockTileSet(256, 15, 4);
 
 VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlocks& blocks, RenderedWires& wires)
 {
@@ -31,8 +29,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		blockVertices.reserve(blocks.size() * 6);
 		for (const auto& block : blocks) {
 			Position blockPosition = block.first;
-			Vec2 uvOrigin = blockTileSet.getTopLeftUV(block.second.blockType + 1, 0);
-			Vec2 uvSize = blockTileSet.getCellUVSize();
+			Vec2 uvOrigin = device->getBlockTextureManager()->getTileset().getTopLeftUV(block.second.blockType + 1, 0);
+			Vec2 uvSize = device->getBlockTextureManager()->getTileset().getCellUVSize();
 
 			// top left, top right, bottom right, bottom left
 			std::array<glm::vec2, 4> uvs = {

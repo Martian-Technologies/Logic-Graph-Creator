@@ -21,7 +21,6 @@ private:
 	Pipeline pipeline;
 
 	// push constant data
-	size_t iMvpOffset = 0;
 	size_t gridFadeOffset = offsetof(GridPushConstants, gridFade);
 };
 

@@ -104,14 +104,16 @@ void Pipeline::init(VulkanDevice* device, const PipelineInformation& info) {
 	if (!info.descriptorSets.empty()) pipelineLayoutInfo.pSetLayouts = info.descriptorSets.data();
 
 	// push constants (optional)
-	std::vector<VkPushConstantRange> pushConstants;
+	size_t currentOffset = 0;
 	for (auto& push : info.pushConstants) {
 		VkPushConstantRange pushConstant{};
-		pushConstant.offset = push.offset;
+		pushConstant.offset = currentOffset;
 		pushConstant.size = push.size;
 		pushConstant.stageFlags = push.stage;
 
 		pushConstants.push_back(pushConstant);
+
+		currentOffset += push.size;
 	}
 	pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
 	pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
@@ -144,6 +146,12 @@ void Pipeline::init(VulkanDevice* device, const PipelineInformation& info) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 };
+
+void Pipeline::cmdPushConstants(VkCommandBuffer commandBuffer, void* data) {
+	for (const auto& constant : pushConstants) {
+		vkCmdPushConstants(commandBuffer, layout, constant.stageFlags, constant.offset, constant.size, (char*)data + constant.offset);
+	}
+}
 
 void Pipeline::cleanup() {
 	vkDestroyPipeline(device->getDevice(), handle, nullptr);
