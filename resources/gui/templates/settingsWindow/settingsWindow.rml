@@ -29,9 +29,9 @@
 			<!-- Content here created by "src/gui/settingsWindow/contentManager.h" -->
 		</div>
 
-		<div id="color-popup">
-			<template src="color-picker"></template>
-		</div>
+		<!-- <div id="color-popup" class="invisible"> -->
+		<!-- 	<template src="color-picker"></template> -->
+		<!-- </div> -->
 	</body>
 
 </template>

@@ -1,8 +1,10 @@
 #include "colorPicker.h"
+#include "gui/interaction/eventPasser.h"
 #include <RmlUi/Core/ID.h>
 
 ColorPicker::ColorPicker(Rml::Element* document) {
 	context = document->GetElementById("color-popup");
+	context->SetClass("invisible", true);
 	Initialize();
 }
 
@@ -34,7 +36,7 @@ void ColorPicker::Initialize() {
 		Rml::ElementList divs;
 		item->GetElementsByTagName(divs, "div");
 
-		for (Rml::Element* div : divs) {
+		for (Rml::Element* div : divs) { // parses each div to set correct color
 			std::string className = div->GetAttribute("class")->Get<Rml::String>();
 
 			if (className == "top-hexagon") {
@@ -45,7 +47,14 @@ void ColorPicker::Initialize() {
 				div->SetProperty("border-top-color", "#" + colors[colorIndex]);
 			}
 		}
-		logInfo(colorIndex);	
+
+		item->AddEventListener("mouseover", new EventPasser(
+			[](Rml::Event& ev) {
+				Rml::Element* target = ev.GetTargetElement();
+				Rml::Log::Message(Rml::Log::LT_INFO, "Hovered over: %s", target->GetId().c_str());
+			})
+		);
+
 		colorIndex++;
 	}
 }

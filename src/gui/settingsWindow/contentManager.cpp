@@ -9,21 +9,10 @@ ContentManager::ContentManager(Rml::Element* document) {
 
 void ContentManager::Initialize() {
 	std::vector<std::vector<std::string>> general = Settings::getGraphicsData("General");
-	std::vector<std::vector<std::string>> appearance = Settings::getGraphicsData("Appearance");
-	std::vector<std::string> keybinds = Settings::getKeybindGraphicsData(); // only a 1d vector, special func for it
 
-	// for (int i = 0; i < general.size(); i++) {
-	// 	generateForm(general[i][1]);
-	// 	logInfo(general[i][0]);
-	// }
-
-	for (int i = 0; i < appearance.size(); i++) {
-		// generateForm(appearance[i][1], appearance[i][0]);
+	for (int i = 0; i < general.size(); i++) {
+		generateForm(general[i][1], general[i][0]);
 	}
-
-	// for (int i = 0; i < keybinds.size(); i++) {
-	// 	generateForm("keybind");
-	// }
 }
 
 void ContentManager::setForm(const std::vector<std::string>& formList, const std::string& type) {
@@ -38,11 +27,25 @@ void ContentManager::setForm(const std::vector<std::string>& formList, const std
 			// TODO: render only the formList items
 		}
 	} else if (type == "appearance") {
-		std::vector<std::vector<std::string>> appearance = Settings::getGraphicsData("Appearance");
+		std::vector<std::vector<std::string>> list = Settings::getGraphicsData("Appearance");
 
+		if (formList.empty()) {
+			for (int i = 0; i < list.size(); i++) {
+				generateForm(list[i][1], list[i][0]);
+			}
+		} else {
+			// TODO: render only the formList items
+		}
 	} else if (type == "keybind") {
-		std::vector<std::string> keybinds = Settings::getKeybindGraphicsData();
-
+		std::vector<std::string> list = Settings::getKeybindGraphicsData();
+		
+		if (formList.empty()) {
+			for (int i = 0; i < list.size(); i++) {
+				generateForm("KEYBIND", list[i]);
+			}
+		} else {
+			// TODO: render only the formList items
+		}
 	} else {
 		logWarning("incorrect type, nothing for form grabbed");
 	}
@@ -54,10 +57,11 @@ void ContentManager::generateForm(const std::string& tabType, std::string name) 
 	Rml::ElementPtr newForm;
 	std::string itemName;
 	if (tabType == "HEADER") itemName = name;
+	else if (tabType.substr(0, 2) == "H_") itemName = name.substr(2); 
 	else itemName = name.substr(name.rfind('.') + 1);
 
 	// creates forms
-	if (tabType == "HEADER") {
+	if (tabType == "HEADER" || tabType.substr(0, 2) == "H_") {
 		newForm = Rml::Factory::InstanceElement(
 			contentPanel,
 			"div",
@@ -91,8 +95,9 @@ void ContentManager::generateForm(const std::string& tabType, std::string name) 
 	} else if (tabType == "FILE_PATH") {
 	} else if (tabType == "DIR_PATH") {
 	} else if (tabType == "KEYBIND") {
+	} else if (tabType == "BOOL") {
 	} else {
-		logWarning("not a type, please contact abearnmountain on github for additional support");
+		logWarning("not a type, please contact abearnmountain on github for additional support:" + tabType + " with name - " + name, "Settings");
 	}
 
 }

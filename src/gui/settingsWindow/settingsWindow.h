@@ -4,6 +4,11 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include "contentManager.h"
+#include "gui/settingsWindow/optionTemplates/colorPicker.h"
+#include "searchBar.h"
+
+
 class SettingsWindow {
 public:
 	SettingsWindow(Rml::ElementDocument* document);
@@ -19,6 +24,11 @@ private:
 	Rml::Element* context;
 	Rml::Element* activeNav;
 	bool visible;
+
+	ContentManager* contentManager;
+	SearchBar* searchBar;
+	ColorPicker* colorPicker;
+
 };
 
 #endif /* settingsWindow_h */

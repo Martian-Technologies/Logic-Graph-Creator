@@ -1,12 +1,13 @@
 # -------------------- General --------------------
-[general.general]
-visual_mode = "Night"
-
 [general.files]
 save_path = "/abc"
 open_path = "/edf"
 
 # -------------------- Appearance --------------------
+[appearance.general]
+visual_mode = "Dark"
+default_view_model = "1440x1080"
+
 [appearance.blocks]
 and = "0xff8e66"
 or = "0x40ffcf"

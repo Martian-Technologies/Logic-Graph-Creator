@@ -7,13 +7,14 @@
 
 const std::vector<std::vector<std::string>> general = {  
 	{ "Files", "HEADER" }, 
-		{ "general.files.save_path", "DIRPATH" },
-		{ "general.files.open_path", "FILEPATH" }, 
+		{ "general.files.save_path", "DIR_PATH" },
+		{ "general.files.open_path", "FILE_PATH" }, 
 };
 
 const std::vector<std::vector<std::string>> appearance = {
 	{ "General", "HEADER" },
-		{ "general.general.visual_mode", "DROPDOWN", "Dark", "Light" },
+		{ "appearance.general.visual_mode", "DROPDOWN", "Dark", "Light" },
+		{ "appearace.general. "}
 	{ "Blocks", "HEADER" },
 		{ "appearance.blocks.and", "COLOR" },
 		{ "appearance.blocks.or", "COLOR" },

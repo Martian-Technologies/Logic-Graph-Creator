@@ -1,17 +1,17 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
-#include "contentManager.h"
-#include "gui/settingsWindow/optionTemplates/colorPicker.h"
-// #include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
 
 SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) {
 	context = document->GetElementById("settings-overlay");
 
-	ContentManager* cm = new ContentManager(document);
+	contentManager = new ContentManager(document);
 	// SearchBar* sb = new SearchBar(document);
-	ColorPicker* cpicker = new ColorPicker(document);
+	
+	// ColorPicker* cpicker = new ColorPicker(document);
+	
+
 	Initialize();
 }
 
@@ -33,14 +33,14 @@ void SettingsWindow::connectCategoryListeners() {
 
 		element->AddEventListener("click", new EventPasser(
 			[this](Rml::Event& event) {
-				Rml::Element* current = event.GetCurrentElement();
-
 				activeNav->SetClass("active-nav", false);
-				activeNav = current;
+				activeNav = event.GetCurrentElement();
 				activeNav->SetClass("active-nav", true);
 
-				std::string loadFile = current->GetId().substr(4) + ".rml";
+				std::string loadFile = activeNav->GetId().substr(4) + ".rml";
 				logInfo(loadFile);
+
+				contentManager->setForm({}, activeNav->GetId().substr(4));
 			}
 		));
 	}

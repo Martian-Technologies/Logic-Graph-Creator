@@ -160,8 +160,10 @@
 				<div class="hexagon"><div class="top-hexagon"></div><div class="mid-hexagon"></div><div class="bot-hexagon"></div></div>
 			</div>
 		</div>
-		
+
+
 		<div class="selector">
+
 			<button>Click</button>
 		</div>
 

@@ -174,14 +174,18 @@ tabset panels panel {
 /* Settings Window */
 #settings-overlay {
 	position: absolute;
-	top:	10%;
-	left:   10%;
-	width:  80%;
-	height: 80%;
+	top:	  10%;
+	left:     10%;
+	width:    80%;
+	height:   80%;
 	align-items: center;
 	justify-content: center;
+	display: flex;
+	flex-direction: collumn;
 	z-index: 1000;
 }
+
+/* for disapearing anything */
 
 .invisible {
 	display: none;
