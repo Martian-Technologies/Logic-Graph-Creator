@@ -12,31 +12,44 @@
 
 // ====================================================================================================================
 
-struct BlockVertex {
+struct BlockInstance {
 	glm::vec2 pos;
-	glm::vec2 tex;
+	uint32_t sizeX;
+	uint32_t sizeY;
+	float texX;
+	uint32_t rotation;
 
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
-		bindingDescriptions[0].stride = sizeof(BlockVertex);
-		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[0].stride = sizeof(BlockInstance);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 
         return bindingDescriptions;
     }
 
 	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(BlockVertex, pos);
+		attributeDescriptions[0].offset = offsetof(BlockInstance, pos);
 
 		attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(BlockVertex, tex);
+		attributeDescriptions[1].format = VK_FORMAT_R32G32_UINT;
+		attributeDescriptions[1].offset = offsetof(BlockInstance, sizeX);
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(BlockInstance, texX);
+
+		attributeDescriptions[3].binding = 0;
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32_UINT;
+		attributeDescriptions[3].offset = offsetof(BlockInstance, rotation);
 
 		return attributeDescriptions;
 	}
@@ -109,7 +122,7 @@ public:
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
-	inline uint32_t getNumBlockVertices() const { return numBlockVertices; }
+	inline uint32_t getNumBlockInstances() const { return numBlockInstances; }
 	
 	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
 	inline uint32_t getNumWireVertices() const { return numWireVertices; }
@@ -122,7 +135,7 @@ public:
 	
 private:
 	std::optional<AllocatedBuffer> blockBuffer;
-	uint32_t numBlockVertices;
+	uint32_t numBlockInstances;
 
 	std::optional<AllocatedBuffer> wireBuffer;
 	uint32_t numWireVertices;

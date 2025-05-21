@@ -23,38 +23,22 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 	// Maps "state position" to a position in the address list so that multiple objects can index the same array
 	std::unordered_map<Position, size_t> posToAddressIdx;
 
-	// Generate block vertices
+	// Generate block instances
 	if (blocks.size() > 0) {
-		std::vector<BlockVertex> blockVertices;
-		blockVertices.reserve(blocks.size() * 6);
+		std::vector<BlockInstance> blockInstances;
+		blockInstances.reserve(blocks.size() );
 		for (const auto& block : blocks) {
 			Position blockPosition = block.first;
 			Vec2 uvOrigin = device->getBlockTextureManager()->getTileset().getTopLeftUV(block.second.blockType + 1, 0);
-			Vec2 uvSize = device->getBlockTextureManager()->getTileset().getCellUVSize();
-
-			// top left, top right, bottom right, bottom left
-			std::array<glm::vec2, 4> uvs = {
-				glm::vec2(uvOrigin.x, uvOrigin.y), // top left
-				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y), // top right
-				glm::vec2(uvOrigin.x + uvSize.x, uvOrigin.y + uvSize.y), // bottom right
-				glm::vec2(uvOrigin.x, uvOrigin.y + uvSize.y) // bottom left
-			};
-
-			// literally rotate uvs
-			std::rotate(uvs.begin(), uvs.end() - block.second.rotation, uvs.end());
 			
-			BlockVertex v1 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, uvs[2]};
-			BlockVertex v2 = {{blockPosition.x, blockPosition.y + block.second.realHeight}, uvs[3]};
-			BlockVertex v3 = {{blockPosition.x, blockPosition.y}, uvs[0]};
-			BlockVertex v4 = {{blockPosition.x, blockPosition.y}, uvs[0]};
-			BlockVertex v5 = {{blockPosition.x + block.second.realWidth, blockPosition.y}, uvs[1]};
-			BlockVertex v6 = {{blockPosition.x + block.second.realWidth, blockPosition.y + block.second.realHeight}, uvs[2]};
-			blockVertices.push_back(v1);
-			blockVertices.push_back(v2);
-			blockVertices.push_back(v3);
-			blockVertices.push_back(v4);
-			blockVertices.push_back(v5);
-			blockVertices.push_back(v6);
+			BlockInstance instance;
+			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
+			instance.sizeX = block.second.realWidth;
+			instance.sizeY = block.second.realHeight;
+			instance.rotation = block.second.rotation;
+			instance.texX = uvOrigin.x;
+
+			blockInstances.push_back(instance);
 
 			// blocks are added to state array
 			posToAddressIdx[blockPosition] = relativeAdresses.size();
@@ -62,10 +46,10 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		}
 		
 		// upload block vertices
-		numBlockVertices = blockVertices.size();
-		size_t blockBufferSize = sizeof(BlockVertex) * numBlockVertices;
+		numBlockInstances = blockInstances.size();
+		size_t blockBufferSize = sizeof(BlockInstance) * numBlockInstances;
 		blockBuffer = createBuffer(device, blockBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		vmaCopyMemoryToAllocation(device->getAllocator(), blockVertices.data(), blockBuffer->allocation, 0, blockBufferSize);
+		vmaCopyMemoryToAllocation(device->getAllocator(), blockInstances.data(), blockBuffer->allocation, 0, blockBufferSize);
 	}
 
 	// Generate wire vertices

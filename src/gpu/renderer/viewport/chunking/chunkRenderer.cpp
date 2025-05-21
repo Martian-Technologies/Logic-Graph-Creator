@@ -27,8 +27,8 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	blockPipelineInfo.vertShader = blockVertShader;
 	blockPipelineInfo.fragShader = blockFragShader;
 	blockPipelineInfo.renderPass = renderPass;
-	blockPipelineInfo.vertexBindingDescriptions = BlockVertex::getBindingDescriptions();
-	blockPipelineInfo.vertexAttributeDescriptions = BlockVertex::getAttributeDescriptions();
+	blockPipelineInfo.vertexBindingDescriptions = BlockInstance::getBindingDescriptions();
+	blockPipelineInfo.vertexAttributeDescriptions = BlockInstance::getAttributeDescriptions();
 	blockPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ChunkPushConstants)});
 	blockPipelineInfo.descriptorSets.push_back(stateBufferDescriptorSetLayout);
 	blockPipelineInfo.descriptorSets.push_back(device->getBlockTextureManager()->getDescriptorLayout());
@@ -38,6 +38,7 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	wirePipelineInfo.vertShader = wireVertShader;
 	wirePipelineInfo.fragShader = wireFragShader;
 	wirePipelineInfo.renderPass = renderPass;
+	wirePipelineInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
 	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
 	wirePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ChunkPushConstants)});
@@ -70,6 +71,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 	// shared push constants
 	ChunkPushConstants pushConstants{};
 	pushConstants.mvp = viewMatrix;
+	Vec2 uvCellSize = device->getBlockTextureManager()->getTileset().getCellUVSize();
+	pushConstants.uvCellSizeX = uvCellSize.x;
+	pushConstants.uvCellSizeY = uvCellSize.y;
 
 	// fill state buffers
 	for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
@@ -116,7 +120,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 0, 1, &stateBufferDescriptorWrite);
 
 				// draw
-				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumBlockVertices()), 1, 0, 0);
+				vkCmdDraw(frame.mainCommandBuffer, 6, static_cast<uint32_t>(chunk->getNumBlockInstances()), 0, 0);
 			}
 		}
 	}

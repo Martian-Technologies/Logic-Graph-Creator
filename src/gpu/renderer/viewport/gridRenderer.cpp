@@ -14,6 +14,7 @@ void GridRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	gridPipelineInfo.vertShader = gridVertShader;
 	gridPipelineInfo.fragShader = gridFragShader;
 	gridPipelineInfo.renderPass = renderPass;
+	gridPipelineInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	gridPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, gridFadeOffset});
 	gridPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(GridPushConstants) - gridFadeOffset});
 	pipeline.init(device, gridPipelineInfo);

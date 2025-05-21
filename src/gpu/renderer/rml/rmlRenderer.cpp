@@ -106,7 +106,6 @@ void RmlRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	rmlPipelineInfo.vertexBindingDescriptions = RmlVertex::getBindingDescriptions();
 	rmlPipelineInfo.vertexAttributeDescriptions = RmlVertex::getAttributeDescriptions();
 	rmlPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(RmlPushConstants)});
-	rmlPipelineInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	untexturedPipeline.init(device, rmlPipelineInfo);
 	// textured
 	rmlPipelineInfo.fragShader = rmlFragShaderTextured;

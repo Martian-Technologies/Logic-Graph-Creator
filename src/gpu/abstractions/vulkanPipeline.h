@@ -14,7 +14,7 @@ struct PipelineInformation {
 	VkShaderModule vertShader, fragShader;
 	std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions;
 	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
-	VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE;
+	VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	bool alphaBlending = true;
 	bool premultipliedAlpha = false;
 
