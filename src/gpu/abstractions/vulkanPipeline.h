@@ -15,6 +15,8 @@ struct PipelineInformation {
 	std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions;
 	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
 	VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE;
+	bool alphaBlending = true;
+	bool premultipliedAlpha = false;
 
 	std::vector<PushConstantDescription> pushConstants;
 	std::vector<VkDescriptorSetLayout> descriptorSets;

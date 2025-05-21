@@ -57,9 +57,6 @@ void FrameManager::incrementFrame() {
 	frameIndex = frameNumber % frames.size();
 }
 
-const float minFrameTime = 6.9f;
-const bool frameLimit = true;
-
 float FrameManager::waitForCurrentFrameCompletion() {
 	// wait until current frame has finished rendering
 	vkWaitForFences(frames[frameIndex].device->getDevice(), 1, &frames[frameIndex].renderFence, VK_TRUE, UINT64_MAX);
@@ -67,16 +64,10 @@ float FrameManager::waitForCurrentFrameCompletion() {
 	// update frame time with newest frame completion
 	auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - frames[frameIndex].lastStartTime).count() / 1000.0f;
 
-	// if we are limiting frame times and under the limit, wait
-	float timeRemaining = minFrameTime - time;
-	if (frameLimit && timeRemaining > 0.0f) {
-		std::this_thread::sleep_for(std::chrono::microseconds(long(timeRemaining * 1000.0f)));
-	}
-
 	// clear used allocations
 	frames[frameIndex].lifetime.flush();
 
-	return time + std::max(0.0f, timeRemaining);
+	return time;
 }
 
 void FrameManager::startCurrentFrame() {

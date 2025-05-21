@@ -111,6 +111,7 @@ void RmlRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	// textured
 	rmlPipelineInfo.fragShader = rmlFragShaderTextured;
 	rmlPipelineInfo.descriptorSets.push_back(singleImageDescriptorSetLayout); // descriptor set 0 (texture image)
+	rmlPipelineInfo.premultipliedAlpha = true;
 	texturedPipeline.init(device, rmlPipelineInfo);
 
 	// destroy shaders
