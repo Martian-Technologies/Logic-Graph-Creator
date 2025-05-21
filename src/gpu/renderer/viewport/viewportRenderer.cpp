@@ -3,11 +3,11 @@
 void ViewportRenderer::init(VulkanDevice* device, VkRenderPass renderPass) {
 	gridRenderer.init(device, renderPass);
 	chunkRenderer.init(device, renderPass);
-	elementRenderer.init(device, renderPass);
+	// elementRenderer.init(device, renderPass);
 }
 
 void ViewportRenderer::cleanup() {
-	elementRenderer.cleanup();
+	// elementRenderer.cleanup();
 	chunkRenderer.cleanup();
 	gridRenderer.cleanup();
 }
