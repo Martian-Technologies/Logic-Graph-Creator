@@ -30,11 +30,14 @@ void Swapchain::recreate(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> siz
 	createSwapchain(surface, size, true);
 }
 
+const bool vsync = true;
+
 void Swapchain::createSwapchain(VkSurfaceKHR surface, std::pair<uint32_t, uint32_t> size, bool useOld) {
 	// Create swapchain
 	vkb::SwapchainBuilder swapchainBuilder(device->getDevice(), surface);
 	swapchainBuilder.set_desired_extent(size.first, size.second);
-	// swapchainBuilder.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR); "vsync"
+	if (vsync) swapchainBuilder.set_desired_present_mode(VK_PRESENT_MODE_MAILBOX_KHR);
+	else swapchainBuilder.set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR);
 	swapchainBuilder.set_desired_format({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
 	if (useOld) swapchainBuilder.set_old_swapchain(swapchain);
 	
