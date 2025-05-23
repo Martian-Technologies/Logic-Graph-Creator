@@ -7,6 +7,8 @@
 #include "backend/circuitView/renderer/renderer.h"
 #include "gpu/renderer/viewport/chunking/vulkanChunker.h"
 
+#include "gpu/renderer/viewport/elements/elementRenderer.h"
+
 struct WindowRenderer;
 
 struct ViewportViewData {
@@ -24,11 +26,11 @@ public:
 	void linkToWindowRenderer(WindowRenderer* windowRenderer);
 	
 	ViewportViewData getViewData();
-	inline bool hasCircuit() { return circuitIsNotNullptr; }
+	inline bool hasCircuit() { std::lock_guard<std::mutex> lock(circuitMux); return circuit != nullptr; }
 	inline VulkanChunker& getChunker() { return chunker; }
 	inline std::shared_ptr<Evaluator> getEvaluator() { std::lock_guard<std::mutex> lock(evaluatorMux); return evaluator; }
 
-	std::vector<BlockPreview> getBlockPreviews();
+	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	
 public:
 	// main flow
@@ -62,16 +64,18 @@ private:
 	// From the UI Side
 	Rml::Element* element;
 	WindowRenderer* linkedWindowRenderer = nullptr;
+	
 	std::shared_ptr<Evaluator> evaluator = nullptr;
 	std::mutex evaluatorMux;
-	std::atomic<bool> circuitIsNotNullptr = false;
+	Circuit* circuit = nullptr;
+	std::mutex circuitMux;
 
 	// Vulkan
 	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view
 
 	// Elements
 	ElementID currentElementID = 0;
-	std::unordered_map<ElementID, BlockPreview> blockPreviews;
+	std::unordered_map<ElementID, BlockPreviewRenderData> blockPreviews;
 	std::mutex blockPreviewMux;
 
 	// View data

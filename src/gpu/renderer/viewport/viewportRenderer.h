@@ -3,6 +3,7 @@
 
 #include "gpu/renderer/viewport/gridRenderer.h"
 #include "gpu/renderer/viewport/chunking/chunkRenderer.h"
+#include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/viewportRenderInterface.h"
 #include "gpu/renderer/frameManager.h"
 
@@ -16,6 +17,7 @@ public:
 private:
 	GridRenderer gridRenderer;
 	ChunkRenderer chunkRenderer;
+	ElementRenderer elementRenderer;
 };
 
 #endif

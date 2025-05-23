@@ -3,11 +3,11 @@
 void ViewportRenderer::init(VulkanDevice* device, VkRenderPass renderPass) {
 	gridRenderer.init(device, renderPass);
 	chunkRenderer.init(device, renderPass);
-	// elementRenderer.init(device, renderPass);
+	elementRenderer.init(device, renderPass);
 }
 
 void ViewportRenderer::cleanup() {
-	// elementRenderer.cleanup();
+	elementRenderer.cleanup();
 	chunkRenderer.cleanup();
 	gridRenderer.cleanup();
 }
@@ -26,4 +26,5 @@ void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 	// render subrenderers
 	gridRenderer.render(frame, viewData.viewportViewMat, viewData.viewScale, viewport->hasCircuit());
 	chunkRenderer.render(frame, viewData.viewportViewMat, viewport->getEvaluator(), viewport->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
+	elementRenderer.render(frame, viewData.viewportViewMat, viewport->getBlockPreviews());
 }

@@ -26,7 +26,9 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 // ====================================== INTERFACE ==========================================
 
 void ViewportRenderInterface::setCircuit(Circuit* circuit) {
-	circuitIsNotNullptr = circuit != nullptr;
+	std::lock_guard<std::mutex> lock(circuitMux);
+	
+	this->circuit = circuit;
 	chunker.setCircuit(circuit);
 }
 
@@ -81,10 +83,19 @@ void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
 
 ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPreview) {
 	std::lock_guard<std::mutex> lock(blockPreviewMux);
-	
-	ElementID newElement = ++currentElementID;
 
-	blockPreviews[newElement] = blockPreview;
+	ElementID newElement = ++currentElementID;
+	BlockPreviewRenderData newPreview;
+	newPreview.position = blockPreview.position;
+	newPreview.rotation = blockPreview.rotation;
+	{
+		std::lock_guard<std::mutex> lock(circuitMux);
+		newPreview.size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
+	}
+	newPreview.type = blockPreview.type;
+
+	// insert new block preview into map
+	blockPreviews[newElement] = newPreview;
 	
 	return newElement;
 }
@@ -95,10 +106,10 @@ void ViewportRenderInterface::removeBlockPreview(ElementID blockPreview) {
 	blockPreviews.erase(blockPreview);
 }
 
-std::vector<BlockPreview> ViewportRenderInterface::getBlockPreviews() {
+std::vector<BlockPreviewRenderData> ViewportRenderInterface::getBlockPreviews() {
 	std::lock_guard<std::mutex> lock(blockPreviewMux);
 
-	std::vector<BlockPreview> returnBlockPreviews;
+	std::vector<BlockPreviewRenderData> returnBlockPreviews;
 	returnBlockPreviews.reserve(blockPreviews.size());
 
 	for (const auto& preview : blockPreviews) {
