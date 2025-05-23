@@ -20,6 +20,11 @@ layout( push_constant ) uniform constants
 
 const int vertsPerBlock = 6;
 
+// magic rotation bitmasks for getting rotation coordinates
+// 0x1C, 0x0E, 0x38, 0x70
+uint bitmasksX[4] = uint[4](0x1C, 0x0E, 0x23, 0x31);
+uint bitmasksY[4] = uint[4](0x0E, 0x1C, 0x31, 0x23);
+
 void main() {
 	// extract state from states array
 	uint val = states[gl_InstanceIndex / statesPerWord];
@@ -27,8 +32,9 @@ void main() {
 
 	// position offset
 	uint b = 1 << (gl_VertexIndex % vertsPerBlock);
-    vec2 baseCoord = vec2((0x1C & b) != 0, (0xE & b) != 0);
+	vec2 posCoord = vec2((bitmasksX[0] & b) != 0, (bitmasksY[0] & b) != 0);
+    vec2 uvCoord = vec2((bitmasksX[inRotation] & b) != 0, (bitmasksY[inRotation] & b) != 0);
 
-	outTex = vec2(inTexX + baseCoord.x*float(inSize.x)*push.uvCellSizeX, (push.uvCellSizeY*float(inSize.y))*(baseCoord.y+float(state)));
-	gl_Position = push.mvp * vec4(inPosition + baseCoord, 0.0, 1.0);
+	outTex = vec2(inTexX + uvCoord.x/**float(inSize.x)*/*push.uvCellSizeX, (push.uvCellSizeY/**float(inSize.y)*/)*(uvCoord.y+float(state)));
+	gl_Position = push.mvp * vec4(inPosition + posCoord*inSize, 0.0, 1.0);
 }
