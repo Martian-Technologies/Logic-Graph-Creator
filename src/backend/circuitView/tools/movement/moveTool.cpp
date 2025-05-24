@@ -17,10 +17,10 @@ void MoveTool::reset() {
 
 void MoveTool::activate() {
 	CircuitTool::activate();
-	registerFunction("Tool Primary Activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
-	registerFunction("Tool Secondary Activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
 	registerFunction("Tool Rotate Block CW", std::bind(&MoveTool::rotateCW, this, std::placeholders::_1));
 	registerFunction("Tool Rotate Block CCW", std::bind(&MoveTool::rotateCCW, this, std::placeholders::_1));
+	registerFunction("Tool Primary Activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
+	registerFunction("Tool Secondary Activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
 	if (!activeSelectionHelper->isFinished()) {
 		toolStackInterface->pushTool(activeSelectionHelper);
 	} else {
@@ -82,7 +82,6 @@ void MoveTool::updateElements() {
 	setStatusBar("Left click to move the selected blocks.");
 	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 	if (pointerInView) {
-
 		Position selectionOrigin = getSelectionOrigin(activeSelectionHelper->getSelection());
 		Vector totalOffset = lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection());
 
