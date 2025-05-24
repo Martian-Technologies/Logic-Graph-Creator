@@ -69,28 +69,40 @@ float ViewportRenderInterface::getLastFrameTimeMs() const {
 	return 0.0f;
 }
 
-ElementID ViewportRenderInterface::addSelectionElement(const SelectionObjectElement& selection) {
+ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObjectElement& selection) {
 	return 0;
 }
 
 ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& selection) {
-	return 0;
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	ElementID newElement = ++currentElementID;
+
+	BoxSelectionRenderData newBoxSelection;
+	// newBoxSelection.topLeft = FPosition(std::min())
+
+	// boxSelections[newElement].push_back();
+	
+	return newElement;
 }
 
 void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
-	
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	boxSelections.erase(selection);
 }
 
 ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPreview) {
-	std::lock_guard<std::mutex> lock(blockPreviewMux);
+	std::lock_guard<std::mutex> lock(elementsMux);
 
 	ElementID newElement = ++currentElementID;
+
 	BlockPreviewRenderData newPreview;
 	newPreview.position = blockPreview.position;
 	newPreview.rotation = blockPreview.rotation;
 	{
 		std::lock_guard<std::mutex> lock(circuitMux);
-		newPreview.size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
+		if (circuit) newPreview.size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
 	}
 	newPreview.type = blockPreview.type;
 
@@ -101,13 +113,13 @@ ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPrev
 }
 
 void ViewportRenderInterface::removeBlockPreview(ElementID blockPreview) {
-	std::lock_guard<std::mutex> lock(blockPreviewMux);
+	std::lock_guard<std::mutex> lock(elementsMux);
 
 	blockPreviews.erase(blockPreview);
 }
 
 std::vector<BlockPreviewRenderData> ViewportRenderInterface::getBlockPreviews() {
-	std::lock_guard<std::mutex> lock(blockPreviewMux);
+	std::lock_guard<std::mutex> lock(elementsMux);
 
 	std::vector<BlockPreviewRenderData> returnBlockPreviews;
 	returnBlockPreviews.reserve(blockPreviews.size());

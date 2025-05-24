@@ -27,6 +27,12 @@ struct BlockPreviewRenderData {
 	BlockType type;
 };
 
+struct BoxSelectionRenderData {
+	FPosition topLeft;
+	FVector size;
+	bool inverted;
+};
+
 class ElementRenderer {
 public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);

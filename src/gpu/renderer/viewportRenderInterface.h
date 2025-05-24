@@ -45,7 +45,7 @@ public:
 
 private:
 	// elements
-	ElementID addSelectionElement(const SelectionObjectElement& selection) override;
+	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) override;
 	ElementID addSelectionElement(const SelectionElement& selection) override;
 	void removeSelectionElement(ElementID selection) override;
 
@@ -76,7 +76,8 @@ private:
 	// Elements
 	ElementID currentElementID = 0;
 	std::unordered_map<ElementID, BlockPreviewRenderData> blockPreviews;
-	std::mutex blockPreviewMux;
+	std::unordered_map<ElementID, std::vector<BoxSelectionRenderData>> boxSelections;
+	std::mutex elementsMux;
 
 	// View data
 	ViewportViewData viewData;

@@ -83,7 +83,7 @@ public:
 
 private:
 	// elements
-	virtual ElementID addSelectionElement(const SelectionObjectElement& selection) = 0;
+	virtual ElementID addSelectionObjectElement(const SelectionObjectElement& selection) = 0;
 	virtual ElementID addSelectionElement(const SelectionElement& selection) = 0;
 	virtual void removeSelectionElement(ElementID selection) = 0;
 

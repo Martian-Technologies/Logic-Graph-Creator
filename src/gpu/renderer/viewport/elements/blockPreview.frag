@@ -12,5 +12,5 @@ layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 0) uniform sampler2D displayTexture;
 
 void main() {
-	outColor = vec4(texture(displayTexture, tex).rgb, push.alpha);
+	outColor = texture(displayTexture, tex) * vec4(1.0, 1.0, 1.0, push.alpha);
 }

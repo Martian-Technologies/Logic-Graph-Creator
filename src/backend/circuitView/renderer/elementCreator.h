@@ -61,7 +61,7 @@ public:
 
 	inline ElementID addSelectionElement(const SelectionObjectElement& selection) {
 		assert(renderer);
-		ElementID id = renderer->addSelectionElement(selection);
+		ElementID id = renderer->addSelectionObjectElement(selection);
 		ids[id] = ElementType::SelectionElement;
 		return id;
 	}
