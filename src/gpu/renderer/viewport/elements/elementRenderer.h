@@ -19,17 +19,23 @@ struct BlockPreviewPushConstant {
 	alignas(4)  float uvCellSizeY;
     alignas(4)  float alpha;
 };
-
 struct BlockPreviewRenderData {
-	Position position;
+	glm::vec2 position;
+	glm::vec2 size;
 	Rotation rotation;
-	Vector size;
 	BlockType type;
 };
 
+struct BoxSelectionPushConstant {
+    alignas(16) glm::mat4 mvp;
+    alignas(8)  glm::vec2 position;
+    alignas(8)  glm::vec2 size;
+    alignas(4)  uint32_t inverted;
+	alignas(4)  float alpha;
+};
 struct BoxSelectionRenderData {
-	FPosition topLeft;
-	FVector size;
+	glm::vec2 topLeft;
+	glm::vec2 size;
 	bool inverted;
 };
 
@@ -38,10 +44,11 @@ public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);
 	void cleanup();
 
-	void render(Frame& frame, const glm::mat4& viewMatrix, std::vector<BlockPreviewRenderData> blockPreviews);
+	void render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BlockPreviewRenderData>& blockPreviews, const std::vector<BoxSelectionRenderData>& boxSelections);
 	
 private:
 	Pipeline blockPreviewPipeline;
+	Pipeline boxSelectionPipeline;
 
 	VulkanDevice* device = nullptr;
 };

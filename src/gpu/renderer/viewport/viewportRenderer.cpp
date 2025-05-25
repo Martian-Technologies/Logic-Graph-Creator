@@ -26,5 +26,5 @@ void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 	// render subrenderers
 	gridRenderer.render(frame, viewData.viewportViewMat, viewData.viewScale, viewport->hasCircuit());
 	chunkRenderer.render(frame, viewData.viewportViewMat, viewport->getEvaluator(), viewport->getChunker().getAllocations(viewData.viewBounds.first.snap(), viewData.viewBounds.second.snap()));
-	elementRenderer.render(frame, viewData.viewportViewMat, viewport->getBlockPreviews());
+	elementRenderer.render(frame, viewData.viewportViewMat, viewport->getBlockPreviews(), viewport->getBoxSelections());
 }

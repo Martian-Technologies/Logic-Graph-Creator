@@ -3,6 +3,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "gpu/renderer/windowRenderer.h"
+#include "backend/selection.h"
 
 ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element)
 	: element(element), chunker(device) {
@@ -70,7 +71,36 @@ float ViewportRenderInterface::getLastFrameTimeMs() const {
 }
 
 ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObjectElement& selection) {
-	return 0;
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	ElementID newElement = ++currentElementID;
+
+	std::stack<SharedSelection> selectionsLeft;
+	selectionsLeft.push(selection.selection);
+	while (!selectionsLeft.empty()) {
+		SharedSelection selectionObj = selectionsLeft.top();
+		selectionsLeft.pop();
+		
+		SharedCellSelection cellSelection = selectionCast<CellSelection>(selectionObj);
+		if (cellSelection) {
+			BoxSelectionRenderData newBoxSelection;
+			Position position = cellSelection->getPosition();
+
+			newBoxSelection.topLeft = glm::vec2(position.x, position.y);
+			newBoxSelection.size = glm::vec2(1.0f);
+			newBoxSelection.inverted = selection.renderMode == SelectionObjectElement::SELECTION_INVERTED;
+
+			boxSelections[newElement].push_back(newBoxSelection);
+		}
+		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selectionObj);
+		if (dimensionalSelection) {
+			for (int i = 0; i < dimensionalSelection->size(); i++) {
+				selectionsLeft.push(dimensionalSelection->getSelection(i));
+			}
+		}
+	}
+	
+	return newElement;
 }
 
 ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& selection) {
@@ -78,10 +108,18 @@ ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& s
 
 	ElementID newElement = ++currentElementID;
 
-	BoxSelectionRenderData newBoxSelection;
-	// newBoxSelection.topLeft = FPosition(std::min())
+	// calculate ordered box
+	FPosition topLeft = selection.topLeft.free();
+	FPosition bottomRight = selection.bottomRight.free();
+	if (selection.topLeft.x > selection.bottomRight.x) std::swap(topLeft.x, bottomRight.x);
+	if (selection.topLeft.y > selection.bottomRight.y) std::swap(topLeft.y, bottomRight.y);
 
-	// boxSelections[newElement].push_back();
+	BoxSelectionRenderData newBoxSelection;
+	newBoxSelection.topLeft = glm::vec2(topLeft.x, topLeft.y);
+	newBoxSelection.size = glm::vec2(bottomRight.x - topLeft.x + 1.0f, bottomRight.y - topLeft.y + 1.0f);
+	newBoxSelection.inverted = selection.inverted;
+
+	boxSelections[newElement].push_back(newBoxSelection);
 	
 	return newElement;
 }
@@ -92,17 +130,32 @@ void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
 	boxSelections.erase(selection);
 }
 
+std::vector<BoxSelectionRenderData> ViewportRenderInterface::getBoxSelections() {
+	std::lock_guard<std::mutex> lock(elementsMux);
+	
+	std::vector<BoxSelectionRenderData> returnBoxSelections;
+	returnBoxSelections.reserve(boxSelections.size());
+
+	for (const auto& boxSelection : boxSelections) {
+		returnBoxSelections.insert(returnBoxSelections.end(), boxSelection.second.begin(), boxSelection.second.end());
+	}
+
+	return returnBoxSelections;
+}
+
 ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	ElementID newElement = ++currentElementID;
 
 	BlockPreviewRenderData newPreview;
-	newPreview.position = blockPreview.position;
+	newPreview.position = glm::vec2(blockPreview.position.x, blockPreview.position.y);
 	newPreview.rotation = blockPreview.rotation;
 	{
 		std::lock_guard<std::mutex> lock(circuitMux);
-		if (circuit) newPreview.size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
+		Vector size(1.0f, 1.0f);
+		if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
+		newPreview.size = glm::vec2(size.dx, size.dy);
 	}
 	newPreview.type = blockPreview.type;
 

@@ -31,6 +31,7 @@ public:
 	inline std::shared_ptr<Evaluator> getEvaluator() { std::lock_guard<std::mutex> lock(evaluatorMux); return evaluator; }
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
+	std::vector<BoxSelectionRenderData> getBoxSelections();
 	
 public:
 	// main flow
