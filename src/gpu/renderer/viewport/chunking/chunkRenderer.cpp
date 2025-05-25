@@ -38,9 +38,8 @@ void ChunkRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	wirePipelineInfo.vertShader = wireVertShader;
 	wirePipelineInfo.fragShader = wireFragShader;
 	wirePipelineInfo.renderPass = renderPass;
-	wirePipelineInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-	wirePipelineInfo.vertexBindingDescriptions = WireVertex::getBindingDescriptions();
-	wirePipelineInfo.vertexAttributeDescriptions = WireVertex::getAttributeDescriptions();
+	wirePipelineInfo.vertexBindingDescriptions = WireInstance::getBindingDescriptions();
+	wirePipelineInfo.vertexAttributeDescriptions = WireInstance::getAttributeDescriptions();
 	wirePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ChunkPushConstants)});
 	wirePipelineInfo.descriptorSets.push_back(stateBufferDescriptorSetLayout);
 	wirePipeline.init(device, wirePipelineInfo);
@@ -153,7 +152,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 				vkCmdPushDescriptorSetKHR(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline.getLayout(), 0, 1, &stateBufferDescriptorWrite);
 				
 				// draw
-				vkCmdDraw(frame.mainCommandBuffer, static_cast<uint32_t>(chunk->getNumWireVertices()), 1, 0, 0);
+				vkCmdDraw(frame.mainCommandBuffer, 6, static_cast<uint32_t>(chunk->getNumWireInstances()), 0, 0);
 			}
 		}
 	}

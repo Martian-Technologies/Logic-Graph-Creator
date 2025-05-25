@@ -26,7 +26,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 	// Generate block instances
 	if (blocks.size() > 0) {
 		std::vector<BlockInstance> blockInstances;
-		blockInstances.reserve(blocks.size() );
+		blockInstances.reserve(blocks.size());
 		for (const auto& block : blocks) {
 			Position blockPosition = block.first;
 			Vec2 uvOrigin = device->getBlockTextureManager()->getTileset().getTopLeftUV(block.second.blockType + 1, 0);
@@ -54,8 +54,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 
 	// Generate wire vertices
 	if (wires.size() > 0) {
-		std::vector<WireVertex> wireVertices;
-		wireVertices.reserve(wires.size() * 6);
+		std::vector<WireInstance> wireInstances;
+		wireInstances.reserve(wires.size());
 		for (const auto& wire : wires) {
 
 			// get wire's index in state buffer
@@ -72,41 +72,19 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 				posToAddressIdx[wire.first.first] = stateIdx;
 			}
 
-			// generate vertices
-			constexpr float WIRE_WIDTH = 0.03f;
-			
-			// get normalized direction
-			FVector dir = wire.second.end - wire.second.start;
-			dir /= dir.length();
+			WireInstance instance;
+			instance.pointA = glm::vec2(wire.second.start.x, wire.second.start.y);
+			instance.pointB = glm::vec2(wire.second.end.x, wire.second.end.y);
+			instance.stateIndex = stateIdx;
 
-			// direction rotated clockwise (I'm thinking right as in a vector pointed in (1, 1) rotated to (1, -1))
-			FVector right(-dir.dy, dir.dx);
-			right *= WIRE_WIDTH; // apply thickness of wire
-
-			// reused position
-			FPosition vertexPos;
-
-			// first triangle
-			vertexPos = wire.second.start + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
-			vertexPos = wire.second.start - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
-			vertexPos = wire.second.end + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
-			// second triangle
-			vertexPos = wire.second.start - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
-			vertexPos = wire.second.end - right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
-			vertexPos = wire.second.end + right;
-			wireVertices.emplace_back(glm::vec2(vertexPos.x, vertexPos.y), stateIdx);
+			wireInstances.push_back(instance);
 		}
 		
 		// upload wire vertices
-		numWireVertices = wireVertices.size();
-		size_t wireBufferSize = sizeof(WireVertex) * numWireVertices;
+		numWireInstances = wireInstances.size();
+		size_t wireBufferSize = sizeof(WireInstance) * numWireInstances;
 		wireBuffer = createBuffer(device, wireBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		vmaCopyMemoryToAllocation(device->getAllocator(), wireVertices.data(), wireBuffer->allocation, 0, wireBufferSize);
+		vmaCopyMemoryToAllocation(device->getAllocator(), wireInstances.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
 	if (!relativeAdresses.empty()) {

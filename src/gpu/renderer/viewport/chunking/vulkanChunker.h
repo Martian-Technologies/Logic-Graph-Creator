@@ -55,31 +55,37 @@ struct BlockInstance {
 	}
 };
 
-struct WireVertex {
-	glm::vec2 pos;
+struct WireInstance {
+	glm::vec2 pointA;
+	glm::vec2 pointB;
 	uint32_t stateIndex;
 
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
-		bindingDescriptions[0].stride = sizeof(WireVertex);
-		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[0].stride = sizeof(WireInstance);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 
         return bindingDescriptions;
     }
 
 	inline static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(3);
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(WireVertex, pos);
+		attributeDescriptions[0].offset = offsetof(WireInstance, pointA);
 
 		attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32_UINT;
-		attributeDescriptions[1].offset = offsetof(WireVertex, stateIndex);
+		attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(WireInstance, pointB);
+		
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32_UINT;
+		attributeDescriptions[2].offset = offsetof(WireInstance, stateIndex);
 
 		return attributeDescriptions;
 	}
@@ -125,7 +131,7 @@ public:
 	inline uint32_t getNumBlockInstances() const { return numBlockInstances; }
 	
 	inline const std::optional<AllocatedBuffer>& getWireBuffer() const { return wireBuffer; }
-	inline uint32_t getNumWireVertices() const { return numWireVertices; }
+	inline uint32_t getNumWireInstances() const { return numWireInstances; }
 
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
@@ -138,7 +144,7 @@ private:
 	uint32_t numBlockInstances;
 
 	std::optional<AllocatedBuffer> wireBuffer;
-	uint32_t numWireVertices;
+	uint32_t numWireInstances;
 
 	std::optional<NBuffer> stateBuffer;
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
