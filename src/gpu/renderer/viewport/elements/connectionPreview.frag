@@ -3,10 +3,8 @@
 
 #include "../sharedLogic/wireConstants.glsl"
 
-layout(location = 0) in vec3 inColor;
-
-layout(location = 0) out vec4 fragColor;
+layout(location = 0) out vec4 outColor;
 
 void main() {
-	fragColor = vec4(inColor, WIRE_OPACITY);
+	outColor = vec4(WIRE_LOW_COLOR, WIRE_OPACITY);
 }

@@ -194,8 +194,6 @@ public:
 private:
 	void updateCircuit(Difference* diff);
 	void updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
-	FVector getOutputOffset(Rotation rotation);
-	FVector getInputOffset(Rotation rotation);
 	
 private:
 	std::unordered_map<Position, ChunkChain> chunks;

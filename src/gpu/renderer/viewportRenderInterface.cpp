@@ -3,6 +3,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "gpu/renderer/windowRenderer.h"
+#include "viewport/sharedLogic/logicRenderingUtils.h"
 #include "backend/selection.h"
 
 ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element)
@@ -185,19 +186,62 @@ std::vector<BlockPreviewRenderData> ViewportRenderInterface::getBlockPreviews() 
 }
 
 ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview& connectionPreview) {
-	return 0;
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	ElementID newElement = ++currentElementID;
+	if (circuit) {
+		std::lock_guard<std::mutex> lock(circuitMux);
+		ConnectionPreviewRenderData newPreview;
+		FPosition pointA = connectionPreview.input.free() + getOutputOffset(connectionPreview.input, circuit);
+		FPosition pointB = connectionPreview.output.free() + getInputOffset(connectionPreview.output, circuit);
+		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
+		newPreview.pointB = glm::vec2(pointB.x, pointB.y);
+		connectionPreviews[newElement] = newPreview;
+	}
+	
+	return newElement;
 }
 
 void ViewportRenderInterface::removeConnectionPreview(ElementID connectionPreview) {
-	
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	connectionPreviews.erase(connectionPreview);
 }
 
 ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
-	return 0;
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	ElementID newElement = ++currentElementID;
+	if (circuit) {
+		std::lock_guard<std::mutex> lock(circuitMux);
+		ConnectionPreviewRenderData newPreview;
+		
+		FPosition pointA = halfConnectionPreview.input.free() + getOutputOffset(halfConnectionPreview.input, circuit);
+		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
+		newPreview.pointB = glm::vec2(halfConnectionPreview.output.x, halfConnectionPreview.output.y);
+		connectionPreviews[newElement] = newPreview;
+	}
+	
+	return newElement;
 }
 
 void ViewportRenderInterface::removeHalfConnectionPreview(ElementID halfConnectionPreview) {
+	std::lock_guard<std::mutex> lock(elementsMux);
 	
+	connectionPreviews.erase(halfConnectionPreview);
+}
+
+std::vector<ConnectionPreviewRenderData> ViewportRenderInterface::getConnectionPreviews() {
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	std::vector<ConnectionPreviewRenderData> returnConnectionPreviews;
+	returnConnectionPreviews.reserve(connectionPreviews.size());
+
+	for (const auto& preview : connectionPreviews) {
+		returnConnectionPreviews.push_back(preview.second);
+	}
+
+	return returnConnectionPreviews;
 }
 
 void ViewportRenderInterface::spawnConfetti(FPosition start) {

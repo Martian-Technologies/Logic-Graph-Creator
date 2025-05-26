@@ -1,5 +1,7 @@
 #include "vulkanChunker.h"
 
+#include "../sharedLogic/logicRenderingUtils.h"
+
 const int CHUNK_SIZE = 25;
 cord_t getChunk(cord_t in) {
 	return std::floor( (float)in / (float)CHUNK_SIZE ) * (int)CHUNK_SIZE;
@@ -329,35 +331,6 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 	for (const Position& chunk : chunksToUpdate) {
 		chunks[chunk].updateAllocation(device);
 	}
-}
-
-constexpr float edgeDistance = 0.48f;
-constexpr float sideShift = 0.25f;
-
-FVector VulkanChunker::getOutputOffset(Rotation rotation) {
-	FVector offset = { 0.5, 0.5 };
-	
-	switch (rotation) {
-	case Rotation::ZERO: offset += { edgeDistance, sideShift }; break;
-	case Rotation::NINETY: offset += { -sideShift, edgeDistance }; break;
-	case Rotation::ONE_EIGHTY: offset += { -edgeDistance, -sideShift }; break;
-	case Rotation::TWO_SEVENTY: offset += { sideShift, -edgeDistance }; break;
-	}
-	
-	return offset;
-}
-
-FVector VulkanChunker::getInputOffset(Rotation rotation) {
-	FVector offset = { 0.5, 0.5 };
-	
-	switch (rotation) {
-	case Rotation::ZERO: offset += { -edgeDistance, -sideShift }; break;
-	case Rotation::NINETY: offset += { sideShift, -edgeDistance }; break;
-	case Rotation::ONE_EIGHTY: offset += { edgeDistance, sideShift }; break;
-	case Rotation::TWO_SEVENTY: offset += { -sideShift, edgeDistance }; break;
-	}
-	
-	return offset;
 }
 
 void VulkanChunker::updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate) {

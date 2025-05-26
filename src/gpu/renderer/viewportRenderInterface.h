@@ -32,6 +32,7 @@ public:
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	std::vector<BoxSelectionRenderData> getBoxSelections();
+	std::vector<ConnectionPreviewRenderData> getConnectionPreviews();
 	
 public:
 	// main flow
@@ -78,6 +79,7 @@ private:
 	ElementID currentElementID = 0;
 	std::unordered_map<ElementID, BlockPreviewRenderData> blockPreviews;
 	std::unordered_map<ElementID, std::vector<BoxSelectionRenderData>> boxSelections;
+	std::unordered_map<ElementID, ConnectionPreviewRenderData> connectionPreviews;
 	std::mutex elementsMux;
 
 	// View data

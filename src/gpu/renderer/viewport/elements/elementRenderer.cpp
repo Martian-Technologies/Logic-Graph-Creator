@@ -15,8 +15,7 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	blockPreviewPipelineInfo.vertShader = blockPreviewVertShader;
 	blockPreviewPipelineInfo.fragShader = blockPreviewFragShader;
 	blockPreviewPipelineInfo.renderPass = renderPass;
-	blockPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(BlockPreviewPushConstant, alpha)});
-	blockPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(float)});
+	blockPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(BlockPreviewPushConstant)});
 	blockPreviewPipelineInfo.descriptorSets.push_back(device->getBlockTextureManager()->getDescriptorLayout());
 	blockPreviewPipeline.init(device, blockPreviewPipelineInfo);
 	
@@ -32,22 +31,38 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	boxSelectionPipelineInfo.fragShader = boxSelectionFragShader;
 	boxSelectionPipelineInfo.renderPass = renderPass;
 	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(BoxSelectionPushConstant, inverted)});
-	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t) + sizeof(float)});
+	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
 	boxSelectionPipeline.init(device, boxSelectionPipelineInfo);
 	
 	destroyShaderModule(device->getDevice(), boxSelectionVertShader);
 	destroyShaderModule(device->getDevice(), boxSelectionFragShader);
+
+	// connection preview
+	VkShaderModule connectionPreviewVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/connectionPreview.vert.spv"));
+	VkShaderModule connectionPreviewFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/connectionPreview.frag.spv"));
+
+	PipelineInformation connectionPreviewPipelineInfo{};
+	connectionPreviewPipelineInfo.vertShader = connectionPreviewVertShader;
+	connectionPreviewPipelineInfo.fragShader = connectionPreviewFragShader;
+	connectionPreviewPipelineInfo.renderPass = renderPass;
+	connectionPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ConnectionPreviewPushConstant)});
+	connectionPreviewPipeline.init(device, connectionPreviewPipelineInfo);
+	
+	destroyShaderModule(device->getDevice(), connectionPreviewVertShader);
+	destroyShaderModule(device->getDevice(), connectionPreviewFragShader);
 }
 
 void ElementRenderer::cleanup() {
+	connectionPreviewPipeline.cleanup();
 	boxSelectionPipeline.cleanup();
 	blockPreviewPipeline.cleanup();
 }
 
-const float PREVIEW_OPACITY = 0.5f;
-const float SELECTION_OPACITY = 0.3f;
-
-void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BlockPreviewRenderData>& blockPreviews, const std::vector<BoxSelectionRenderData>& boxSelections) {
+void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix,
+							 const std::vector<BlockPreviewRenderData>& blockPreviews,
+							 const std::vector<BoxSelectionRenderData>& boxSelections,
+							 const std::vector<ConnectionPreviewRenderData>& connectionPreviews) {
+	
 	// Block previews
 	if (!blockPreviews.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPreviewPipeline.getHandle());
@@ -55,7 +70,6 @@ void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const st
 	
 		BlockPreviewPushConstant blockPreviewConstant;
 		blockPreviewConstant.mvp = viewMatrix;
-		blockPreviewConstant.alpha = PREVIEW_OPACITY;
 		Vec2 uvCellSize = device->getBlockTextureManager()->getTileset().getCellUVSize();
 		blockPreviewConstant.uvCellSizeX = uvCellSize.x;
 		blockPreviewConstant.uvCellSizeY = uvCellSize.y;
@@ -76,7 +90,6 @@ void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const st
 	
 		BoxSelectionPushConstant boxSelectionConstant;
 		boxSelectionConstant.mvp = viewMatrix;
-		boxSelectionConstant.alpha = SELECTION_OPACITY;
 		
 		for (const BoxSelectionRenderData& boxSelection : boxSelections){
 			boxSelectionConstant.position = boxSelection.topLeft;
@@ -84,6 +97,22 @@ void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix, const st
 			boxSelectionConstant.inverted = boxSelection.inverted;
 
 			boxSelectionPipeline.cmdPushConstants(frame.mainCommandBuffer, &boxSelectionConstant);
+			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
+		}
+	}
+
+	// Connection previews
+	if (!connectionPreviews.empty()) {
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, connectionPreviewPipeline.getHandle());
+	
+		ConnectionPreviewPushConstant connectionPreviewConstant;
+		connectionPreviewConstant.mvp = viewMatrix;
+		
+		for (const ConnectionPreviewRenderData& connectionPreview : connectionPreviews){
+			connectionPreviewConstant.pointA = connectionPreview.pointA;
+			connectionPreviewConstant.pointB = connectionPreview.pointB;
+
+			connectionPreviewPipeline.cmdPushConstants(frame.mainCommandBuffer, &connectionPreviewConstant);
 			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 		}
 	}
