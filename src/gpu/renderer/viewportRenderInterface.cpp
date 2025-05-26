@@ -192,8 +192,8 @@ ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview&
 	if (circuit) {
 		std::lock_guard<std::mutex> lock(circuitMux);
 		ConnectionPreviewRenderData newPreview;
-		FPosition pointA = connectionPreview.input.free() + getOutputOffset(connectionPreview.input, circuit);
-		FPosition pointB = connectionPreview.output.free() + getInputOffset(connectionPreview.output, circuit);
+		FPosition pointA = connectionPreview.output.free() + getOutputOffset(connectionPreview.output, circuit);
+		FPosition pointB = connectionPreview.input.free() + getInputOffset(connectionPreview.input, circuit);
 		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
 		newPreview.pointB = glm::vec2(pointB.x, pointB.y);
 		connectionPreviews[newElement] = newPreview;
@@ -216,9 +216,9 @@ ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnection
 		std::lock_guard<std::mutex> lock(circuitMux);
 		ConnectionPreviewRenderData newPreview;
 		
-		FPosition pointA = halfConnectionPreview.input.free() + getOutputOffset(halfConnectionPreview.input, circuit);
+		FPosition pointA = halfConnectionPreview.output.free() + getOutputOffset(halfConnectionPreview.output, circuit);
 		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
-		newPreview.pointB = glm::vec2(halfConnectionPreview.output.x, halfConnectionPreview.output.y);
+		newPreview.pointB = glm::vec2(halfConnectionPreview.input.x, halfConnectionPreview.input.y);
 		connectionPreviews[newElement] = newPreview;
 	}
 	

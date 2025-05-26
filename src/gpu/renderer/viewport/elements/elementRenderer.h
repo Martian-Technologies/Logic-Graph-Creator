@@ -52,10 +52,11 @@ public:
 	void init(VulkanDevice* device, VkRenderPass& renderPass);
 	void cleanup();
 
-	void render(Frame& frame, const glm::mat4& viewMatrix,
-				const std::vector<BlockPreviewRenderData>& blockPreviews,
-				const std::vector<BoxSelectionRenderData>& boxSelections,
-				const std::vector<ConnectionPreviewRenderData>& connectionPreviews);
+	void renderBlockPreviews(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BlockPreviewRenderData>& blockPreviews);
+
+	void renderBoxSelections(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BoxSelectionRenderData>& boxSelections);
+
+	void renderConnectionPreviews(Frame& frame, const glm::mat4& viewMatrix, const std::vector<ConnectionPreviewRenderData>& connectionPreviews);
 	
 private:
 	Pipeline blockPreviewPipeline;

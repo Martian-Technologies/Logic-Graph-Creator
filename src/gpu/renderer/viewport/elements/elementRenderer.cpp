@@ -58,12 +58,7 @@ void ElementRenderer::cleanup() {
 	blockPreviewPipeline.cleanup();
 }
 
-void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix,
-							 const std::vector<BlockPreviewRenderData>& blockPreviews,
-							 const std::vector<BoxSelectionRenderData>& boxSelections,
-							 const std::vector<ConnectionPreviewRenderData>& connectionPreviews) {
-	
-	// Block previews
+void ElementRenderer::renderBlockPreviews(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BlockPreviewRenderData>& blockPreviews) {
 	if (!blockPreviews.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPreviewPipeline.getHandle());
 		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPreviewPipeline.getLayout(), 0, 1, &device->getBlockTextureManager()->getTexture().descriptor, 0, nullptr);
@@ -83,8 +78,9 @@ void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix,
 			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 		}
 	}
+}
 
-	// Box selections
+void ElementRenderer::renderBoxSelections(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BoxSelectionRenderData>& boxSelections) {
 	if (!boxSelections.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, boxSelectionPipeline.getHandle());
 	
@@ -100,8 +96,9 @@ void ElementRenderer::render(Frame& frame, const glm::mat4& viewMatrix,
 			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
 		}
 	}
+}
 
-	// Connection previews
+void ElementRenderer::renderConnectionPreviews(Frame& frame, const glm::mat4& viewMatrix, const std::vector<ConnectionPreviewRenderData>& connectionPreviews) {
 	if (!connectionPreviews.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, connectionPreviewPipeline.getHandle());
 	

@@ -50,20 +50,20 @@ struct BlockPreview {
 
 struct ConnectionPreview {
 	ConnectionPreview() = default;
-	ConnectionPreview(Position input, Position output)
-		: input(input), output(output) { }
+	ConnectionPreview(Position output, Position input)
+		: output(output), input(input) { }
 
-	Position input;
 	Position output;
+	Position input;
 };
 
 struct HalfConnectionPreview {
 	HalfConnectionPreview() = default;
-	HalfConnectionPreview(Position input, FPosition output)
-		: input(input), output(output) { }
+	HalfConnectionPreview(Position output, FPosition input)
+		: output(output), input(input) { }
 
-	Position input;
-	FPosition output;
+	Position output;
+	FPosition input;
 };
 
 // Renderer -----------------------------------
