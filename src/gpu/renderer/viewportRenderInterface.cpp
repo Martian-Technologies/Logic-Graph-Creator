@@ -81,7 +81,8 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 	while (!selectionsLeft.empty()) {
 		SharedSelection selectionObj = selectionsLeft.top();
 		selectionsLeft.pop();
-		
+
+		// add cell selection no matter what
 		SharedCellSelection cellSelection = selectionCast<CellSelection>(selectionObj);
 		if (cellSelection) {
 			BoxSelectionRenderData newBoxSelection;
@@ -89,14 +90,65 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 
 			newBoxSelection.topLeft = glm::vec2(position.x, position.y);
 			newBoxSelection.size = glm::vec2(1.0f);
-			newBoxSelection.inverted = selection.renderMode == SelectionObjectElement::SELECTION_INVERTED;
+			if (selection.renderMode == SelectionObjectElement::RenderMode::SELECTION) newBoxSelection.state = BoxSelectionRenderData::Normal;
+			else if (selection.renderMode == SelectionObjectElement::RenderMode::SELECTION_INVERTED) newBoxSelection.state = BoxSelectionRenderData::Inverted;
+			else if (selection.renderMode == SelectionObjectElement::RenderMode::ARROWS) newBoxSelection.state = BoxSelectionRenderData::Special;
 
 			boxSelections[newElement].push_back(newBoxSelection);
 		}
+
+		
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selectionObj);
+		// if we're dimensional and stuff we gotta do stuff
 		if (dimensionalSelection) {
-			for (int i = 0; i < dimensionalSelection->size(); i++) {
-				selectionsLeft.push(dimensionalSelection->getSelection(i));
+			
+			if (selection.renderMode != SelectionObjectElement::RenderMode::ARROWS) {
+				// go through dimensions if we are normal
+				for (int i = 0; i < dimensionalSelection->size(); i++) {
+					selectionsLeft.push(dimensionalSelection->getSelection(i));
+				}
+			} else {
+				// if we are arrows, do some fucked shit
+				SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selection.selection);
+				if (projectionSelection) {
+					// if we have projection, add some arrows
+
+					// calculate height and origin
+					SharedDimensionalSelection dSel = dimensionalSelection;
+					Position origin; // this variable used to be called 'orgin' because Ben can't spell (or maybe it's a typo (or maybe it's chatgpt))
+					unsigned int height = 0;
+					while (dSel) {
+						SharedSelection sel = dSel->getSelection(0);
+						SharedCellSelection cSel = selectionCast<CellSelection>(sel);
+						if (cSel) {
+							origin = cSel->getPosition();
+							break;
+						}
+						height++;
+						dSel = selectionCast<DimensionalSelection>(sel);
+					}
+				
+					selectionsLeft.push(dimensionalSelection->getSelection(0)); // no idea why we do this, I don't understand the selection system
+				
+					if (projectionSelection->size() == 1) {
+						// add this kind of arrow
+						// SDL_FPoint point = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
+						// SDL_DrawArrow(sdlRenderer, point.x, point.y, point.x, point.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
+					} else {
+						// add a bunch of different kinds of arrows
+						// for (int i = 1; i < projectionSelection->size(); i++) {
+						// SDL_FPoint start = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
+						// origin += projectionSelection->getStep();
+						// SDL_FPoint end = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
+						// SDL_DrawArrow(sdlRenderer, start.x, start.y, end.x, end.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
+						// }
+					}
+				} else {
+					// we don't don't have projection, go through dimensions
+					for (int i = 0; i < dimensionalSelection->size(); i++) {
+						selectionsLeft.push(dimensionalSelection->getSelection(i));
+					}
+				}
 			}
 		}
 	}
@@ -118,7 +170,7 @@ ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& s
 	BoxSelectionRenderData newBoxSelection;
 	newBoxSelection.topLeft = glm::vec2(topLeft.x, topLeft.y);
 	newBoxSelection.size = glm::vec2(bottomRight.x - topLeft.x + 1.0f, bottomRight.y - topLeft.y + 1.0f);
-	newBoxSelection.inverted = selection.inverted;
+	newBoxSelection.state = selection.inverted ? BoxSelectionRenderData::Inverted : BoxSelectionRenderData::Normal;
 
 	boxSelections[newElement].push_back(newBoxSelection);
 	

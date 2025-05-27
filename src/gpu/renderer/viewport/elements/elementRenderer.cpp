@@ -30,7 +30,7 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	boxSelectionPipelineInfo.vertShader = boxSelectionVertShader;
 	boxSelectionPipelineInfo.fragShader = boxSelectionFragShader;
 	boxSelectionPipelineInfo.renderPass = renderPass;
-	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(BoxSelectionPushConstant, inverted)});
+	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(BoxSelectionPushConstant, state)});
 	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
 	boxSelectionPipeline.init(device, boxSelectionPipelineInfo);
 	
@@ -90,7 +90,7 @@ void ElementRenderer::renderBoxSelections(Frame& frame, const glm::mat4& viewMat
 		for (const BoxSelectionRenderData& boxSelection : boxSelections){
 			boxSelectionConstant.position = boxSelection.topLeft;
 			boxSelectionConstant.size = boxSelection.size;
-			boxSelectionConstant.inverted = boxSelection.inverted;
+			boxSelectionConstant.state = boxSelection.state;
 
 			boxSelectionPipeline.cmdPushConstants(frame.mainCommandBuffer, &boxSelectionConstant);
 			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);

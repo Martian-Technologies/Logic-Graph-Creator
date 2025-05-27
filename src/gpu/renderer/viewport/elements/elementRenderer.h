@@ -29,12 +29,17 @@ struct BoxSelectionPushConstant {
     alignas(16) glm::mat4 mvp;
     alignas(8)  glm::vec2 position;
     alignas(8)  glm::vec2 size;
-    alignas(4)  uint32_t inverted;
+    alignas(4)  uint32_t state;
 };
 struct BoxSelectionRenderData {
+	enum BoxSelectionState : uint32_t {
+		Normal,
+		Inverted,
+		Special
+	};
 	glm::vec2 topLeft;
 	glm::vec2 size;
-	bool inverted;
+	BoxSelectionState state;
 };
 
 struct ConnectionPreviewPushConstant {
