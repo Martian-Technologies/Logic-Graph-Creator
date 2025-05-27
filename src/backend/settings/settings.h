@@ -4,15 +4,15 @@
 #include "settingsMap.h"
 
 namespace Settings {
-	template<SettingsMap::SettingType settingType>
+	template<SettingType settingType>
 	void registerName(std::string name);
-	template<SettingsMap::SettingType settingType>
-	void registerName(std::string name, const typename SettingsMap::SettingTypeToType<settingType>::type& value);
-	template<SettingsMap::SettingType settingType>
-	const typename SettingsMap::SettingTypeToType<settingType>::type* get(const std::string& key);
-	template<SettingsMap::SettingType settingType>
-	bool set(const std::string& key, const typename SettingsMap::SettingTypeToType<settingType>::type& value);
-	const SettingsMap::SettingType getType(const std::string& key);
+	template<SettingType settingType>
+	void registerName(std::string name, const typename SettingTypeToType<settingType>::type& value);
+	template<SettingType settingType>
+	const typename SettingTypeToType<settingType>::type* get(const std::string& key);
+	template<SettingType settingType>
+	bool set(const std::string& key, const typename SettingTypeToType<settingType>::type& value);
+	const SettingType getType(const std::string& key);
 	bool hasKey(const std::string& key);
 };
 

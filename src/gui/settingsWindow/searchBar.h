@@ -5,17 +5,11 @@
 
 // TODO: not fully implemented, figure out plan moving forward
 
-enum ACTIVE_CATEGORIES {
-	GENERAL,
-	APPEARANCE,
-	KEYBIND
-};
-
 class SearchBar {
 public:
 	SearchBar(Rml::Element* document);
 
-	inline void setActiveCategory(const ACTIVE_CATEGORIES category) { activeCategory = category; }
+	// inline void setActiveCategory(const ACTIVE_CATEGORIES category) { activeCategory = category; }
 
 private:
 	void Initialize();
@@ -31,7 +25,7 @@ private:
 
 
 	Rml::Element* context;
-	ACTIVE_CATEGORIES activeCategory; // should always start as general
+	// ACTIVE_CATEGORIES activeCategory; // should always start as general
 };
 
 #endif /* searchBar_h */

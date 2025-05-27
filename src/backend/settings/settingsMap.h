@@ -1,19 +1,19 @@
 #ifndef settingsMap_h
 #define settingsMap_h
 
+enum SettingType {
+	VOID,
+	STRING,
+	INT,
+	KEYBIND
+};
+template<SettingType settingType> struct SettingTypeToType;
+template<> struct SettingTypeToType<SettingType::STRING> { using type = std::string; };
+template<> struct SettingTypeToType<SettingType::INT> { using type = int; };
+template<> struct SettingTypeToType<SettingType::KEYBIND> { using type = std::string; };
+
 class SettingsMap {
 public:
-	enum SettingType {
-		VOID,
-		STRING,
-		INT,
-		KEYBIND
-	};
-	template<SettingType settingType> struct SettingTypeToType;
-	template<> struct SettingTypeToType<SettingType::STRING> { using type = std::string; };
-	template<> struct SettingTypeToType<SettingType::INT> { using type = int; };
-	template<> struct SettingTypeToType<SettingType::KEYBIND> { using type = std::string; };
-
 	SettingsMap() { }
 
 	template<SettingType settingType>
