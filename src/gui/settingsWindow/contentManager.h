@@ -2,7 +2,7 @@
 #define contentManager_h
 
 #include <RmlUi/Core.h>
-#include "util/config/config.h"
+#include "backend/settings/settings.h"
 
 class ContentManager {
 public:
@@ -11,7 +11,6 @@ public:
 	void setForm(const std::vector<std::string>& formList, const std::string& type);
 
 private:
-
 	void Initialize();
 	void generateForm(const std::string& formType, std::string name);
 
