@@ -8,7 +8,7 @@ void Settings::registerName(std::string name) {
 }
 
 template<SettingsMap::SettingType settingType>
-void Settings::registerName(std::string name, const SettingsMap::SettingTypeToType<settingType>::type& value) {
+void Settings::registerName(std::string name, const typename SettingsMap::SettingTypeToType<settingType>::type& value) {
 	settingsMap.registerName(name, value);
 }
 
@@ -18,7 +18,7 @@ const SettingsMap::SettingTypeToType<settingType>::type* get(const std::string& 
 }
 
 template<SettingsMap::SettingType settingType>
-bool Settings::set(const std::string& key, const SettingsMap::SettingTypeToType<settingType>::type& value) {
+bool Settings::set(const std::string& key, const typename SettingsMap::SettingTypeToType<settingType>::type& value) {
 	return settingsMap.set(key, value);
 }
 
