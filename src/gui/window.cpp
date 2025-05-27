@@ -8,7 +8,7 @@
 #include "gui/rml/RmlUi_Platform_SDL.h"
 #include "gui/menuBar/menuBar.h"
 #include "gui/settingsWindow/settingsWindow.h"
-#include "util/config/config.h"
+#include "backend/settings/settings.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), pinchEventId(pinchEventId) {
 	// create SDL renderer
@@ -44,7 +44,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 	
 	simControlsManager.emplace(document, circuitViewWidget, backend->getDataUpdateEventManager());
 
-	Settings::serializeData();
+	// Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(document);
 
 	MenuBar* menuBar = new MenuBar(document, settingsWindow, this);
