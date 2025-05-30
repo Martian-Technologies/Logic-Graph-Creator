@@ -1,4 +1,6 @@
 #version 450
+#extension GL_GOOGLE_include_directive : require
+#include "sharedArrow.glsl"
 
 layout( push_constant ) uniform constants
 {
@@ -15,5 +17,7 @@ void main() {
 	float dist = length(inTex);
 	float smoothing = fwidth(dist);
 	float alpha = 1.0f - smoothstep(THRESHOLD-smoothing, THRESHOLD, dist);
-	outColor = vec4(1.0f, 0.0f, 0.0f, alpha);
+
+	vec4 col = arrowColorOrder[push.depth % numArrowColors];
+	outColor = vec4(col.xyz, alpha * col.a);
 }
