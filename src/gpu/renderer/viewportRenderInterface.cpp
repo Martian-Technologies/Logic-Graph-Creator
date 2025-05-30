@@ -110,13 +110,13 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 				}
 			} else {
 				// if we are arrows, do some fucked shit
-				SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selection.selection);
+				SharedProjectionSelection projectionSelection = selectionCast<ProjectionSelection>(selectionObj);
 				if (projectionSelection) {
 					// if we have projection, add some arrows
 
 					// calculate height and origin
 					SharedDimensionalSelection dSel = dimensionalSelection;
-					Position origin; // this variable used to be called 'orgin' because Ben can't spell (or maybe it's a typo (or maybe it's chatgpt))
+					Position origin; // this variable used to be called 'orgin' because Ben can't spell (or maybe it's a typo)
 					unsigned int height = 0;
 					while (dSel) {
 						SharedSelection sel = dSel->getSelection(0);
@@ -137,7 +137,9 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 					} else {
 						// add a bunch of different kinds of arrows
 						for (int i = 1; i < projectionSelection->size(); i++) {
-							arrows[newElement].push_back(ArrowRenderData(origin, origin + projectionSelection->getStep(), height));
+							Position newOrigin = origin + projectionSelection->getStep();
+							arrows[newElement].push_back(ArrowRenderData(origin, newOrigin, height));
+							origin = newOrigin;
 						}
 					}
 				} else {
