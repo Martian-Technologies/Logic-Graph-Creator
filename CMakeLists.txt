@@ -1,6 +1,10 @@
 # ======================================== CMAKE SETUP ========================================
 cmake_minimum_required(VERSION 3.28)
 
+if(APPLE)
+	set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+endif()
+
 # generate compile commands json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -21,8 +25,6 @@ endif()
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
 project(Gatality VERSION 0.6.0)
-
-
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -51,7 +53,6 @@ add_library(${GATALITY_JSON_LIB_NAME} INTERFACE)
 target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
 
 if (GATALITY_BUILD_APP)
-
 	# ======================================= APP DEPENDENCY SETUP =======================================
 	# Find vulkan (we don't actually use the headers, we just want shaderc compiler (won't be needed when we switch to slang hopefully))
 	find_package(Vulkan REQUIRED COMPONENTS glslc)
@@ -87,7 +88,6 @@ if (GATALITY_BUILD_APP)
 
 	# GLM
 	add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
-
 	
 	# ===================================== CREATE APP EXECUTABLE ========================================
 	# Platform specific business before add_executable
@@ -275,7 +275,6 @@ endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 if (GATALITY_BUILD_TESTS)
-
 	# Google Testing
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 	

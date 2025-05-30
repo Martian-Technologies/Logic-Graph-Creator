@@ -7,7 +7,7 @@
 #include "gui/rml/rmlSystemInterface.h"
 #include "gui/menuBar/menuBar.h"
 #include "gui/settingsWindow/settingsWindow.h"
-#include "util/config/config.h"
+#include "backend/settings/settings.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) : sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager) {
 	// create rmlUi context
@@ -35,7 +35,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRend
 	
 	simControlsManager.emplace(rmlDocument, circuitViewWidget, backend->getDataUpdateEventManager());
 
-	Settings::serializeData();
+	// Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(rmlDocument);
 
 	MenuBar* menuBar = new MenuBar(rmlDocument, settingsWindow, this);

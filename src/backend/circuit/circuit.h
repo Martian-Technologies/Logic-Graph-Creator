@@ -58,7 +58,7 @@ public:
 
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit);
-	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position);
+	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
 
 	/* ----------- block data ----------- */
 	// Sets the data value to a block at position. Returns if block found.

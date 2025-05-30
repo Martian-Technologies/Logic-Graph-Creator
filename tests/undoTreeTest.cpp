@@ -1,4 +1,4 @@
-#include "undoTreeTests.h"
+#include "undoTreeTest.h"
 #include "../src/backend/circuit/undoTree/undoTree.h"
 
 TEST_F(UndoTreeTest, InitTest) {

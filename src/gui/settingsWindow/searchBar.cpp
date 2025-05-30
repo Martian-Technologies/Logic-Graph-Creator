@@ -1,8 +1,8 @@
 #include "searchBar.h"
 #include "gui/interaction/eventPasser.h"
-#include "util/config/config.h"
+#include "backend/settings/settings.h"
 
-SearchBar::SearchBar(Rml::Element* document) : context(document), activeCategory(ACTIVE_CATEGORIES::GENERAL) {
+SearchBar::SearchBar(Rml::Element* document) : context(document) {
 	Initialize();
 }
 
@@ -22,20 +22,20 @@ void SearchBar::Initialize() {
 }
 
 void SearchBar::queryContext(const std::string& text) {
-	if (activeCategory == ACTIVE_CATEGORIES::GENERAL) {
-		std::vector<std::vector<std::string>> stack = Settings::getGraphicsData("general");
-		std::vector<std::string> output;
+	// if (activeCategory == ACTIVE_CATEGORIES::GENERAL) {
+	// 	// std::vector<std::vector<std::string>> stack = Settings::getGraphicsData("general");
+	// 	std::vector<std::string> output;
 
-		if (querySubcategory(stack, text, output)) {
-			// recall and switch active_category
-		}
-	} else if (activeCategory == ACTIVE_CATEGORIES::APPEARANCE) {
+	// 	// if (querySubcategory(stack, text, output)) {
+	// 		// recall and switch active_category
+	// 	// }
+	// } else if (activeCategory == ACTIVE_CATEGORIES::APPEARANCE) {
 
-	} else if (activeCategory == ACTIVE_CATEGORIES::KEYBIND) {
+	// } else if (activeCategory == ACTIVE_CATEGORIES::KEYBIND) {
 
-	} else {
-		logWarning("error settings active category gui/settingsWindow/searchbar.cpp");
-	}
+	// } else {
+	// 	logWarning("error settings active category gui/settingsWindow/searchbar.cpp");
+	// }
 }
 
 bool SearchBar::querySubcategory(

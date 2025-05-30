@@ -69,62 +69,62 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("undo"); if (circuitView->getCircuit()) circuitView->getCircuit()->undo(); }
+		[this]() { if (circuitView->getCircuit()) circuitView->getCircuit()->undo(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Z,
 		Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
-		[this]() { logInfo("redo"); if (circuitView->getCircuit()) circuitView->getCircuit()->redo(); }
+		[this]() { if (circuitView->getCircuit()) circuitView->getCircuit()->redo(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_S,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("save"); save(); }
+		[this]() { save(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_S,
 		Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT,
-		[this]() { logInfo("save"); asSave(); }
+		[this]() { asSave(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_O,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("load"); load(); }
+		[this]() { load(); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_C,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("Copy"); circuitView->getEventRegister().doEvent(Event("Copy")); }
+		[this]() { circuitView->getEventRegister().doEvent(Event("Copy")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_V,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("Paste"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_I,
-		[this]() { logInfo("Interactive"); if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
-		[this]() { logInfo("Tool Rotate Block CCW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
+		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_E,
-		[this]() { logInfo("Tool Rotate Block CW"); circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CW")); }
+		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CW")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_E,
-		[this]() { logInfo("Confirm"); circuitView->getEventRegister().doEvent(Event("Confirm")); }
+		[this]() { circuitView->getEventRegister().doEvent(Event("Confirm")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_Q,
-		[this]() { logInfo("Tool Invert Mode"); circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
+		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
 	);
 	keybindHandler.addListener(
 		Rml::Input::KeyIdentifier::KI_N,
 		Rml::Input::KeyModifier::KM_CTRL,
-		[this]() { logInfo("New Circuit"); newCircuit(); }
+		[this]() { newCircuit(); }
 	);
 
 	Rml::Element* root = document->GetElementById("main-container");

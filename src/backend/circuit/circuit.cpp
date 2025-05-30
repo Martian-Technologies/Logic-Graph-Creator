@@ -190,21 +190,33 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 	return true;
 }
 
-bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position) {
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation amountToRotate) {
 	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
-	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
-		if (blockContainer.checkCollision(block.position + totalOffset, block.rotation, block.blockType)) {
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {		
+		if (blockContainer.checkCollision(
+			position + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
+			addRotations(block.rotation, amountToRotate),
+			block.blockType
+		)) {
 			return false;
 		}
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
-		if (!blockContainer.tryInsertBlock(block.position + totalOffset, block.rotation, block.blockType, difference.get())) {
+		if (!blockContainer.tryInsertBlock(
+			position + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
+			addRotations(block.rotation, amountToRotate),
+			block.blockType, difference.get()
+		)) {
 			logError("Failed to insert block while inserting block.");
 		}
 	}
 	for (const std::pair<Position, Position>& conn : copiedBlocks->getCopiedConnections()) {
-		if (!blockContainer.tryCreateConnection(conn.second + totalOffset, conn.first + totalOffset, difference.get())) {
+		if (!blockContainer.tryCreateConnection(
+			position + rotateVector(conn.second - copiedBlocks->getMinPosition(), amountToRotate),
+			position + rotateVector(conn.first - copiedBlocks->getMinPosition(), amountToRotate),
+			difference.get()
+		)) {
 			logError("Failed to create connection while inserting block.");
 		}
 	}

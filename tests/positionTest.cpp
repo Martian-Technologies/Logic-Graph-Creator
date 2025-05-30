@@ -1,4 +1,4 @@
-#include "positionTests.h"
+#include "positionTest.h"
 #include "util/uuid.h"
 
 void PositionTest::SetUp() { }
