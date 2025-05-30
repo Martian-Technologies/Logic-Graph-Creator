@@ -266,8 +266,6 @@ endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 if (GATALITY_BUILD_TESTS)
-	project(${PROJECT_NAME}_tests VERSION 0.6.0)
-
 	# Google Testing
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 	
