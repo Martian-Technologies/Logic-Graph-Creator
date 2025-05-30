@@ -2,6 +2,7 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
 #include "viewport/sharedLogic/logicRenderingUtils.h"
 #include "backend/selection.h"
@@ -132,16 +133,12 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 				
 					if (projectionSelection->size() == 1) {
 						// add this kind of arrow
-						// SDL_FPoint point = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
-						// SDL_DrawArrow(sdlRenderer, point.x, point.y, point.x, point.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
+						arrows[newElement].push_back(ArrowRenderData(origin, origin, height));
 					} else {
 						// add a bunch of different kinds of arrows
-						// for (int i = 1; i < projectionSelection->size(); i++) {
-						// SDL_FPoint start = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
-						// origin += projectionSelection->getStep();
-						// SDL_FPoint end = gridToSDL(origin.free() + FVector(0.5f, 0.5f));
-						// SDL_DrawArrow(sdlRenderer, start.x, start.y, end.x, end.y, scalePixelCount(50.f), arrowColorOrder[height % 26]);
-						// }
+						for (int i = 1; i < projectionSelection->size(); i++) {
+							arrows[newElement].push_back(ArrowRenderData(origin, origin + projectionSelection->getStep(), height));
+						}
 					}
 				} else {
 					// we don't don't have projection, go through dimensions
@@ -152,7 +149,7 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 			}
 		}
 	}
-	
+
 	return newElement;
 }
 
@@ -173,7 +170,7 @@ ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& s
 	newBoxSelection.state = selection.inverted ? BoxSelectionRenderData::Inverted : BoxSelectionRenderData::Normal;
 
 	boxSelections[newElement].push_back(newBoxSelection);
-	
+
 	return newElement;
 }
 
@@ -181,11 +178,25 @@ void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	boxSelections.erase(selection);
+	arrows.erase(selection);
+}
+
+std::vector<ArrowRenderData> ViewportRenderInterface::getArrows() {
+	std::lock_guard<std::mutex> lock(elementsMux);
+	
+	std::vector<ArrowRenderData> returnArrows;
+	returnArrows.reserve(arrows.size());
+
+	for (const auto& arrow : arrows) {
+		returnArrows.insert(returnArrows.end(), arrow.second.begin(), arrow.second.end());
+	}
+
+	return returnArrows;
 }
 
 std::vector<BoxSelectionRenderData> ViewportRenderInterface::getBoxSelections() {
 	std::lock_guard<std::mutex> lock(elementsMux);
-	
+
 	std::vector<BoxSelectionRenderData> returnBoxSelections;
 	returnBoxSelections.reserve(boxSelections.size());
 
@@ -214,7 +225,7 @@ ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPrev
 
 	// insert new block preview into map
 	blockPreviews[newElement] = newPreview;
-	
+
 	return newElement;
 }
 
@@ -250,7 +261,7 @@ ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview&
 		newPreview.pointB = glm::vec2(pointB.x, pointB.y);
 		connectionPreviews[newElement] = newPreview;
 	}
-	
+
 	return newElement;
 }
 
@@ -267,19 +278,19 @@ ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnection
 	if (circuit) {
 		std::lock_guard<std::mutex> lock(circuitMux);
 		ConnectionPreviewRenderData newPreview;
-		
+
 		FPosition pointA = halfConnectionPreview.output.free() + getOutputOffset(halfConnectionPreview.output, circuit);
 		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
 		newPreview.pointB = glm::vec2(halfConnectionPreview.input.x, halfConnectionPreview.input.y);
 		connectionPreviews[newElement] = newPreview;
 	}
-	
+
 	return newElement;
 }
 
 void ViewportRenderInterface::removeHalfConnectionPreview(ElementID halfConnectionPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
-	
+
 	connectionPreviews.erase(halfConnectionPreview);
 }
 

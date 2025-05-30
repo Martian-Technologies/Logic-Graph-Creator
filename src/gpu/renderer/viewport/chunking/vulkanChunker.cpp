@@ -281,12 +281,12 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 			for (const auto& end : blockToConnections[curPosition]) {
 				if (end.second.otherBlock != curPosition) {
 					Rotation otherRotation = chunks[getChunk(end.second.otherBlock)].getBlocksForUpdating()[end.second.otherBlock].rotation;
-				
+
 					// remove old wire
 					blockToConnections[end.second.otherBlock].erase(end.first); // remove other's entry
 					if (end.second.isInput) { updateChunksOverConnection(end.first.first, otherRotation, end.first.second, rotation, false, chunksToUpdate); }
 					else { updateChunksOverConnection(end.first.first, rotation, end.first.second, otherRotation, false, chunksToUpdate); }
-				
+
 					// calculate new wire
 					std::pair<Position, Position> newConnection;
 					if (end.second.isInput) { newConnection = {end.first.first, end.first.second + moveVector}; }

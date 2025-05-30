@@ -29,4 +29,5 @@ void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 	elementRenderer.renderBlockPreviews(frame, viewData.viewportViewMat, viewport->getBlockPreviews());
 	elementRenderer.renderConnectionPreviews(frame, viewData.viewportViewMat, viewport->getConnectionPreviews());
 	elementRenderer.renderBoxSelections(frame, viewData.viewportViewMat, viewport->getBoxSelections());
+	elementRenderer.renderArrows(frame, viewData.viewportViewMat, viewport->getArrows());
 }

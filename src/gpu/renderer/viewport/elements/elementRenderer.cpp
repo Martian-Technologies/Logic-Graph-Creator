@@ -3,6 +3,9 @@
 #include "computerAPI/directoryManager.h"
 #include "computerAPI/fileLoader.h"
 #include "gpu/abstractions/vulkanShader.h"
+#include <cstddef>
+#include <glm/ext/vector_float2.hpp>
+#include <vulkan/vulkan_core.h>
 
 void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	this->device = device;
@@ -50,9 +53,41 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	
 	destroyShaderModule(device->getDevice(), connectionPreviewVertShader);
 	destroyShaderModule(device->getDevice(), connectionPreviewFragShader);
+	
+	// arrow circle
+	VkShaderModule arrowCircleVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrowCircle.vert.spv"));
+	VkShaderModule arrowCircleFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrowCircle.frag.spv"));
+
+	PipelineInformation arrowCirclePipelineInfo{};
+	arrowCirclePipelineInfo.vertShader = arrowCircleVertShader;
+	arrowCirclePipelineInfo.fragShader = arrowCircleFragShader;
+	arrowCirclePipelineInfo.renderPass = renderPass;
+	arrowCirclePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowCirclePushConstant, depth)});
+	arrowCirclePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
+	arrowCirclePipeline.init(device, arrowCirclePipelineInfo);
+	
+	destroyShaderModule(device->getDevice(), arrowCircleVertShader);
+	destroyShaderModule(device->getDevice(), arrowCircleFragShader);
+
+	// arrow
+	VkShaderModule arrowVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrow.vert.spv"));
+	VkShaderModule arrowFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrow.frag.spv"));
+
+	PipelineInformation arrowPipelineInfo{};
+	arrowPipelineInfo.vertShader = arrowVertShader;
+	arrowPipelineInfo.fragShader = arrowFragShader;
+	arrowPipelineInfo.renderPass = renderPass;
+	arrowPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowPushConstant, depth)});
+	arrowPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
+	arrowPipeline.init(device, arrowPipelineInfo);
+	
+	destroyShaderModule(device->getDevice(), arrowVertShader);
+	destroyShaderModule(device->getDevice(), arrowFragShader);
 }
 
 void ElementRenderer::cleanup() {
+	arrowPipeline.cleanup();
+	arrowCirclePipeline.cleanup();
 	connectionPreviewPipeline.cleanup();
 	boxSelectionPipeline.cleanup();
 	blockPreviewPipeline.cleanup();
@@ -111,6 +146,36 @@ void ElementRenderer::renderConnectionPreviews(Frame& frame, const glm::mat4& vi
 
 			connectionPreviewPipeline.cmdPushConstants(frame.mainCommandBuffer, &connectionPreviewConstant);
 			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
+		}
+	}
+}
+
+void ElementRenderer::renderArrows(Frame& frame, const glm::mat4& viewMatrix, const std::vector<ArrowRenderData>& arrows) {
+	if (!arrows.empty()) {
+		// arrow circles
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, arrowCirclePipeline.getHandle());
+		ArrowCirclePushConstant arrowCircleConstant;
+		arrowCircleConstant.mvp = viewMatrix;
+		for (const ArrowRenderData& arrow : arrows){
+			if (arrow.pointA != arrow.pointB) continue;
+			arrowCircleConstant.topLeft = glm::vec2(arrow.pointA.x, arrow.pointA.y);
+			arrowCircleConstant.depth = arrow.depth;
+
+			arrowCirclePipeline.cmdPushConstants(frame.mainCommandBuffer, &arrowCircleConstant);
+			vkCmdDraw(frame.mainCommandBuffer, 6, 1, 0, 0);
+		}
+
+		// arrow
+		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, arrowPipeline.getHandle());
+		ArrowPushConstant arrowConstant;
+		arrowConstant.mvp = viewMatrix;
+		for (const ArrowRenderData& arrow : arrows){
+			arrowConstant.pointA = glm::vec2(arrow.pointA.x + 0.5f, arrow.pointA.y + 0.5f);
+			arrowConstant.pointB = glm::vec2(arrow.pointB.x + 0.5f, arrow.pointB.y + 0.5f);
+			arrowConstant.depth = arrow.depth;
+
+			arrowPipeline.cmdPushConstants(frame.mainCommandBuffer, &arrowConstant);
+			vkCmdDraw(frame.mainCommandBuffer, 9, 1, 0, 0);
 		}
 	}
 }
