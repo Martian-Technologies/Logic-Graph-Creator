@@ -11,8 +11,20 @@ bool BlockContainer::checkCollision(Position positionSmall, Position positionLar
 	return false;
 }
 
+bool BlockContainer::checkCollision(Position positionSmall, Position positionLarge, block_id_t idToIgnore) const {
+	for (auto iter = positionSmall.iterTo(positionLarge); iter; iter++) {
+		const Cell* cell = getCell(*iter);
+		if (cell && cell->getBlockId() != idToIgnore) return true;
+	}
+	return false;
+}
+
 bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType) const {
 	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation) - Vector(1));
+}
+
+bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType, block_id_t idToIgnore) const {
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation) - Vector(1), idToIgnore);
 }
 
 bool BlockContainer::tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference) {
@@ -60,14 +72,17 @@ bool BlockContainer::tryRemoveBlock(Position position, Difference* difference) {
 	return true;
 }
 
-bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, Difference* difference) {
+bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, Rotation amountToRotate, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
-	if (checkCollision(position, block->getRotation(), block->type())) return false;
+	Rotation newRotation = addRotations(block->getRotation(), amountToRotate);
+	Position newPosition = position + (block->getPosition() - positionOfBlock);
+	if (checkCollision(newPosition, newRotation, block->type(), block->id())) return false;
 	// do move
-	difference->addMovedBlock(block->getPosition(), position + (block->getPosition() - positionOfBlock));
+	difference->addMovedBlock(block->getPosition(), block->getRotation(), newPosition, newRotation);
 	removeBlockCells(block);
-	block->setPosition(position + (block->getPosition() - positionOfBlock));
+	block->setPosition(newPosition);
+	block->setRotation(newRotation);
 	placeBlockCells(block);
 	return true;
 }
@@ -120,7 +135,7 @@ void BlockContainer::resizeBlockType(BlockType blockType, Vector newSize, Differ
 		}
 		placeBlockCells(block->id(), position, newRotatedSize);
 		if (block->getPosition() == position) continue;
-		difference->addMovedBlock(block->getPosition(), position);
+		difference->addMovedBlock(block->getPosition(), block->getRotation(), position, block->getRotation());
 		block->setPosition(position);
 	}
 }

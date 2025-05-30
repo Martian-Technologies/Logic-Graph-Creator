@@ -10,6 +10,7 @@ void MoveTool::reset() {
 		mode = "Area";
 		activeSelectionHelper = std::make_shared<AreaCreationTool>();
 	}
+	amountToRotate = Rotation::ZERO;
 	activeSelectionHelper->restart();
 	updateElements();
 }
@@ -18,6 +19,8 @@ void MoveTool::activate() {
 	CircuitTool::activate();
 	registerFunction("Tool Primary Activate", std::bind(&MoveTool::click, this, std::placeholders::_1));
 	registerFunction("Tool Secondary Activate", std::bind(&MoveTool::unclick, this, std::placeholders::_1));
+	registerFunction("Tool Rotate Block CW", std::bind(&MoveTool::rotateCW, this, std::placeholders::_1));
+	registerFunction("Tool Rotate Block CCW", std::bind(&MoveTool::rotateCCW, this, std::placeholders::_1));
 	if (!activeSelectionHelper->isFinished()) {
 		toolStackInterface->pushTool(activeSelectionHelper);
 	} else {
@@ -40,12 +43,25 @@ void MoveTool::setMode(std::string toolMode) {
 	}
 }
 
+bool MoveTool::rotateCW(const Event* event) {
+	amountToRotate = rotate(amountToRotate, true);
+	updateElements();
+	return true;
+}
+
+bool MoveTool::rotateCCW(const Event* event) {
+	amountToRotate = rotate(amountToRotate, false);
+	updateElements();
+	return true;
+}
+
 bool MoveTool::click(const Event* event) {
 	if (!activeSelectionHelper->isFinished() || !circuit) return false;
 	if (circuit->tryMoveBlocks(
 		activeSelectionHelper->getSelection(),
-		lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()))
-	) {
+		lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()),
+		amountToRotate
+	)) {
 		reset();
 		toolStackInterface->pushTool(activeSelectionHelper);
 	}
@@ -67,6 +83,7 @@ void MoveTool::updateElements() {
 	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 	if (pointerInView) {
 
+		Position selectionOrigin = getSelectionOrigin(activeSelectionHelper->getSelection());
 		Vector totalOffset = lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection());
 
 		std::unordered_set<Position> positions;
@@ -86,7 +103,11 @@ void MoveTool::updateElements() {
 			// }
 			if (blocksSet.contains(block)) continue;
 			blocksSet.insert(block);
-			elementCreator.addBlockPreview(BlockPreview(block->type(), block->getPosition() + totalOffset, block->getRotation()));
+			elementCreator.addBlockPreview(BlockPreview(
+				block->type(),
+				lastPointerPosition + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
+				addRotations(block->getRotation(), amountToRotate)
+			));
 
 			// const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
 			// for (auto& iter : block->getConnectionContainer().getConnections()) {

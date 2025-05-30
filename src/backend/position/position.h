@@ -311,8 +311,16 @@ enum Rotation : char {
 	TWO_SEVENTY = 3,
 };
 
-inline Vector rotateSize(Rotation rotation, Vector size) noexcept {
-	if (rotation & 1) return Vector(size.dy, size.dx);
+inline Vector rotateVector(Vector vector, Rotation rotationAmount) noexcept {
+	switch (rotationAmount) {
+	case Rotation::TWO_SEVENTY: return Vector(vector.dy, -vector.dx);
+	case Rotation::ONE_EIGHTY: return Vector(-vector.dx, -vector.dy);
+	case Rotation::NINETY: return Vector(-vector.dy, vector.dx);
+	default: return vector;
+	}
+}
+inline Vector rotateSize(Rotation rotationAmount, Vector size) noexcept {
+	if (rotationAmount & 1) return Vector(size.dy, size.dx);
 	return size;
 }
 inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
@@ -322,6 +330,12 @@ inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
 	}
 	if (rotation == Rotation::ZERO) return Rotation::TWO_SEVENTY;
 	return (Rotation)((int)rotation - 1);
+}
+inline constexpr Rotation addRotations(Rotation rotationA, Rotation rotationB) {
+	char output = rotationA + rotationB;
+	if ((char)output > (char)Rotation::TWO_SEVENTY)
+		output -= 4;
+	return (Rotation)output;
 }
 inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 - (char)rotation) * (char)rotation); }
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
