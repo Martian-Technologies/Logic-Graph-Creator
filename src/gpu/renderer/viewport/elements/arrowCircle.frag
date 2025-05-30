@@ -11,7 +11,7 @@ layout(location = 0) in vec2 inTex;
 
 layout(location = 0) out vec4 outColor;
 
-const float THRESHOLD = 0.4f; 
+const float THRESHOLD = 0.2f; 
 
 void main() {
 	float dist = length(inTex);

@@ -158,6 +158,7 @@ void ElementRenderer::renderArrows(Frame& frame, const glm::mat4& viewMatrix, co
 		arrowCircleConstant.mvp = viewMatrix;
 		for (const ArrowRenderData& arrow : arrows){
 			if (arrow.pointA != arrow.pointB) continue;
+
 			arrowCircleConstant.topLeft = glm::vec2(arrow.pointA.x, arrow.pointA.y);
 			arrowCircleConstant.depth = arrow.depth;
 
@@ -170,6 +171,8 @@ void ElementRenderer::renderArrows(Frame& frame, const glm::mat4& viewMatrix, co
 		ArrowPushConstant arrowConstant;
 		arrowConstant.mvp = viewMatrix;
 		for (const ArrowRenderData& arrow : arrows){
+			if (arrow.pointA == arrow.pointB) continue;
+
 			arrowConstant.pointA = glm::vec2(arrow.pointA.x + 0.5f, arrow.pointA.y + 0.5f);
 			arrowConstant.pointB = glm::vec2(arrow.pointB.x + 0.5f, arrow.pointB.y + 0.5f);
 			arrowConstant.depth = arrow.depth;

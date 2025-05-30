@@ -22,9 +22,9 @@ layout( push_constant ) uniform constants
 	vec2 pointB;
 } push;
 
-const float GIRTH = 0.2f;
-const float HEAD_LENGTH = 0.35f;
-const float HEAD_GIRTH = 0.35f;
+const float GIRTH = 0.15f;
+const float HEAD_LENGTH = 0.25f;
+const float HEAD_GIRTH = 0.25f;
 
 void main() {
 	vec2 xBasis = push.pointB - push.pointA;
