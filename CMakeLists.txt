@@ -1,6 +1,10 @@
 # ======================================== CMAKE SETUP ========================================
 cmake_minimum_required(VERSION 3.28)
 
+if(APPLE)
+	set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+endif()
+
 # generate compile commands json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

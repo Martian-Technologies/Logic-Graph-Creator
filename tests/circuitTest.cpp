@@ -1,4 +1,4 @@
-#include "circuitTests.h"
+#include "circuitTest.h"
 #include "util/uuid.h"
 
 void CircuitTest::SetUp() {

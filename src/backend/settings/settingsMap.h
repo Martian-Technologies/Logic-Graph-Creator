@@ -14,15 +14,13 @@ template<> struct SettingTypeToType<SettingType::KEYBIND> { using type = std::st
 
 class SettingsMap {
 public:
-	SettingsMap() { }
-
 	template<SettingType settingType>
-	void registerName(std::string name) {
-		mappings[name] = std::make_unique<settingType>();
+	void registerSetting(std::string name) {
+		mappings[name] = std::make_unique<SettingEntry<settingType>>();
 	}
 	template<SettingType settingType>
-	void registerName(std::string name, const SettingTypeToType<settingType>::type& value) {
-		mappings[name] = std::make_unique<settingType>(value);
+	void registerSetting(std::string name, const SettingTypeToType<settingType>::type& value) {
+		mappings[name] = std::make_unique<SettingEntry<settingType>>(value);
 	}
 
 	// -- Getters --
@@ -30,14 +28,14 @@ public:
 	const SettingTypeToType<settingType>::type* get(const std::string& key) const {
 		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::const_iterator iter = mappings.find(key);
 		if (iter == mappings.end() || settingType != iter->second->getType()) return nullptr;
-		const SettingEntry<settingType>* settingEntry = dynamic_cast<std::unique_ptr<SettingEntry<settingType>>>(iter->second).get();
+		const SettingEntry<settingType>* settingEntry = dynamic_cast<const SettingEntry<settingType>*>(iter->second.get());
 		if (!settingEntry) {
 			logError("Failed to get value. Type and SettingType mismatched internal state bad. Please report error and relaunch the app.", "SettingsMap");
 			return nullptr;
 		}
 		return &(settingEntry->getValue());
 	}
-	const SettingType getType(const std::string& key) const {
+	SettingType getType(const std::string& key) const {
 		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::const_iterator iter = mappings.find(key);
 		if (iter == mappings.end()) return SettingType::VOID;
 		return iter->second->getType();
@@ -56,7 +54,7 @@ public:
 			logError("Failed to set value. Could not find key \"" + key + "\"", "SettingsMap");
 			return false;
 		}
-		SettingEntry<settingType>* settingEntry = dynamic_cast<std::unique_ptr<SettingEntry<settingType>>>(iter->second).get();
+		SettingEntry<settingType>* settingEntry = dynamic_cast<SettingEntry<settingType>*>(iter->second.get());
 		if (!settingEntry) {
 			logError("Failed to set value. Type and SettingType mismatched internal state bad. Please report error and relaunch the app.", "SettingsMap");
 			return false;
@@ -68,24 +66,24 @@ public:
 private:
 	class SettingEntryBase {
 	public:
-	SettingEntryBase(SettingType type) : type(type) { }
-		SettingType getType() const { return type; }
-
-	private:
+		SettingEntryBase(SettingType type) : type(type) {}
+		virtual ~SettingEntryBase() = default;
+		SettingType getType() const { return type; };
+	private: 
 		SettingType type;
 	};
 
-	template <SettingType T>
+	template <SettingType settingType>
 	class SettingEntry : public SettingEntryBase {
 	public:
-		SettingEntry() : SettingEntryBase(T) { }
-		SettingEntry(const SettingTypeToType<T>::type& value) : SettingEntryBase(T), value(value) { }
-		
-		const SettingTypeToType<T>::type& getValue() const { return value; }
-		void setValue(const SettingTypeToType<T>::type& value) { this->value = value; }
+		SettingEntry() : SettingEntryBase(settingType) { }
+		SettingEntry(const SettingTypeToType<settingType>::type& value) : SettingEntryBase(settingType), value(value) { }
+
+		const SettingTypeToType<settingType>::type& getValue() const { return value; }
+		void setValue(const SettingTypeToType<settingType>::type& value) { this->value = value; }
 
 	private:
-		SettingTypeToType<T>::type value;
+		SettingTypeToType<settingType>::type value;
 	};
 
 	std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>> mappings;
