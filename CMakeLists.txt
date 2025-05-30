@@ -22,8 +22,6 @@ endif()
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
 project(Gatality VERSION 0.6.0)
 
-
-
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -51,7 +49,6 @@ add_library(${GATALITY_JSON_LIB_NAME} INTERFACE)
 target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
 
 if (GATALITY_BUILD_APP)
-
 	# ======================================= APP DEPENDENCY SETUP =======================================
 	# Vulkan
 	find_package(Vulkan REQUIRED COMPONENTS glslc)
@@ -81,7 +78,6 @@ if (GATALITY_BUILD_APP)
 
 	# GLM
 	add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
-
 	
 	# ===================================== CREATE APP EXECUTABLE ========================================
 	# Platform specific business before add_executable
@@ -266,6 +262,7 @@ endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
 if (GATALITY_BUILD_TESTS)
+	project(${PROJECT_NAME}_tests VERSION 0.6.0)
 
 	# Google Testing
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)

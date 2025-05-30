@@ -1,4 +1,4 @@
-#include "evaluatorTests.h"
+#include "evaluatorTest.h"
 
 // Note that logic simulator is tested separately
 void EvaluatorTest::SetUp() {
