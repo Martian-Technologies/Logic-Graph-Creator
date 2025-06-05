@@ -6,14 +6,17 @@
 
 class ContentManager {
 public:
-	ContentManager(Rml::Element* document);
+	ContentManager(Rml::ElementDocument* document);
 
-	void setForm(const std::vector<std::string>& formList, const std::string& type);
+	void load();
 
 private:
-	void Initialize();
-	void generateForm(const std::string& formType, std::string name);
+	Rml::ElementPtr generateItem(const std::string& key);
 
+	std::string getPath(Rml::Element* item);
+	void setPaths(const std::vector<std::vector<std::string>>& paths, Rml::Element* current);
+
+	Rml::ElementDocument* document;
 	Rml::Element* contentPanel;
 };
 

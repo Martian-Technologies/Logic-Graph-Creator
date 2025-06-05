@@ -1,48 +1,44 @@
 #include "settingsWindow.h"
 #include "gui/interaction/eventPasser.h"
-#include "contentManager.h"
 // #include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
 
-SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : visible(false) {
+SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : contentManager(document), visible(false) {
 	context = document->GetElementById("settings-overlay");
 
-	ContentManager* cm = new ContentManager(document);
 	// SearchBar* sb = new SearchBar(document);
 
-	Initialize();
-}
-
-void SettingsWindow::Initialize() {
-	connectCategoryListeners();
+	// connectCategoryListeners();
 	connectWindowOptions();
+
+	contentManager.load();
 }
 
 void SettingsWindow::connectCategoryListeners() {
-	Rml::ElementList items;
-	Rml::ElementUtilities::GetElementsByClassName(items, context->GetElementById("navigation-panel"), "nav-item");
+	// Rml::ElementList items;
+	// Rml::ElementUtilities::GetElementsByClassName(items, context->GetElementById("navigation-panel"), "nav-item");
 
-	for (size_t i = 0; i < items.size(); i++) {
-		Rml::Element* element = items[i];
-		if (i == 0) {
-			activeNav = element;
-			element->SetClass("active-nav", true);
-		}
+	// for (size_t i = 0; i < items.size(); i++) {
+	// 	Rml::Element* element = items[i];
+	// 	if (i == 0) {
+	// 		activeNav = element;
+	// 		element->SetClass("active-nav", true);
+	// 	}
 
-		element->AddEventListener("click", new EventPasser(
-			[this](Rml::Event& event) {
-				Rml::Element* current = event.GetCurrentElement();
+	// 	element->AddEventListener("click", new EventPasser(
+	// 		[this](Rml::Event& event) {
+	// 			Rml::Element* current = event.GetCurrentElement();
 
-				activeNav->SetClass("active-nav", false);
-				activeNav = current;
-				activeNav->SetClass("active-nav", true);
+	// 			activeNav->SetClass("active-nav", false);
+	// 			activeNav = current;
+	// 			activeNav->SetClass("active-nav", true);
 
-				std::string loadFile = current->GetId().substr(4) + ".rml";
-				logInfo(loadFile);
-			}
-		));
-	}
+	// 			std::string loadFile = current->GetId().substr(4) + ".rml";
+	// 			logInfo(loadFile);
+	// 		}
+	// 	));
+	// }
 
 }
 

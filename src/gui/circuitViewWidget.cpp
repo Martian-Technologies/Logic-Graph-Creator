@@ -1,10 +1,12 @@
-#include "backend/circuitView/circuitView.h"
-#include "computerAPI/directoryManager.h"
 #include "circuitViewWidget.h"
-#include "backend/backend.h"
-#include "interaction/eventPasser.h"
 
 #include <SDL3/SDL.h>
+
+#include "backend/circuitView/circuitView.h"
+#include "computerAPI/directoryManager.h"
+#include "backend/settings/settings.h"
+#include "interaction/eventPasser.h"
+#include "backend/backend.h"
 
 void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;

@@ -14,6 +14,15 @@ template<> struct SettingTypeToType<SettingType::KEYBIND> { using type = std::st
 
 class SettingsMap {
 public:
+	class SettingEntryBase {
+	public:
+		SettingEntryBase(SettingType type) : type(type) {}
+		virtual ~SettingEntryBase() = default;
+		SettingType getType() const { return type; };
+	private: 
+		SettingType type;
+	};
+
 	template<SettingType settingType>
 	void registerSetting(std::string name) {
 		mappings[name] = std::make_unique<SettingEntry<settingType>>();
@@ -24,6 +33,7 @@ public:
 	}
 
 	// -- Getters --
+	const std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>& getAllKeys() const { return mappings; }
 	template<SettingType settingType>
 	const SettingTypeToType<settingType>::type* get(const std::string& key) const {
 		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::const_iterator iter = mappings.find(key);
@@ -64,15 +74,6 @@ public:
 	}
 
 private:
-	class SettingEntryBase {
-	public:
-		SettingEntryBase(SettingType type) : type(type) {}
-		virtual ~SettingEntryBase() = default;
-		SettingType getType() const { return type; };
-	private: 
-		SettingType type;
-	};
-
 	template <SettingType settingType>
 	class SettingEntry : public SettingEntryBase {
 	public:

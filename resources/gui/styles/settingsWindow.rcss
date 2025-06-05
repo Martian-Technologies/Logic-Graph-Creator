@@ -101,6 +101,45 @@ Nord Color Pallete:
 	flex: 1;
 }
 
+.settings-tree ul ul {
+	display: block;
+	padding-left: 0.5rem;
+}
+
+.settings-tree li span {
+	padding: 0em 0.2em;
+	display: inline;
+	vertical-align: top;
+}
+
+.settings-tree li .settings-tree-header {
+	display: inline-block;
+}
+
+.settings-tree li .settings-tree-item {
+	display: block;
+}
+
+.settings-tree li {
+	display: block;
+	padding: 0.1em 0.1em;
+}
+
+.collapsed div ul {
+	display: none;
+}
+
+.settings-tree li .settings-tree-item input {
+	display: block;
+	background-color: #232323;
+	border-radius: 0.1em;
+	margin: 0 0.1em;
+}
+
+.settings-tree .keybind {
+	width: 20rem;
+}
+
 #settings-content-panel .content-item {
 	min-width: 56vw; /* settings is 80% window size, content panel is 60%, so 100% width is (.7)(.8) = .56vw */
 	display: flex;

@@ -11,11 +11,11 @@
 					<h1>Settings</h1>
 					<!-- <input id="settings-search" type="text" /> -->
 				</div>
-				<div id="navigation-panel">
+				<!-- <div id="navigation-panel">
 					<div class="nav-item" id="nav-general">General</div>
 					<div class="nav-item" id="nav-appearance">Appearance</div>
 					<div class="nav-item" id="nav-keybind">Keybind</div>
-				</div>
+				</div> -->
 				<div id="setting-actions">
 					<button class="settings-action" id="settings-reset">Reset</button>
 					<button class="settings-action" id="settings-apply">Apply</button>

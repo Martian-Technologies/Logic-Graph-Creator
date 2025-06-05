@@ -4,6 +4,8 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include "contentManager.h"
+
 class SettingsWindow {
 public:
 	SettingsWindow(Rml::ElementDocument* document);
@@ -12,12 +14,14 @@ public:
 	bool isVisible() const { return visible; };
 
 private:
-	void Initialize();
 	void connectCategoryListeners(); // creates listeners for changing content-panels information
 	void connectWindowOptions(); // creates listeners for saving, reseting, or canceling the settings info
 
 	Rml::Element* context;
 	Rml::Element* activeNav;
+
+	ContentManager contentManager;
+
 	bool visible;
 };
 

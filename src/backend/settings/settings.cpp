@@ -1,5 +1,7 @@
 #include "settings.h"
 
-SettingsMap settingsMap;
 
-SettingsMap& Settings::getSettingsMap() { return settingsMap; }
+SettingsMap& Settings::getSettingsMap() {
+	static SettingsMap settingsMap;
+	return settingsMap;
+}

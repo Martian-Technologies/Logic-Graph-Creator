@@ -3,6 +3,8 @@
 
 #include "settingsMap.h"
 
+class SettingEntryBase;
+
 namespace Settings {
 	SettingsMap& getSettingsMap();
 	template<SettingType settingType>
@@ -11,7 +13,7 @@ namespace Settings {
 	}
 	template<SettingType settingType>
 	inline void registerSetting(std::string name, const typename SettingTypeToType<settingType>::type& value) {
-		getSettingsMap().registerSetting(name, value);
+		getSettingsMap().registerSetting<settingType>(name, value);
 	}
 	template<SettingType settingType>
 	inline const SettingTypeToType<settingType>::type* get(const std::string& key) {
@@ -19,7 +21,7 @@ namespace Settings {
 	}
 	template<SettingType settingType>
 	inline bool set(const std::string& key, const typename SettingTypeToType<settingType>::type& value) {
-		return getSettingsMap().set(key, value);
+		return getSettingsMap().set<settingType>(key, value);
 	}
 	inline SettingType getType(const std::string& key) {
 		return getSettingsMap().getType(key);

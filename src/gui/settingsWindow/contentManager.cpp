@@ -1,38 +1,31 @@
 #include "contentManager.h"
 #include "backend/settings/settings.h"
+#include "gui/interaction/menuTreeListener.h"
+#include "util/algorithm.h"
 
-ContentManager::ContentManager(Rml::Element* document) {
+ContentManager::ContentManager(Rml::ElementDocument* document) : document(document) {
 	contentPanel = document->GetElementById("settings-content-panel");
-
-	Initialize();
+	contentPanel->SetClass("settings-tree", true);
 }
 
-void ContentManager::Initialize() {
-	// std::vector<std::vector<std::string>> general = Settings::getGraphicsData("General");
-	// std::vector<std::vector<std::string>> appearance = Settings::getGraphicsData("Appearance");
-	// std::vector<std::string> keybinds = Settings::getKeybindGraphicsData(); // only a 1d vector, special func for it
+void ContentManager::load() {
+	const auto& mapKeys = Settings::getSettingsMap().getAllKeys();
+	std::vector<std::vector<std::string>> vecPaths(mapKeys.size());
+	int i = 0;
+	for (const auto& pair : mapKeys) {
+		const std::string& key = pair.first;
+		stringSplitInto(key, '/', vecPaths[i]);
+		i++;
+	}
 
-	// for (int i = 0; i < general.size(); i++) {
-	// 	generateForm(general[i][1]);
-	// 	logInfo(general[i][0]);
-	// }
+	setPaths(vecPaths, contentPanel);
 
-	// for (int i = 0; i < appearance.size(); i++) {
-		// generateForm(appearance[i][1], appearance[i][0]);
-	// }
-
-	// for (int i = 0; i < keybinds.size(); i++) {
-	// 	generateForm("keybind");
-	// }
-}
-
-void ContentManager::setForm(const std::vector<std::string>& formList, const std::string& type) {
 	// if (type == "general") {
 	// 	std::vector<std::vector<std::string>> list = Settings::getGraphicsData("General");
 
 	// 	if (formList.empty()) {
 	// 		for (int i = 0; i < list.size(); i++) {
-	// 			generateForm(list[i][1], list[i][0]);
+	// 			generateItem(list[i][1], list[i][0]);
 	// 		}
 	// 	} else {
 	// 		// TODO: render only the formList items
@@ -48,50 +41,143 @@ void ContentManager::setForm(const std::vector<std::string>& formList, const std
 	// }
 }
 
-void ContentManager::generateForm(const std::string& tabType, std::string name) {
-	// std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+void ContentManager::setPaths(const std::vector<std::vector<std::string>>& paths, Rml::Element* current) {
+	if (!current) return;
 
-	// Rml::ElementPtr newForm;
-	// std::string itemName;
-	// if (tabType == "HEADER") itemName = name;
-	// else itemName = name.substr(name.rfind('.') + 1);
+	std::string pathStr = getPath(current);
 
-	// // creates forms
-	// if (tabType == "HEADER") {
-	// 	newForm = Rml::Factory::InstanceElement(
-	// 		contentPanel,
-	// 		"div",
-	// 		name,
-	// 		Rml::XMLAttributes()
-	// 	);
-	// 	newForm->SetAttribute("class", "header-option");
-	// 	newForm->SetInnerRML(
-	// 		"<div class=\"header-label\">" + itemName + "</div>"
-	// 	);
+	Rml::ElementList elements;
+	current->GetElementsByClassName(elements, "settings-tree-header");
+	if (elements.empty()) {
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		newDiv->SetClass("settings-tree-header", true);
+		elements.push_back(current->AppendChild(std::move(newDiv)));
+	}
+	Rml::Element* div = elements[0];
 
-	// 	contentPanel->AppendChild(std::move(newForm));
-	// } else if (tabType == "USER_INT") {
-	// } else if (tabType == "USER_STRING") {
-	// } else if (tabType == "DROPDOWN") {
-	// } else if (tabType == "COLOR") {
-	// 	newForm = Rml::Factory::InstanceElement(
-	// 		contentPanel,
-	// 		"div",
-	// 		name,
-	// 		Rml::XMLAttributes()
-	// 	);
+	if (paths.empty()) {
+		// remove class
+		current->SetClass("parent", false);
+		// remove ul
+		elements.clear();
+		div->GetElementsByTagName(elements, "ul");
+		if (!elements.empty()) div->RemoveChild(elements[0]);
+		// remove span
+		elements.clear();
+		current->GetElementsByTagName(elements, "span");
+		if (!elements.empty()) current->RemoveChild(elements[0]);
+		return;
+	}
+	std::map<std::string, std::vector<std::vector<std::string>>> pathsByRoot;
+	for (const auto& path : paths) {
+		if (path.size() == 1) {
+			pathsByRoot[path[0]];
+		} else {
+			auto& pathVec = pathsByRoot[path[0]].emplace_back(path.size() - 1);
+			for (unsigned int i = 1; i < path.size(); i++) {
+				pathVec[i - 1] = path[i];
+			}
+		}
+	}
 
-	// 	newForm->SetAttribute("class", "content-item user-int-option");
-	// 	newForm->SetInnerRML(
-	// 		"<div class=\"label\">" + itemName + "</div>\n<input type=\"text\" />"
-	// 	);
+	Rml::Element* listElement;
+	elements.clear();
+	div->GetElementsByTagName(elements, "ul");
+	if (elements.empty()) {
+		Rml::ElementPtr newList = document->CreateElement("ul");
+		// current->SetClass("collapsed", current != contentPanel); // closed by default
+		listElement = div->AppendChild(std::move(newList));
+		current->SetClass("parent", true);
+		if (current != contentPanel) {
+			Rml::ElementPtr arrow = document->CreateElement("span");
+			arrow->SetInnerRML(">");
+			arrow->AddEventListener("click", new MenuTreeListener());
+			current->InsertBefore(std::move(arrow), div);
+		}
+	} else {
+		listElement = elements[0];
+		std::vector<Rml::Element*> children;
+		for (unsigned int i = 0; i < listElement->GetNumChildren(); i++) {
+			children.push_back(listElement->GetChild(i));
+		}
+		for (auto element : children) {
+			getPath(element);
+			const std::string& id = element->GetId();
+			unsigned int index = id.size() - 5;
+			while (index != 0 && id[index] != '/') index--;
+			auto iter = pathsByRoot.find(id.substr(index + (index != 0), id.size() - 5 - index - (index != 0)));
+			if (iter == pathsByRoot.end()) {
+				listElement->RemoveChild(element);
+				continue;
+			}
+			setPaths(iter->second, element);
+			pathsByRoot.erase(iter);
+		}
+	}
+	if (!(pathStr.empty())) pathStr += "/";
+	for (auto iter : pathsByRoot) {
+		Rml::ElementPtr newItem = document->CreateElement("li");
+		// add listener
+		// if (!clickableName) 
+		newItem->AddEventListener("click", new MenuTreeListener(false, nullptr));
+		// else {
+		// 	newItem->AddEventListener("click", new EventPasser(
+		// 		[this](Rml::Event& event) {
+		// 			event.StopPropagation();
+		// 			Rml::Element* target = event.GetCurrentElement();
+		// 			if (listenerFunction)
+		// 				listenerFunction(target->GetId().substr(0, target->GetId().size() - 5));
+		// 		}
+		// 	));
+		// }
+		// set id
+		newItem->SetId(pathStr + iter.first + "-menu");
+		// create div for text
+		Rml::ElementPtr newDiv = document->CreateElement("div");
+		newDiv->SetClass("settings-tree-header", true);
+		newDiv->AppendChild(std::move(document->CreateTextNode(iter.first)));
+		Rml::ElementPtr item = generateItem(pathStr + iter.first);
+		if (item) newDiv->AppendChild(std::move(item));
+		newItem->AppendChild(std::move(newDiv));
+		Rml::Element* newItem2 = listElement->AppendChild(std::move(newItem));
+		if (!iter.second.empty()) {
+			setPaths(iter.second, newItem2);
+		}
+	}
+}
 
+std::string ContentManager::getPath(Rml::Element* item) {
+	if (item == contentPanel) return "";
+	return item->GetId().substr(0, item->GetId().size() - 5);
+}
 
-	// 	contentPanel->AppendChild(std::move(newForm));
-	// } else if (tabType == "FILE_PATH") {
-	// } else if (tabType == "DIR_PATH") {
-	// } else if (tabType == "KEYBIND") {
-	// } else {
-	// 	logWarning("not a type, please contact abearnmountain on github for additional support");
-	// }
+Rml::ElementPtr ContentManager::generateItem(const std::string& key) {
+	if (!Settings::hasKey(key)) return nullptr;
+	Rml::ElementPtr item = document->CreateElement("div");
+	item->SetClass("settings-tree-item", true);
+	switch (Settings::getType(key)) {
+	case SettingType::INT:
+		break;
+	case SettingType::KEYBIND: {
+		item->AppendChild(std::move(document->CreateTextNode("Keybind: " + key)));
+		Rml::XMLAttributes nameAttributes;
+		nameAttributes["type"] = "text";
+		nameAttributes["maxlength"] = "20";
+		nameAttributes["size"] = "20";
+		Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
+		Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
+		nameElement->SetValue(*Settings::get<SettingType::KEYBIND>(key));
+		name->SetClass("keybind", true);
+		item->AppendChild(std::move(name));
+		break;
+	}
+	case SettingType::STRING:
+		break;
+	case SettingType::VOID:
+		item->AppendChild(std::move(document->CreateTextNode("NULL TYPE")));
+		break;
+	default:
+		break;
+	}
+	return item;
 }
