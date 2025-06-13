@@ -68,38 +68,31 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// create keybind shortcuts and connect them
 	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_Z,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/Editing/Undo",
 		[this]() { if (circuitView->getCircuit()) circuitView->getCircuit()->undo(); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_Z,
-		Rml::Input::KeyModifier::KM_CTRL + Rml::Input::KeyModifier::KM_SHIFT,
+		"Keybinds/Editing/Redo",
 		[this]() { if (circuitView->getCircuit()) circuitView->getCircuit()->redo(); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_S,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/File/Save",
 		[this]() { save(); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_S,
-		Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT,
+		"Keybinds/File/Save As",
 		[this]() { asSave(); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_O,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/File/Open",
 		[this]() { load(); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_C,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/Editing/Copy",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Copy")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_V,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/Editing/Paste",
 		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(

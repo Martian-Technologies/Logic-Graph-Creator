@@ -3,8 +3,6 @@
 
 #include "settingsMap.h"
 
-class SettingEntryBase;
-
 namespace Settings {
 	SettingsMap& getSettingsMap();
 	template<SettingType settingType>
@@ -28,6 +26,10 @@ namespace Settings {
 	}
 	inline bool hasKey(const std::string& key) {
 		return getSettingsMap().hasKey(key);
+	}
+	template<SettingType settingType>
+	inline void registerListener(std::string key, SettingsMap::ListenerFunction<settingType> listener) {
+		getSettingsMap().registerListener<settingType>(key, listener);
 	}
 };
 

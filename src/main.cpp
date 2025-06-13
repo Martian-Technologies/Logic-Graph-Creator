@@ -10,13 +10,13 @@ int main(int argc, char* argv[]) {
 		DirectoryManager::findDirectories();
 
 		// register settings
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/undo", "ctrl z");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/redo", "ctrl shift z");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/save", "ctrl s");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/save as", "ctrl shift s");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/open", "ctrl o");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/copy", "ctrl c");
-		Settings::registerSetting<SettingType::KEYBIND>("keybinds/paste", "ctrl v");
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Undo", Keybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Redo", Keybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", Keybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", Keybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Open", Keybind(Rml::Input::KeyIdentifier::KI_O, Rml::Input::KeyModifier::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Copy", Keybind(Rml::Input::KeyIdentifier::KI_C, Rml::Input::KeyModifier::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Paste", Keybind(Rml::Input::KeyIdentifier::KI_V, Rml::Input::KeyModifier::KM_CTRL));
 
 		App app;
 		app.runLoop();

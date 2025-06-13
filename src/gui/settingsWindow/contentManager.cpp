@@ -166,7 +166,7 @@ Rml::ElementPtr ContentManager::generateItem(const std::string& key) {
 		nameAttributes["size"] = "20";
 		Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
 		Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
-		nameElement->SetValue(*Settings::get<SettingType::KEYBIND>(key));
+		nameElement->SetValue(Settings::get<SettingType::KEYBIND>(key)->toString());
 		name->SetClass("keybind", true);
 		item->AppendChild(std::move(name));
 		break;
