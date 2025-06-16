@@ -1,10 +1,27 @@
 #ifndef circuitNode_h
 #define circuitNode_h
 
+enum class NodeType : char {
+    AND,
+    OR,
+    XOR,
+    NAND,
+    NOR,
+    XNOR,
+    RETAIN,
+    ONETICK,
+    DUMMY,
+    CONST_ON,
+    JUNCTION,
+    P_TRISTATE_BUFFER,
+    P_TRISTATE_BUFFER_INVERTED,
+    V_CUSTOM,
+    R_IO,
+};
+
 struct CircuitNode {
-    bool simulatorReference; // true if this node references a real gate in the simulator, false if it is a virtual node that references an IC or acts as an input/output node for a multi-cell gate
-    int id; // semi-unique ID for the node. IDs are not unique across simulatorReference true/false, but are unique within each type
+    int id; // semi-unique ID for the node. IDs are not unique across real/parent and virtual/refernece gates.
     NodeType type;
-}
+};
 
 #endif /* circuitNode_h */
