@@ -3,7 +3,7 @@
 
 #include "logicState.h"
 #include "gateType.h"
-#include "backend/container/block/blockDefs.h"
+#include "container/block/blockDefs.h"
 
 struct GateConnection {
 	block_id_t gateId;

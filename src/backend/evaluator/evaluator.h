@@ -6,8 +6,6 @@
 #include "backend/container/difference.h"
 #include "backend/dataUpdateEventManager.h"
 
-#include "logicSimulatorWrapper.h"
-#include "addressTree.h"
 #include "backend/address.h"
 #include "logicState.h"
 #include "diffCache.h"
@@ -30,8 +28,6 @@ public:
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(addressTree.getContainerId())->getCircuitNameNumber() + ")"; }
 
-	circuit_id_t getCircuitId(const Address& address) { return addressTree.getBranch(address)->getContainerId(); }
-
 	void reset();
 	void setPause(bool pause);
 	bool isPause() const { return paused; }
@@ -50,9 +46,6 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
-	void removeCircuitIO(const DataUpdateEventManager::EventData* data);
-
-	const AddressTreeNode<EvaluatorGate>& getAddressTree() const { return addressTree; }
 
 private:
 
@@ -60,14 +53,10 @@ private:
 	bool paused;
 	bool usingTickrate;
 	unsigned long long targetTickrate;
-	LogicSimulatorWrapper logicSimulatorWrapper;
-	AddressTreeNode<EvaluatorGate> addressTree;
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 
 	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
-	int getGroupIndex(EvaluatorGate gate, const Vector offset, bool trackInput);
-	std::pair<wrapper_gate_id_t, int> getConnectionPoint(AddressTreeNode<EvaluatorGate>& addressTree, const Address& address, Vector offset, bool trackInput);
 };
 
 GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC);
