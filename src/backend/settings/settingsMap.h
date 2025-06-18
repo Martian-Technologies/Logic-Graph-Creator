@@ -22,7 +22,7 @@ public:
 
 	class SettingListenerBase {
 	public:
-		SettingListenerBase(SettingType type) : type(type) {}
+		SettingListenerBase(SettingType type) : type(type) { }
 		virtual ~SettingListenerBase() = default;
 		SettingType getType() const { return type; };
 	private:
@@ -32,7 +32,7 @@ public:
 	class SettingEntryBase {
 		friend SettingsMap;
 	public:
-		SettingEntryBase(SettingType type) : type(type) {}
+		SettingEntryBase(SettingType type) : type(type) { }
 		virtual ~SettingEntryBase() = default;
 		SettingType getType() const { return type; };
 		template<SettingType settingType>
@@ -61,20 +61,6 @@ public:
 			mappings[key] = std::make_unique<SettingEntry<settingType>>(value);
 		} else {
 			changeType<settingType>(iter->second, value);
-		}
-	}
-	template<>
-	void registerSetting<SettingType::VOID>(std::string key) {
-		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::iterator iter = mappings.find(key);
-		if (iter != mappings.end()) {
-			changeType<SettingType::VOID>(iter->second);
-		}
-	}
-	template<>
-	void registerSetting<SettingType::VOID>(std::string key, const SettingTypeToType<SettingType::VOID>::type& value) { // IDK how you would even call this
-		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::iterator iter = mappings.find(key);
-		if (iter != mappings.end()) {
-			changeType<SettingType::VOID>(iter->second, value);
 		}
 	}
 	template<SettingType settingType>
@@ -129,11 +115,6 @@ public:
 		}
 		settingEntry->setValue(value);
 		return true;
-	}
-	template<>
-	bool set<SettingType::VOID>(const std::string& key, const SettingTypeToType<SettingType::VOID>::type& value) { // IDK how you would even call this
-		logError("Failed to set value. Could not set type VOID.", "SettingsMap");
-		return false;
 	}
 
 private:
@@ -208,5 +189,27 @@ private:
 
 	std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>> mappings;
 };
+
+template<>
+inline void SettingsMap::registerSetting<SettingType::VOID>(std::string key) {
+	std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::iterator iter = mappings.find(key);
+	if (iter != mappings.end()) {
+		changeType<SettingType::VOID>(iter->second);
+	}
+}
+
+template<>
+inline void SettingsMap::registerSetting<SettingType::VOID>(std::string key, const SettingTypeToType<SettingType::VOID>::type& value) { // IDK how you would even call this
+	std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::iterator iter = mappings.find(key);
+	if (iter != mappings.end()) {
+		changeType<SettingType::VOID>(iter->second, value);
+	}
+}
+
+template<>
+inline bool SettingsMap::set<SettingType::VOID>(const std::string& key, const SettingTypeToType<SettingType::VOID>::type& value) { // IDK how you would even call this
+	logError("Failed to set value. Could not set type VOID.", "SettingsMap");
+	return false;
+}
 
 #endif /* settingsMap_h */
