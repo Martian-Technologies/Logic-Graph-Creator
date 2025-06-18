@@ -3,6 +3,7 @@
 
 class Keybind {
 public:
+	Keybind() = default;
 	Keybind(unsigned int keyCombined) : keyCombined(keyCombined) { }
 
 	bool operator==(Keybind keybind) const { return keybind.getKeyCombined() == keyCombined; }
@@ -11,7 +12,7 @@ public:
 	unsigned int getKeyCombined() const { return keyCombined; }
 	std::string toString() const { return std::to_string(keyCombined); }
 private:
-	unsigned int keyCombined;
+	unsigned int keyCombined = 0;
 };
 
 template<>
