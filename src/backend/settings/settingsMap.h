@@ -67,7 +67,7 @@ public:
 	void registerListener(std::string key, ListenerFunction<settingType> listener) {
 		std::unordered_map<std::string, std::unique_ptr<SettingEntryBase>>::iterator iter = mappings.find(key);
 		if (iter == mappings.end()) {
-			(mappings[key] = std::make_unique<SettingEntryBase>(SettingType::VOID))->addListener<settingType>(listener);
+			(mappings[key] = std::make_unique<SettingEntryBase>(SettingType::VOID))->template addListener<settingType>(listener);
 		} else {
 			iter->second->addListener<settingType>(listener);
 		}
