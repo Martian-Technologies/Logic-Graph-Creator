@@ -15,7 +15,7 @@ public:
 
 private:
 	void connectCategoryListeners(); // creates listeners for changing content-panels information
-	void connectWindowOptions(); // creates listeners for saving, reseting, or canceling the settings info
+	// void connectWindowOptions(); // creates listeners for saving, reseting, or canceling the settings info
 
 	Rml::Element* context;
 	Rml::Element* activeNav;

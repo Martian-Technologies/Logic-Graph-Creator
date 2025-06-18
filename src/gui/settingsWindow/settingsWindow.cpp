@@ -10,7 +10,7 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : contentManager(
 	// SearchBar* sb = new SearchBar(document);
 
 	// connectCategoryListeners();
-	connectWindowOptions();
+	// connectWindowOptions();
 
 	contentManager.load();
 }
@@ -42,33 +42,33 @@ void SettingsWindow::connectCategoryListeners() {
 
 }
 
-void SettingsWindow::connectWindowOptions() {
-	Rml::Element* settingsActions = context->GetElementById("setting-actions");
+// void SettingsWindow::connectWindowOptions() {
+// 	Rml::Element* settingsActions = context->GetElementById("setting-actions");
 
-	// Save
-	Rml::Element* saveButton = settingsActions->GetElementById("settings-apply");
-	saveButton->AddEventListener("click", new EventPasser(
-		[this](Rml::Event& event) {
-			logInfo("saved");
-		}
-	));
+// 	// Save
+// 	Rml::Element* saveButton = settingsActions->GetElementById("settings-apply");
+// 	saveButton->AddEventListener("click", new EventPasser(
+// 		[this](Rml::Event& event) {
+// 			logInfo("saved");
+// 		}
+// 	));
 
-	// Default
-	Rml::Element* defaultButton = settingsActions->GetElementById("settings-reset");
-	defaultButton->AddEventListener("click", new EventPasser(
-		[this](Rml::Event& event) {
-			logInfo("default");
-		}
-	));
+// 	// Default
+// 	Rml::Element* defaultButton = settingsActions->GetElementById("settings-reset");
+// 	defaultButton->AddEventListener("click", new EventPasser(
+// 		[this](Rml::Event& event) {
+// 			logInfo("default");
+// 		}
+// 	));
 
-	// Cancel
-	Rml::Element* closeButton = settingsActions->GetElementById("settings-cancel");
-	closeButton->AddEventListener("click", new EventPasser(
-		[this](Rml::Event& event) {
-			logInfo("closed");
-		}
-	));
-}
+// 	// Cancel
+// 	Rml::Element* closeButton = settingsActions->GetElementById("settings-cancel");
+// 	closeButton->AddEventListener("click", new EventPasser(
+// 		[this](Rml::Event& event) {
+// 			logInfo("closed");
+// 		}
+// 	));
+// }
 
 void SettingsWindow::toggleVisibility() {
 	visible = !visible;

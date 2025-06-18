@@ -1,7 +1,7 @@
 #ifndef settingsMap_h
 #define settingsMap_h
 
-#include "gui/interaction/keybind.h"
+#include "keybind.h"
 
 enum SettingType {
 	VOID,
