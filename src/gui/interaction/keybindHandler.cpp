@@ -2,10 +2,9 @@
 
 #include "util/algorithm.h"
 #include "backend/settings/settings.h"
-#include "keybind.h"
 
 void KeybindHandler::ProcessEvent(Rml::Event& event) {
-	for (auto [iter, iterEnd] = listenerFunctions.equal_range(Keybind(event)); iter != iterEnd; ++iter) {
+	for (auto [iter, iterEnd] = listenerFunctions.equal_range(makeKeybind(event)); iter != iterEnd; ++iter) {
 		iter->second.second();
 	}
 
@@ -32,7 +31,7 @@ void KeybindHandler::addListener(const std::string& keybindSettingPath, Listener
 }
 
 void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, unsigned int modifier, ListenerFunction listenerFunction) {
-	listenerFunctions.emplace(Keybind(key, modifier), std::pair<unsigned int, ListenerFunction>(getBindId(), listenerFunction));
+	listenerFunctions.emplace(makeKeybind(key, modifier), std::pair<unsigned int, ListenerFunction>(getBindId(), listenerFunction));
 }
 
 void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, ListenerFunction listenerFunction) {

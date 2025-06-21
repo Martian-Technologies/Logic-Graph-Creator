@@ -30,10 +30,10 @@ TEST_F(SettingsTest, RegisterTypesWithSet) {
 	ASSERT_EQ(settingsMap.getType("word"), SettingType::STRING);
 	ASSERT_NE(settingsMap.get<SettingType::STRING>("word"), nullptr);
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word"), "letters");
-	settingsMap.registerSetting<SettingType::KEYBIND>("key", "cmd+s");
+	settingsMap.registerSetting<SettingType::KEYBIND>("key", Keybind(420));
 	ASSERT_EQ(settingsMap.getType("key"), SettingType::KEYBIND);
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), "cmd+s");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), Keybind(420));
 	// check that all retain type and data
 	ASSERT_EQ(settingsMap.getType("number"), SettingType::INT);
 	ASSERT_NE(settingsMap.get<SettingType::INT>("number"), nullptr);
@@ -43,7 +43,7 @@ TEST_F(SettingsTest, RegisterTypesWithSet) {
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word"), "letters");
 	ASSERT_EQ(settingsMap.getType("key"), SettingType::KEYBIND);
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), "cmd+s");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), Keybind(420));
 }
 
 TEST_F(SettingsTest, SetAndGet) {
@@ -63,19 +63,19 @@ TEST_F(SettingsTest, SetAndGet) {
 	ASSERT_NE(settingsMap.get<SettingType::STRING>("word"), nullptr);
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word"), "");
 	settingsMap.registerSetting<SettingType::KEYBIND>("key");
-	ASSERT_TRUE(settingsMap.set<SettingType::KEYBIND>("key", "ctrl+shift+z"));
+	ASSERT_TRUE(settingsMap.set<SettingType::KEYBIND>("key", Keybind(69)));
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), "ctrl+shift+z");
-	ASSERT_TRUE(settingsMap.set<SettingType::KEYBIND>("key", "n"));
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), Keybind(69));
+	ASSERT_TRUE(settingsMap.set<SettingType::KEYBIND>("key", Keybind(8)));
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), "n");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), Keybind(8));
 	// check that all retain type and data
 	ASSERT_NE(settingsMap.get<SettingType::INT>("number"), nullptr);
 	ASSERT_EQ(*settingsMap.get<SettingType::INT>("number"), 481);
 	ASSERT_NE(settingsMap.get<SettingType::STRING>("word"), nullptr);
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word"), "");
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), "n");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key"), Keybind(8));
 }
 
 TEST_F(SettingsTest, SameType) {
@@ -98,13 +98,13 @@ TEST_F(SettingsTest, SameType) {
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word2"), "hauwf");
 	ASSERT_NE(settingsMap.get<SettingType::STRING>("word3"), nullptr);
 	ASSERT_EQ(*settingsMap.get<SettingType::STRING>("word3"), "281hr");
-	settingsMap.registerSetting<SettingType::KEYBIND>("key1", "w");
-	settingsMap.registerSetting<SettingType::KEYBIND>("key2", "a");
-	settingsMap.registerSetting<SettingType::KEYBIND>("key3", "d");
+	settingsMap.registerSetting<SettingType::KEYBIND>("key1", Keybind(42));
+	settingsMap.registerSetting<SettingType::KEYBIND>("key2", Keybind(1024));
+	settingsMap.registerSetting<SettingType::KEYBIND>("key3", Keybind(666));
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key1"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key1"), "w");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key1"), Keybind(42));
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key2"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key2"), "a");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key2"), Keybind(1024));
 	ASSERT_NE(settingsMap.get<SettingType::KEYBIND>("key3"), nullptr);
-	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key3"), "d");
+	ASSERT_EQ(*settingsMap.get<SettingType::KEYBIND>("key3"), Keybind(666));
 }
