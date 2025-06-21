@@ -12,7 +12,7 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	circuitIds.push_back(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
-	receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
+	// receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
 
 	makeEdit(std::make_shared<Difference>(difference), circuitId);
 }

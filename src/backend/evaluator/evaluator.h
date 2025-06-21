@@ -42,6 +42,8 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
+	circuit_id_t getCircuitId() const { return circuitIds.at(0); }
+	circuit_id_t getCircuitId(const Address& address) const;
 
 private:
 

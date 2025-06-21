@@ -2,8 +2,8 @@
 #define circuitLattice_h
 
 #include "circuitNode.h"
-#include "position/position.h"
-#include "position/sparse2d.h"
+#include "backend/position/position.h"
+#include "backend/position/sparse2d.h"
 
 typedef int lattice_coord_t;
 
