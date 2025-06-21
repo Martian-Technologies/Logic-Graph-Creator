@@ -9,6 +9,7 @@
 #include "backend/address.h"
 #include "logicState.h"
 #include "diffCache.h"
+#include "circuitLattice.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -17,16 +18,11 @@ class DataUpdateEventManager;
 class Evaluator {
 public:
 	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData;
-	struct EvaluatorGate {
-		wrapper_gate_id_t gateId;
-		BlockType blockType;
-		Rotation rotation;
-	};
 
 	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
-	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(addressTree.getContainerId())->getCircuitNameNumber() + ")"; }
+	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(circuitIds.at(0))->getCircuitNameNumber() + ")"; }
 
 	void reset();
 	void setPause(bool pause);
@@ -55,11 +51,11 @@ private:
 	unsigned long long targetTickrate;
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
+	CircuitLattice circuitLattice;
+	std::vector<circuit_id_t> circuitIds;
 
-	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC);
+	void makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t circuitId, DiffCache& diffCache);
 };
-
-GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC);
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;
 
