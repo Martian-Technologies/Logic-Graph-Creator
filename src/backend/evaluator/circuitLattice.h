@@ -33,7 +33,7 @@ public:
     }
     void removeLayer(lattice_coord_t l) {
         if (l < 0 || l >= static_cast<lattice_coord_t>(layers.size())) {
-            logError("Attempted to remove invalid layer index: {}", "CircuitLattice", l);
+            logError("Attempted to remove invalid layer index: {}", "CircuitLattice::removeLayer", l);
             return; // Invalid layer index
         }
         if (layers.at(l).has_value()) {
