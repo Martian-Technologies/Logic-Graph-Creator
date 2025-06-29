@@ -15,6 +15,7 @@ public:
 		if (keyCombined & 4U) { if (keyString.size()) keyString += " + "; keyString += "ALT"; };
 		if (keyCombined & 1U) { if (keyString.size()) keyString += " + "; keyString += "CTRL"; };
 		if (keyCombined & 2U) { if (keyString.size()) keyString += " + "; keyString += "SHIFT"; };
+		if (keyCombined & 8U) { if (keyString.size()) keyString += " + "; keyString += "COMMAND"; };
 		unsigned int key = keyCombined >> 8;
 		if (key != 0) {
 			if (keyString.size()) keyString += " + ";
@@ -72,6 +73,7 @@ public:
 			default: keyString += "unknown key id:" + std::to_string(key);
 			}
 		}
+
 		return keyString;
 	}
 private:
