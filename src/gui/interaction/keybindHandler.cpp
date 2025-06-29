@@ -25,6 +25,7 @@ void KeybindHandler::addListener(const std::string& keybindSettingPath, Listener
 				auto data = iter->second;
 				listenerFunctions.erase(iter);
 				listenerFunctions.emplace(keybind, data);
+				return;
 			}
 		}
 	});
