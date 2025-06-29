@@ -81,9 +81,9 @@ public:
 			case 60: keyString += "Num9"; break;
 			case 61: keyString += "NumEnter"; break;
 			case 62: keyString += "*"; break;
-			case 63: keyString += "+"; break;
+			case 63: keyString += "Plus"; break;
 			case 64: keyString += "Separator"; break;
-			case 65: keyString += "-"; break;
+			case 65: keyString += "Minus"; break;
 			case 66: keyString += "Numpad ."; break;
 			case 67: keyString += "/"; break;
 			case 68: keyString += "="; break;
