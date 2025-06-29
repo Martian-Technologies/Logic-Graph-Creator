@@ -9,11 +9,11 @@ enum SettingType {
 	INT,
 	KEYBIND
 };
-template<SettingType settingType> struct SettingTypeToType;
+
 template<SettingType settingType>
-struct SettingsTypeToType {
+struct SettingTypeToType {
 	static_assert(
-		settingsType == SettingType::VOID ||
+		settingType == SettingType::VOID ||
 		settingType == SettingType::STRING ||
 		settingType == SettingType::INT ||
 		settingType == SettingType::KEYBIND,
