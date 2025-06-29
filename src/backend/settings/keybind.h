@@ -13,8 +13,8 @@ public:
 	std::string toString() const {
 		std::string keyString;
 		if (keyCombined & 4U) { if (keyString.size()) keyString += " + "; keyString += "ALT"; };
-		if (keyCombined & 2U) { if (keyString.size()) keyString += " + "; keyString += "CTRL"; };
-		if (keyCombined & 1U) { if (keyString.size()) keyString += " + "; keyString += "SHIFT"; };
+		if (keyCombined & 1U) { if (keyString.size()) keyString += " + "; keyString += "CTRL"; };
+		if (keyCombined & 2U) { if (keyString.size()) keyString += " + "; keyString += "SHIFT"; };
 		unsigned int key = keyCombined >> 8;
 		if (key != 0) {
 			if (keyString.size()) keyString += " + ";
