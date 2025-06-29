@@ -58,12 +58,12 @@ private:
 
 	void makeEditInPlace(lattice_coord_t layerIndex, DifferenceSharedPtr difference, DiffCache& diffCache);
 
-	void edit_removeBlock(lattice_coord_t layerIndex, Position position, Rotation rotation, BlockType type);
-	void edit_placeBlock(lattice_coord_t layerIndex, Position position, Rotation rotation, BlockType type);
-	void edit_removeConnection(lattice_coord_t layerIndex, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
-	void edit_createConnection(lattice_coord_t layerIndex, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
-	void edit_moveBlock(lattice_coord_t layerIndex, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
-	void edit_setData(lattice_coord_t layerIndex, Position position, block_data_t newData, block_data_t oldData);
+	void edit_removeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
+	void edit_placeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
+	void edit_removeConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
+	void edit_createConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
+	void edit_moveBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
+	void edit_setData(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData);
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;

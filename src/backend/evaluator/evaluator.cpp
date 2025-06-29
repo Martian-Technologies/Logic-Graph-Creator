@@ -40,32 +40,32 @@ void Evaluator::makeEditInPlace(lattice_coord_t layerIndex, DifferenceSharedPtr 
 		switch (modificationType) {
 			case Difference::ModificationType::REMOVED_BLOCK: {
 				const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-				edit_removeBlock(layerIndex, position, rotation, blockType);
+				edit_removeBlock(layerIndex, diffCache, position, rotation, blockType);
 				break;
 			}
 			case Difference::ModificationType::PLACE_BLOCK: {
 				const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-				edit_placeBlock(layerIndex, position, rotation, blockType);
+				edit_placeBlock(layerIndex, diffCache, position, rotation, blockType);
 				break;
 			}
 			case Difference::ModificationType::MOVE_BLOCK: {
 				const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
-				edit_moveBlock(layerIndex, curPosition, curRotation, newPosition, newRotation);
+				edit_moveBlock(layerIndex, diffCache, curPosition, curRotation, newPosition, newRotation);
 				break;
 			}
 			case Difference::ModificationType::REMOVED_CONNECTION: {
 				const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-				edit_removeConnection(layerIndex, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
+				edit_removeConnection(layerIndex, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
 				break;
 			}
 			case Difference::ModificationType::CREATED_CONNECTION: {
 				const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-				edit_createConnection(layerIndex, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
+				edit_createConnection(layerIndex, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
 				break;
 			}
 			case Difference::ModificationType::SET_DATA: {
 				const auto& [position, newData, oldData] = std::get<Difference::data_modification_t>(modificationData);
-				edit_setData(layerIndex, position, newData, oldData);
+				edit_setData(layerIndex, diffCache, position, newData, oldData);
 				break;
 			}
 		}
