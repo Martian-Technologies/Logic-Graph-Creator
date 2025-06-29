@@ -1,23 +1,38 @@
 #include "keybindHandler.h"
 
-void KeybindHandler::ProcessEvent(Rml::Event& event) {
-	unsigned int key = event.GetParameter<unsigned int>("key_identifier", 0) << 8;
-	key += event.GetParameter<int>("alt_key", 0) * Rml::Input::KeyModifier::KM_ALT;
-	key += event.GetParameter<int>("meta_key", 0) * Rml::Input::KeyModifier::KM_META;
-	key += event.GetParameter<int>("ctrl_key", 0) * Rml::Input::KeyModifier::KM_CTRL;
-	key += event.GetParameter<int>("shift_key", 0) * Rml::Input::KeyModifier::KM_SHIFT;
+#include "util/algorithm.h"
+#include "backend/settings/settings.h"
 
-	for (auto [iter, iterEnd] = listenerFunctions.equal_range(key); iter != iterEnd; ++iter) {
-		iter->second();
+void KeybindHandler::ProcessEvent(Rml::Event& event) {
+	for (auto [iter, iterEnd] = listenerFunctions.equal_range(makeKeybind(event)); iter != iterEnd; ++iter) {
+		iter->second.second();
 	}
 
 	event.StopPropagation();
 }
 
-void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, int modifier, ListenerFunction listenerFunction) {
-	unsigned int keyCombined = key << 8;
-	keyCombined += modifier;
-	listenerFunctions.emplace(keyCombined, listenerFunction);
+void KeybindHandler::addListener(const std::string& keybindSettingPath, ListenerFunction listenerFunction) {
+	unsigned int bindId = getBindId();
+	const Keybind* keybind = Settings::get<SettingType::KEYBIND>(keybindSettingPath);
+	if (keybind) {
+		listenerFunctions.emplace(*keybind, std::pair<unsigned int, ListenerFunction>(bindId, listenerFunction));
+	} else {
+		listenerFunctions.emplace(0, std::pair<unsigned int, ListenerFunction>(bindId, listenerFunction)); // unknown
+	}
+	Settings::registerListener<SettingType::KEYBIND>(keybindSettingPath, [this, bindId](const Keybind& keybind) {
+		for (auto iter = listenerFunctions.begin(); iter != listenerFunctions.end(); ++iter) {
+			if (iter->second.first == bindId) {
+				auto data = iter->second;
+				listenerFunctions.erase(iter);
+				listenerFunctions.emplace(keybind, data);
+				return;
+			}
+		}
+	});
+}
+
+void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, unsigned int modifier, ListenerFunction listenerFunction) {
+	listenerFunctions.emplace(makeKeybind(key, modifier), std::pair<unsigned int, ListenerFunction>(getBindId(), listenerFunction));
 }
 
 void KeybindHandler::addListener(Rml::Input::KeyIdentifier key, ListenerFunction listenerFunction) {

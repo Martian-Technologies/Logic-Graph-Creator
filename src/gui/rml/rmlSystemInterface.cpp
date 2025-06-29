@@ -492,13 +492,8 @@ int RmlSDL::ConvertMouseButton(int button) {
 int RmlSDL::GetKeyModifierState() {
 	SDL_Keymod sdl_mods = SDL_GetModState();
 
-#ifdef __APPLE__
-	constexpr auto mod_ctrl = SDL_KMOD_GUI;
-	constexpr auto mod_gui = SDL_KMOD_CTRL;
-#else
 	constexpr auto mod_ctrl = SDL_KMOD_CTRL;
 	constexpr auto mod_gui = SDL_KMOD_GUI;
-#endif
 	constexpr auto mod_shift = SDL_KMOD_SHIFT;
 	constexpr auto mod_alt = SDL_KMOD_ALT;
 	constexpr auto mod_num = SDL_KMOD_NUM;
