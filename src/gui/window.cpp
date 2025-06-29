@@ -18,8 +18,8 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(800, 600)); // ptr managed by rmlUi (I think)
-	// Rml::Debugger::Initialise(rmlContext);
-	// Rml::Debugger::SetVisible(true);
+	Rml::Debugger::Initialise(rmlContext);
+	Rml::Debugger::SetVisible(true);
 	Rml::ElementDocument* document = rmlContext->LoadDocument((DirectoryManager::getResourceDirectory() / "gui/mainWindow.rml").string());
 
 	// show rmlUi document

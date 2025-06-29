@@ -5,7 +5,7 @@
 
 #include "backend/settings/keybind.h"
 
-inline Keybind makeKeybind(Rml::Input::KeyIdentifier key, unsigned int modifier) {
+inline Keybind makeKeybind(Rml::Input::KeyIdentifier key, unsigned int modifier = 0) {
 	switch (key) {
 	case Rml::Input::KeyIdentifier::KI_LSHIFT:
 		return Keybind(modifier | Rml::Input::KeyModifier::KM_SHIFT);
