@@ -71,3 +71,22 @@ void Evaluator::makeEditInPlace(lattice_coord_t layerIndex, DifferenceSharedPtr 
 		}
 	}
 }
+
+void Evaluator::edit_removeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+	
+}
+void Evaluator::edit_placeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+
+}
+void Evaluator::edit_removeConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+
+}
+void Evaluator::edit_createConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+
+}
+void Evaluator::edit_moveBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
+
+}
+void Evaluator::edit_setData(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData) {
+
+}
