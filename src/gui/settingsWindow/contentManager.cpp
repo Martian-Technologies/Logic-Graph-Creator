@@ -1,6 +1,8 @@
 #include "contentManager.h"
-#include "backend/settings/settings.h"
 #include "gui/interaction/menuTreeListener.h"
+#include "../interaction/keybindHelpers.h"
+#include "../interaction/eventPasser.h"
+#include "backend/settings/settings.h"
 #include "util/algorithm.h"
 
 ContentManager::ContentManager(Rml::ElementDocument* document) : document(document) {
@@ -160,15 +162,42 @@ Rml::ElementPtr ContentManager::generateItem(const std::string& key) {
 		break;
 	case SettingType::KEYBIND: {
 		item->AppendChild(std::move(document->CreateTextNode("Keybind: " + key)));
-		Rml::XMLAttributes nameAttributes;
-		nameAttributes["type"] = "text";
-		nameAttributes["maxlength"] = "20";
-		nameAttributes["size"] = "20";
-		Rml::ElementPtr name = Rml::Factory::InstanceElement(document, "input", "input", nameAttributes);
-		Rml::ElementFormControlInput* nameElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(name.get());
-		nameElement->SetValue(Settings::get<SettingType::KEYBIND>(key)->toString());
-		name->SetClass("keybind", true);
-		item->AppendChild(std::move(name));
+		Rml::ElementPtr keybindText = document->CreateElement("div");
+		keybindText->SetInnerRML(Settings::get<SettingType::KEYBIND>(key)->toString());
+		keybindText->SetClass("keybind", true);
+		
+		keybindText->AddEventListener(Rml::EventId::Click, new EventPasser([this, key](Rml::Event& event){
+			if (activeItem == key) return;
+			activeItem = key;
+			Rml::Element* keybindText = event.GetCurrentElement();
+			keybindText->Focus();
+			dynamic_cast<Rml::ElementText*>(keybindText->GetChild(0))->SetText("Press desired keys and then press Enter");
+		}));
+		keybindText->AddEventListener(Rml::EventId::Blur, new EventPasser([this, key](Rml::Event& event){
+			dynamic_cast<Rml::ElementText*>(event.GetCurrentElement()->GetChild(0))->SetText(Settings::get<SettingType::KEYBIND>(key)->toString()); // this needs to happen even if it is not the activeItem
+			if (activeItem != key) return;
+			activeItem = "";
+		}));
+		keybindText->AddEventListener(Rml::EventId::Keydown, new EventPasser([this, key](Rml::Event& event){
+			if (activeItem != key) return;
+			Rml::Input::KeyIdentifier pressedKey = event.GetParameter<Rml::Input::KeyIdentifier>("key_identifier", Rml::Input::KeyIdentifier::KI_UNKNOWN);
+			if (pressedKey == Rml::Input::KeyIdentifier::KI_RETURN) {
+				if (lastPressedKeys.getKeyCombined() != Rml::Input::KeyIdentifier::KI_UNKNOWN) {
+					Settings::set<SettingType::KEYBIND>(key, lastPressedKeys);
+					dynamic_cast<Rml::ElementText*>(event.GetCurrentElement()->GetChild(0))->SetText(lastPressedKeys.toString());
+				} else {
+					dynamic_cast<Rml::ElementText*>(event.GetCurrentElement()->GetChild(0))->SetText(Settings::get<SettingType::KEYBIND>(key)->toString());
+				}
+				activeItem = "";
+			} else if (pressedKey == Rml::Input::KeyIdentifier::KI_ESCAPE) {
+				dynamic_cast<Rml::ElementText*>(event.GetCurrentElement()->GetChild(0))->SetText(Settings::get<SettingType::KEYBIND>(key)->toString());
+				activeItem = "";
+			} else {
+				lastPressedKeys = makeKeybind(event);
+				dynamic_cast<Rml::ElementText*>(event.GetCurrentElement()->GetChild(0))->SetText(lastPressedKeys.toString());
+			}
+		}));
+		item->AppendChild(std::move(keybindText));
 		break;
 	}
 	case SettingType::STRING:
@@ -181,3 +210,5 @@ Rml::ElementPtr ContentManager::generateItem(const std::string& key) {
 	}
 	return item;
 }
+
+

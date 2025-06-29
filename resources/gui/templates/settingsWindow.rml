@@ -1,14 +1,14 @@
 <template name="settings-window" content="content">
 
 	<head>
-		<link type="text/rcss" href="../../styles/settingsWindow.rcss" />
+		<link type="text/rcss" href="../styles/settingsWindow.rcss" />
 	</head>
 
 	<body>
 		<div id="settings-window">
 			<div id="settings-navigation">
 				<div id="setting-actions">
-					<button class="settings-action" id="settings-cancel">Cancel</button>
+					<button class="settings-action" id="settings-close">Close</button>
 				</div>
 				<!-- <div id="navigation-top-container">
 					<h1>Settings</h1>
