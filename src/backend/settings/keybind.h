@@ -117,8 +117,6 @@ public:
 			case 98: keyString += "Insert"; break;
 			case 99: keyString += "Delete"; break;
 			case 100: keyString += "Help"; break;
-			case 101: keyString += "Left Win"; break;
-			case 102: keyString += "Right Win"; break;
 			case 103: keyString += "Apps"; break;
 			case 104: keyString += "Power"; break;
 			case 105: keyString += "Sleep"; break;
@@ -185,8 +183,6 @@ public:
 			case 172: keyString += "Zoom"; break;
 			case 173: keyString += "PA1"; break;
 			case 174: keyString += "OEM Clear"; break;
-			case 175: keyString += "Left Meta"; break;
-			case 176: keyString += "Right Meta"; break;
 			default: keyString += "<" + std::to_string(key) + ">";
 			}
 		}
