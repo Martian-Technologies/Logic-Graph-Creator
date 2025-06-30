@@ -9,6 +9,7 @@
 
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "computerAPI/fileListener/fileListener.h"
 
 class App {
 public:
@@ -20,6 +21,7 @@ private:
 	Rml::EventId pinchEventId;
 	Backend backend;
 	CircuitFileManager circuitFileManager;
+	FileListener fileListener;
 
 	RenderInterface_SDL rmlRenderInterface;
 	SystemInterface_SDL rmlSystemInterface;

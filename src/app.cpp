@@ -1,8 +1,8 @@
 #include "app.h"
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
 	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
-	windows.emplace_back(&backend, &circuitFileManager, pinchEventId);
+	windows.emplace_back(&backend, &circuitFileManager, &fileListener, pinchEventId);
 }
 
 void App::runLoop() {
