@@ -3,7 +3,6 @@
 
 #include "logicState.h"
 #include "gateType.h"
-#include "container/block/blockDefs.h"
 
 struct GateConnection {
 	block_id_t gateId;
@@ -54,52 +53,5 @@ inline const GateTypeConfig& getGateTypeConfig(GateType type) {
 	static const GateTypeConfig defaultConfig(1, 1);
 	return defaultConfig;
 }
-
-struct Gate {
-	std::vector<logic_state_t> statesA;
-	std::vector<logic_state_t> statesB;
-
-	GateType type;
-
-	std::vector<std::vector<GateConnection>> inputGroups;
-	std::vector<std::vector<std::pair<block_id_t, size_t>>> outputGroups;
-
-	Gate(GateType gateType = GateType::NONE) : type(gateType) {
-		const GateTypeConfig& config = getGateTypeConfig(gateType);
-		inputGroups.resize(config.inputGroupCount);
-		outputGroups.resize(config.outputGroupCount);
-
-		statesA.resize(config.outputGroupCount, logic_state_t::LOW);
-		statesB.resize(config.outputGroupCount, logic_state_t::LOW);
-	}
-
-	bool isValid() const {
-		return type != GateType::NONE;
-	}
-
-	size_t getTotalInputCount() const {
-		size_t count = 0;
-		for (const auto& group : inputGroups) {
-			count += group.size();
-		}
-		return count;
-	}
-
-	size_t getTotalOutputCount() const {
-		size_t count = 0;
-		for (const auto& group : outputGroups) {
-			count += group.size();
-		}
-		return count;
-	}
-
-	size_t getInputGroupCount() const {
-		return inputGroups.size();
-	}
-
-	size_t getOutputGroupCount() const {
-		return outputGroups.size();
-	}
-};
 
 #endif // gate_h

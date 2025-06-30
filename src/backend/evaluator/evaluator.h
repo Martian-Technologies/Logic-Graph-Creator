@@ -9,7 +9,7 @@
 #include "backend/address.h"
 #include "logicState.h"
 #include "diffCache.h"
-#include "circuitLattice.h"
+#include "evalCircuitContainer.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -17,12 +17,18 @@ class DataUpdateEventManager;
 
 class Evaluator {
 public:
-	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData;
+	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData; // I hate pairs, but this is how I get the data
 
 	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
-	std::string getEvaluatorName() const { return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(circuitIds.at(0))->getCircuitNameNumber() + ")"; }
+	std::string getEvaluatorName() const {
+		std::optional<circuit_id_t> circuitId = evalCircuitContainer.getCircuitId(0);
+		if (!circuitId.has_value()) {
+			return "Eval " + std::to_string(evaluatorId) + " (No Circuit)";
+		}
+		return "Eval " + std::to_string(evaluatorId) + " (" + circuitManager.getCircuit(circuitId.value())->getCircuitNameNumber() + ")";
+	}
 
 	void reset();
 	void setPause(bool pause);
@@ -42,7 +48,9 @@ public:
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin);
-	circuit_id_t getCircuitId() const { return circuitIds.at(0); }
+	circuit_id_t getCircuitId() const {
+		return evalCircuitContainer.getCircuitId(0).value_or(0);
+	}
 	circuit_id_t getCircuitId(const Address& address) const;
 
 private:
@@ -53,17 +61,16 @@ private:
 	unsigned long long targetTickrate;
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
-	CircuitLattice circuitLattice;
-	std::vector<circuit_id_t> circuitIds;
+	EvalCircuitContainer evalCircuitContainer;
 
-	void makeEditInPlace(lattice_coord_t layerIndex, DifferenceSharedPtr difference, DiffCache& diffCache);
+	void makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache);
 
-	void edit_removeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
-	void edit_placeBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
-	void edit_removeConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
-	void edit_createConnection(lattice_coord_t layerIndex, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
-	void edit_moveBlock(lattice_coord_t layerIndex, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
-	void edit_setData(lattice_coord_t layerIndex, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData);
+	void edit_removeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
+	void edit_placeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type);
+	void edit_removeConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
+	void edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
+	void edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
+	void edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData);
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;
