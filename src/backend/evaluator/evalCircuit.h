@@ -8,19 +8,19 @@
 
 class EvalCircuit {
 public:
-    EvalCircuit(circuit_id_t circuitId)
-        : circuitId(circuitId) {};
-    EvalCircuit(const EvalCircuit&) = delete;
-    EvalCircuit& operator=(const EvalCircuit&) = delete;
-    EvalCircuit(EvalCircuit&&) = default;
-    EvalCircuit& operator=(EvalCircuit&&) = default;
-    std::optional<CircuitNode> getNode(Position pos) const noexcept;
-    circuit_id_t getCircuitId() const noexcept {
-        return circuitId;
-    }
+	EvalCircuit(circuit_id_t circuitId)
+		: circuitId(circuitId) {};
+	EvalCircuit(const EvalCircuit&) = delete;
+	EvalCircuit& operator=(const EvalCircuit&) = delete;
+	EvalCircuit(EvalCircuit&&) = default;
+	EvalCircuit& operator=(EvalCircuit&&) = default;
+	std::optional<CircuitNode> getNode(Position pos) const noexcept;
+	circuit_id_t getCircuitId() const noexcept {
+		return circuitId;
+	}
 private:
-    circuit_id_t circuitId;
-    Sparse2dArray<CircuitNode> circuitNodes;
+	circuit_id_t circuitId;
+	Sparse2dArray<CircuitNode> circuitNodes;
 };
 
 #endif // evalCircuit_h
