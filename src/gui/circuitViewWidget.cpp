@@ -339,7 +339,7 @@ void CircuitViewWidget::load() {
 		{ "OpenCircuit Files", "*.circiut" },
 	};
 
-	SDL_ShowOpenFileDialog(LoadCallback, this, nullptr, filters, SDL_arraysize(filters), nullptr, true);
+	SDL_ShowOpenFileDialog(LoadCallback, this, nullptr, nullptr, 0, nullptr, true);
 }
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
