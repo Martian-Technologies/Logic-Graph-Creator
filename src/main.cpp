@@ -27,9 +27,9 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_T));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", makeKeybind(Rml::Input::KeyIdentifier::KI_P));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", makeKeybind(Rml::Input::KeyIdentifier::KI_S));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
 #else
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL));
@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_T));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", makeKeybind(Rml::Input::KeyIdentifier::KI_P));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", makeKeybind(Rml::Input::KeyIdentifier::KI_S));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
 #endif
