@@ -58,4 +58,4 @@ private:
 	std::map<evaluator_id_t, SharedEvaluator> evaluators;
 };
 
-#endif /* evaluatorManager_h */
+#endif // evaluatorManager_h

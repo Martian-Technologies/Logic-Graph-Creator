@@ -42,4 +42,4 @@ private:
 	Evaluator* evaluator;
 };
 
-#endif /* evaluatorStateInterface_h */
+#endif // evaluatorStateInterface_h

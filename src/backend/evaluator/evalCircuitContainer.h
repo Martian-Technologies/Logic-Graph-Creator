@@ -39,4 +39,4 @@ private:
     std::set<size_t> nullCircuits;
 };
 
-#endif /* evalCircuitContainer_h */
+#endif // evalCircuitContainer_h
