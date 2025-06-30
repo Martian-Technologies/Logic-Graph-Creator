@@ -1,13 +1,11 @@
 #include "evaluator.h"
 
 Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager)
-	: evaluatorId(evaluatorId), paused(true),
-	targetTickrate(0),
-	usingTickrate(false),
+	: evaluatorId(evaluatorId),
 	circuitManager(circuitManager),
 	evalCircuitContainer(),
-	receiver(dataUpdateEventManager) {
-	setTickrate(40 * 60);
+	receiver(dataUpdateEventManager),
+	evalConfig() {
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	evalCircuitContainer.addCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
@@ -77,20 +75,25 @@ void Evaluator::makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceShare
 }
 
 void Evaluator::edit_removeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
-	
+
 }
+
 void Evaluator::edit_placeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
 
 }
+
 void Evaluator::edit_removeConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
 
 }
+
 void Evaluator::edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
 
 }
+
 void Evaluator::edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
 
 }
+
 void Evaluator::edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData) {
 
 }

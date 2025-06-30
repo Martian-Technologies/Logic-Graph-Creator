@@ -10,6 +10,7 @@
 #include "logicState.h"
 #include "diffCache.h"
 #include "evalCircuitContainer.h"
+#include "evalConfig.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -32,11 +33,11 @@ public:
 
 	void reset();
 	void setPause(bool pause);
-	bool isPause() const { return paused; }
-	void setTickrate(unsigned long long tickrate);
-	unsigned long long getTickrate() const { return targetTickrate; }
-	void setUseTickrate(bool useTickrate);
-	bool getUseTickrate() const { return usingTickrate; }
+	bool isPause() const { return !evalConfig.running; }
+	void setTickrate(unsigned long long tickrate) { evalConfig.targetTickrate = tickrate; }
+	unsigned long long getTickrate() const { return evalConfig.targetTickrate; }
+	void setUseTickrate(bool useTickrate) { evalConfig.tickrateLimiter = useTickrate; }
+	bool getUseTickrate() const { return evalConfig.tickrateLimiter; }
 	long long int getRealTickrate() const;
 	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
@@ -56,12 +57,10 @@ public:
 private:
 
 	evaluator_id_t evaluatorId;
-	bool paused;
-	bool usingTickrate;
-	unsigned long long targetTickrate;
 	CircuitManager& circuitManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 	EvalCircuitContainer evalCircuitContainer;
+	EvalConfig evalConfig;
 
 	void makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache);
 
