@@ -24,7 +24,7 @@ endif()
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Gatality VERSION 0.6.0)
+project(Gatality VERSION 0.7.0)
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
