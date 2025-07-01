@@ -10,6 +10,7 @@
 
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "computerAPI/fileListener/fileListener.h"
 
 class App {
 public:
@@ -20,6 +21,7 @@ public:
 private:
 	Backend backend;
 	CircuitFileManager circuitFileManager;
+	FileListener fileListener;
 
 	RmlRenderInterface rmlRenderInterface;
 	RmlSystemInterface rmlSystemInterface;

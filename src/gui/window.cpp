@@ -9,7 +9,13 @@
 #include "gui/settingsWindow/settingsWindow.h"
 #include "backend/settings/settings.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) : sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
+	sdlWindow("Gatality"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener) {
+	// create SDL renderer
+	// sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
+	// if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
+	// SDL_SetRenderVSync(sdlRenderer, 1);
+
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 

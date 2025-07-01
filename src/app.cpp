@@ -1,7 +1,18 @@
 #include "app.h"
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())) {
-	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager, rmlRenderInterface, &vulkan));
+Rml::EventId pinchEventId = Rml::EventId::Invalid;
+
+Rml::EventId getPinchEventId() {
+	if (pinchEventId == Rml::EventId::Invalid) {
+		logError("Dont call getPinchEventId before initializing the App");
+		return Rml::EventId::Scroll;
+	}
+	return pinchEventId;
+}
+
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
+	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
+	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
 }
 
 void App::runLoop() {

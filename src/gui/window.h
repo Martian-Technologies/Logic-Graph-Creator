@@ -8,18 +8,19 @@
 #include "gpu/renderer/windowRenderer.h"
 #include "rml/rmlRenderInterface.h"
 
-#include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "computerAPI/fileListener/fileListener.h"
+#include "backend/backend.h"
 
-#include "selectorWindow.h"
-#include "evalWindow.h"
+#include "gui/circuitView/simControlsManager.h"
 #include "blockCreationWindow.h"
 #include "circuitViewWidget.h"
-#include "gui/circuitView/simControlsManager.h"
+#include "selectorWindow.h"
+#include "evalWindow.h"
 
 class Window {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
+	Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
 	~Window();
 
 	// no copy
@@ -44,10 +45,9 @@ public:
 private:
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
-
+	FileListener* fileListener;
 	SdlWindow sdlWindow;
 	WindowRenderer renderer;
-
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
 	std::optional<BlockCreationWindow> blockCreationWindow;
