@@ -11,13 +11,14 @@ Nord Color Pallete:
 	flex-direction: column;
 	/* align-items: center; */
 	justify-content: center;
+	height: 100%;
 }
 
 #settings-overlay {
 	background-color: #6d6d6d;
 }
 
----------- NAVIGATION ----------
+/* ---------- NAVIGATION ---------- */
 #settings-navigation {
 	height: 3em;
 	background-color: #403f3c;
@@ -71,7 +72,7 @@ Nord Color Pallete:
 	border-left-color: #0078d4;
 }*/
 
---- action buttons ---
+/* --- action buttons --- */
 #setting-actions {
 	align-items: center;
 	justify-content: center; 
@@ -90,10 +91,9 @@ Nord Color Pallete:
 	text-align: center;
 }
 
----------- CONTENT ----------
+/* ---------- CONTENT ---------- */
 #settings-content-panel {
 	width: 70%;
-	background-color: #0f0f0f;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
