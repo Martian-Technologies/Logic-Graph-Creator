@@ -12,7 +12,7 @@ class GateSubstituter {
 public:
 	GateSubstituter(EvalConfig& config) : evalConfig(config) {}
 	middle_id_t addGate(GateType gateType);
-	middle_id_t removeGate(middle_id_t gateId);
+	bool removeGate(middle_id_t gateId);
 	bool addConnection(middle_id_t sourceGateId, connection_port_id_t sourcePort, middle_id_t targetGateId, connection_port_id_t targetPort);
 	bool removeConnection(middle_id_t sourceGateId, connection_port_id_t sourcePort, middle_id_t targetGateId, connection_port_id_t targetPort);
 	bool setState(middle_id_t gateId, connection_port_id_t port, logic_state_t state);
