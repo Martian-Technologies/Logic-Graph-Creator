@@ -96,28 +96,47 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_I,
+		"Keybinds/Editing/Tools/State Changer",
 		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_Q,
+		"Keybinds/Editing/Tools/Connection",
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("connection"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Move",
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("move"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Mode Changer",
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("mode changer"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Placement",
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("placement"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Selection Maker",
+		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection maker"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Rotate CCW",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CCW")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_E,
+		"Keybinds/Editing/Rotate CW",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Rotate Block CW")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_E,
+		"Keybinds/Editing/Confirm",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Confirm")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_Q,
+		"Keybinds/Editing/Tool Invert Mode",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Tool Invert Mode")); }
 	);
 	keybindHandler.addListener(
-		Rml::Input::KeyIdentifier::KI_N,
-		Rml::Input::KeyModifier::KM_CTRL,
+		"Keybinds/File/New",
 		[this]() { newCircuit(); }
 	);
 
@@ -315,12 +334,12 @@ void CircuitViewWidget::asSave() {
 void CircuitViewWidget::load() {
 	if (!fileManager) return;
 
-	static SDL_DialogFileFilter filter[2];
-	filter[0].name = "Circuit Files";
-	filter[0].pattern = "*.cir";
-	filter[1].name = "OpenCircuit Files";
-	filter[1].pattern = "*.circiut";
-	SDL_ShowOpenFileDialog(LoadCallback, this, window, filter, 0, nullptr, true);
+	static const SDL_DialogFileFilter filters[] = {
+		{ "Circuit Files",  "*.cir" },
+		{ "OpenCircuit Files", "*.circiut" },
+	};
+
+	SDL_ShowOpenFileDialog(LoadCallback, this, nullptr, nullptr, 0, nullptr, true);
 }
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {

@@ -10,7 +10,8 @@
 #include "gui/settingsWindow/settingsWindow.h"
 #include "backend/settings/settings.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId) : sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), pinchEventId(pinchEventId) {
+Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, Rml::EventId pinchEventId) :
+	sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener), pinchEventId(pinchEventId) {
 	// create SDL renderer
 	sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
 	if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
@@ -41,7 +42,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::Ev
 
 	Rml::Element* blockCreationMenu = document->GetElementById("block-creation-form");
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), document, blockCreationMenu);
-	
+
 	simControlsManager.emplace(document, circuitViewWidget, backend->getDataUpdateEventManager());
 
 	// Settings::serializeData();

@@ -21,10 +21,11 @@ void KeybindHandler::addListener(const std::string& keybindSettingPath, Listener
 	}
 	Settings::registerListener<SettingType::KEYBIND>(keybindSettingPath, [this, bindId](const Keybind& keybind) {
 		for (auto iter = listenerFunctions.begin(); iter != listenerFunctions.end(); ++iter) {
-			if (iter->first == bindId) {
+			if (iter->second.first == bindId) {
 				auto data = iter->second;
 				listenerFunctions.erase(iter);
 				listenerFunctions.emplace(keybind, data);
+				return;
 			}
 		}
 	});

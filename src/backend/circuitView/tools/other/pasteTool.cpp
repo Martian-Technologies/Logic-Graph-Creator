@@ -22,7 +22,7 @@ bool PasteTool::rotateCCW(const Event* event) {
 
 bool PasteTool::place(const Event* event) {
 	SharedCopiedBlocks copiedBlocks = circuitView->getBackend()->getClipboard();
-	circuit->tryInsertCopiedBlocks(copiedBlocks, lastPointerPosition, amountToRotate);
+	if (copiedBlocks) circuit->tryInsertCopiedBlocks(copiedBlocks, lastPointerPosition, amountToRotate);
 
 	return true;
 }

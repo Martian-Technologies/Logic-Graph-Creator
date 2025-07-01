@@ -18,6 +18,9 @@ private:
 
 	Rml::ElementDocument* document;
 	Rml::Element* contentPanel;
+
+	std::string activeItem = "";
+	Keybind lastPressedKeys;
 };
 
 #endif /* contentManager_h */

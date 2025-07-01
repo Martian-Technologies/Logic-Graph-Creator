@@ -8,18 +8,19 @@
 #include "gui/rml/RmlUi_Renderer_SDL.h"
 #include "sdl/sdlWindow.h"
 
-#include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
+#include "computerAPI/fileListener/fileListener.h"
+#include "backend/backend.h"
 
-#include "selectorWindow.h"
-#include "evalWindow.h"
+#include "gui/circuitView/simControlsManager.h"
 #include "blockCreationWindow.h"
 #include "circuitViewWidget.h"
-#include "gui/circuitView/simControlsManager.h"
+#include "selectorWindow.h"
+#include "evalWindow.h"
 
 class Window {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager, Rml::EventId pinchEventId);
+	Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, Rml::EventId pinchEventId);
 	~Window();
 
 	bool recieveEvent(SDL_Event& event);
@@ -41,6 +42,7 @@ private:
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
+	FileListener* fileListener;
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
 	std::optional<BlockCreationWindow> blockCreationWindow;

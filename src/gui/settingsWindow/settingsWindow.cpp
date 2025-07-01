@@ -7,6 +7,8 @@
 SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : contentManager(document), visible(false) {
 	context = document->GetElementById("settings-overlay");
 
+	context->GetElementById("settings-close")->AddEventListener(Rml::EventId::Click, new EventPasser([this](Rml::Event& event) { toggleVisibility(); }));
+
 	// SearchBar* sb = new SearchBar(document);
 
 	// connectCategoryListeners();
