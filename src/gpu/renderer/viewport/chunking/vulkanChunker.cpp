@@ -66,8 +66,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 			// check if wire state position is already in the state array
 			if (itr != posToAddressIdx.end()) {
 				stateIdx = itr->second;
-			}
-			else {
+			} else {
 				// add address to state buffer
 				stateIdx = relativeAdresses.size();
 				relativeAdresses.push_back(wire.second.relativeStateAddress);
