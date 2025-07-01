@@ -3,17 +3,18 @@
 
 #include "logicState.h"
 #include "gateType.h"
+#include "evalGate.h"
 
-typedef int block_id_t;
+typedef unsigned int simulator_id_t;
 
 struct GateConnection {
-	block_id_t gateId;
-	size_t outputGroup;
+	simulator_id_t gateId;
+	connection_port_id_t portId;
 
-	GateConnection(block_id_t id = -1, size_t group = 0) : gateId(id), outputGroup(group) {}
+	GateConnection(simulator_id_t id, connection_port_id_t port) : gateId(id), portId(port) {}
 
 	bool operator==(const GateConnection& other) const {
-		return gateId == other.gateId && outputGroup == other.outputGroup;
+		return gateId == other.gateId && portId == other.portId;
 	}
 
 	bool operator!=(const GateConnection& other) const {
@@ -22,11 +23,11 @@ struct GateConnection {
 };
 
 struct GateTypeConfig {
-	size_t inputGroupCount;
-	size_t outputGroupCount;
+	connection_port_id_t inputPortCount;
+	connection_port_id_t outputPortCount;
 
-	GateTypeConfig(size_t inGroups = 1, size_t outGroups = 1)
-		: inputGroupCount(inGroups), outputGroupCount(outGroups) {}
+	GateTypeConfig(connection_port_id_t inPorts = 1, connection_port_id_t outPorts = 1)
+		: inputPortCount(inPorts), outputPortCount(outPorts) {}
 };
 
 inline const GateTypeConfig& getGateTypeConfig(GateType type) {
@@ -44,6 +45,13 @@ inline const GateTypeConfig& getGateTypeConfig(GateType type) {
 		default:
 			return GateTypeConfig(1, 1);
 	}
+}
+
+struct BGate { // includes AND / OR / NAND / NOR
+
+
+private:
+	std::vector<GateConnection> inputs;
 }
 
 #endif // simulatorGate_h
