@@ -61,7 +61,7 @@ void ChunkRenderer::cleanup() {
 	wirePipeline.cleanup();
 }
 
-void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const Address& address, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);
@@ -81,7 +81,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 
 			std::vector<logic_state_t> states(chunk->getRelativeAddresses().size());
 			if (evaluator != nullptr) {
-				states = evaluator->getBulkStates(chunk->getRelativeAddresses());
+				states = evaluator->getBulkStates(chunk->getRelativeAddresses(), address);
 			}
 			
 			vmaCopyMemoryToAllocation(device->getAllocator(), states.data(), chunk->getStateBuffer()->getCurrentBuffer().allocation, 0, states.size());

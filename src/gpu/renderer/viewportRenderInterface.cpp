@@ -41,7 +41,8 @@ void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator)
 }
 
 void ViewportRenderInterface::setAddress(const Address& address) {
-	
+	std::lock_guard<std::mutex> lock(addressMux);
+	this->address = address;
 }
 
 void ViewportRenderInterface::updateView(ViewManager* viewManager) {
