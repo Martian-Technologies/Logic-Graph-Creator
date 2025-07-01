@@ -12,6 +12,8 @@
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "computerAPI/fileListener/fileListener.h"
 
+Rml::EventId getPinchEventId();
+
 class App {
 public:
 	App();
