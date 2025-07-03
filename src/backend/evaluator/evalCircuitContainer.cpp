@@ -1,15 +1,12 @@
 #include "evalCircuitContainer.h"
 
 eval_circuit_id_t EvalCircuitContainer::addCircuit(circuit_id_t circuitId) {
-	// check the nullCircuits set to see if we can reuse a circuit
-	if (!nullCircuits.empty()) {
-		size_t circuitIndex = *nullCircuits.begin();
-		nullCircuits.erase(nullCircuits.begin());
-		circuits.at(circuitIndex) = new EvalCircuit(circuitId);
-		return circuitIndex;
+	eval_circuit_id_t newCircuitId = evalCircuitIdProvider.getNewId();
+	if (newCircuitId >= circuits.size()) {
+		circuits.resize(newCircuitId + 1, nullptr);
 	}
-	circuits.emplace_back(new EvalCircuit(circuitId));
-	return circuits.size() - 1;
+	circuits[newCircuitId] = new EvalCircuit(circuitId);
+	return newCircuitId;
 }
 
 void EvalCircuitContainer::removeCircuit(eval_circuit_id_t evalCircuitId) {
@@ -20,7 +17,7 @@ void EvalCircuitContainer::removeCircuit(eval_circuit_id_t evalCircuitId) {
 	if (circuits.at(evalCircuitId) != nullptr) {
 		delete circuits.at(evalCircuitId);
 		circuits.at(evalCircuitId) = nullptr;
-		nullCircuits.insert(evalCircuitId);
+		evalCircuitIdProvider.releaseId(evalCircuitId);
 	}
 }
 

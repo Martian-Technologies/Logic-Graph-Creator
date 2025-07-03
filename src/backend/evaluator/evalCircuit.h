@@ -4,7 +4,7 @@
 #include "backend/circuit/circuit.h"
 #include "backend/position/sparse2d.h"
 #include "circuitNode.h"
-#include "evalGate.h"
+#include "evalTypedef.h"
 
 class EvalCircuit {
 public:

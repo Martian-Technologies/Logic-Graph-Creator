@@ -4,6 +4,7 @@
 #include "backend/position/position.h"
 #include "circuitNode.h"
 #include "evalCircuit.h"
+#include "idProvider.h"
 
 struct EvalPosition {
 	Position position;
@@ -36,7 +37,7 @@ public:
 
 private:
 	std::vector<EvalCircuit*> circuits;
-	std::set<size_t> nullCircuits;
+	IdProvider<eval_circuit_id_t> evalCircuitIdProvider;
 };
 
 #endif // evalCircuitContainer_h
