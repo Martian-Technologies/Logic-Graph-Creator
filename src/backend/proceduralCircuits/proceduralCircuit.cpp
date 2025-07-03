@@ -17,23 +17,23 @@ void ProceduralCircuit::setProceduralCircuitName(const std::string& name) {
 	this->proceduralCircuitName = name;
 	for (const auto& iter : generatedCircuits) {
 		SharedCircuit circuit = circuitManager->getCircuit(iter.second);
-		if (circuit) circuit->setCircuitName(name + iter.first.toString())
+		if (circuit) circuit->setCircuitName(name + iter.first.toString());
 	}
 }
 
-circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuit::ProceduralCircuitParameters& parameters) {
+circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& parameters) {
 	// Make sure to only use parameters that are reconized (anything in parameterDefaults)
 	ProceduralCircuitParameters realParameters = parameterDefaults;
 	for (auto& iter : realParameters.parameters) {
-		const auto& iter2 = parameters.parameters.find(iter.first);
-		if (iter2) {
+		auto iter2 = parameters.parameters.find(iter.first);
+		if (iter2 != parameters.parameters.end()) {
 			iter.second = iter2->second;
 		}
 	}
 
 	// Check if its already been generated
 	auto iter = generatedCircuits.find(realParameters);
-	if (iter) {
+	if (iter != generatedCircuits.end()) {
 		return iter->second;
 	}
 
@@ -43,7 +43,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuit::Procedural
 	circuit_id_t id = circuitManager->createNewCircuit();
 
 	// Add the circuit id to the generated circuits
-	generatedCircuits[realParameters] = id
+	generatedCircuits[realParameters] = id;
 
 	// Setup the block to be a IC
 	BlockType type = circuitManager->setupBlockData(id);
