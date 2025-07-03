@@ -7,9 +7,12 @@ ProceduralCircuit::ProceduralCircuit(
 	DataUpdateEventManager* dataUpdateEventManager,
 	const std::string& name,
 	const std::string& uuid
-) : circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), proceduralCircuitName(name), proceduralCircuitUUID(uuid) {
+) : circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), proceduralCircuitName(name), proceduralCircuitUUID(uuid) { }
 
-}
+ProceduralCircuit::ProceduralCircuit(ProceduralCircuit&& other) :
+	proceduralCircuitName(std::move(other.proceduralCircuitName)), proceduralCircuitUUID(std::move(other.proceduralCircuitUUID)),
+	circuitManager(other.circuitManager), generatedCircuits(std::move(other.generatedCircuits)),
+	dataUpdateEventManager(other.dataUpdateEventManager), dataUpdateEventReceiver(std::move(other.dataUpdateEventReceiver)) { }
 
 ProceduralCircuit::~ProceduralCircuit() {
 	// Destroy unused generated circuits. If some are still used ask the user what to do.
@@ -67,7 +70,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	circuit->tryInsertBlock(Position(-1, -1), Rotation::ZERO, BlockType::SWITCH);
 	circuitBlockData->setConnectionIdPosition(1, Position(-1, -1));
 	blockData->setConnectionInput(Vector(0, 1), 1);
-	
+
 	circuit->tryInsertBlock(Position(1, 0), Rotation::ZERO, BlockType::LIGHT);
 	circuitBlockData->setConnectionIdPosition(2, Position(1, 0));
 	blockData->setConnectionOutput(Vector(1, 0), 2);

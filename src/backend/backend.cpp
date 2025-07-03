@@ -2,7 +2,6 @@
 
 Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager), evaluatorManager(&dataUpdateEventManager) {
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
-	circuitManager.getProceduralCircuitManager()->test();
 }
 
 // void Backend::clear() {

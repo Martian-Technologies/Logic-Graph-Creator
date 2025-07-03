@@ -1,11 +1,19 @@
 #include "dataUpdateEventManager.h"
 
 DataUpdateEventManager::DataUpdateEventReceiver::DataUpdateEventReceiver(DataUpdateEventManager* eventManager) : eventManager(eventManager) {
-	if (eventManager) eventManager->dataUpdateEventReceivers.emplace(this);
+	assert(eventManager);
+	eventManager->dataUpdateEventReceivers.emplace(this);
 }
 
 DataUpdateEventManager::DataUpdateEventReceiver::DataUpdateEventReceiver(const DataUpdateEventReceiver& other) : eventManager(other.eventManager) {
-	if (eventManager) eventManager->dataUpdateEventReceivers.emplace(this);
+	assert(eventManager);
+	eventManager->dataUpdateEventReceivers.emplace(this);
+}
+
+DataUpdateEventManager::DataUpdateEventReceiver::DataUpdateEventReceiver(DataUpdateEventReceiver&& other) : eventManager(other.eventManager), functions(std::move(other.functions)) {
+	assert(eventManager);
+	eventManager->dataUpdateEventReceivers.erase(&other);
+	eventManager->dataUpdateEventReceivers.emplace(this);
 }
 
 DataUpdateEventManager::DataUpdateEventReceiver& DataUpdateEventManager::DataUpdateEventReceiver::operator=(const DataUpdateEventReceiver& other) {

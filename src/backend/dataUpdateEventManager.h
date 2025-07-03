@@ -28,6 +28,7 @@ public:
 	public:
 		DataUpdateEventReceiver(DataUpdateEventManager* eventManager);
 		DataUpdateEventReceiver(const DataUpdateEventReceiver& other);
+		DataUpdateEventReceiver(DataUpdateEventReceiver&& other);
 		DataUpdateEventReceiver& operator=(const DataUpdateEventReceiver& other);
 		~DataUpdateEventReceiver();
 

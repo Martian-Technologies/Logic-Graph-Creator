@@ -9,14 +9,14 @@ class ProceduralCircuitManager {
 public:
 	ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager);
 
-	void test() {
-		std::string uuid = generate_uuid_v4();
-		proceduralCircuits.emplace(uuid, ProceduralCircuit(circuitManager, dataUpdateEventManager, "And Gate", uuid));
-		logInfo(getProceduralCircuit(uuid)->getCircuitId(ProceduralCircuitParameters()));
-	}
+	const std::string& createNewProceduralCircuit();
+	void createProceduralCircuit(const std::string& uuid);
+
 
 	ProceduralCircuit* getProceduralCircuit(const std::string& uuid);
 	const ProceduralCircuit* getProceduralCircuit(const std::string& uuid) const;
+
+	inline const std::map<std::string, ProceduralCircuit>& getProceduralCircuits() const { return proceduralCircuits; }
 
 private:
 	CircuitManager* circuitManager;
