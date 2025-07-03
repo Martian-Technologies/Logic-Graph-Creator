@@ -64,28 +64,9 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	// blockData->setIsPlaceable(false);
 	blockData->setPath(getPath() + " (" + realParameters.toString() + ")"); // for testing
 
-	// Make the block
-
-	blockData->setSize(Vector(2, 2));
-
-	circuit->tryInsertBlock(Position(-1, 1), Rotation::ZERO, BlockType::SWITCH);
-	circuitBlockData->setConnectionIdPosition(0, Position(-1, 1));
-	blockData->setConnectionInput(Vector(0, 0), 0);
-
-	circuit->tryInsertBlock(Position(-1, -1), Rotation::ZERO, BlockType::SWITCH);
-	circuitBlockData->setConnectionIdPosition(1, Position(-1, -1));
-	blockData->setConnectionInput(Vector(0, 1), 1);
-
-	circuit->tryInsertBlock(Position(1, 0), Rotation::ZERO, BlockType::LIGHT);
-	circuitBlockData->setConnectionIdPosition(2, Position(1, 0));
-	blockData->setConnectionOutput(Vector(1, 0), 2);
-
-	circuit->tryInsertBlock(Position(0, 0), Rotation::ZERO, BlockType::AND);
-
-	circuit->tryCreateConnection(Position(-1, 1), Position(0, 0));
-	circuit->tryCreateConnection(Position(-1, -1), Position(0, 0));
-	circuit->tryCreateConnection(Position(0, 0), Position(1, 0));
-
+	// Make the circuit
+	this->makeCircuit(realParameters, circuit, blockData, circuitBlockData);
+	
 	return id;
 }
 

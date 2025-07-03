@@ -37,7 +37,7 @@ void SelectorWindow::updateList() {
 	}
 	for (const auto& iter : proceduralCircuitManager->getProceduralCircuits()) {
 		std::vector<std::string>& path = paths.emplace_back(1, "Blocks");
-		stringSplitInto(iter.second.getPath(), '/', path);
+		stringSplitInto(iter.second->getPath(), '/', path);
 	}
 	menuTree->setPaths(paths);
 }
@@ -56,7 +56,7 @@ void SelectorWindow::updateSelected(const std::string& string) {
 		if (blockType == BlockType::NONE) { 
 			const std::string* uuid = proceduralCircuitManager->getProceduralCircuitUUID(path);
 			if (uuid) {
-				ProceduralCircuit* proceduralCircuit = proceduralCircuitManager->getProceduralCircuit(*uuid);
+				SharedProceduralCircuit proceduralCircuit = proceduralCircuitManager->getProceduralCircuit(*uuid);
 				blockType = proceduralCircuit->getBlockType(ProceduralCircuitParameters());
 			}
 		}

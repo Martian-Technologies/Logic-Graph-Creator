@@ -5,6 +5,7 @@
 #include "backend/circuit/circuit.h"
 
 class CircuitManager;
+class CircuitBlockData;
 
 typedef unsigned int procedural_circuit_id_t;
 
@@ -48,7 +49,7 @@ public:
 		const std::string& uuid
 	);
 	ProceduralCircuit(ProceduralCircuit&& other);
-	~ProceduralCircuit();
+	virtual ~ProceduralCircuit();
 
 	inline std::string getPath() const { return "Procedural Circuits/" + getProceduralCircuitName(); }
 
@@ -57,9 +58,13 @@ public:
 	inline const std::string& getProceduralCircuitName() const { return proceduralCircuitName; }
 	void setProceduralCircuitName(const std::string& name);
 
-	inline void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; }
+	inline void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; regenerateAll(); }
 	circuit_id_t getCircuitId(const ProceduralCircuitParameters& parameters);
 	BlockType getBlockType(const ProceduralCircuitParameters& parameters);
+
+protected:
+	virtual void makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData) = 0;
+	void regenerateAll() {}
 
 private:
 	std::string proceduralCircuitName;
@@ -73,5 +78,7 @@ private:
 	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 };
+
+typedef std::shared_ptr<ProceduralCircuit> SharedProceduralCircuit;
 
 #endif /* proceduralCircuit_h */
