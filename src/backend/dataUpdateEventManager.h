@@ -26,7 +26,7 @@ public:
 	class DataUpdateEventReceiver {
 		friend class DataUpdateEventManager;
 	public:
-		DataUpdateEventReceiver(DataUpdateEventManager* eventManager = nullptr);
+		DataUpdateEventReceiver(DataUpdateEventManager* eventManager);
 		DataUpdateEventReceiver(const DataUpdateEventReceiver& other);
 		DataUpdateEventReceiver& operator=(const DataUpdateEventReceiver& other);
 		~DataUpdateEventReceiver();

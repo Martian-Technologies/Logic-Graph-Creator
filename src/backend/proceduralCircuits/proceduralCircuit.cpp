@@ -1,11 +1,13 @@
 #include "proceduralCircuit.h"
 
+#include "../circuit/circuitManager.h"
+
 ProceduralCircuit::ProceduralCircuit(
 	CircuitManager* circuitManager,
 	DataUpdateEventManager* dataUpdateEventManager,
 	const std::string& name,
 	const std::string& uuid
-) : circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), proceduralCircuitName(name), proceduralCircuitUUID(uuid) {
+) : circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), proceduralCircuitName(name), proceduralCircuitUUID(uuid) {
 
 }
 

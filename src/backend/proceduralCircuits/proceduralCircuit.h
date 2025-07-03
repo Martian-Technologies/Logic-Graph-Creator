@@ -1,7 +1,10 @@
 #ifndef proceduralCircuit_h
 #define proceduralCircuit_h
 
-#include "../circuit/circuitManager.h"
+#include "backend/dataUpdateEventManager.h"
+#include "backend/circuit/circuit.h"
+
+class CircuitManager;
 
 typedef unsigned int procedural_circuit_id_t;
 
