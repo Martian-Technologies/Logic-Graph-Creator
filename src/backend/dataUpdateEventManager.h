@@ -39,6 +39,8 @@ public:
 		DataUpdateEventManager* eventManager = nullptr;
 	};
 
+	~DataUpdateEventManager();
+
 	void sendEvent(const std::string& eventName) {
 		for (DataUpdateEventReceiver* dataUpdateEventReceiver : dataUpdateEventReceivers) {
 			for (auto pair : dataUpdateEventReceiver->functions) {

@@ -22,9 +22,9 @@ public:
 	SharedProceduralCircuit getProceduralCircuit(const std::string& uuid);
 	const SharedProceduralCircuit getProceduralCircuit(const std::string& uuid) const;
 	template<class ProceduralCircuitType>
-	inline std::shared_ptr<ProceduralCircuitType> getProceduralCircuit(const std::string& uuid) { return dynamic_cast<std::shared_ptr<ProceduralCircuitType>>(getProceduralCircuit(uuid)); }
+	inline std::shared_ptr<ProceduralCircuitType> getProceduralCircuit(const std::string& uuid) { return std::static_pointer_cast<ProceduralCircuitType>(getProceduralCircuit(uuid)); }
 	template<class ProceduralCircuitType>
-	inline const std::shared_ptr<ProceduralCircuitType> getProceduralCircuit(const std::string& uuid) const { return dynamic_cast<std::shared_ptr<ProceduralCircuitType>>(getProceduralCircuit(uuid)); }
+	inline const std::shared_ptr<ProceduralCircuitType> getProceduralCircuit(const std::string& uuid) const { return std::static_pointer_cast<ProceduralCircuitType>(getProceduralCircuit(uuid)); }
 
 	inline const std::map<std::string, SharedProceduralCircuit>& getProceduralCircuits() const { return proceduralCircuits; }
 

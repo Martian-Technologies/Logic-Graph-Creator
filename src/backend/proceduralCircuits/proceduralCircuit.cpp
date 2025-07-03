@@ -66,7 +66,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 
 	// Make the circuit
 	this->makeCircuit(realParameters, circuit, blockData, circuitBlockData);
-	
+
 	return id;
 }
 
