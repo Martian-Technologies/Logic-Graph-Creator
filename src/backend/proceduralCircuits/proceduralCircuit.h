@@ -50,6 +50,8 @@ public:
 	ProceduralCircuit(ProceduralCircuit&& other);
 	~ProceduralCircuit();
 
+	inline std::string getPath() const { return "Procedural Circuits/" + getProceduralCircuitName(); }
+
 	inline const std::string& getUUID() const { return proceduralCircuitUUID; }
 	inline std::string getProceduralCircuitNameUUID() const { return proceduralCircuitName + " : " + proceduralCircuitUUID; }
 	inline const std::string& getProceduralCircuitName() const { return proceduralCircuitName; }
@@ -57,6 +59,7 @@ public:
 
 	inline void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; }
 	circuit_id_t getCircuitId(const ProceduralCircuitParameters& parameters);
+	BlockType getBlockType(const ProceduralCircuitParameters& parameters);
 
 private:
 	std::string proceduralCircuitName;

@@ -12,6 +12,7 @@ public:
 	const std::string& createNewProceduralCircuit();
 	void createProceduralCircuit(const std::string& uuid);
 
+	const std::string* getProceduralCircuitUUID(const std::string& path) const;
 
 	ProceduralCircuit* getProceduralCircuit(const std::string& uuid);
 	const ProceduralCircuit* getProceduralCircuit(const std::string& uuid) const;
@@ -21,7 +22,9 @@ public:
 private:
 	CircuitManager* circuitManager;
 	DataUpdateEventManager* dataUpdateEventManager;
+	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	std::map<std::string, ProceduralCircuit> proceduralCircuits;
+	std::map<std::string, std::string> pathToUUID;
 };
 
 #endif /* proceduralCircuitManager_h */

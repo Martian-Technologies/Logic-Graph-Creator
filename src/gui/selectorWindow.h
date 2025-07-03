@@ -10,6 +10,7 @@ public:
 	SelectorWindow(
 		const BlockDataManager* blockDataManager,
 		DataUpdateEventManager* dataUpdateEventManager,
+		ProceduralCircuitManager* proceduralCircuitManager,
 		ToolManagerManager* toolManagerManager,
 		Rml::ElementDocument* document,
 		Rml::Element* itemTreeParent,
@@ -26,6 +27,7 @@ private:
 	std::optional<MenuTree> menuTree;
 	std::optional<MenuTree> modeMenuTree;
 	const BlockDataManager* blockDataManager;
+	ProceduralCircuitManager* proceduralCircuitManager;
 	ToolManagerManager* toolManagerManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 };

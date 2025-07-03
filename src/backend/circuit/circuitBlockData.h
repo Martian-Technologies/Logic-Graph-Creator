@@ -19,16 +19,16 @@ public:
 		if (!posPtr) return;
 		Position pos = *posPtr;
 		connectionIdPosition.remove(endId);
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::tuple<BlockType, connection_end_id_t, Position>>(
 			"circuitBlockDataConnectionPositionRemove",
-			DataUpdateEventManager::EventDataWithValue<std::tuple<BlockType, connection_end_id_t, Position>>({ blockType, endId, pos })
+			{ blockType, endId, pos }
 		);
 	}
 	inline void setConnectionIdPosition(connection_end_id_t endId, Position position) {
 		connectionIdPosition.set(endId, position);
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"circuitBlockDataConnectionPositionSet",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId })
+			{ blockType, endId }
 		);
 	}
 	inline const Position* getConnectionIdToPosition(connection_end_id_t endId) const {

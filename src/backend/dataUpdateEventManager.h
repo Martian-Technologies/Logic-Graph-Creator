@@ -47,11 +47,12 @@ public:
 		}
 	}
 
-	template <class DataType>
-	void sendEvent(const std::string& eventName, const DataType& eventData) {
+	template <class V>
+	void sendEvent(const std::string& eventName, const V& value) {
+		DataUpdateEventManager::EventDataWithValue<V> eventDataWithValue(value);
 		for (DataUpdateEventReceiver* DataUpdateeventReceiver : dataUpdateEventReceivers) {
 			for (auto pair : DataUpdateeventReceiver->functions) {
-				if (pair.first == eventName) pair.second((EventData*)&eventData);
+				if (pair.first == eventName) pair.second((EventData*)&eventDataWithValue);
 			}
 		}
 	}

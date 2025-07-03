@@ -24,6 +24,7 @@ void ProceduralCircuit::setProceduralCircuitName(const std::string& name) {
 		SharedCircuit circuit = circuitManager->getCircuit(iter.second);
 		if (circuit) circuit->setCircuitName(name + iter.first.toString());
 	}
+	dataUpdateEventManager->sendEvent<std::string>("proceduralCircuitPathUpdate", getUUID());
 }
 
 circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& parameters) {
@@ -59,6 +60,10 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(type);
 	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
 
+	// Set the block to no appear in the ui
+	// blockData->setIsPlaceable(false);
+	blockData->setPath(getPath() + " (" + realParameters.toString() + ")"); // for testing
+
 	// Make the block
 
 	blockData->setSize(Vector(2, 2));
@@ -82,4 +87,10 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	circuit->tryCreateConnection(Position(0, 0), Position(1, 0));
 
 	return id;
+}
+
+BlockType ProceduralCircuit::getBlockType(const ProceduralCircuitParameters& parameters) {
+	circuit_id_t circuitId = getCircuitId(parameters);
+	SharedCircuit circuit = circuitManager->getCircuit(circuitId);
+	return circuit ? circuit->getBlockType() : BlockType::NONE;
 }
