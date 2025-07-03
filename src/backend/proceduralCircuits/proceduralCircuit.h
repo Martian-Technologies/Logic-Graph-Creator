@@ -8,6 +8,15 @@ typedef unsigned int procedural_circuit_id_t;
 class ProceduralCircuit {
 public:
 	struct ProceduralCircuitParameters {
+		std::string toString() {
+			std::string str = "(";
+			for (const auto& iter : parameters) {
+				if (str.size() != 1) str += ", "
+				str += iter.first + ": " + std::to_string(iter.second)
+			}
+			return str + ")";
+		}
+
 		std::map<std::string, int> parameters;
 	};
 
@@ -24,14 +33,18 @@ public:
 	inline const std::string& getProceduralCircuitName() const { return proceduralCircuitName; }
 	void setProceduralCircuitName(const std::string& name);
 
-	void setParameterKeys(std::vector<std::string> parameterKeys);
+	void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; }
 	circuit_id_t getCircuitId(const ProceduralCircuitParameters& parameters);
 
 private:
 	std::string proceduralCircuitName;
 	std::string proceduralCircuitUUID;
-	std::map<ProceduralCircuitParameters, circuit_id_t> generatedCircuits;
+
+	ProceduralCircuitParameters	parameterDefaults;
+
 	CircuitManager* circuitManager;
+	std::map<ProceduralCircuitParameters, circuit_id_t> generatedCircuits;
+
 	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 };
