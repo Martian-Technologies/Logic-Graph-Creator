@@ -25,7 +25,7 @@ public:
 private:
 	void addListItem(bool isInput);
 	void updateSelected(std::string string);
-	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree);
+	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const EvalAddressTree& addressTree);
 
 	Rml::ElementDocument* document;
 	Rml::Element* outputList;

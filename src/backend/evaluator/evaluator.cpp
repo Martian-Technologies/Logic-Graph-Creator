@@ -97,3 +97,22 @@ void Evaluator::edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffC
 void Evaluator::edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData) {
 
 }
+
+const EvalAddressTree Evaluator::buildAddressTree() const {
+	return buildAddressTree(0);
+}
+
+const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitId) const {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found in Evaluator", "Evaluator::buildAddressTree", evalCircuitId);
+		return EvalAddressTree(0);
+	}
+	EvalAddressTree root = EvalAddressTree(evalCircuit->getCircuitId());
+	evalCircuit->forEachNode([this, &root](Position pos, const CircuitNode& node) {
+		if (node.isIC()) {
+			root.addBranch(pos, buildAddressTree(node.getId()));
+		}
+	});
+	return root;
+}

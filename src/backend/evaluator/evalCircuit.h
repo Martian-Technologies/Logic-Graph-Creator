@@ -18,6 +18,12 @@ public:
 	circuit_id_t getCircuitId() const noexcept {
 		return circuitId;
 	}
+	template<typename F>
+	void forEachNode(F&& func) const {
+		circuitNodes.forEach([&func](Position pos, const CircuitNode& node) {
+			func(pos, node);
+		});
+	}
 private:
 	circuit_id_t circuitId;
 	Sparse2dArray<CircuitNode> circuitNodes;

@@ -11,6 +11,7 @@
 #include "diffCache.h"
 #include "evalCircuitContainer.h"
 #include "evalConfig.h"
+#include "evalAddressTree.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -39,7 +40,6 @@ public:
 	void setUseTickrate(bool useTickrate) { evalConfig.tickrateLimiter = useTickrate; }
 	bool getUseTickrate() const { return evalConfig.tickrateLimiter; }
 	long long int getRealTickrate() const;
-	void runNTicks(unsigned long long n);
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address);
@@ -53,6 +53,8 @@ public:
 		return evalCircuitContainer.getCircuitId(0).value_or(0);
 	}
 	circuit_id_t getCircuitId(const Address& address) const;
+	const EvalAddressTree buildAddressTree() const;
+	const EvalAddressTree buildAddressTree(eval_circuit_id_t evalCircuitId) const;
 
 private:
 
