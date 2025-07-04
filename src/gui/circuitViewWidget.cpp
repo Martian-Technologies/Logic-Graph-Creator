@@ -29,7 +29,7 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 		std::string filePath = filePaths[0];
 		std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(filePath);
 		if (ids.empty()) {
-			logError("Failed to load circuit file.");
+			// logError("Failed to load circuit file."); // Not a error! It is valid to load 0 circuits.
 			return;
 		}
 		circuit_id_t id = ids.back();

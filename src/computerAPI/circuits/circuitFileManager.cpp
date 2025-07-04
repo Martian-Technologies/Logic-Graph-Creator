@@ -25,6 +25,8 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
 		}
 		return circuits;
+	} else if ((path.size() >= 4 && path.substr(path.size() - 4) == ".wat") || (path.size() >= 5 && path.substr(path.size() - 5) == ".wasm")) {
+		logInfo("Got wasm! Doing nothing rn :(", "FileManager");
 	} else {
 		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
 	}
