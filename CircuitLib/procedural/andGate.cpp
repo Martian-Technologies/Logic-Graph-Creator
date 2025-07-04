@@ -2,6 +2,9 @@
 
 extern "C" {
 
+const char* UUID = "8a92b940-456a-4d81-bc40-1f6e8bef4464";
+const char* name = "And Gate";
+
 bool generateCircuit() {
 	setSize(2, 2);
 

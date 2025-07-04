@@ -2,6 +2,7 @@
 #define proceduralCircuitManager_h
 
 #include "proceduralCircuit.h"
+#include "wasmProceduralCircuit.h"
 
 #include "util/uuid.h"
 
@@ -13,9 +14,17 @@ public:
 	const std::string& createProceduralCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4()) {
 		std::shared_ptr<ProceduralCircuitType> proceduralCircuit = std::make_shared<ProceduralCircuitType>(circuitManager, dataUpdateEventManager, name, uuid);
 		pathToUUID.emplace(proceduralCircuit->getPath(), uuid);
-		auto pair = proceduralCircuits.emplace(uuid, proceduralCircuit);
-		return pair.first->first;
+		proceduralCircuits.emplace(uuid, proceduralCircuit);
+		return proceduralCircuit->getUUID();
 	}
+
+	template<>
+	const std::string& createProceduralCircuit<WasmProceduralCircuit>(const std::string& name, const std::string& uuid) {
+		logError("WasmProceduralCircuit cant be made with createProceduralCircuit. Call createWasmProceduralCircuit() instead.", "ProceduralCircuitManager");
+		return uuid; // Need to return something. Maybe make this a optinal?
+	}
+
+	const std::string& createWasmProceduralCircuit(wasmtime::Module wasmModule);
 
 	const std::string* getProceduralCircuitUUID(const std::string& path) const;
 

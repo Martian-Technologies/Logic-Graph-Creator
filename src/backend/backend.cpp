@@ -6,11 +6,11 @@
 
 Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager), evaluatorManager(&dataUpdateEventManager) {
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
-	const std::string& uuid = circuitManager.getProceduralCircuitManager()->createProceduralCircuit<WasmProceduralCircuit>("And Gate");
 	std::optional<wasmtime::Module> module = Wasm::loadModule((DirectoryManager().getResourceDirectory() / "/Users/ben/Documents/GitHub/Logic-Graph-Creator/CircuitLib/procedural/andGate.wasm").string());
-	if (module) circuitManager.getProceduralCircuitManager()->getProceduralCircuit<WasmProceduralCircuit>(uuid)->setWasm(module.value());
-	else {
-		logError("failed to load wasm module");
+	if (module) {
+		circuitManager.getProceduralCircuitManager()->createWasmProceduralCircuit(module.value());
+	} else {
+		logError("Failed to load wasm module", "Backend");
 	}
 }
 
