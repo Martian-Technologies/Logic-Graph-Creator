@@ -462,7 +462,7 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 		if (cellSelection) {
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
-			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(0, 0, 255, 64));
+			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(0, 0, 255, 50));
 			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
 			return;
@@ -482,7 +482,7 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 		if (cellSelection) {
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
-			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(255, 0, 0, 64));
+			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(255, 0, 0, 50));
 			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
 		}
@@ -501,7 +501,7 @@ void SdlRenderer::renderSelection(const SharedSelection selection, SelectionObje
 		if (cellSelection) {
 			SDL_FPoint topLeft = gridToSDL(cellSelection->getPosition().free());
 			SDL_FPoint size = gridToSDL((cellSelection->getPosition() - cellSelection->getPosition() + Vector(1)).free());
-			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(255, 0, 0255, 64));
+			SDL_SetRenderDrawColor(sdlRenderer, SDL_Color(0, 0, 255, 50));
 			SDL_FRect rect(topLeft.x, topLeft.y, size.x, size.y);
 			SDL_RenderFillRect(sdlRenderer, &rect);
 			return;

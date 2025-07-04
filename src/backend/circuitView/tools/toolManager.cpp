@@ -19,10 +19,19 @@ void ToolManager::selectStack(int stack) {
 
 SharedCircuitTool ToolManager::selectTool(SharedCircuitTool tool) {
 	if (!tool) return nullptr;
+	
 	if (activeToolStack != tool->getStackId()) {
 		toolStacks[activeToolStack].deactivate();
 		activeToolStack = tool->getStackId();
 		toolStacks[activeToolStack].activate();
+	}
+	if (circuit) {
+		if (!(circuit->isEditable())) {
+			if (tool->canMakeEdits()) {
+				toolStacks[activeToolStack].clearTools();
+				return nullptr; // Can't select tool that can make edits
+			}
+		}
 	}
 	if (!toolStacks[activeToolStack].empty() && toolStacks[activeToolStack].getCurrentNonHelperTool()->getPath() == tool->getPath()) {
 		return toolStacks[activeToolStack].getCurrentNonHelperTool();

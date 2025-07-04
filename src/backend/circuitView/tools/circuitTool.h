@@ -20,6 +20,7 @@ public:
 	inline virtual unsigned int getStackId() const { return 0; }
 	bool sendEvent(const Event* event);
 	inline virtual bool showInMenu() const { return !isHelper(); }
+	inline virtual bool canMakeEdits() const { return true; };
 
 protected:
 	void registerFunction(std::string eventName, EventFunction function);

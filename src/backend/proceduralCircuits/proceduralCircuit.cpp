@@ -60,9 +60,11 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(type);
 	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
 
-	// Set the block to no appear in the ui
-	// blockData->setIsPlaceable(false);
-	blockData->setPath(getPath() + " (" + realParameters.toString() + ")"); // for testing
+	// Settings
+	blockData->setIsPlaceable(false);
+	blockData->setPath(getPath() + " instances"); // for testing
+	circuit->setCircuitName(getProceduralCircuitName() + " (" + realParameters.toString() + ")");
+	circuit->setEditable(false);
 
 	// Make the circuit
 	this->makeCircuit(realParameters, circuit, blockData, circuitBlockData);
