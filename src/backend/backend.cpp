@@ -23,7 +23,6 @@ Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager),
 // 	}
 // }
 
-
 circuit_id_t Backend::createCircuit(const std::string& name, const std::string& uuid) {
 	return circuitManager.createNewCircuit(name, uuid);
 }
