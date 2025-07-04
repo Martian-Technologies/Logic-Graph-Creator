@@ -54,8 +54,6 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
 #endif
 
-		Wasm::initialize();
-
 		App app;
 		app.runLoop();
 

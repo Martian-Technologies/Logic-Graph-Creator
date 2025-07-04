@@ -11,20 +11,20 @@ public:
 	ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager);
 
 	template<class ProceduralCircuitType>
-	const std::string& createProceduralCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4()) {
+	const std::string* createProceduralCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4()) {
 		std::shared_ptr<ProceduralCircuitType> proceduralCircuit = std::make_shared<ProceduralCircuitType>(circuitManager, dataUpdateEventManager, name, uuid);
 		pathToUUID.emplace(proceduralCircuit->getPath(), uuid);
 		proceduralCircuits.emplace(uuid, proceduralCircuit);
-		return proceduralCircuit->getUUID();
+		return &(proceduralCircuit->getUUID());
 	}
 
 	template<>
-	const std::string& createProceduralCircuit<WasmProceduralCircuit>(const std::string& name, const std::string& uuid) {
+	const std::string* createProceduralCircuit<WasmProceduralCircuit>(const std::string& name, const std::string& uuid) {
 		logError("WasmProceduralCircuit cant be made with createProceduralCircuit. Call createWasmProceduralCircuit() instead.", "ProceduralCircuitManager");
-		return uuid; // Need to return something. Maybe make this a optinal?
+		return nullptr; // Need to return something. Maybe make this a optinal?
 	}
 
-	const std::string& createWasmProceduralCircuit(wasmtime::Module wasmModule);
+	const std::string* createWasmProceduralCircuit(wasmtime::Module wasmModule);
 
 	const std::string* getProceduralCircuitUUID(const std::string& path) const;
 

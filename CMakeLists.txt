@@ -287,9 +287,16 @@ if (GATALITY_BUILD_TESTS)
 		cpplocate::cpplocate
 		gtest gtest_main
 		${GATALITY_JSON_LIB_NAME}
+		wasmtime
 	)
+
+	if(APPLE)
+		# Link CoreFoundation explicitly on macOS
+		list(APPEND EXTERNAL_LINKS_TESTS "-framework CoreFoundation")
+	endif()
+
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
-	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
+	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}wasmtime")
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
 	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 endif()

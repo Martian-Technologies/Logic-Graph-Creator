@@ -2,13 +2,13 @@
 
 std::optional<wasmtime::Engine> Wasm::engine = std::nullopt;
 std::optional<wasmtime::Store> Wasm::store = std::nullopt;
-std::optional<wasmtime::Linker> Wasm::linker = std::nullopt;
 
 bool Wasm::initialize() {
 	try {
-		engine = wasmtime::Engine();
-		store = wasmtime::Store(*engine);
-		linker = wasmtime::Linker(*engine);
+		if (!(engine.has_value())) {
+			engine.emplace();
+			store.emplace(engine.value());
+		}
 		return true;
 	} catch (const std::exception& e) {
 		logError("Wasmtime initialization error: {}", "Wasm", e.what());
@@ -24,9 +24,6 @@ wasmtime::Store* Wasm::getStore() {
 	return store ? &(store.value()) : nullptr;
 }
 
-wasmtime::Linker* Wasm::getLinker() {
-	return linker ? &(linker.value()) : nullptr;
-}
 
 std::optional<wasmtime::Module> Wasm::loadModule(const std::string& path) {
 	if (!engine.has_value()) {
