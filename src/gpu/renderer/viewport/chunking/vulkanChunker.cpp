@@ -244,7 +244,7 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 		case Difference::ModificationType::MOVE_BLOCK:
 		{
 			const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
-			logInfo("Move dif: {}, {}, {}, {}", "", curPosition.toString(), (int)curRotation, newPosition.toString(), (int)newRotation);
+
 			if (curPosition == newPosition) continue;
 
 			// MOVE BLOCK
