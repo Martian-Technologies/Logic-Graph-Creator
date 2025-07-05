@@ -16,7 +16,7 @@ After cloning the main project, clone the submodules with these commands:
 > If you have a client that can do this, or clone the repo with the submodules to begin with, that's fine too.
 
 ## System dependencies
-This project requires [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) [Wasmtime](https://github.com/bytecodealliance/wasmtime) to build.
+This project requires [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) and [Wasmtime](https://github.com/bytecodealliance/wasmtime) to build.
 
 ## Setting up the CMake build system
 You need the CMake build system and a C++ compiler to build this project.
