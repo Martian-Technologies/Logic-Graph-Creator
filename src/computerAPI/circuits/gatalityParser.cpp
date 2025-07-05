@@ -141,19 +141,30 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 			int blockId;
 			std::string blockTypeStr;
 			float posX, posY;
-			inputFile >> blockId >> std::quoted(blockTypeStr) >> posX >> posY >> token;
+			inputFile >> blockId >> std::quoted(blockTypeStr);
 			BlockType blockType = stringToBlockType(blockTypeStr);
-			Rotation rotation = stringToRotation(token);
-
+			
 			if (blockType == BlockType::CUSTOM) {
 				SharedCircuit circuit = circuitManager->getCircuit(blockTypeStr);
-				if (!circuit) {
-					logError("Count not find Circuit with UUID: {}", "GatalityParser", blockTypeStr);
-					return circuitIds;
+				if (circuit) {
+					blockType = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuit->getCircuitId())->getBlockType();
+				} else {
+					SharedProceduralCircuit proceduralCircuit = circuitManager->getProceduralCircuitManager()->getProceduralCircuit(blockTypeStr);
+					if (proceduralCircuit) {
+						inputFile >> cToken;
+						std::string proceduralCircuitParameters;
+						std::getline(inputFile, proceduralCircuitParameters, ')');
+						logInfo(proceduralCircuitParameters);
+						blockType = proceduralCircuit->getBlockType(ProceduralCircuitParameters());
+					} else {
+						logError("Count not find Circuit or ProceduralCircuit with UUID: {}", "GatalityParser", blockTypeStr);
+						return circuitIds;
+					}
 				}
-				blockType = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuit->getCircuitId())->getBlockType();
-				BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(blockType);
 			}
+
+			inputFile  >> posX >> posY >> token;
+			Rotation rotation = stringToRotation(token);
 
 			currentParsedCircuit->addBlock(blockId, { .pos = FPosition(posX, posY), .rotation = rotation, .type = blockType });
 
@@ -221,6 +232,10 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 			if (blockData->isPrimitive() || !imports.insert(blockData->getBlockType()).second) continue;
 			circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockData->getBlockType());
 			const CircuitBlockData* subCircuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(subCircuitId);
+			if (!subCircuitBlockData) {
+				logError("Could not find save path for depedecy {}", "GatalityParser", subCircuitId);
+				continue;
+			}
 			const std::optional<std::string>& subProceduralCircuitUUID = subCircuitBlockData->getProceduralCircuitUUID();
 			const std::string* subSavePath = nullptr;
 			const std::string* subUUID;
@@ -232,10 +247,10 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 			}
 			subSavePath = circuitFileManager->getSavePath(*subUUID);
 			if (!subSavePath) {
-				logError("Count not find save path for depedecy {}", "GatalityParser", circuitManager->getCircuit(subCircuitId)->getCircuitNameNumber());
+				logError("Could not find save path for depedecy {}", "GatalityParser", *subUUID);
 				continue;
 			}
-			
+
 			if (std::filesystem::equivalent(std::filesystem::path(*subSavePath), std::filesystem::path(path))) {
 				inFileDependencies[UUID].emplace(*subUUID);
 			} else {
@@ -305,8 +320,16 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 			std::string blockTypeStr;
 			if (!blockData->isPrimitive()) {
 				circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(block.type());
-				const SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
-				blockTypeStr = '"' + circuit->getUUID() + '"';
+				const std::optional<std::string>& proceduralCircuitUUID = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(subCircuitId)->getProceduralCircuitUUID();
+				if (proceduralCircuitUUID.has_value()) {
+					const ProceduralCircuitParameters* proceduralCircuitParameters =
+						circuitManager->getProceduralCircuitManager()->getProceduralCircuit(proceduralCircuitUUID.value())->getProceduralCircuitParameters(subCircuitId);
+
+					blockTypeStr = '"' + proceduralCircuitUUID.value() + "\" " + (proceduralCircuitParameters->toString());
+				} else {
+					const SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
+					blockTypeStr = '"' + circuit->getUUID() + '"';
+				}
 			} else {
 				blockTypeStr = blockTypeToString(block.type());
 			}

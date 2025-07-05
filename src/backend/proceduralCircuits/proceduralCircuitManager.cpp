@@ -21,6 +21,7 @@ const std::string* ProceduralCircuitManager::createWasmProceduralCircuit(wasmtim
 	WasmProceduralCircuit::WasmInstance wasmInstance(wasmModule);
 	if (!wasmInstance.isValid()) {
 		logError("createWasmProceduralCircuit failed because wasmInstance was not valid.", "ProceduralCircuitManager");
+		return nullptr;
 	}
 	SharedProceduralCircuit proceduralCircuit = getProceduralCircuit(wasmInstance.getUUID());
 	if (proceduralCircuit) {
@@ -28,14 +29,15 @@ const std::string* ProceduralCircuitManager::createWasmProceduralCircuit(wasmtim
 		if (wasmProceduralCircuit) {
 			logInfo("WasmProceduralCircuit with UUID {} already exists. Update wasm in WasmProceduralCircuit", "ProceduralCircuitManager", wasmInstance.getUUID());
 			wasmProceduralCircuit->setWasm(std::move(wasmInstance));
+			return &(wasmProceduralCircuit->getUUID());
 		} else {
 			logError("Non Wasm ProceduralCircuit with UUID {} already exists. Can't create WasmProceduralCircuit.", "ProceduralCircuitManager", wasmInstance.getUUID());
 		}
 	} else {
-		SharedWasmProceduralCircuit proceduralCircuit = std::make_shared<WasmProceduralCircuit>(circuitManager, dataUpdateEventManager, std::move(wasmInstance));
-		pathToUUID.emplace(proceduralCircuit->getPath(), proceduralCircuit->getUUID());
-		proceduralCircuits.emplace(proceduralCircuit->getUUID(), proceduralCircuit);
-		return &(proceduralCircuit->getUUID());
+		SharedWasmProceduralCircuit wasmProceduralCircuit = std::make_shared<WasmProceduralCircuit>(circuitManager, dataUpdateEventManager, std::move(wasmInstance));
+		pathToUUID.emplace(wasmProceduralCircuit->getPath(), wasmProceduralCircuit->getUUID());
+		proceduralCircuits.emplace(wasmProceduralCircuit->getUUID(), wasmProceduralCircuit);
+		return &(wasmProceduralCircuit->getUUID());
 	}
 	return nullptr;
 }

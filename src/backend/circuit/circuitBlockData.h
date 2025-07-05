@@ -13,6 +13,7 @@ public:
 	CircuitBlockData(circuit_id_t id, DataUpdateEventManager* dataUpdateEventManager, const std::string& proceduralCircuitUUID) :
 		id(id), dataUpdateEventManager(dataUpdateEventManager), proceduralCircuitUUID(proceduralCircuitUUID) { }
 
+	inline void setProceduralCircuitUUID(const std::string& proceduralCircuitUUID) { this->proceduralCircuitUUID.emplace(proceduralCircuitUUID); }
 	inline const std::optional<std::string>& getProceduralCircuitUUID() const { return proceduralCircuitUUID; }
 
 	inline void setBlockType(BlockType blockType) { this->blockType = blockType; }

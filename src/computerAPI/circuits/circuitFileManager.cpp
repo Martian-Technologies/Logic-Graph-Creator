@@ -26,7 +26,15 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 		}
 		return circuits;
 	} else if ((path.size() >= 4 && path.substr(path.size() - 4) == ".wat") || (path.size() >= 5 && path.substr(path.size() - 5) == ".wasm")) {
-		logInfo("Got wasm! Doing nothing rn :(", "FileManager");
+		std::optional<wasmtime::Module> module = Wasm::loadModule(path);
+		if (module) {
+			const std::string* UUID = circuitManager->getProceduralCircuitManager()->createWasmProceduralCircuit(module.value());
+			if (UUID) {
+				setSaveFilePath(*UUID, std::filesystem::absolute(std::filesystem::path(path)).string());
+			}
+		} else {
+			logError("Failed to load wasm module", "CircuitFileManager");
+		}
 	} else {
 		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
 	}
@@ -47,7 +55,7 @@ bool CircuitFileManager::saveToFile(const std::string& path, const std::string& 
 bool CircuitFileManager::save(const std::string& UUID) {
 	std::map<std::string, std::string>::iterator iter = UUIDToFilePath.find(UUID);
 	if (iter == UUIDToFilePath.end()) {
-		logError("Can not save: {}. No file set", "CircuitFileManager", UUID);
+		logInfo("Can not save: {}. No file set", "CircuitFileManager", UUID);
 		return false;
 	}
 

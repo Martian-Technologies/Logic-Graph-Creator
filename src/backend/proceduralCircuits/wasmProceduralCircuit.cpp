@@ -2,44 +2,45 @@
 
 #include "backend/circuit/circuitBlockData.h"
 
-WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) {
+WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thisPtr(std::make_unique<WasmInstance*>(this)) {
+	WasmInstance** thisPtrPtr = thisPtr.get();
 	wasmtime::Func tryInsertBlockFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t x, int32_t y, int32_t rotation, int32_t blockType) -> int32_t {
-			return circuit->tryInsertBlock(Position(x, y), (Rotation)rotation, (BlockType)blockType);
+		[thisPtrPtr](int32_t x, int32_t y, int32_t rotation, int32_t blockType) -> int32_t {
+			return (*thisPtrPtr)->circuit->tryInsertBlock(Position(x, y), (Rotation)rotation, (BlockType)blockType);
 		});
 
 	wasmtime::Func tryCreateConnectionFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t outputX, int32_t outputY, int32_t inputX, int32_t inputY) -> int32_t {
-			return circuit->tryCreateConnection(Position(outputX, outputY), Position(inputX, inputY));
+		[thisPtrPtr](int32_t outputX, int32_t outputY, int32_t inputX, int32_t inputY) -> int32_t {
+			return (*thisPtrPtr)->circuit->tryCreateConnection(Position(outputX, outputY), Position(inputX, inputY));
 		});
 
 	wasmtime::Func addConnectionInputFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
-			circuitBlockData->setConnectionIdPosition(portId, Position(blockX, blockY));
-			blockData->setConnectionInput(Vector(portX, portY), portId);
-			++(portId);
+		[thisPtrPtr](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
+			(*thisPtrPtr)->circuitBlockData->setConnectionIdPosition((*thisPtrPtr)->portId, Position(blockX, blockY));
+			(*thisPtrPtr)->blockData->setConnectionInput(Vector(portX, portY), (*thisPtrPtr)->portId);
+			++((*thisPtrPtr)->portId);
 		});
 
 	wasmtime::Func addConnectionOutputFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
-			circuitBlockData->setConnectionIdPosition(portId, Position(blockX, blockY));
-			blockData->setConnectionOutput(Vector(portX, portY), portId);
-			++(portId);
+		[thisPtrPtr](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
+			(*thisPtrPtr)->circuitBlockData->setConnectionIdPosition((*thisPtrPtr)->portId, Position(blockX, blockY));
+			(*thisPtrPtr)->blockData->setConnectionOutput(Vector(portX, portY), (*thisPtrPtr)->portId);
+			++((*thisPtrPtr)->portId);
 		});
 
 	wasmtime::Func setSizeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t width, int32_t height) {
-			blockData->setSize(Vector(width, height));
+		[thisPtrPtr](int32_t width, int32_t height) {
+			(*thisPtrPtr)->blockData->setSize(Vector(width, height));
 		});
 
 	wasmtime::Func logInfoFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t strOffset) {
-			logInfo(wasmToString(strOffset), "WasmProceduralCircuit > WasmCode");
+		[thisPtrPtr](int32_t strOffset) {
+			logInfo((*thisPtrPtr)->wasmToString(strOffset), "WasmProceduralCircuit > WasmCode");
 		});
 
 	wasmtime::Func logErrorFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[this](int32_t strOffset) {
-			logError(wasmToString(strOffset), "WasmProceduralCircuit > WasmCode");
+		[thisPtrPtr](int32_t strOffset) {
+			logError((*thisPtrPtr)->wasmToString(strOffset), "WasmProceduralCircuit > WasmCode");
 		});
 
 	// Linker to associate "env" functions
@@ -120,7 +121,8 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(WasmInstance&& wasmInstance) :
 	instance(std::move(wasmInstance.instance.value())),
 	memory(std::move(wasmInstance.memory.value())),
 	name(std::move(wasmInstance.name)),
-	UUID(std::move(wasmInstance.UUID)) { }
+	UUID(std::move(wasmInstance.UUID)),
+	thisPtr(std::move(wasmInstance.thisPtr)) { *thisPtr = this; }
 
 WasmProceduralCircuit::WasmInstance& WasmProceduralCircuit::WasmInstance::operator=(WasmInstance&& wasmInstance) {
 	if (this != &wasmInstance) {
@@ -128,6 +130,8 @@ WasmProceduralCircuit::WasmInstance& WasmProceduralCircuit::WasmInstance::operat
 		memory = std::move(wasmInstance.memory.value());
 		name = std::move(wasmInstance.name);
 		UUID = std::move(wasmInstance.UUID);
+		thisPtr = std::move(wasmInstance.thisPtr);
+		*thisPtr = this;
 	}
 	return *this;
 }

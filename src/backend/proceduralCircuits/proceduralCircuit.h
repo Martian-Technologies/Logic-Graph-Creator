@@ -57,6 +57,7 @@ public:
 	void setProceduralCircuitName(const std::string& name);
 
 	inline void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; regenerateAll(); }
+	const ProceduralCircuitParameters* getProceduralCircuitParameters(circuit_id_t circuitId) const;
 	circuit_id_t getCircuitId(const ProceduralCircuitParameters& parameters);
 	BlockType getBlockType(const ProceduralCircuitParameters& parameters);
 
@@ -72,6 +73,7 @@ private:
 
 	CircuitManager* circuitManager;
 	std::unordered_map<ProceduralCircuitParameters, circuit_id_t> generatedCircuits;
+	std::unordered_map<circuit_id_t, ProceduralCircuitParameters> circuitIdToProceduralCircuitParameters;
 
 	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;

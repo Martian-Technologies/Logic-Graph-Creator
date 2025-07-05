@@ -104,7 +104,12 @@ public:
 		blockData->setSize(Vector(1));
 
 		// Circuit Block Data
-		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType, proceduralCircuitUUID);
+		CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(circuitId);
+		if (!circuitBlockData) {
+			circuitBlockDataManager.newCircuitBlockData(circuitId, blockType, proceduralCircuitUUID);
+		} else {
+			circuitBlockData->setProceduralCircuitUUID(proceduralCircuitUUID);
+		}
 		circuit->setBlockType(blockType);
 
 		return blockType;

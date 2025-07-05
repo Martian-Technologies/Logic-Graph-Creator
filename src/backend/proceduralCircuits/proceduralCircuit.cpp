@@ -12,6 +12,7 @@ ProceduralCircuit::ProceduralCircuit(
 ProceduralCircuit::ProceduralCircuit(ProceduralCircuit&& other) :
 	proceduralCircuitName(std::move(other.proceduralCircuitName)), proceduralCircuitUUID(std::move(other.proceduralCircuitUUID)),
 	circuitManager(other.circuitManager), generatedCircuits(std::move(other.generatedCircuits)),
+	circuitIdToProceduralCircuitParameters(std::move(other.circuitIdToProceduralCircuitParameters)),
 	dataUpdateEventManager(other.dataUpdateEventManager), dataUpdateEventReceiver(std::move(other.dataUpdateEventReceiver)) { }
 
 ProceduralCircuit::~ProceduralCircuit() {
@@ -25,6 +26,12 @@ void ProceduralCircuit::setProceduralCircuitName(const std::string& name) {
 		if (circuit) circuit->setCircuitName(name + iter.first.toString());
 	}
 	dataUpdateEventManager->sendEvent<std::string>("proceduralCircuitPathUpdate", getUUID());
+}
+
+const ProceduralCircuitParameters* ProceduralCircuit::getProceduralCircuitParameters(circuit_id_t circuitId) const {
+	auto iter = circuitIdToProceduralCircuitParameters.find(circuitId);
+	if (iter == circuitIdToProceduralCircuitParameters.end()) return nullptr;
+	return &(iter->second);
 }
 
 circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& parameters) {
@@ -50,6 +57,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 
 	// Add the circuit id to the generated circuits
 	generatedCircuits[realParameters] = id;
+	circuitIdToProceduralCircuitParameters[id] = realParameters;
 
 	// Setup the block to be a IC
 	BlockType type = circuitManager->setupBlockData(id, proceduralCircuitUUID);

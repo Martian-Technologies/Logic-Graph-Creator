@@ -36,6 +36,8 @@ public:
 		mutable SharedCircuit circuit = nullptr;
 		mutable BlockData* blockData = nullptr;
 		mutable CircuitBlockData* circuitBlockData = nullptr;
+
+		std::unique_ptr<WasmInstance*> thisPtr;
 	};
 
 	WasmProceduralCircuit(
