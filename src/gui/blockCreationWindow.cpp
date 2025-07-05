@@ -41,7 +41,7 @@ BlockCreationWindow::BlockCreationWindow(
 
 void BlockCreationWindow::updateFromMenu() {
 	Circuit* circuit = circuitViewWidget->getCircuitView()->getCircuit();
-	if (!circuit) return;
+	if (!circuit || !(circuit->isEditable())) return;
 	circuit_id_t id = circuit->getCircuitId();
 	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
 	BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
@@ -278,15 +278,17 @@ void BlockCreationWindow::resetMenu() {
 		setPositionButton->AddEventListener(Rml::EventId::Click, new EventPasser(
 			[this, endId](Rml::Event& event) {
 				auto tool = std::dynamic_pointer_cast<PortSelector>(circuitViewWidget->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
-				tool->setPort(endId, [this, endId](Position position) {
-					Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
-					Rml::ElementList elements;
-					row->GetElementsByClassName(elements, "connection-list-item-pos-x");
-					rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.x));
-					elements.clear();
-					row->GetElementsByClassName(elements, "connection-list-item-pos-y");
-					rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.y));
-				});
+				if (tool) {
+					tool->setPort(endId, [this, endId](Position position) {
+						Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
+						Rml::ElementList elements;
+						row->GetElementsByClassName(elements, "connection-list-item-pos-x");
+						rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.x));
+						elements.clear();
+						row->GetElementsByClassName(elements, "connection-list-item-pos-y");
+						rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.y));
+					});
+				}
 			}
 		));
 		// add children and set classes
@@ -373,20 +375,23 @@ void BlockCreationWindow::addListItem(bool isInput) {
 	Rml::ElementFormControlInput* positionYElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(positionY.get());
 	positionXElement->SetValue("N/A");
 	positionYElement->SetValue("N/A");
+	
 	Rml::ElementPtr setPositionButton = document->CreateElement("button");
 	setPositionButton->AppendChild(std::move(document->CreateTextNode("S")));
 	setPositionButton->AddEventListener(Rml::EventId::Click, new EventPasser(
 		[this, endId](Rml::Event& event) {
 			auto tool = std::dynamic_pointer_cast<PortSelector>(circuitViewWidget->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
-			tool->setPort(endId, [this, endId](Position position) {
-				Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
-				Rml::ElementList elements;
-				row->GetElementsByClassName(elements, "connection-list-item-pos-x");
-				rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.x));
-				elements.clear();
-				row->GetElementsByClassName(elements, "connection-list-item-pos-y");
-				rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.y));
-			});
+			if (tool) {
+				tool->setPort(endId, [this, endId](Position position) {
+					Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
+					Rml::ElementList elements;
+					row->GetElementsByClassName(elements, "connection-list-item-pos-x");
+					rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.x));
+					elements.clear();
+					row->GetElementsByClassName(elements, "connection-list-item-pos-y");
+					rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements.front())->SetValue(std::to_string(position.y));
+				});
+			}
 		}
 	));
 	// add children and set classes

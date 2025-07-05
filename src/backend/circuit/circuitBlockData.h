@@ -10,6 +10,11 @@
 class CircuitBlockData {
 public:
 	CircuitBlockData(circuit_id_t id, DataUpdateEventManager* dataUpdateEventManager) : id(id), dataUpdateEventManager(dataUpdateEventManager) { }
+	CircuitBlockData(circuit_id_t id, DataUpdateEventManager* dataUpdateEventManager, const std::string& proceduralCircuitUUID) :
+		id(id), dataUpdateEventManager(dataUpdateEventManager), proceduralCircuitUUID(proceduralCircuitUUID) { }
+
+	inline void setProceduralCircuitUUID(const std::string& proceduralCircuitUUID) { this->proceduralCircuitUUID.emplace(proceduralCircuitUUID); }
+	inline const std::optional<std::string>& getProceduralCircuitUUID() const { return proceduralCircuitUUID; }
 
 	inline void setBlockType(BlockType blockType) { this->blockType = blockType; }
 	inline BlockType getBlockType() const { return blockType; }
@@ -19,16 +24,16 @@ public:
 		if (!posPtr) return;
 		Position pos = *posPtr;
 		connectionIdPosition.remove(endId);
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::tuple<BlockType, connection_end_id_t, Position>>(
 			"circuitBlockDataConnectionPositionRemove",
-			DataUpdateEventManager::EventDataWithValue<std::tuple<BlockType, connection_end_id_t, Position>>({ blockType, endId, pos })
+			{ blockType, endId, pos }
 		);
 	}
 	inline void setConnectionIdPosition(connection_end_id_t endId, Position position) {
 		connectionIdPosition.set(endId, position);
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"circuitBlockDataConnectionPositionSet",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId })
+			{ blockType, endId }
 		);
 	}
 	inline const Position* getConnectionIdToPosition(connection_end_id_t endId) const {
@@ -43,6 +48,7 @@ private:
 	DataUpdateEventManager* dataUpdateEventManager;
 	BlockType blockType;
 	circuit_id_t id;
+	std::optional<std::string> proceduralCircuitUUID = std::nullopt;
 
 };
 

@@ -45,7 +45,10 @@ option(GATALITY_BUILD_TESTS "Build Gatality Tests" OFF)
 # CPPLocate (they have extreme cmake goofyness)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
-add_subdirectory(external/cpplocate EXCLUDE_FROM_ALL)
+add_subdirectory("${EXTERNAL_DIR}/cpplocate" EXCLUDE_FROM_ALL)
+
+# wasmtime
+add_subdirectory("external/wasmtime/crates/c-api")
 
 # JSON
 set(GATALITY_JSON_LIB_NAME "json")
@@ -110,10 +113,11 @@ if (GATALITY_BUILD_APP)
 		glm
 		${GATALITY_JSON_LIB_NAME}
 		${GATALITY_STB_IMAGE_LIB_NAME}
+		wasmtime
 	)
 
 	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
+	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS} "${EXTERNAL_DIR}wasmtime")
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
@@ -283,9 +287,16 @@ if (GATALITY_BUILD_TESTS)
 		cpplocate::cpplocate
 		gtest gtest_main
 		${GATALITY_JSON_LIB_NAME}
+		wasmtime
 	)
+
+	if(APPLE)
+		# Link CoreFoundation explicitly on macOS
+		list(APPEND EXTERNAL_LINKS_TESTS "-framework CoreFoundation")
+	endif()
+
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
-	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR})
+	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}wasmtime")
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
 	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 endif()

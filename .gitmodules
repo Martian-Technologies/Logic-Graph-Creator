@@ -19,3 +19,6 @@
 [submodule "freetype"]
 	path = external/freetype
 	url = https://github.com/libsdl-org/freetype.git
+[submodule "external/wasmtime"]
+	path = external/wasmtime
+	url = https://github.com/bytecodealliance/wasmtime

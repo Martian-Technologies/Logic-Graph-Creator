@@ -49,6 +49,8 @@ private:
 	bool exitBlockView(const Event* event);
 	bool pointerMove(const Event* event);
 
+	void verifyNoEdits();
+
 	bool pointerInView = false;
 	FPosition lastPointerFPosition;
 	Position lastPointerPosition;

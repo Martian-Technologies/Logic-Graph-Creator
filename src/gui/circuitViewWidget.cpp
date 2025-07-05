@@ -16,8 +16,10 @@ void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 			logError("Circuit was null, could not save");
 			return;
 		}
-		logWarning("This circuit " + circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() + " will be saved with a new UUID");
-		circuitViewWidget->getFileManager()->saveToFile(filePath, circuitViewWidget->getCircuitView()->getCircuit()->getCircuitId());
+		const std::string& UUID = circuitViewWidget->getCircuitView()->getCircuit()->getUUID();
+		if (circuitViewWidget->getFileManager()->getSavePath(UUID) != nullptr)
+			logWarning("This circuit " + circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() + " will be saved with a new UUID");
+		circuitViewWidget->getFileManager()->saveToFile(filePath, UUID);
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}
@@ -29,7 +31,7 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 		std::string filePath = filePaths[0];
 		std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(filePath);
 		if (ids.empty()) {
-			logError("Failed to load circuit file.");
+			// logError("Failed to load circuit file."); // Not a error! It is valid to load 0 circuits.
 			return;
 		}
 		circuit_id_t id = ids.back();
@@ -310,8 +312,7 @@ void CircuitViewWidget::setStatusBar(const std::string& text) {
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
 	if (fileManager && circuitView->getCircuit()) {
-		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
-		if (!fileManager->saveCircuit(circuitId)) {
+		if (!fileManager->save(circuitView->getCircuit()->getUUID())) {
 			// if failed to save the circuit with out a path
 			static SDL_DialogFileFilter filter;
 			filter.name = "Circuit Files";

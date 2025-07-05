@@ -23,8 +23,8 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 }
 
 CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
-	dataUpdateEventManager(dataUpdateEventManager), blockDataManager(dataUpdateEventManager),
-	circuitBlockDataManager(dataUpdateEventManager), evaluatorManager(evaluatorManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+	blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager), proceduralCircuitManager(this, dataUpdateEventManager),
+	dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager) {
 	dataUpdateEventReceiver.linkFunction("postBlockSizeChange", [this](const DataUpdateEventManager::EventData* eventData) {
 		linkedFunctionForUpdates<Vector>(eventData);
 	});

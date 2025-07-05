@@ -6,6 +6,8 @@
 
 #include "computerAPI/fileListener/fileListener.h"
 
+#include "backend/wasm/wasm.h"
+
 int main(int argc, char* argv[]) {
 	try {
 		// Set up directory manager
