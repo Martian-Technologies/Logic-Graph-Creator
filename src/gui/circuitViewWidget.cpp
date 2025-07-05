@@ -16,8 +16,10 @@ void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 			logError("Circuit was null, could not save");
 			return;
 		}
-		logWarning("This circuit " + circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() + " will be saved with a new UUID");
-		circuitViewWidget->getFileManager()->saveToFile(filePath, circuitViewWidget->getCircuitView()->getCircuit()->getCircuitId());
+		const std::string& UUID = circuitViewWidget->getCircuitView()->getCircuit()->getUUID();
+		if (circuitViewWidget->getFileManager()->getSavePath(UUID) != nullptr)
+			logWarning("This circuit " + circuitViewWidget->getCircuitView()->getCircuit()->getCircuitName() + " will be saved with a new UUID");
+		circuitViewWidget->getFileManager()->saveToFile(filePath, UUID);
 	} else {
 		std::cout << "File dialog canceled." << std::endl;
 	}
@@ -310,8 +312,7 @@ void CircuitViewWidget::setStatusBar(const std::string& text) {
 // Called via Ctrl-S keybind
 void CircuitViewWidget::save() {
 	if (fileManager && circuitView->getCircuit()) {
-		circuit_id_t circuitId = circuitView->getCircuit()->getCircuitId();
-		if (!fileManager->saveCircuit(circuitId)) {
+		if (!fileManager->save(circuitView->getCircuit()->getUUID())) {
 			// if failed to save the circuit with out a path
 			static SDL_DialogFileFilter filter;
 			filter.name = "Circuit Files";

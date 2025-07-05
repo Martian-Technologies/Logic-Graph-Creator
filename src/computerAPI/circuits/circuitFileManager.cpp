@@ -11,13 +11,13 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 		// our gatality file parser function
 		GatalityParser parser(this, circuitManager);
 
-        std::vector<circuit_id_t> circuits = parser.load(path);
+		std::vector<circuit_id_t> circuits = parser.load(path);
 		if (circuits.empty()) {
 			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
 		}
 		return circuits;
 	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
-        SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
+		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		OpenCircuitsParser parser(this, circuitManager);
 		std::vector<circuit_id_t> circuits = parser.load(path);
@@ -33,122 +33,137 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 	return {};
 }
 
-bool CircuitFileManager::saveToFile(const std::string& path, circuit_id_t circuitId) {
-    // Doesn't check if the file is saved, we are just saving as
-	setCircuitFilePath(circuitId, path);
+bool CircuitFileManager::saveToFile(const std::string& path, const std::string& UUID) {
+	// Doesn't check if the file is saved, we are just saving as
+	setSaveFilePath(UUID, path);
 	GatalityParser saver(this, circuitManager);
 	if (saver.save(filePathToFile.at(path), true)) {
-		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", path);
+		logInfo("Successfully saved to: {}", "CircuitFileManager", path);
 		return true;
-	} 
+	}
 	return false;
 }
 
-bool CircuitFileManager::saveCircuit(circuit_id_t circuitId) {
-    std::map<circuit_id_t, std::string>::iterator iter = circuitIdToFilePath.find(circuitId);
-	if (iter == circuitIdToFilePath.end()) return false;
+bool CircuitFileManager::save(const std::string& UUID) {
+	std::map<std::string, std::string>::iterator iter = UUIDToFilePath.find(UUID);
+	if (iter == UUIDToFilePath.end()) {
+		logError("Can not save: {}. No file set", "CircuitFileManager", UUID);
+		return false;
+	}
 
-    FileData& fileData = filePathToFile.at(iter->second);
-    unsigned long long currentEditCount = circuitManager->getCircuit(circuitId)->getEditCount();
-    unsigned long long lastSaved = fileData.circuitLastSaved.at(circuitId);
-    if (lastSaved >= currentEditCount) {
-		logInfo("No changes to save ({})", "CircuitFileManager", iter->second);
-        return true;
-    }
-
-    fileData.circuitLastSaved[circuitId] = currentEditCount;
+	FileData& fileData = filePathToFile.at(iter->second);
+	SharedCircuit circuit = circuitManager->getCircuit(UUID);
+	if (circuit) {
+		unsigned long long currentEditCount = circuit->getEditCount();
+		unsigned long long lastSaved = fileData.lastSavedEdit.at(UUID);
+		if (lastSaved >= currentEditCount) {
+			logInfo("No changes to save ({})", "CircuitFileManager", iter->second);
+			return true;
+		}
+		// fileData.lastSavedEdit[UUID] = currentEditCount; // Should this be here? Move into GatalityParser?
+	} else {
+		SharedProceduralCircuit proceduralCircuit = circuitManager->getProceduralCircuitManager()->getProceduralCircuit(UUID);
+		if (!proceduralCircuit) {
+			logError("Save failed! No Circuit or ProceduralCircuit with UUID {}", "CircuitFileManager", UUID); // this should not happen
+			return false;
+		}
+	}
 
 	GatalityParser saver(this, circuitManager);
 	if (saver.save(fileData, false)) {
-		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", iter->second);
+		for (auto& pair : fileData.lastSavedEdit) {
+			SharedCircuit savedCircuit = circuitManager->getCircuit(pair.first);
+			if (savedCircuit) pair.second = savedCircuit->getEditCount();
+		}
+		logInfo("Successfully saved to: {}", "CircuitFileManager", iter->second);
 		return true;
 	}
 	return false;
 }
 
-bool CircuitFileManager::saveAllDependencies(circuit_id_t circuitId) {
-    const BlockContainer* blockContainer = circuitManager->getCircuit(circuitId)->getBlockContainer();
-    const CircuitBlockDataManager* circuitBlockDataManager = circuitManager->getCircuitBlockDataManager();
-    for (const std::pair<block_id_t, Block>& iter: *blockContainer){
-        // could check if it primitive first but shouldn't need to
-        circuit_id_t id = circuitBlockDataManager->getCircuitId(iter.second.type());
-        if (id != 0) {
-            if (!saveCircuit(id)) {
-                logWarning("Failed to save subcircuit: {}", "CircuitFileManager", id);
-                return false;
-            }
-        }
-    }
-    return true;
-}
+// bool CircuitFileManager::saveAllDependencies(const std::string& UUID) {
+// 	const BlockContainer* blockContainer = circuitManager->getCircuit(circuitId)->getBlockContainer();
+// 	const CircuitBlockDataManager* circuitBlockDataManager = circuitManager->getCircuitBlockDataManager();
+// 	for (const std::pair<block_id_t, Block>& iter : *blockContainer) {
+// 		// could check if it primitive first but shouldn't need to
+// 		circuit_id_t id = circuitBlockDataManager->getCircuitId(iter.second.type());
+// 		if (id != 0) {
+// 			if (!saveCircuit(id)) {
+// 				logWarning("Failed to save subcircuit: {}", "CircuitFileManager", id);
+// 				return false;
+// 			}
+// 		}
+// 	}
+// 	return true;
+// }
 
-bool CircuitFileManager::saveAsMultiCircuitFile(const std::unordered_set<circuit_id_t>& circuits, const std::string& fileLocation) {
-    GatalityParser saver(this, circuitManager);
-    FileData fileData(fileLocation);
-    fileData.circuitIds = circuits; // put all circuits in here, and the saver will save as a single mulit-circuit file
-    if (saver.save(fileData, true)) {
-		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocation);
-		return true;
-    }
-    return false;
-}
+// bool CircuitFileManager::saveAsMultiFile(const std::unordered_set<std::string>& UUIDs, const std::string& fileLocation) {
+//     GatalityParser saver(this, circuitManager);
+//     FileData fileData(fileLocation);
+//     fileData.circuitIds = circuits; // put all circuits in here, and the saver will save as a single mulit-circuit file
+//     if (saver.save(fileData, true)) {
+// 		logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocation);
+// 		return true;
+//     }
+//     return false;
+// }
 
-bool CircuitFileManager::saveAsNewProject(const std::unordered_set<circuit_id_t>& circuits, const std::string& fileLocationPrefix) {
-    GatalityParser saver(this, circuitManager);
+// bool CircuitFileManager::saveAsNewProject(const std::unordered_set<std::string>& UUIDs, const std::string& fileLocationPrefix) {
+// 	GatalityParser saver(this, circuitManager);
+//
+// 	FileData fileData(fileLocationPrefix);
+// 	int untitled = 1;
+//
+// 	std::filesystem::path prefixPath(fileLocationPrefix);
+// 	if (!fileLocationPrefix.empty() && fileLocationPrefix.back() != std::filesystem::path::preferred_separator) {
+// 		prefixPath += std::filesystem::path::preferred_separator;
+// 	}
+//
+// 	for (circuit_id_t id : circuits) {
+// 		fileData.circuitIds = { id }; // isolate each circuit id and save them individually
+// 		std::map<circuit_id_t, std::string>::iterator itr = circuitIdToFilePath.find(id);
+// 		if (itr == circuitIdToFilePath.end()) {
+// 			// give default name
+// 			fileData.fileLocation = (prefixPath / ("Untitled_" + std::to_string(untitled++))).string();
+// 		} else {
+// 			// get the name that we loaded the circuit in as
+// 			fileData.fileLocation = (prefixPath / std::filesystem::path(itr->second).filename()).string();
+// 		}
+// 		if (saver.save(fileData, true)) {
+// 			logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocationPrefix);
+// 		} else {
+// 			return false;
+// 		}
+// 	}
+// 	return true;
+// }
 
-    FileData fileData(fileLocationPrefix);
-    int untitled = 1;
-
-    std::filesystem::path prefixPath(fileLocationPrefix);
-    if (!fileLocationPrefix.empty() && fileLocationPrefix.back() != std::filesystem::path::preferred_separator) {
-        prefixPath += std::filesystem::path::preferred_separator;
-    }
-
-    for (circuit_id_t id: circuits){
-        fileData.circuitIds = {id}; // isolate each circuit id and save them individually
-        std::map<circuit_id_t, std::string>::iterator itr = circuitIdToFilePath.find(id);
-        if (itr == circuitIdToFilePath.end()) {
-            // give default name
-            fileData.fileLocation = (prefixPath / ("Untitled_"+std::to_string(untitled++))).string();
-        } else {
-            // get the name that we loaded the circuit in as
-            fileData.fileLocation = (prefixPath / std::filesystem::path(itr->second).filename()).string();
-        }
-        if (saver.save(fileData, true)) {
-            logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocationPrefix);
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation) {
-    std::map<std::string, FileData>::iterator iter = filePathToFile.find(fileLocation);
+void CircuitFileManager::setSaveFilePath(const std::string& UUID, const std::string& fileLocation) {
+	std::map<std::string, FileData>::iterator iter = filePathToFile.find(fileLocation);
 	if (iter == filePathToFile.end()) {
 		iter = filePathToFile.emplace(fileLocation, fileLocation).first;
 	} else {
-		if (iter->second.circuitIds.contains(circuitId)) return;
+		if (iter->second.UUIDs.contains(UUID)) return;
 	}
-	iter->second.circuitIds.emplace(circuitId);
-    iter->second.circuitLastSaved[circuitId] = 0;
-	
-    std::map<circuit_id_t, std::string>::iterator iter2 = circuitIdToFilePath.find(circuitId);
-	if (iter2 != circuitIdToFilePath.end()) {
-		filePathToFile.at(iter2->second).circuitIds.erase(circuitId);
+	iter->second.UUIDs.emplace(UUID);
+	SharedCircuit circuit = circuitManager->getCircuit(UUID);
+	if (circuit) {
+		iter->second.lastSavedEdit[UUID] = 0;
 	}
-	circuitIdToFilePath[circuitId] = fileLocation;
+
+	std::map<std::string, std::string>::iterator iter2 = UUIDToFilePath.find(UUID);
+	if (iter2 != UUIDToFilePath.end()) {
+		filePathToFile.at(iter2->second).UUIDs.erase(UUID);
+		if (circuit) filePathToFile.at(iter2->second).lastSavedEdit.erase(UUID);
+		iter2->second = fileLocation;
+	} else {
+		UUIDToFilePath[UUID] = fileLocation;
+	}
 }
 
-const std::string* CircuitFileManager::getCircuitSavePath(circuit_id_t circuitId) const {
-	auto iter = circuitIdToFilePath.find(circuitId);
-	if (iter == circuitIdToFilePath.end()) return nullptr;
-	return &(iter->second);
-}
-
-const std::string* CircuitFileManager::getProceduralCircuitFilePath(const std::string& proceduralCircuitUUID) const {
-	auto iter = proceduralCircuitUUIDToFilePath.find(proceduralCircuitUUID);
-	if (iter == proceduralCircuitUUIDToFilePath.end()) return nullptr;
+const std::string* CircuitFileManager::getSavePath(const std::string& UUID) const {
+	auto iter = UUIDToFilePath.find(UUID);
+	if (iter == UUIDToFilePath.end()) return nullptr;
 	return &(iter->second);
 }
 
@@ -159,9 +174,8 @@ circuit_id_t CircuitFileManager::loadParsedCircuit(SharedParsedCircuit parsedCir
 	}
 	circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
 	if (parsedCircuit->getAbsoluteFilePath() != "") {
-		setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
+		setSaveFilePath(circuitManager->getCircuit(id)->getUUID(), parsedCircuit->getAbsoluteFilePath());
 	}
-	//circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType()
 
 	return id; // 0 if circuit creation failed
 }
