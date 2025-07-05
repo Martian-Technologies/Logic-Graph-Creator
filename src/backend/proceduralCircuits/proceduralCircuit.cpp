@@ -11,7 +11,13 @@ ProceduralCircuitParameters::ProceduralCircuitParameters(std::istream& ss) {
 	}
 	while (true) {
 		std::string str;
-		if (ss.peek() != '"') break;
+		ss >> cToken;
+		if (cToken != ',') ss.unget();
+		ss >> cToken;
+		ss.unget();
+		if (cToken != '"') {
+			break;
+		}
 		ss >> std::quoted(str);
 		ss >> cToken;
 		int value = 0;
