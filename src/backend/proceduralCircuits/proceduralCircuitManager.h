@@ -15,6 +15,7 @@ public:
 		std::shared_ptr<ProceduralCircuitType> proceduralCircuit = std::make_shared<ProceduralCircuitType>(circuitManager, dataUpdateEventManager, name, uuid);
 		pathToUUID.emplace(proceduralCircuit->getPath(), uuid);
 		proceduralCircuits.emplace(uuid, proceduralCircuit);
+		dataUpdateEventManager->sendEvent<std::string>("proceduralCircuitPathUpdate", proceduralCircuit->getUUID());
 		return &(proceduralCircuit->getUUID());
 	}
 

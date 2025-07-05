@@ -12,9 +12,7 @@ public:
 		DataUpdateEventManager* dataUpdateEventManager,
 		ProceduralCircuitManager* proceduralCircuitManager,
 		ToolManagerManager* toolManagerManager,
-		Rml::ElementDocument* document,
-		Rml::Element* itemTreeParent,
-		Rml::Element* modeTreeParent
+		Rml::ElementDocument* document
 	);
 
 	void updateToolModeOptions();
@@ -23,7 +21,13 @@ public:
 private:
 	void updateSelected(const std::string& string);
 	void updateSelectedMode(const std::string& string);
+	void setupProceduralCircuitParameterMenu();
+	void hideProceduralCircuitParameterMenu();
 
+	SharedProceduralCircuit selectedProceduralCircuit = nullptr;
+
+	Rml::ElementDocument* document;
+	Rml::Element* parameterMenu;
 	std::optional<MenuTree> menuTree;
 	std::optional<MenuTree> modeMenuTree;
 	const BlockDataManager* blockDataManager;

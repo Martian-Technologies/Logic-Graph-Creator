@@ -37,6 +37,7 @@ const std::string* ProceduralCircuitManager::createWasmProceduralCircuit(wasmtim
 		SharedWasmProceduralCircuit wasmProceduralCircuit = std::make_shared<WasmProceduralCircuit>(circuitManager, dataUpdateEventManager, std::move(wasmInstance));
 		pathToUUID.emplace(wasmProceduralCircuit->getPath(), wasmProceduralCircuit->getUUID());
 		proceduralCircuits.emplace(wasmProceduralCircuit->getUUID(), wasmProceduralCircuit);
+		dataUpdateEventManager->sendEvent<std::string>("proceduralCircuitPathUpdate", wasmProceduralCircuit->getUUID());
 		return &(wasmProceduralCircuit->getUUID());
 	}
 	return nullptr;

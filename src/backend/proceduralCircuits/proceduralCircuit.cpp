@@ -59,6 +59,7 @@ ProceduralCircuit::~ProceduralCircuit() {
 }
 
 void ProceduralCircuit::setProceduralCircuitName(const std::string& name) {
+	if (this->proceduralCircuitName == name) return;
 	this->proceduralCircuitName = name;
 	for (const auto& iter : generatedCircuits) {
 		SharedCircuit circuit = circuitManager->getCircuit(iter.second);

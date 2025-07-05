@@ -59,6 +59,7 @@ public:
 	void setProceduralCircuitName(const std::string& name);
 
 	inline void setParameterDefaults(const ProceduralCircuitParameters& parameterDefaults) { this->parameterDefaults = parameterDefaults; regenerateAll(); }
+	const ProceduralCircuitParameters& getParameterDefaults() const { return this->parameterDefaults; }
 	const ProceduralCircuitParameters* getProceduralCircuitParameters(circuit_id_t circuitId) const;
 	circuit_id_t getCircuitId(const ProceduralCircuitParameters& parameters);
 	BlockType getBlockType(const ProceduralCircuitParameters& parameters);
