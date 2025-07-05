@@ -14,6 +14,7 @@ public:
 		std::string fileLocation;
         std::unordered_map<circuit_id_t, unsigned long long> circuitLastSaved;
 		std::unordered_set<circuit_id_t> circuitIds;
+		std::unordered_set<std::string> proceduralCircuitUUIDs;
 	};
 
 	CircuitFileManager(CircuitManager* circuitManager);
@@ -28,30 +29,17 @@ public:
 
 	void setCircuitFilePath(circuit_id_t circuitId, const std::string& fileLocation);
 	
-	const std::string* getCircuitSavePath(circuit_id_t circuitId) const {
-		auto iter = circuitIdToFilePath.find(circuitId);
-		if (iter == circuitIdToFilePath.end()) return nullptr;
-		return &(iter->second);
-	}
+	const std::string* getCircuitSavePath(circuit_id_t circuitId) const;
+
+	const std::string* getProceduralCircuitFilePath(const std::string& proceduralCircuitUUID) const;
 
 private:
-	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
-		CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
-		if (!parsedCircuit->isValid()) {
-            return 0;
-        }
-		circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
-        if (parsedCircuit->getAbsoluteFilePath() != "") {
-            setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
-        }
-        //circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType()
-
-		return id; // 0 if circuit creation failed
-	}
+	circuit_id_t loadParsedCircuit(SharedParsedCircuit parsedCircuit);
 
 	CircuitManager* circuitManager;
 	std::map<std::string, FileData> filePathToFile;
 	std::map<circuit_id_t, std::string> circuitIdToFilePath;
+	std::map<std::string, std::string> proceduralCircuitUUIDToFilePath;
 };
 
 #endif /* circuitFileManager_h */

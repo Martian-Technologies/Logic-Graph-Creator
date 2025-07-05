@@ -84,6 +84,32 @@ public:
 		return blockType;
 	}
 
+	inline BlockType setupBlockData(circuit_id_t circuitId, const std::string& proceduralCircuitUUID) {
+		auto iter = circuits.find(circuitId);
+		if (iter == circuits.end()) return BlockType::NONE;
+		SharedCircuit circuit = iter->second;
+		// Block Data
+		BlockType blockType = circuit->getBlockType();
+		if (blockType == BlockType::NONE) {
+			blockType = blockDataManager.addBlock();
+		}
+		auto blockData = blockDataManager.getBlockData(blockType);
+		if (!blockData) {
+			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
+			return BlockType::NONE;
+		}
+		blockData->setDefaultData(false);
+		blockData->setPrimitive(false);
+		blockData->setPath("Custom");
+		blockData->setSize(Vector(1));
+
+		// Circuit Block Data
+		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType, proceduralCircuitUUID);
+		circuit->setBlockType(blockType);
+
+		return blockType;
+	}
+
 	// Create a custom new block from a parsed circuit
 	inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
 		if (!parsedCircuit->isValid()) {

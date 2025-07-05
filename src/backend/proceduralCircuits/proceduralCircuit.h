@@ -7,8 +7,6 @@
 class CircuitManager;
 class CircuitBlockData;
 
-typedef unsigned int procedural_circuit_id_t;
-
 struct ProceduralCircuitParameters {
 	std::string toString() const {
 		std::string str = "(";

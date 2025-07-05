@@ -139,3 +139,29 @@ void CircuitFileManager::setCircuitFilePath(circuit_id_t circuitId, const std::s
 	}
 	circuitIdToFilePath[circuitId] = fileLocation;
 }
+
+const std::string* CircuitFileManager::getCircuitSavePath(circuit_id_t circuitId) const {
+	auto iter = circuitIdToFilePath.find(circuitId);
+	if (iter == circuitIdToFilePath.end()) return nullptr;
+	return &(iter->second);
+}
+
+const std::string* CircuitFileManager::getProceduralCircuitFilePath(const std::string& proceduralCircuitUUID) const {
+	auto iter = proceduralCircuitUUIDToFilePath.find(proceduralCircuitUUID);
+	if (iter == proceduralCircuitUUIDToFilePath.end()) return nullptr;
+	return &(iter->second);
+}
+
+circuit_id_t CircuitFileManager::loadParsedCircuit(SharedParsedCircuit parsedCircuit) {
+	CircuitValidator validator(*parsedCircuit, circuitManager->getBlockDataManager());
+	if (!parsedCircuit->isValid()) {
+		return 0;
+	}
+	circuit_id_t id = circuitManager->createNewCircuit(parsedCircuit.get());
+	if (parsedCircuit->getAbsoluteFilePath() != "") {
+		setCircuitFilePath(id, parsedCircuit->getAbsoluteFilePath());
+	}
+	//circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType()
+
+	return id; // 0 if circuit creation failed
+}

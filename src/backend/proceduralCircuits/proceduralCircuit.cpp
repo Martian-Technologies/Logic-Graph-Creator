@@ -52,7 +52,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	generatedCircuits[realParameters] = id;
 
 	// Setup the block to be a IC
-	BlockType type = circuitManager->setupBlockData(id);
+	BlockType type = circuitManager->setupBlockData(id, proceduralCircuitUUID);
 	if (type == BlockType::NONE) return 0;
 
 	// Get useful objects

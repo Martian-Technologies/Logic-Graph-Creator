@@ -212,6 +212,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 	// find all required imports
 	// not ideal but if we loop through from maxBlockId down then we will find all dependencies across every circuit, not just this one
 	std::unordered_set<BlockType> imports;
+	std::set<std::string> proceduralCircuitImports;
 	for (auto itr = blockContainer->begin(); itr != blockContainer->end(); ++itr) {
 		BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(itr->second.type());
 		if (!blockData) {
@@ -220,14 +221,29 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 		}
 		if (blockData->isPrimitive() || !imports.insert(blockData->getBlockType()).second) continue;
 		circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockData->getBlockType());
-		SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
-		const std::string* subCircuitPath = circuitFileManager->getCircuitSavePath(subCircuitId);
-		if (!subCircuitPath) {
-			logError("Count not find save path for depedecy {}", "GatalityParser", circuitManager->getCircuit(subCircuitId)->getCircuitNameNumber());
-			continue;
+		const CircuitBlockData* subCircuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(subCircuitId);
+		const std::optional<std::string>& proceduralCircuitUUID = subCircuitBlockData->getProceduralCircuitUUID();
+		if (proceduralCircuitUUID) {
+			const std::string* subCircuitPath = circuitFileManager->getProceduralCircuitFilePath(proceduralCircuitUUID);
+			if (!subCircuitPath) {
+				logError(
+					"Count not find save path for depedecy {}", "GatalityParser",
+					circuitManager->getProceduralCircuitManager()->getProceduralCircuit(*proceduralCircuitUUID)->getProceduralCircuitName()
+				);
+				continue;
+			}
+			std::string relPath = std::filesystem::relative(std::filesystem::path(*subCircuitPath), std::filesystem::path(path) / "..").string();
+			outputFile << "import \"" << relPath << "\"\n";
+		} else {
+			SharedCircuit circuit = circuitManager->getCircuit(subCircuitId);
+			const std::string* subCircuitPath = circuitFileManager->getCircuitSavePath(subCircuitId);
+			if (!subCircuitPath) {
+				logError("Count not find save path for depedecy {}", "GatalityParser", circuitManager->getCircuit(subCircuitId)->getCircuitNameNumber());
+				continue;
+			}
+			std::string relPath = std::filesystem::relative(std::filesystem::path(*subCircuitPath), std::filesystem::path(path) / "..").string();
+			outputFile << "import \"" << relPath << "\"\n";
 		}
-		std::string relPath = std::filesystem::relative(std::filesystem::path(*subCircuitPath), std::filesystem::path(path) / "..").string();
-		outputFile << "import \"" << relPath << "\"\n"; // TODO make relative path from this file
 	}
 
 	const CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(circuitId);

@@ -10,6 +10,10 @@
 class CircuitBlockData {
 public:
 	CircuitBlockData(circuit_id_t id, DataUpdateEventManager* dataUpdateEventManager) : id(id), dataUpdateEventManager(dataUpdateEventManager) { }
+	CircuitBlockData(circuit_id_t id, DataUpdateEventManager* dataUpdateEventManager, const std::string& proceduralCircuitUUID) :
+		id(id), dataUpdateEventManager(dataUpdateEventManager), proceduralCircuitUUID(proceduralCircuitUUID) { }
+
+	inline const std::optional<std::string>& getProceduralCircuitUUID() const { return proceduralCircuitUUID; }
 
 	inline void setBlockType(BlockType blockType) { this->blockType = blockType; }
 	inline BlockType getBlockType() const { return blockType; }
@@ -43,6 +47,7 @@ private:
 	DataUpdateEventManager* dataUpdateEventManager;
 	BlockType blockType;
 	circuit_id_t id;
+	std::optional<std::string> proceduralCircuitUUID = std::nullopt;
 
 };
 
