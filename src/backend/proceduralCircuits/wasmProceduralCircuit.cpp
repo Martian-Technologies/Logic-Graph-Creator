@@ -52,7 +52,7 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thi
 
 	// Linker to associate "env" functions
 	wasmtime::Linker linker(*Wasm::getEngine());
-	wasmtime::Result<std::__1::monostate> linkerResult = wasmtime::Result<std::__1::monostate>(nullptr);
+	wasmtime::Result<std::monostate> linkerResult = wasmtime::Result<std::monostate>(nullptr);
 	linkerResult = linker.define(*Wasm::getStore(), "env", "getParameter", getParameterFunc);
 	if (!linkerResult) {
 		logError("could not create link to env.getParameter()", "WasmProceduralCircuit::WasmInstance");
