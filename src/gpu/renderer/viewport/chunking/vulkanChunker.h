@@ -156,9 +156,9 @@ private:
 
 class ChunkChain {
 public:
-	inline RenderedBlocks& getBlocksForUpdating() { allocationDirty = true; return blocks; }
-	inline RenderedWires& getWiresForUpdating() { allocationDirty = true; return wires; }
-	void updateAllocation(VulkanDevice* device);
+	inline RenderedBlocks& getRenderedBlocks() { allocationDirty = true; return blocks; }
+	inline RenderedWires& getRenderedWires() { allocationDirty = true; return wires; }
+	void rebuildAllocation(VulkanDevice* device);
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
 	
@@ -193,7 +193,7 @@ public:
 
 private:
 	void updateCircuit(Difference* diff);
-	void updateChunksOverConnection(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
+	void updateWireOverChunks(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
 	
 private:
 	std::unordered_map<Position, ChunkChain> chunks;
