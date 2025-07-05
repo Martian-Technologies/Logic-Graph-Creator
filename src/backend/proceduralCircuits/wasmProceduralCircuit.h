@@ -19,6 +19,7 @@ public:
 		inline bool isValid() const { return valid; }
 		inline const std::string& getName() const { return name; }
 		inline const std::string& getUUID() const { return UUID; }
+		inline const ProceduralCircuitParameters& getDefaultParameters() const { return defaultParameters; }
 
 	private:
 		std::string wasmToString(int32_t wasmPtr);
@@ -30,9 +31,11 @@ public:
 		bool valid = false;
 		std::string name;
 		std::string UUID;
+		ProceduralCircuitParameters defaultParameters;
 
 		// per wasm run need data
 		mutable unsigned int portId = 0;
+		mutable const ProceduralCircuitParameters* parameters;
 		mutable SharedCircuit circuit = nullptr;
 		mutable BlockData* blockData = nullptr;
 		mutable CircuitBlockData* circuitBlockData = nullptr;

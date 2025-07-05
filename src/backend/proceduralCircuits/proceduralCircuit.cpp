@@ -2,6 +2,45 @@
 
 #include "../circuit/circuitManager.h"
 
+ProceduralCircuitParameters::ProceduralCircuitParameters(std::istream& ss) {
+	char cToken;
+	ss >> cToken;
+	if (cToken != '(') {
+		ss.unget(); // Makes the stream be unchanged from when it was passed in
+		return;
+	}
+	while (true) {
+		std::string str;
+		if (ss.peek() != '"') break;
+		ss >> std::quoted(str);
+		ss >> cToken;
+		int value = 0;
+		ss >> value;
+		parameters[str] = value;
+	}
+	ss.ignore(std::numeric_limits<std::streamsize>::max(), ')');
+}
+
+ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(const ProceduralCircuitParameters& other) {
+	if (this != &other)
+		parameters = other.parameters;
+	return *this;
+}
+ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(ProceduralCircuitParameters&& other) {
+	if (this != &other)
+		parameters = std::move(other.parameters);
+	return *this;
+}
+
+std::string ProceduralCircuitParameters::toString() const {
+	std::string str = "(";
+	for (const auto& iter : parameters) {
+		if (str.size() != 1) str += ", ";
+		str += '"' + iter.first + "\": " + std::to_string(iter.second);
+	}
+	return str + ")";
+}
+
 ProceduralCircuit::ProceduralCircuit(
 	CircuitManager* circuitManager,
 	DataUpdateEventManager* dataUpdateEventManager,

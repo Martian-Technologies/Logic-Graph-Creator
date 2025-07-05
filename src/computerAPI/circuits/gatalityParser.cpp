@@ -151,11 +151,7 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 				} else {
 					SharedProceduralCircuit proceduralCircuit = circuitManager->getProceduralCircuitManager()->getProceduralCircuit(blockTypeStr);
 					if (proceduralCircuit) {
-						inputFile >> cToken;
-						std::string proceduralCircuitParameters;
-						std::getline(inputFile, proceduralCircuitParameters, ')');
-						logInfo(proceduralCircuitParameters);
-						blockType = proceduralCircuit->getBlockType(ProceduralCircuitParameters());
+						blockType = proceduralCircuit->getBlockType(ProceduralCircuitParameters(inputFile));
 					} else {
 						logError("Count not find Circuit or ProceduralCircuit with UUID: {}", "GatalityParser", blockTypeStr);
 						return circuitIds;

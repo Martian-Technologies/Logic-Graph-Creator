@@ -8,14 +8,16 @@ class CircuitManager;
 class CircuitBlockData;
 
 struct ProceduralCircuitParameters {
-	std::string toString() const {
-		std::string str = "(";
-		for (const auto& iter : parameters) {
-			if (str.size() != 1) str += ", ";
-			str += iter.first + ": " + std::to_string(iter.second);
-		}
-		return str + ")";
-	}
+	ProceduralCircuitParameters() { }
+	ProceduralCircuitParameters(const ProceduralCircuitParameters& other) : parameters(other.parameters) { }
+	ProceduralCircuitParameters(ProceduralCircuitParameters&& other) : parameters(std::move(other.parameters)) { }
+
+	ProceduralCircuitParameters(std::istream& ss);
+
+	ProceduralCircuitParameters& operator=(const ProceduralCircuitParameters& other);
+	ProceduralCircuitParameters& operator=(ProceduralCircuitParameters&& other);
+
+	std::string toString() const;
 
 	bool operator==(const ProceduralCircuitParameters& other) const {
 		return parameters == other.parameters;

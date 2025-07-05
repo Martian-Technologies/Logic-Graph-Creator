@@ -17,6 +17,10 @@ extern "C" {
 
 	exportedVar(char*, UUID, UUID)
 	exportedVar(char*, name, Name)
+	exportedVar(char*, defaultParameters, DefaultParameters)
+
+	externalFunction(getParameter)
+	int getParameter(const char* key);
 
 	externalFunction(tryInsertBlock)
 	bool tryInsertBlock(cord_t x, cord_t y, Rotation rotation, BlockType blockType);
