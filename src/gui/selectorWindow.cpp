@@ -1,5 +1,6 @@
 #include "selectorWindow.h"
 #include "backend/dataUpdateEventManager.h"
+#include "gui/interaction/eventPasser.h"
 #include "util/algorithm.h"
 
 SelectorWindow::SelectorWindow(
@@ -21,6 +22,33 @@ SelectorWindow::SelectorWindow(
 	dataUpdateEventReceiver.linkFunction("setToolUpdate", std::bind(&SelectorWindow::updateToolModeOptions, this));
 
 	parameterMenu = document->GetElementById("parameter-menu");
+	parameterMenu->GetElementById("reset-parameters")->AddEventListener(Rml::EventId::Click, new EventPasser([this](Rml::Event& event) {setupProceduralCircuitParameterMenu();}));
+	parameterMenu->GetElementById("create-block")->AddEventListener(Rml::EventId::Click, new EventPasser(
+		[this](Rml::Event& event) {
+			if (!selectedProceduralCircuit) return;
+			Rml::Element* parametersElement = parameterMenu->GetElementById("parameter-menu-parameters");
+
+			ProceduralCircuitParameters proceduralCircuitParameters;
+			for (unsigned int i = 0; i < parametersElement->GetNumChildren(); ++i) {
+				Rml::ElementList elements;
+				parametersElement->GetChild(i)->GetElementsByClassName(elements, "parameter-name");
+				std::string key = elements[0]->GetInnerRML();
+				key.pop_back();
+				elements.clear();
+				parametersElement->GetChild(i)->GetElementsByClassName(elements, "parameter-input");
+				Rml::ElementFormControlInput* parameterInput = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(elements[0]);
+				std::string str = parameterInput->GetValue();
+				try {
+					int value = std::stoi(str);
+					proceduralCircuitParameters.parameters.emplace(std::move(key), value);
+				} catch (std::exception const& ex) {
+					logError("Invalid parameter for {}: {}. {}", "", key, str, ex.what());
+					return;
+				}
+			}
+			this->toolManagerManager->setBlock(selectedProceduralCircuit->getBlockType(proceduralCircuitParameters));
+		}
+	));
 
 	updateList();
 	updateToolModeOptions();
@@ -54,6 +82,7 @@ void SelectorWindow::updateSelected(const std::string& string) {
 	std::vector parts = stringSplit(string, '/');
 	if (parts.size() <= 1) return;
 	if (parts[0] == "Blocks") {
+		selectedProceduralCircuit = nullptr; // either it will be set or this should go away!
 		std::string path = string.substr(7, string.size() - 7);
 		BlockType blockType = blockDataManager->getBlockType(path);
 		if (blockType == BlockType::NONE) {
@@ -62,10 +91,10 @@ void SelectorWindow::updateSelected(const std::string& string) {
 				selectedProceduralCircuit = proceduralCircuitManager->getProceduralCircuit(*uuid);
 				if (selectedProceduralCircuit) setupProceduralCircuitParameterMenu();
 				else logError("unknow block with path: {}", "SelectorWindow", path);
-			} else {
 			}
 		}
 		toolManagerManager->setBlock(blockType);
+		if (!selectedProceduralCircuit) hideProceduralCircuitParameterMenu();
 	} else if (parts[0] == "Tools") {
 		toolManagerManager->setTool(string.substr(6, string.size() - 6));
 	} else {
