@@ -8,19 +8,18 @@ const char* defaultParameters = "(\"size\": 1)";
 
 bool generateCircuit() {
 	int size = getParameter("size");
-	logInfo(size)
 
 	setSize(2, size);
 
-	tryInsertBlock(1, 0, 0, 13);
+	tryInsertBlock(1, 0, 0, BlockType::LIGHT);
 	addConnectionOutput(1, 0, 1, 0);
 
-	tryInsertBlock(0, 0, 0, 1);
+	tryInsertBlock(0, 0, 0, BlockType::AND);
 
 	tryCreateConnection(0, 0, 1, 0);
 
 	for (int i = 0; i < size; i++) {
-		tryInsertBlock(-1, i, 0, 11);
+		tryInsertBlock(-1, i, 0, BlockType::SWITCH);
 		addConnectionInput(-1, i, 0, i);
 		tryCreateConnection(-1, i, 0, 0);
 	}
