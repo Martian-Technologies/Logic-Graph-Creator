@@ -36,14 +36,12 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileLis
 	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), document, evalTreeParent);
 
 	//  blocks/tools menutree
-	Rml::Element* itemTreeParent = document->GetElementById("item-selection-tree");
-	Rml::Element* modeTreeParent = document->GetElementById("mode-selection-tree");
 	selectorWindow.emplace(
 		backend->getBlockDataManager(),
 		backend->getDataUpdateEventManager(),
 		backend->getCircuitManager().getProceduralCircuitManager(),
 		&(backend->getToolManagerManager()),
-		document, itemTreeParent, modeTreeParent
+		document
 	);
 
 	Rml::Element* blockCreationMenu = document->GetElementById("block-creation-form");
