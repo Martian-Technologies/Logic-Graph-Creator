@@ -19,12 +19,6 @@ public:
 		return &(proceduralCircuit->getUUID());
 	}
 
-	template<>
-	const std::string* createProceduralCircuit<WasmProceduralCircuit>(const std::string& name, const std::string& uuid) {
-		logError("WasmProceduralCircuit cant be made with createProceduralCircuit. Call createWasmProceduralCircuit() instead.", "ProceduralCircuitManager");
-		return nullptr; // Need to return something. Maybe make this a optinal?
-	}
-
 	const std::string* createWasmProceduralCircuit(wasmtime::Module wasmModule);
 
 	const std::string* getProceduralCircuitUUID(const std::string& path) const;
@@ -45,5 +39,12 @@ private:
 	std::map<std::string, SharedProceduralCircuit> proceduralCircuits;
 	std::map<std::string, std::string> pathToUUID;
 };
+
+
+template<>
+inline const std::string* ProceduralCircuitManager::createProceduralCircuit<WasmProceduralCircuit>(const std::string& name, const std::string& uuid) {
+	logError("WasmProceduralCircuit cant be made with createProceduralCircuit. Call createWasmProceduralCircuit() instead.", "ProceduralCircuitManager");
+	return nullptr;
+}
 
 #endif /* proceduralCircuitManager_h */
