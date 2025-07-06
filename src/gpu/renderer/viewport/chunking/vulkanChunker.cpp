@@ -1,6 +1,7 @@
 #include "vulkanChunker.h"
 
 #include "../sharedLogic/logicRenderingUtils.h"
+#include "backend/position/position.h"
 #include "logging/logging.h"
 
 const int CHUNK_SIZE = 25;
@@ -106,7 +107,7 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // ChunkChain
 // =========================================================================================================
 
-void ChunkChain::rebuildAllocation(VulkanDevice* device) {
+void Chunk::rebuildAllocation(VulkanDevice* device) {
 	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
 		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(device, blocks, wires);
@@ -130,7 +131,7 @@ void ChunkChain::rebuildAllocation(VulkanDevice* device) {
 	allocationDirty = false;
 }
 
-std::optional<std::shared_ptr<VulkanChunkAllocation>> ChunkChain::getAllocation() {
+std::optional<std::shared_ptr<VulkanChunkAllocation>> Chunk::getAllocation() {
 	// if the buffer has finished allocating, replace the newest with it
 	if (currentlyAllocating.has_value() && currentlyAllocating.value()->isAllocationComplete()) {
 		newestAllocation = currentlyAllocating;
@@ -143,7 +144,7 @@ std::optional<std::shared_ptr<VulkanChunkAllocation>> ChunkChain::getAllocation(
 	return newestAllocation;
 }
 
-void ChunkChain::annihilateOrphanGBs() {
+void Chunk::annihilateOrphanGBs() {
 	// erase all GBs that are complete and not pointed to
 	auto itr = gbJail.begin();
 	while (itr != gbJail.end()) {
@@ -360,115 +361,97 @@ void VulkanChunker::updateCircuit(Difference* diff) {
 	}
 }
 
+std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition start, FPosition end) {
+	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license) also known as DDA (or Ben is lying)
+	// Thank you One Lone Coder and lodev
+
+	std::vector<ChunkIntersection> intersections;
+
+	FVector diff = end - start;
+	float distance = diff.length();
+	FVector dir = diff / distance;
+
+	Position chunk = getChunk(start.snap());
+
+	//length of ray from one x or y-side to next x or y-side
+	FVector rayUnitStepSize = FVector( sqrt(1 + (dir.dy / dir.dx) * (dir.dy / dir.dx)), sqrt(1 + (dir.dx / dir.dy) * (dir.dx / dir.dy)) ) * CHUNK_SIZE;
+
+	// starting conditions
+	FVector rayLength1D;
+	Vector step;
+	if (dir.dx < 0)
+	{
+		step.dx = -CHUNK_SIZE;
+		rayLength1D.dx = ((start.x - float(chunk.x)) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
+	} else {
+		step.dx = CHUNK_SIZE;
+		rayLength1D.dx = ((float(chunk.x + CHUNK_SIZE) - start.x) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
+	}
+	if (dir.dy < 0)
+	{
+		step.dy = -CHUNK_SIZE;
+		rayLength1D.dy = ((start.y - float(chunk.y)) / float(CHUNK_SIZE)) * rayUnitStepSize.dy;
+	} else {
+		step.dy = CHUNK_SIZE;
+		rayLength1D.dy = ((float(chunk.y + CHUNK_SIZE) - start.y) / float(CHUNK_SIZE)) * rayUnitStepSize.dy;
+	}
+
+	FPosition currentPos = start;
+	float currentDistance = 0.0f;
+	while (currentDistance < distance) {
+
+		Position oldChunk = chunk;
+
+		// decide which direction we walk
+		if (rayLength1D.dx < rayLength1D.dy)
+		{
+			chunk.x += step.dx;
+			currentDistance = rayLength1D.dx;
+			rayLength1D.dx += rayUnitStepSize.dx;
+
+		} else if (rayLength1D.dx > rayLength1D.dy) {
+			chunk.y += step.dy;
+			currentDistance = rayLength1D.dy;
+			rayLength1D.dy += rayUnitStepSize.dy;
+		} else {
+			chunk += step;
+			currentDistance = rayLength1D.dx;
+			rayLength1D.dx += rayUnitStepSize.dx;
+			rayLength1D.dy += rayUnitStepSize.dy;
+		}
+
+		// clamp overshoot
+		if (currentDistance > distance) {
+			currentDistance = distance;
+		}
+
+		// add point at current distance
+		FPosition newPos = start + dir * currentDistance;
+		intersections.push_back({oldChunk, currentPos, newPos});
+		currentPos = newPos;
+	}
+
+	return intersections;
+}
+
 void VulkanChunker::updateWireOverChunks(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate) {
 
 	// TODO - handle same position
-
-	// the Jamisonian algorithm for calculating (lines which aren't necessary inside of a chunk but still bound to them)'s input and output points of intersections with chunks on a grid
-	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license)
-
-	// honestly it's a little jank and it may break if the offsets leave the block far enough
-	// and it won't work at all for curved wires, we will prob redesign system for that
+	std::pair<Position, Position> wire = { start, end };
 
 	// get state address for connection
-	Address relativeAddress;
-	relativeAddress = start; // TODO - use actual address
+	Address relativeAddress = start; // TODO - use actual address
 
-	// chunk positions
-	Position currentChunk = getChunk(start);
-	Position endChunk = getChunk(end);
+	// get start line position
+	FPosition startF = start.free() + getOutputOffset(startRotation);
+	FPosition endF = end.free() + getInputOffset(endRotation);
 
-	// start line position
-	FVector startOffset = getOutputOffset(startRotation);
-	f_cord_t currentX = start.x + startOffset.dx;
-	f_cord_t currentY = start.y + startOffset.dy;
-
-	// end line position
-	FVector endOffset = getInputOffset(endRotation);
-	f_cord_t endX = end.x + endOffset.dx;
-	f_cord_t endY = end.y + endOffset.dy;
-
-	// line change and slopes
-	f_cord_t dx = endX - currentX;
-	cord_t dirX = (dx > 0) ? 1 : -1;
-	f_cord_t dy = endY - currentY;
-	cord_t dirY = (dy > 0) ? 1 : -1;
-	f_cord_t slope = dy / dx;
-	f_cord_t iSlope = dx / dy;
-
-	// calculate the distance to the next chunk border from starting X
-	f_cord_t relativeChunkPercentX = (currentX / CHUNK_SIZE);
-	relativeChunkPercentX -= (float)currentChunk.x / CHUNK_SIZE; // make it relative
-	f_cord_t dstToNextChunkBorderX = (dirX > 0 ? 1.0f - relativeChunkPercentX : -relativeChunkPercentX) * CHUNK_SIZE;
-
-	// calculate the distance to the next chunk border from starting Y
-	f_cord_t relativeChunkPercentY = (currentY / CHUNK_SIZE);
-	relativeChunkPercentY -= (float)currentChunk.y / CHUNK_SIZE; // make it relative
-	f_cord_t dstToNextChunkBorderY = (dirY > 0 ? 1.0f - relativeChunkPercentY : -relativeChunkPercentY) * CHUNK_SIZE;
-
-	// go along line connecting chunks until last one
-	while (currentChunk != endChunk) {
-		bool moveHorizontal;
-
-		f_cord_t yChangeForHorizontal = dstToNextChunkBorderX * slope;
-		f_cord_t xChangeForVertical = dstToNextChunkBorderY * iSlope;
-
-		// figure out which direction we should move
-		if (currentChunk.x == endChunk.x) { moveHorizontal = false; } // check if we have purely vertical to go
-		else if (currentChunk.y == endChunk.y) { moveHorizontal = true; } // check if we have purely horizontal to go
-		else {
-			// compare movement distances, pick shortest
-
-			// get line distance (squared) for moving to vertical (x) chunk edge
-			f_cord_t horizontalTravelCost = (dstToNextChunkBorderX * dstToNextChunkBorderX) + (yChangeForHorizontal * yChangeForHorizontal);
-
-			// get line distance (squared) for moving to horizontal (y) chunk edge
-			f_cord_t verticalTravelCost = (dstToNextChunkBorderY * dstToNextChunkBorderY) + (xChangeForVertical * xChangeForVertical);
-
-			moveHorizontal = horizontalTravelCost < verticalTravelCost;
-		}
-
-		// update connection
-		f_cord_t newX = currentX;
-		f_cord_t newY = currentY;
-		if (moveHorizontal) {
-			newX += dstToNextChunkBorderX;
-			newY += yChangeForHorizontal;
-		} else {
-			newX += xChangeForVertical;
-			newY += dstToNextChunkBorderY;
-		}
-		if (add) chunks[currentChunk].getRenderedWires()[{start, end}] = { {currentX, currentY}, {newX, newY}, relativeAddress };
-		else chunks[currentChunk].getRenderedWires().erase({ start, end });
-		chunksToUpdate.insert(currentChunk);
-
-		// move in the desired direction
-		if (moveHorizontal) {
-			// update positions
-			currentX = newX;
-			currentY = newY;
-
-			dstToNextChunkBorderX = CHUNK_SIZE * dirX;
-			dstToNextChunkBorderY -= yChangeForHorizontal;
-
-			currentChunk.x += CHUNK_SIZE * dirX;
-
-		} else {
-			// update positions
-			currentX = newX;
-			currentY = newY;
-
-			dstToNextChunkBorderX -= xChangeForVertical;
-			dstToNextChunkBorderY = CHUNK_SIZE * dirY;
-
-			currentChunk.y += CHUNK_SIZE * dirY;
-		}
+	// update all wires in intersecting chunks
+	for (const ChunkIntersection& intersection : getChunkIntersections(startF, endF)) {
+		if (add) chunks[intersection.chunk].getRenderedWires()[wire] = { intersection.start, intersection.end, relativeAddress };
+		else chunks[intersection.chunk].getRenderedWires().erase(wire);
+		chunksToUpdate.insert(intersection.chunk);
 	}
-
-	// connect last chunk
-	if (add) chunks[currentChunk].getRenderedWires()[{start, end}] = { {currentX, currentY}, {endX, endY}, relativeAddress };
-	else chunks[currentChunk].getRenderedWires().erase({ start, end });
-	chunksToUpdate.insert(currentChunk);
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {

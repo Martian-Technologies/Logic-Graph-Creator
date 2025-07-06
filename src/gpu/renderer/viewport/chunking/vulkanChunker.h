@@ -1,11 +1,13 @@
 #ifndef vulkanChunker_h
 #define vulkanChunker_h
 
+#include <freetype/tttables.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
 #include "backend/address.h"
 #include "backend/circuit/circuit.h"
+#include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
 #include "gpu/helper/nBuffer.h"
@@ -154,7 +156,7 @@ private:
 
 // ====================================================================================================================
 
-class ChunkChain {
+class Chunk {
 public:
 	inline RenderedBlocks& getRenderedBlocks() { allocationDirty = true; return blocks; }
 	inline RenderedWires& getRenderedWires() { allocationDirty = true; return wires; }
@@ -182,6 +184,12 @@ struct ChunkerConnectionEnd {
 	bool isInput;
 };
 
+struct ChunkIntersection {
+	Position chunk;
+	FPosition start;
+	FPosition end;
+};
+
 class VulkanChunker {
 public:
 	VulkanChunker(VulkanDevice* device);
@@ -193,10 +201,11 @@ public:
 
 private:
 	void updateCircuit(Difference* diff);
+	std::vector<ChunkIntersection> getChunkIntersections(FPosition start, FPosition end);
 	void updateWireOverChunks(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
 	
 private:
-	std::unordered_map<Position, ChunkChain> chunks;
+	std::unordered_map<Position, Chunk> chunks;
 	std::unordered_map<Position, std::unordered_map<std::pair<Position, Position>, ChunkerConnectionEnd, WireHash>> blockToConnections;
 	std::mutex mux; // sync can be relaxed in the future
 
