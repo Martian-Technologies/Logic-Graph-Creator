@@ -63,6 +63,6 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	logInfo("Exiting Gatality...");
+	logInfo("Exiting Connection Machine...");
 	return EXIT_SUCCESS;
 }

@@ -24,7 +24,12 @@ endif()
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Gatality VERSION 0.7.0)
+project(Connection_Machine VERSION 0.7.0)
+if (APPLE)
+	set(APP_NAME "Connection Machine")
+else()
+	set(APP_NAME Connection_Machine)
+endif()
 
 # Set directories
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -36,9 +41,9 @@ file(GLOB_RECURSE PROJECT_SOURCES
 	"${SOURCE_DIR}/*.cpp"
 )
 
-option(GATALITY_BUILD_APP "Build Gatality App" ON)
-option(GATALITY_DISTRIBUTE_APP "Distribute App" OFF)
-option(GATALITY_BUILD_TESTS "Build Gatality Tests" OFF)
+option(CONNECTION_MACHINE_BUILD_APP "Build Connection Machine App" ON)
+option(CONNECTION_MACHINE_DISTRIBUTE_APP "Distribute App" OFF)
+option(CONNECTION_MACHINE_BUILD_TESTS "Build Connection Machine Tests" OFF)
 
 # ======================================= SHARED DEPENDENCY SETUP ========================================
 
@@ -51,26 +56,26 @@ add_subdirectory("${EXTERNAL_DIR}/cpplocate" EXCLUDE_FROM_ALL)
 add_subdirectory("external/wasmtime/crates/c-api")
 
 # JSON
-set(GATALITY_JSON_LIB_NAME "json")
-add_library(${GATALITY_JSON_LIB_NAME} INTERFACE)
-target_include_directories(${GATALITY_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
+set(CONNECTION_MACHINE_JSON_LIB_NAME "json")
+add_library(${CONNECTION_MACHINE_JSON_LIB_NAME} INTERFACE)
+target_include_directories(${CONNECTION_MACHINE_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
 
-if (GATALITY_BUILD_APP)
+if (CONNECTION_MACHINE_BUILD_APP)
 	# ======================================= APP DEPENDENCY SETUP =======================================
 	# Vulkan
 	find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 	# SDL
-	if (GATALITY_BUILD_TESTS) # hack to allow SDL to build without window system on linux
+	if (CONNECTION_MACHINE_BUILD_TESTS) # hack to allow SDL to build without window system on linux
 		set(SDL_UNIX_CONSOLE_BUILD ON)
 	endif()
 	set(SDL_STATIC ON)
 	add_subdirectory("${EXTERNAL_DIR}/SDL" SYSTEM EXCLUDE_FROM_ALL)
 
 	# STB Image
-	set(GATALITY_STB_IMAGE_LIB_NAME "stb_image")
-	add_library(${GATALITY_STB_IMAGE_LIB_NAME} INTERFACE)
-	target_include_directories(${GATALITY_STB_IMAGE_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/stb/")
+	set(CONNECTION_MACHINE_STB_IMAGE_LIB_NAME "stb_image")
+	add_library(${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME} INTERFACE)
+	target_include_directories(${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/stb/")
 	
 	# Freetype
 	add_subdirectory("${EXTERNAL_DIR}/freetype" SYSTEM EXCLUDE_FROM_ALL)
@@ -87,6 +92,7 @@ if (GATALITY_BUILD_APP)
 	add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
 	
 	# ===================================== CREATE APP EXECUTABLE ========================================
+	
 	# Platform specific business before add_executable
 	if(APPLE) # MacOS
 		# Icon
@@ -111,8 +117,8 @@ if (GATALITY_BUILD_APP)
 		cpplocate::cpplocate
 		VulkanMemoryAllocator
 		glm
-		${GATALITY_JSON_LIB_NAME}
-		${GATALITY_STB_IMAGE_LIB_NAME}
+		${CONNECTION_MACHINE_JSON_LIB_NAME}
+		${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
 		wasmtime
 	)
 
@@ -121,19 +127,20 @@ if (GATALITY_BUILD_APP)
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
+	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${APP_NAME}")
+
 	# Platform specific business after add_executable
 	if(APPLE) # MacOS
 		# set(CMAKE_MACOSX_BUNDLE YES)
 
 		set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
-
 		# Bundle Properties 
 		set_target_properties(${PROJECT_NAME} PROPERTIES
 			MACOSX_BUNDLE TRUE
 			# indentification
-			MACOSX_BUNDLE_BUNDLE_NAME "Gatality"
-			MACOSX_BUNDLE_GUI_IDENTIFIER "com.logic-graph-creator.Gatality"
-			MACOSX_BUNDLE_NAME "Gatality"
+			MACOSX_BUNDLE_BUNDLE_NAME "${APP_NAME}"
+			MACOSX_BUNDLE_GUI_IDENTIFIER "com.connection-machine.app"
+			MACOSX_BUNDLE_NAME "${APP_NAME}"
 			MACOSX_BUNDLE_COPYRIGHT "MIT License" # this needs changing
 			# version info
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
@@ -165,7 +172,7 @@ if (GATALITY_BUILD_APP)
 	foreach(resource_path_relative IN LISTS RESOURCE_FILES)
 		set(original_resource "${RESOURCES_DIR}/${resource_path_relative}")
 		if(APPLE)
-			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/${resource_path_relative}")
+			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/MacOS/resources/${resource_path_relative}")
 		else()
 			set(copied_resource "${CMAKE_CURRENT_BINARY_DIR}/resources/${resource_path_relative}")
 		endif()
@@ -188,7 +195,7 @@ if (GATALITY_BUILD_APP)
 
 	# ===================================== SHADER COMPILATION =========================================
 	if(APPLE)
-		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/resources/shaders")
+		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/MacOS/resources/shaders")
 	else()
 		set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/shaders")
 	endif()
@@ -217,7 +224,7 @@ if (GATALITY_BUILD_APP)
 	add_custom_target(compile-shaders DEPENDS ${SHADER_PRODUCTS})
 	add_dependencies(${PROJECT_NAME} compile-shaders)
 
-	if (APPLE AND GATALITY_DISTRIBUTE_APP)
+	if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
 		set(TEAM_ID "" CACHE STRING "The development team ID for code signing")
 		execute_process(
 			COMMAND bash -c "security find-identity -v -p codesigning | grep 'Developer ID Application' | sed -n 's/.*(\\(.*\\)).*/\\1/p'"
@@ -249,13 +256,13 @@ if (GATALITY_BUILD_APP)
 			
 			install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION ".")
 
-			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-MacOS")
+			set(CPACK_PACKAGE_FILE_NAME "$Connection-Machine-${PROJECT_VERSION}-MacOS")
 
 			install(CODE "
 				include(BundleUtilities)
-				fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\" \"\" \"${DIRS}\")
-				execute_process(COMMAND codesign --force --deep --sign ${TEAM_ID} \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\")
-				execute_process(COMMAND codesign --verify --verbose=2 \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app\")
+				fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\" \"\" \"${DIRS}\")
+				execute_process(COMMAND codesign --force --deep --sign ${TEAM_ID} \"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\")
+				execute_process(COMMAND codesign --verify --verbose=2 \"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\")
 				message(\"To sign the .dgm run\")
 				message(\"codesign --force --verbose=2 --sign $(security find-identity -v -p codesigning | grep 'Developer ID Application' | sed -n 's/.*(\\\\(.*\\\\)).*/\\\\1/p') '${CMAKE_CURRENT_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}.dmg'\")
 				message(\"To verify the .dgm is signed run\")
@@ -269,7 +276,7 @@ if (GATALITY_BUILD_APP)
 endif()
 
 # ==================================== CREATE TESTING EXECUTABLE ============================================
-if (GATALITY_BUILD_TESTS)
+if (CONNECTION_MACHINE_BUILD_TESTS)
 	# Google Testing
 	add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
 	
@@ -286,7 +293,7 @@ if (GATALITY_BUILD_TESTS)
 	set(EXTERNAL_LINKS_TESTS
 		cpplocate::cpplocate
 		gtest gtest_main
-		${GATALITY_JSON_LIB_NAME}
+		${CONNECTION_MACHINE_JSON_LIB_NAME}
 		wasmtime
 	)
 

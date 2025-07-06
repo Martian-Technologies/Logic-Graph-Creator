@@ -1,6 +1,6 @@
 # Building
 ## Introduction
-Gatality compiles on MacOS, Windows, and Linux. There are a few things you have to do in order to get it up and running:
+Connection Machine compiles on MacOS, Windows, and Linux. There are a few things you have to do in order to get it up and running:
 1. Download the code
 2. Install the dependencies (Vulkan, wasmtime)
 3. Set up the CMake build system

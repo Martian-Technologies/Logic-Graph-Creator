@@ -1,6 +1,6 @@
 #include <filesystem>
 
-#include "gatalityParser.h"
+#include "connectionMachineParser.h"
 #include "util/uuid.h"
 
 BlockType stringToBlockType(const std::string& str) {
@@ -60,22 +60,22 @@ std::string rotationToString(Rotation rotation) {
 	}
 }
 
-std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
+std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path) {
 	// Check for cyclic import
 	if (importedFiles.find(path) != importedFiles.end()) {
-		logError("Cyclic import detected: " + path, "GatalityParser");
+		logError("Cyclic import detected: " + path, "ConnectionMachineParser");
 		return {};
 	}
 	importedFiles.insert(path);
-	logInfo("Parsing Gatality Circuit File (.cir)", "GatalityParser");
+	logInfo("Parsing Connection Machine Circuit File (.cir)", "ConnectionMachineParser");
 
 	std::ifstream inputFile(path, std::ios::in | std::ios::binary);
 	if (!inputFile.is_open()) {
-		logError("Couldn't open file at path: " + path, "GatalityParser");
+		logError("Couldn't open file at path: " + path, "ConnectionMachineParser");
 		return {};
 	}
 
-	logInfo("Inserted current file as a dependency: " + path, "GatalityParser");
+	logInfo("Inserted current file as a dependency: " + path, "ConnectionMachineParser");
 
 	std::string token;
 	char cToken;
@@ -87,7 +87,7 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 	} else if (token == "version_5" || token == "version_4" || token == "version_3" || token == "version_2") {
 		version = 5;
 	} else {
-		logError("Invalid circuit file version: " + token, "GatalityParser");
+		logError("Invalid circuit file version: " + token, "ConnectionMachineParser");
 		return {};
 	}
 
@@ -112,7 +112,7 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 			std::string circuitName;
 			inputFile >> std::quoted(circuitName);
 			currentParsedCircuit->setName(circuitName);
-			logInfo("\tFound circuit: {}", "GatalityParser", circuitName);
+			logInfo("\tFound circuit: {}", "ConnectionMachineParser", circuitName);
 		} else if (token == "size:") {
 			currentParsedCircuit->markAsCustom();
 			unsigned int width, height;
@@ -153,7 +153,7 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 					if (proceduralCircuit) {
 						blockType = proceduralCircuit->getBlockType(ProceduralCircuitParameters(inputFile));
 					} else {
-						logError("Count not find Circuit or ProceduralCircuit with UUID: {}", "GatalityParser", blockTypeStr);
+						logError("Count not find Circuit or ProceduralCircuit with UUID: {}", "ConnectionMachineParser", blockTypeStr);
 						return circuitIds;
 					}
 				}
@@ -177,7 +177,7 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 				while (lineStream >> cToken) { // open paren
 					int otherConnId, otherBlockId;
 					if (!(lineStream >> otherBlockId >> otherConnId >> cToken)) {
-						logError("Failed to parse (blockid, connection_id) token", "GatalityParser");
+						logError("Failed to parse (blockid, connection_id) token", "ConnectionMachineParser");
 						break;
 					}
 					currentParsedCircuit->addConnection({
@@ -199,12 +199,12 @@ std::vector<circuit_id_t> GatalityParser::load(const std::string& path) {
 	return circuitIds;
 }
 
-bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool compressed) {
+bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData, bool compressed) {
 	const std::string& path = fileData.fileLocation;
 
 	std::ofstream outputFile(path);
 	if (!outputFile.is_open()) {
-		logError("Couldn't open file at path: {}", "GatalityParser", path);
+		logError("Couldn't open file at path: {}", "ConnectionMachineParser", path);
 		return false;
 	}
 
@@ -222,14 +222,14 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 		for (auto itr = blockContainer->begin(); itr != blockContainer->end(); ++itr) {
 			BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(itr->second.type());
 			if (!blockData) {
-				logError("Could not find block data for block {}", "GatalityParser", std::to_string(itr->second.type()));
+				logError("Could not find block data for block {}", "ConnectionMachineParser", std::to_string(itr->second.type()));
 				continue;
 			}
 			if (blockData->isPrimitive() || !imports.insert(blockData->getBlockType()).second) continue;
 			circuit_id_t subCircuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockData->getBlockType());
 			const CircuitBlockData* subCircuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(subCircuitId);
 			if (!subCircuitBlockData) {
-				logError("Could not find save path for depedecy {}", "GatalityParser", subCircuitId);
+				logError("Could not find save path for depedecy {}", "ConnectionMachineParser", subCircuitId);
 				continue;
 			}
 			const std::optional<std::string>& subProceduralCircuitUUID = subCircuitBlockData->getProceduralCircuitUUID();
@@ -243,7 +243,7 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 			}
 			subSavePath = circuitFileManager->getSavePath(*subUUID);
 			if (!subSavePath) {
-				logError("Could not find save path for depedecy {}", "GatalityParser", *subUUID);
+				logError("Could not find save path for depedecy {}", "ConnectionMachineParser", *subUUID);
 				continue;
 			}
 
@@ -287,12 +287,12 @@ bool GatalityParser::save(const CircuitFileManager::FileData& fileData, bool com
 				if (position) {
 					const Block* block = blockContainer->getBlock(*position);
 					if (!block) {
-						logError("Could not find block for connection: {}", "GatalityParser", pair.first);
+						logError("Could not find block for connection: {}", "ConnectionMachineParser", pair.first);
 						continue;
 					}
 					id = block->id();
 				} else {
-					logError("Could not find position for connection: {}", "GatalityParser", pair.first);
+					logError("Could not find position for connection: {}", "ConnectionMachineParser", pair.first);
 					id = 0;
 				}
 				const std::string* namePtr = blockData->getConnectionIdToName(pair.first);

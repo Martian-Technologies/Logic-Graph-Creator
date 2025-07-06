@@ -1,7 +1,7 @@
 <rml>
 
 	<head>
-		<title>Gatality</title>
+		<title>Connection Machine</title>
 		<link type="text/rcss" href="styles/mainWindowStyle.rcss"/>
 		<link type="text/template" href="templates/selector.rml"/>
 		<link type="text/template" href="templates/menuBar.rml"/>

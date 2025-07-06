@@ -1,15 +1,15 @@
 #include "circuitFileManager.h"
 
 #include "openCircuitsParser.h"
-#include "gatalityParser.h"
+#include "connectionMachineParser.h"
 #include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) { }
 
 std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& path) {
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
-		// our gatality file parser function
-		GatalityParser parser(this, circuitManager);
+		// our Connection Machine file parser function
+		ConnectionMachineParser parser(this, circuitManager);
 
 		std::vector<circuit_id_t> circuits = parser.load(path);
 		if (circuits.empty()) {
@@ -44,7 +44,7 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 bool CircuitFileManager::saveToFile(const std::string& path, const std::string& UUID) {
 	// Doesn't check if the file is saved, we are just saving as
 	setSaveFilePath(UUID, path);
-	GatalityParser saver(this, circuitManager);
+	ConnectionMachineParser saver(this, circuitManager);
 	if (saver.save(filePathToFile.at(path), true)) {
 		logInfo("Successfully saved to: {}", "CircuitFileManager", path);
 		return true;
@@ -68,7 +68,7 @@ bool CircuitFileManager::save(const std::string& UUID) {
 			logInfo("No changes to save ({})", "CircuitFileManager", iter->second);
 			return true;
 		}
-		// fileData.lastSavedEdit[UUID] = currentEditCount; // Should this be here? Move into GatalityParser?
+		// fileData.lastSavedEdit[UUID] = currentEditCount; // Should this be here? Move into ConnectionMachineParser?
 	} else {
 		SharedProceduralCircuit proceduralCircuit = circuitManager->getProceduralCircuitManager()->getProceduralCircuit(UUID);
 		if (!proceduralCircuit) {
@@ -77,7 +77,7 @@ bool CircuitFileManager::save(const std::string& UUID) {
 		}
 	}
 
-	GatalityParser saver(this, circuitManager);
+	ConnectionMachineParser saver(this, circuitManager);
 	if (saver.save(fileData, false)) {
 		for (auto& pair : fileData.lastSavedEdit) {
 			SharedCircuit savedCircuit = circuitManager->getCircuit(pair.first);
@@ -106,7 +106,7 @@ bool CircuitFileManager::save(const std::string& UUID) {
 // }
 
 // bool CircuitFileManager::saveAsMultiFile(const std::unordered_set<std::string>& UUIDs, const std::string& fileLocation) {
-//     GatalityParser saver(this, circuitManager);
+//     ConnectionMachineParser saver(this, circuitManager);
 //     FileData fileData(fileLocation);
 //     fileData.circuitIds = circuits; // put all circuits in here, and the saver will save as a single mulit-circuit file
 //     if (saver.save(fileData, true)) {
@@ -117,7 +117,7 @@ bool CircuitFileManager::save(const std::string& UUID) {
 // }
 
 // bool CircuitFileManager::saveAsNewProject(const std::unordered_set<std::string>& UUIDs, const std::string& fileLocationPrefix) {
-// 	GatalityParser saver(this, circuitManager);
+// 	ConnectionMachineParser saver(this, circuitManager);
 //
 // 	FileData fileData(fileLocationPrefix);
 // 	int untitled = 1;
