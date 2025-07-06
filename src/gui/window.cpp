@@ -11,7 +11,7 @@
 #include "backend/settings/settings.h"
 
 Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, Rml::EventId pinchEventId) :
-	sdlWindow("Gatality"), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener), pinchEventId(pinchEventId) {
+	sdlWindow("Connection Machine"), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener), pinchEventId(pinchEventId) {
 	// create SDL renderer
 	sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
 	if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
