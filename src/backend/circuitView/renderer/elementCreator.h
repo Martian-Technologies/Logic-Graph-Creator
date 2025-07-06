@@ -73,11 +73,16 @@ public:
 		return id;
 	}
 
-	ElementID addBlockPreview(const BlockPreview& blockPreview) {
+	ElementID addBlockPreview(BlockPreview&& blockPreview) {
 		assert(renderer);
-		ElementID id = renderer->addBlockPreview(blockPreview);
+		ElementID id = renderer->addBlockPreview(std::move(blockPreview));
 		ids[id] = ElementType::BlockPreview;
 		return id;
+	}
+
+	void shiftBlockPreview(ElementID id, Vector shift) {
+		assert(renderer);
+		if (ids.contains(id)) renderer->shiftBlockPreview(id, shift);
 	}
 
 	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) {

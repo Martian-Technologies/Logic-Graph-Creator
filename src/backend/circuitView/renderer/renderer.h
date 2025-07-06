@@ -39,13 +39,20 @@ struct SelectionObjectElement {
 };
 
 struct BlockPreview {
+	struct Block {
+		Block(BlockType type, Position position, Rotation rotation)
+		: type(type), position(position), rotation(rotation) { }
+		BlockType type;
+		Position position;
+		Rotation rotation;
+	};
+
 	BlockPreview() = default;
 	BlockPreview(BlockType type, Position position, Rotation rotation)
-		: type(type), position(position), rotation(rotation) { }
+		: blocks({BlockPreview::Block(type, position, rotation)}) { }
+	BlockPreview(std::vector<Block>&& blocks) : blocks(std::move(blocks)) {}
 
-	BlockType type;
-	Position position;
-	Rotation rotation;
+	std::vector<Block> blocks;
 };
 
 struct ConnectionPreview {
@@ -85,16 +92,17 @@ private:
 	// elements
 	virtual ElementID addSelectionObjectElement(const SelectionObjectElement& selection) = 0;
 	virtual ElementID addSelectionElement(const SelectionElement& selection) = 0;
-	virtual void removeSelectionElement(ElementID selection) = 0;
+	virtual void removeSelectionElement(ElementID id) = 0;
 
-	virtual ElementID addBlockPreview(const BlockPreview& blockPreview) = 0;
-	virtual void removeBlockPreview(ElementID blockPreview) = 0;
+	virtual ElementID addBlockPreview(BlockPreview&& blockPreview) = 0;
+	virtual void shiftBlockPreview(ElementID id, Vector shift) = 0;
+	virtual void removeBlockPreview(ElementID id) = 0;
 
 	virtual ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) = 0;
-	virtual void removeConnectionPreview(ElementID connectionPreview) = 0;
+	virtual void removeConnectionPreview(ElementID id) = 0;
 
 	virtual ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) = 0;
-	virtual void removeHalfConnectionPreview(ElementID halfConnectionPreview) = 0;
+	virtual void removeHalfConnectionPreview(ElementID id) = 0;
 
 	virtual void spawnConfetti(FPosition start) = 0;
 };

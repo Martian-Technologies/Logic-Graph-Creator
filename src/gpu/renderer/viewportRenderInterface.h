@@ -38,31 +38,32 @@ public:
 	
 public:
 	// main flow
-	void setCircuit(Circuit* circuit) override;
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator) override;
-	void setAddress(const Address& address) override;
+	void setCircuit(Circuit* circuit) override final;
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator) override final;
+	void setAddress(const Address& address) override final;
 
-	void updateView(ViewManager* viewManager) override;
-	void updateCircuit(DifferenceSharedPtr diff) override;
+	void updateView(ViewManager* viewManager) override final;
+	void updateCircuit(DifferenceSharedPtr diff) override final;
 
-	float getLastFrameTimeMs() const override;
+	float getLastFrameTimeMs() const override final;
 
 private:
 	// elements
-	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) override;
-	ElementID addSelectionElement(const SelectionElement& selection) override;
-	void removeSelectionElement(ElementID selection) override;
+	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) override final;
+	ElementID addSelectionElement(const SelectionElement& selection) override final;
+	void removeSelectionElement(ElementID selection) override final;
 
-	ElementID addBlockPreview(const BlockPreview& blockPreview) override;
-	void removeBlockPreview(ElementID blockPreview) override;
+	ElementID addBlockPreview(BlockPreview&& blockPreview) override final;
+	void shiftBlockPreview(ElementID id, Vector shift) override final;
+	void removeBlockPreview(ElementID blockPreview) override final;
 
-	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override;
-	void removeConnectionPreview(ElementID connectionPreview) override;
+	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override final;
+	void removeConnectionPreview(ElementID connectionPreview) override final;
 
-	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override;
-	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override;
+	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override final;
+	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override final;
 
-	void spawnConfetti(FPosition start) override;
+	void spawnConfetti(FPosition start) override final;
 
 private:
 	// From the UI Side
@@ -81,7 +82,7 @@ private:
 
 	// Elements
 	ElementID currentElementID = 0;
-	std::unordered_map<ElementID, BlockPreviewRenderData> blockPreviews;
+	std::unordered_multimap<ElementID, BlockPreviewRenderData> blockPreviews;
 	std::unordered_map<ElementID, std::vector<BoxSelectionRenderData>> boxSelections;
 	std::unordered_map<ElementID, ConnectionPreviewRenderData> connectionPreviews;
 	std::unordered_map<ElementID, std::vector<ArrowRenderData>> arrows;

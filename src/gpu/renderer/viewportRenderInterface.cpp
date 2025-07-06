@@ -177,11 +177,11 @@ ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& s
 	return newElement;
 }
 
-void ViewportRenderInterface::removeSelectionElement(ElementID selection) {
+void ViewportRenderInterface::removeSelectionElement(ElementID id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	boxSelections.erase(selection);
-	arrows.erase(selection);
+	boxSelections.erase(id);
+	arrows.erase(id);
 }
 
 std::vector<ArrowRenderData> ViewportRenderInterface::getArrows() {
@@ -210,32 +210,43 @@ std::vector<BoxSelectionRenderData> ViewportRenderInterface::getBoxSelections() 
 	return returnBoxSelections;
 }
 
-ElementID ViewportRenderInterface::addBlockPreview(const BlockPreview& blockPreview) {
+ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	ElementID newElement = ++currentElementID;
 
-	BlockPreviewRenderData newPreview;
-	newPreview.position = glm::vec2(blockPreview.position.x, blockPreview.position.y);
-	newPreview.rotation = blockPreview.rotation;
-	{
-		std::lock_guard<std::mutex> lock(circuitMux);
-		Vector size(1.0f, 1.0f);
-		if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(blockPreview.type, blockPreview.rotation);
-		newPreview.size = glm::vec2(size.dx, size.dy);
-	}
-	newPreview.type = blockPreview.type;
+	for (const BlockPreview::Block& block : blockPreview.blocks) {
+		BlockPreviewRenderData newPreview;
+		newPreview.position = glm::vec2(block.position.x, block.position.y);
+		newPreview.rotation = block.rotation;
+		{
+			std::lock_guard<std::mutex> lock(circuitMux);
+			Vector size(1.0f, 1.0f);
+			if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.rotation);
+			newPreview.size = glm::vec2(size.dx, size.dy);
+		}
+		newPreview.type = block.type;
 
-	// insert new block preview into map
-	blockPreviews[newElement] = newPreview;
+		// insert new block preview into map
+		blockPreviews.emplace(newElement, std::move(newPreview));
+	}
 
 	return newElement;
 }
 
-void ViewportRenderInterface::removeBlockPreview(ElementID blockPreview) {
+void ViewportRenderInterface::shiftBlockPreview(ElementID id, Vector shift) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	blockPreviews.erase(blockPreview);
+	auto iterPair = blockPreviews.equal_range(id);
+	for (auto iter = iterPair.first; iter != iterPair.second; ++iter) {
+		iter->second.position += glm::vec2(shift.dx, shift.dy);
+	}
+}
+
+void ViewportRenderInterface::removeBlockPreview(ElementID id) {
+	std::lock_guard<std::mutex> lock(elementsMux);
+
+	blockPreviews.erase(id);
 }
 
 std::vector<BlockPreviewRenderData> ViewportRenderInterface::getBlockPreviews() {
@@ -268,10 +279,10 @@ ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview&
 	return newElement;
 }
 
-void ViewportRenderInterface::removeConnectionPreview(ElementID connectionPreview) {
+void ViewportRenderInterface::removeConnectionPreview(ElementID id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	connectionPreviews.erase(connectionPreview);
+	connectionPreviews.erase(id);
 }
 
 ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
@@ -291,10 +302,10 @@ ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnection
 	return newElement;
 }
 
-void ViewportRenderInterface::removeHalfConnectionPreview(ElementID halfConnectionPreview) {
+void ViewportRenderInterface::removeHalfConnectionPreview(ElementID id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	connectionPreviews.erase(halfConnectionPreview);
+	connectionPreviews.erase(id);
 }
 
 std::vector<ConnectionPreviewRenderData> ViewportRenderInterface::getConnectionPreviews() {
