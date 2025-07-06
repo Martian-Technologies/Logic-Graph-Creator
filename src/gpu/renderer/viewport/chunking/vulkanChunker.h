@@ -207,6 +207,7 @@ private:
 private:
 	std::unordered_map<Position, Chunk> chunks;
 	std::unordered_map<Position, std::unordered_map<std::pair<Position, Position>, ChunkerConnectionEnd, WireHash>> blockToConnections;
+	std::unordered_map<std::pair<Position, Position>, std::vector<Position>, WireHash> wireToChunks;
 	std::mutex mux; // sync can be relaxed in the future
 
 	// refs

@@ -447,10 +447,19 @@ void VulkanChunker::updateWireOverChunks(Position start, Rotation startRotation,
 	FPosition endF = end.free() + getInputOffset(endRotation);
 
 	// update all wires in intersecting chunks
-	for (const ChunkIntersection& intersection : getChunkIntersections(startF, endF)) {
-		if (add) chunks[intersection.chunk].getRenderedWires()[wire] = { intersection.start, intersection.end, relativeAddress };
-		else chunks[intersection.chunk].getRenderedWires().erase(wire);
-		chunksToUpdate.insert(intersection.chunk);
+	if (add) {
+		for (const ChunkIntersection& intersection : getChunkIntersections(startF, endF)) {
+			chunks[intersection.chunk].getRenderedWires()[wire] = { intersection.start, intersection.end, relativeAddress };
+			wireToChunks[{start, end}].push_back(intersection.chunk);
+			chunksToUpdate.insert(intersection.chunk);
+		}
+	} else {
+		auto itr = wireToChunks.find({start, end});
+		for (Position p : itr->second) {
+			chunks[p].getRenderedWires().erase(wire);
+			chunksToUpdate.insert(p);
+		}
+		wireToChunks.erase(itr);
 	}
 }
 
