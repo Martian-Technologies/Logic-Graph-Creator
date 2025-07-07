@@ -4,7 +4,7 @@
 #include "backend/position/position.h"
 #include "logging/logging.h"
 
-const int CHUNK_SIZE = 25;
+const int CHUNK_SIZE = 64;
 cord_t getChunk(cord_t in) {
 	return std::floor((float)in / (float)CHUNK_SIZE) * (int)CHUNK_SIZE;
 }
