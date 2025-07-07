@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.28)
 
 if(APPLE)
 	set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+	if (CONNECTION_MACHINE_DISTRIBUTE_APP)
+		set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+		set(Vulkan_LIBRARY "${CMAKE_SOURCE_DIR}/lib-binary/libMoltenVK.dylib")
+	endif()
 endif()
 
 # generate compile commands json
@@ -53,7 +57,15 @@ set(OPTION_BUILD_TESTS OFF) # these are cpplocate's tests
 add_subdirectory("${EXTERNAL_DIR}/cpplocate" EXCLUDE_FROM_ALL)
 
 # wasmtime
-add_subdirectory("external/wasmtime/crates/c-api")
+if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
+	add_library(wasmtime STATIC IMPORTED GLOBAL)
+	set_target_properties(wasmtime PROPERTIES
+		IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib-binary/libwasmtime.a"
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_DIR}/wasmtime/crates/c-api"  # where .h file is
+	)
+else()
+	add_subdirectory("${EXTERNAL_DIR}/wasmtime/crates/c-api")
+endif()
 
 # JSON
 set(CONNECTION_MACHINE_JSON_LIB_NAME "json")
@@ -123,7 +135,7 @@ if (CONNECTION_MACHINE_BUILD_APP)
 	)
 
 	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS} "${EXTERNAL_DIR}wasmtime")
+	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
