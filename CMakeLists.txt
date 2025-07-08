@@ -268,7 +268,7 @@ if (CONNECTION_MACHINE_BUILD_APP)
 			
 			install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION ".")
 
-			set(CPACK_PACKAGE_FILE_NAME "$Connection-Machine-${PROJECT_VERSION}-MacOS")
+			set(CPACK_PACKAGE_FILE_NAME "Connection-Machine-${PROJECT_VERSION}-Mac-universal")
 
 			install(CODE "
 				include(BundleUtilities)
