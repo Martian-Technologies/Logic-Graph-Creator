@@ -20,7 +20,7 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileLis
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 
 	renderer.activateRml(renderInterface);
-	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "gui/mainWindow.rml");
+	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow.rml");
 
 	// get widget for circuit view
 	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
