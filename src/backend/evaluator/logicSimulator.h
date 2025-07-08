@@ -8,6 +8,14 @@ public:
 	LogicSimulator() = default;
 
 private:
+	std::thread simulationThread;
+	std::atomic<bool> running;
+
+	std::vector<logic_state_t> statesA;
+	std::vector<logic_state_t> statesB;
+	std::mutex statesAMutex;
+	std::mutex statesBMutex;
+
 	std::vector<BasicGate> gates;
 	std::vector<XORLikeGate> xorGates;
 	std::vector<JunctionGate> junctions;
