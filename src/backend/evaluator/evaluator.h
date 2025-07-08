@@ -12,6 +12,7 @@
 #include "evalCircuitContainer.h"
 #include "evalConfig.h"
 #include "evalAddressTree.h"
+#include "logicSimulator.h"
 
 typedef unsigned int evaluator_id_t;
 
