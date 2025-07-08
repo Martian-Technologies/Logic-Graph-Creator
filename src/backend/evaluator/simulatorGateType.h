@@ -5,7 +5,7 @@
 #include "gateType.h"
 
 struct GateTypeConfig {
-    connection_port_id_t inputPortCount;
+	connection_port_id_t inputPortCount;
 	connection_port_id_t outputPortCount;
 
 	GateTypeConfig(connection_port_id_t inPorts = 1, connection_port_id_t outPorts = 1)
