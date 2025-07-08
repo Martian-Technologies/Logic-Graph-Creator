@@ -59,11 +59,8 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	});
 
 	// set initial view
-	int w = element->GetClientWidth();
-	int h = element->GetClientHeight();
-	int x = element->GetAbsoluteLeft() + element->GetClientLeft();
-	int y = element->GetAbsoluteTop() + element->GetClientTop();
-	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+	element->AddEventListener(Rml::EventId::Resize, new EventPasser([this](Rml::Event&){handleResize();}));
+	handleResize();
 
 	// link render interface to windowRenderer
 	rendererInterface->linkToWindowRenderer(windowRenderer);

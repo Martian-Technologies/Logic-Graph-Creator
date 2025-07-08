@@ -16,6 +16,7 @@ App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&
 }
 
 void App::runLoop() {
+	bool firstPass = true;
 	running = true;
 	while (running) {
 		// Wait for the next event (so we don't overload the cpu)
@@ -65,6 +66,12 @@ void App::runLoop() {
 		// tell all windows to update rml
 		for (auto& window : windows) {
 			window->updateRml(rmlRenderInterface);
+		}
+		if (firstPass) {
+			firstPass = false;
+			for (auto& window : windows) {
+				window->getCircuitViewWidget()->handleResize();
+			}
 		}
 	}
 }
