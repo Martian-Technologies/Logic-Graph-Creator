@@ -18,6 +18,11 @@ public:
 		(circuitBlockData.emplace(std::pair<circuit_id_t, CircuitBlockData>(circuitId, { circuitId, dataUpdateEventManager }))).first->second.setBlockType(blockType);
 		blockTypeToCircuitId[blockType] = circuitId;
 	}
+
+	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType, const std::string& proceduralCircuitUUID) {
+		(circuitBlockData.emplace(std::pair<circuit_id_t, CircuitBlockData>(circuitId, { circuitId, dataUpdateEventManager, proceduralCircuitUUID }))).first->second.setBlockType(blockType);
+		blockTypeToCircuitId[blockType] = circuitId;
+	}
 	// void removeCircuitBlockData(circuit_id_t circuitId) {
 	// 	auto iter = circuitBlockData.find(circuitId);
 	// 	if (iter == circuitBlockData.end()) {

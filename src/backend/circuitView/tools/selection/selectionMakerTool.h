@@ -10,10 +10,11 @@ public:
 	void activate() override final;
 
 	static inline std::vector<std::string> getModes_() { return { "Area", "Tensor" }; }
-	static inline std::string getPath_() { return "selection maker"; }
 	inline std::vector<std::string> getModes() const override final { return getModes_(); }
-	inline std::string getPath() const override final { return getPath_(); }
 	void setMode(std::string toolMode) override final;
+	static inline std::string getPath_() { return "selection maker"; }
+	inline std::string getPath() const override final { return getPath_(); }
+	inline bool canMakeEdits() const override final { return false; }
 
 	void updateElements() override final;
 

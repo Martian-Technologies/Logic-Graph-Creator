@@ -1,7 +1,7 @@
 #include "logging.h"
 #include "logger.h"
 
-Logger mainLogger("gatality.log");
+Logger mainLogger("connection_machine.log");
 
 void logInfo(const std::string& message, const std::string& subcategory) {
 	mainLogger.log(LogType::Info, message, subcategory);

@@ -25,3 +25,6 @@
 [submodule "volk"]
 	path = external/volk
 	url = https://github.com/zeux/volk.git
+[submodule "external/wasmtime"]
+	path = external/wasmtime
+	url = https://github.com/bytecodealliance/wasmtime

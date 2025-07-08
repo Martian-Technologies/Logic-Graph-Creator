@@ -1,6 +1,6 @@
 # Introduction 
 
-Gatality comes with a set amount of default circuits that can be imported and modified as a base.  
+Connection Machine comes with a set amount of default circuits that can be imported and modified as a base.  
 Due to at the time of writing this documentation there is no way to label pins on parts of the circuit.  Therefore, this doc is written to guide users on what each switch input does for a circuitlib circuit.
 This document will divide the circuits into different group by functionality and discuss each.
 

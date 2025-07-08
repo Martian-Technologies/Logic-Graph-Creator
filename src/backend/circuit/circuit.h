@@ -26,9 +26,12 @@ public:
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
 	void setCircuitName(const std::string& name);
-	
+
 	inline unsigned long long getEditCount() const { return editCount; }
-	void addEdit() { editCount ++; }
+	void addEdit() { editCount++; }
+
+	bool isEditable() { return editable; }
+	void setEditable(bool isEditable) { editable = isEditable; }
 
 	/* ----------- listener ----------- */
 	// subject to change
@@ -123,6 +126,7 @@ private:
 
 	UndoSystem undoSystem;
 	bool midUndo = false;
+	bool editable = true;
 
 	unsigned long long editCount = 0;
 };

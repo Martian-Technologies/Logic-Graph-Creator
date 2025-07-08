@@ -29,24 +29,27 @@ jobs:
             - os: windows-latest
               c_compiler: cl
               cpp_compiler: cl
-              runExecutable: .\Debug\Gatality_tests.exe
+              runExecutable: .\Debug\Connection_Machine_tests.exe
             - os: ubuntu-latest
               c_compiler: gcc
               cpp_compiler: g++
-              runExecutable: ./Gatality_tests
+              runExecutable: ./Connection_Machine_tests
             # - os: ubuntu-latest
             #   c_compiler: clang
             #   cpp_compiler: clang++
-            #   runExecutable:
+            #   runExecutable: ./Connection_Machine_tests
             # - os: macos-latest
             #   c_compiler: clang
             #   cpp_compiler: clang++
-            #   runExecutable: ./Gatality_tests
+            #   runExecutable: ./Connection Machine_tests
 
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
+    
+    - name: Setup `wasmtime`
+      uses: bytecodealliance/actions/wasmtime/setup@v1
 
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
@@ -67,8 +70,8 @@ jobs:
         build-dir: ${{ steps.strings.outputs.build-output-dir }}
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
-        configure-options: "-DGATALITY_BUILD_TESTS=ON -DGATALITY_BUILD_APP=OFF"
-        target: Gatality_tests
+        configure-options: "-DCONNECTION_MACHINE_BUILD_TESTS=ON -DCONNECTION_MACHINE_BUILD_APP=OFF"
+        target: Connection_Machine_tests
         build-type: ${{ matrix.build_type }}
 
     - name: List files

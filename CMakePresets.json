@@ -12,7 +12,8 @@
 			"binaryDir": "build",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
-				"GATALITY_BUILD_APP": "ON"
+				"CONNECTION_MACHINE_BUILD_APP": "ON",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
 			}
 		},
 		{
@@ -21,7 +22,8 @@
 			"binaryDir": "build-release",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
-				"GATALITY_BUILD_APP": "ON"
+				"CONNECTION_MACHINE_BUILD_APP": "ON",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
 			}
 		},
 		{
@@ -30,8 +32,8 @@
 			"binaryDir": "build-release",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
-				"GATALITY_BUILD_APP": "ON",
-				"GATALITY_DISTRIBUTE_APP": "ON"
+				"CONNECTION_MACHINE_BUILD_APP": "ON",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "ON"
 			}
 		},
 		{
@@ -40,8 +42,9 @@
 			"binaryDir": "build-tests",
 			"cacheVariables": {
 			    "CMAKE_BUILD_TYPE": "Debug",
-			    "GATALITY_BUILD_TESTS": "ON",
-				"GATALITY_BUILD_APP": "OFF"
+			    "CONNECTION_MACHINE_BUILD_TESTS": "ON",
+				"CONNECTION_MACHINE_BUILD_APP": "OFF",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
 			}
 		}
 	],

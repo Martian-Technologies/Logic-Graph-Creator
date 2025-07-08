@@ -26,8 +26,9 @@ public:
 	class DataUpdateEventReceiver {
 		friend class DataUpdateEventManager;
 	public:
-		DataUpdateEventReceiver(DataUpdateEventManager* eventManager = nullptr);
+		DataUpdateEventReceiver(DataUpdateEventManager* eventManager);
 		DataUpdateEventReceiver(const DataUpdateEventReceiver& other);
+		DataUpdateEventReceiver(DataUpdateEventReceiver&& other);
 		DataUpdateEventReceiver& operator=(const DataUpdateEventReceiver& other);
 		~DataUpdateEventReceiver();
 
@@ -38,6 +39,8 @@ public:
 		DataUpdateEventManager* eventManager = nullptr;
 	};
 
+	~DataUpdateEventManager();
+
 	void sendEvent(const std::string& eventName) {
 		for (DataUpdateEventReceiver* dataUpdateEventReceiver : dataUpdateEventReceivers) {
 			for (auto pair : dataUpdateEventReceiver->functions) {
@@ -46,11 +49,12 @@ public:
 		}
 	}
 
-	template <class DataType>
-	void sendEvent(const std::string& eventName, const DataType& eventData) {
+	template <class V>
+	void sendEvent(const std::string& eventName, const V& value) {
+		DataUpdateEventManager::EventDataWithValue<V> eventDataWithValue(value);
 		for (DataUpdateEventReceiver* DataUpdateeventReceiver : dataUpdateEventReceivers) {
 			for (auto pair : DataUpdateeventReceiver->functions) {
-				if (pair.first == eventName) pair.second((EventData*)&eventData);
+				if (pair.first == eventName) pair.second((EventData*)&eventDataWithValue);
 			}
 		}
 	}

@@ -7,6 +7,8 @@
 
 #include "computerAPI/fileListener/fileListener.h"
 
+#include "backend/wasm/wasm.h"
+
 int main(int argc, char* argv[]) {
 	try {
 		// Set up directory manager
@@ -62,6 +64,6 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	logInfo("Exiting Gatality...");
+	logInfo("Exiting Connection Machine...");
 	return EXIT_SUCCESS;
 }

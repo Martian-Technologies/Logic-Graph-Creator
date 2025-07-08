@@ -3,7 +3,7 @@
 ## Introduction
 
 Propagation delay (or gate delay) is the time it takes for the output of a gate to reflect its inputs.  
-This is naturally built into gatality when vizualizing how an input propagates throughout the circuit.  However, currently all delays are considered to be the same and does not take into account the addition of clocks.
+This is naturally built into Connection Machine when vizualizing how an input propagates throughout the circuit.  However, currently all delays are considered to be the same and does not take into account the addition of clocks.
 Propation delay generally happens in digital circuits due to the "slew rate" for MOSFET's.  The most comment form of logic gates are made using CMOS technology.  Below we show the gate implementation of an OR gate.
 
 
@@ -23,7 +23,7 @@ However, in real life gates and chips have different propagation delays.  Theref
 
 ## Benchmarking of existing software and room for improvement.
 
-Logicworks gate delay seems to be buggy.  Having an intuitive way to set gate delay would make Gatality easier to use than logicworks.
+Logicworks gate delay seems to be buggy.  Having an intuitive way to set gate delay would make Connection Machine easier to use than logicworks.
 
 
 ## Benchmarking Tests with other software and edge cases
