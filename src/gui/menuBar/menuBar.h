@@ -1,3 +1,6 @@
+#ifndef menuBar_h
+#define menuBar_h
+
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Event.h>
 
@@ -16,3 +19,5 @@ private:
 	SettingsWindow* settingsWindow;
 	Window* window;
 };
+
+#endif /* menuBar_h */

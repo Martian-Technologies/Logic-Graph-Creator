@@ -5,8 +5,8 @@
 #include <VkBootstrap.h>
 #include <vk_mem_alloc.h>
 
-struct VulkanInstance;
-struct BlockTextureManager;
+class VulkanInstance;
+class BlockTextureManager;
 
 struct QueueInfo {
 	VkQueue queue;
