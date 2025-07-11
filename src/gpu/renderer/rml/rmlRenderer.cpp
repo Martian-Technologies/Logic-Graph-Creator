@@ -160,7 +160,6 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 	vkCmdSetScissor(cmd, 0, 1, &defaultScissor);
 
 	// set up data for custom scissor
-	bool customScissorEnabled = false;
 	VkRect2D customScissor{};
 	customScissor.offset = {0, 0};
 	customScissor.extent = extent;
@@ -221,8 +220,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 			// ENABLE SCISSOR instruction
 			const RmlEnableScissorInstruction& enableScissorInstruction = std::get<RmlEnableScissorInstruction>(instruction);
 
-			customScissorEnabled = enableScissorInstruction.state;
-			if (customScissorEnabled) {
+			if (enableScissorInstruction.state) {
 				vkCmdSetScissor(cmd, 0, 1, &customScissor);
 			}
 			else {
@@ -235,7 +233,7 @@ void RmlRenderer::render(Frame& frame, VkExtent2D windowExtent) {
 
 			customScissor.offset = { (int)setScissorInstruction.offset.x, (int)setScissorInstruction.offset.y};
 			customScissor.extent = { (unsigned int)setScissorInstruction.size.x, (unsigned int)setScissorInstruction.size.y};
-			if (customScissorEnabled) vkCmdSetScissor(cmd, 0, 1, &customScissor);
+			vkCmdSetScissor(cmd, 0, 1, &customScissor);
 		}
 	}
 }
@@ -310,7 +308,7 @@ void RmlRenderer::ReleaseTexture(Rml::TextureHandle texture_handle) {
 
 // Scissor
 void RmlRenderer::EnableScissorRegion(bool enable) {
-	tempRenderInstructions.push_back(RmlEnableScissorInstruction(true));
+	tempRenderInstructions.push_back(RmlEnableScissorInstruction(enable));
 }
 void RmlRenderer::SetScissorRegion(Rml::Rectanglei region) {
 	tempRenderInstructions.push_back(RmlSetScissorInstruction({region.Left(), region.Top()}, {region.Width(), region.Height()}));
