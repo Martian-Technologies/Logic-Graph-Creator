@@ -36,10 +36,10 @@ public:
 	}
 	inline const std::map<circuit_id_t, SharedCircuit>& getCircuits() const { return circuits; }
 
-	inline circuit_id_t createNewCircuit() {
-		return createNewCircuit("circuit" + std::to_string(lastId + 1), generate_uuid_v4());
+	inline circuit_id_t createNewCircuit(bool createEval = true) {
+		return createNewCircuit("circuit" + std::to_string(lastId + 1), generate_uuid_v4(), createEval);
 	}
-	circuit_id_t createNewCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4());
+	circuit_id_t createNewCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4(), bool createEval = true);
 	inline void destroyCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
 		if (iter != circuits.end()) {
