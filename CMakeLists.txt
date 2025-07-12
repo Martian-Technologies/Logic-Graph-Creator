@@ -28,7 +28,7 @@ endif()
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Connection_Machine VERSION 0.7.0)
+project(Connection_Machine VERSION 0.8.0)
 if (APPLE)
 	set(APP_NAME "Connection Machine")
 else()
