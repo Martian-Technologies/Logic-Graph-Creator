@@ -22,6 +22,9 @@ public:
 	bool place(const Event* event);
 
 private:
+	Position lastElementPosition;
+	ElementID elementID = 0;
+	unsigned long long lastClipboardEditCounter = 0;
 	Rotation amountToRotate = Rotation::ZERO;
 	bool validatePlacement() const;
 };

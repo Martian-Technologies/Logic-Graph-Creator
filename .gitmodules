@@ -19,6 +19,12 @@
 [submodule "freetype"]
 	path = external/freetype
 	url = https://github.com/libsdl-org/freetype.git
+[submodule "vk-bootstrap"]
+	path = external/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap.git
+[submodule "volk"]
+	path = external/volk
+	url = https://github.com/zeux/volk.git
 [submodule "external/wasmtime"]
 	path = external/wasmtime
 	url = https://github.com/bytecodealliance/wasmtime

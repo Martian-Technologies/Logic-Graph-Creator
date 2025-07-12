@@ -47,26 +47,24 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent, SDL_Window* window, SDL_Renderer* sdlRenderer) : fileManager(fileManager), document(document), window(window), parent(parent) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window), element(element) {
 	// create circuitView
-	renderer = std::make_unique<SdlRenderer>(sdlRenderer);
-	circuitView = std::make_unique<CircuitView>(renderer.get());
+	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element);
+	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
+	
 	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
 		auto eventData = event->cast2<std::string>();
 		if (eventData) setStatusBar(eventData->get());
 		return false;
 	});
 
-	int w = parent->GetClientWidth();
-	int h = parent->GetClientHeight();
-	int x = parent->GetAbsoluteLeft() + parent->GetClientLeft();
-	int y = parent->GetAbsoluteTop() + parent->GetClientTop();
+	// set initial view
+	element->AddEventListener(Rml::EventId::Resize, new EventPasser([this](Rml::Event&){handleResize();}));
+	handleResize();
 
-	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-	renderer->resize(w, h);
-	renderer->reposition(x, y);
-	renderer->initializeTileSet((DirectoryManager::getResourceDirectory() / "logicTiles.png").string());
-
+	// link render interface to windowRenderer
+	rendererInterface->linkToWindowRenderer(windowRenderer);
+	
 	// create keybind shortcuts and connect them
 	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
 	keybindHandler.addListener(
@@ -142,26 +140,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		[this]() { newCircuit(); }
 	);
 
-	document->AddEventListener(Rml::EventId::Resize, new EventPasser(
-		[this](Rml::Event& event) {
-			doResize = true;
-		}
-	));
-
-	parent->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
-		[this](Rml::Event& event) {
-			int button = event.GetParameter<int>("button", 0);
-			if (button == 0) { // left
-				if (event.GetParameter<int>("alt_key", 0)) {
-					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
-				}
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
-			} else if (button == 1) { // right
-				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
-			}
-		}
-	));
-
 	Rml::Element* root = document->GetElementById("main-container");
 	root->AddEventListener(Rml::EventId::Mouseup, new EventPasser(
 		[this](Rml::Event& event) {
@@ -175,7 +153,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	));
 
-	parent->AddEventListener(Rml::EventId::Mousemove, new EventPasser(
+	element->AddEventListener(Rml::EventId::Mousemove, new EventPasser(
 		[this](Rml::Event& event) {
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			if (insideWindow(point)) { // inside the widget
@@ -185,11 +163,25 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	));
 
-	parent->AddEventListener(Rml::EventId::Mouseover, new EventPasser(
+	element->AddEventListener(Rml::EventId::Mousedown, new EventPasser(
+		[this](Rml::Event& event) {
+			int button = event.GetParameter<int>("button", 0);
+			if (button == 0) { // left
+				if (event.GetParameter<int>("alt_key", 0)) {
+					if (circuitView->getEventRegister().doEvent(PositionEvent("View Attach Anchor", circuitView->getViewManager().getPointerPosition()))) { event.StopPropagation(); return; }
+				}
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Primary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
+			} else if (button == 1) { // right
+				if (circuitView->getEventRegister().doEvent(PositionEvent("Tool Secondary Activate", circuitView->getViewManager().getPointerPosition()))) event.StopPropagation();
+			}
+		}
+	));
+
+	element->AddEventListener(Rml::EventId::Mouseover, new EventPasser(
 		[this](Rml::Event& event) {
 			// // grab focus so key inputs work without clicking
 			// setFocus(Qt::MouseFocusReason);
-			this->parent->Focus();
+			this->document->Focus();
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			Vec2 viewPos = pixelsToView(point);
 			if (viewPos.x < 0 || viewPos.y < 0 || viewPos.x > 1 || viewPos.y > 1) return;
@@ -197,7 +189,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	));
 
-	parent->AddEventListener(Rml::EventId::Mouseout, new EventPasser(
+	element->AddEventListener(Rml::EventId::Mouseout, new EventPasser(
 		[this](Rml::Event& event) {
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			Vec2 viewPos = pixelsToView(point);
@@ -206,7 +198,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 		}
 	));
 
-	parent->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
+	element->AddEventListener(Rml::EventId::Mousescroll, new EventPasser(
 		[this](Rml::Event& event) {
 			SDL_FPoint delta(event.GetParameter<float>("wheel_delta_x", 0) * 12, event.GetParameter<float>("wheel_delta_y", 0) * -12);
 			// logInfo("{}, {}", "", delta.x, delta.y);
@@ -226,7 +218,8 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			}
 		}
 	));
-	parent->AddEventListener("pinch", new EventPasser(
+	
+	element->AddEventListener("pinch", new EventPasser(
 		[this](Rml::Event& event) {
 			float delta = event.GetParameter<float>("delta", 0);
 			logInfo(delta);
@@ -248,34 +241,36 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	));
 }
 
-void CircuitViewWidget::render() {
-	if (doResize) {
-		doResize = false;
-		int w = this->parent->GetClientWidth();
-		int h = this->parent->GetClientHeight();
-		int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
-		int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
 
-		circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+// removing this for now, will re implement later
+// void CircuitViewWidget::render() {
+// 	if (doResize) {
+// 		doResize = false;
+// 		int w = this->parent->GetClientWidth();
+// 		int h = this->parent->GetClientHeight();
+// 		int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
+// 		int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
 
-		renderer->resize(w, h);
-		renderer->reposition(x, y);
-	}
-	Evaluator* evaluator = circuitView->getEvaluator();
-	std::string tpsText = "Real tps: N/A";
-	if (evaluator) {
-		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
-	}
-	Rml::Element* realTpsDisplay = parent->GetElementById("real-tps-display");
-	Rml::Element* realTpsDisplayElement = realTpsDisplay->GetChild(0);
-	if (!realTpsDisplayElement)
-		realTpsDisplayElement = realTpsDisplay->AppendChild(std::move(realTpsDisplay->GetOwnerDocument()->CreateTextNode("")));
-	Rml::ElementText* realTpsDisplayText = rmlui_dynamic_cast<Rml::ElementText*>(realTpsDisplayElement);
-	if (realTpsDisplayText->GetText() != tpsText) {
-		realTpsDisplayText->SetText(tpsText);
-	}
-	renderer->render();
-}
+// 		circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+
+// 		renderer->resize(w, h);
+// 		renderer->reposition(x, y);
+// 	}
+// 	Evaluator* evaluator = circuitView->getEvaluator();
+// 	std::string tpsText = "Real tps: N/A";
+// 	if (evaluator) {
+// 		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
+// 	}
+// 	Rml::Element* realTpsDisplay = parent->GetElementById("real-tps-display");
+// 	Rml::Element* realTpsDisplayElement = realTpsDisplay->GetChild(0);
+// 	if (!realTpsDisplayElement)
+// 		realTpsDisplayElement = realTpsDisplay->AppendChild(std::move(realTpsDisplay->GetOwnerDocument()->CreateTextNode("")));
+// 	Rml::ElementText* realTpsDisplayText = rmlui_dynamic_cast<Rml::ElementText*>(realTpsDisplayElement);
+// 	if (realTpsDisplayText->GetText() != tpsText) {
+// 		realTpsDisplayText->SetText(tpsText);
+// 	}
+// 	renderer->render();
+// }
 
 void CircuitViewWidget::setSimState(bool state) {
 	if (circuitView->getEvaluator())
@@ -304,7 +299,7 @@ void CircuitViewWidget::newCircuit() {
 }
 
 void CircuitViewWidget::setStatusBar(const std::string& text) {
-	Rml::Element* statusBar = parent->GetElementById("status-bar");
+	Rml::Element* statusBar = element->GetElementById("status-bar");
 	statusBar->SetInnerRML(text);
 }
 
@@ -343,6 +338,15 @@ void CircuitViewWidget::load() {
 	SDL_ShowOpenFileDialog(LoadCallback, this, nullptr, nullptr, 0, nullptr, true);
 }
 
+void CircuitViewWidget::handleResize() {
+	int w = this->element->GetClientWidth();
+	int h = this->element->GetClientHeight();
+	int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
+	int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
+
+	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
+}
+
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {
 	return Vec2((point.x - getPixelsXPos()) / getPixelsWidth(), (point.y - getPixelsYPos()) / getPixelsHeight());
 }
@@ -354,17 +358,17 @@ inline bool CircuitViewWidget::insideWindow(const SDL_FPoint& point) const {
 }
 
 inline float CircuitViewWidget::getPixelsWidth() const {
-	return parent->GetClientWidth();
+	return element->GetClientWidth();
 }
 
 inline float CircuitViewWidget::getPixelsHeight() const {
-	return parent->GetClientHeight();
+	return element->GetClientHeight();
 }
 
 inline float CircuitViewWidget::getPixelsXPos() const {
-	return parent->GetAbsoluteLeft() + parent->GetClientLeft();
+	return element->GetAbsoluteLeft() + element->GetClientLeft();
 }
 
 inline float CircuitViewWidget::getPixelsYPos() const {
-	return parent->GetAbsoluteTop() + parent->GetClientTop();
+	return element->GetAbsoluteTop() + element->GetClientTop();
 }

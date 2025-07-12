@@ -11,19 +11,19 @@ SdlInstance::SdlInstance() {
 	logInfo("Initializing SDL...");
 
 #if defined(unix) && !(defined(__APPLE__) || defined(__MACH__))
+	// If we have wayland, enable wayland for SDL (thanks Riley J. Beckett (nathanial b))
 	int numberOfVideoDrivers = SDL_GetNumVideoDrivers();
 	for (int i = 0; i < numberOfVideoDrivers; i++) {
 		if (std::string(SDL_GetVideoDriver(i)) == "wayland") {
 			SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "wayland", SDL_HINT_OVERRIDE);
+			break;
 		}
 	}
 #endif
 
-	// SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");
-	// SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
-
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
-		throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
+	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
+	{
+		throwFatalError("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
 	}
 
 	// if (Gesture_Init() == -1) {

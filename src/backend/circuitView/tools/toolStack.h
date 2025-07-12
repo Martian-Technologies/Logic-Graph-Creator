@@ -56,7 +56,7 @@ private:
 	Position lastPointerPosition;
 
 	// current block container
-	Circuit* circuit;
+	Circuit* circuit = nullptr;
 	CircuitView* circuitView;
 
 	// tool function event linking

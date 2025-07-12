@@ -74,8 +74,11 @@ target_include_directories(${CONNECTION_MACHINE_JSON_LIB_NAME} INTERFACE "${EXTE
 
 if (CONNECTION_MACHINE_BUILD_APP)
 	# ======================================= APP DEPENDENCY SETUP =======================================
-	# Vulkan
+	# Find vulkan (we don't actually use the headers, we just want shaderc compiler (won't be needed when we switch to slang hopefully))
 	find_package(Vulkan REQUIRED COMPONENTS glslc)
+
+	# Volk vulkan meta loader
+	add_subdirectory("${EXTERNAL_DIR}/volk" SYSTEM EXCLUDE_FROM_ALL)
 
 	# SDL
 	if (CONNECTION_MACHINE_BUILD_TESTS) # hack to allow SDL to build without window system on linux
@@ -100,6 +103,9 @@ if (CONNECTION_MACHINE_BUILD_APP)
 	# VMA
 	add_subdirectory("${EXTERNAL_DIR}/VulkanMemoryAllocator" SYSTEM EXCLUDE_FROM_ALL)
 
+	# Vk Bootstrap
+	add_subdirectory("${EXTERNAL_DIR}/vk-bootstrap" SYSTEM EXCLUDE_FROM_ALL)
+
 	# GLM
 	add_subdirectory("${EXTERNAL_DIR}/glm" SYSTEM EXCLUDE_FROM_ALL)
 	
@@ -121,11 +127,12 @@ if (CONNECTION_MACHINE_BUILD_APP)
 
 	# Add executable
 	set(EXTERNAL_LINKS
-		${Vulkan_LIBRARIES}
 		freetype
 		RmlUi::RmlUi
 		RmlUi::Debugger
 		SDL3::SDL3
+		volk
+		vk-bootstrap::vk-bootstrap
 		cpplocate::cpplocate
 		VulkanMemoryAllocator
 		glm
@@ -139,6 +146,7 @@ if (CONNECTION_MACHINE_BUILD_APP)
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
+	target_compile_definitions(${PROJECT_NAME} PRIVATE VK_NO_PROTOTYPES)
 	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${APP_NAME}")
 
 	# Platform specific business after add_executable

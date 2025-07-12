@@ -3,10 +3,10 @@
 
 #include <RmlUi/Core.h>
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_render.h>
 
-#include "gui/rml/RmlUi_Renderer_SDL.h"
 #include "sdl/sdlWindow.h"
+#include "gpu/renderer/windowRenderer.h"
+#include "rml/rmlRenderInterface.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "computerAPI/fileListener/fileListener.h"
@@ -20,12 +20,16 @@
 
 class Window {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, Rml::EventId pinchEventId);
+	Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
 	~Window();
 
+	// no copy
+	Window(const Window&) = delete;
+	Window& operator=(const Window&) = delete;
+	
+public:
 	bool recieveEvent(SDL_Event& event);
-	void update();
-	void render(RenderInterface_SDL& renderInterface);
+	void updateRml(RmlRenderInterface& renderInterface);
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 	inline float getSdlWindowScalingSize() const { return sdlWindow.getWindowScalingSize(); }
@@ -39,20 +43,20 @@ public:
 	void setMode(std::string tool);
 
 private:
-	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	FileListener* fileListener;
+	SdlWindow sdlWindow;
+	WindowRenderer renderer;
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
 	std::optional<BlockCreationWindow> blockCreationWindow;
 	std::optional<SimControlsManager> simControlsManager;
 
-	SdlWindow sdlWindow;
-	SDL_Renderer* sdlRenderer;
-
-	Rml::EventId pinchEventId;
+	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
+	
 	Rml::Context* rmlContext;
+	Rml::ElementDocument* rmlDocument;
 };
 
 #endif

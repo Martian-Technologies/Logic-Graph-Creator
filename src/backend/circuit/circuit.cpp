@@ -361,7 +361,7 @@ void Circuit::undo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), std::get<1>(moveModification), newDifference.get());
+			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), subRotations(std::get<1>(moveModification), std::get<3>(moveModification)), newDifference.get());
 			break;
 		case MinimalDifference::SET_DATA:
 			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
@@ -401,7 +401,7 @@ void Circuit::redo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), std::get<3>(moveModification), newDifference.get());
+			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), subRotations(std::get<3>(moveModification), std::get<1>(moveModification)), newDifference.get());
 			break;
 		case MinimalDifference::SET_DATA:
 			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);

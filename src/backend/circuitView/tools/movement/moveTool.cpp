@@ -45,12 +45,14 @@ void MoveTool::setMode(std::string toolMode) {
 
 bool MoveTool::rotateCW(const Event* event) {
 	amountToRotate = rotate(amountToRotate, true);
+	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool MoveTool::rotateCCW(const Event* event) {
 	amountToRotate = rotate(amountToRotate, false);
+	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
@@ -77,18 +79,28 @@ bool MoveTool::unclick(const Event* event) {
 
 void MoveTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
-	elementCreator.clear();
-	if (!activeSelectionHelper->isFinished()) return;
+
+	if (!activeSelectionHelper->isFinished()) {
+		elementCreator.clear();
+		return;
+	}
 	setStatusBar("Left click to move the selected blocks.");
-	elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
-	if (pointerInView) {
+	if (!pointerInView) {
+		elementCreator.clear();
+		elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
+		return;
+	}
+	if (lastCircuitEdit != circuit->getEditCount() || !elementCreator.hasElement(elementID)) {
+		lastCircuitEdit = circuit->getEditCount();
+		elementCreator.clear();
+		elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 		Position selectionOrigin = getSelectionOrigin(activeSelectionHelper->getSelection());
-		Vector totalOffset = lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection());
 
 		std::unordered_set<Position> positions;
 		std::unordered_set<const Block*> blocksSet;
 		bool foundPos = false;
 		flattenSelection(activeSelectionHelper->getSelection(), positions);
+		std::vector<BlockPreview::Block> blocks;
 		for (Position position : positions) {
 			const Block* block = circuit->getBlockContainer()->getBlock(position);
 			if (!block) continue;
@@ -102,11 +114,11 @@ void MoveTool::updateElements() {
 			// }
 			if (blocksSet.contains(block)) continue;
 			blocksSet.insert(block);
-			elementCreator.addBlockPreview(BlockPreview(
+			blocks.emplace_back(
 				block->type(),
 				lastPointerPosition + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
 				addRotations(block->getRotation(), amountToRotate)
-			));
+			);
 
 			// const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
 			// for (auto& iter : block->getConnectionContainer().getConnections()) {
@@ -134,15 +146,14 @@ void MoveTool::updateElements() {
 			// 	}
 			// }
 		}
-
-
-
-
-
-
-		// elementCreator.addSelectionElement(SelectionObjectElement(
-		// 	shiftSelection(activeSelectionHelper->getSelection(), lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection())),
-		// 	SelectionObjectElement::RenderMode::SELECTION
-		// ));
+		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
+		lastElementPosition = lastPointerPosition;
+	} else {
+		elementCreator.shiftBlockPreview(elementID, lastPointerPosition - lastElementPosition);
+		lastElementPosition = lastPointerPosition;
 	}
+	// elementCreator.addSelectionElement(SelectionObjectElement(
+	// 	shiftSelection(activeSelectionHelper->getSelection(), lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection())),
+	// 	SelectionObjectElement::RenderMode::SELECTION
+	// ));
 }

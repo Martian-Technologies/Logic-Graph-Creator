@@ -19,6 +19,7 @@ public:
 	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
 
 	// getters
+	inline float getViewScale() const { return viewScale; }
 	inline FPosition getViewCenter() const { return viewCenter; }
 	inline const FPosition& getPointerPosition() const { return pointerPosition; }
 	inline float getAspectRatio() const { return aspectRatio; }

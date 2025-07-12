@@ -352,6 +352,33 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	return states;
 }
 
+std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
+	std::vector<logic_state_t> states;
+	states.reserve(addresses.size());
+	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
+	const AddressTreeNode<Evaluator::EvaluatorGate>* branchOrigin = addressTree.getBranch(addressOrigin);
+	if (branchOrigin) {
+		for (const auto& address : addresses) {
+			// check if the address is valid
+			if (branchOrigin->hasBranch(address)) {
+				states.push_back(logic_state_t::LOW);
+				continue;
+			}
+			const bool exists = branchOrigin->hasValue(address);
+			if (!exists) {
+				states.push_back(logic_state_t::UNDEFINED);
+			} else {
+				const wrapper_gate_id_t blockId = branchOrigin->getValue(address).gateId;
+				states.push_back(logicSimulatorWrapper.getState(blockId, 0)); // TODO: 0 temp
+			}
+		}
+	} else {
+		states.resize(addresses.size(), logic_state_t::UNDEFINED);
+	}
+	lock.unlock();
+	return states;
+}
+
 void Evaluator::setState(const Address& address, logic_state_t state) {
 	const auto gate = addressTree.getValue(address, EvaluatorGate{0, BlockType::NONE, Rotation::ZERO});
 	if (gate.blockType == BlockType::NONE) {
