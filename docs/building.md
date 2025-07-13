@@ -17,6 +17,9 @@ After cloning the main project, clone the submodules with these commands:
 
 ## System dependencies
 This project requires [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) and [Wasmtime](https://github.com/bytecodealliance/wasmtime) to build.
+- On MacOS, it is recommended to install `vulkan-tools`, `vulkan-validationlayers`, and `shaderc` using [brew](https://brew.sh/).
+- On Windows, make sure to add the Vulkan SDK headers and binaries to your PATH.
+- On Linux, Vulkan development packages should be available through your package manager.
 
 ## Setting up the CMake build system
 You need the CMake build system and a C++ compiler to build this project.
@@ -37,9 +40,6 @@ Even if you are going to have your IDE manage CMake, it's a good idea to try run
 
 You can also build for release with `release` preset
 > Works for MacOS, Windows (MSVC), and Linux
-
-## Setting up CMake in an IDE
-TODO
 
 ## Notes
 If your error highlighting or IDE integration is showing red, make sure you have already compiled the project and the compile_commands.json in the build folder is being recognized (default for most lsp)
