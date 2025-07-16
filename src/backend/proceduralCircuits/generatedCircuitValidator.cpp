@@ -176,7 +176,10 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 	// preprocess connected component connections
 	std::vector<std::unordered_map<block_id_t, std::vector<block_id_t>>> componentAdjs(components.size());
 	for (const GeneratedCircuit::ConnectionData& conn : generatedCircuit.connections) {
-		if (blockDataManager->isConnectionInput(generatedCircuit.blocks.at(conn.outputBlockId).type, conn.outputId)) {
+		auto iter = generatedCircuit.blocks.find(conn.outputBlockId);
+		if (iter == generatedCircuit.blocks.end()) continue;
+
+		if (blockDataManager->isConnectionInput(iter->second.type, conn.outputId)) {
 			int cc = blockToComponent[conn.inputBlockId];
 			componentAdjs[cc][conn.inputBlockId].push_back(conn.outputBlockId);
 		}
@@ -292,7 +295,9 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 		int maxYPlaced = 0;
 		for (int sccIndex : sccOrder) {
 			for (block_id_t id : sccs[sccIndex]) {
-				GeneratedCircuit::GeneratedCircuitBlockData& block = generatedCircuit.blocks.at(id);
+				auto iter = generatedCircuit.blocks.find(id);
+				if (iter == generatedCircuit.blocks.end()) continue;
+				GeneratedCircuit::GeneratedCircuitBlockData& block = iter->second;
 				if (block.position.x != std::numeric_limits<cord_t>::max() &&
 					block.position.y != std::numeric_limits<cord_t>::max()) {
 					continue;

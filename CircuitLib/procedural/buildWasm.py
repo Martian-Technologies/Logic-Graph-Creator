@@ -3,7 +3,7 @@ import os
 file_path = os.path.realpath(__file__)
 os.chdir("/".join(file_path.split("/")[:-1]))
 
-file = "andGate.cpp"
+file = "adder.cpp"
 
 os.system("emcc " + file + " -Os -s STANDALONE_WASM -s EXPORTED_FUNCTIONS=\"['_generateCircuit', '_getUUID', '_getName', '_getDefaultParameters']\" --no-entry -o " + file[:file.rfind(".")] + ".wasm")
 
