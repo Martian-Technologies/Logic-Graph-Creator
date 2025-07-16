@@ -455,6 +455,10 @@ void VulkanChunker::updateWireOverChunks(Position start, Rotation startRotation,
 		}
 	} else {
 		auto itr = wireToChunks.find({start, end});
+		if (itr == wireToChunks.end()) {
+			logError("Could not find wire {{{}, {}}} to remove", "VulkanChunker", start, end);
+			return;
+		}
 		for (Position p : itr->second) {
 			chunks[p].getRenderedWires().erase(wire);
 			chunksToUpdate.insert(p);

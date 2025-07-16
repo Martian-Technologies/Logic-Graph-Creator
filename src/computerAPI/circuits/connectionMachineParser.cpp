@@ -251,8 +251,12 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 				inFileDependencies[UUID].emplace(*subUUID);
 			} else {
 				if (!pathImports.insert(*subSavePath).second) continue;
-				std::string relPath = std::filesystem::relative(std::filesystem::path(*subSavePath), std::filesystem::path(path) / "..").string();
-				outputFile << "import \"" << relPath << "\"\n";
+				try {
+					std::string relPath = std::filesystem::relative(std::filesystem::path(*subSavePath), std::filesystem::path(path) / "..").string();
+					outputFile << "import \"" << relPath << "\"\n";
+				} catch (...) {
+					logError("Could not find relPath between, \"{}\" and \"{}\".", "ConnectionMachineParser", *subSavePath, path);
+				}
 			}
 		}
 	}

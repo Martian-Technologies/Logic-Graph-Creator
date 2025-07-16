@@ -235,7 +235,7 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 
 bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation amountToRotate) {
 	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
-	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {		
+	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (blockContainer.checkCollision(
 			position + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
 			addRotations(block.rotation, amountToRotate),
