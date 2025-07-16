@@ -1,4 +1,6 @@
 #include "circuit.h"
+
+#include "backend/proceduralCircuits/generatedCircuit.h"
 #include "logging/logging.h"
 #include "parsedCircuit.h"
 
@@ -172,6 +174,47 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 
 	for (const auto& conn : parsedCircuit.getConns()) {
 		const ParsedCircuit::BlockData* parsedBlock = parsedCircuit.getBlock(conn.outputBlockId);
+		if (!parsedBlock) {
+			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
+			continue;
+		}
+		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputId)) {
+			// skip inputs
+			continue;
+		}
+
+		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
+		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
+		if (!tryCreateConnection(output, input)) {
+			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+		}
+	}
+	return true;
+}
+
+bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position) {
+	if (!generatedCircuit.isValid()) return false;
+
+	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
+		if (blockContainer.checkCollision(block.position, block.rotation, block.type)) {
+			return false;
+		}
+	}
+	logInfo("all blocks can be placed");
+
+	std::unordered_map<block_id_t, block_id_t> realIds;
+	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
+		Position targetPos = block.position;
+		block_id_t newId;
+		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
+			logError("Failed to insert block while inserting block.", "Circuit");
+		} else {
+			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
+		}
+	}
+
+	for (const auto& conn : generatedCircuit.getConns()) {
+		const GeneratedCircuit::GeneratedCircuitBlockData* parsedBlock = generatedCircuit.getBlock(conn.outputBlockId);
 		if (!parsedBlock) {
 			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
 			continue;

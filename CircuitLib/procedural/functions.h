@@ -29,27 +29,32 @@ extern "C" {
 
 	typedef unsigned int connection_end_id_t;
 	typedef unsigned char block_size_t;
-	typedef char Rotation;
+	typedef int block_id_t;
 	typedef int cord_t;
 
-	exportedVar(char*, UUID, UUID)
-		exportedVar(char*, name, Name)
-		exportedVar(char*, defaultParameters, DefaultParameters)
+	typedef char Rotation;
 
-		externalFunction(getParameter)
+	exportedVar(char*, UUID, UUID)
+	exportedVar(char*, name, Name)
+	exportedVar(char*, defaultParameters, DefaultParameters)
+
+	externalFunction(getParameter)
 		int getParameter(const char* key);
 
-	externalFunction(tryInsertBlock)
-		bool tryInsertBlock(cord_t x, cord_t y, Rotation rotation, BlockType blockType);
+	externalFunction(createBlock)
+		block_id_t createBlock(BlockType blockType);
 
-	externalFunction(tryCreateConnection)
-		bool tryCreateConnection(cord_t outputX, cord_t outputY, cord_t inputX, cord_t inputY);
+	externalFunction(createBlockAtPosition)
+		block_id_t createBlockAtPosition(cord_t x, cord_t y, Rotation rotation, BlockType blockType);
+
+	externalFunction(createConnection)
+		void createConnection(block_id_t outputBlockId, int outputPortId, block_id_t inputBlockId, int inputPortId);
 
 	externalFunction(addConnectionInput)
-		void addConnectionInput(cord_t blockX, cord_t blockY, cord_t portX, cord_t portY);
+		void addConnectionInput(cord_t portX, cord_t portY, block_id_t internalBlockId, connection_end_id_t internalBlockPortId);
 
 	externalFunction(addConnectionOutput)
-		void addConnectionOutput(cord_t blockX, cord_t blockY, cord_t portX, cord_t portY);
+		void addConnectionOutput(cord_t portX, cord_t portY, block_id_t internalBlockId, connection_end_id_t internalBlockPortId);
 
 	externalFunction(setSize)
 		void setSize(cord_t width, cord_t height);

@@ -6,6 +6,7 @@
 
 class CircuitManager;
 class CircuitBlockData;
+class GeneratedCircuit;
 
 struct ProceduralCircuitParameters {
 	ProceduralCircuitParameters() { }
@@ -65,7 +66,7 @@ public:
 	BlockType getBlockType(const ProceduralCircuitParameters& parameters);
 
 protected:
-	virtual void makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData) = 0;
+	virtual void makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) = 0;
 	void regenerateAll() { }
 
 private:

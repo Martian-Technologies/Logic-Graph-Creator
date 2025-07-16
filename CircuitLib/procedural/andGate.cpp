@@ -11,17 +11,17 @@ bool generateCircuit() {
 
 	setSize(2, size);
 
-	tryInsertBlock(1, 0, 0, BlockType::LIGHT);
-	addConnectionOutput(1, 0, 1, 0);
+	block_id_t light = createBlockAtPosition(1, 0, 0, BlockType::LIGHT);
+	addConnectionOutput(1, 0, light, 0);
 
-	tryInsertBlock(0, 0, 0, BlockType::AND);
+	block_id_t andGate = createBlockAtPosition(0, 0, 0, BlockType::AND);
 
-	tryCreateConnection(0, 0, 1, 0);
+	createConnection(andGate, 1, light, 0);
 
 	for (int i = 0; i < size; i++) {
-		tryInsertBlock(-1, i, 0, BlockType::SWITCH);
-		addConnectionInput(-1, i, 0, i);
-		tryCreateConnection(-1, i, 0, 0);
+		block_id_t input = createBlockAtPosition(-1, i, 0, BlockType::SWITCH);
+		addConnectionInput(0, i, input, 0);
+		createConnection(input, 0, andGate, 0);
 	}
 
 	return true;

@@ -4,10 +4,11 @@
 #include <assert.h>
 
 #include "backend/container/blockContainer.h"
+#include "backend/container/copiedBlocks.h"
 #include "backend/selection.h"
 #include "undoSystem.h"
-#include "backend/container/copiedBlocks.h"
 
+class GeneratedCircuit;
 class ParsedCircuit;
 
 typedef unsigned int circuit_id_t;
@@ -61,6 +62,7 @@ public:
 
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit);
+	bool tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position);
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
 
 	/* ----------- block data ----------- */
