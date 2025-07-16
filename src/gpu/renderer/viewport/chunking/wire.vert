@@ -32,5 +32,5 @@ void main() {
 	outColor += WIRE_LOW_COLOR * float(state == 0); // normal
 	outColor += WIRE_HIGH_COLOR * float(state == 1); // powered on
 	outColor += WIRE_Z_COLOR * float(state == 2); // z (floating)
-	outColor += WIRE_X_COLOR * float(state == 4); // x
+	outColor += WIRE_X_COLOR * float(state == 3); // x
 }
