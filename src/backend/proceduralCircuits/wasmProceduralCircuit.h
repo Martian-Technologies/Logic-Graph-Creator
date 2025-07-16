@@ -14,7 +14,7 @@ public:
 
 		WasmInstance& operator=(WasmInstance&& wasmInstance);
 
-		void makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData);
+		void makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit);
 
 		inline bool isValid() const { return valid; }
 		inline const std::string& getName() const { return name; }
@@ -34,11 +34,10 @@ public:
 		ProceduralCircuitParameters defaultParameters;
 
 		// per wasm run need data
+		mutable unsigned int blockId = 0;
 		mutable unsigned int portId = 0;
-		mutable const ProceduralCircuitParameters* parameters;
-		mutable SharedCircuit circuit = nullptr;
-		mutable BlockData* blockData = nullptr;
-		mutable CircuitBlockData* circuitBlockData = nullptr;
+		mutable const ProceduralCircuitParameters* parameters = nullptr;
+		mutable GeneratedCircuit* generatedCircuit = nullptr;
 
 		std::unique_ptr<WasmInstance*> thisPtr;
 	};
@@ -53,9 +52,10 @@ public:
 	void setWasm(WasmInstance&& wasmInstance);
 
 private:
-	void makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData) override final;
+	void makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) override final;
 
 	WasmInstance wasmInstance;
+
 };
 
 typedef std::shared_ptr<WasmProceduralCircuit> SharedWasmProceduralCircuit;

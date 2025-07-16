@@ -190,7 +190,7 @@ public:
 		return iter != connections.end() && iter->second.second;
 	}
 	inline bool isConnectionOutput(connection_end_id_t connectionId) const noexcept {
-		if (defaultData) return connectionId == 0;
+		if (defaultData) return connectionId == 1;
 		auto iter = connections.find(connectionId);
 		return iter != connections.end() && !(iter->second.second);
 	}

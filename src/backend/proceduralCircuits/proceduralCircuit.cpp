@@ -1,6 +1,7 @@
 #include "proceduralCircuit.h"
 
 #include "../circuit/circuitManager.h"
+#include "generatedCircuitValidator.h"
 
 ProceduralCircuitParameters::ProceduralCircuitParameters(std::istream& ss) {
 	char cToken;
@@ -98,8 +99,16 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 
 	logInfo("Creating circuit with parameters: {}", "ProceduralCircuit", realParameters.toString());
 
+	// Make the circuit
+	GeneratedCircuit generatedCircuit;
+	this->makeCircuit(realParameters, generatedCircuit);
+	generatedCircuit.markAsCustom();
+	GeneratedCircuitValidator validator(generatedCircuit, circuitManager->getBlockDataManager());
+	
+	if (!(generatedCircuit.isValid())) return 0;
+
 	// Create the circuit if it has not been generated
-	circuit_id_t id = circuitManager->createNewCircuit(false);
+	circuit_id_t id = circuitManager->createNewCircuit(&generatedCircuit, false);
 
 	// Add the circuit id to the generated circuits
 	generatedCircuits[realParameters] = id;
@@ -119,9 +128,6 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	blockData->setPath(getPath() + " instances"); // for testing
 	circuit->setCircuitName(getProceduralCircuitName() + " (" + realParameters.toString() + ")");
 	circuit->setEditable(false);
-
-	// Make the circuit
-	this->makeCircuit(realParameters, circuit, blockData, circuitBlockData);
 
 	return id;
 }

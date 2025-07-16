@@ -1,6 +1,7 @@
 #include "wasmProceduralCircuit.h"
 
 #include "backend/circuit/circuitBlockData.h"
+#include "generatedCircuitValidator.h"
 
 WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thisPtr(std::make_unique<WasmInstance*>(this)) {
 	WasmInstance** thisPtrPtr = thisPtr.get();
@@ -11,33 +12,36 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thi
 			return (iter == parameters.end()) ? 0 : iter->second;
 		});
 
-	wasmtime::Func tryInsertBlockFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[thisPtrPtr](int32_t x, int32_t y, int32_t rotation, int32_t blockType) -> int32_t {
-			return (*thisPtrPtr)->circuit->tryInsertBlock(Position(x, y), (Rotation)rotation, (BlockType)blockType);
+	wasmtime::Func createBlockFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t blockType) -> int32_t {
+			return (*thisPtrPtr)->generatedCircuit->addBlock((BlockType)blockType);
 		});
 
-	wasmtime::Func tryCreateConnectionFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[thisPtrPtr](int32_t outputX, int32_t outputY, int32_t inputX, int32_t inputY) -> int32_t {
-			return (*thisPtrPtr)->circuit->tryCreateConnection(Position(outputX, outputY), Position(inputX, inputY));
+	wasmtime::Func createBlockAtPositionFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t x, int32_t y, int32_t rotation, int32_t blockType) -> int32_t {
+			return (*thisPtrPtr)->generatedCircuit->addBlock(Position(x, y), (Rotation)rotation, (BlockType)blockType);
+		});
+
+	wasmtime::Func createConnectionFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t outputBlockId, int32_t outputPortId, int32_t inputBlockId, int32_t inputPortId) {
+			(*thisPtrPtr)->generatedCircuit->addConnection(outputBlockId, outputPortId, inputBlockId, inputPortId);
 		});
 
 	wasmtime::Func addConnectionInputFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[thisPtrPtr](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
-			(*thisPtrPtr)->circuitBlockData->setConnectionIdPosition((*thisPtrPtr)->portId, Position(blockX, blockY));
-			(*thisPtrPtr)->blockData->setConnectionInput(Vector(portX, portY), (*thisPtrPtr)->portId);
+		[thisPtrPtr](int32_t portX, int32_t portY, int32_t internalBlockId, int32_t internalBlockPortId) {
+			(*thisPtrPtr)->generatedCircuit->addConnectionPort(true, (*thisPtrPtr)->portId, Vector(portX, portY), internalBlockId, internalBlockPortId, "Port" + std::to_string((*thisPtrPtr)->portId));
 			++((*thisPtrPtr)->portId);
 		});
 
 	wasmtime::Func addConnectionOutputFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[thisPtrPtr](int32_t blockX, int32_t blockY, int32_t portX, int32_t portY) {
-			(*thisPtrPtr)->circuitBlockData->setConnectionIdPosition((*thisPtrPtr)->portId, Position(blockX, blockY));
-			(*thisPtrPtr)->blockData->setConnectionOutput(Vector(portX, portY), (*thisPtrPtr)->portId);
+		[thisPtrPtr](int32_t portX, int32_t portY, int32_t internalBlockId, int32_t internalBlockPortId) {
+			(*thisPtrPtr)->generatedCircuit->addConnectionPort(false, (*thisPtrPtr)->portId, Vector(portX, portY), internalBlockId, internalBlockPortId, "Port" + std::to_string((*thisPtrPtr)->portId));
 			++((*thisPtrPtr)->portId);
 		});
 
 	wasmtime::Func setSizeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
 		[thisPtrPtr](int32_t width, int32_t height) {
-			(*thisPtrPtr)->blockData->setSize(Vector(width, height));
+			(*thisPtrPtr)->generatedCircuit->setSize(Vector(width, height));
 		});
 
 	wasmtime::Func logInfoFunc = wasmtime::Func::wrap(*Wasm::getStore(),
@@ -55,42 +59,47 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thi
 	wasmtime::Result<std::monostate> linkerResult = wasmtime::Result<std::monostate>(nullptr);
 	linkerResult = linker.define(*Wasm::getStore(), "env", "getParameter", getParameterFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.getParameter()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.getParameter", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
-	linkerResult = linker.define(*Wasm::getStore(), "env", "tryInsertBlock", tryInsertBlockFunc);
+	linkerResult = linker.define(*Wasm::getStore(), "env", "createBlock", createBlockFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.tryInsertBlock()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.createBlockFunc", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
-	linkerResult = linker.define(*Wasm::getStore(), "env", "tryCreateConnection", tryCreateConnectionFunc);
+	linkerResult = linker.define(*Wasm::getStore(), "env", "createBlockAtPosition", createBlockAtPositionFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.tryCreateConnection()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.createBlockAtPosition", "WasmProceduralCircuit::WasmInstance");
+		return;
+	}
+	linkerResult = linker.define(*Wasm::getStore(), "env", "createConnection", createConnectionFunc);
+	if (!linkerResult) {
+		logError("could not create link to env.createConnection", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "addConnectionInput", addConnectionInputFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.addConnectionInput()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.addConnectionInput", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "addConnectionOutput", addConnectionOutputFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.addConnectionOutput()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.addConnectionOutput", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "setSize", setSizeFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.setSize()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.setSize", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "logInfo", logInfoFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.logInfo()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.logInfo", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "logError", logErrorFunc);
 	if (!linkerResult) {
-		logError("could not create link to env.logError()", "WasmProceduralCircuit::WasmInstance");
+		logError("could not create link to env.logError", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 
@@ -161,23 +170,20 @@ WasmProceduralCircuit::WasmInstance& WasmProceduralCircuit::WasmInstance::operat
 	return *this;
 }
 
-void WasmProceduralCircuit::WasmInstance::makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData) {
+void WasmProceduralCircuit::WasmInstance::makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) {
 	if (!instance.has_value()) return;
 
 	this->parameters = &parameters;
-	this->circuit = circuit;
-	this->blockData = blockData;
-	this->circuitBlockData = circuitBlockData;
+	this->generatedCircuit = &generatedCircuit;
 	portId = 0;
+	blockId = 0;
 
 	auto func = std::get<wasmtime::Func>(instance.value().get(*Wasm::getStore(), "generateCircuit").value());
 	auto results = func.call(*Wasm::getStore(), {}).unwrap();
 	bool success = results.front().i32();
 
 	this->parameters = nullptr;
-	this->circuit = nullptr;
-	this->blockData = nullptr;
-	this->circuitBlockData = nullptr;
+	this->generatedCircuit = nullptr;
 }
 
 std::string WasmProceduralCircuit::WasmInstance::wasmToString(int32_t wasmPtr) {
@@ -216,6 +222,6 @@ void WasmProceduralCircuit::setWasm(WasmInstance&& wasmInstance) {
 	regenerateAll();
 }
 
-void WasmProceduralCircuit::makeCircuit(const ProceduralCircuitParameters& parameters, SharedCircuit circuit, BlockData* blockData, CircuitBlockData* circuitBlockData) {
-	wasmInstance.makeCircuit(parameters, circuit, blockData, circuitBlockData);
+void WasmProceduralCircuit::makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) {
+	wasmInstance.makeCircuit(parameters, generatedCircuit);
 }

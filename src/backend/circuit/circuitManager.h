@@ -4,11 +4,12 @@
 #include "backend/proceduralCircuits/proceduralCircuitManager.h"
 #include "backend/blockData/blockDataManager.h"
 #include "circuitBlockDataManager.h"
-#include "parsedCircuit.h"
 #include "util/uuid.h"
 #include "circuit.h"
 
 class EvaluatorManager;
+class GeneratedCircuit;
+class ParsedCircuit;
 
 class CircuitManager {
 public:
@@ -92,16 +93,16 @@ public:
 		BlockType blockType = circuit->getBlockType();
 		if (blockType == BlockType::NONE) {
 			blockType = blockDataManager.addBlock();
+			auto blockData = blockDataManager.getBlockData(blockType);
+			if (!blockData) {
+				logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
+				return BlockType::NONE;
+			}
+			blockData->setDefaultData(false);
+			blockData->setPrimitive(false);
+			blockData->setPath("Custom");
+			blockData->setSize(Vector(1));
 		}
-		auto blockData = blockDataManager.getBlockData(blockType);
-		if (!blockData) {
-			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
-			return BlockType::NONE;
-		}
-		blockData->setDefaultData(false);
-		blockData->setPrimitive(false);
-		blockData->setPath("Custom");
-		blockData->setSize(Vector(1));
 
 		// Circuit Block Data
 		CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(circuitId);
@@ -115,81 +116,8 @@ public:
 		return blockType;
 	}
 
-	// Create a custom new block from a parsed circuit
-	inline circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit) {
-		if (!parsedCircuit->isValid()) {
-			logError("parsedCircuit is not validated", "CircuitManager");
-			return 0;
-		}
-
-		std::string uuid = parsedCircuit->getUUID();
-		if (uuid.empty()) {
-			logInfo("Setting a uuid for parsed circuit", "CircuitManager");
-			uuid = generate_uuid_v4();
-		} else {
-			SharedCircuit possibleExistingCircuit = getCircuit(uuid);
-			if (possibleExistingCircuit) {
-				// this duplicates check won't really work with open circuits ics because we have no way of knowing
-				// unless we save which paths we have loaded. Though this would require then linking the IC blocktype to
-				// the parsed circuit which seems annoying
-				logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", uuid);
-				return possibleExistingCircuit->getCircuitId();
-			}
-		}
-
-
-		circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid);
-		SharedCircuit circuit = getCircuit(id);
-		circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
-
-		// if is custom
-		if (!parsedCircuit->isCustom()) {
-			return id;
-		}
-
-		// Block Data
-		BlockType blockType = circuit->getBlockType();
-		if (blockType == BlockType::NONE) {
-			blockType = blockDataManager.addBlock();
-		}
-		BlockData* blockData = blockDataManager.getBlockData(blockType);
-		if (!blockData) {
-			logError("Did not find newly created block data with block type: {}", "CircuitManager", std::to_string(blockType));
-			return id;
-		}
-		blockData->setDefaultData(false);
-		blockData->setPrimitive(false);
-		blockData->setPath("Custom");
-		blockData->setSize(parsedCircuit->getSize());
-
-		// Circuit Block Data
-		circuitBlockDataManager.newCircuitBlockData(id, blockType);
-		circuit->setBlockType(blockType);
-
-		CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
-		if (!circuitBlockData) {
-			logError("Did not find newly created circuit block data with circuit id: {}", "CircuitManager", (unsigned int)id);
-			return id;
-		}
-
-		// Connections
-		const std::vector<ParsedCircuit::ConnectionPort>& ports = parsedCircuit->getConnectionPorts();
-
-		for (const ParsedCircuit::ConnectionPort& port : ports) {
-			if (port.isInput) blockData->setConnectionInput(port.positionOnBlock, port.connectionEndId);
-			else blockData->setConnectionOutput(port.positionOnBlock, port.connectionEndId);
-			if (!port.portName.empty()) {
-				blockData->setConnectionIdName(port.connectionEndId, port.portName);
-			}
-			if (port.block != 0) {
-				circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
-			}
-		}
-
-		dataUpdateEventManager->sendEvent("blockDataUpdate");
-
-		return id;
-	}
+	circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit, bool createEval = true);
+	circuit_id_t createNewCircuit(const GeneratedCircuit* parsedCircuit, bool createEval = true);
 
 	// Iterator
 	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;
