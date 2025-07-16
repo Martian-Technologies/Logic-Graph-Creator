@@ -1,3 +1,4 @@
+#include <SDL3/SDL_init.h>
 #include <SDL3/SDL_main.h>
 
 #include "computerAPI/directoryManager.h"
@@ -5,6 +6,8 @@
 #include "app.h"
 
 #include "computerAPI/fileListener/fileListener.h"
+
+#include "backend/wasm/wasm.h"
 
 int main(int argc, char* argv[]) {
 	try {
@@ -48,7 +51,7 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", makeKeybind(Rml::Input::KeyIdentifier::KI_S));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
 #endif
 
@@ -57,10 +60,10 @@ int main(int argc, char* argv[]) {
 
 	} catch (const std::exception& e) {
 		// Top level fatal error catcher, logs issue
-		logFatalError("{}", "", e.what());
+		logFatalError("Exiting Gatality because of fatal error: '{}'", "", e.what());
 		return EXIT_FAILURE;
 	}
 
-	logInfo("Exiting Gatality...");
+	logInfo("Exiting Connection Machine...");
 	return EXIT_SUCCESS;
 }

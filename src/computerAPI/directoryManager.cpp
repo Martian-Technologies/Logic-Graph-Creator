@@ -45,7 +45,6 @@ void DirectoryManager::findDirectories() {
 	logFatalError("Could not find resource directory. Make sure you are executing the program from the top of the source tree.");
 }
 
-// thank you for this snippet Jacob Tate - https://gist.github.com/Jacob-Tate/7b326a086cf3f9d46e32315841101109
 std::filesystem::path DirectoryManager::getExecutablePath() {
 	return cpplocate::getExecutablePath();
 }

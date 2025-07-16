@@ -18,7 +18,7 @@ void CircuitView::setBackend(Backend* backend) {
 }
 
 void CircuitView::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-	renderer->setEvaluator(evaluator.get());
+	renderer->setEvaluator(evaluator);
 	evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 	toolManager.setEvaluatorStateInterface(&evaluatorStateInterface);
 	this->evaluator = evaluator;
@@ -48,6 +48,7 @@ void CircuitView::setAddress(const Address& address) {
 
 void CircuitView::viewChanged() {
 	eventRegister.doEvent(PositionEvent("Pointer Move", viewManager.getPointerPosition()));
+	renderer->updateView(&viewManager);
 }
 
 void CircuitView::circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId) {

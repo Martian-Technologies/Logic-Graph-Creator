@@ -4,6 +4,7 @@
 
 void ToolStack::activate() {
 	isActive = true;
+	verifyNoEdits();
 	if (!toolStack.empty()) {
 		if (pointerInView) {
 			PositionEvent event("Stack Updating Position", lastPointerFPosition);
@@ -51,7 +52,7 @@ SharedCircuitTool ToolStack::getCurrentTool() const {
 }
 
 void ToolStack::setMode(std::string mode) {
-	getCurrentNonHelperTool()->setMode(mode);
+	if (!toolStack.empty()) getCurrentNonHelperTool()->setMode(mode);
 }
 
 void ToolStack::reset() {
@@ -62,6 +63,14 @@ void ToolStack::reset() {
 }
 
 void ToolStack::pushTool(SharedCircuitTool newTool, bool resetTool) {
+	if (circuit) {
+		if (!(circuit->isEditable())) {
+			if (newTool->canMakeEdits()) {
+				clearTools(); // Can't select tool that can make edits
+				return;
+			}
+		}
+	}
 	if (!toolStack.empty())
 		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
@@ -154,4 +163,15 @@ bool ToolStack::pointerMove(const Event* event) {
 		lastPointerPosition = positionEvent->getPosition();
 	}
 	return false;
+}
+
+void ToolStack::verifyNoEdits() {
+	if (circuit && !(circuit->isEditable())) {
+		for (SharedCircuitTool tool : toolStack) {
+			if (tool->canMakeEdits()) {
+				clearTools();
+				return; 
+			}
+		}
+	}
 }

@@ -49,12 +49,14 @@ private:
 	bool exitBlockView(const Event* event);
 	bool pointerMove(const Event* event);
 
+	void verifyNoEdits();
+
 	bool pointerInView = false;
 	FPosition lastPointerFPosition;
 	Position lastPointerPosition;
 
 	// current block container
-	Circuit* circuit;
+	Circuit* circuit = nullptr;
 	CircuitView* circuitView;
 
 	// tool function event linking

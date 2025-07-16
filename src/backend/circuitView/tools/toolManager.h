@@ -20,6 +20,7 @@ public:
 	void setMode(std::string mode);
 
 	inline void setCircuit(Circuit* circuit) {
+		this->circuit = circuit;
 		for (auto& toolStack : toolStacks) toolStack.setCircuit(circuit);
 	}
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* interface) {
@@ -28,6 +29,7 @@ public:
 
 private:
 	int activeToolStack = 0;
+	Circuit* circuit;
 	std::array<ToolStack, 3> toolStacks;
 	std::map<std::string, SharedCircuitTool> toolInstances;
 };

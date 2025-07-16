@@ -337,7 +337,10 @@ inline constexpr Rotation addRotations(Rotation rotationA, Rotation rotationB) {
 		output -= 4;
 	return (Rotation)output;
 }
-inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 - (char)rotation) * (char)rotation); }
+inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)(4 - (char)rotation); }
+inline constexpr Rotation subRotations(Rotation rotationA, Rotation rotationB) {
+	return addRotations(rotationA, rotationNeg(rotationB));
+}
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
 inline Vector rotateVectorWithArea(Vector vector, Vector size, Rotation rotationAmount) {
 	switch (rotationAmount) {

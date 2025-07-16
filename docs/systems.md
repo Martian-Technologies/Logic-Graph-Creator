@@ -47,12 +47,6 @@ Renderers are made to interface with both the windowing library and the backend.
 
 Tools are mannaged by the tool mannager which deals with swapping and registering tools for a view. You can create tools by inheriting `CircuitTool`.
 
-## QT
-
-## Actions
-
-TODO
-
 ## Settings
 
 TODO

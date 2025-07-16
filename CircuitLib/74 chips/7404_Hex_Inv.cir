@@ -1,0 +1,59 @@
+version_6
+Circuit: "7404 (Hex Inv)"
+UUID: 61ace8bf-1e6d-4782-bb0b-806101cd67af
+size: <7, 2>
+ports:
+	(OUT, 11, 19, <2, 0>, "Y6")
+	(OUT, 10, 20, <4, 0>, "Y5")
+	(OUT, 9, 21, <6, 0>, "Y4")
+	(OUT, 8, 18, <5, 1>, "Y3")
+	(OUT, 7, 17, <3, 1>, "Y2")
+	(OUT, 6, 16, <1, 1>, "Y1")
+	(IN, 5, 10, <1, 0>, "A6")
+	(IN, 4, 11, <3, 0>, "A5")
+	(IN, 3, 12, <5, 0>, "A4")
+	(IN, 2, 15, <4, 1>, "A3")
+	(IN, 1, 14, <2, 1>, "A2")
+	(IN, 0, 13, <0, 1>, "A1")
+blockId 21 LIGHT 5 -2 ZERO
+	(connId:0) (3 1)
+blockId 20 LIGHT 2 -2 ZERO
+	(connId:0) (2 1)
+blockId 19 LIGHT -1 -2 ZERO
+	(connId:0) (1 1)
+blockId 18 LIGHT 2 2 ZERO
+	(connId:0) (9 1)
+blockId 17 LIGHT -1 2 ZERO
+	(connId:0) (7 1)
+blockId 16 LIGHT -4 2 ZERO
+	(connId:0) (8 1)
+blockId 15 SWITCH 0 2 ZERO
+	(connId:0) (9 0)
+blockId 11 SWITCH 0 -2 ZERO
+	(connId:0) (2 0)
+blockId 10 SWITCH -3 -2 ZERO
+	(connId:0) (1 0)
+blockId 9 NOR 1 1 ZERO
+	(connId:0) (15 0)
+	(connId:1) (18 0)
+blockId 8 NOR -5 1 ZERO
+	(connId:0) (13 0)
+	(connId:1) (16 0)
+blockId 14 SWITCH -3 2 ZERO
+	(connId:0) (7 0)
+blockId 3 NOR 4 -1 ZERO
+	(connId:1) (21 0)
+	(connId:0) (12 0)
+blockId 7 NOR -2 1 ZERO
+	(connId:0) (14 0)
+	(connId:1) (17 0)
+blockId 13 SWITCH -6 2 ZERO
+	(connId:0) (8 0)
+blockId 2 NOR 1 -1 ZERO
+	(connId:1) (20 0)
+	(connId:0) (11 0)
+blockId 12 SWITCH 3 -2 ZERO
+	(connId:0) (3 0)
+blockId 1 NOR -2 -1 ZERO
+	(connId:1) (19 0)
+	(connId:0) (10 0)

@@ -1,13 +1,27 @@
 #include "app.h"
 
+Rml::EventId pinchEventId = Rml::EventId::Invalid;
+
+Rml::EventId getPinchEventId() {
+	if (pinchEventId == Rml::EventId::Invalid) {
+		logError("Dont call getPinchEventId before initializing the App");
+		return Rml::EventId::Scroll;
+	}
+	return pinchEventId;
+}
+
 App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
 	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
-	windows.emplace_back(&backend, &circuitFileManager, &fileListener, pinchEventId);
+	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
 }
 
 void App::runLoop() {
+	bool firstPass = true;
 	running = true;
 	while (running) {
+		// Wait for the next event (so we don't overload the cpu)
+		SDL_WaitEvent(nullptr);
+		
 		// process events (TODO - should probably just have a map of window ids to windows)
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -20,8 +34,8 @@ void App::runLoop() {
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
 				// Single window was closed, check which window was closed and remove it
 				auto itr = windows.begin();
-				while (itr != windows.end()) {
-					if (itr->recieveEvent(event)) {
+				while (itr != windows.end()) {	
+					if ((*itr)->recieveEvent(event)) {
 						windows.erase(itr);
 						break;
 					}
@@ -31,51 +45,33 @@ void App::runLoop() {
 			}
 			case SDL_EVENT_WINDOW_FOCUS_GAINED: {
 				// Window focus switched, check which window gained focus
-				for (Window& window : windows) {
-					if (window.recieveEvent(event)) {
+				for (auto& window : windows) {
+					if (window->recieveEvent(event)) {
 						// tell system interface about focus change
-						rmlSystemInterface.SetWindow(window.getSdlWindow());
+						rmlSystemInterface.SetWindow(window->getSdlWindow());
 						break;
 					}
 				}
 				break;
 			}
-			case SDL_EVENT_DROP_FILE: {
-				std::string file = event.drop.data;
-				std::cout << file << "\n";
-				for (Window& window : windows) {
-					std::shared_ptr<CircuitViewWidget> circuitViewWidget = window.getCircuitViewWidget();
-					std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(file);
-					if (ids.empty()) {
-						logError("Error", "Failed to load circuit file.");
-						return;
-					}
-					circuit_id_t id = ids.back();
-					if (id == 0) {
-						logError("Error", "Failed to load circuit file.");
-						return;
-					}
-					window.getCircuitViewWidget()->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-					for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
-						if (iter.second->getCircuitId(Address()) == id) {
-							circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
-						}
-					}
-				}
-			}
 			default: {
 				// Send event to all windows
-				for (Window& window : windows) {
-					window.recieveEvent(event);
+				for (auto& window : windows) {
+					window->recieveEvent(event);
 				}
 			}
 			}
 		}
 
-		// tell all windows to render
-		for (Window& window : windows) {
-			window.update();
-			window.render(rmlRenderInterface);
+		// tell all windows to update rml
+		for (auto& window : windows) {
+			window->updateRml(rmlRenderInterface);
+		}
+		if (firstPass) {
+			firstPass = false;
+			for (auto& window : windows) {
+				window->getCircuitViewWidget()->handleResize();
+			}
 		}
 	}
 }

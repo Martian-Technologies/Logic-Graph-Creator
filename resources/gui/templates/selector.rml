@@ -1,0 +1,24 @@
+<template name="selector" content="content">
+
+	<head>
+		<link type="text/rcss" href="../styles/selector.rcss" />
+	</head>
+
+	<body>
+		<div id="selection-tree">
+			<div id="item-selection-tree"></div>
+			<div id="mode-selection-tree"></div>
+			<div id="parameter-menu-hide" class="invisible">
+				<div id="parameter-menu">
+					<span id="parameter-menu-lable">Procedural Circuit Parameters</span>
+					<span id="parameter-menu-active"> AND GATE </span>
+					<div id="parameter-menu-parameters"></div>
+					<div>
+						<div id="reset-parameters">Reset</div>
+						<div id="create-block">Create</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</template>

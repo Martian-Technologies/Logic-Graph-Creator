@@ -1,10 +1,9 @@
-# Gatality
+# Connection Machine
 
-[Gatality](https://gatality.com) is a desktop application for designing and simulating logic graph systems.
-A build of the app for Windows exists in the [releases tab](https://github.com/Martian-Technologies/Logic-Graph-Creator/releases).
+[Connection Machine](https://gatality.com) is a desktop application for designing and simulating logic graph systems.
+Download builds of the app in the [releases tab](https://github.com/Martian-Technologies/Logic-Graph-Creator/releases). Otherwise, read the [build instructions](docs/building.md).
 
 ## Developer Documentation
-- [HOW TO BUILD <----- CLICK HERE](docs/building.md)
 - [Explanation of major systems](docs/systems.md)
 - [Coding conventions, style, and feature usage guidelines](docs/conventions.md)
 - [Processes that should be followed when developing](docs/processes.md)

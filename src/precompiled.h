@@ -16,6 +16,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <list>
 #include <array>
 #include <stack>
 #include <queue>
@@ -35,5 +36,6 @@
 #include <iomanip>
 
 #include "logging/logging.h"
+#include "util/fatal.h"
 
 #endif /* LGC_PCH */

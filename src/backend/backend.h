@@ -46,12 +46,14 @@ public:
 	bool linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_id_t evalId, const Address& address);
 
 	const SharedCopiedBlocks getClipboard() const { return clipboard; }
-	void setClipboard(SharedCopiedBlocks copiedBlocks) { clipboard = copiedBlocks; }
+	unsigned long long getClipboardEditCounter() const { return clipboardEditCounter; }
+	void setClipboard(SharedCopiedBlocks copiedBlocks) { clipboard = copiedBlocks; ++clipboardEditCounter; }
 
 private:
 	std::set<CircuitView*> circuitViews;
 
 	SharedCopiedBlocks clipboard = nullptr;
+	unsigned long long clipboardEditCounter = 1;
 
 	DataUpdateEventManager dataUpdateEventManager; // this needs to be constructed first
 	CircuitManager circuitManager;

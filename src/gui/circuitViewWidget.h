@@ -3,6 +3,9 @@
 
 #include <RmlUi/Core.h>
 #include <SDL3/SDL.h>
+
+#include "gpu/renderer/viewportRenderInterface.h"
+#include "gpu/renderer/windowRenderer.h"
 #include "sdl/sdlWindow.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
@@ -10,12 +13,10 @@
 #include "interaction/keybindHandler.h"
 #include "util/vec2.h"
 
-#include "renderer/sdlRenderer.h"
-
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* parent, SDL_Window* window, SDL_Renderer* sdlRenderer);
-	~CircuitViewWidget() { document->RemoveEventListener("keydown", &keybindHandler); }
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderer* windowRenderer);
+	~CircuitViewWidget() { element->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
 	inline CircuitView* getCircuitView() { return circuitView.get(); }
@@ -25,7 +26,8 @@ public:
 	void setSimSpeed(double speed);
 	void setStatusBar(const std::string& text = "");
 
-	void render();
+	void handleResize();
+
 	void newCircuit();
 	void load();
 	void save();
@@ -40,14 +42,13 @@ private:
 	inline float getPixelsXPos() const;
 	inline float getPixelsYPos() const;
 
-	std::unique_ptr<SdlRenderer> renderer;
+	std::unique_ptr<ViewportRenderInterface> rendererInterface;
 	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
-	Rml::Element* parent;
+	Rml::Element* element;
 	SDL_Window* window;
 	KeybindHandler keybindHandler;
-	bool doResize = false;
 
 	// settings (temp)
 	bool mouseControls = false;

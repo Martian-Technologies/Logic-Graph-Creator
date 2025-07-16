@@ -17,18 +17,18 @@ public:
 		if (defaultData == this->defaultData) return;
 		bool sentPre = false;
 		if (defaultData && getSize() != Vector(1)) {
-			dataUpdateEventManager->sendEvent(
+			dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
 				"preBlockSizeChange",
-				DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+				{ blockType, Vector(1) }
 			);
 			sentPre = true;
 		}
 		this->defaultData = defaultData;
 		blockSize = Vector(1);
 		if (sentPre) {
-			dataUpdateEventManager->sendEvent(
+			dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
 				"postBlockSizeChange",
-				DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+				{ blockType, Vector(1) }
 			);
 		}
 		sendBlockDataUpdate();
@@ -40,14 +40,14 @@ public:
 
 	inline void setSize(Vector size) noexcept {
 		if (getSize() == size) return;
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
 			"preBlockSizeChange",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, size })
+			{ blockType, size }
 		);
 		blockSize = size;
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
 			"postBlockSizeChange",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, getSize() })
+			{ blockType, getSize() }
 		);
 		sendBlockDataUpdate();
 	}
@@ -68,42 +68,42 @@ public:
 	inline void removeConnection(connection_end_id_t connectionEndId) noexcept {
 		auto iter = connections.find(connectionEndId);
 		if (iter == connections.end()) return;
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"preBlockDataRemoveConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		bool isInput = iter->second.second;
 		connections.erase(iter);
 		inputConnectionCount -= isInput;
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"blockDataRemoveConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		sendBlockDataUpdate();
 	}
 	inline void setConnectionInput(Vector vector, connection_end_id_t connectionEndId) noexcept {
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"preBlockDataSetConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		connections[connectionEndId] = { vector, true };
 		inputConnectionCount++;
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"blockDataSetConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		sendBlockDataUpdate();
 	}
 	// trys to set a connection output in the block. Returns success.
 	inline void setConnectionOutput(Vector vector, connection_end_id_t connectionEndId) noexcept {
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"preBlockDataSetConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		connections[connectionEndId] = { vector, false };
-		dataUpdateEventManager->sendEvent(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, connection_end_id_t>>(
 			"blockDataSetConnection",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, connectionEndId })
+			{ blockType, connectionEndId }
 		);
 		sendBlockDataUpdate();
 	}
@@ -190,7 +190,7 @@ public:
 		return iter != connections.end() && iter->second.second;
 	}
 	inline bool isConnectionOutput(connection_end_id_t connectionId) const noexcept {
-		if (defaultData) return connectionId == 0;
+		if (defaultData) return connectionId == 1;
 		auto iter = connections.find(connectionId);
 		return iter != connections.end() && !(iter->second.second);
 	}

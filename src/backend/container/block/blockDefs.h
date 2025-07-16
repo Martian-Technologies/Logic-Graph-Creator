@@ -7,8 +7,6 @@ typedef char block_data_index_t;
 typedef unsigned char block_size_t;
 typedef unsigned int block_id_t;
 
-// typedef std::uint16_t BlockType;
-
 enum BlockType : std::uint16_t {
 	NONE,
 	AND,

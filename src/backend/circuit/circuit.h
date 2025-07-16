@@ -4,10 +4,11 @@
 #include <assert.h>
 
 #include "backend/container/blockContainer.h"
+#include "backend/container/copiedBlocks.h"
 #include "backend/selection.h"
 #include "undoSystem.h"
-#include "backend/container/copiedBlocks.h"
 
+class GeneratedCircuit;
 class ParsedCircuit;
 
 typedef unsigned int circuit_id_t;
@@ -26,9 +27,12 @@ public:
 	inline std::string getCircuitNameNumber() const { return circuitName + " : " + std::to_string(circuitId); }
 	inline const std::string& getCircuitName() const { return circuitName; }
 	void setCircuitName(const std::string& name);
-	
+
 	inline unsigned long long getEditCount() const { return editCount; }
-	void addEdit() { editCount ++; }
+	void addEdit() { editCount++; }
+
+	bool isEditable() { return editable; }
+	void setEditable(bool isEditable) { editable = isEditable; }
 
 	/* ----------- listener ----------- */
 	// subject to change
@@ -58,6 +62,7 @@ public:
 
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit);
+	bool tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position);
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
 
 	/* ----------- block data ----------- */
@@ -123,6 +128,7 @@ private:
 
 	UndoSystem undoSystem;
 	bool midUndo = false;
+	bool editable = true;
 
 	unsigned long long editCount = 0;
 };

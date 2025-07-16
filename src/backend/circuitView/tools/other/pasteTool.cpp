@@ -10,12 +10,14 @@ void PasteTool::activate() {
 
 bool PasteTool::rotateCW(const Event* event) {
 	amountToRotate = rotate(amountToRotate, true);
+	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool PasteTool::rotateCCW(const Event* event) {
 	amountToRotate = rotate(amountToRotate, false);
+	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
@@ -30,21 +32,37 @@ bool PasteTool::place(const Event* event) {
 // Preview is only shown for the primary parsed circuit, not the dependencies that will be created in a different circuit
 void PasteTool::updateElements() {
 	if (!elementCreator.isSetup()) return;
-	elementCreator.clear();
-	if (!pointerInView) return;
 
-	SharedCopiedBlocks copiedBlocks = circuitView->getBackend()->getClipboard();
-	if (!copiedBlocks) return;
-
-	Vector totalOffset = Vector(lastPointerPosition.x, lastPointerPosition.y) + (Position() - copiedBlocks->getMinPosition());
-
-	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
-		elementCreator.addBlockPreview(BlockPreview(
-			block.blockType,
-			lastPointerPosition + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
-			addRotations(block.rotation, amountToRotate)
-		));
+	if (!pointerInView) {
+		elementCreator.clear();
+		return;
 	}
+
+	if (circuitView->getBackend()->getClipboardEditCounter() != lastClipboardEditCounter || !elementCreator.hasElement(elementID)) {
+		lastClipboardEditCounter = circuitView->getBackend()->getClipboardEditCounter();
+		// reset and remake blocks
+		elementCreator.clear();
+
+		SharedCopiedBlocks copiedBlocks = circuitView->getBackend()->getClipboard();
+		if (!copiedBlocks) return;
+
+		std::vector<BlockPreview::Block> blocks;
+		blocks.reserve(copiedBlocks->getCopiedBlocks().size());
+		for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
+			blocks.emplace_back(
+				block.blockType,
+				lastPointerPosition + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
+				addRotations(block.rotation, amountToRotate)
+			);
+		}
+		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
+		lastElementPosition = lastPointerPosition;
+	} else {
+		// update old element
+		elementCreator.shiftBlockPreview(elementID, lastPointerPosition - lastElementPosition);
+		lastElementPosition = lastPointerPosition;
+	}
+
 }
 
 bool PasteTool::validatePlacement() const {

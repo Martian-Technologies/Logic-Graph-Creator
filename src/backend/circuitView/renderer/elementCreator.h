@@ -61,7 +61,7 @@ public:
 
 	inline ElementID addSelectionElement(const SelectionObjectElement& selection) {
 		assert(renderer);
-		ElementID id = renderer->addSelectionElement(selection);
+		ElementID id = renderer->addSelectionObjectElement(selection);
 		ids[id] = ElementType::SelectionElement;
 		return id;
 	}
@@ -73,11 +73,16 @@ public:
 		return id;
 	}
 
-	ElementID addBlockPreview(const BlockPreview& blockPreview) {
+	ElementID addBlockPreview(BlockPreview&& blockPreview) {
 		assert(renderer);
-		ElementID id = renderer->addBlockPreview(blockPreview);
+		ElementID id = renderer->addBlockPreview(std::move(blockPreview));
 		ids[id] = ElementType::BlockPreview;
 		return id;
+	}
+
+	void shiftBlockPreview(ElementID id, Vector shift) {
+		assert(renderer);
+		if (ids.contains(id)) renderer->shiftBlockPreview(id, shift);
 	}
 
 	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) {
