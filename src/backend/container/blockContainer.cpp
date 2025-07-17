@@ -4,6 +4,17 @@
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
 
+void BlockContainer::clear(Difference* difference) {
+	for (auto iter : blocks) {
+		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+	}
+
+	lastId = 0;
+	grid.clear();
+	blocks.clear();
+	blockTypeCounts.clear();
+}
+
 bool BlockContainer::checkCollision(Position positionSmall, Position positionLarge) const {
 	for (auto iter = positionSmall.iterTo(positionLarge); iter; iter++) {
 		if (checkCollision(*iter)) return true;

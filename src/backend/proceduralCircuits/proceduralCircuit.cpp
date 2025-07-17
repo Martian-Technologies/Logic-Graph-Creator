@@ -33,6 +33,7 @@ ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(const Proced
 		parameters = other.parameters;
 	return *this;
 }
+
 ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(ProceduralCircuitParameters&& other) {
 	if (this != &other)
 		parameters = std::move(other.parameters);
@@ -121,7 +122,6 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	// Get useful objects
 	SharedCircuit circuit = circuitManager->getCircuit(id);
 	BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(type);
-	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
 
 	// Settings
 	blockData->setIsPlaceable(false);
@@ -136,4 +136,24 @@ BlockType ProceduralCircuit::getBlockType(const ProceduralCircuitParameters& par
 	circuit_id_t circuitId = getCircuitId(parameters);
 	SharedCircuit circuit = circuitManager->getCircuit(circuitId);
 	return circuit ? circuit->getBlockType() : BlockType::NONE;
+}
+
+void ProceduralCircuit::regenerateAll() {
+	for (auto pair : generatedCircuits) {
+		ProceduralCircuitParameters realParameters = parameterDefaults;
+		for (auto& iter : realParameters.parameters) {
+			auto iter2 = pair.first.parameters.find(iter.first);
+			if (iter2 != pair.first.parameters.end()) {
+				iter.second = iter2->second;
+			}
+		}
+		GeneratedCircuit generatedCircuit;
+		this->makeCircuit(realParameters, generatedCircuit);
+		generatedCircuit.markAsCustom();
+		GeneratedCircuitValidator validator(generatedCircuit, circuitManager->getBlockDataManager());
+		circuitManager->updateExistingCircuit(pair.second, &generatedCircuit);
+		circuitIdToProceduralCircuitParameters[pair.second] = realParameters;
+		SharedCircuit circuit = circuitManager->getCircuit(pair.second);
+		circuit->setCircuitName(getProceduralCircuitName() + " (" + realParameters.toString() + ")");
+	}
 }

@@ -193,8 +193,7 @@ void BlockCreationWindow::updateFromMenu() {
 
 		if (portIsInput) blockData->setConnectionInput(portPositionOnBlock, endId);
 		else blockData->setConnectionOutput(portPositionOnBlock, endId);
-		if (!(portName.empty())) blockData->setConnectionIdName(endId, portName);
-		blockData->setConnectionIdName(endId, portName);
+		if (!portName.empty()) blockData->setConnectionIdName(endId, portName);
 
 		circuitBlockData->setConnectionIdPosition(endId, portBlockPosition);
 	}

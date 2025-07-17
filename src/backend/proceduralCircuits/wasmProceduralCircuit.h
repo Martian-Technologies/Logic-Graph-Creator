@@ -5,11 +5,13 @@
 
 #include "backend/wasm/wasm.h"
 
+class CircuitFileManager;
+
 class WasmProceduralCircuit : public ProceduralCircuit {
 public:
 	class WasmInstance {
 	public:
-		WasmInstance(wasmtime::Module module);
+		WasmInstance(wasmtime::Module module, CircuitManager* circuitManager, CircuitFileManager* fileManager);
 		WasmInstance(WasmInstance&& wasmInstance);
 
 		WasmInstance& operator=(WasmInstance&& wasmInstance);
@@ -26,6 +28,9 @@ public:
 
 		std::optional<wasmtime::Instance> instance;
 		std::optional<wasmtime::Memory> memory;
+
+		CircuitManager* circuitManager;
+		CircuitFileManager* fileManager;
 
 		// gotten on load
 		bool valid = false;

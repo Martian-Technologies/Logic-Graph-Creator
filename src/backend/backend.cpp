@@ -4,7 +4,7 @@
 
 #include "computerAPI/directoryManager.h"
 
-Backend::Backend() : toolManagerManager(&circuitViews, &dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager), evaluatorManager(&dataUpdateEventManager) {
+Backend::Backend(CircuitFileManager* fileManager) : toolManagerManager(&circuitViews, &dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager, fileManager), evaluatorManager(&dataUpdateEventManager) {
 	Wasm::initialize();
 	circuitManager.connectListener(&evaluatorManager, std::bind(&EvaluatorManager::applyDiff, &evaluatorManager, std::placeholders::_1, std::placeholders::_2));
 }

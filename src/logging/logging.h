@@ -53,5 +53,4 @@ void logFatalError(const T& obj, const std::string& subcategory = "") {
 	logFatalError("{}", subcategory, obj);
 }
 
-
 #endif /* logging_h */

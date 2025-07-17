@@ -21,6 +21,8 @@ class Circuit {
 public:
 	Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
 
+	void clear(bool clearUndoTree = false);
+
 	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }

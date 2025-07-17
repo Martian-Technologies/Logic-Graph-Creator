@@ -6,9 +6,11 @@
 
 #include "util/uuid.h"
 
+class CircuitFileManager;
+
 class ProceduralCircuitManager {
 public:
-	ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager);
+	ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager, CircuitFileManager* fileManager);
 
 	template<class ProceduralCircuitType>
 	const std::string* createProceduralCircuit(const std::string& name, const std::string& uuid = generate_uuid_v4()) {
@@ -34,7 +36,9 @@ public:
 
 private:
 	CircuitManager* circuitManager;
+	CircuitFileManager* fileManager;
 	DataUpdateEventManager* dataUpdateEventManager;
+
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	std::map<std::string, SharedProceduralCircuit> proceduralCircuits;
 	std::map<std::string, std::string> pathToUUID;
