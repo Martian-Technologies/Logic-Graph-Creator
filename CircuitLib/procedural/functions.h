@@ -9,23 +9,7 @@
 extern "C" {
 #endif
 
-	enum BlockType : unsigned int {
-		NONE,
-		AND,
-		OR,
-		XOR,
-		NAND,
-		NOR,
-		XNOR,
-		JUNCTION,
-		TRISTATE_BUFFER,
-		//TIMER,
-		BUTTON,
-		TICK_BUTTON,
-		SWITCH,
-		CONSTANT,
-		LIGHT
-	};
+	typedef unsigned int BlockType;
 
 	typedef unsigned int connection_end_id_t;
 	typedef unsigned char block_size_t;
@@ -38,8 +22,21 @@ extern "C" {
 	exportedVar(char*, name, Name)
 	exportedVar(char*, defaultParameters, DefaultParameters)
 
+	externalFunction(importFile)
+		// returns number of files imported
+		unsigned int importFile(const char* filePath);
+
 	externalFunction(getParameter)
 		int getParameter(const char* key);
+	
+	externalFunction(getPrimitiveType)
+		BlockType getPrimitiveType(const char* primitiveName);
+
+	externalFunction(getNonPrimitiveType)
+		BlockType getNonPrimitiveType(const char* UUID);
+
+	externalFunction(getProceduralCircuitType)
+		BlockType getProceduralCircuitType(const char* UUID, const char* parameters);
 
 	externalFunction(createBlock)
 		block_id_t createBlock(BlockType blockType);

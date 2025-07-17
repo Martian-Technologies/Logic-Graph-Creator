@@ -13,7 +13,7 @@ class ParsedCircuit;
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager);
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager, CircuitFileManager* fileManager);
 	// Circuit
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);

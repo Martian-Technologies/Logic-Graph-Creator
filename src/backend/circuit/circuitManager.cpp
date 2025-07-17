@@ -26,8 +26,8 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 	return id;
 }
 
-CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager) :
-	blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager), proceduralCircuitManager(this, dataUpdateEventManager),
+CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager, CircuitFileManager* fileManager) :
+	blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager), proceduralCircuitManager(this, dataUpdateEventManager, fileManager),
 	dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager) {
 	dataUpdateEventReceiver.linkFunction("postBlockSizeChange", [this](const DataUpdateEventManager::EventData* eventData) {
 		linkedFunctionForUpdates<Vector>(eventData);
@@ -61,6 +61,11 @@ circuit_id_t CircuitManager::createNewCircuit(const ParsedCircuit* parsedCircuit
 			// the parsed circuit which seems annoying
 			logWarning("Dependency Circuit with UUID {} already exists; not creating custom block.", "CircuitManager", uuid);
 			return possibleExistingCircuit->getCircuitId();
+		} else {
+			if (getProceduralCircuitManager()->getProceduralCircuit(uuid)) {
+				logWarning("Dependency Circuit with UUID {} already exists as ProceduralCircuit. Can't create block.", "CircuitManager", uuid);
+				return 0;
+			}
 		}
 	}
 
