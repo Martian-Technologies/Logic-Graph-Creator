@@ -13,7 +13,7 @@ public:
 
 	VulkanDevice* createOrGetDevice(VkSurfaceKHR surfaceForPresenting);
 
-	inline vkb::Instance getVkbInstance() { return instance; };
+	inline vkb::Instance getVkbInstance() const { return instance; };
 
 private:
 	vkb::Instance instance;

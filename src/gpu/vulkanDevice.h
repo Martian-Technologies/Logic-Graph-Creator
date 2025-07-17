@@ -24,13 +24,13 @@ public:
 	VkResult submitPresent(VkPresentInfoKHR* presentInfo);
 	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
-	inline uint32_t getGraphicsQueueIndex() { return graphicsQueue.index; }
-	inline uint32_t getPresentQueueIndex() { return presentQueue.index; }
+	inline uint32_t getGraphicsQueueIndex() const { return graphicsQueue.index; }
+	inline uint32_t getPresentQueueIndex() const { return presentQueue.index; }
 
 	inline vkb::Device& getDevice() { return device; }
-	inline VmaAllocator getAllocator() { return vmaAllocator; }
+	inline VmaAllocator getAllocator() const { return vmaAllocator; }
 
-	inline BlockTextureManager* getBlockTextureManager() { return blockTextureManager.get(); }
+	inline BlockTextureManager* getBlockTextureManager() const { return blockTextureManager.get(); }
 	
 private:
 	void createAllocator();
