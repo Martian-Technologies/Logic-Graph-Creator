@@ -67,7 +67,7 @@ public:
 
 protected:
 	virtual void makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) = 0;
-	void regenerateAll() { }
+	void regenerateAll();
 
 private:
 	std::string proceduralCircuitName;

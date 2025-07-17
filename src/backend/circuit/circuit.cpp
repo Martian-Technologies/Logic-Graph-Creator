@@ -11,6 +11,15 @@ Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, Dat
 	dataUpdateEventReceiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Circuit::removeConnectionPort, this, std::placeholders::_1));
 }
 
+void Circuit::clear(bool clearUndoTree) {
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.clear(difference.get());
+	sendDifference(difference);
+	if (clearUndoTree) {
+		undoSystem.clear();
+	}
+}
+
 bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());

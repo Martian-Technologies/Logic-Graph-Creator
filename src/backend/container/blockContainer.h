@@ -8,9 +8,11 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer(BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+	inline BlockContainer(BlockDataManager* blockDataManager) : blockDataManager(blockDataManager) { }
 
 	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
+
+	void clear(Difference* difference);
 
 	inline BlockType getBlockType() const { return selfBlockType; }
 	inline void setBlockType(BlockType type) { if (getBlockTypeCount(type) == 0) selfBlockType = type; }
@@ -108,7 +110,7 @@ private:
 
 	BlockType selfBlockType = BlockType::NONE;
 	BlockDataManager* blockDataManager;
-	block_id_t lastId;
+	block_id_t lastId = 0;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;
 	std::vector<unsigned int> blockTypeCounts;

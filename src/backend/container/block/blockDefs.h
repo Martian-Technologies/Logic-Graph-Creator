@@ -26,4 +26,11 @@ enum BlockType : std::uint16_t {
 	CUSTOM, // placeholder for custom blocks in parsed circuit
 };
 
+template <>
+struct std::formatter<BlockType> : std::formatter<std::string> {
+    auto format(BlockType blockType, format_context& ctx) const {
+        return formatter<string>::format(std::to_string((unsigned int)blockType), ctx);
+    }
+};
+
 #endif /* blockDefs_h */
