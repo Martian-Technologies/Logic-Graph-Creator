@@ -59,11 +59,11 @@ public:
 	};
 	void setState(const Address& address, bool state) { setState(address, fromBool(state)); }
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) {
-		logWarning("not implemented yet", "Evaluator::getBulkStates");
+		// logWarning("not implemented yet", "Evaluator::getBulkStates");
 		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
 	};
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
-		logWarning("not implemented yet", "Evaluator::getBulkStates");
+		// logWarning("not implemented yet", "Evaluator::getBulkStates");
 		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
 	};
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
@@ -76,9 +76,22 @@ public:
 		return evalCircuitContainer.getCircuitId(0).value_or(0);
 	}
 	circuit_id_t getCircuitId(const Address& address) const {
-		logWarning("not implemented yet", "Evaluator::getCircuitId");
-		return evalCircuitContainer.getCircuitId(0).value_or(0);
-	};
+		eval_circuit_id_t evalCircuitId = 0;
+		for (int i = 0; i < address.size(); i++) {
+			std::optional<CircuitNode> node = evalCircuitContainer.getNode(address.getPosition(i), evalCircuitId);
+			if (!node.has_value()) {
+				logError("CircuitNode not found for address {}", "Evaluator::getCircuitId", "Evaluator::getCircuitId", address.toString());
+				return getCircuitId(); // Invalid circuit ID
+			}
+			if (node->isIC()) {
+				evalCircuitId = node->getId();
+			} else {
+				logError("Address {} does not point to an IC", "Evaluator::getCircuitId", address.toString());
+				return getCircuitId();
+			}
+		}
+		return evalCircuitContainer.getCircuitId(evalCircuitId).value_or(0);
+	}
 	const EvalAddressTree buildAddressTree() const;
 	const EvalAddressTree buildAddressTree(eval_circuit_id_t evalCircuitId) const;
 
@@ -89,6 +102,7 @@ private:
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 	EvalCircuitContainer evalCircuitContainer;
 	EvalConfig evalConfig;
+	IdProvider<middle_id_t> middleIdProvider;
 
 	void makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache);
 

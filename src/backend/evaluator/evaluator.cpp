@@ -11,6 +11,7 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 		logError("Circuit with ID {} not found in evaluator constructor", "Evaluator", circuitId);
 		return;
 	}
+	logInfo("Creating Evaluator with ID {} for Circuit ID {}", "Evaluator", evaluatorId, circuitId);
 	evalCircuitContainer.addCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
@@ -79,27 +80,27 @@ void Evaluator::makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceShare
 }
 
 void Evaluator::edit_removeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
-
+	logWarning("not implemented yet", "Evaluator::edit_removeBlock");
 }
 
 void Evaluator::edit_placeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
-
+	logWarning("not implemented yet", "Evaluator::edit_placeBlock");
 }
 
 void Evaluator::edit_removeConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-
+	logWarning("not implemented yet", "Evaluator::edit_removeConnection");
 }
 
 void Evaluator::edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-
+	logWarning("not implemented yet", "Evaluator::edit_createConnection");
 }
 
 void Evaluator::edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
-
+	logWarning("not implemented yet", "Evaluator::edit_moveBlock");
 }
 
 void Evaluator::edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData) {
-
+	logWarning("not implemented yet", "Evaluator::edit_setData");
 }
 
 const EvalAddressTree Evaluator::buildAddressTree() const {

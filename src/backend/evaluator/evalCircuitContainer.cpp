@@ -50,5 +50,5 @@ std::optional<eval_circuit_id_t> EvalCircuitContainer::getCircuitId(eval_circuit
 	if (circuits.at(evalCircuitId) == nullptr) {
 		return std::nullopt;
 	}
-	return evalCircuitId;
+	return circuits.at(evalCircuitId)->getCircuitId();
 }
