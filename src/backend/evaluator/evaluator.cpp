@@ -7,6 +7,10 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	receiver(dataUpdateEventManager),
 	evalConfig() {
 	const auto circuit = circuitManager.getCircuit(circuitId);
+	if (!circuit) {
+		logError("Circuit with ID {} not found in evaluator constructor", "Evaluator", circuitId);
+		return;
+	}
 	evalCircuitContainer.addCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
