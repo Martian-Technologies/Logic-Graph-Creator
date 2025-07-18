@@ -1,8 +1,6 @@
 #ifndef directoryManager_h
 #define directoryManager_h
 
-#include <filesystem>
-
 class DirectoryManager {
 public:
 	static void findDirectories();

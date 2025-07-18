@@ -3,7 +3,6 @@
 #include <RmlUi/Core/ElementUtilities.h>
 #include <RmlUi/Core/Factory.h>
 #include <RmlUi/Core/Types.h>
-#include <string>
 
 #include "tabsManager.h"
 #include "../interaction/eventPasser.h"

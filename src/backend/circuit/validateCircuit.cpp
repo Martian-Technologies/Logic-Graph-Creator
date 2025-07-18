@@ -1,5 +1,4 @@
 #include "parsedCircuit.h"
-#include <stack>
 
 void CircuitValidator::validate() {
 	bool isValid = true;

@@ -7,7 +7,6 @@
 #include "gpu/renderer/frameManager.h"
 #include "gpu/renderer/viewport/blockTextureManager.h"
 
-#include <cstdint>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float2.hpp>
 

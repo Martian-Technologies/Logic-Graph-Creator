@@ -1,7 +1,5 @@
 #include "generatedCircuitValidator.h"
 
-#include <stack>
-
 #include "backend/blockData/blockDataManager.h"
 
 void GeneratedCircuitValidator::validate() {
