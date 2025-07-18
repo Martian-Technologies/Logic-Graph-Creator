@@ -4,6 +4,7 @@
 #include "simulatorGates.h"
 
 class LogicSimulator {
+friend class SimulatorOptimizer;
 public:
 	LogicSimulator() = default;
 

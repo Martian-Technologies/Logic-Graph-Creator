@@ -5,8 +5,10 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	circuitManager(circuitManager),
 	evalCircuitContainer(),
 	receiver(dataUpdateEventManager),
-	evalConfig() {
-	const auto circuit = circuitManager.getCircuit(circuitId);
+	evalConfig(),
+	middleIdProvider(),
+	simulatorOptimizer(middleIdProvider) {
+const auto circuit = circuitManager.getCircuit(circuitId);
 	if (!circuit) {
 		logError("Circuit with ID {} not found in evaluator constructor", "Evaluator", circuitId);
 		return;
