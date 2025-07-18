@@ -6,6 +6,7 @@
 
 class EvaluatorTest : public ::testing::Test {
 public:
+	EvaluatorTest() : backend(nullptr) { }
 	void changeState(const Address& addr);
 	void readState(const Address& addr) const;
 
