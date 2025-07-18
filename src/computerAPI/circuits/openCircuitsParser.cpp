@@ -1,6 +1,5 @@
 #include "openCircuitsParser.h"
 
-#include <string>
 #include <math.h>
 
 #include "circuitFileManager.h"

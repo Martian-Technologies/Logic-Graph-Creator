@@ -1,5 +1,3 @@
-#include <cassert>
-
 #include "blockContainer.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"

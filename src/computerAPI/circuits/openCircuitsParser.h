@@ -2,7 +2,6 @@
 #define openCircuitsParser_h
 
 #include <nlohmann/json.hpp>
-#include <list>
 
 #include "backend/circuit/parsedCircuit.h"
 #include "backend/position/position.h"
