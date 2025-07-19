@@ -17,7 +17,7 @@ private:
 	std::mutex statesAMutex;
 	std::mutex statesBMutex;
 
-	std::vector<BasicGate> gates;
+	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
 	std::vector<JunctionGate> junctions;
 	std::vector<BufferGate> buffers;
