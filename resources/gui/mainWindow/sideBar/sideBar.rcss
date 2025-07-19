@@ -30,20 +30,3 @@ tabset panels panel {
 	width: 100%;
 	height: 100%;
 }
-
-
-/* Settings Window */
-#settings-overlay {
-	position: absolute;
-	top:	10%;
-	left:   10%;
-	width:  80%;
-	height: 80%;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-}
-
-.invisible {
-	display: none;
-}

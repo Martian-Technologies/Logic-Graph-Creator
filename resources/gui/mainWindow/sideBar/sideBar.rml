@@ -1,9 +1,10 @@
 <template name="sideBar" content="content">
 
 	<head>
-		<link type="text/rcss" href="sideBar.rcss"/>
-		<link type="text/template" href="selector/selector.rml"/>
-		<link type="text/template" href="icEditor/blockCreation.rml"/>
+		<link type="text/rcss" href="sideBar.rcss" />
+		<link type="text/template" href="selector/selector.rml" />
+		<link type="text/template" href="simulation/simulationTree.rml" />
+		<link type="text/template" href="icEditor/blockCreation.rml" />
 	</head>
 
 	<body>
@@ -12,15 +13,17 @@
 			<panel>
 				<template src="selector"></template>
 			</panel>
+
 			<tab>Simulation</tab>
 			<panel>
-				<div id="eval-tree"></div>
+				<template src="simulationTree"></template>
 			</panel>
+
 			<tab>IC Editor</tab>
 			<panel>
 				<template src="blockCreation"></template>
 			</panel>
 		</tabset>
 	</body>
-	
+
 </template>

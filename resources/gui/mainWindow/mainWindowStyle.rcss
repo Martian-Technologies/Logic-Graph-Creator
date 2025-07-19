@@ -39,3 +39,19 @@ body {
 	flex-basis: 20rem;
 	background-color: #1d1d1d;
 }
+
+/* Settings Window */
+#settings-overlay {
+	position: absolute;
+	top:	10%;
+	left:   10%;
+	width:  80%;
+	height: 80%;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.invisible {
+	display: none;
+}
