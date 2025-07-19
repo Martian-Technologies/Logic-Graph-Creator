@@ -1,7 +1,8 @@
 #include "contentManager.h"
-#include "gui/interaction/menuTreeListener.h"
-#include "../interaction/keybindHelpers.h"
-#include "../interaction/eventPasser.h"
+
+#include "gui/helper/menuTreeListener.h"
+#include "gui/helper/keybindHelpers.h"
+#include "gui/helper/eventPasser.h"
 #include "backend/settings/settings.h"
 #include "util/algorithm.h"
 

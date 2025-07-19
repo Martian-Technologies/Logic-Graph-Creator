@@ -2,8 +2,8 @@
 
 #include <RmlUi/Core/Input.h>
 
-#include "gui/interaction/eventPasser.h"
-#include "gui/circuitViewWidget.h"
+#include "gui/helper/eventPasser.h"
+#include "gui/mainWindow/circuitView/circuitViewWidget.h"
 
 SimControlsManager::SimControlsManager(Rml::ElementDocument* document, std::shared_ptr<CircuitViewWidget> circuitViewWidget, DataUpdateEventManager* dataUpdateEventManager) : circuitViewWidget(circuitViewWidget), dataUpdateEventReceiver(dataUpdateEventManager) {
 	toggleSimElement = document->GetElementById("toggle-simulation");

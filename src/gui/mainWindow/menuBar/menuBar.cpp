@@ -1,10 +1,10 @@
 #include "menuBar.h"
 
-#include "gui/interaction/eventPasser.h"
-#include "gui/settingsWindow/settingsWindow.h"
-#include "gui/window.h"
+#include "gui/helper/eventPasser.h"
+#include "gui/mainWindow/settingsWindow/settingsWindow.h"
+#include "gui/mainWindow/mainWindow.h"
 
-MenuBar::MenuBar(Rml::ElementDocument* context, SettingsWindow* settingsWindow, Window* window) : context(context), element(context->GetElementById("menu-bar")), settingsWindow(settingsWindow), window(window) {
+MenuBar::MenuBar(Rml::ElementDocument* context, SettingsWindow* settingsWindow, MainWindow* window) : context(context), element(context->GetElementById("menu-bar")), settingsWindow(settingsWindow), window(window) {
 	Rml::Element* element = context->GetElementById("menu-bar");
 	if (element) initialize(element);
 }

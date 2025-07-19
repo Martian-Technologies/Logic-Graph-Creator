@@ -2,7 +2,7 @@
 #include "backend/evaluator/evaluatorManager.h"
 #include "backend/dataUpdateEventManager.h"
 #include "backend/circuit/circuitManager.h"
-#include "circuitViewWidget.h"
+#include "gui/mainWindow/circuitView/circuitViewWidget.h"
 #include "backend/backend.h"
 #include "util/algorithm.h"
 

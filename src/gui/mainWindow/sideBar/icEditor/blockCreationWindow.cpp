@@ -1,10 +1,11 @@
 #include "blockCreationWindow.h"
+
 #include "backend/dataUpdateEventManager.h"
 #include "backend/circuit/circuitManager.h"
-#include "circuitViewWidget.h"
+#include "gui/mainWindow/circuitView/circuitViewWidget.h"
 #include "backend/backend.h"
 #include "util/algorithm.h"
-#include "interaction/eventPasser.h"
+#include "gui/helper/eventPasser.h"
 #include "backend/circuitView/tools/other/portSelector.h"
 
 BlockCreationWindow::BlockCreationWindow(

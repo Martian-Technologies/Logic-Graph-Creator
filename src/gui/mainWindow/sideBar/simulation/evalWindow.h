@@ -1,40 +1,37 @@
-#ifndef blockCreationWindow_h
-#define blockCreationWindow_h
+#ifndef evalWindow_h
+#define evalWindow_h
 
 #include "backend/blockData/blockDataManager.h"
 #include "backend/tools/toolManagerManager.h"
-#include "interaction/menuTree.h"
+#include "gui/helper/menuTree.h"
 
+class EvaluatorManager;
 class CircuitManager;
 class CircuitViewWidget;
 
-class BlockCreationWindow {
+class EvalWindow {
 public:
-	BlockCreationWindow(
-		CircuitManager* circuitManager,
+	EvalWindow(
+		const EvaluatorManager* evaluatorManager,
+		const CircuitManager* circuitManager,
 		std::shared_ptr<CircuitViewWidget> circuitViewWidget,
 		DataUpdateEventManager* dataUpdateEventManager,
-		ToolManagerManager* toolManagerManager,
 		Rml::ElementDocument* document,
-		Rml::Element* menu
+		Rml::Element* parent
 	);
 
-	void updateFromMenu();
-	void resetMenu();
+	void updateList();
 
 private:
-	void addListItem(bool isInput);
 	void updateSelected(std::string string);
 	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree);
 
-	Rml::ElementDocument* document;
-	Rml::Element* outputList;
-	Rml::Element* inputList;
-	Rml::Element* menu;
+	MenuTree menuTree;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
-	CircuitManager* circuitManager;
-	ToolManagerManager* toolManagerManager;
+	const EvaluatorManager* evaluatorManager;
+	const CircuitManager* circuitManager;
+
 };
 
-#endif /* blockCreationWindow_h */
+#endif /* evalWindow_h */

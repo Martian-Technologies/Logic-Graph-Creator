@@ -1,5 +1,6 @@
 #include "searchBar.h"
-#include "gui/interaction/eventPasser.h"
+
+#include "gui/helper/eventPasser.h"
 #include "backend/settings/settings.h"
 
 SearchBar::SearchBar(Rml::Element* document) : context(document) {

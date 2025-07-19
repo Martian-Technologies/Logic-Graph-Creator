@@ -1,6 +1,6 @@
 #include "selectorWindow.h"
 #include "backend/dataUpdateEventManager.h"
-#include "gui/interaction/eventPasser.h"
+#include "gui/helper/eventPasser.h"
 #include "util/algorithm.h"
 
 SelectorWindow::SelectorWindow(

@@ -3,7 +3,7 @@
 
 #include "backend/blockData/blockDataManager.h"
 #include "backend/tools/toolManagerManager.h"
-#include "interaction/menuTree.h"
+#include "gui/helper/menuTree.h"
 
 class SelectorWindow {
 public:

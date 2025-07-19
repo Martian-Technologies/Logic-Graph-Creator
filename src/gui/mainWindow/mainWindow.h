@@ -4,28 +4,28 @@
 #include <RmlUi/Core.h>
 #include <SDL3/SDL_events.h>
 
-#include "sdl/sdlWindow.h"
+#include "gui/sdl/sdlWindow.h"
 #include "gpu/renderer/windowRenderer.h"
-#include "rml/rmlRenderInterface.h"
+#include "gui/rml/rmlRenderInterface.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "computerAPI/fileListener/fileListener.h"
 #include "backend/backend.h"
 
-#include "gui/circuitView/simControlsManager.h"
-#include "blockCreationWindow.h"
-#include "circuitViewWidget.h"
-#include "selectorWindow.h"
-#include "evalWindow.h"
+#include "sideBar/icEditor/blockCreationWindow.h"
+#include "circuitView/simControlsManager.h"
+#include "circuitView/circuitViewWidget.h"
+#include "sideBar/selector/selectorWindow.h"
+#include "sideBar/simulation/evalWindow.h"
 
-class Window {
+class MainWindow {
 public:
-	Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
-	~Window();
+	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
+	~MainWindow();
 
 	// no copy
-	Window(const Window&) = delete;
-	Window& operator=(const Window&) = delete;
+	MainWindow(const MainWindow&) = delete;
+	MainWindow& operator=(const MainWindow&) = delete;
 	
 public:
 	bool recieveEvent(SDL_Event& event);

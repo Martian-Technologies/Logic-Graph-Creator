@@ -5,11 +5,11 @@
 #include <RmlUi/Core/Event.h>
 
 class SettingsWindow;
-class Window;
+class MainWindow;
 
 class MenuBar {
 public:
-	MenuBar(Rml::ElementDocument* context, SettingsWindow* settingsWindow, Window* window);
+	MenuBar(Rml::ElementDocument* context, SettingsWindow* settingsWindow, MainWindow* window);
 	void triggerEvent(const std::string& item);
 
 private:
@@ -17,7 +17,7 @@ private:
 	Rml::ElementDocument* context;
 	Rml::Element* element;
 	SettingsWindow* settingsWindow;
-	Window* window;
+	MainWindow* window;
 };
 
 #endif /* menuBar_h */

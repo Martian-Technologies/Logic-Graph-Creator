@@ -1,15 +1,15 @@
-#include "window.h"
+#include "mainWindow.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
 
+#include "settingsWindow/settingsWindow.h"
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "gui/menuBar/menuBar.h"
-#include "gui/settingsWindow/settingsWindow.h"
 #include "backend/settings/settings.h"
+#include "menuBar/menuBar.h"
 
-Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
+MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
 	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener) {
 	// create SDL renderer
 	// sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
@@ -57,12 +57,12 @@ Window::Window(Backend* backend, CircuitFileManager* circuitFileManager, FileLis
 	rmlDocument->Show();
 }
 
-Window::~Window() {
+MainWindow::~MainWindow() {
 	Rml::RemoveContext(rmlContext->GetName());
 	rmlContext = nullptr;
 }
 
-bool Window::recieveEvent(SDL_Event& event) {
+bool MainWindow::recieveEvent(SDL_Event& event) {
 	// check if we want this event
 	if (sdlWindow.isThisMyEvent(event)) {
 		if (event.type == SDL_EVENT_DROP_FILE) {
@@ -101,7 +101,7 @@ bool Window::recieveEvent(SDL_Event& event) {
 	return false;
 }
 
-void Window::updateRml(RmlRenderInterface& renderInterface) {
+void MainWindow::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
 	
 	renderer.prepareForRml(renderInterface);
@@ -109,15 +109,15 @@ void Window::updateRml(RmlRenderInterface& renderInterface) {
 	renderer.endRml();
 }
 
-void Window::setBlock(std::string blockPath) {
+void MainWindow::setBlock(std::string blockPath) {
 	BlockType blockType = backend->getBlockDataManager()->getBlockType(blockPath);
 	backend->getToolManagerManager().setBlock(blockType);
 }
 
-void Window::setTool(std::string tool) {
+void MainWindow::setTool(std::string tool) {
 	backend->getToolManagerManager().setTool(tool);
 }
 
-void Window::setMode(std::string mode) {
+void MainWindow::setMode(std::string mode) {
 	backend->getToolManagerManager().setMode(mode);
 }

@@ -1,6 +1,6 @@
 #include "settingsWindow.h"
-#include "gui/interaction/eventPasser.h"
-// #include "searchBar.h"
+
+#include "gui/helper/eventPasser.h"
 
 #include <RmlUi/Core/Element.h>
 

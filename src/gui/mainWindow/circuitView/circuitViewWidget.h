@@ -6,11 +6,11 @@
 
 #include "gpu/renderer/viewportRenderInterface.h"
 #include "gpu/renderer/windowRenderer.h"
-#include "sdl/sdlWindow.h"
+#include "gui/sdl/sdlWindow.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
 #include "backend/circuitView/circuitView.h"
-#include "interaction/keybindHandler.h"
+#include "gui/helper/keybindHandler.h"
 #include "util/vec2.h"
 
 class CircuitViewWidget {

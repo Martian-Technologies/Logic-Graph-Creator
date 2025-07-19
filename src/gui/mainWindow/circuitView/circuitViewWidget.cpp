@@ -5,7 +5,7 @@
 #include "backend/circuitView/circuitView.h"
 #include "computerAPI/directoryManager.h"
 #include "backend/settings/settings.h"
-#include "interaction/eventPasser.h"
+#include "gui/helper/eventPasser.h"
 #include "backend/backend.h"
 
 void SaveCallback(void* userData, const char* const* filePaths, int filter) {
