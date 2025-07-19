@@ -1,7 +1,7 @@
 <template name="selector" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/selector.rcss" />
+		<link type="text/rcss" href="selector.rcss" />
 	</head>
 
 	<body>

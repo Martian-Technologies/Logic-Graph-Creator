@@ -1,3 +1,5 @@
+/* Mainbar Styles */
+
 .menu-bar {
 	display: flex;
 	background-color: #333;
@@ -5,6 +7,10 @@
 }
 
 .menu {
+	border-radius: 4dp;
+	margin: 0.25rem;
+	text-align: center;
+	background-color: #1d1d1d;
 	position: relative;
 	cursor: pointer;
 }
@@ -20,23 +26,23 @@
 	position: absolute;
 	top: 100%;
 	left: 0;
-	min-width: 100%;
+	width: 65dp; /* TODO: make this dynimicly sized */
+	overflow: visible;
 	background: #444;
 	z-index: 100;
+	flex-direction: column;
 }
 
 .menu:hover .dropdown {
-	display: block; /* hover makes it visible */
+	display: flex; /* hover makes it visible */
 }
 
 .menu-item {
-	padding: 2dp 4dp;
-	margin: 1dp 0;   
-	width: 100%;
-	box-sizing: border-box;
+	margin: 0.5dp 3dp;
+	padding: 0.2rem 0.2rem;
+	border-radius: 4dp;
 }
 
 .menu-item:hover {
 	background: #555555;
-	margin: 0;
 }

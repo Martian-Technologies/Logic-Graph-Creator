@@ -1,7 +1,7 @@
-<template name="settings-window" content="content">
+<template name="settingsWindow" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/settingsWindow.rcss" />
+		<link type="text/rcss" href="settingsWindow.rcss" />
 	</head>
 
 	<body>

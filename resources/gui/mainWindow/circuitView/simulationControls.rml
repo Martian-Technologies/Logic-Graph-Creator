@@ -1,7 +1,7 @@
-<template name="sim-controls" content="content">
+<template name="simulationControls" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/simControls.rcss"/>
+		<link type="text/rcss" href="simulationControls.rcss"/>
 	</head>
 
 	<body>

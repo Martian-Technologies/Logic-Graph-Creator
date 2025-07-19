@@ -1,0 +1,17 @@
+<template name="circuitView" content="content">
+
+	<head>
+		<link type="text/rcss" href="circuitView.rcss" />
+		<link type="text/template" href="simulationControls.rml" />
+	</head>
+
+	<body>
+		<div id="circuit-view-rendering-area">
+			<template src="simulationControls"></template>
+			<div id="status-bar-centering">
+				<div id="status-bar"></div>
+			</div>
+		</div>
+	</body>
+
+</template>

@@ -99,6 +99,7 @@ Nord Color Pallete:
 	box-sizing: border-box;
 	overflow-y: auto;
 	flex: 1;
+	padding: 10dp;
 }
 
 .settings-tree ul ul {

@@ -1,10 +1,9 @@
 <template name="menuBar" content="content">
 	<head>
-		<link type="text/rcss" href="../styles/menuBar.rcss"/>
+		<link type="text/rcss" href="menuBar.rcss"/>
 	</head>
 
 	<body>
-
 		<div id="menu-bar" class="menu-bar">
 
 			<div class="menu" id="menu-app">
@@ -14,7 +13,6 @@
 				</div>
 			</div>
 
-			<!-- File -->	
 			<div class="menu" id="menu-file">
 				<div class="menu-title">File</div>
 				<div class="dropdown">
@@ -24,8 +22,6 @@
 				</div>
 			</div>
 		</div>
-
-
 	</body>
 
 </template>

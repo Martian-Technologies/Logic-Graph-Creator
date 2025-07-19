@@ -20,11 +20,10 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 
 	renderer.activateRml(renderInterface);
-	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow.rml");
+	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow/mainWindow.rml");
 
 	// get widget for circuit view
-	Rml::Element* circuitViewParent = rmlDocument->GetElementById("circuitview-container");
-	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, circuitViewParent, sdlWindow.getHandle(), &renderer);
+	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), &renderer);
 	backend->linkCircuitView(circuitViewWidget->getCircuitView());
 
 	// eval menutree

@@ -47,8 +47,9 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, Rml::Element* element, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window), element(element) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window) {
 	// create circuitView
+	element = document->GetElementById("circuit-view-rendering-area");
 	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element);
 	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
 	

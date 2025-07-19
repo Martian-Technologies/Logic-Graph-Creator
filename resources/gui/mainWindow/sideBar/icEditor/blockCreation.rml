@@ -1,7 +1,7 @@
-<template name="block-creation" content="content">
+<template name="blockCreation" content="content">
 
 	<head>
-		<link type="text/rcss" href="../styles/blockCreation.rcss" />
+		<link type="text/rcss" href="blockCreation.rcss" />
 	</head>
 
 	<body>
