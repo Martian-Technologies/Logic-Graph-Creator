@@ -7,7 +7,7 @@
 std::vector<circuit_id_t> OpenCircuitsParser::load(const std::string& path) {
 	SharedParsedCircuit out;
 	parse(path, out);
-	return {loadParsedCircuit(out)};
+	return { loadParsedCircuit(out) };
 }
 
 bool OpenCircuitsParser::parse(const std::string& path, SharedParsedCircuit outParsedCircuit) {
@@ -429,7 +429,7 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 			newType = it->second;
 		}
 
-		pc->addBlock(id, { block->position * posScale, Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), newType });
+		pc->addBlock(id, block->position * posScale, Rotation(std::lrint(block->angle * (2 / M_PI)) % 4), newType);
 
 		std::unordered_map<int, int> inputOccurrenceTracker;
 		int i = 0;
@@ -460,12 +460,7 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 
 			int thisConnId = t == BlockType::CUSTOM ? block->inputBlocks.size() - 1 - i : 0; // current connid will always be zero for primative inputs
 
-			pc->addConnection({
-					static_cast<block_id_t>(id),
-					static_cast<connection_end_id_t>(thisConnId),
-					static_cast<block_id_t>(b),
-					static_cast<connection_end_id_t>(otherConnectionId)
-					});
+			pc->addConnection(id, thisConnId, b, otherConnectionId);
 		}
 
 		int primativeOutputConnId = !block->inputBlocks.empty();
@@ -495,14 +490,9 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 
 			int thisConnId = t == BlockType::CUSTOM ? block->inputBlocks.size() + block->outputBlocks.size() - 1 - i : primativeOutputConnId;
 
-			pc->addConnection({
-					static_cast<block_id_t>(id),
-					static_cast<connection_end_id_t>(thisConnId),
-					static_cast<block_id_t>(b),
-					static_cast<connection_end_id_t>(otherConnectionId)
-					});
+			pc->addConnection(id, thisConnId, b, otherConnectionId);
 		}
-		};
+	};
 
 
 	// add all parsed IC instances as dependencies to the primary parsed circuit
@@ -527,9 +517,9 @@ void OpenCircuitsParser::fillParsedCircuit(const std::unordered_map<int, OpenCir
 				fillParsedBlock(pc, comp.first, block, &itr->second.components);
 			}
 		}
-        circuit_id_t id = loadParsedCircuit(pc);
+		circuit_id_t id = loadParsedCircuit(pc);
 		icD_to_blockType[icRef] = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id)->getBlockType();
-    };
+		};
 
 	for (const std::pair<int, OpenCircuitsBlockInfo*>& p : filteredBlocks) {
 		OpenCircuitsBlockInfo* block = p.second;

@@ -154,17 +154,11 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 	return false;
 }
 
-bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit) {
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position) {
 	if (!parsedCircuit.isValid()) return false;
 
-	Vector totalOffset(0, 0);
-	// if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
-	if (!customCircuit) {
-		// this is only relevent for finding offset for given position, generally from mouse position
-		totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
-	}
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
-		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
+		if (blockContainer.checkCollision(block.position.snap(), block.rotation, block.type)) {
 			return false;
 		}
 	}
@@ -172,7 +166,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 
 	std::unordered_map<block_id_t, block_id_t> realIds;
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
-		Position targetPos = block.pos.snap() + totalOffset;
+		Position targetPos = block.position.snap();
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
 			logError("Failed to insert block while inserting block.", "Circuit");
@@ -187,15 +181,15 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
 			continue;
 		}
-		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputId)) {
+		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputEndId)) {
 			// skip inputs
 			continue;
 		}
 
-		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
-		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
+		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputEndId);
+		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputEndId);
 		if (!tryCreateConnection(output, input)) {
-			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 		}
 	}
 	return true;

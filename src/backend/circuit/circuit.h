@@ -63,7 +63,7 @@ public:
 	bool checkCollision(const SharedSelection& selection);
 
 	// Trys to place a parsed circuit at a position
-	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit);
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position);
 	bool tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position);
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
 

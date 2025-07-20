@@ -71,7 +71,7 @@ circuit_id_t CircuitManager::createNewCircuit(const ParsedCircuit* parsedCircuit
 
 	circuit_id_t id = createNewCircuit(parsedCircuit->getName(), uuid, createEval);
 	SharedCircuit circuit = getCircuit(id);
-	circuit->tryInsertParsedCircuit(*parsedCircuit, Position(), true);
+	circuit->tryInsertParsedCircuit(*parsedCircuit, Position());
 
 	// if is custom
 	if (!parsedCircuit->isCustom()) {
@@ -112,8 +112,12 @@ circuit_id_t CircuitManager::createNewCircuit(const ParsedCircuit* parsedCircuit
 		if (!port.portName.empty()) {
 			blockData->setConnectionIdName(port.connectionEndId, port.portName);
 		}
-		if (port.block != 0) {
-			circuitBlockData->setConnectionIdPosition(port.connectionEndId, parsedCircuit->getBlock(port.block)->pos.snap());
+		if (port.internalBlockId != 0) {
+			const ParsedCircuit::BlockData* parsedBlock = parsedCircuit->getBlock(port.internalBlockId);
+			circuitBlockData->setConnectionIdPosition(
+				port.connectionEndId,
+				parsedBlock->position.snap() + blockDataManager.getConnectionVector(parsedBlock->type, port.internalBlockConnectionEndId).first
+			);
 		}
 	}
 

@@ -63,17 +63,17 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 			std::istringstream ss(token);
 			while (ss >> token) {
 				if (token.front() == '#') break;
-				current.parsedCircuit->addBlock(++current.blockIdCounter, ParsedCircuit::BlockData(BlockType::SWITCH));
+				current.parsedCircuit->addBlock(++current.blockIdCounter, BlockType::SWITCH);
 				current.nameToConnectionEnd.emplace(token, ConnectionEnd(current.blockIdCounter, 0));
-				current.parsedCircuit->addConnectionPort(true, current.endId++, Vector(0, current.inPortY++), current.blockIdCounter, token);
+				current.parsedCircuit->addConnectionPort(true, current.endId++, Vector(0, current.inPortY++), current.blockIdCounter, 0, token);
 			}
 		} else if (token == ".outputs") {
 			std::getline(inputFile, token);
 			std::istringstream ss(token);
 			while (ss >> token) {
 				if (token.front() == '#') break;
-				current.parsedCircuit->addBlock(++current.blockIdCounter, ParsedCircuit::BlockData(BlockType::LIGHT));
-				current.parsedCircuit->addConnectionPort(false, current.endId++, Vector(1, current.outPortY++), current.blockIdCounter, token);
+				current.parsedCircuit->addBlock(++current.blockIdCounter, BlockType::LIGHT);
+				current.parsedCircuit->addConnectionPort(false, current.endId++, Vector(1, current.outPortY++), current.blockIdCounter, 0, token);
 			}
 		} else if (token == ".names") {
 			std::getline(inputFile, token);
@@ -94,7 +94,7 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 				if (ports.size() != token.size()) {
 					logError("Bad input plane \"{}\" of size {}. Should be {} bits wide.", "BLIFParser", token, token.size(), ports.size());
 				}
-				current.parsedCircuit->addBlock(++current.blockIdCounter, ParsedCircuit::BlockData(BlockType::AND));
+				current.parsedCircuit->addBlock(++current.blockIdCounter, BlockType::AND);
 
 				block_id_t blockId = current.blockIdCounter;
 				gates.push_back(blockId);
@@ -103,22 +103,19 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 					if (c == '1') {
 						current.connectionsToMake.emplace_back(ports[index], ConnectionEnd(blockId, 0));
 					} else if (c == '0') {
-						current.parsedCircuit->addBlock(++current.blockIdCounter, ParsedCircuit::BlockData(BlockType::NOR));
+						current.parsedCircuit->addBlock(++current.blockIdCounter, BlockType::NOR);
 						current.connectionsToMake.emplace_back(ports[index], ConnectionEnd(current.blockIdCounter, 0));
-						current.parsedCircuit->addConnection(ParsedCircuit::ConnectionData(current.blockIdCounter, 1, blockId, 0));
+						current.parsedCircuit->addConnection(current.blockIdCounter, 1, blockId, 0);
 					}
 					++index;
 				}
 				inputFile >> std::ws;
 			}
-			current.parsedCircuit->addBlock(++current.blockIdCounter, ParsedCircuit::BlockData(BlockType::OR));
+			current.parsedCircuit->addBlock(++current.blockIdCounter, BlockType::OR);
 			current.nameToConnectionEnd.emplace(output, ConnectionEnd(current.blockIdCounter, 1));
 			for (block_id_t gate : gates) {
-				current.parsedCircuit->addConnection(ParsedCircuit::ConnectionData(gate, 1, current.blockIdCounter, 0));
+				current.parsedCircuit->addConnection(gate, 1, current.blockIdCounter, 0);
 			}
-
-
-			// currentParsedCircuit->addBlock(blockId, ParsedCircuit::BlockData(blockType));
 		} else if (token == ".subckt") {
 			std::string blockName;
 			inputFile >> blockName;
@@ -175,7 +172,7 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 				logInfo("Failed to find BLIFParsedCircuitData for custom block {}", "BLIFParser", customBlock.first);
 				continue;
 			}
-			cirData.parsedCircuit->addBlock(++cirData.blockIdCounter, ParsedCircuit::BlockData(iter->second.type));
+			cirData.parsedCircuit->addBlock(++cirData.blockIdCounter, iter->second.type);
 			for (const ParsedCircuit::ConnectionPort& port : iter->second.parsedCircuit->getConnectionPorts()) {
 				auto iter2 = customBlock.second.find(port.portName);
 				if (iter2 != customBlock.second.end()) {
@@ -193,12 +190,12 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 				logError("Failed to make connection. Port \"{}\" was never defined.", "BLIFParser", connection.first);
 				continue;
 			}
-			cirData.parsedCircuit->addConnection(ParsedCircuit::ConnectionData(
+			cirData.parsedCircuit->addConnection(
 				iter->second.getBlockId(),
 				iter->second.getConnectionId(),
 				connection.second.getBlockId(),
 				connection.second.getConnectionId()
-			));
+			);
 		}
 		for (const auto& port : cirData.parsedCircuit->getConnectionPorts()) {
 			if (port.isInput) continue;
@@ -207,12 +204,12 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 				logError("Failed to make connection. Port \"{}\" was never defined.", "BLIFParser", port.portName);
 				continue;
 			}
-			cirData.parsedCircuit->addConnection(ParsedCircuit::ConnectionData(
+			cirData.parsedCircuit->addConnection(
 				iter->second.getBlockId(),
 				iter->second.getConnectionId(),
-				port.block,
+				port.internalBlockId,
 				port.internalBlockConnectionEndId
-			));
+			);
 		}
 		circuit_id_t id = loadParsedCircuit(cirData.parsedCircuit);
 		circuitIds.push_back(id);

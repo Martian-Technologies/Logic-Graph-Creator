@@ -251,11 +251,16 @@ struct std::formatter<Position> : std::formatter<std::string> {
 };
 
 struct FPosition {
+	static FPosition getInvalid() { return FPosition(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()); }
 	inline FPosition() noexcept : x(0.0f), y(0.0f) { }
 	inline FPosition(f_cord_t x, f_cord_t y) noexcept : x(x), y(y) { }
 	inline Position snap() const noexcept;
 
 	inline std::string toString() const noexcept { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+
+	inline void setInvalid() { x = y = std::numeric_limits<double>::quiet_NaN(); }
+	inline bool isValid() const { return !isInvalid(); }
+	inline bool isInvalid() const { return (std::isnan(x) || std::isnan(y)); }
 
 	inline bool operator==(FPosition position) const noexcept { return approx_equals(x, position.x) && approx_equals(y, position.y); }
 	inline bool operator!=(FPosition position) const noexcept { return !operator==(position); }
