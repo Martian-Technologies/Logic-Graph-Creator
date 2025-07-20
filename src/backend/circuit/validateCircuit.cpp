@@ -20,7 +20,7 @@ bool CircuitValidator::validateBlockData() {
 	if (parsedCircuit.getSize().dy == 0)
 		size.dy = 1;
 	for (auto& port : parsedCircuit.getConnectionPorts()) {
-		size.extentToFit(port.positionOnBlock);
+		size.extentToFit(port.positionOnBlock + Vector(1));
 	}
 	parsedCircuit.setSize(size);
 	return true;
@@ -69,16 +69,11 @@ bool CircuitValidator::handleInvalidConnections() {
 	while (i < (int)parsedCircuit.connections.size()) {
 		ParsedCircuit::ConnectionData& conn = parsedCircuit.connections[i];
 
-		ParsedCircuit::ConnectionData reversePair {
-			.outputBlockId = conn.inputBlockId,
-			.outputId = conn.inputId,
-			.inputBlockId = conn.outputBlockId,
-			.inputId = conn.outputId,
-		};
+		ParsedCircuit::ConnectionData reversePair(conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 
 		if (--connectionCounts[reversePair] < 0) {
 			parsedCircuit.connections.push_back(reversePair);
-			logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "CircuitValidator", conn.inputBlockId, conn.outputBlockId, reversePair.inputBlockId, reversePair.outputBlockId);
+			logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "CircuitValidator", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 			connectionCounts[reversePair] = 0;
 		}
 		++i;

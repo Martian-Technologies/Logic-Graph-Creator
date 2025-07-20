@@ -1,0 +1,14 @@
+.model 4bitadder
+.inputs A3 A2 A1 A0 B3 B2 B1 B0 CIN
+.outputs COUT S3 S2 S1 S0
+.subckt fulladder a=A0 b=B0 cin=CIN s=S0 cout=CARRY1
+.subckt fulladder a=A3 b=B3 cin=CARRY3 s=S3 cout=COUT
+.subckt fulladder b=B1 a=A1 cin=CARRY1 s=XX cout=CARRY2
+.subckt fulladder a=JJ b=B2 cin=CARRY2 s=S2 cout=CARRY3
+# for the sake of example,
+.names XX S1 # formal output ‘s’ does not fanout to a primary output
+1 1
+.names A2 JJ # formal input ‘a’ does not fanin from a primary input
+1 1
+.end
+.search FullAdder.blif

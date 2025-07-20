@@ -11,12 +11,18 @@ class ParsedCircuit {
 	friend class CircuitValidator;
 public:
 	struct BlockData {
-		FPosition pos; // will be validated into integer values
-		Rotation rotation; // todo: make into integer value to generalize the rotation
-		BlockType type;
+		BlockData() { } // nothing bad block
+		BlockData(FPosition pos, Rotation rotation, BlockType type) : pos(pos), rotation(rotation), type(type) { }
+		BlockData(BlockType type) : type(type) { }
+
+		FPosition pos = FPosition(std::numeric_limits<float>::max(), std::numeric_limits<float>::max()); // will be validated into integer values
+		Rotation rotation = Rotation::ZERO; // todo: make into integer value to generalize the rotation
+		BlockType type = BlockType::NONE;
 	};
 
 	struct ConnectionData {
+		ConnectionData(block_id_t outputBlockId, connection_end_id_t outputId, block_id_t inputBlockId, connection_end_id_t inputId) :
+			outputBlockId(outputBlockId), outputId(outputId), inputBlockId(inputBlockId), inputId(inputId) { }
 		block_id_t outputBlockId;
 		connection_end_id_t outputId;
 		block_id_t inputBlockId;
@@ -31,10 +37,13 @@ public:
 	struct ConnectionPort {
 		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block, const std::string& portName) :
 			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block), portName(portName) { }
+		ConnectionPort(bool isInput, connection_end_id_t connectionEndId, Vector positionOnBlock, block_id_t block, connection_end_id_t internalBlockConnectionEndId, const std::string& portName) :
+			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), block(block), internalBlockConnectionEndId(internalBlockConnectionEndId), portName(portName) { }
 		bool isInput;
 		connection_end_id_t connectionEndId;
 		Vector positionOnBlock;
 		block_id_t block;
+		connection_end_id_t internalBlockConnectionEndId = 0; // for switch and light this is fine
 		std::string portName;
 	};
 

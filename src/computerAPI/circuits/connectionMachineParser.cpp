@@ -160,7 +160,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 			inputFile  >> posX >> posY >> token;
 			Rotation rotation = stringToRotation(token);
 
-			currentParsedCircuit->addBlock(blockId, { .pos = FPosition(posX, posY), .rotation = rotation, .type = blockType });
+			currentParsedCircuit->addBlock(blockId, ParsedCircuit::BlockData(FPosition(posX, posY), rotation, blockType));
 
 			if (version <= 5) getline(inputFile, token);
 			while (true) {
