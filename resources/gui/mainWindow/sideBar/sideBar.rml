@@ -11,17 +11,17 @@
 		<tabset>
 			<tab>Blocks</tab>
 			<panel>
-				<template src="selector"></template>
+					<template src="selector"></template>
 			</panel>
 
 			<tab>Simulation</tab>
 			<panel>
-				<template src="simulationTree"></template>
+					<template src="simulationTree"></template>
 			</panel>
 
 			<tab>IC Editor</tab>
 			<panel>
-				<template src="blockCreation"></template>
+					<template src="blockCreation"></template>
 			</panel>
 		</tabset>
 	</body>

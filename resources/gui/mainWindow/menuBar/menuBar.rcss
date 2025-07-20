@@ -2,7 +2,7 @@
 
 .menu-bar {
 	display: flex;
-	background-color: #333;
+	background-color: #3b3b3b;
 	color: white;
 }
 
@@ -13,6 +13,10 @@
 	background-color: #1d1d1d;
 	position: relative;
 	cursor: pointer;
+}
+
+.menu:hover {
+	background: #555555;
 }
 
 .menu-title {
@@ -28,7 +32,7 @@
 	left: 0;
 	width: 65dp; /* TODO: make this dynimicly sized */
 	overflow: visible;
-	background: #444;
+	background: #2e2e2e;
 	z-index: 100;
 	flex-direction: column;
 }
@@ -43,6 +47,8 @@
 	border-radius: 4dp;
 }
 
-.menu-item:hover {
-	background: #555555;
+.menu-item {
+	background-color: #2e2e2e;
 }
+
+

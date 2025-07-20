@@ -5,7 +5,7 @@
 	</head>
 
 	<body>
-		<div id="block-creation-view">
+		<!-- <div id="block-creation-view"> -->
 			<div id="block-creation-form">
 				<div>
 					<label class="form-label" for="name"> Name: </label>
@@ -22,22 +22,22 @@
 				<div id="connection-menu">
 					<div>
 						Inputs<br />
-						<div id="connection-list-add-input">Add Input</div>
+						<button id="connection-list-add-input">Add Input</button>
 					</div>
 					<div id="connection-list-input-headers">Name | Port X/Y | Block X/Y</div>
 					<div id="connection-list-input"></div>
 					<div>
 						Outputs<br />
-						<div id="connection-list-add-output">Add Output</div>
+						<button id="connection-list-add-output">Add Output</button>
 					</div>
 					<div id="connection-list-output-headers">Name | Port X/Y | Block X/Y</div>
 					<div id="connection-list-output"></div>
 				</div>
 				<div>
-					<div id="reset-block-creation" class="">Reset</div>
-					<div id="update-block-creation" class="">Update</div>
+					<button id="reset-block-creation" class="">Reset</button>
+					<button id="update-block-creation" class="">Update</button>
 				</div>
 			</div>
-		</div>
+		<!-- </div> -->
 	</body>
 </template>

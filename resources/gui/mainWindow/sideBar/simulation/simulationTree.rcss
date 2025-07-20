@@ -1,14 +1,15 @@
-
-/* #eval-tree > div > ul > li:nth-child(even){
-	background-color: rgb(32, 32, 32);
-} */
+#eval-tree > div {
+	padding-top: 3dp;
+	padding-bottom: 3dp;
+}
 
 #eval-tree > div > ul > li {
 	border-color: #484848;
 	border-top: 1dp;
-	border-bottom: 0.5dp;
+	/* border-bottom: 0.5dp; */
 }
 
-/* #eval-tree > div > ul > li:nth-child(odd){
-	background-color: rgb(37, 37, 37);
-} */
+#eval-tree > div > ul > li:nth-last-child(1) {
+	border-bottom: 1dp;
+	/* border-bottom: 0.5dp; */
+}

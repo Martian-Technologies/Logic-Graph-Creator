@@ -1,7 +1,7 @@
 <template name="simulationTree" content="content">
 
 	<head>
-		<link type="text/rcss" href="simulationTree.rcss" />
+		<link type="text/rcss" href="simulationTree.rcss"/>
 	</head>
 
 	<body>

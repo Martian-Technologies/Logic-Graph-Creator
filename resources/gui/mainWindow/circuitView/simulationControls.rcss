@@ -34,6 +34,10 @@
 	padding: 0.2em;
 }
 
+#toggle-simulation:hover {
+	background-color: #efefef90;;
+}
+
 #toggle-simulation:active, #toggle-simulation.checked {
 	background-color: #c5c5c590;;
 }
@@ -47,20 +51,4 @@
 	color: #fff;
 	height: 18dp;
 	width: 60dp;
-} 
-
-input[type="checkbox"] {
-	width: 16dp;
-	height: 16dp;
-	background-color: #5a6262;
-	border: 1dp;
-	border-radius: 3dp;
-	color: #f0f0f0;
-	margin-right: 8dp;
-
-}
-
-input[type="checkbox"].checked {
-	background-color: #8fbc8f;
-	border-color: #a9d1a9; 
 }

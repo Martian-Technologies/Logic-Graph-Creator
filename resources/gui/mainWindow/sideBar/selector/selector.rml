@@ -14,8 +14,8 @@
 					<span id="parameter-menu-active"> AND GATE </span>
 					<div id="parameter-menu-parameters"></div>
 					<div>
-						<div id="reset-parameters">Reset</div>
-						<div id="create-block">Create</div>
+						<button id="reset-parameters">Reset</button>
+						<button id="create-block">Create</button>
 					</div>
 				</div>
 			</div>

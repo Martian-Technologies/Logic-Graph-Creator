@@ -1,0 +1,55 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: Monaspace Argon;
+	font-size: 12dp;
+	cursor: pointer;
+}
+
+button {
+	padding: 0.15em 0.2em;
+	border-radius: 0.4em;
+	background-color: #474747;
+}
+
+button:hover {
+	background: #555555;
+}
+
+button:active {
+	background: #717171;
+}
+
+input[type="checkbox"] {
+	width: 16dp;
+	height: 16dp;
+	background-color: #474747;
+	border: 1dp;
+	border-radius: 3dp;
+	color: #f0f0f0;
+	margin-right: 8dp;
+}
+
+input[type="checkbox"]:hover {
+	background-color: #555555;
+	border-color: #f0f0f0; 
+}
+
+input[type="checkbox"]:checked {
+	background-color: #8fbc8f;
+	border-color: #a9d1a9; 
+}
+
+tab {
+	background-color: #474747;
+}
+
+tab:hover {
+	background: #555555;
+}
+
+tab:active {
+	background: #717171;
+}
+

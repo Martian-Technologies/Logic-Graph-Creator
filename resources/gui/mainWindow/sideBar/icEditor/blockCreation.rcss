@@ -1,31 +1,23 @@
-#block-creation-view {
-	display: block;
-	height: 100%;
-	width: 100%;
-	overflow-y: auto;
-}
-
 #block-creation-form {
-	display: flex;
-	flex-direction: column;
 	background-color: #2e2e2e;
 	border-radius: 0.3em;
-	margin: 0.6em 0.3em 3em 0.3em;
-	padding: 0.2em;
+	margin: 0.5em 0.1em;
+	display: flex;
+	flex-direction: column;
+	min-height: 2rem;
+	padding-left: 4dp;
 }
 
 scrollbarvertical {
 	width: 0;
 }
 
-#block-creation-form input {
-	background-color: #151515;
+#connection-list-add-input #connection-list-add-output {
+	display: inline-block;
+	margin: 1em 1em;
 }
 
-#reset-block-creation, #update-block-creation, #connection-list-add {
-	padding: 0.15em 0.2em;
-	border-radius: 0.3em;
-	background-color: #525252;
+#reset-block-creation, #update-block-creation {
 	display: inline-block;
 	margin: 0.2em 0.2em;
 }
@@ -41,13 +33,13 @@ scrollbarvertical {
 
 #connection-list-output-headers, #connection-list-input-headers {
 	display: block;
-	background-color: #151515;
+	background-color: #1d1d1d;
 	border-radius: 0.3em 0.3em 0.1em 0.1em;
 	margin: 0.15em 0.15em 0 0.15em;
 }
 #connection-list-output, #connection-list-input {
 	display: block;
-	background-color: #151515;
+	background-color: #1d1d1d;
 	border-radius: 0.1em;
 	margin: 0 0.15em 0.15em 0.15em;
 	min-height: 3rem;
@@ -55,29 +47,21 @@ scrollbarvertical {
 
 .connection-list-item {
 	display: block;
-	background-color: #232323;
+	background-color: #2e2e2e;
 	border-radius: 0.2em;
 	padding: 0.075em;
 	margin: 0.15em;
 }
 
-.connection-list-item input {
-	background-color: #151515;
+.connection-list-item input, #name-input, #width-input, #height-input {
+	background-color: #1d1d1d;
 	border-radius: 0.1em;
 	vertical-align: middle;
 	margin: 0 0.1em;
 }
 
 .connection-list-item button {
-	padding: 0em 0.2em;
-	border-radius: 0.4em;
-	background-color: #525252;
-	display: inline-block;
 	margin: 0 0.1em;
-}
-
-.connection-list-item button:active {
-	background-color: #606060;
 }
 
 .name {
@@ -90,19 +74,4 @@ scrollbarvertical {
 
 .number-long {
 	width: 4rem
-}
-
-input[type="checkbox"] {
-	width: 16dp;
-	height: 16dp;
-	background-color: #5a6262;
-	border: 1dp;
-	border-radius: 3dp;
-	color: #f0f0f0;
-	margin-right: 8dp;
-}
-
-input[type="checkbox"]:checked {
-	background-color: #8fbc8f;
-	border-color: #a9d1a9; 
 }
