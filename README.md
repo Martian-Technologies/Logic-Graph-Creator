@@ -9,9 +9,11 @@ Download builds of the app in the [releases tab](https://github.com/Martian-Tech
 - [Processes that should be followed when developing](docs/processes.md)
 
 ## Controls
-- Scroll zoom
-- alt click move
+- Shift+Scroll zoom
+- Alt+Click move
 - Q/E rotate
-- z/y undo redo
-- Ctrl+S Save. Drop file load
+- Ctrl+Z undo, Ctrl+Shift+Z redo
+- Ctrl+S Save. Ctrl+I or Drop file load
+- Ctrl+N new file
 - L/R click to use tools. E confirm (for tensor)
+- Check setting for more!
