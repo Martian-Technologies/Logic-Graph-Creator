@@ -85,8 +85,7 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 						logicSimulatorWrapper.deleteGate(value.gateId);
 					}
 					addressTree.nukeBranch(address);
-				}
-				else{
+				} else {
 					const wrapper_gate_id_t blockId = addressTree.getValue(address).gateId;
 					logicSimulatorWrapper.deleteGate(blockId);
 					addressTree.removeValue(address);
@@ -99,13 +98,12 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			const auto [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 			const GateType gateType = circuitToEvaluatorGatetype(blockType, insideIC);
 			if (gateType != GateType::NONE) {
-				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate{ 0, blockType, rotation });
+				const auto addresses = addressTree.addValue(position, containerId, EvaluatorGate { 0, blockType, rotation });
 				for (const auto& address : addresses) {
 					const wrapper_gate_id_t blockId = logicSimulatorWrapper.createGate(gateType, true);
-					addressTree.setValue(address, EvaluatorGate{ blockId, blockType, rotation });
+					addressTree.setValue(address, EvaluatorGate { blockId, blockType, rotation });
 				}
-			}
-			else {
+			} else {
 				// check if it's a custom block
 				const circuit_id_t integratedCircuitId = circuitManager.getCircuitBlockDataManager()->getCircuitId(blockType);
 				if (integratedCircuitId == 0) {
@@ -159,7 +157,6 @@ void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t con
 			addressTree.moveData(containerId, curPosition, newPosition);
 			break;
 		}
-		case Difference::SET_DATA: break;
 		}
 	}
 }
@@ -242,17 +239,14 @@ std::pair<wrapper_gate_id_t, int> Evaluator::getConnectionPoint(AddressTreeNode<
 		const auto inputConnectionIdData = blockData->getInputConnectionId(offset, branch->getRotation());
 		if (inputConnectionIdData.second) {
 			connectionId = inputConnectionIdData.first;
-		}
-		else {
+		} else {
 			logError("getConnectionPoint: input connection id not found");
 		}
-	}
-	else {
+	} else {
 		const auto outputConnectionIdData = blockData->getOutputConnectionId(offset, branch->getRotation());
 		if (outputConnectionIdData.second) {
 			connectionId = outputConnectionIdData.first;
-		}
-		else {
+		} else {
 			logError("getConnectionPoint: output connection id not found");
 		}
 	}
@@ -275,32 +269,28 @@ GateType circuitToEvaluatorGatetype(BlockType blockType, bool insideIC) {
 	case BlockType::SWITCH: {
 		if (insideIC) {
 			return GateType::JUNCTION;
-		}
-		else {
+		} else {
 			return GateType::DEFAULT_RETURN_CURRENTSTATE;
 		}
 	};
 	case BlockType::BUTTON: {
 		if (insideIC) {
 			return GateType::JUNCTION;
-		}
-		else {
+		} else {
 			return GateType::DEFAULT_RETURN_CURRENTSTATE;
 		}
 	};
 	case BlockType::TICK_BUTTON: {
 		if (insideIC) {
 			return GateType::JUNCTION;
-		}
-		else {
+		} else {
 			return GateType::TICK_INPUT;
 		}
 	};
 	case BlockType::LIGHT: {
 		if (insideIC) {
 			return GateType::JUNCTION;
-		}
-		else {
+		} else {
 			return GateType::COPYINPUT;
 		}
 	};
@@ -380,7 +370,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
-	const auto gate = addressTree.getValue(address, EvaluatorGate{0, BlockType::NONE, Rotation::ZERO});
+	const auto gate = addressTree.getValue(address, EvaluatorGate { 0, BlockType::NONE, Rotation::ZERO });
 	if (gate.blockType == BlockType::NONE) {
 		logError("setState: gate is not a valid block type");
 		return;

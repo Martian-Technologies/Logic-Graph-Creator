@@ -50,19 +50,6 @@ public:
 	inline bool isConnectionInput(connection_end_id_t connectionId) const { return blockDataManager->isConnectionInput(type(), connectionId); }
 	inline bool isConnectionOutput(connection_end_id_t connectionId) const { return blockDataManager->isConnectionOutput(type(), connectionId); }
 
-	// saved data
-	inline block_data_t getRawData() const { return data; }
-	inline void setRawData(block_data_t data) { this->data = data; }
-
-	template<class T, unsigned int index, BlockType type>
-	inline bool hasDataValue() const { return hasBlockDataValue<T, index, type>(); }
-
-	template<class T, unsigned int index, BlockType type>
-	inline T getDataValue() const { return getBlockDataValue<T, index, type>(data); }
-
-	template<class T, unsigned int index, BlockType type>
-	inline void setDataValue(T value) { setBlockDataValue<T, index, type>(data, value); }
-
 protected:
 	inline void destroy() { }
 	inline ConnectionContainer& getConnectionContainer() { return connections; }
@@ -83,7 +70,6 @@ protected:
 	// changing data
 	Position position;
 	Rotation rotation;
-	block_data_t data;
 };
 
 inline Block getBlockClass(const BlockDataManager* blockDataManager, BlockType type) { return Block(blockDataManager, type); }

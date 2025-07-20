@@ -276,13 +276,6 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	return true;
 }
 
-bool Circuit::trySetBlockData(Position positionOfBlock, block_data_t data) {
-	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.trySetBlockData(positionOfBlock, data, difference.get());
-	sendDifference(difference);
-	return out;
-}
-
 bool Circuit::tryCreateConnection(Position outputPosition, Position inputPosition) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputPosition, inputPosition, difference.get());
@@ -391,7 +384,6 @@ void Circuit::undo() {
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
-	MinimalDifference::data_modification_t dataModification;
 	const std::vector<MinimalDifference::Modification>& modifications = difference->getModifications();
 	for (unsigned int i = modifications.size(); i > 0; --i) {
 		const MinimalDifference::Modification& modification = modifications[i - 1];
@@ -415,10 +407,6 @@ void Circuit::undo() {
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), subRotations(std::get<1>(moveModification), std::get<3>(moveModification)), newDifference.get());
 			break;
-		case MinimalDifference::SET_DATA:
-			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
-			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<2>(dataModification), newDifference.get());
-			break;
 		}
 	}
 	sendDifference(newDifference);
@@ -433,7 +421,6 @@ void Circuit::redo() {
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
-	MinimalDifference::data_modification_t dataModification;
 	for (auto modification : difference->getModifications()) {
 		switch (modification.first) {
 		case MinimalDifference::REMOVED_BLOCK:
@@ -454,10 +441,6 @@ void Circuit::redo() {
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), subRotations(std::get<3>(moveModification), std::get<1>(moveModification)), newDifference.get());
-			break;
-		case MinimalDifference::SET_DATA:
-			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
-			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<1>(dataModification), newDifference.get());
 			break;
 		}
 	}

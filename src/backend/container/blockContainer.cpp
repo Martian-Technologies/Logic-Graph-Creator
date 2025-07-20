@@ -149,22 +149,6 @@ void BlockContainer::resizeBlockType(BlockType blockType, Vector newSize, Differ
 	}
 }
 
-// block_data_t BlockContainer::getBlockData(Position positionOfBlock) const {
-//     Block* block = getBlock(positionOfBlock);
-//     if (!block) return 0;
-//     return block->getRawData();
-// }
-
-bool BlockContainer::trySetBlockData(Position positionOfBlock, block_data_t data, Difference* difference) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	block_data_t oldData = block->getRawData();
-	if (oldData == data) return true;
-	block->setRawData(data);
-	difference->addSetData(positionOfBlock, data, oldData);
-	return true;
-}
-
 bool BlockContainer::connectionExists(Position outputPosition, Position inputPosition) const {
 	const Block* input = getBlock(inputPosition);
 	if (!input) return false;

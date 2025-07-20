@@ -23,8 +23,7 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 		blocks.emplace_back(
 			block->type(),
 			block->getPosition(),
-			block->getRotation(),
-			block->getRawData()
+			block->getRotation()
 		);
 		const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
 		for (auto& iter : block->getConnectionContainer().getConnections()) {

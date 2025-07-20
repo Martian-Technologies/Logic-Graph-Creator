@@ -1,7 +1,6 @@
 #ifndef blockDefs_h
 #define blockDefs_h
 
-typedef std::uint32_t block_data_t; // change if need more data
 typedef char block_data_index_t;
 
 typedef unsigned char block_size_t;
