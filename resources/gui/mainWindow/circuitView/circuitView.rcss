@@ -1,0 +1,37 @@
+/* Circuit View */
+
+#circuit-view-rendering-area {
+	flex: 1;  /* Takes available space between sidebars */
+	display: flex;
+	position: relative;
+}
+
+/* Status Bar */ 
+
+#status-bar-centering {
+	color: black;
+	display: inline-block;
+	position: absolute;
+	bottom: 50px;
+	width: 100%;
+	text-align: center;
+}
+
+#status-bar {
+	display: inline-block;
+	text-align: center;
+	background-color: #ffffff90;
+	font-size: 16dp;
+	border-radius: 0.3em;
+	padding: 0.2em;
+}
+
+#status-bar:empty {
+	display: none;
+}
+
+/* Simulation Controls */
+
+#simulation-controls-container {
+	background-color: #0b0b0b;
+}

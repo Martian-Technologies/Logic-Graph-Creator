@@ -1,0 +1,54 @@
+#sim-controls-area {
+	display: flex;
+	flex-direction: column;
+	gap: 4dp;
+	padding: 2dp;
+	font-size: 16dp;
+	border-radius: 0.3em;
+}
+
+#sim-controls-buttons {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8dp;
+	padding: 2dp;
+	font-size: 16dp;
+	border-radius: 0.3em;
+}
+
+#toggle-simulation {
+	color: #252525;
+	height: 20dp;
+	background-color: #ffffff90;
+	font-size: 12dp;
+	border-radius: 0.3em;
+	padding: 0.2em;
+}
+
+#real-tps-display {
+	color: #252525;
+	height: 20dp;
+	width: auto;
+	font-size: 12dp;
+	padding: 0.2em;
+}
+
+#toggle-simulation:hover {
+	background-color: #efefef90;;
+}
+
+#toggle-simulation:active, #toggle-simulation.checked {
+	background-color: #c5c5c590;;
+}
+
+#limit-speed {
+	margin: 0;
+}
+
+#tps-input {
+	background-color: #252525;
+	color: #fff;
+	height: 18dp;
+	width: 60dp;
+}
