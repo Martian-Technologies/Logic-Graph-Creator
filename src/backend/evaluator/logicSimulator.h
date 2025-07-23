@@ -5,31 +5,39 @@
 
 class LogicSimulator {
 friend class SimulatorOptimizer;
+friend class SimPauseGuard;
 public:
 	LogicSimulator();
 	~LogicSimulator();
 	void clearState();
-	void setTargetTickrate(unsigned int targetTickrate);
+	void setTargetTickrate(unsigned int targetTickrate) {
+		this->targetTickrate = targetTickrate;
+	}
+	void setThrottlingTickrate(bool throttlingTickrate) {
+		this->throttlingTickrate = throttlingTickrate;
+	}
 	unsigned int getAverageTickrate();
-	void setPaused(bool paused);
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
-	logic_state_t getState(simulator_id_t id);
-	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids);
+	logic_state_t getState(simulator_id_t id) const;
+	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
 
 private:
-	std::thread simulationThread;
-	std::atomic<bool> running;
+	std::jthread simulationThread;
+	std::atomic<bool> running { true };
 
-	std::atomic<bool> paused{false};
-	std::atomic<unsigned> targetTickrate{40*60}; // ticks per minute
+	std::atomic<unsigned> targetTickrate { 40 * 60 }; // ticks per minute
+	std::atomic<bool> throttlingTickrate { true };
 
+	std::atomic<bool> pauseRequest { false };
+	std::atomic<bool> isPaused { false };
 	std::mutex cvMutex;
 	std::condition_variable cv;
 
 	std::vector<logic_state_t> statesA;
 	std::vector<logic_state_t> statesB;
-	std::mutex statesAMutex;
+
+	mutable std::shared_mutex statesAMutex;
 	std::mutex statesBMutex;
 
 	std::vector<ANDLikeGate> andGates;
@@ -43,7 +51,31 @@ private:
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 
 	void simulationLoop();
-	void tickOnce();
+	inline void tickOnce();
+};
+
+class SimPauseGuard {
+public:
+	explicit SimPauseGuard(LogicSimulator& s) : sim(s) {
+		{
+			std::lock_guard<std::mutex> lk(sim.cvMutex);
+			sim.pauseRequest.store(true, std::memory_order_release);
+			sim.cv.notify_all();
+		}
+		// wait until the sim thread *confirms* it is paused
+		std::unique_lock<std::mutex> lk(sim.cvMutex);
+		sim.cv.wait(lk, [&]{ return sim.isPaused.load(std::memory_order_acquire); });
+	}
+	~SimPauseGuard() {
+		{
+			std::lock_guard<std::mutex> lk(sim.cvMutex);
+			sim.pauseRequest.store(false, std::memory_order_release);
+			sim.cv.notify_all();
+		}
+	}
+
+private:
+	LogicSimulator& sim;
 };
 
 #endif // logicSimulator_h

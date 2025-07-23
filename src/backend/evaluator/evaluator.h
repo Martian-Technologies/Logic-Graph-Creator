@@ -12,7 +12,7 @@
 #include "evalCircuitContainer.h"
 #include "evalConfig.h"
 #include "evalAddressTree.h"
-#include "simulatorOptimizer.h"
+#include "evalSimulator.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -103,7 +103,7 @@ private:
 	EvalCircuitContainer evalCircuitContainer;
 	EvalConfig evalConfig;
 	IdProvider<middle_id_t> middleIdProvider;
-	SimulatorOptimizer simulatorOptimizer;
+	EvalSimulator evalSimulator;
 
 	void makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache);
 

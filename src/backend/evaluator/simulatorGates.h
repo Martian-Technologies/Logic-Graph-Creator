@@ -12,17 +12,16 @@ struct ANDLikeGate {
 	std::vector<simulator_id_t> inputs;
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		bool foundDesiredState = false;
+		bool foundGoofyState = false;
 		logic_state_t desiredState = inputsInverted ? logic_state_t::HIGH : logic_state_t::LOW;
 		// desiredState will be LOW for AND and NAND, HIGH for OR and NOR
 		for (const auto& inputId : inputs) {
 			logic_state_t state = statesA[inputId];
 			if (state == logic_state_t::UNDEFINED) {
-				statesB[id] = logic_state_t::UNDEFINED;
-				return;
+				foundGoofyState = true;
 			}
 			if (state == logic_state_t::FLOATING) {
-				statesB[id] = logic_state_t::UNDEFINED;
-				return;
+				foundGoofyState = true;
 			}
 			if (state == desiredState) {
 				foundDesiredState = true;
@@ -32,6 +31,10 @@ struct ANDLikeGate {
 		if (foundDesiredState) {
 			statesB[id] = outputInverted ? logic_state_t::HIGH : logic_state_t::LOW;
 		} else {
+			if (foundGoofyState) {
+				statesB[id] = logic_state_t::UNDEFINED;
+				return;
+			}
 			statesB[id] = outputInverted ? logic_state_t::LOW : logic_state_t::HIGH;
 		}
 	}
@@ -66,7 +69,7 @@ struct XORLikeGate {
 struct JunctionGate {
 	simulator_id_t id;
 	std::vector<simulator_id_t> inputs;
-	inline void tick(std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+	inline void tick(std::vector<logic_state_t>& statesB) {
 		logic_state_t outputState = logic_state_t::FLOATING;
 		for (const auto& inputId : inputs) {
 			logic_state_t state = statesB[inputId]; // we read statesB because junctions need to act instantly, and we simulate them last in the tick
@@ -84,8 +87,6 @@ struct JunctionGate {
 				break;
 			}
 		}
-		// junctions are instant, so we update both statesA and statesB
-		statesA[id] = outputState;
 		statesB[id] = outputState;
 	}
 };
