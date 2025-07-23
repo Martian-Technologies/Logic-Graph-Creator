@@ -112,7 +112,6 @@ private:
 	void edit_removeConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
-	void edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData);
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;

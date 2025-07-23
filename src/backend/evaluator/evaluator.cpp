@@ -72,11 +72,6 @@ void Evaluator::makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceShare
 				edit_createConnection(evalCircuitId, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
 				break;
 			}
-			case Difference::ModificationType::SET_DATA: {
-				const auto& [position, newData, oldData] = std::get<Difference::data_modification_t>(modificationData);
-				edit_setData(evalCircuitId, diffCache, position, newData, oldData);
-				break;
-			}
 		}
 	}
 }
@@ -99,10 +94,6 @@ void Evaluator::edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache
 
 void Evaluator::edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
 	logWarning("not implemented yet", "Evaluator::edit_moveBlock");
-}
-
-void Evaluator::edit_setData(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, block_data_t newData, block_data_t oldData) {
-	logWarning("not implemented yet", "Evaluator::edit_setData");
 }
 
 const EvalAddressTree Evaluator::buildAddressTree() const {
