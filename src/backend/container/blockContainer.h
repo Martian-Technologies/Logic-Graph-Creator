@@ -8,9 +8,11 @@
 
 class BlockContainer {
 public:
-	inline BlockContainer(BlockDataManager* blockDataManager) : lastId(0), blockDataManager(blockDataManager) { }
+	inline BlockContainer(BlockDataManager* blockDataManager) : blockDataManager(blockDataManager) { }
 
 	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
+
+	void clear(Difference* difference);
 
 	inline BlockType getBlockType() const { return selfBlockType; }
 	inline void setBlockType(BlockType type) { if (getBlockTypeCount(type) == 0) selfBlockType = type; }
@@ -48,16 +50,6 @@ public:
 	bool trySetType(Position positionOfBlock, BlockType type, Difference* difference);
 	// moves blocks until they 
 	void resizeBlockType(BlockType blockType, Vector size, Difference* difference);
-
-	/* ----------- block data ----------- */
-	// // Gets the data from a block at position. Returns 0 if no block is found. 
-	// block_data_t getBlockData(Position positionOfBlock) const;
-
-	// Sets the data to a block at position. Returns if successful.  Pass a Difference* to read the what changes were made.
-	bool trySetBlockData(Position positionOfBlock, block_data_t data, Difference* difference);
-	// Sets the data value to a block at position. Returns if block found.  Pass a Difference* to read the what changes were made.
-	template<class T, unsigned int index>
-	bool trySetBlockDataValue(Position positionOfBlock, T value, Difference* difference);
 
 	/* ----------- connections ----------- */
 	// -- getters --
@@ -108,7 +100,7 @@ private:
 
 	BlockType selfBlockType = BlockType::NONE;
 	BlockDataManager* blockDataManager;
-	block_id_t lastId;
+	block_id_t lastId = 0;
 	Sparse2d<Cell> grid;
 	std::unordered_map<block_id_t, Block> blocks;
 	std::vector<unsigned int> blockTypeCounts;
@@ -132,17 +124,6 @@ inline Block* BlockContainer::getBlock_(block_id_t blockId) {
 inline const Block* BlockContainer::getBlock(block_id_t blockId) const {
 	auto iter = blocks.find(blockId);
 	return (iter == blocks.end()) ? nullptr : &(iter->second);
-}
-
-template<class T, unsigned int index>
-bool BlockContainer::trySetBlockDataValue(Position positionOfBlock, T value, Difference* difference) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	block_data_t oldData = block->getRawData();
-	block->setDataValue<T, index>(value);
-	block_data_t newData = block->getRawData();
-	if (oldData != newData) difference->addSetData(positionOfBlock, newData, oldData);
-	return true;
 }
 
 #endif /* blockContainer_h */

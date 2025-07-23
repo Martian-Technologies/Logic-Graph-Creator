@@ -5,8 +5,6 @@
 
 class UndoSystem {
 public:
-	inline UndoSystem() : undoPosition(0) { }
-
 	inline void addBlocker() {
 		while (undoPosition < differences.size()) differences.pop_back();
 		++undoPosition; differences.emplace_back(std::nullopt);
@@ -29,9 +27,13 @@ public:
 		undoPosition--;
 		return nullptr;
 	}
+	inline void clear() {
+		differences.clear();
+		undoPosition = 0;
+	}
 
 private:
-	unsigned int undoPosition;
+	unsigned int undoPosition = 0;
 	std::vector<std::optional<MinimalDifference>> differences;
 
 };

@@ -2,14 +2,76 @@
 
 #include "backend/circuit/circuitBlockData.h"
 #include "generatedCircuitValidator.h"
+#include "../circuit/circuitManager.h"
+#include "computerAPI/circuits/circuitFileManager.h"
 
-WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thisPtr(std::make_unique<WasmInstance*>(this)) {
+WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module, CircuitManager* circuitManager, CircuitFileManager* fileManager) : circuitManager(circuitManager), fileManager(fileManager), thisPtr(std::make_unique<WasmInstance*>(this)) {
 	WasmInstance** thisPtrPtr = thisPtr.get();
+	wasmtime::Func importFileFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t fileStrOffset) -> int32_t {
+			std::string path = (*thisPtrPtr)->wasmToString(fileStrOffset);
+			if (std::filesystem::path(path).is_relative()) {
+				const std::string* thisPath = (*thisPtrPtr)->fileManager->getSavePath((*thisPtrPtr)->UUID);
+				path = std::filesystem::path(*thisPath).replace_filename(std::filesystem::path(path)).string();
+			}
+			return (*thisPtrPtr)->fileManager->loadFromFile(path).size();
+		});
+
 	wasmtime::Func getParameterFunc = wasmtime::Func::wrap(*Wasm::getStore(),
-		[thisPtrPtr](int32_t strOffset) -> int32_t {
+		[thisPtrPtr](int32_t keyStrOffset) -> int32_t {
 			const std::map<std::string, int>& parameters = (*thisPtrPtr)->parameters->parameters;
-			auto iter = parameters.find((*thisPtrPtr)->wasmToString(strOffset));
+			auto iter = parameters.find((*thisPtrPtr)->wasmToString(keyStrOffset));
 			return (iter == parameters.end()) ? 0 : iter->second;
+		});
+
+	wasmtime::Func getPrimitiveTypeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t nameStrOffset) -> int32_t {
+			std::string blockName = (*thisPtrPtr)->wasmToString(nameStrOffset);
+			if (blockName == "AND") return BlockType::AND;
+			else if (blockName == "OR") return BlockType::OR;
+			else if (blockName == "XOR") return BlockType::XOR;
+			else if (blockName == "NAND") return BlockType::NAND;
+			else if (blockName == "NOR") return BlockType::NOR;
+			else if (blockName == "XNOR") return BlockType::XNOR;
+			else if (blockName == "JUNCTION") return BlockType::JUNCTION;
+			else if (blockName == "TRISTATE_BUFFER") return BlockType::TRISTATE_BUFFER;
+			else if (blockName == "BUTTON") return BlockType::BUTTON;
+			else if (blockName == "TICK_BUTTON") return BlockType::TICK_BUTTON;
+			else if (blockName == "SWITCH") return BlockType::SWITCH;
+			else if (blockName == "CONSTANT") return BlockType::CONSTANT;
+			else if (blockName == "LIGHT") return BlockType::LIGHT;
+			return BlockType::NONE;
+		});
+
+	wasmtime::Func getNonPrimitiveTypeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t UUIDStrOffset) -> int32_t {
+			std::string UUID = (*thisPtrPtr)->wasmToString(UUIDStrOffset);
+			SharedCircuit circuit = (*thisPtrPtr)->circuitManager->getCircuit(UUID);
+			if (circuit) {
+				return circuit->getBlockType();
+			}
+			SharedProceduralCircuit proceduralCircuit = (*thisPtrPtr)->circuitManager->getProceduralCircuitManager()->getProceduralCircuit(UUID);
+			if (proceduralCircuit) {
+				logError("To get the BlockType of a ProceduralCircuit you need to use \"getProceduralCircuitType\" not \"getNonPrimitiveType\"", "WasmProceduralCircuit::WasmInstance");
+			}
+			logError("Failed to find Circuit with UUID", "WasmInstance", UUID);
+			return BlockType::NONE;
+		});
+
+	wasmtime::Func getProceduralCircuitTypeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
+		[thisPtrPtr](int32_t UUIDStrOffset, int32_t parametersStrOffset) -> int32_t {
+			std::string UUID = (*thisPtrPtr)->wasmToString(UUIDStrOffset);
+			SharedProceduralCircuit proceduralCircuit = (*thisPtrPtr)->circuitManager->getProceduralCircuitManager()->getProceduralCircuit(UUID);
+			if (proceduralCircuit) {
+				std::stringstream ss((*thisPtrPtr)->wasmToString(parametersStrOffset));
+				return proceduralCircuit->getBlockType(ProceduralCircuitParameters(ss));
+			}
+			SharedCircuit circuit = (*thisPtrPtr)->circuitManager->getCircuit(UUID);
+			if (circuit) {
+				logError("To get the BlockType of a Circuit you need to use \"getNonPrimitiveType\" not \"getProceduralCircuitType\".", "WasmProceduralCircuit::WasmInstance");
+			}
+			logError("Failed to find ProceduralCircuit with UUID", "WasmInstance", UUID);
+			return BlockType::NONE;
 		});
 
 	wasmtime::Func createBlockFunc = wasmtime::Func::wrap(*Wasm::getStore(),
@@ -57,9 +119,29 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module) : thi
 	// Linker to associate "env" functions
 	wasmtime::Linker linker(*Wasm::getEngine());
 	wasmtime::Result<std::monostate> linkerResult = wasmtime::Result<std::monostate>(nullptr);
+	linkerResult = linker.define(*Wasm::getStore(), "env", "importFile", importFileFunc);
+	if (!linkerResult) {
+		logError("could not create link to env.importFile", "WasmProceduralCircuit::WasmInstance");
+		return;
+	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "getParameter", getParameterFunc);
 	if (!linkerResult) {
 		logError("could not create link to env.getParameter", "WasmProceduralCircuit::WasmInstance");
+		return;
+	}
+	linkerResult = linker.define(*Wasm::getStore(), "env", "getPrimitiveType", getPrimitiveTypeFunc);
+	if (!linkerResult) {
+		logError("could not create link to env.getPrimitiveType", "WasmProceduralCircuit::WasmInstance");
+		return;
+	}
+	linkerResult = linker.define(*Wasm::getStore(), "env", "getNonPrimitiveType", getNonPrimitiveTypeFunc);
+	if (!linkerResult) {
+		logError("could not create link to env.getNonPrimitiveType", "WasmProceduralCircuit::WasmInstance");
+		return;
+	}
+	linkerResult = linker.define(*Wasm::getStore(), "env", "getProceduralCircuitType", getProceduralCircuitTypeFunc);
+	if (!linkerResult) {
+		logError("could not create link to env.getProceduralCircuitType", "WasmProceduralCircuit::WasmInstance");
 		return;
 	}
 	linkerResult = linker.define(*Wasm::getStore(), "env", "createBlock", createBlockFunc);
@@ -153,7 +235,9 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(WasmInstance&& wasmInstance) :
 	name(std::move(wasmInstance.name)),
 	UUID(std::move(wasmInstance.UUID)),
 	defaultParameters(std::move(wasmInstance.defaultParameters)),
-	thisPtr(std::move(wasmInstance.thisPtr)) {
+	thisPtr(std::move(wasmInstance.thisPtr)),
+	circuitManager(wasmInstance.circuitManager),
+	fileManager(wasmInstance.fileManager) {
 	*thisPtr = this;
 }
 
@@ -165,6 +249,8 @@ WasmProceduralCircuit::WasmInstance& WasmProceduralCircuit::WasmInstance::operat
 		UUID = std::move(wasmInstance.UUID);
 		defaultParameters = std::move(wasmInstance.defaultParameters);
 		thisPtr = std::move(wasmInstance.thisPtr);
+		circuitManager = wasmInstance.circuitManager;
+		fileManager = wasmInstance.fileManager;
 		*thisPtr = this;
 	}
 	return *this;
@@ -173,6 +259,12 @@ WasmProceduralCircuit::WasmInstance& WasmProceduralCircuit::WasmInstance::operat
 void WasmProceduralCircuit::WasmInstance::makeCircuit(const ProceduralCircuitParameters& parameters, GeneratedCircuit& generatedCircuit) {
 	if (!instance.has_value()) return;
 
+	// saved in case we are calling this recursively
+	const ProceduralCircuitParameters* tmpParameters = this->parameters;
+	GeneratedCircuit* tmpCircuit = this->generatedCircuit;
+	unsigned int tmpPortId = portId;
+	unsigned int tmpBlockId = blockId;
+	
 	this->parameters = &parameters;
 	this->generatedCircuit = &generatedCircuit;
 	portId = 0;
@@ -182,8 +274,10 @@ void WasmProceduralCircuit::WasmInstance::makeCircuit(const ProceduralCircuitPar
 	auto results = func.call(*Wasm::getStore(), {}).unwrap();
 	bool success = results.front().i32();
 
-	this->parameters = nullptr;
-	this->generatedCircuit = nullptr;
+	this->parameters = tmpParameters;
+	this->generatedCircuit = tmpCircuit;
+	portId = tmpPortId;
+	blockId = tmpBlockId;
 }
 
 std::string WasmProceduralCircuit::WasmInstance::wasmToString(int32_t wasmPtr) {

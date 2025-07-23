@@ -1,8 +1,17 @@
-#include <cassert>
-
 #include "blockContainer.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
+
+void BlockContainer::clear(Difference* difference) {
+	for (auto iter : blocks) {
+		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+	}
+
+	lastId = 0;
+	grid.clear();
+	blocks.clear();
+	blockTypeCounts.clear();
+}
 
 bool BlockContainer::checkCollision(Position positionSmall, Position positionLarge) const {
 	for (auto iter = positionSmall.iterTo(positionLarge); iter; iter++) {
@@ -138,22 +147,6 @@ void BlockContainer::resizeBlockType(BlockType blockType, Vector newSize, Differ
 		difference->addMovedBlock(block->getPosition(), block->getRotation(), position, block->getRotation());
 		block->setPosition(position);
 	}
-}
-
-// block_data_t BlockContainer::getBlockData(Position positionOfBlock) const {
-//     Block* block = getBlock(positionOfBlock);
-//     if (!block) return 0;
-//     return block->getRawData();
-// }
-
-bool BlockContainer::trySetBlockData(Position positionOfBlock, block_data_t data, Difference* difference) {
-	Block* block = getBlock_(positionOfBlock);
-	if (!block) return false;
-	block_data_t oldData = block->getRawData();
-	if (oldData == data) return true;
-	block->setRawData(data);
-	difference->addSetData(positionOfBlock, data, oldData);
-	return true;
 }
 
 bool BlockContainer::connectionExists(Position outputPosition, Position inputPosition) const {

@@ -11,7 +11,7 @@
 
 class Backend {
 public:
-	Backend();
+	Backend(CircuitFileManager* fileManager);
 
 	// void clear();
 

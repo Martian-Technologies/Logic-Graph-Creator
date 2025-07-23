@@ -1,5 +1,3 @@
-#include <filesystem>
-
 #include "connectionMachineParser.h"
 #include "util/uuid.h"
 
@@ -130,7 +128,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 				cord_t vecX, vecY;
 				std::string portName = "";
 				inputFile >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken >> std::quoted(portName) >> cToken;
-				currentParsedCircuit->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, portName);
+				currentParsedCircuit->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, 0, portName);
 			}
 		} else if (token == "UUID:") {
 			std::string uuid;
@@ -143,7 +141,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 			float posX, posY;
 			inputFile >> blockId >> std::quoted(blockTypeStr);
 			BlockType blockType = stringToBlockType(blockTypeStr);
-			
+
 			if (blockType == BlockType::CUSTOM) {
 				SharedCircuit circuit = circuitManager->getCircuit(blockTypeStr);
 				if (circuit) {
@@ -159,10 +157,10 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 				}
 			}
 
-			inputFile  >> posX >> posY >> token;
+			inputFile >> posX >> posY >> token;
 			Rotation rotation = stringToRotation(token);
 
-			currentParsedCircuit->addBlock(blockId, { .pos = FPosition(posX, posY), .rotation = rotation, .type = blockType });
+			currentParsedCircuit->addBlock(blockId, FPosition(posX, posY), rotation, blockType);
 
 			if (version <= 5) getline(inputFile, token);
 			while (true) {
@@ -180,12 +178,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 						logError("Failed to parse (blockid, connection_id) token", "ConnectionMachineParser");
 						break;
 					}
-					currentParsedCircuit->addConnection({
-						static_cast<block_id_t>(blockId),
-						static_cast<connection_end_id_t>(connId),
-						static_cast<block_id_t>(otherBlockId),
-						static_cast<connection_end_id_t>(otherConnId)
-					});
+					currentParsedCircuit->addConnection(blockId, connId, otherBlockId, otherConnId);
 				}
 			}
 		}

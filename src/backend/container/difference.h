@@ -12,15 +12,13 @@ public:
 		PLACE_BLOCK,
 		MOVE_BLOCK,
 		REMOVED_CONNECTION,
-		CREATED_CONNECTION,
-		SET_DATA,
+		CREATED_CONNECTION
 	};
 	typedef std::tuple<Position, Rotation, BlockType> block_modification_t;
 	typedef std::tuple<Position, Rotation, Position, Rotation> move_modification_t;
 	typedef std::tuple<Position, Position, Position, Position> connection_modification_t;
-	typedef std::tuple<Position, block_data_t, block_data_t> data_modification_t;
 
-	typedef std::pair<ModificationType, std::variant<block_modification_t, move_modification_t, connection_modification_t, data_modification_t>> Modification;
+	typedef std::pair<ModificationType, std::variant<block_modification_t, move_modification_t, connection_modification_t>> Modification;
 
 	inline bool empty() const { return modifications.empty(); }
 	inline const std::vector<Modification>& getModifications() const { return modifications; }
@@ -31,7 +29,6 @@ private:
 	void addMovedBlock(Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) { modifications.push_back({ ModificationType::MOVE_BLOCK, std::make_tuple(curPosition, curRotation, newPosition, newRotation) }); }
 	void addRemovedConnection(Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) { modifications.push_back({ ModificationType::REMOVED_CONNECTION, std::make_tuple(outputBlockPosition, outputPosition, inputBlockPosition, inputPosition) }); }
 	void addCreatedConnection(Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) { modifications.push_back({ ModificationType::CREATED_CONNECTION, std::make_tuple(outputBlockPosition, outputPosition, inputBlockPosition, inputPosition) }); }
-	void addSetData(Position position, block_data_t newData, block_data_t oldData) { modifications.push_back({ ModificationType::SET_DATA, std::make_tuple(position, newData, oldData) }); }
 
 	std::vector<Modification> modifications;
 };

@@ -14,7 +14,8 @@ public:
 	T* get(Position position);
 	const T* get(Position position) const;
 	void insert(Position position, const T& value);
-	void remove(Position position)
+	void remove(Position position);
+	void clear();
 }
 */
 
@@ -22,7 +23,6 @@ template <class T> class Sparse2dArray;
 
 template <class T>
 using Sparse2d = Sparse2dArray<T>;
-
 
 template <class T>
 class Sparse2dArray {
@@ -33,6 +33,7 @@ public:
 
 	inline void insert(Position position, const T& value);
 	inline void remove(Position position);
+	inline void clear();
 
 	template<typename F>
 	void forEach(F&& func) const {
@@ -83,6 +84,11 @@ void Sparse2dArray<T>::remove(Position position) {
 	iterator iter = data.find(position);
 	if (iter != data.end())
 		data.erase(iter);
+}
+
+template<class T>
+void Sparse2dArray<T>::clear() {
+	data.clear();
 }
 
 #endif /* sparse2d_h */

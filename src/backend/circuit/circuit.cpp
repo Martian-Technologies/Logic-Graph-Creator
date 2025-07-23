@@ -11,6 +11,15 @@ Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, Dat
 	dataUpdateEventReceiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Circuit::removeConnectionPort, this, std::placeholders::_1));
 }
 
+void Circuit::clear(bool clearUndoTree) {
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+	blockContainer.clear(difference.get());
+	sendDifference(difference);
+	if (clearUndoTree) {
+		undoSystem.clear();
+	}
+}
+
 bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
@@ -145,17 +154,11 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 	return false;
 }
 
-bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit) {
+bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position) {
 	if (!parsedCircuit.isValid()) return false;
 
-	Vector totalOffset(0, 0);
-	// if it is a custom circuit, we want no offset as the parsedCircuit should be "makePositionsRelative"d
-	if (!customCircuit) {
-		// this is only relevent for finding offset for given position, generally from mouse position
-		totalOffset = (parsedCircuit.getMinPos() * -1) + Vector(position.x, position.y);
-	}
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
-		if (blockContainer.checkCollision(block.pos.snap() + totalOffset, block.rotation, block.type)) {
+		if (blockContainer.checkCollision(block.position.snap(), block.rotation, block.type)) {
 			return false;
 		}
 	}
@@ -163,7 +166,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 
 	std::unordered_map<block_id_t, block_id_t> realIds;
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
-		Position targetPos = block.pos.snap() + totalOffset;
+		Position targetPos = block.position.snap();
 		block_id_t newId;
 		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
 			logError("Failed to insert block while inserting block.", "Circuit");
@@ -178,15 +181,15 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 			logError("Could not get block from parsed circuit while inserting block.", "Circuit");
 			continue;
 		}
-		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputId)) {
+		if (blockContainer.getBlockDataManager()->isConnectionInput(parsedBlock->type, conn.outputEndId)) {
 			// skip inputs
 			continue;
 		}
 
-		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
-		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
+		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputEndId);
+		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputEndId);
 		if (!tryCreateConnection(output, input)) {
-			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
+			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 		}
 	}
 	return true;
@@ -265,13 +268,6 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	}
 	sendDifference(difference);
 	return true;
-}
-
-bool Circuit::trySetBlockData(Position positionOfBlock, block_data_t data) {
-	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.trySetBlockData(positionOfBlock, data, difference.get());
-	sendDifference(difference);
-	return out;
 }
 
 bool Circuit::tryCreateConnection(Position outputPosition, Position inputPosition) {
@@ -382,7 +378,6 @@ void Circuit::undo() {
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
-	MinimalDifference::data_modification_t dataModification;
 	const std::vector<MinimalDifference::Modification>& modifications = difference->getModifications();
 	for (unsigned int i = modifications.size(); i > 0; --i) {
 		const MinimalDifference::Modification& modification = modifications[i - 1];
@@ -406,10 +401,6 @@ void Circuit::undo() {
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), subRotations(std::get<1>(moveModification), std::get<3>(moveModification)), newDifference.get());
 			break;
-		case MinimalDifference::SET_DATA:
-			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
-			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<2>(dataModification), newDifference.get());
-			break;
 		}
 	}
 	sendDifference(newDifference);
@@ -424,7 +415,6 @@ void Circuit::redo() {
 	MinimalDifference::block_modification_t blockModification;
 	MinimalDifference::connection_modification_t connectionModification;
 	MinimalDifference::move_modification_t moveModification;
-	MinimalDifference::data_modification_t dataModification;
 	for (auto modification : difference->getModifications()) {
 		switch (modification.first) {
 		case MinimalDifference::REMOVED_BLOCK:
@@ -445,10 +435,6 @@ void Circuit::redo() {
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
 			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), subRotations(std::get<3>(moveModification), std::get<1>(moveModification)), newDifference.get());
-			break;
-		case MinimalDifference::SET_DATA:
-			dataModification = std::get<MinimalDifference::data_modification_t>(modification.second);
-			blockContainer.trySetBlockData(std::get<0>(dataModification), std::get<1>(dataModification), newDifference.get());
 			break;
 		}
 	}

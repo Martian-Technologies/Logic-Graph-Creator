@@ -13,7 +13,7 @@ class ParsedCircuit;
 
 class CircuitManager {
 public:
-	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager);
+	CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager, CircuitFileManager* fileManager);
 	// Circuit
 	inline SharedCircuit getCircuit(circuit_id_t id) {
 		auto iter = circuits.find(id);
@@ -117,7 +117,8 @@ public:
 	}
 
 	circuit_id_t createNewCircuit(const ParsedCircuit* parsedCircuit, bool createEval = true);
-	circuit_id_t createNewCircuit(const GeneratedCircuit* parsedCircuit, bool createEval = true);
+	circuit_id_t createNewCircuit(const GeneratedCircuit* generatedCircuit, bool createEval = true);
+	void updateExistingCircuit(circuit_id_t circuitId, const GeneratedCircuit* generatedCircuit);
 
 	// Iterator
 	typedef std::map<circuit_id_t, SharedCircuit>::iterator iterator;

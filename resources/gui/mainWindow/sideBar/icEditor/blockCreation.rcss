@@ -1,0 +1,77 @@
+#block-creation-form {
+	background-color: #2e2e2e;
+	border-radius: 0.3em;
+	margin: 0.5em 0.1em;
+	display: flex;
+	flex-direction: column;
+	min-height: 2rem;
+	padding-left: 4dp;
+}
+
+scrollbarvertical {
+	width: 0;
+}
+
+#connection-list-add-input #connection-list-add-output {
+	display: inline-block;
+	margin: 1em 1em;
+}
+
+#reset-block-creation, #update-block-creation {
+	display: inline-block;
+	margin: 0.2em 0.2em;
+}
+
+#connection-menu {
+	display: flex;
+	flex-direction: column;
+	background-color: #3b3b3b;
+	border-radius: 0.3em;
+	margin: 0.3em 0.1em;
+	padding: 0.1em 0.1em;
+}
+
+#connection-list-output-headers, #connection-list-input-headers {
+	display: block;
+	background-color: #1d1d1d;
+	border-radius: 0.3em 0.3em 0.1em 0.1em;
+	margin: 0.15em 0.15em 0 0.15em;
+}
+#connection-list-output, #connection-list-input {
+	display: block;
+	background-color: #1d1d1d;
+	border-radius: 0.1em;
+	margin: 0 0.15em 0.15em 0.15em;
+	min-height: 3rem;
+}
+
+.connection-list-item {
+	display: block;
+	background-color: #2e2e2e;
+	border-radius: 0.2em;
+	padding: 0.075em;
+	margin: 0.15em;
+}
+
+.connection-list-item input, #name-input, #width-input, #height-input {
+	background-color: #1d1d1d;
+	border-radius: 0.1em;
+	vertical-align: middle;
+	margin: 0 0.1em;
+}
+
+.connection-list-item button {
+	margin: 0 0.1em;
+}
+
+.name {
+	width: 11rem;
+}
+
+.number {
+	width: 2.4rem;
+}
+
+.number-long {
+	width: 4rem
+}

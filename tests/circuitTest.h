@@ -7,7 +7,7 @@
 
 class CircuitTest : public ::testing::Test {
 public:
-	CircuitTest() : evaluatorManager(&dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager) { }
+	CircuitTest() : evaluatorManager(&dataUpdateEventManager), circuitManager(&dataUpdateEventManager, &evaluatorManager, nullptr) { }
 
 protected:
 	void SetUp() override;

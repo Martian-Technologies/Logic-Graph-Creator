@@ -1,7 +1,7 @@
 #include "proceduralCircuitManager.h"
 
-ProceduralCircuitManager::ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager) :
-	circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+ProceduralCircuitManager::ProceduralCircuitManager(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager, CircuitFileManager* fileManager) :
+	circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), fileManager(fileManager) {
 	dataUpdateEventReceiver.linkFunction("proceduralCircuitPathUpdate", [this](const DataUpdateEventManager::EventData* eventData) {
 		auto data = eventData->cast<std::string>();
 		if (data) {
@@ -18,7 +18,7 @@ ProceduralCircuitManager::ProceduralCircuitManager(CircuitManager* circuitManage
 }
 
 const std::string* ProceduralCircuitManager::createWasmProceduralCircuit(wasmtime::Module wasmModule) {
-	WasmProceduralCircuit::WasmInstance wasmInstance(wasmModule);
+	WasmProceduralCircuit::WasmInstance wasmInstance(wasmModule, circuitManager, fileManager);
 	if (!wasmInstance.isValid()) {
 		logError("createWasmProceduralCircuit failed because wasmInstance was not valid.", "ProceduralCircuitManager");
 		return nullptr;

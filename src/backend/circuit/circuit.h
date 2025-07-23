@@ -21,6 +21,8 @@ class Circuit {
 public:
 	Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
 
+	void clear(bool clearUndoTree = false);
+
 	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
 	inline circuit_id_t getCircuitId() const { return circuitId; }
@@ -61,21 +63,9 @@ public:
 	bool checkCollision(const SharedSelection& selection);
 
 	// Trys to place a parsed circuit at a position
-	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position, bool customCircuit);
+	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position);
 	bool tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position);
 	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
-
-	/* ----------- block data ----------- */
-	// Sets the data value to a block at position. Returns if block found.
-	bool trySetBlockData(Position positionOfBlock, block_data_t data);
-	// Sets the data value to a block at position. Returns if block found.
-	template<class T, unsigned int index>
-	bool trySetBlockDataValue(Position positionOfBlock, T value) {
-		DifferenceSharedPtr difference = std::make_shared<Difference>();
-		bool out = blockContainer.trySetBlockDataValue<T, index>(positionOfBlock, value, difference.get());
-		sendDifference(difference);
-		return out;
-	}
 
 	/* ----------- connections ----------- */
 	// Trys to creates a connection. Returns if successful.

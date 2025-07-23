@@ -1,7 +1,6 @@
 #ifndef blockDefs_h
 #define blockDefs_h
 
-typedef std::uint32_t block_data_t; // change if need more data
 typedef char block_data_index_t;
 
 typedef unsigned char block_size_t;
@@ -24,6 +23,13 @@ enum BlockType : std::uint16_t {
 	CONSTANT,
 	LIGHT,
 	CUSTOM, // placeholder for custom blocks in parsed circuit
+};
+
+template <>
+struct std::formatter<BlockType> : std::formatter<std::string> {
+    auto format(BlockType blockType, format_context& ctx) const {
+        return formatter<string>::format(std::to_string((unsigned int)blockType), ctx);
+    }
 };
 
 #endif /* blockDefs_h */

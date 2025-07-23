@@ -1,5 +1,4 @@
 #include "parsedCircuit.h"
-#include <stack>
 
 void CircuitValidator::validate() {
 	bool isValid = true;
@@ -21,7 +20,7 @@ bool CircuitValidator::validateBlockData() {
 	if (parsedCircuit.getSize().dy == 0)
 		size.dy = 1;
 	for (auto& port : parsedCircuit.getConnectionPorts()) {
-		size.extentToFit(port.positionOnBlock);
+		size.extentToFit(port.positionOnBlock + Vector(1));
 	}
 	parsedCircuit.setSize(size);
 	return true;
@@ -39,19 +38,14 @@ bool CircuitValidator::validateBlockTypes() {
 }
 
 bool CircuitValidator::setBlockPositionsInt() {
-	parsedCircuit.makePositionsRelative();
-
 	for (auto& [id, block] : parsedCircuit.blocks) {
-		if (!isIntegerPosition(block.pos)) {
-			FPosition oldPosition = block.pos;
-			block.pos.x = std::floor(block.pos.x);
-			block.pos.y = std::floor(block.pos.y);
-			if (block.pos.x < parsedCircuit.minPos.dx) parsedCircuit.minPos.dx = block.pos.x;
-			if (block.pos.y < parsedCircuit.minPos.dy) parsedCircuit.minPos.dy = block.pos.y;
-			if (block.pos.x > parsedCircuit.maxPos.dx) parsedCircuit.maxPos.dx = block.pos.x;
-			if (block.pos.y > parsedCircuit.maxPos.dy) parsedCircuit.maxPos.dy = block.pos.y;
+		if (block.position.isInvalid()) continue;
+		if (!isIntegerPosition(block.position)) {
+			FPosition oldPosition = block.position;
+			block.position.x = std::floor(block.position.x);
+			block.position.y = std::floor(block.position.y);
 
-			logInfo("Converted block id={} position from {} to {}", "CircuitValidator", id, oldPosition.toString(), block.pos.toString());
+			logInfo("Converted block id={} position from {} to {}", "CircuitValidator", id, oldPosition.toString(), block.position.toString());
 		}
 	}
 	return true;
@@ -70,16 +64,11 @@ bool CircuitValidator::handleInvalidConnections() {
 	while (i < (int)parsedCircuit.connections.size()) {
 		ParsedCircuit::ConnectionData& conn = parsedCircuit.connections[i];
 
-		ParsedCircuit::ConnectionData reversePair {
-			.outputBlockId = conn.inputBlockId,
-			.outputId = conn.inputId,
-			.inputBlockId = conn.outputBlockId,
-			.inputId = conn.outputId,
-		};
+		ParsedCircuit::ConnectionData reversePair(conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 
 		if (--connectionCounts[reversePair] < 0) {
 			parsedCircuit.connections.push_back(reversePair);
-			logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "CircuitValidator", conn.inputBlockId, conn.outputBlockId, reversePair.inputBlockId, reversePair.outputBlockId);
+			logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "CircuitValidator", conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 			connectionCounts[reversePair] = 0;
 		}
 		++i;
@@ -98,12 +87,11 @@ bool CircuitValidator::handleInvalidConnections() {
 
 bool CircuitValidator::setOverlapsUnpositioned() {
 	for (auto& [id, block] : parsedCircuit.blocks) {
-		if (block.pos.x == std::numeric_limits<float>::max() ||
-			block.pos.y == std::numeric_limits<float>::max()) {
+		if (block.position.isInvalid()) {
 			continue;
 		}
 
-		Position intPos(static_cast<int>(block.pos.x), static_cast<int>(block.pos.y));
+		Position intPos = block.position.snap();
 
 		BlockData* blockData = blockDataManager->getBlockData(block.type);
 		if (!blockData) {
@@ -114,7 +102,7 @@ bool CircuitValidator::setOverlapsUnpositioned() {
 		bool hasOverlap = false;
 		for (auto iter = (blockData->getSize(block.rotation) - Vector(1)).iter(); iter; iter++) {
 			Position checkPos(intPos + *iter);
-			if (occupiedPositions.count(checkPos)) {
+			if (occupiedPositions.contains(checkPos)) {
 				hasOverlap = true;
 				break;
 			} else {
@@ -124,12 +112,13 @@ bool CircuitValidator::setOverlapsUnpositioned() {
 
 		if (hasOverlap) {
 			// set the block position as undefined
-			logInfo("Found overlapped block position at {} --> {}, setting to undefined position",
-				   "CircuitValidator",
-				   block.pos.toString(),
-				   intPos.toString());
-			block.pos.x = std::numeric_limits<float>::max();
-			block.pos.y = std::numeric_limits<float>::max();
+			logInfo(
+				"Found overlapped block position at {} --> {}, setting to undefined position",
+				"CircuitValidator",
+				block.position.toString(),
+				intPos.toString()
+			);
+			block.position.setInvalid();
 		} else {
 			// mark all positions as occupied
 			occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
@@ -194,7 +183,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 	// preprocess connected component connections
 	std::vector<std::unordered_map<block_id_t, std::vector<block_id_t>>> componentAdjs(components.size());
 	for (const ParsedCircuit::ConnectionData& conn : parsedCircuit.connections) {
-		if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type, conn.outputId)) {
+		if (blockDataManager->isConnectionInput(parsedCircuit.blocks.at(conn.outputBlockId).type, conn.outputEndId)) {
 			int cc = blockToComponent[conn.inputBlockId];
 			componentAdjs[cc][conn.inputBlockId].push_back(conn.outputBlockId);
 		}
@@ -307,12 +296,15 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 		// place blocks in layers
 		const int xSpacing = 2; // x spacing between layers
 		std::unordered_map<int, int> layerYcounter;
-		int maxYPlaced = parsedCircuit.minPos.dy;
+		int maxYPlaced = 0;
 		for (int sccIndex : sccOrder) {
 			for (block_id_t id : sccs[sccIndex]) {
-				ParsedCircuit::BlockData& block = parsedCircuit.blocks[id];
-				if (block.pos.x != std::numeric_limits<float>::max() &&
-					block.pos.y != std::numeric_limits<float>::max()) {
+				auto blockIter = parsedCircuit.blocks.find(id);
+				if (blockIter == parsedCircuit.blocks.end()) {
+					continue;
+				}
+				ParsedCircuit::BlockData& block = blockIter->second;
+				if (block.position.isValid()) {
 					continue;
 				}
 
@@ -324,14 +316,14 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 				Vector blockSize = blockData->getSize(block.rotation);
 
 				const int layer = layers[id];
-				const int x = static_cast<int>(parsedCircuit.minPos.dx) + (layer - 1) * xSpacing;
+				const int x = (layer - 1) * xSpacing;
 
 				// find first available Y position in current layer column
 				int y;
 				if (layerYcounter.find(x) != layerYcounter.end()) {
 					y = layerYcounter[x];
 				} else {
-					y = static_cast<int>(parsedCircuit.minPos.dy) + currentYOffset;
+					y = currentYOffset;
 				}
 
 				std::vector<Position> takenPositions;
@@ -356,15 +348,11 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 				// mark the found positions
 				occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
 
-				block.pos = FPosition(static_cast<float>(x), static_cast<float>(y));
+				block.position = FPosition(x, y);
 				layerYcounter[x] = y + blockSize.dy;
 
 				float blockMaxX = x + blockSize.dx - 1;
 				float blockMaxY = y + blockSize.dy - 1;
-				parsedCircuit.minPos.dx = std::fmin(parsedCircuit.minPos.dx, static_cast<float>(x));
-				parsedCircuit.minPos.dy = std::fmin(parsedCircuit.minPos.dy, static_cast<float>(y));
-				parsedCircuit.maxPos.dx = std::fmax(parsedCircuit.maxPos.dx, blockMaxX);
-				parsedCircuit.maxPos.dy = std::fmax(parsedCircuit.maxPos.dy, blockMaxY);
 
 				maxYPlaced = std::max(maxYPlaced, static_cast<int>(blockMaxY));
 			}

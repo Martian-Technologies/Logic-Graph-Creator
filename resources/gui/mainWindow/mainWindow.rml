@@ -1,0 +1,39 @@
+<rml>
+
+	<head>
+		<title>Connection Machine</title>
+		<link type="text/rcss" href="mainWindow.rcss"/>
+		<link type="text/rcss" href="../helper/menuTree.rcss"/>
+		<link type="text/rcss" href="../helper/base.rcss"/>
+		<link type="text/template" href="menuBar/menuBar.rml"/>
+		<link type="text/template" href="sideBar/sideBar.rml"/>
+		<link type="text/template" href="circuitView/circuitView.rml"/>
+		<link type="text/template" href="settingsWindow/settingsWindow.rml"/>
+	</head>
+
+	<body>
+		<div id="main-container">
+
+			<div id="top-container">
+				<template src="menuBar"></template>
+			</div>
+
+			<div id="middle-container">
+				<div id="sidebar-container">
+					<template src="sideBar"></template>
+				</div>
+
+				
+				<!-- <div id="center-container"> -->
+				<div id="circuit-view-container">
+					<template src="circuitView"></template>
+				</div>
+				<!-- </div> -->
+			</div>
+
+			<div id="settings-overlay" class="invisible">
+				<template src="settingsWindow"></template>
+			</div>
+		</div>
+	</body>
+</rml>

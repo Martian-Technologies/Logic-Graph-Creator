@@ -15,13 +15,49 @@ public:
 	}
 
 	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType) {
-		(circuitBlockData.emplace(std::pair<circuit_id_t, CircuitBlockData>(circuitId, { circuitId, dataUpdateEventManager }))).first->second.setBlockType(blockType);
-		blockTypeToCircuitId[blockType] = circuitId;
+		auto pair = circuitBlockData.emplace(circuitId, CircuitBlockData(circuitId, dataUpdateEventManager));
+		if (pair.second) {
+			pair.first->second.setBlockType(blockType);
+			blockTypeToCircuitId[blockType] = circuitId;
+		} else {
+			auto iter = blockTypeToCircuitId.find(blockType);
+			if (iter == blockTypeToCircuitId.end()) {
+				blockTypeToCircuitId[blockType] = circuitId;
+			} else {
+				if (iter->second != circuitId) {
+					logError("Can not link 2 circuits to the same block type. Circuit id: {} Block type:{}", "CircuitBlockDataManager", circuitId, blockType);
+				}
+			}
+			if (pair.first->second.getProceduralCircuitUUID() != std::nullopt) {
+				logError("CircuitBlockData cant lose proceduralCircuitUUID. Circuit id: {} Procedural circuit UUID: \"{}\"", "CircuitBlockDataManager", circuitId, pair.first->second.getProceduralCircuitUUID().value());
+			}
+		}
 	}
 
 	void newCircuitBlockData(circuit_id_t circuitId, BlockType blockType, const std::string& proceduralCircuitUUID) {
-		(circuitBlockData.emplace(std::pair<circuit_id_t, CircuitBlockData>(circuitId, { circuitId, dataUpdateEventManager, proceduralCircuitUUID }))).first->second.setBlockType(blockType);
-		blockTypeToCircuitId[blockType] = circuitId;
+		auto pair = circuitBlockData.emplace(circuitId, CircuitBlockData(circuitId, dataUpdateEventManager, proceduralCircuitUUID));
+		if (pair.second) {
+			pair.first->second.setBlockType(blockType);
+			blockTypeToCircuitId[blockType] = circuitId;
+		} else {
+			auto iter = blockTypeToCircuitId.find(blockType);
+			if (iter == blockTypeToCircuitId.end()) {
+				blockTypeToCircuitId[blockType] = circuitId;
+			} else {
+				if (iter->second != circuitId) {
+					logError("Can not link 2 circuits to the same block type. Circuit id: {} Block type: {}", "CircuitBlockDataManager", circuitId, blockType);
+				}
+			}
+			if (pair.first->second.getProceduralCircuitUUID() == std::nullopt) {
+				logError("CircuitBlockData cant gain proceduralCircuitUUID. Circuit id: {} Procedural circuit UUID: \"{}\"", "CircuitBlockDataManager", circuitId, proceduralCircuitUUID);
+			} else if (pair.first->second.getProceduralCircuitUUID().value() != proceduralCircuitUUID) {
+				logError(
+					"CircuitBlockData cant change proceduralCircuitUUID. Current procedural circuit UUID: \"{}\" Attempted procedural circuit UUID: \"{}\"", "CircuitBlockDataManager",
+					pair.first->second.getProceduralCircuitUUID().value(),
+					proceduralCircuitUUID
+				);
+			}
+		}
 	}
 	// void removeCircuitBlockData(circuit_id_t circuitId) {
 	// 	auto iter = circuitBlockData.find(circuitId);

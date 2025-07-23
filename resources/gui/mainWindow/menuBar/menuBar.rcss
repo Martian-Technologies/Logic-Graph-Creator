@@ -1,0 +1,54 @@
+/* Mainbar Styles */
+
+.menu-bar {
+	display: flex;
+	background-color: #3b3b3b;
+	color: white;
+}
+
+.menu {
+	border-radius: 4dp;
+	margin: 0.25rem;
+	text-align: center;
+	background-color: #1d1d1d;
+	position: relative;
+	cursor: pointer;
+}
+
+.menu:hover {
+	background: #555555;
+}
+
+.menu-title {
+	padding: 4dp 4dp;
+	text-align: center;
+	line-height: 1.5em;
+}
+
+.dropdown {
+	display: none; /* makes it invisible */
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 65dp; /* TODO: make this dynimicly sized */
+	overflow: visible;
+	background: #2e2e2e;
+	z-index: 100;
+	flex-direction: column;
+}
+
+.menu:hover .dropdown {
+	display: flex; /* hover makes it visible */
+}
+
+.menu-item {
+	margin: 0.5dp 3dp;
+	padding: 0.2rem 0.2rem;
+	border-radius: 4dp;
+}
+
+.menu-item {
+	background-color: #2e2e2e;
+}
+
+

@@ -6,7 +6,7 @@
 #include "gui/rml/rmlInstance.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "gui/window.h"
+#include "gui/mainWindow/mainWindow.h"
 
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
@@ -32,7 +32,7 @@ private:
 	SdlInstance sdl;
 	RmlInstance rml;
 
-	std::vector<std::unique_ptr<Window>> windows; // we could make this just a vector later, I don't want to deal with moving + threads
+	std::vector<std::unique_ptr<MainWindow>> windows; // we could make this just a vector later, I don't want to deal with moving + threads
 	bool running = false;
 };
 

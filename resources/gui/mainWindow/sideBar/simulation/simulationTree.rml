@@ -1,0 +1,10 @@
+<template name="simulationTree" content="content">
+
+	<head>
+		<link type="text/rcss" href="simulationTree.rcss"/>
+	</head>
+
+	<body>
+		<div id="eval-tree"></div>
+	</body>
+</template>

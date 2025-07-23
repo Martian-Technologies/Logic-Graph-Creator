@@ -10,9 +10,9 @@ Rml::EventId getPinchEventId() {
 	return pinchEventId;
 }
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
+App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFileManager), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
 	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
-	windows.push_back(std::make_unique<Window>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
+	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
 }
 
 void App::runLoop() {
