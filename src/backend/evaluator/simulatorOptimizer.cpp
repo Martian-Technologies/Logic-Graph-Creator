@@ -36,11 +36,11 @@ void SimulatorOptimizer::addGate(const GateType gateType, const middle_id_t gate
         simulator.tristateBuffers.push_back({ simulatorId, true, {}, {} });
         break;
     case GateType::CONSTANT_OFF:
-        simulator.constantGates.push_back({ simulatorId });
+        // simulator.constantGates.push_back({ simulatorId });
         // set the output state to OFF
         break;
     case GateType::CONSTANT_ON:
-        simulator.constantGates.push_back({ simulatorId });
+        // simulator.constantGates.push_back({ simulatorId });
         // set the output state to ON
         break;
     case GateType::DUMMY_INPUT:
@@ -81,7 +81,7 @@ void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {
     removeGateIf(simulator.buffers);
     removeGateIf(simulator.singleBuffers);
     removeGateIf(simulator.tristateBuffers);
-    removeGateIf(simulator.constantGates);
+    // removeGateIf(simulator.constantGates);
     removeGateIf(simulator.constantResetGates);
     removeGateIf(simulator.copySelfOutputGates);
 }
