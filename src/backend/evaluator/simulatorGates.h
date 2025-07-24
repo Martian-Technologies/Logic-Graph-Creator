@@ -1,7 +1,8 @@
 #ifndef simulatorGates_h
 #define simulatorGates_h
 
-#include "simulatorConnection.h"
+#include "evalTypedef.h"
+#include "logicState.h"
 
 struct ANDLikeGate {
 	// By default, behaves like an AND gate

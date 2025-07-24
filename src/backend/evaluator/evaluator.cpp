@@ -7,8 +7,8 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	receiver(dataUpdateEventManager),
 	evalConfig(),
 	middleIdProvider(),
-	evalSimulator(middleIdProvider) {
-const auto circuit = circuitManager.getCircuit(circuitId);
+	evalSimulator(evalConfig, middleIdProvider) {
+	const auto circuit = circuitManager.getCircuit(circuitId);
 	if (!circuit) {
 		logError("Circuit with ID {} not found in evaluator constructor", "Evaluator", circuitId);
 		return;
@@ -23,16 +23,16 @@ const auto circuit = circuitManager.getCircuit(circuitId);
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId) {
-	logWarning("implement simulator locking", "Evaluator::makeEdit");
+	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
 	DiffCache diffCache(circuitManager);
 	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
 		if (evalCircuitContainer.getCircuitId(evalCircuitId) == circuitId) {
-			makeEditInPlace(evalCircuitId, difference, diffCache);
+			makeEditInPlace(pauseGuard, evalCircuitId, difference, diffCache);
 		}
 	}
 }
 
-void Evaluator::makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache) {
+void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache) {
 	std::optional<eval_circuit_id_t> circuitId = evalCircuitContainer.getCircuitId(evalCircuitId);
 	if (!circuitId.has_value()) {
 		logError("EvalCircuit with id {} not found in Evaluator", "Evaluator::makeEditInPlace", evalCircuitId);
@@ -49,50 +49,50 @@ void Evaluator::makeEditInPlace(eval_circuit_id_t evalCircuitId, DifferenceShare
 		switch (modificationType) {
 			case Difference::ModificationType::REMOVED_BLOCK: {
 				const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-				edit_removeBlock(evalCircuitId, diffCache, position, rotation, blockType);
+				edit_removeBlock(pauseGuard, evalCircuitId, diffCache, position, rotation, blockType);
 				break;
 			}
 			case Difference::ModificationType::PLACE_BLOCK: {
 				const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-				edit_placeBlock(evalCircuitId, diffCache, position, rotation, blockType);
+				edit_placeBlock(pauseGuard, evalCircuitId, diffCache, position, rotation, blockType);
 				break;
 			}
 			case Difference::ModificationType::MOVE_BLOCK: {
 				const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
-				edit_moveBlock(evalCircuitId, diffCache, curPosition, curRotation, newPosition, newRotation);
+				edit_moveBlock(pauseGuard, evalCircuitId, diffCache, curPosition, curRotation, newPosition, newRotation);
 				break;
 			}
 			case Difference::ModificationType::REMOVED_CONNECTION: {
 				const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-				edit_removeConnection(evalCircuitId, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
+				edit_removeConnection(pauseGuard, evalCircuitId, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
 				break;
 			}
 			case Difference::ModificationType::CREATED_CONNECTION: {
 				const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-				edit_createConnection(evalCircuitId, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
+				edit_createConnection(pauseGuard, evalCircuitId, diffCache, outputBlockPosition, outputPosition, inputBlockPosition, inputPosition);
 				break;
 			}
 		}
 	}
 }
 
-void Evaluator::edit_removeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
 	logWarning("not implemented yet", "Evaluator::edit_removeBlock");
 }
 
-void Evaluator::edit_placeBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
 	logWarning("not implemented yet", "Evaluator::edit_placeBlock");
 }
 
-void Evaluator::edit_removeConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
 	logWarning("not implemented yet", "Evaluator::edit_removeConnection");
 }
 
-void Evaluator::edit_createConnection(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
 	logWarning("not implemented yet", "Evaluator::edit_createConnection");
 }
 
-void Evaluator::edit_moveBlock(eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
+void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
 	logWarning("not implemented yet", "Evaluator::edit_moveBlock");
 }
 

@@ -1,8 +1,7 @@
 #include "simulatorOptimizer.h"
 
-void SimulatorOptimizer::addGate(const GateType gateType, const middle_id_t gateId) {
+void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 	simulator_id_t simulatorId = simulatorIdProvider.getNewId();
-	SimPauseGuard g(simulator);
 	// if simulatorIds is too short, extend it
 	if (simulatorIds.size() <= simulatorId) {
 		simulatorIds.resize(simulatorId + 1);
@@ -60,9 +59,8 @@ void SimulatorOptimizer::addGate(const GateType gateType, const middle_id_t gate
 	return;
 }
 
-void SimulatorOptimizer::removeGate(const middle_id_t gateId) {
+void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
 	// Find the gate in the simulator and remove it
-	SimPauseGuard g(simulator);
 	auto it = std::find(simulatorIds.begin(), simulatorIds.end(), gateId);
 	if (it != simulatorIds.end()) {
 		simulator_id_t simulatorId = std::distance(simulatorIds.begin(), it);
