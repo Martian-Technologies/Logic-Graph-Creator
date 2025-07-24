@@ -172,7 +172,12 @@ logic_state_t Evaluator::getState(const Address& address) {
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
-	logWarning("not implemented yet", "Evaluator::setState");
+	std::optional<middle_id_t> middleIdOpt = getMiddleId(address);
+	if (!middleIdOpt.has_value()) {
+		logError("Failed to get middle ID for address {} in Evaluator::setState", "Evaluator::setState", address.toString());
+		return;
+	}
+	evalSimulator.setState(middleIdOpt.value(), state);
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {

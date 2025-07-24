@@ -12,6 +12,10 @@ struct ANDLikeGate {
 	bool outputInverted;
 	std::vector<simulator_id_t> inputs;
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		if (inputs.empty()) {
+			statesB[id] = logic_state_t::LOW;
+			return;
+		}
 		bool foundDesiredState = false;
 		bool foundGoofyState = false;
 		logic_state_t desiredState = inputsInverted ? logic_state_t::HIGH : logic_state_t::LOW;
@@ -48,6 +52,10 @@ struct XORLikeGate {
 	bool outputInverted;
 	std::vector<simulator_id_t> inputs;
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		if (inputs.empty()) {
+			statesB[id] = logic_state_t::LOW;
+			return;
+		}
 		unsigned int highCount = outputInverted ? 1 : 0;
 		for (const auto& inputId : inputs) {
 			logic_state_t state = statesA[inputId];
