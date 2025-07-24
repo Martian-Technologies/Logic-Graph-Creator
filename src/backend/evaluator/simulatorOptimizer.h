@@ -17,6 +17,19 @@ public:
 	SimPauseGuard beginEdit() {
 		return SimPauseGuard(simulator);
 	}
+	void endEdit(SimPauseGuard& pauseGuard);
+	logic_state_t getState(simulator_id_t id) const {
+		return simulator.getState(id);
+	}
+	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const {
+		return simulator.getStates(ids);
+	}
+	void setState(simulator_id_t id, logic_state_t state) {
+		simulator.setState(id, state);
+	}
+	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
+		simulator.setStates(ids, states);
+	}
 
 private:
 	LogicSimulator simulator;

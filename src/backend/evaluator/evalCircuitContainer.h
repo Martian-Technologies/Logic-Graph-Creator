@@ -5,6 +5,7 @@
 #include "circuitNode.h"
 #include "evalCircuit.h"
 #include "idProvider.h"
+#include "backend/address.h"
 
 struct EvalPosition {
 	Position position;
@@ -31,6 +32,23 @@ public:
 	}
 	inline bool empty() const noexcept {
 		return circuits.empty();
+	}
+
+	std::optional<CircuitNode> traverse(const Address& address) const {
+		if (address.size() == 0) {
+			return std::nullopt;
+		}
+		EvalPosition evalPos(address.getPosition(0), 0);
+		for (int i = 1; i < address.size(); i++) {
+			std::optional<CircuitNode> node = getNode(evalPos);
+			if (!node.has_value() || !node->isIC()) {
+				return std::nullopt; // invalid path
+			}
+			evalPos.evalCircuitId = node->getId();
+			evalPos.position = address.getPosition(i);
+		}
+		std::optional<CircuitNode> node = getNode(evalPos);
+		return node;
 	}
 
 	std::optional<eval_circuit_id_t> getCircuitId(eval_circuit_id_t evalCircuitId) const noexcept;

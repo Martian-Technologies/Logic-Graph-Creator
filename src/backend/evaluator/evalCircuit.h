@@ -18,6 +18,9 @@ public:
 	circuit_id_t getCircuitId() const noexcept {
 		return circuitId;
 	}
+	void setNode(Position pos, CircuitNode node) {
+		circuitNodes.insert(pos, node);
+	}
 	template<typename F>
 	void forEachNode(F&& func) const {
 		circuitNodes.forEach([&func](Position pos, const CircuitNode& node) {

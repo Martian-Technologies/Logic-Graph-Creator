@@ -7,6 +7,13 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 		simulatorIds.resize(simulatorId + 1);
 	}
 	simulatorIds[simulatorId] = gateId;
+	// extend the states if necessary
+	if (simulator.statesA.size() <= simulatorId) {
+		simulator.statesA.resize(simulatorId + 1, logic_state_t::UNDEFINED);
+		simulator.statesB.resize(simulatorId + 1, logic_state_t::UNDEFINED);
+	}
+	simulator.statesA[simulatorId] = logic_state_t::UNDEFINED;
+	simulator.statesB[simulatorId] = logic_state_t::UNDEFINED;
 	switch (gateType) {
 	case GateType::AND:
 		simulator.andGates.push_back({ simulatorId, false, false, {} });
@@ -36,21 +43,25 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 		simulator.tristateBuffers.push_back({ simulatorId, true, {}, {} });
 		break;
 	case GateType::CONSTANT_OFF:
-		// simulator.constantGates.push_back({ simulatorId });
-		// set the output state to OFF
+		simulator.statesA[simulatorId] = logic_state_t::LOW;
+		simulator.statesB[simulatorId] = logic_state_t::LOW;
 		break;
 	case GateType::CONSTANT_ON:
-		// simulator.constantGates.push_back({ simulatorId });
-		// set the output state to ON
+		simulator.statesA[simulatorId] = logic_state_t::HIGH;
+		simulator.statesB[simulatorId] = logic_state_t::HIGH;
 		break;
 	case GateType::DUMMY_INPUT:
 		simulator.copySelfOutputGates.push_back({ simulatorId });
+		simulator.statesA[simulatorId] = logic_state_t::LOW;
+		simulator.statesB[simulatorId] = logic_state_t::LOW;
 		break;
 	case GateType::THROUGH:
 		simulator.singleBuffers.push_back({ simulatorId, false, std::nullopt });
 		break;
 	case GateType::TICK_INPUT:
 		simulator.constantResetGates.push_back({ simulatorId, logic_state_t::LOW });
+		simulator.statesA[simulatorId] = logic_state_t::LOW;
+		simulator.statesB[simulatorId] = logic_state_t::LOW;
 		break;
 	case GateType::NONE:
 		logError("Cannot add gate of type NONE", "SimulatorOptimizer::addGate");
@@ -84,4 +95,7 @@ void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {
 	// removeGateIf(simulator.constantGates);
 	removeGateIf(simulator.constantResetGates);
 	removeGateIf(simulator.copySelfOutputGates);
+}
+
+void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {
 }

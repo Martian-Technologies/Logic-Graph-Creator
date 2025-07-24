@@ -46,26 +46,19 @@ public:
 	bool getUseTickrate() const { return evalConfig.tickrateLimiter; }
 	long long int getRealTickrate() const { logWarning("not implemented yet", "Evaluator::getRealTickrate"); return 0; };
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
-	logic_state_t getState(const Address& address) {
-		logWarning("not implemented yet", "Evaluator::getState");
-		return logic_state_t::UNDEFINED;
-	};
+	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address) {
-		logWarning("not implemented yet", "Evaluator::getBoolState");
-		return false;
+		return toBool(getState(address));
 	};
-	void setState(const Address& address, logic_state_t state) {
-		logWarning("not implemented yet", "Evaluator::setState");
-	};
-	void setState(const Address& address, bool state) { setState(address, fromBool(state)); }
+	void setState(const Address& address, logic_state_t state);
+	void setState(const Address& address, bool state) {
+		setState(address, fromBool(state));
+	}
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) {
-		// logWarning("not implemented yet", "Evaluator::getBulkStates");
+		logWarning("not implemented yet", "Evaluator::getBulkStates");
 		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
 	};
-	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
-		// logWarning("not implemented yet", "Evaluator::getBulkStates");
-		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
-	};
+	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
 		logWarning("not implemented yet", "Evaluator::setBulkStates");
 	};
@@ -112,6 +105,8 @@ private:
 	void edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
+
+	std::optional<middle_id_t> getMiddleId(const Address& address) const;
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;
