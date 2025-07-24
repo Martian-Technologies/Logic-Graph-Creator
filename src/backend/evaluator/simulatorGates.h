@@ -43,6 +43,19 @@ struct ANDLikeGate {
 			statesB[id] = outputInverted ? logic_state_t::LOW : logic_state_t::HIGH;
 		}
 	}
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		inputs.push_back(inputId);
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		// remove the first instance of inputId in inputs
+		auto it = std::find(inputs.begin(), inputs.end(), inputId);
+		if (it != inputs.end()) {
+			inputs.erase(it);
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct XORLikeGate {
@@ -73,6 +86,19 @@ struct XORLikeGate {
 		}
 		statesB[id] = (highCount % 2 == 0) ? logic_state_t::LOW : logic_state_t::HIGH;
 	}
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		inputs.push_back(inputId);
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		// remove the first instance of inputId in inputs
+		auto it = std::find(inputs.begin(), inputs.end(), inputId);
+		if (it != inputs.end()) {
+			inputs.erase(it);
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct JunctionGate {
@@ -98,6 +124,19 @@ struct JunctionGate {
 		}
 		statesB[id] = outputState;
 	}
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		inputs.push_back(inputId);
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		// remove the first instance of inputId in inputs
+		auto it = std::find(inputs.begin(), inputs.end(), inputId);
+		if (it != inputs.end()) {
+			inputs.erase(it);
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct BufferGate {
@@ -105,12 +144,53 @@ struct BufferGate {
 	bool outputInverted;
 	unsigned int extraDelayTicks;
 	std::optional<simulator_id_t> input;
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (input.has_value()) {
+			logError("BufferGate already has an input", "BufferGate::addInput");
+			return;
+		}
+		input = inputId;
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (input == inputId) {
+			input.reset();
+		} else {
+			logError("BufferGate does not have the specified input", "BufferGate::removeInput");
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct SingleBufferGate {
 	simulator_id_t id;
 	bool outputInverted;
 	std::optional<simulator_id_t> input;
+	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		if (!input.has_value()) {
+			statesB[id] = logic_state_t::LOW;
+			return;
+		}
+		statesB[id] = statesA[input.value()];
+	}
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (input.has_value()) {
+			logError("SingleBufferGate already has an input", "SingleBufferGate::addInput");
+			return;
+		}
+		input = inputId;
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (input == inputId) {
+			input.reset();
+		} else {
+			logError("SingleBufferGate does not have the specified input", "SingleBufferGate::removeInput");
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct TristateBufferGate {
@@ -118,15 +198,52 @@ struct TristateBufferGate {
 	bool enableInverted;
 	std::vector<simulator_id_t> inputs;
 	std::vector<simulator_id_t> enableInputs;
+	void addInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (portId == 0) {
+			inputs.push_back(inputId);
+		} else {
+			enableInputs.push_back(inputId);
+		}
+	}
+	void removeInput(simulator_id_t inputId, connection_port_id_t portId) {
+		if (portId == 0) {
+			auto it = std::find(inputs.begin(), inputs.end(), inputId);
+			if (it != inputs.end()) {
+				inputs.erase(it);
+			}
+		} else {
+			auto it = std::find(enableInputs.begin(), enableInputs.end(), inputId);
+			if (it != enableInputs.end()) {
+				enableInputs.erase(it);
+			}
+		}
+	}
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
+};
+
+struct ConstantGate {
+	simulator_id_t id;
+	logic_state_t outputState;
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct ConstantResetGate {
 	simulator_id_t id;
 	logic_state_t outputState;
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 struct CopySelfOutputGate {
 	simulator_id_t id;
+	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const {
+		return id;
+	}
 };
 
 #endif // simulatorGates_h

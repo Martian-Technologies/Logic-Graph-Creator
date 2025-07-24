@@ -1,11 +1,12 @@
 #ifndef simulatorOptimizer_h
 #define simulatorOptimizer_h
 
-#include "logicSimulator.h"
+#include "evalConfig.h"
+#include "evalConnection.h"
 #include "evalTypedef.h"
 #include "idProvider.h"
 #include "gateType.h"
-#include "evalConfig.h"
+#include "logicSimulator.h"
 
 class SimulatorOptimizer {
 public:
@@ -18,18 +19,49 @@ public:
 		return SimPauseGuard(simulator);
 	}
 	void endEdit(SimPauseGuard& pauseGuard);
-	logic_state_t getState(simulator_id_t id) const {
-		return simulator.getState(id);
+	std::optional<simulator_id_t> getSimIdFromMiddleId(middle_id_t middleId) const {
+		auto it = std::find(simulatorIds.begin(), simulatorIds.end(), middleId);
+		if (it != simulatorIds.end()) {
+			return static_cast<simulator_id_t>(std::distance(simulatorIds.begin(), it));
+		}
+		return std::nullopt;
 	}
-	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const {
-		return simulator.getStates(ids);
+	logic_state_t getState(middle_id_t id) const {
+		simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
+		return simulator.getState(simId);
 	}
-	void setState(simulator_id_t id, logic_state_t state) {
-		simulator.setState(id, state);
+	std::vector<logic_state_t> getStates(const std::vector<middle_id_t>& ids) const {
+		std::vector<simulator_id_t> simIds;
+		simIds.reserve(ids.size());
+		for (const auto& id : ids) {
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
+			if (simIdOpt.has_value()) {
+				simIds.push_back(simIdOpt.value());
+			} else {
+				simIds.push_back(0);
+			}
+		}
+		return simulator.getStates(simIds);
 	}
-	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
-		simulator.setStates(ids, states);
+	void setState(middle_id_t id, logic_state_t state) {
+		simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
+		simulator.setState(simId, state);
 	}
+	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
+		std::vector<simulator_id_t> simIds;
+		simIds.reserve(ids.size());
+		for (const auto& id : ids) {
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
+			if (simIdOpt.has_value()) {
+				simIds.push_back(simIdOpt.value());
+			} else {
+				simIds.push_back(0);
+			}
+		}
+		simulator.setStates(simIds, states);
+	}
+	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
+	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection);
 
 private:
 	LogicSimulator simulator;

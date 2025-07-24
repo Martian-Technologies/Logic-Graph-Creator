@@ -46,7 +46,7 @@ private:
 	std::vector<BufferGate> buffers;
 	std::vector<SingleBufferGate> singleBuffers;
 	std::vector<TristateBufferGate> tristateBuffers;
-	// std::vector<ConstantGate> constantGates;
+	std::vector<ConstantGate> constantGates;
 	std::vector<ConstantResetGate> constantResetGates; // for tick buttons mainly
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 

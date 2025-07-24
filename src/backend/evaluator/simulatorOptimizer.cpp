@@ -43,10 +43,12 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 		simulator.tristateBuffers.push_back({ simulatorId, true, {}, {} });
 		break;
 	case GateType::CONSTANT_OFF:
+		simulator.constantGates.push_back({ simulatorId, logic_state_t::LOW });
 		simulator.statesA[simulatorId] = logic_state_t::LOW;
 		simulator.statesB[simulatorId] = logic_state_t::LOW;
 		break;
 	case GateType::CONSTANT_ON:
+		simulator.constantGates.push_back({ simulatorId, logic_state_t::HIGH });
 		simulator.statesA[simulatorId] = logic_state_t::HIGH;
 		simulator.statesB[simulatorId] = logic_state_t::HIGH;
 		break;
@@ -92,10 +94,29 @@ void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {
 	removeGateIf(simulator.buffers);
 	removeGateIf(simulator.singleBuffers);
 	removeGateIf(simulator.tristateBuffers);
-	// removeGateIf(simulator.constantGates);
+	removeGateIf(simulator.constantGates);
 	removeGateIf(simulator.constantResetGates);
 	removeGateIf(simulator.copySelfOutputGates);
 }
 
-void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {
+void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {}
+
+void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+	middle_id_t sourceGateId = connection.sourceGateId;
+	middle_id_t destinationGateId = connection.destinationGateId;
+	connection_port_id_t sourcePort = connection.sourceGatePort;
+	connection_port_id_t destinationPort = connection.destinationGatePort;
+	std::optional<simulator_id_t> sourceSimId = getSimIdFromMiddleId(sourceGateId);
+	std::optional<simulator_id_t> destinationSimId = getSimIdFromMiddleId(destinationGateId);
+	if (!sourceSimId.has_value() || !destinationSimId.has_value()) {
+		logError("Cannot make connection: source or destination gate not found", "SimulatorOptimizer::makeConnection");
+		return;
+	}
+}
+
+void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
+	middle_id_t sourceGateId = connection.sourceGateId;
+	middle_id_t destinationGateId = connection.destinationGateId;
+	connection_port_id_t sourcePort = connection.sourceGatePort;
+	connection_port_id_t destinationPort = connection.destinationGatePort;
 }
