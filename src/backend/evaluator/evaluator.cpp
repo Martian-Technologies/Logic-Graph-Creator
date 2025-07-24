@@ -144,8 +144,8 @@ const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitI
 	return root;
 }
 
-std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const {
-	std::optional<CircuitNode> node = evalCircuitContainer.traverse(address);
+std::optional<middle_id_t> Evaluator::getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const {
+	std::optional<CircuitNode> node = evalCircuitContainer.traverse(startingPoint, address);
 	if (!node.has_value()) {
 		logError("Invalid address {} in Evaluator::getMiddleId", "Evaluator::getMiddleId", address.toString());
 		return std::nullopt;
@@ -155,6 +155,10 @@ std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const 
 		return std::nullopt;
 	}
 	return node->getId();
+}
+
+std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const {
+	return getMiddleId(0, address);
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
@@ -172,10 +176,22 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
+	if (addresses.empty()) {
+		return {};
+	}
+	eval_circuit_id_t startingPoint = 0;
+	if (addressOrigin.size() != 0) {
+		std::optional<CircuitNode> originNode = evalCircuitContainer.traverse(addressOrigin);
+		if (!originNode.has_value() || !originNode->isIC()) {
+			logError("Invalid address origin {} in Evaluator::getBulkStates", "Evaluator::getBulkStates", addressOrigin.toString());
+			return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
+		}
+		startingPoint = originNode->getId();
+	}
 	std::vector<middle_id_t> middleIds;
 	middleIds.reserve(addresses.size());
 	for (const Address& addr : addresses) {
-		std::optional<middle_id_t> middleIdOpt = getMiddleId(addr);
+		std::optional<middle_id_t> middleIdOpt = getMiddleId(startingPoint, addr);
 		if (middleIdOpt.has_value()) {
 			middleIds.push_back(middleIdOpt.value());
 		} else {
