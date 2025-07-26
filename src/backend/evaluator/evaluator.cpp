@@ -114,7 +114,18 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 }
 
 void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-	logWarning("not implemented yet", "Evaluator::edit_removeConnection");
+	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, outputBlockPosition, outputPosition, Direction::OUT);
+	if (!outputPoint.has_value()) {
+		logError("Output connection point not found for position {}", "Evaluator::edit_removeConnection", outputPosition.toString());
+		return;
+	}
+	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, inputBlockPosition, inputPosition, Direction::IN);
+	if (!inputPoint.has_value()) {
+		logError("Input connection point not found for position {}", "Evaluator::edit_removeConnection", inputPosition.toString());
+		return;
+	}
+	EvalConnection connection(outputPoint.value(), inputPoint.value());
+	evalSimulator.removeConnection(pauseGuard, connection);
 }
 
 void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {

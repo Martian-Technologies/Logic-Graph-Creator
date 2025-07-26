@@ -44,6 +44,7 @@ inline void LogicSimulator::tickOnce() {
 		for (auto& gate : xorGates) gate.tick(statesA, statesB);
 		for (auto& gate : constantResetGates) gate.tick(statesB);
 		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
+		for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
 
 		// junctions are special because they need to act instantly, so they run at the end of the tick
 		for (auto& gate : junctions) gate.tick(statesB);

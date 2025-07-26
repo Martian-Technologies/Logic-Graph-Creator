@@ -297,6 +297,66 @@ struct TristateBufferGate : public SimulatorGate {
 		states[id] = logic_state_t::UNDEFINED;
 	}
 
+	void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		bool foundGoofyState = false;
+		bool foundEnabled = false;
+		bool foundDisabled = false;
+		// go through the enable inputs first
+		for (const auto& enableId : enableInputs) {
+			logic_state_t enableState = statesA[enableId];
+			if (enableState == logic_state_t::UNDEFINED) {
+				foundGoofyState = true;
+				break;
+			}
+			if (enableState == logic_state_t::HIGH) {
+				foundEnabled = true;
+			} else if (enableState == logic_state_t::LOW) {
+				foundDisabled = true;
+			}
+			if (foundEnabled && foundDisabled) {
+				break;
+			}
+		}
+		// if foundEnabled XNOR foundDisabled, then we set foundGoofyState to true
+		if (foundEnabled == foundDisabled) {
+			foundGoofyState = true;
+		}
+		if (foundGoofyState) {
+			statesB[id] = logic_state_t::UNDEFINED;
+			return;
+		}
+		if (foundEnabled == enableInverted) {
+			statesB[id] = logic_state_t::FLOATING;
+			return;
+		}
+		if (inputs.empty()) {
+			statesB[id] = logic_state_t::UNDEFINED;
+			return;
+		}
+		logic_state_t outputState = logic_state_t::FLOATING;
+		for (const auto& inputId : inputs) {
+			logic_state_t state = statesA[inputId];
+			if (state == logic_state_t::UNDEFINED) {
+				foundGoofyState = true;
+				break;
+			}
+			if (state == logic_state_t::FLOATING) {
+				continue;
+			}
+			if (outputState == logic_state_t::FLOATING) {
+				outputState = state;
+			} else if (outputState != state) {
+				outputState = logic_state_t::UNDEFINED;
+				break;
+			}
+		}
+		if (foundGoofyState) {
+			statesB[id] = logic_state_t::UNDEFINED;
+		} else {
+			statesB[id] = outputState;
+		}
+	}
+
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
 	}

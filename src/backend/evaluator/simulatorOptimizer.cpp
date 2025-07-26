@@ -176,8 +176,34 @@ void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnectio
 }
 
 void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
-	// middle_id_t sourceGateId = connection.sourceGateId;
-	// middle_id_t destinationGateId = connection.destinationGateId;
-	// connection_port_id_t sourcePort = connection.sourceGatePort;
-	// connection_port_id_t destinationPort = connection.destinationGatePort;
+	middle_id_t sourceGateId = connection.source.gateId;
+	middle_id_t destinationGateId = connection.destination.gateId;
+	connection_port_id_t sourcePort = connection.source.portId;
+	connection_port_id_t destinationPort = connection.destination.portId;
+	std::optional<simulator_id_t> sourceSimId = getSimIdFromMiddleId(sourceGateId);
+	std::optional<simulator_id_t> destinationSimId = getSimIdFromMiddleId(destinationGateId);
+	if (!sourceSimId.has_value() || !destinationSimId.has_value()) {
+		logError("Cannot remove connection: source or destination gate not found", "SimulatorOptimizer::removeConnection");
+		return;
+	}
+	simulator_id_t sourceId = sourceSimId.value();
+	simulator_id_t destinationId = destinationSimId.value();
+
+	auto removeInputFromGate = [&](auto& gates) {
+		auto it = std::find_if(gates.begin(), gates.end(),
+			[destinationId](const auto& gate) { return gate.getId() == destinationId; });
+		if (it != gates.end()) {
+			it->removeInput(sourceId, destinationPort);
+		}
+	};
+
+	removeInputFromGate(simulator.andGates);
+	removeInputFromGate(simulator.xorGates);
+	removeInputFromGate(simulator.junctions);
+	removeInputFromGate(simulator.buffers);
+	removeInputFromGate(simulator.singleBuffers);
+	removeInputFromGate(simulator.tristateBuffers);
+	removeInputFromGate(simulator.constantGates);
+	removeInputFromGate(simulator.constantResetGates);
+	removeInputFromGate(simulator.copySelfOutputGates);
 }
