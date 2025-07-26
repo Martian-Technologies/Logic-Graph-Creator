@@ -21,6 +21,18 @@ public:
 	void setNode(Position pos, CircuitNode node) {
 		circuitNodes.insert(pos, node);
 	}
+	void removeNode(Position pos) {
+		circuitNodes.remove(pos);
+	}
+	void moveNode(Position oldPos, Position newPos) {
+		std::optional<CircuitNode> node = getNode(oldPos);
+		if (node) {
+			circuitNodes.remove(oldPos);
+			circuitNodes.insert(newPos, node.value());
+		} else {
+			logError("Node at position {} not found", "EvalCircuit::moveNode", oldPos.toString());
+		}
+	}
 	template<typename F>
 	void forEachNode(F&& func) const {
 		circuitNodes.forEach([&func](Position pos, const CircuitNode& node) {

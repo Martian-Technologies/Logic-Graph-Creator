@@ -189,7 +189,12 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 }
 
 void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
-	logWarning("not implemented yet", "Evaluator::edit_moveBlock");
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_moveBlock", evalCircuitId);
+		return;
+	}
+	evalCircuit->moveNode(curPosition, newPosition);
 }
 
 const EvalAddressTree Evaluator::buildAddressTree() const {
