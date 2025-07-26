@@ -15,8 +15,8 @@ public:
 	virtual void removeInput(simulator_id_t inputId, connection_port_id_t portId) = 0;
 	virtual void removeIdRefs(simulator_id_t otherId) = 0;
 	virtual simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const = 0;
-	virtual void releaseIds(IdProvider<simulator_id_t>& simulatorIdProvider) const = 0;
 	virtual void resetState(std::vector<logic_state_t>& states) = 0;
+	virtual std::vector<simulator_id_t> getOutputSimIds() const = 0;
 
 	simulator_id_t getId() const { return id; }
 
@@ -30,16 +30,16 @@ public:
 
 	virtual void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) = 0;
 
-	void releaseIds(IdProvider<simulator_id_t>& simulatorIdProvider) const override {
-		simulatorIdProvider.releaseId(id);
-	}
-
 	void resetState(std::vector<logic_state_t>& states) override {
 		states[id] = logic_state_t::UNDEFINED;
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
+	}
+
+	std::vector<simulator_id_t> getOutputSimIds() const override {
+		return {id};
 	}
 };
 
@@ -212,16 +212,16 @@ struct JunctionGate : public SimulatorGate {
 		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
 	}
 
-	void releaseIds(IdProvider<simulator_id_t>& simulatorIdProvider) const override {
-		simulatorIdProvider.releaseId(id);
-	}
-
 	void resetState(std::vector<logic_state_t>& states) override {
 		states[id] = logic_state_t::UNDEFINED;
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
+	}
+
+	std::vector<simulator_id_t> getOutputSimIds() const override {
+		return {id};
 	}
 };
 
@@ -287,10 +287,6 @@ struct TristateBufferGate : public SimulatorGate {
 	void removeIdRefs(simulator_id_t otherId) override {
 		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
 		enableInputs.erase(std::remove(enableInputs.begin(), enableInputs.end(), otherId), enableInputs.end());
-	}
-
-	void releaseIds(IdProvider<simulator_id_t>& simulatorIdProvider) const override {
-		simulatorIdProvider.releaseId(id);
 	}
 
 	void resetState(std::vector<logic_state_t>& states) override {
@@ -360,6 +356,10 @@ struct TristateBufferGate : public SimulatorGate {
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
 	}
+
+	std::vector<simulator_id_t> getOutputSimIds() const override {
+		return {id};
+	}
 };
 
 class ConstantGateBase : public SimulatorGate {
@@ -373,10 +373,6 @@ public:
 
 	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {}
 
-	void releaseIds(IdProvider<simulator_id_t>& simulatorIdProvider) const override {
-		simulatorIdProvider.releaseId(id);
-	}
-
 	void resetState(std::vector<logic_state_t>& states) override {
 		states[id] = outputState;
 	}
@@ -385,6 +381,10 @@ public:
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
+	}
+
+	std::vector<simulator_id_t> getOutputSimIds() const override {
+		return {id};
 	}
 };
 

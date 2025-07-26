@@ -83,23 +83,7 @@ void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t
 }
 
 void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {
-	auto removeGateIf = [this, simulatorId](auto& gates) {
-		auto it = std::find_if(gates.begin(), gates.end(),
-			[simulatorId](const auto& gate) { return gate.getId() == simulatorId; });
-		if (it != gates.end()) {
-			it->releaseIds(simulatorIdProvider);
-			gates.erase(it);
-		}
-	};
-	removeGateIf(simulator.andGates);
-	removeGateIf(simulator.xorGates);
-	removeGateIf(simulator.junctions);
-	removeGateIf(simulator.buffers);
-	removeGateIf(simulator.singleBuffers);
-	removeGateIf(simulator.tristateBuffers);
-	removeGateIf(simulator.constantGates);
-	removeGateIf(simulator.constantResetGates);
-	removeGateIf(simulator.copySelfOutputGates);
+	
 }
 
 void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {}
