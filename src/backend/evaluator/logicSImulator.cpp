@@ -42,8 +42,8 @@ inline void LogicSimulator::tickOnce() {
 		std::shared_lock lkCur(statesAMutex);
 		for (auto& gate : andGates) gate.tick(statesA, statesB);
 		for (auto& gate : xorGates) gate.tick(statesA, statesB);
-		for (auto& gate : constantResetGates) statesB[gate.id] = gate.outputState;
-		for (auto& gate : copySelfOutputGates) statesB[gate.id] = statesA[gate.id];
+		for (auto& gate : constantResetGates) gate.tick(statesB);
+		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 
 		// junctions are special because they need to act instantly, so they run at the end of the tick
 		for (auto& gate : junctions) gate.tick(statesB);

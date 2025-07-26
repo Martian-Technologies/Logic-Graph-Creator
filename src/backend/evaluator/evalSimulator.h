@@ -33,6 +33,12 @@ public:
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
 		simulatorOptimizer.setStates(ids, states);
 	}
+	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+		simulatorOptimizer.makeConnection(pauseGuard, connection);
+	}
+	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
+		simulatorOptimizer.removeConnection(pauseGuard, connection);
+	}
 private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;

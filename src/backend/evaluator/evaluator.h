@@ -13,6 +13,7 @@
 #include "evalConfig.h"
 #include "evalAddressTree.h"
 #include "evalSimulator.h"
+#include "directionEnum.h"
 
 typedef unsigned int evaluator_id_t;
 
@@ -108,6 +109,8 @@ private:
 
 	std::optional<middle_id_t> getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const;
 	std::optional<middle_id_t> getMiddleId(const Address& address) const;
+
+	std::optional<connection_port_id_t> getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const;
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;

@@ -10,7 +10,7 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	evalSimulator(evalConfig, middleIdProvider) {
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	if (!circuit) {
-		logError("Circuit with ID {} not found in evaluator constructor", "Evaluator", circuitId);
+		logError("Circuit with ID {} not found", "Evaluator::Evaluator", circuitId);
 		return;
 	}
 	logInfo("Creating Evaluator with ID {} for Circuit ID {}", "Evaluator", evaluatorId, circuitId);
@@ -36,12 +36,12 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId)
 void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache) {
 	std::optional<eval_circuit_id_t> circuitId = evalCircuitContainer.getCircuitId(evalCircuitId);
 	if (!circuitId.has_value()) {
-		logError("EvalCircuit with id {} not found in Evaluator", "Evaluator::makeEditInPlace", evalCircuitId);
+		logError("EvalCircuit with id {} not found", "Evaluator::makeEditInPlace", evalCircuitId);
 		return;
 	}
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId.value());
 	if (!circuit) {
-		logError("Circuit with id {} not found in Evaluator", "Evaluator::makeEditInPlace", circuitId.value());
+		logError("Circuit with id {} not found", "Evaluator::makeEditInPlace", circuitId.value());
 		return;
 	}
 	const std::vector<Difference::Modification>& modifications = difference->getModifications();
@@ -99,14 +99,14 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	case BlockType::LIGHT: gateType = GateType::JUNCTION; break;
 	}
 	if (gateType == GateType::NONE) {
-		logError("Unsupported BlockType {} in Evaluator::edit_placeBlock", "Evaluator::edit_placeBlock", type);
+		logError("Unsupported BlockType {}", "Evaluator::edit_placeBlock", type);
 		return;
 	}
 	middle_id_t gateId = middleIdProvider.getNewId();
 	evalSimulator.addGate(pauseGuard, gateType, gateId);
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
-		logError("EvalCircuit with id {} not found in Evaluator", "Evaluator::edit_placeBlock", evalCircuitId);
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_placeBlock", evalCircuitId);
 		return;
 	}
 	CircuitNode node = CircuitNode::fromMiddle(gateId);
@@ -118,7 +118,66 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 }
 
 void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-	logWarning("not implemented yet", "Evaluator::edit_createConnection");
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_createConnection", evalCircuitId);
+		return;
+	}
+	std::optional<CircuitNode> outputNode = evalCircuit->getNode(outputBlockPosition);
+	std::optional<CircuitNode> inputNode = evalCircuit->getNode(inputBlockPosition);
+	if (!outputNode.has_value() || !inputNode.has_value()) {
+		logError("Invalid output or input node", "Evaluator::edit_createConnection");
+		return;
+	}
+	if (outputNode->isIC() || inputNode->isIC()) {
+		logError("Cannot create connection between ICs yet", "Evaluator::edit_createConnection");
+		return;
+	}
+	std::optional<connection_port_id_t> outputPortId = getPortId(evalCircuit->getCircuitId(), outputBlockPosition, outputPosition, Direction::OUT);
+	std::optional<connection_port_id_t> inputPortId = getPortId(evalCircuit->getCircuitId(), inputBlockPosition, inputPosition, Direction::IN);
+	if (!outputPortId.has_value()) {
+		logError("Output port not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
+		return;
+	}
+	if (!inputPortId.has_value()) {
+		logError("Input port not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
+		return;
+	}
+	EvalConnection connection(outputNode->getId(), outputPortId.value(), inputNode->getId(), inputPortId.value());
+	evalSimulator.makeConnection(pauseGuard, connection);
+}
+
+std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const {
+	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
+	if (!circuit) {
+		logError("Circuit with ID {} not found", "Evaluator::getInputPortId", circuitId);
+		return std::nullopt;
+	}
+	const BlockContainer* blockContainer = circuit->getBlockContainer();
+	if (!blockContainer) {
+		logError("BlockContainer not found", "Evaluator::getInputPortId");
+		return std::nullopt;
+	}
+	const Block* block = blockContainer->getBlock(blockPosition);
+	if (!block) {
+		logError("Block not found at position {}", "Evaluator::getInputPortId", blockPosition.toString());
+		return std::nullopt;
+	}
+	if (direction == Direction::IN) {
+		const std::pair<connection_port_id_t, bool> port = block->getInputConnectionId(portPosition);
+		if (!port.second) {
+			logError("Input port not found at position {}", "Evaluator::getPortId", portPosition.toString());
+			return std::nullopt;
+		}
+		return port.first;
+	} else {
+		const std::pair<connection_port_id_t, bool> port = block->getOutputConnectionId(portPosition);
+		if (!port.second) {
+			logError("Output port not found at position {}", "Evaluator::getPortId", portPosition.toString());
+			return std::nullopt;
+		}
+		return port.first;
+	}
 }
 
 void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
@@ -132,7 +191,7 @@ const EvalAddressTree Evaluator::buildAddressTree() const {
 const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitId) const {
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
-		logError("EvalCircuit with id {} not found in Evaluator", "Evaluator::buildAddressTree", evalCircuitId);
+		logError("EvalCircuit with id {} not found", "Evaluator::buildAddressTree", evalCircuitId);
 		return EvalAddressTree(0);
 	}
 	EvalAddressTree root = EvalAddressTree(evalCircuit->getCircuitId());
@@ -147,11 +206,11 @@ const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitI
 std::optional<middle_id_t> Evaluator::getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const {
 	std::optional<CircuitNode> node = evalCircuitContainer.traverse(startingPoint, address);
 	if (!node.has_value()) {
-		logError("Invalid address {} in Evaluator::getMiddleId", "Evaluator::getMiddleId", address.toString());
+		logError("Invalid address {}", "Evaluator::getMiddleId", address.toString());
 		return std::nullopt;
 	}
 	if (node->isIC()) {
-		logError("Address {} does not point to an IC in Evaluator::getMiddleId", "Evaluator::getMiddleId", address.toString());
+		logError("Address {} does not point to an IC", "Evaluator::getMiddleId", address.toString());
 		return std::nullopt;
 	}
 	return node->getId();
@@ -164,7 +223,7 @@ std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const 
 logic_state_t Evaluator::getState(const Address& address) {
 	std::optional<middle_id_t> middleIdOpt = getMiddleId(address);
 	if (!middleIdOpt.has_value()) {
-		logError("Failed to get middle ID for address {} in Evaluator::getState", "Evaluator::getState", address.toString());
+		logError("Failed to get middle ID for address {}", "Evaluator::getState", address.toString());
 		return logic_state_t::UNDEFINED; // or some other default state
 	}
 	logic_state_t state = evalSimulator.getState(middleIdOpt.value());
@@ -174,7 +233,7 @@ logic_state_t Evaluator::getState(const Address& address) {
 void Evaluator::setState(const Address& address, logic_state_t state) {
 	std::optional<middle_id_t> middleIdOpt = getMiddleId(address);
 	if (!middleIdOpt.has_value()) {
-		logError("Failed to get middle ID for address {} in Evaluator::setState", "Evaluator::setState", address.toString());
+		logError("Failed to get middle ID for address {}", "Evaluator::setState", address.toString());
 		return;
 	}
 	evalSimulator.setState(middleIdOpt.value(), state);
@@ -188,7 +247,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	if (addressOrigin.size() != 0) {
 		std::optional<CircuitNode> originNode = evalCircuitContainer.traverse(addressOrigin);
 		if (!originNode.has_value() || !originNode->isIC()) {
-			logError("Invalid address origin {} in Evaluator::getBulkStates", "Evaluator::getBulkStates", addressOrigin.toString());
+			logError("Invalid address origin {}", "Evaluator::getBulkStates", addressOrigin.toString());
 			return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
 		}
 		startingPoint = originNode->getId();
