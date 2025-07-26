@@ -105,10 +105,10 @@ void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {
 void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {}
 
 void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
-	middle_id_t sourceGateId = connection.sourceGateId;
-	middle_id_t destinationGateId = connection.destinationGateId;
-	connection_port_id_t sourcePort = connection.sourceGatePort;
-	connection_port_id_t destinationPort = connection.destinationGatePort;
+	middle_id_t sourceGateId = connection.source.gateId;
+	middle_id_t destinationGateId = connection.destination.gateId;
+	connection_port_id_t sourcePort = connection.source.portId;
+	connection_port_id_t destinationPort = connection.destination.portId;
 	std::optional<simulator_id_t> sourceSimId = getSimIdFromMiddleId(sourceGateId);
 	std::optional<simulator_id_t> destinationSimId = getSimIdFromMiddleId(destinationGateId);
 	if (!sourceSimId.has_value() || !destinationSimId.has_value()) {
@@ -176,8 +176,8 @@ void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnectio
 }
 
 void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
-	middle_id_t sourceGateId = connection.sourceGateId;
-	middle_id_t destinationGateId = connection.destinationGateId;
-	connection_port_id_t sourcePort = connection.sourceGatePort;
-	connection_port_id_t destinationPort = connection.destinationGatePort;
+	// middle_id_t sourceGateId = connection.sourceGateId;
+	// middle_id_t destinationGateId = connection.destinationGateId;
+	// connection_port_id_t sourcePort = connection.sourceGatePort;
+	// connection_port_id_t destinationPort = connection.destinationGatePort;
 }

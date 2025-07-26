@@ -111,6 +111,7 @@ private:
 	std::optional<middle_id_t> getMiddleId(const Address& address) const;
 
 	std::optional<connection_port_id_t> getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const;
+	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position blockPosition, const Position portPosition, Direction direction) const;
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;

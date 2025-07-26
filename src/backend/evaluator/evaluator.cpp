@@ -118,32 +118,17 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 }
 
 void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
-	if (!evalCircuit) {
-		logError("EvalCircuit with id {} not found", "Evaluator::edit_createConnection", evalCircuitId);
+	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, outputBlockPosition, outputPosition, Direction::OUT);
+	if (!outputPoint.has_value()) {
+		logError("Output connection point not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
 		return;
 	}
-	std::optional<CircuitNode> outputNode = evalCircuit->getNode(outputBlockPosition);
-	std::optional<CircuitNode> inputNode = evalCircuit->getNode(inputBlockPosition);
-	if (!outputNode.has_value() || !inputNode.has_value()) {
-		logError("Invalid output or input node", "Evaluator::edit_createConnection");
+	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, inputBlockPosition, inputPosition, Direction::IN);
+	if (!inputPoint.has_value()) {
+		logError("Input connection point not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
 		return;
 	}
-	if (outputNode->isIC() || inputNode->isIC()) {
-		logError("Cannot create connection between ICs yet", "Evaluator::edit_createConnection");
-		return;
-	}
-	std::optional<connection_port_id_t> outputPortId = getPortId(evalCircuit->getCircuitId(), outputBlockPosition, outputPosition, Direction::OUT);
-	std::optional<connection_port_id_t> inputPortId = getPortId(evalCircuit->getCircuitId(), inputBlockPosition, inputPosition, Direction::IN);
-	if (!outputPortId.has_value()) {
-		logError("Output port not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
-		return;
-	}
-	if (!inputPortId.has_value()) {
-		logError("Input port not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
-		return;
-	}
-	EvalConnection connection(outputNode->getId(), outputPortId.value(), inputNode->getId(), inputPortId.value());
+	EvalConnection connection(outputPoint.value(), inputPoint.value());
 	evalSimulator.makeConnection(pauseGuard, connection);
 }
 
@@ -178,6 +163,29 @@ std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circ
 		}
 		return port.first;
 	}
+}
+
+std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position blockPosition, const Position portPosition, Direction direction) const {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::getConnectionPoint", evalCircuitId);
+		return std::nullopt;
+	}
+	std::optional<CircuitNode> node = evalCircuit->getNode(blockPosition);
+	if (!node.has_value()) {
+		logError("Node not found at position {}", "Evaluator::getConnectionPoint", blockPosition.toString());
+		return std::nullopt;
+	}
+	if (node->isIC()) {
+		logError("Cannot get connection point for IC at position {} yet", "Evaluator::getConnectionPoint", blockPosition.toString());
+		return std::nullopt;
+	}
+	std::optional<connection_port_id_t> portId = getPortId(evalCircuit->getCircuitId(), blockPosition, portPosition, direction);
+	if (!portId.has_value()) {
+		logError("Port not found at position {}", "Evaluator::getConnectionPoint", portPosition.toString());
+		return std::nullopt;
+	}
+	return EvalConnectionPoint(node->getId(), portId.value());
 }
 
 void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {

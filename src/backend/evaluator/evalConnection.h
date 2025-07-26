@@ -4,18 +4,35 @@
 #include "logicState.h"
 #include "evalTypedef.h"
 
+struct EvalConnectionPoint {
+	middle_id_t gateId;
+	connection_port_id_t portId;
+
+	EvalConnectionPoint(middle_id_t gateId, connection_port_id_t portId)
+		: gateId(gateId), portId(portId) {}
+
+	bool operator==(const EvalConnectionPoint& other) const {
+		return gateId == other.gateId && portId == other.portId;
+	}
+
+	bool operator!=(const EvalConnectionPoint& other) const {
+		return !(*this == other);
+	}
+};
+
 struct EvalConnection {
-	middle_id_t sourceGateId;
-	middle_id_t destinationGateId;
-	connection_port_id_t sourceGatePort;
+	EvalConnectionPoint source;
+	EvalConnectionPoint destination;
+
+	EvalConnection(EvalConnectionPoint source, EvalConnectionPoint destination)
+		: source(source), destination(destination) {}
 	connection_port_id_t destinationGatePort;
 
 	EvalConnection(middle_id_t srcId, connection_port_id_t srcPort, middle_id_t destId, connection_port_id_t destPort)
-		: sourceGateId(srcId), sourceGatePort(srcPort), destinationGateId(destId), destinationGatePort(destPort) {}
+		: source(srcId, srcPort), destination(destId, destPort) {}
 
 	bool operator==(const EvalConnection& other) const {
-		return sourceGateId == other.sourceGateId && sourceGatePort == other.sourceGatePort &&
-			destinationGateId == other.destinationGateId && destinationGatePort == other.destinationGatePort;
+		return source == other.source && destination == other.destination;
 	}
 
 	bool operator!=(const EvalConnection& other) const {
