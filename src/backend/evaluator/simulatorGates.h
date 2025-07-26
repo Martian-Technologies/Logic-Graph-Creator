@@ -239,6 +239,8 @@ struct BufferGate : public BufferGateBase {
 
 	BufferGate(simulator_id_t id, bool outputInverted = false, unsigned int extraDelayTicks = 0)
 		: BufferGateBase(id, outputInverted), extraDelayTicks(extraDelayTicks) {}
+
+	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) override {}
 };
 
 struct SingleBufferGate : public BufferGateBase {
@@ -419,5 +421,41 @@ struct CopySelfOutputGate : public LogicGate {
 		return id;
 	}
 };
+
+using SimulatorGateVariant = std::variant<
+	ANDLikeGate,
+	XORLikeGate,
+	JunctionGate,
+	BufferGate,
+	SingleBufferGate,
+	TristateBufferGate,
+	ConstantGate,
+	ConstantResetGate,
+	CopySelfOutputGate
+>;
+
+template<typename Func>
+auto visitGate(SimulatorGateVariant& gate, Func&& func) {
+	return std::visit(std::forward<Func>(func), gate);
+}
+
+template<typename Func>
+auto visitGate(const SimulatorGateVariant& gate, Func&& func) {
+	return std::visit(std::forward<Func>(func), gate);
+}
+
+template<typename ReturnType = void, typename... Args>
+auto callOnGate(SimulatorGateVariant& gate, ReturnType (SimulatorGate::*func)(Args...), Args... args) {
+	return visitGate(gate, [func, args...](auto& g) -> ReturnType {
+		return (static_cast<SimulatorGate&>(g).*func)(args...);
+	});
+}
+
+template<typename ReturnType = void, typename... Args>
+auto callOnGate(const SimulatorGateVariant& gate, ReturnType (SimulatorGate::*func)(Args...) const, Args... args) {
+	return visitGate(gate, [func, args...](const auto& g) -> ReturnType {
+		return (static_cast<const SimulatorGate&>(g).*func)(args...);
+	});
+}
 
 #endif // simulatorGates_h

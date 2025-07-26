@@ -7,6 +7,7 @@
 #include "idProvider.h"
 #include "gateType.h"
 #include "logicSimulator.h"
+#include "simulatorGates.h"
 
 class SimulatorOptimizer {
 public:
@@ -62,6 +63,8 @@ public:
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection);
+
+	SimulatorGateVariant* getGateFromSimId(simulator_id_t simId) const;
 
 private:
 	LogicSimulator simulator;
