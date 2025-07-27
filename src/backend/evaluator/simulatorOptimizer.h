@@ -27,15 +27,41 @@ public:
 		}
 		return std::nullopt;
 	}
-	logic_state_t getState(middle_id_t id) const {
-		simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
+	std::optional<simulator_id_t> getSimIdFromConnectionPoint(const EvalConnectionPoint& point) const {
+		std::optional<simulator_id_t> gateId = getSimIdFromMiddleId(point.gateId);
+		if (!gateId.has_value()) {
+			logError("Gate ID not found for connection point", "SimulatorOptimizer::getSimIdFromConnectionPoint");
+			return std::nullopt;
+		}
+		return getOutputPortId(gateId.value(), point.portId);
+	}
+	logic_state_t getState(EvalConnectionPoint point) const {
+		// simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
+		// return simulator.getState(simId);
+		std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
+		if (!simIdOpt.has_value()) {
+			logError("Sim ID not found for connection point", "SimulatorOptimizer::getState");
+			return logic_state_t::UNDEFINED; // or some other default state
+		}
+		simulator_id_t simId = simIdOpt.value();
 		return simulator.getState(simId);
 	}
-	std::vector<logic_state_t> getStates(const std::vector<middle_id_t>& ids) const {
+	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+		// std::vector<simulator_id_t> simIds;
+		// simIds.reserve(ids.size());
+		// for (const auto& id : ids) {
+		// 	std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
+		// 	if (simIdOpt.has_value()) {
+		// 		simIds.push_back(simIdOpt.value());
+		// 	} else {
+		// 		simIds.push_back(0);
+		// 	}
+		// }
+		// return simulator.getStates(simIds);
 		std::vector<simulator_id_t> simIds;
-		simIds.reserve(ids.size());
-		for (const auto& id : ids) {
-			std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
+		simIds.reserve(points.size());
+		for (const auto& point : points) {
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
 			if (simIdOpt.has_value()) {
 				simIds.push_back(simIdOpt.value());
 			} else {

@@ -21,11 +21,11 @@ public:
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
 		simulatorOptimizer.removeGate(pauseGuard, gateId);
 	}
-	logic_state_t getState(middle_id_t id) const {
-		return simulatorOptimizer.getState(id);
+	logic_state_t getState(EvalConnectionPoint point) const {
+		return simulatorOptimizer.getState(point);
 	}
-	std::vector<logic_state_t> getStates(const std::vector<middle_id_t>& ids) const {
-		return simulatorOptimizer.getStates(ids);
+	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+		return simulatorOptimizer.getStates(points);
 	}
 	void setState(middle_id_t id, logic_state_t state) {
 		simulatorOptimizer.setState(id, state);
