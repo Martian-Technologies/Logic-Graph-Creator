@@ -81,3 +81,4 @@ CppProperties.json
 # for cbuild plugin
 build_error.txt
 /releaseFiles
+/docs/Doxygen
