@@ -13,7 +13,8 @@ void BlockTest::TearDown() {
 TEST_F(BlockTest, constructor) {
 	Block noneBlock(&(blockDataManager.value()));
 	ASSERT_EQ(noneBlock.type(), BlockType::NONE);
-	for (BlockType blockType = BlockType::NONE; blockType <= blockDataManager->maxBlockId() + 5; blockType = (BlockType)(blockType + 1)) {
+	for (int blockTypeI = (int)BlockType::NONE; blockTypeI <= blockDataManager->maxBlockId() + 5; ++blockTypeI) {
+		BlockType blockType = (BlockType)blockTypeI;
 		if (blockDataManager->blockExists(blockType)) {
 			Block block = getBlockClass(&(blockDataManager.value()), blockType);
 			ASSERT_EQ(block.type(), blockType);
@@ -23,5 +24,4 @@ TEST_F(BlockTest, constructor) {
 			ASSERT_EQ(blockDataManager->getBlockSize(blockType), Vector());
 		}
 	}
-
 }
