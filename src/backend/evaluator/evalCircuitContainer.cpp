@@ -73,3 +73,25 @@ std::optional<CircuitNode> EvalCircuitContainer::traverse(const eval_circuit_id_
 std::optional<CircuitNode> EvalCircuitContainer::traverse(const Address& address) const {
 	return traverse(0, address);
 }
+
+eval_circuit_id_t EvalCircuitContainer::traverseToTopLevelIC(const eval_circuit_id_t startingPoint, const Address& address) const {
+	if (address.size() == 0) {
+		return startingPoint;
+	}
+	eval_circuit_id_t currentCircuitId = startingPoint;
+	for (int i = 0; i < address.size(); i++) {
+		std::optional<CircuitNode> node = getNode(address.getPosition(i), currentCircuitId);
+		if (!node.has_value()) {
+			return currentCircuitId;
+		}
+		if (!node->isIC()) {
+			return currentCircuitId;
+		}
+		currentCircuitId = node->getId();
+	}
+	return currentCircuitId;
+}
+
+eval_circuit_id_t EvalCircuitContainer::traverseToTopLevelIC(const Address& address) const {
+	return traverseToTopLevelIC(0, address);
+}

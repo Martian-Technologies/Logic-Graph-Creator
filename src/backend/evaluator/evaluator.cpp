@@ -248,13 +248,37 @@ const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitI
 }
 
 std::optional<middle_id_t> Evaluator::getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const {
-	std::optional<CircuitNode> node = evalCircuitContainer.traverse(startingPoint, address);
-	if (!node.has_value()) {
-		logError("Invalid address {}", "Evaluator::getMiddleId", address.toString());
+	// std::optional<CircuitNode> node = evalCircuitContainer.traverse(startingPoint, address);
+	// if (!node.has_value()) {
+	// 	logError("Invalid address {}", "Evaluator::getMiddleId", address.toString());
+	// 	return std::nullopt;
+	// }
+	// if (node->isIC()) {
+	// 	logError("Address {} does not point to an IC", "Evaluator::getMiddleId", address.toString());
+	// 	return std::nullopt;
+	// }
+	// return node->getId();
+	eval_circuit_id_t evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(startingPoint, address);
+	circuit_id_t circuitId = evalCircuitContainer.getCircuitId(evalCircuitId).value_or(0);
+	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
+	if (!circuit) {
+		logError("Circuit with ID {} not found", "Evaluator::getInputPortId", circuitId);
 		return std::nullopt;
 	}
-	if (node->isIC()) {
-		logError("Address {} does not point to an IC", "Evaluator::getMiddleId", address.toString());
+	const BlockContainer* blockContainer = circuit->getBlockContainer();
+	if (!blockContainer) {
+		logError("BlockContainer not found", "Evaluator::getInputPortId");
+		return std::nullopt;
+	}
+	Position blockPosition = address.getPosition(address.size() - 1);
+	const Block* block = blockContainer->getBlock(blockPosition);
+	if (!block) {
+		logError("Block not found at position {}", "Evaluator::getInputPortId", blockPosition.toString());
+		return std::nullopt;
+	}
+	std::optional<CircuitNode> node = evalCircuitContainer.getNode(block->getPosition(), evalCircuitId);
+	if (!node.has_value()) {
+		logError("Node not found for address {}", "Evaluator::getMiddleId", address.toString());
 		return std::nullopt;
 	}
 	return node->getId();
