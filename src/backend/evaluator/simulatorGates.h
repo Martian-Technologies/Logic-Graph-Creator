@@ -422,40 +422,6 @@ struct CopySelfOutputGate : public LogicGate {
 	}
 };
 
-using SimulatorGateVariant = std::variant<
-	ANDLikeGate,
-	XORLikeGate,
-	JunctionGate,
-	BufferGate,
-	SingleBufferGate,
-	TristateBufferGate,
-	ConstantGate,
-	ConstantResetGate,
-	CopySelfOutputGate
->;
 
-template<typename Func>
-auto visitGate(SimulatorGateVariant& gate, Func&& func) {
-	return std::visit(std::forward<Func>(func), gate);
-}
-
-template<typename Func>
-auto visitGate(const SimulatorGateVariant& gate, Func&& func) {
-	return std::visit(std::forward<Func>(func), gate);
-}
-
-template<typename ReturnType = void, typename... Args>
-auto callOnGate(SimulatorGateVariant& gate, ReturnType (SimulatorGate::*func)(Args...), Args... args) {
-	return visitGate(gate, [func, args...](auto& g) -> ReturnType {
-		return (static_cast<SimulatorGate&>(g).*func)(args...);
-	});
-}
-
-template<typename ReturnType = void, typename... Args>
-auto callOnGate(const SimulatorGateVariant& gate, ReturnType (SimulatorGate::*func)(Args...) const, Args... args) {
-	return visitGate(gate, [func, args...](const auto& g) -> ReturnType {
-		return (static_cast<const SimulatorGate&>(g).*func)(args...);
-	});
-}
 
 #endif // simulatorGates_h

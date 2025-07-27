@@ -78,10 +78,28 @@ void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 }
 
 void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
-	logWarning("not implemented yet", "Evaluator::edit_removeBlock");
+	logInfo("Removing block of type {} at position {}", "Evaluator::edit_removeBlock", type, position.toString());
+	// Find the circuit and remove the block
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_removeBlock", evalCircuitId);
+		return;
+	}
+	std::optional<CircuitNode> node = evalCircuit->getNode(position);
+	if (!node.has_value()) {
+		logError("Node at position {} not found", "Evaluator::edit_removeBlock", position.toString());
+		return;
+	}
+	if (node->isIC()) {
+		logError("Cannot remove IC nodes yet", "Evaluator::edit_removeBlock", position.toString());
+		return;
+	}
+	evalSimulator.removeGate(pauseGuard, node->getId());
+	evalCircuit->removeNode(position);
 }
 
 void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+	logInfo("Placing block of type {} at position {}", "Evaluator::edit_placeBlock", type, position.toString());
 	GateType gateType = GateType::NONE;
 	switch (type) {
 	case BlockType::AND: gateType = GateType::AND; break;
@@ -114,6 +132,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 }
 
 void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+	logInfo("Removing connection from output {} at {} to input {} at {}. evalCircuitId: {}", "Evaluator::edit_removeConnection", outputBlockPosition.toString(), outputPosition.toString(), inputBlockPosition.toString(), inputPosition.toString(), evalCircuitId);
 	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, outputBlockPosition, outputPosition, Direction::OUT);
 	if (!outputPoint.has_value()) {
 		logError("Output connection point not found for position {}", "Evaluator::edit_removeConnection", outputPosition.toString());
@@ -129,6 +148,7 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 }
 
 void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
+	logInfo("Creating connection from output {} at {} to input {} at {}", "Evaluator::edit_createConnection", outputBlockPosition.toString(), outputPosition.toString(), inputBlockPosition.toString(), inputPosition.toString());
 	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, outputBlockPosition, outputPosition, Direction::OUT);
 	if (!outputPoint.has_value()) {
 		logError("Output connection point not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());

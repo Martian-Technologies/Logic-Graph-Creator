@@ -64,8 +64,6 @@ public:
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection);
 
-	SimulatorGateVariant* getGateFromSimId(simulator_id_t simId) const;
-
 private:
 	LogicSimulator simulator;
 	EvalConfig& evalConfig;
@@ -73,7 +71,11 @@ private:
 	IdProvider<middle_id_t>& middleIdProvider;
 	std::vector<simulator_id_t> simulatorIds;
 
-	void removeGateBySimId(const simulator_id_t simulatorId);
+	void removeGateBySimId(SimPauseGuard& pauseGuard, const simulator_id_t simulatorId);
+	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
+	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
+	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
+	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;
 };
 
 #endif // simulatorOptimizer_h

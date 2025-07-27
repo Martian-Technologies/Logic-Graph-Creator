@@ -77,12 +77,48 @@ void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t
 	auto it = std::find(simulatorIds.begin(), simulatorIds.end(), gateId);
 	if (it != simulatorIds.end()) {
 		simulator_id_t simulatorId = std::distance(simulatorIds.begin(), it);
-		removeGateBySimId(simulatorId);
-		simulatorIds.erase(it);
+		removeGateBySimId(pauseGuard, simulatorId);
 	}
 }
 
-void SimulatorOptimizer::removeGateBySimId(const simulator_id_t simulatorId) {}
+void SimulatorOptimizer::removeGateBySimId(SimPauseGuard& pauseGuard, const simulator_id_t simulatorId) {
+	std::optional<std::vector<simulator_id_t>> outputIdsOpt = getOutputSimIdsFromGate(simulatorId);
+	if (!outputIdsOpt.has_value()) {
+		logError("Cannot remove gate: no output IDs found for simulator_id_t " + std::to_string(simulatorId), "SimulatorOptimizer::removeGateBySimId");
+		return;
+	}
+
+	for (const auto& id : outputIdsOpt.value()) {
+		for (auto& gate : simulator.andGates) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.xorGates) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.junctions) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.buffers) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.singleBuffers) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.tristateBuffers) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.constantGates) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.constantResetGates) {
+			gate.removeIdRefs(id);
+		}
+		for (auto& gate : simulator.copySelfOutputGates) {
+			gate.removeIdRefs(id);
+		}
+		simulatorIdProvider.releaseId(id);
+	}
+}
 
 void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {}
 
@@ -100,28 +136,20 @@ void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnectio
 	simulator_id_t sourceId = sourceSimId.value();
 	simulator_id_t destinationId = destinationSimId.value();
 
-	// Find source gate and get output port ID
-	SimulatorGateVariant* sourceGate = getGateFromSimId(sourceId);
-	if (!sourceGate) {
-		logError("Source gate not found", "SimulatorOptimizer::makeConnection");
+	logInfo("Making connection from gate {} (simulator_id_t {}) port {} to gate {} (simulator_id_t {}) port {}", "SimulatorOptimizer::makeConnection",
+		sourceGateId, sourceId, sourcePort, destinationGateId, destinationId, destinationPort);
+
+	std::optional<simulator_id_t> actualSourceId = getOutputPortId(sourceId, sourcePort);
+
+	if (!actualSourceId.has_value()) {
+		logError("Cannot resolve actual source ID for connection", "SimulatorOptimizer::makeConnection");
 		return;
 	}
 
-	simulator_id_t actualSourceId = 0;
-	visitGate(*sourceGate, [&](auto& gate) {
-		actualSourceId = gate.getIdOfOutputPort(sourcePort);
-	});
+	logInfo("Source gate {} (simulator_id_t {}) port {} resolved to actual source ID {}", "SimulatorOptimizer::makeConnection",
+		sourceGateId, sourceId, sourcePort, actualSourceId.value());
 
-	// Find destination gate and add input
-	SimulatorGateVariant* destinationGate = getGateFromSimId(destinationId);
-	if (!destinationGate) {
-		logError("Destination gate not found", "SimulatorOptimizer::makeConnection");
-		return;
-	}
-
-	visitGate(*destinationGate, [&](auto& gate) {
-		gate.addInput(actualSourceId, destinationPort);
-	});
+	addInputToGate(destinationId, actualSourceId.value(), destinationPort);
 }
 
 void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
@@ -138,82 +166,243 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, const EvalC
 	simulator_id_t sourceId = sourceSimId.value();
 	simulator_id_t destinationId = destinationSimId.value();
 
-	SimulatorGateVariant* destinationGate = getGateFromSimId(destinationId);
-	if (!destinationGate) {
-		logError("Destination gate not found", "SimulatorOptimizer::removeConnection");
-		return;
-	}
-
-	visitGate(*destinationGate, [&](auto& gate) {
-		gate.removeInput(sourceId, destinationPort);
-	});
+	removeInputFromGate(destinationId, sourceId, destinationPort);
 }
 
-SimulatorGateVariant* SimulatorOptimizer::getGateFromSimId(simulator_id_t simId) const {
-	// Search through all gate vectors to find the gate with matching simulator_id_t
-
-	// Check ANDLikeGates
+std::optional<simulator_id_t> SimulatorOptimizer::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
 	auto andIt = std::find_if(simulator.andGates.begin(), simulator.andGates.end(),
 		[simId](const ANDLikeGate& gate) { return gate.getId() == simId; });
 	if (andIt != simulator.andGates.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*andIt)));
+		return andIt->getIdOfOutputPort(portId);
 	}
 
-	// Check XORLikeGates
 	auto xorIt = std::find_if(simulator.xorGates.begin(), simulator.xorGates.end(),
 		[simId](const XORLikeGate& gate) { return gate.getId() == simId; });
 	if (xorIt != simulator.xorGates.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*xorIt)));
+		return xorIt->getIdOfOutputPort(portId);
 	}
 
-	// Check JunctionGates
 	auto junctionIt = std::find_if(simulator.junctions.begin(), simulator.junctions.end(),
 		[simId](const JunctionGate& gate) { return gate.getId() == simId; });
 	if (junctionIt != simulator.junctions.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*junctionIt)));
+		return junctionIt->getIdOfOutputPort(portId);
 	}
-	// Check BufferGates
+
 	auto bufferIt = std::find_if(simulator.buffers.begin(), simulator.buffers.end(),
 		[simId](const BufferGate& gate) { return gate.getId() == simId; });
 	if (bufferIt != simulator.buffers.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*bufferIt)));
+		return bufferIt->getIdOfOutputPort(portId);
 	}
 
-	// Check SingleBufferGates
 	auto singleBufferIt = std::find_if(simulator.singleBuffers.begin(), simulator.singleBuffers.end(),
 		[simId](const SingleBufferGate& gate) { return gate.getId() == simId; });
 	if (singleBufferIt != simulator.singleBuffers.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*singleBufferIt)));
+		return singleBufferIt->getIdOfOutputPort(portId);
 	}
 
-	// Check TristateBufferGates
 	auto tristateIt = std::find_if(simulator.tristateBuffers.begin(), simulator.tristateBuffers.end(),
 		[simId](const TristateBufferGate& gate) { return gate.getId() == simId; });
 	if (tristateIt != simulator.tristateBuffers.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*tristateIt)));
+		return tristateIt->getIdOfOutputPort(portId);
 	}
 
-	// Check ConstantGates
 	auto constantIt = std::find_if(simulator.constantGates.begin(), simulator.constantGates.end(),
 		[simId](const ConstantGate& gate) { return gate.getId() == simId; });
 	if (constantIt != simulator.constantGates.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*constantIt)));
+		return constantIt->getIdOfOutputPort(portId);
 	}
 
-	// Check ConstantResetGates
 	auto constantResetIt = std::find_if(simulator.constantResetGates.begin(), simulator.constantResetGates.end(),
 		[simId](const ConstantResetGate& gate) { return gate.getId() == simId; });
 	if (constantResetIt != simulator.constantResetGates.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*constantResetIt)));
+		return constantResetIt->getIdOfOutputPort(portId);
 	}
 
-	// Check CopySelfOutputGates
 	auto copySelfIt = std::find_if(simulator.copySelfOutputGates.begin(), simulator.copySelfOutputGates.end(),
 		[simId](const CopySelfOutputGate& gate) { return gate.getId() == simId; });
 	if (copySelfIt != simulator.copySelfOutputGates.end()) {
-		return const_cast<SimulatorGateVariant*>(reinterpret_cast<const SimulatorGateVariant*>(&(*copySelfIt)));
+		return copySelfIt->getIdOfOutputPort(portId);
 	}
 
-	// Gate not found
-	return nullptr;
+	return std::nullopt;
+}
+
+void SimulatorOptimizer::addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId) {
+	auto andIt = std::find_if(simulator.andGates.begin(), simulator.andGates.end(),
+		[simId](ANDLikeGate& gate) { return gate.getId() == simId; });
+	if (andIt != simulator.andGates.end()) {
+		andIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto xorIt = std::find_if(simulator.xorGates.begin(), simulator.xorGates.end(),
+		[simId](XORLikeGate& gate) { return gate.getId() == simId; });
+	if (xorIt != simulator.xorGates.end()) {
+		xorIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto junctionIt = std::find_if(simulator.junctions.begin(), simulator.junctions.end(),
+		[simId](JunctionGate& gate) { return gate.getId() == simId; });
+	if (junctionIt != simulator.junctions.end()) {
+		junctionIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto bufferIt = std::find_if(simulator.buffers.begin(), simulator.buffers.end(),
+		[simId](BufferGate& gate) { return gate.getId() == simId; });
+	if (bufferIt != simulator.buffers.end()) {
+		bufferIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto singleBufferIt = std::find_if(simulator.singleBuffers.begin(), simulator.singleBuffers.end(),
+		[simId](SingleBufferGate& gate) { return gate.getId() == simId; });
+	if (singleBufferIt != simulator.singleBuffers.end()) {
+		singleBufferIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto tristateIt = std::find_if(simulator.tristateBuffers.begin(), simulator.tristateBuffers.end(),
+		[simId](TristateBufferGate& gate) { return gate.getId() == simId; });
+	if (tristateIt != simulator.tristateBuffers.end()) {
+		tristateIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto constantIt = std::find_if(simulator.constantGates.begin(), simulator.constantGates.end(),
+		[simId](ConstantGate& gate) { return gate.getId() == simId; });
+	if (constantIt != simulator.constantGates.end()) {
+		constantIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto constantResetIt = std::find_if(simulator.constantResetGates.begin(), simulator.constantResetGates.end(),
+		[simId](ConstantResetGate& gate) { return gate.getId() == simId; });
+	if (constantResetIt != simulator.constantResetGates.end()) {
+		constantResetIt->addInput(inputId, portId);
+		return;
+	}
+
+	auto copySelfIt = std::find_if(simulator.copySelfOutputGates.begin(), simulator.copySelfOutputGates.end(),
+		[simId](CopySelfOutputGate& gate) { return gate.getId() == simId; });
+	if (copySelfIt != simulator.copySelfOutputGates.end()) {
+		copySelfIt->addInput(inputId, portId);
+		return;
+	}
+
+	logError("Gate not found for addInputToGate", "SimulatorOptimizer::addInputToGate");
+}
+
+void SimulatorOptimizer::removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId) {
+	auto andIt = std::find_if(simulator.andGates.begin(), simulator.andGates.end(),
+		[simId](ANDLikeGate& gate) { return gate.getId() == simId; });
+	if (andIt != simulator.andGates.end()) {
+		andIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto xorIt = std::find_if(simulator.xorGates.begin(), simulator.xorGates.end(),
+		[simId](XORLikeGate& gate) { return gate.getId() == simId; });
+	if (xorIt != simulator.xorGates.end()) {
+		xorIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto junctionIt = std::find_if(simulator.junctions.begin(), simulator.junctions.end(),
+		[simId](JunctionGate& gate) { return gate.getId() == simId; });
+	if (junctionIt != simulator.junctions.end()) {
+		junctionIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto bufferIt = std::find_if(simulator.buffers.begin(), simulator.buffers.end(),
+		[simId](BufferGate& gate) { return gate.getId() == simId; });
+	if (bufferIt != simulator.buffers.end()) {
+		bufferIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto singleBufferIt = std::find_if(simulator.singleBuffers.begin(), simulator.singleBuffers.end(),
+		[simId](SingleBufferGate& gate) { return gate.getId() == simId; });
+	if (singleBufferIt != simulator.singleBuffers.end()) {
+		singleBufferIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto tristateIt = std::find_if(simulator.tristateBuffers.begin(), simulator.tristateBuffers.end(),
+		[simId](TristateBufferGate& gate) { return gate.getId() == simId; });
+	if (tristateIt != simulator.tristateBuffers.end()) {
+		tristateIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto constantIt = std::find_if(simulator.constantGates.begin(), simulator.constantGates.end(),
+		[simId](ConstantGate& gate) { return gate.getId() == simId; });
+	if (constantIt != simulator.constantGates.end()) {
+		constantIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto constantResetIt = std::find_if(simulator.constantResetGates.begin(), simulator.constantResetGates.end(),
+		[simId](ConstantResetGate& gate) { return gate.getId() == simId; });
+	if (constantResetIt != simulator.constantResetGates.end()) {
+		constantResetIt->removeInput(inputId, portId);
+		return;
+	}
+
+	auto copySelfIt = std::find_if(simulator.copySelfOutputGates.begin(), simulator.copySelfOutputGates.end(),
+		[simId](CopySelfOutputGate& gate) { return gate.getId() == simId; });
+	if (copySelfIt != simulator.copySelfOutputGates.end()) {
+		copySelfIt->removeInput(inputId, portId);
+		return;
+	}
+
+	logError("Gate not found for removeInputFromGate", "SimulatorOptimizer::removeInputFromGate");
+}
+
+std::optional<std::vector<simulator_id_t>> SimulatorOptimizer::getOutputSimIdsFromGate(simulator_id_t simId) const {
+	auto andIt = std::find_if(simulator.andGates.begin(), simulator.andGates.end(),
+		[simId](const ANDLikeGate& gate) { return gate.getId() == simId; });
+	if (andIt != simulator.andGates.end()) {
+		return andIt->getOutputSimIds();
+	}
+
+	auto xorIt = std::find_if(simulator.xorGates.begin(), simulator.xorGates.end(),
+		[simId](const XORLikeGate& gate) { return gate.getId() == simId; });
+	if (xorIt != simulator.xorGates.end()) {
+		return xorIt->getOutputSimIds();
+	}
+
+	auto junctionIt = std::find_if(simulator.junctions.begin(), simulator.junctions.end(),
+		[simId](const JunctionGate& gate) { return gate.getId() == simId; });
+	if (junctionIt != simulator.junctions.end()) {
+		return junctionIt->getOutputSimIds();
+	}
+
+	auto bufferIt = std::find_if(simulator.buffers.begin(), simulator.buffers.end(),
+		[simId](const BufferGate& gate) { return gate.getId() == simId; });
+	if (bufferIt != simulator.buffers.end()) {
+		return bufferIt->getOutputSimIds();
+	}
+
+	auto singleBufferIt = std::find_if(simulator.singleBuffers.begin(), simulator.singleBuffers.end(),
+		[simId](const SingleBufferGate& gate) { return gate.getId() == simId; });
+	if (singleBufferIt != simulator.singleBuffers.end()) {
+		return singleBufferIt->getOutputSimIds();
+	}
+
+	auto tristateIt = std::find_if(simulator.tristateBuffers.begin(), simulator.tristateBuffers.end(),
+		[simId](const TristateBufferGate& gate) { return gate.getId() == simId; });
+	if (tristateIt != simulator.tristateBuffers.end()) {
+		return tristateIt->getOutputSimIds();
+	}
+
+	auto constantIt = std::find_if(simulator.constantGates.begin(), simulator.constantGates.end(),
+		[simId](const ConstantGate& gate) { return gate.getId() == simId; });
+	if (constantIt != simulator.constantGates.end()) {
+		return constantIt->getOutputSimIds();
+	}
+
+	return std::nullopt;
 }
