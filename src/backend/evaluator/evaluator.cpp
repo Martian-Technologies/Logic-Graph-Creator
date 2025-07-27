@@ -95,6 +95,8 @@ void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t ev
 		return;
 	}
 	evalSimulator.removeGate(pauseGuard, node->getId());
+	middleIdProvider.releaseId(node->getId());
+	logInfo("Released middle ID {}", "Evaluator::edit_removeBlock", node->getId());
 	evalCircuit->removeNode(position);
 }
 
@@ -121,6 +123,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 		return;
 	}
 	middle_id_t gateId = middleIdProvider.getNewId();
+	logInfo("Using middle ID {} for new gate", "Evaluator::edit_placeBlock", gateId);
 	evalSimulator.addGate(pauseGuard, gateType, gateId);
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
@@ -269,18 +272,18 @@ std::optional<middle_id_t> Evaluator::getMiddleId(const eval_circuit_id_t starti
 	circuit_id_t circuitId = evalCircuitContainer.getCircuitId(evalCircuitId).value_or(0);
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
 	if (!circuit) {
-		logError("Circuit with ID {} not found", "Evaluator::getInputPortId", circuitId);
+		logError("Circuit with ID {} not found", "Evaluator::getMiddleId", circuitId);
 		return std::nullopt;
 	}
 	const BlockContainer* blockContainer = circuit->getBlockContainer();
 	if (!blockContainer) {
-		logError("BlockContainer not found", "Evaluator::getInputPortId");
+		logError("BlockContainer not found", "Evaluator::getMiddleId");
 		return std::nullopt;
 	}
 	Position blockPosition = address.getPosition(address.size() - 1);
 	const Block* block = blockContainer->getBlock(blockPosition);
 	if (!block) {
-		logError("Block not found at position {}", "Evaluator::getInputPortId", blockPosition.toString());
+		logError("Block not found at position {}", "Evaluator::getMiddleId", blockPosition.toString());
 		return std::nullopt;
 	}
 	std::optional<CircuitNode> node = evalCircuitContainer.getNode(block->getPosition(), evalCircuitId);
@@ -296,13 +299,6 @@ std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const 
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
-	// std::optional<middle_id_t> middleIdOpt = getMiddleId(address);
-	// if (!middleIdOpt.has_value()) {
-	// 	logError("Failed to get middle ID for address {}", "Evaluator::getState", address.toString());
-	// 	return logic_state_t::UNDEFINED; // or some other default state
-	// }
-	// logic_state_t state = evalSimulator.getState(middleIdOpt.value());
-	// return state;
 	std::optional<eval_circuit_id_t> evalCircuitIdOpt = evalCircuitContainer.traverseToTopLevelIC(address);
 	if (!evalCircuitIdOpt.has_value()) {
 		logError("Failed to traverse to top-level IC for address {}", "Evaluator::getState", address.toString());
@@ -326,29 +322,6 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
-	// if (addresses.empty()) {
-	// 	return {};
-	// }
-	// eval_circuit_id_t startingPoint = 0;
-	// if (addressOrigin.size() != 0) {
-	// 	std::optional<CircuitNode> originNode = evalCircuitContainer.traverse(addressOrigin);
-	// 	if (!originNode.has_value() || !originNode->isIC()) {
-	// 		logError("Invalid address origin {}", "Evaluator::getBulkStates", addressOrigin.toString());
-	// 		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
-	// 	}
-	// 	startingPoint = originNode->getId();
-	// }
-	// std::vector<middle_id_t> middleIds;
-	// middleIds.reserve(addresses.size());
-	// for (const Address& addr : addresses) {
-	// 	std::optional<middle_id_t> middleIdOpt = getMiddleId(startingPoint, addr);
-	// 	if (middleIdOpt.has_value()) {
-	// 		middleIds.push_back(middleIdOpt.value());
-	// 	} else {
-	// 		middleIds.push_back(0); // or some other invalid ID
-	// 	}
-	// }
-	// return evalSimulator.getStates(middleIds);
 	if (addresses.empty()) {
 		return {};
 	}
