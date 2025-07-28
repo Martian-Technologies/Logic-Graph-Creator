@@ -34,6 +34,7 @@ public:
 		// SWITCH
 		getBlockData(BlockType::SWITCH)->setName("Switch");
 		getBlockData(BlockType::SWITCH)->setDefaultData(false);
+		getBlockData(BlockType::SWITCH)->setConnectionInput(Vector(0), 1); // TEMPORARY FOR TESTING
 		getBlockData(BlockType::SWITCH)->setConnectionOutput(Vector(0), 0);
 		// CONSTANT
 		getBlockData(BlockType::CONSTANT)->setName("Constant");

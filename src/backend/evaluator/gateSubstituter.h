@@ -1,25 +1,55 @@
 #ifndef gateSubstituter_h
 #define gateSubstituter_h
 
-#include "container/block/blockDefs.h"
-
+#include "simulatorOptimizer.h"
 #include "evalConfig.h"
-#include "gateType.h"
+#include "evalConnection.h"
 #include "evalTypedef.h"
-#include "logicState.h"
+#include "idProvider.h"
+#include "gateType.h"
+#include "logicSimulator.h"
+#include <vector>
 
 class GateSubstituter {
 public:
-	GateSubstituter(EvalConfig& config) : evalConfig(config) {}
-	middle_id_t addGate(GateType gateType);
-	bool removeGate(middle_id_t gateId);
-	bool addConnection(middle_id_t sourceGateId, connection_port_id_t sourcePort, middle_id_t targetGateId, connection_port_id_t targetPort);
-	bool removeConnection(middle_id_t sourceGateId, connection_port_id_t sourcePort, middle_id_t targetGateId, connection_port_id_t targetPort);
-	bool setState(middle_id_t gateId, connection_port_id_t port, logic_state_t state);
-	logic_state_t getState(middle_id_t gateId, connection_port_id_t port) const;
+	GateSubstituter(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
+		simulatorOptimizer(evalConfig, middleIdProvider) {
+	}
+
+	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
+		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
+	}
+	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
+		simulatorOptimizer.removeGate(pauseGuard, gateId);
+	}
+	SimPauseGuard beginEdit() {
+		return simulatorOptimizer.beginEdit();
+	}
+	void endEdit(SimPauseGuard& pauseGuard) {
+		simulatorOptimizer.endEdit(pauseGuard);
+	}
+
+	logic_state_t getState(EvalConnectionPoint point) const {
+		return simulatorOptimizer.getState(point);
+	}
+	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+		return simulatorOptimizer.getStates(points);
+	}
+	void setState(middle_id_t id, logic_state_t state) {
+		simulatorOptimizer.setState(id, state);
+	}
+	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
+		simulatorOptimizer.setStates(ids, states);
+	}
+	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+		simulatorOptimizer.makeConnection(pauseGuard, connection);
+	}
+	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
+		simulatorOptimizer.removeConnection(pauseGuard, connection);
+	}
 
 private:
-	EvalConfig& evalConfig;
+	SimulatorOptimizer simulatorOptimizer;
 };
 
 #endif // gateSubstituter_h

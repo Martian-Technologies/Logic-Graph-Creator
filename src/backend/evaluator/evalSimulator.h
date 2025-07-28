@@ -1,48 +1,48 @@
 #ifndef evalSimulator_h
 #define evalSimulator_h
 
-#include "simulatorOptimizer.h"
+#include "gateSubstituter.h"
 
 class EvalSimulator {
 public:
 	EvalSimulator(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
 		evalConfig(evalConfig),
-		middleIdProvider(middleIdProvider), simulatorOptimizer(evalConfig, middleIdProvider) {
+		middleIdProvider(middleIdProvider), gateSubstituter(evalConfig, middleIdProvider) {
 	}
 	SimPauseGuard beginEdit() {
-		return simulatorOptimizer.beginEdit();
+		return gateSubstituter.beginEdit();
 	}
 	void endEdit(SimPauseGuard& pauseGuard) {
-		simulatorOptimizer.endEdit(pauseGuard);
+		gateSubstituter.endEdit(pauseGuard);
 	}
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
-		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
+		gateSubstituter.addGate(pauseGuard, gateType, gateId);
 	}
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
-		simulatorOptimizer.removeGate(pauseGuard, gateId);
+		gateSubstituter.removeGate(pauseGuard, gateId);
 	}
 	logic_state_t getState(EvalConnectionPoint point) const {
-		return simulatorOptimizer.getState(point);
+		return gateSubstituter.getState(point);
 	}
 	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
-		return simulatorOptimizer.getStates(points);
+		return gateSubstituter.getStates(points);
 	}
 	void setState(middle_id_t id, logic_state_t state) {
-		simulatorOptimizer.setState(id, state);
+		gateSubstituter.setState(id, state);
 	}
 	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
-		simulatorOptimizer.setStates(ids, states);
+		gateSubstituter.setStates(ids, states);
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
-		simulatorOptimizer.makeConnection(pauseGuard, connection);
+		gateSubstituter.makeConnection(pauseGuard, connection);
 	}
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
-		simulatorOptimizer.removeConnection(pauseGuard, connection);
+		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
 private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;
-	SimulatorOptimizer simulatorOptimizer;
+	GateSubstituter gateSubstituter;
 };
 
 #endif // evalSimulator_h
