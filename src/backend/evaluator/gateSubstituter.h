@@ -1,7 +1,7 @@
 #ifndef gateSubstituter_h
 #define gateSubstituter_h
 
-#include "simulatorOptimizer.h"
+#include "replacer.h"
 #include "evalConfig.h"
 #include "evalConnection.h"
 #include "evalTypedef.h"
@@ -64,7 +64,7 @@ struct TrackedGate {
 class GateSubstituter {
 public:
 	GateSubstituter(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
-		simulatorOptimizer(evalConfig, middleIdProvider) {
+		replacer(evalConfig, middleIdProvider) {
 	}
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
@@ -72,10 +72,10 @@ public:
 			logInfo("Begining to track gate with ID {}", "GateSubstituter::addGate", gateId);
 			addTrackedGate({ gateId, gateType, gateType, GateType::JUNCTION, {}, {}, 1 });
 		}
-		simulatorOptimizer.addGate(pauseGuard, gateType, gateId); // this may need to be conditional in the future if we add more conditional gates
+		replacer.addGate(pauseGuard, gateType, gateId); // this may need to be conditional in the future if we add more conditional gates
 	}
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
-		simulatorOptimizer.removeGate(pauseGuard, gateId);
+		replacer.removeGate(pauseGuard, gateId);
 		deleteTrackedGate(gateId);
 		for (auto& trackedGate : trackedGates) {
 			bool success = trackedGate.second.removeReferencesToId(gateId);
@@ -84,39 +84,39 @@ public:
 				GateType newState = trackedGateRef.evaluate();
 				if (newState != trackedGateRef.currentState) {
 					trackedGateRef.currentState = newState;
-					simulatorOptimizer.removeGate(pauseGuard, trackedGateRef.id);
-					simulatorOptimizer.addGate(pauseGuard, newState, trackedGateRef.id);
+					replacer.removeGate(pauseGuard, trackedGateRef.id);
+					replacer.addGate(pauseGuard, newState, trackedGateRef.id);
 					for (const auto& input : trackedGateRef.inputs) {
-						simulatorOptimizer.makeConnection(pauseGuard, input);
+						replacer.makeConnection(pauseGuard, input);
 					}
 					for (const auto& output : trackedGateRef.outputs) {
 						if (output.source.gateId == output.destination.gateId) {
 							continue;
 						}
-						simulatorOptimizer.makeConnection(pauseGuard, output);
+						replacer.makeConnection(pauseGuard, output);
 					}
 				}
 			}
 		}
 	}
 	SimPauseGuard beginEdit() {
-		return simulatorOptimizer.beginEdit();
+		return replacer.beginEdit();
 	}
 	void endEdit(SimPauseGuard& pauseGuard) {
-		simulatorOptimizer.endEdit(pauseGuard);
+		replacer.endEdit(pauseGuard);
 	}
 
 	logic_state_t getState(EvalConnectionPoint point) const {
-		return simulatorOptimizer.getState(point);
+		return replacer.getState(point);
 	}
 	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
-		return simulatorOptimizer.getStates(points);
+		return replacer.getStates(points);
 	}
 	void setState(middle_id_t id, logic_state_t state) {
-		simulatorOptimizer.setState(id, state);
+		replacer.setState(id, state);
 	}
 	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
-		simulatorOptimizer.setStates(ids, states);
+		replacer.setStates(ids, states);
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		middle_id_t sourceGateId = connection.source.gateId;
@@ -133,23 +133,23 @@ public:
 			GateType newState = trackedGate.evaluate();
 			if (newState != trackedGate.currentState) {
 				trackedGate.currentState = newState;
-				simulatorOptimizer.removeGate(pauseGuard, destinationGateId);
-				simulatorOptimizer.addGate(pauseGuard, newState, destinationGateId);
+				replacer.removeGate(pauseGuard, destinationGateId);
+				replacer.addGate(pauseGuard, newState, destinationGateId);
 				for (const auto& input : trackedGate.inputs) {
-					simulatorOptimizer.makeConnection(pauseGuard, input);
+					replacer.makeConnection(pauseGuard, input);
 				}
 				for (const auto& output : trackedGate.outputs) {
 					if (output.source.gateId == output.destination.gateId) {
 						continue;
 					}
-					simulatorOptimizer.makeConnection(pauseGuard, output);
+					replacer.makeConnection(pauseGuard, output);
 				}
 			}
 		}
-		simulatorOptimizer.makeConnection(pauseGuard, connection);
+		replacer.makeConnection(pauseGuard, connection);
 	}
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
-		simulatorOptimizer.removeConnection(pauseGuard, connection);
+		replacer.removeConnection(pauseGuard, connection);
 		middle_id_t sourceGateId = connection.source.gateId;
 		middle_id_t destinationGateId = connection.destination.gateId;
 		auto it = trackedGates.find(sourceGateId);
@@ -164,23 +164,23 @@ public:
 			GateType newState = trackedGate.evaluate();
 			if (newState != trackedGate.currentState) {
 				trackedGate.currentState = newState;
-				simulatorOptimizer.removeGate(pauseGuard, destinationGateId);
-				simulatorOptimizer.addGate(pauseGuard, newState, destinationGateId);
+				replacer.removeGate(pauseGuard, destinationGateId);
+				replacer.addGate(pauseGuard, newState, destinationGateId);
 				for (const auto& input : trackedGate.inputs) {
-					simulatorOptimizer.makeConnection(pauseGuard, input);
+					replacer.makeConnection(pauseGuard, input);
 				}
 				for (const auto& output : trackedGate.outputs) {
 					if (output.source.gateId == output.destination.gateId) {
 						continue;
 					}
-					simulatorOptimizer.makeConnection(pauseGuard, output);
+					replacer.makeConnection(pauseGuard, output);
 				}
 			}
 		}
 	}
 
 private:
-	SimulatorOptimizer simulatorOptimizer;
+	Replacer replacer;
 	std::unordered_map<middle_id_t, TrackedGate> trackedGates;
 	void addTrackedGate(const TrackedGate& gate) {
 		trackedGates[gate.id] = gate;
