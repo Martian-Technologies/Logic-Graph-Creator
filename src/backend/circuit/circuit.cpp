@@ -1,5 +1,9 @@
 #include "circuit.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 #include "backend/proceduralCircuits/generatedCircuit.h"
 #include "logging/logging.h"
 #include "parsedCircuit.h"
@@ -21,6 +25,9 @@ void Circuit::clear(bool clearUndoTree) {
 }
 
 bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
 	sendDifference(difference);
@@ -28,6 +35,9 @@ bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blo
 }
 
 bool Circuit::tryRemoveBlock(Position position) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveBlock(position, difference.get());
 	sendDifference(difference);
@@ -35,6 +45,9 @@ bool Circuit::tryRemoveBlock(Position position) {
 }
 
 bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, Rotation::ZERO, difference.get());
 	assert(out != difference->empty());
@@ -43,6 +56,9 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 }
 
 bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation amountToRotate) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (movement == Vector(0)) return true;
 	Position selectionOrigin = getSelectionOrigin(selection);
 	Position newSelectionOrigin = selectionOrigin + movement;
@@ -90,12 +106,16 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation
 }
 
 void Circuit::setType(SharedSelection selection, BlockType type) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	setType(selection, type, difference.get());
 	sendDifference(difference);
 }
 
 void Circuit::setType(SharedSelection selection, BlockType type, Difference* difference) {
+	
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
@@ -112,6 +132,9 @@ void Circuit::setType(SharedSelection selection, BlockType type, Difference* dif
 }
 
 void Circuit::tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (cellA.x > cellB.x) std::swap(cellA.x, cellB.x);
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
@@ -125,6 +148,9 @@ void Circuit::tryInsertOverArea(Position cellA, Position cellB, Rotation rotatio
 }
 
 void Circuit::tryRemoveOverArea(Position cellA, Position cellB) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (cellA.x > cellB.x) std::swap(cellA.x, cellB.x);
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
@@ -155,6 +181,9 @@ bool Circuit::checkCollision(const SharedSelection& selection) {
 }
 
 bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (!parsedCircuit.isValid()) return false;
 
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
@@ -196,6 +225,9 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 }
 
 bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (!generatedCircuit.isValid()) return false;
 
 	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
@@ -237,6 +269,9 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 }
 
 bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation amountToRotate) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (blockContainer.checkCollision(
@@ -271,6 +306,9 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 }
 
 bool Circuit::tryCreateConnection(Position outputPosition, Position inputPosition) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputPosition, inputPosition, difference.get());
 	sendDifference(difference);
@@ -278,6 +316,9 @@ bool Circuit::tryCreateConnection(Position outputPosition, Position inputPositio
 }
 
 bool Circuit::tryRemoveConnection(Position outputPosition, Position inputPosition) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputPosition, inputPosition, difference.get());
 	sendDifference(difference);
@@ -285,6 +326,9 @@ bool Circuit::tryRemoveConnection(Position outputPosition, Position inputPositio
 }
 
 bool Circuit::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
 	sendDifference(difference);
@@ -292,6 +336,9 @@ bool Circuit::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionE
 }
 
 bool Circuit::tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
 	sendDifference(difference);
@@ -299,6 +346,9 @@ bool Circuit::tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionE
 }
 
 bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (!sameSelectionShape(outputSelection, inputSelection)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	createConnection(outputSelection, inputSelection, difference.get());
@@ -307,6 +357,9 @@ bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelecti
 }
 
 bool Circuit::tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (!sameSelectionShape(outputSelection, inputSelection)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	removeConnection(outputSelection, inputSelection, difference.get());
@@ -371,6 +424,9 @@ void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection 
 }
 
 void Circuit::undo() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
 	const MinimalDifference* difference = undoSystem.undoDifference();
 	if (!difference) return;
@@ -408,6 +464,9 @@ void Circuit::undo() {
 }
 
 void Circuit::redo() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	DifferenceSharedPtr newDifference = std::make_shared<Difference>();
 	const MinimalDifference* difference = undoSystem.redoDifference();
 	if (!difference) return;

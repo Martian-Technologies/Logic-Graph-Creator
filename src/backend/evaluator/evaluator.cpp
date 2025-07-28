@@ -1,5 +1,9 @@
 #include "evaluator.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager)
 	: evaluatorId(evaluatorId), paused(true),
 	targetTickrate(0),
@@ -66,6 +70,9 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t containerI
 }
 
 void Evaluator::makeEditInPlace(DifferenceSharedPtr difference, circuit_id_t containerId, AddressTreeNode<EvaluatorGate>& addressTree, DiffCache& diffCache, bool insideIC) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	const auto modifications = difference->getModifications();
 	bool deletedBlocks = false;
 	for (const auto& modification : modifications) {
@@ -321,6 +328,9 @@ bool Evaluator::getBoolState(const Address& address) {
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses) {
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
 	std::vector<logic_state_t> states;
 	states.reserve(addresses.size());
 	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
@@ -343,11 +353,17 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
 	std::vector<logic_state_t> states;
 	states.reserve(addresses.size());
 	std::shared_lock<std::shared_mutex> lock = logicSimulatorWrapper.getSimulationSharedLock();
 	const AddressTreeNode<Evaluator::EvaluatorGate>* branchOrigin = addressTree.getBranch(addressOrigin);
 	if (branchOrigin) {
+		#ifdef TRACY_PROFILER
+			ZoneScopedN("getBulkStates Has Lock");
+		#endif
 		for (const auto& address : addresses) {
 			// check if the address is valid
 			if (branchOrigin->hasBranch(address)) {

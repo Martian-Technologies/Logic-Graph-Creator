@@ -1,5 +1,9 @@
 #include "chunkRenderer.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 #include "backend/evaluator/logicState.h"
 #include "gpu/vulkanInstance.h"
 #include "gpu/abstractions/vulkanShader.h"
@@ -62,6 +66,10 @@ void ChunkRenderer::cleanup() {
 }
 
 void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const Address& address, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
+	
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);
@@ -90,6 +98,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 	
 	// block drawing pass
 	{
+		#ifdef TRACY_PROFILER
+			ZoneScopedN("block drawing");
+		#endif
 		// bind render pipeline
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getHandle());
 		
@@ -126,6 +137,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 
 	// wire drawing pass
 	{
+		#ifdef TRACY_PROFILER
+			ZoneScopedN("wire drawing");
+		#endif
 		// bind render pipeline
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wirePipeline.getHandle());
 		
