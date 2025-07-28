@@ -9,6 +9,14 @@
 #include "gateType.h"
 #include "logicSimulator.h"
 
+class Replacement {
+public:
+	Replacement(SimulatorOptimizer& optimizer)
+		: simulatorOptimizer(optimizer) {}
+private:
+	SimulatorOptimizer& simulatorOptimizer;
+};
+
 class Replacer {
 public:
 	Replacer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
@@ -62,7 +70,6 @@ public:
 		simulatorOptimizer.removeConnection(pauseGuard, connection);
 	}
 
-	// Get average tickrate from the simulator
 	unsigned int getAverageTickrate() const {
 		return simulatorOptimizer.getAverageTickrate();
 	}
@@ -71,6 +78,11 @@ private:
 	SimulatorOptimizer simulatorOptimizer;
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;
+	std::vector<Replacement> replacements;
+	Replacement& makeReplacement() {
+		replacements.push_back(Replacement(simulatorOptimizer));
+		return replacements.back();
+	}
 };
 
 #endif // replacer_h

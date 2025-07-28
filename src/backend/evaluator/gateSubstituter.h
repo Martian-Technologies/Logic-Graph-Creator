@@ -179,7 +179,6 @@ public:
 		}
 	}
 
-	// Get average tickrate from the simulator  
 	unsigned int getAverageTickrate() const {
 		return replacer.getAverageTickrate();
 	}
