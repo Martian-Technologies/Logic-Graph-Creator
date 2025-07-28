@@ -31,9 +31,9 @@ void LogicSimulator::simulationLoop()
 		tickOnce();
 		auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes{1} / targetTickrate.load(std::memory_order_relaxed));
 
-        nextTick += period;
-        std::unique_lock lk(cvMutex);
-        cv.wait_until(lk, nextTick, [&]{ return pauseRequest || !running; });
+		nextTick += period;
+		std::unique_lock lk(cvMutex);
+		cv.wait_until(lk, nextTick, [&]{ return pauseRequest || !running; });
 	}
 }
 
@@ -88,7 +88,9 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 // Gate management methods (moved from SimulatorOptimizer)
 simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 	simulator_id_t simulatorId = simulatorIdProvider.getNewId();
-	
+
+	logInfo("Adding gate of type {} with simulator_id_t {}", "LogicSimulator::addGate", static_cast<int>(gateType), simulatorId);
+
 	// extend the states if necessary
 	if (statesA.size() <= simulatorId) {
 		statesA.resize(simulatorId + 1, logic_state_t::UNDEFINED);
@@ -96,7 +98,7 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 	}
 	statesA[simulatorId] = logic_state_t::UNDEFINED;
 	statesB[simulatorId] = logic_state_t::UNDEFINED;
-	
+
 	switch (gateType) {
 	case GateType::AND:
 		andGates.push_back({ simulatorId, false, false });
@@ -162,7 +164,11 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		return;
 	}
 
+	logInfo("Removing gate with simulator_id_t {}", "LogicSimulator::removeGate", simulatorId);
+
+	// First, remove all references to this gate's outputs from other gates
 	for (const auto& id : outputIdsOpt.value()) {
+		logInfo("Removing all references to simulator_id_t {}", "LogicSimulator::removeGate", id);
 		for (auto& gate : andGates) {
 			gate.removeIdRefs(id);
 		}
@@ -192,6 +198,34 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		}
 		simulatorIdProvider.releaseId(id);
 	}
+
+	// Now remove the gate itself from the appropriate gate vector
+	andGates.erase(std::remove_if(andGates.begin(), andGates.end(),
+		[simulatorId](const ANDLikeGate& gate) { return gate.getId() == simulatorId; }), andGates.end());
+
+	xorGates.erase(std::remove_if(xorGates.begin(), xorGates.end(),
+		[simulatorId](const XORLikeGate& gate) { return gate.getId() == simulatorId; }), xorGates.end());
+
+	junctions.erase(std::remove_if(junctions.begin(), junctions.end(),
+		[simulatorId](const JunctionGate& gate) { return gate.getId() == simulatorId; }), junctions.end());
+
+	buffers.erase(std::remove_if(buffers.begin(), buffers.end(),
+		[simulatorId](const BufferGate& gate) { return gate.getId() == simulatorId; }), buffers.end());
+
+	singleBuffers.erase(std::remove_if(singleBuffers.begin(), singleBuffers.end(),
+		[simulatorId](const SingleBufferGate& gate) { return gate.getId() == simulatorId; }), singleBuffers.end());
+
+	tristateBuffers.erase(std::remove_if(tristateBuffers.begin(), tristateBuffers.end(),
+		[simulatorId](const TristateBufferGate& gate) { return gate.getId() == simulatorId; }), tristateBuffers.end());
+
+	constantGates.erase(std::remove_if(constantGates.begin(), constantGates.end(),
+		[simulatorId](const ConstantGate& gate) { return gate.getId() == simulatorId; }), constantGates.end());
+
+	constantResetGates.erase(std::remove_if(constantResetGates.begin(), constantResetGates.end(),
+		[simulatorId](const ConstantResetGate& gate) { return gate.getId() == simulatorId; }), constantResetGates.end());
+
+	copySelfOutputGates.erase(std::remove_if(copySelfOutputGates.begin(), copySelfOutputGates.end(),
+		[simulatorId](const CopySelfOutputGate& gate) { return gate.getId() == simulatorId; }), copySelfOutputGates.end());
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
