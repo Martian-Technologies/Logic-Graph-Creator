@@ -2,6 +2,9 @@
 #define logicSimulator_h
 
 #include "simulatorGates.h"
+#include "gateType.h"
+#include "idProvider.h"
+#include "evalConnection.h"
 
 class LogicSimulator {
 friend class SimulatorOptimizer;
@@ -21,6 +24,12 @@ public:
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
+
+	simulator_id_t addGate(const GateType gateType);
+	void removeGate(simulator_id_t gateId);
+	void makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
+	void removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
+	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 
 private:
 	std::jthread simulationThread;
@@ -50,8 +59,14 @@ private:
 	std::vector<ConstantResetGate> constantResetGates; // for tick buttons mainly
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 
+	IdProvider<simulator_id_t> simulatorIdProvider;
+
 	void simulationLoop();
 	inline void tickOnce();
+
+	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
+	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
+	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;
 };
 
 class SimPauseGuard {
