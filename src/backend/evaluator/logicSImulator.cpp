@@ -484,5 +484,17 @@ std::optional<std::vector<simulator_id_t>> LogicSimulator::getOutputSimIdsFromGa
 		return constantIt->getOutputSimIds();
 	}
 
+	auto constantResetIt = std::find_if(constantResetGates.begin(), constantResetGates.end(),
+		[simId](const ConstantResetGate& gate) { return gate.getId() == simId; });
+	if (constantResetIt != constantResetGates.end()) {
+		return constantResetIt->getOutputSimIds();
+	}
+
+	auto copySelfIt = std::find_if(copySelfOutputGates.begin(), copySelfOutputGates.end(),
+		[simId](const CopySelfOutputGate& gate) { return gate.getId() == simId; });
+	if (copySelfIt != copySelfOutputGates.end()) {
+		return copySelfIt->getOutputSimIds();
+	}
+
 	return std::nullopt;
 }
