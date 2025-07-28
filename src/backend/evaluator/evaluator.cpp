@@ -23,6 +23,8 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId) {
+	logInfo("_________________________________________________________________________________________");
+	logInfo("Applying edit to Evaluator with ID {} for Circuit ID {}", "Evaluator::makeEdit", evaluatorId, circuitId);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
 	DiffCache diffCache(circuitManager);
 	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
