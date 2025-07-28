@@ -2,8 +2,8 @@
 #define directionEnum_h
 
 enum class Direction {
-    IN,
-    OUT,
+	IN,
+	OUT,
 };
 
 #endif // directionEnum_h
