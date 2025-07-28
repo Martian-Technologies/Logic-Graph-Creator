@@ -12,7 +12,7 @@
 class Replacer {
 public:
 	Replacer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
-		simulatorOptimizer(evalConfig, middleIdProvider) {}
+		simulatorOptimizer(evalConfig, middleIdProvider), evalConfig(evalConfig), middleIdProvider(middleIdProvider) {}
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
@@ -62,8 +62,15 @@ public:
 		simulatorOptimizer.removeConnection(pauseGuard, connection);
 	}
 
+	// Get average tickrate from the simulator
+	unsigned int getAverageTickrate() const {
+		return simulatorOptimizer.getAverageTickrate();
+	}
+
 private:
 	SimulatorOptimizer simulatorOptimizer;
+	EvalConfig& evalConfig;
+	IdProvider<middle_id_t>& middleIdProvider;
 };
 
 #endif // replacer_h

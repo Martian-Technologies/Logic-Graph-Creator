@@ -39,6 +39,9 @@ public:
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
+	unsigned int getAverageTickrate() const {
+		return gateSubstituter.getAverageTickrate();
+	}
 private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;

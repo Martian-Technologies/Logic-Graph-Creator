@@ -39,13 +39,13 @@ public:
 	}
 
 	void reset();
-	void setPause(bool pause) { logWarning("not implemented yet", "Evaluator::setPause"); };
-	bool isPause() const { return !evalConfig.running; }
-	void setTickrate(unsigned long long tickrate) { evalConfig.targetTickrate = tickrate; }
-	unsigned long long getTickrate() const { return evalConfig.targetTickrate; }
-	void setUseTickrate(bool useTickrate) { evalConfig.tickrateLimiter = useTickrate; }
-	bool getUseTickrate() const { return evalConfig.tickrateLimiter; }
-	long long int getRealTickrate() const { logWarning("not implemented yet", "Evaluator::getRealTickrate"); return 0; };
+	void setPause(bool pause) { evalConfig.setRunning(!pause); }
+	bool isPause() const { return !evalConfig.isRunning(); }
+	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
+	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
+	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
+	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
+	long long int getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address) {

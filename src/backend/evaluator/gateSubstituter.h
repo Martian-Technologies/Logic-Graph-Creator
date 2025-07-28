@@ -179,6 +179,11 @@ public:
 		}
 	}
 
+	// Get average tickrate from the simulator  
+	unsigned int getAverageTickrate() const {
+		return replacer.getAverageTickrate();
+	}
+
 private:
 	Replacer replacer;
 	std::unordered_map<middle_id_t, TrackedGate> trackedGates;

@@ -1,7 +1,14 @@
 #include "logicSimulator.h"
 #include "gateType.h"
 
-LogicSimulator::LogicSimulator() {
+LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) {
+	// Subscribe to EvalConfig changes to update the simulator accordingly
+	evalConfig.subscribe([this]() {
+		// Notify the simulation thread about config changes
+		std::lock_guard<std::mutex> lk(cvMutex);
+		cv.notify_all();
+	});
+
 	simulationThread = std::jthread(&LogicSimulator::simulationLoop, this);
 }
 
@@ -11,6 +18,14 @@ LogicSimulator::~LogicSimulator() {
 		running = false;
 		cv.notify_all();
 	}
+}
+
+void LogicSimulator::clearState() {}
+
+unsigned int LogicSimulator::getAverageTickrate() const {
+	// TODO: Implement a proper tickrate calculation
+	long long targetTickrate = evalConfig.getTargetTickrate();
+	return static_cast<unsigned int>(targetTickrate > 0 ? targetTickrate : 0);
 }
 
 void LogicSimulator::simulationLoop()
@@ -23,17 +38,34 @@ void LogicSimulator::simulationLoop()
 		{
 			std::unique_lock<std::mutex> lk(cvMutex);
 			isPaused.store(true, std::memory_order_release);
-			cv.notify_all();                           // acknowledge
+			cv.notify_all();
 			cv.wait(lk, [&]{ return !pauseRequest || !running; });
 			isPaused.store(false, std::memory_order_release);
 			if (!running) break;
+			// reset nextTick after resuming from pause
+			nextTick = clock::now();
 		}
-		tickOnce();
-		auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes{1} / targetTickrate.load(std::memory_order_relaxed));
 
-		nextTick += period;
-		std::unique_lock lk(cvMutex);
-		cv.wait_until(lk, nextTick, [&]{ return pauseRequest || !running; });
+		if (evalConfig.isRunning()) {
+			tickOnce();
+
+			// handle timing after ticking
+			if (evalConfig.isTickrateLimiterEnabled()) {
+				long long targetTickrate = evalConfig.getTargetTickrate();
+				if (targetTickrate > 0) {
+					auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes { 1 }) / targetTickrate;
+					nextTick += period;
+					std::unique_lock lk(cvMutex);
+					cv.wait_until(lk, nextTick, [&]{ return pauseRequest || !running || !evalConfig.isRunning(); });
+				}
+			}
+		} else {
+			// simulation is paused, so we wait for state change
+			std::unique_lock lk(cvMutex);
+			cv.wait(lk, [&]{ return pauseRequest || !running || evalConfig.isRunning(); });
+			// reset nextTick when resuming simulation
+			nextTick = clock::now();
+		}
 	}
 }
 

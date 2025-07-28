@@ -12,6 +12,7 @@
 class SimulatorOptimizer {
 public:
 	SimulatorOptimizer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
+		simulator(evalConfig),
 		evalConfig(evalConfig),
 		middleIdProvider(middleIdProvider) {}
 
@@ -79,6 +80,10 @@ public:
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
 	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection);
+
+	unsigned int getAverageTickrate() const {
+		return simulator.getAverageTickrate();
+	}
 
 private:
 	LogicSimulator simulator;
