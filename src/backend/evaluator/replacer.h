@@ -16,10 +16,11 @@ struct ReplacementGate {
 
 class Replacement {
 public:
-	Replacement(SimulatorOptimizer* optimizer)
-		: simulatorOptimizer(optimizer) {}
+	Replacement(SimulatorOptimizer* optimizer, IdProvider<middle_id_t>* middleIdProvider, 
+	            std::unordered_map<middle_id_t, middle_id_t>* replacedIds) :
+		simulatorOptimizer(optimizer), middleIdProvider(middleIdProvider), replacedIds(replacedIds) {}
 
-	void removeGate(SimPauseGuard& pauseGuard, middle_id_t gateId) {
+	void removeGate(SimPauseGuard& pauseGuard, middle_id_t gateId, middle_id_t replacementId) {
 		isEmpty = false;
 		// track connection removals
 		std::vector<EvalConnection> outputs = simulatorOptimizer->getOutputs(gateId);
@@ -35,6 +36,7 @@ public:
 		deletedGates.push_back({ gateId, simulatorOptimizer->getGateType(gateId) });
 		idsToTrackInputs.insert(gateId);
 		idsToTrackOutputs.insert(gateId);
+		replacedIds->insert({ gateId, replacementId });
 		simulatorOptimizer->removeGate(pauseGuard, gateId);
 	}
 
@@ -71,14 +73,19 @@ public:
 		}
 		for (const auto& gate : deletedGates) {
 			simulatorOptimizer->addGate(pauseGuard, gate.type, gate.id);
+			replacedIds->erase(gate.id);
 		}
 		for (const auto& conn : deletedConnections) {
 			simulatorOptimizer->makeConnection(pauseGuard, conn);
+		}
+		for (const auto& id : reservedIds) {
+			middleIdProvider->releaseId(id);
 		}
 		addedConnections.clear();
 		addedGates.clear();
 		deletedConnections.clear();
 		deletedGates.clear();
+		reservedIds.clear();
 		idsToTrackInputs.clear();
 		idsToTrackOutputs.clear();
 	}
@@ -99,12 +106,21 @@ public:
 		return isEmpty;
 	}
 
+	middle_id_t getNewId() {
+		middle_id_t newId = middleIdProvider->getNewId();
+		reservedIds.push_back(newId);
+		return newId;
+	}
+
 private:
 	SimulatorOptimizer* simulatorOptimizer;
+	IdProvider<middle_id_t>* middleIdProvider;
+	std::unordered_map<middle_id_t, middle_id_t>* replacedIds;
 	std::vector<ReplacementGate> addedGates;
 	std::vector<ReplacementGate> deletedGates;
 	std::vector<EvalConnection> addedConnections;
 	std::vector<EvalConnection> deletedConnections;
+	std::vector<middle_id_t> reservedIds;
 	std::set<middle_id_t> idsToTrackOutputs;
 	std::set<middle_id_t> idsToTrackInputs;
 	bool isEmpty { true };
@@ -183,7 +199,7 @@ private:
 	std::vector<Replacement> replacements;
 	std::unordered_map<middle_id_t, middle_id_t> replacedIds;
 	Replacement& makeReplacement() {
-		replacements.push_back(Replacement(&simulatorOptimizer));
+		replacements.push_back(Replacement(&simulatorOptimizer, &middleIdProvider, &replacedIds));
 		return replacements.back();
 	}
 	void cleanReplacements() {
@@ -252,6 +268,24 @@ private:
 			}
 			logInfo("Found junction with ID {}", "Replacer::mergeJunctions", id);
 			JunctionFloodFillResult floodFillResult = junctionFloodFill(id);
+			// print the result for debug
+			if (floodFillResult.junctionIds.size() < 2) {
+				continue;
+			}
+			logInfo("Junction flood fill result for ID {}: {} inputs, {} outputs, {} junctions", "Replacer::mergeJunctions",
+				id, floodFillResult.inputsPullingFromJunctions.size(), floodFillResult.outputsGoingIntoJunctions.size(), floodFillResult.junctionIds.size());
+			Replacement& replacement = makeReplacement();
+			middle_id_t newJunctionId = replacement.getNewId();
+			replacement.addGate(pauseGuard, GateType::JUNCTION, newJunctionId);
+			for (const auto& junctionId : floodFillResult.junctionIds) {
+				replacement.removeGate(pauseGuard, junctionId, newJunctionId);
+			}
+			for (const auto& input : floodFillResult.inputsPullingFromJunctions) {
+				replacement.makeConnection(pauseGuard, EvalConnection(EvalConnectionPoint(newJunctionId, 0), input.destination));
+			}
+			for (const auto& output : floodFillResult.outputsGoingIntoJunctions) {
+				replacement.makeConnection(pauseGuard, EvalConnection(output, EvalConnectionPoint(newJunctionId, 0)));
+			}
 		}
 	}
 
