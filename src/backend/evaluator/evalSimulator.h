@@ -36,7 +36,7 @@ public:
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		gateSubstituter.makeConnection(pauseGuard, connection);
 	}
-	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
+	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
 	unsigned int getAverageTickrate() const {

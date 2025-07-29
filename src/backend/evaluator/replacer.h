@@ -1,6 +1,7 @@
 #ifndef replacer_h
 #define replacer_h
 
+#include <set>
 #include "simulatorOptimizer.h"
 #include "evalConfig.h"
 #include "evalConnection.h"
@@ -28,8 +29,8 @@ public:
 			deletedConnections.push_back(conn);
 		}
 		deletedGates.push_back({ gateId, simulatorOptimizer.getGateType(gateId) });
-		idsToTrackInputs.push_back(gateId);
-		idsToTrackOutputs.push_back(gateId);
+		idsToTrackInputs.insert(gateId);
+		idsToTrackOutputs.insert(gateId);
 		simulatorOptimizer.removeGate(pauseGuard, gateId);
 	}
 
@@ -43,16 +44,16 @@ public:
 	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		isEmpty = false;
 		simulatorOptimizer.removeConnection(pauseGuard, connection);
-		idsToTrackInputs.push_back(connection.destination.gateId);
-		idsToTrackOutputs.push_back(connection.source.gateId);
+		idsToTrackInputs.insert(connection.destination.gateId);
+		idsToTrackOutputs.insert(connection.source.gateId);
 		deletedConnections.push_back(connection);
 	}
 
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		isEmpty = false;
 		simulatorOptimizer.makeConnection(pauseGuard, connection);
-		idsToTrackInputs.push_back(connection.destination.gateId);
-		idsToTrackOutputs.push_back(connection.source.gateId);
+		idsToTrackInputs.insert(connection.destination.gateId);
+		idsToTrackOutputs.insert(connection.source.gateId);
 		addedConnections.push_back(connection);
 	}
 
@@ -79,13 +80,13 @@ public:
 	}
 
 	void pingOutput(SimPauseGuard& pauseGuard, middle_id_t id) {
-		if (std::find(idsToTrackOutputs.begin(), idsToTrackOutputs.end(), id) != idsToTrackOutputs.end()) {
+		if (idsToTrackOutputs.find(id) != idsToTrackOutputs.end()) {
 			revert(pauseGuard);
 		}
 	}
 
 	void pingInput(SimPauseGuard& pauseGuard, middle_id_t id) {
-		if (std::find(idsToTrackInputs.begin(), idsToTrackInputs.end(), id) != idsToTrackInputs.end()) {
+		if (idsToTrackInputs.find(id) != idsToTrackInputs.end()) {
 			revert(pauseGuard);
 		}
 	}
@@ -103,8 +104,8 @@ private:
 	std::vector<ReplacementGate> deletedGates;
 	std::vector<EvalConnection> addedConnections;
 	std::vector<EvalConnection> deletedConnections;
-	std::vector<middle_id_t> idsToTrackOutputs;
-	std::vector<middle_id_t> idsToTrackInputs;
+	std::set<middle_id_t> idsToTrackOutputs;
+	std::set<middle_id_t> idsToTrackInputs;
 	bool isEmpty { true };
 };
 
@@ -128,6 +129,7 @@ public:
 	}
 
 	void endEdit(SimPauseGuard& pauseGuard) {
+		cleanReplacements();
 		simulatorOptimizer.endEdit(pauseGuard);
 	}
 
