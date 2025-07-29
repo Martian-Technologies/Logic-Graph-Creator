@@ -70,6 +70,7 @@ public:
 		return evalCircuitContainer.getCircuitId(0).value_or(0);
 	}
 	circuit_id_t getCircuitId(const Address& address) const {
+		std::shared_lock lk(simMutex);
 		eval_circuit_id_t evalCircuitId = 0;
 		for (int i = 0; i < address.size(); i++) {
 			std::optional<CircuitNode> node = evalCircuitContainer.getNode(address.getPosition(i), evalCircuitId);
@@ -112,6 +113,8 @@ private:
 
 	std::optional<connection_port_id_t> getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const;
 	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction) const;
+
+	mutable std::shared_mutex simMutex;
 };
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;

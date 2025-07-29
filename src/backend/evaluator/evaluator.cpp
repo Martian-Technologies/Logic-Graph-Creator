@@ -26,6 +26,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId)
 	logInfo("_________________________________________________________________________________________");
 	logInfo("Applying edit to Evaluator with ID {} for Circuit ID {}", "Evaluator::makeEdit", evaluatorId, circuitId);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+	std::unique_lock lk(simMutex);
 	DiffCache diffCache(circuitManager);
 	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
 		if (evalCircuitContainer.getCircuitId(evalCircuitId) == circuitId) {
@@ -255,6 +256,7 @@ const EvalAddressTree Evaluator::buildAddressTree() const {
 }
 
 const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitId) const {
+	std::shared_lock lk(simMutex);
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::buildAddressTree", evalCircuitId);
@@ -301,6 +303,7 @@ std::optional<middle_id_t> Evaluator::getMiddleId(const Address& address) const 
 }
 
 logic_state_t Evaluator::getState(const Address& address) {
+	std::shared_lock lk(simMutex);
 	std::optional<eval_circuit_id_t> evalCircuitIdOpt = evalCircuitContainer.traverseToTopLevelIC(address);
 	if (!evalCircuitIdOpt.has_value()) {
 		logError("Failed to traverse to top-level IC for address {}", "Evaluator::getState", address.toString());
@@ -315,6 +318,7 @@ logic_state_t Evaluator::getState(const Address& address) {
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
+	std::unique_lock lk(simMutex);
 	std::optional<eval_circuit_id_t> evalCircuitIdOpt = evalCircuitContainer.traverseToTopLevelIC(address);
 	if (!evalCircuitIdOpt.has_value()) {
 		logError("Failed to traverse to top-level IC for address {}", "Evaluator::setState", address.toString());
@@ -343,6 +347,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	if (addresses.empty()) {
 		return {};
 	}
+	std::shared_lock lk(simMutex);
 	eval_circuit_id_t startingPoint = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
 	std::vector<EvalConnectionPoint> connectionPoints;
 	connectionPoints.reserve(addresses.size());
