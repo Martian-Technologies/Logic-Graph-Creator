@@ -14,7 +14,10 @@ public:
 	SimulatorOptimizer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
 		simulator(evalConfig),
 		evalConfig(evalConfig),
-		middleIdProvider(middleIdProvider) {}
+		middleIdProvider(middleIdProvider) {
+		inputConnections.resize(1000);
+		outputConnections.resize(1000);
+	}
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId);
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId);
@@ -79,7 +82,16 @@ public:
 		simulator.setStates(simIds, states);
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
-	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection);
+	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
+
+	std::vector<EvalConnection> getInputs(middle_id_t middleId) const;
+	std::vector<EvalConnection> getOutputs(middle_id_t middleId) const;
+	GateType getGateType(middle_id_t middleId) const {
+		if (middleId < gateTypes.size()) {
+			return gateTypes[middleId];
+		}
+		return GateType::NONE;
+	}
 
 	unsigned int getAverageTickrate() const {
 		return simulator.getAverageTickrate();
@@ -90,6 +102,10 @@ private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;
 	std::vector<middle_id_t> simulatorIds; // maps simulator_id_t to middle_id_t
+
+	std::vector<std::vector<EvalConnection>> inputConnections;  // inputConnections[middleId] = connections TO this gate
+	std::vector<std::vector<EvalConnection>> outputConnections; // outputConnections[middleId] = connections FROM this gate
+	std::vector<GateType> gateTypes; // maps middle_id_t to GateType
 };
 
 #endif // simulatorOptimizer_h

@@ -27,15 +27,15 @@ struct TrackedGate {
 		}
 	}
 
-	void addInput(const EvalConnection& connection) {
+	void addInput(EvalConnection connection) {
 		inputs.push_back(connection);
 	}
 
-	void addOutput(const EvalConnection& connection) {
+	void addOutput(EvalConnection connection) {
 		outputs.push_back(connection);
 	}
 
-	void removeInput(const EvalConnection& connection) {
+	void removeInput(EvalConnection connection) {
 		auto it = std::find_if(inputs.begin(), inputs.end(),
 			[&](const EvalConnection& conn) { return conn.source == connection.source && conn.destination == connection.destination; });
 		if (it != inputs.end()) {
@@ -43,7 +43,7 @@ struct TrackedGate {
 		}
 	}
 
-	void removeOutput(const EvalConnection& connection) {
+	void removeOutput(EvalConnection connection) {
 		auto it = std::find_if(outputs.begin(), outputs.end(),
 			[&](const EvalConnection& conn) { return conn.source == connection.source && conn.destination == connection.destination; });
 		if (it != outputs.end()) {
@@ -148,7 +148,7 @@ public:
 		}
 		replacer.makeConnection(pauseGuard, connection);
 	}
-	void removeConnection(SimPauseGuard& pauseGuard, const EvalConnection& connection) {
+	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		replacer.removeConnection(pauseGuard, connection);
 		middle_id_t sourceGateId = connection.source.gateId;
 		middle_id_t destinationGateId = connection.destination.gateId;
