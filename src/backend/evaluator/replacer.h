@@ -1,7 +1,6 @@
 #ifndef replacer_h
 #define replacer_h
 
-#include <set>
 #include "simulatorOptimizer.h"
 #include "evalConfig.h"
 #include "evalConnection.h"
@@ -252,7 +251,7 @@ private:
 				continue;
 			}
 			logInfo("Found junction with ID {}", "Replacer::mergeJunctions", id);
-			
+			JunctionFloodFillResult floodFillResult = junctionFloodFill(id);
 		}
 	}
 
@@ -272,6 +271,25 @@ private:
 				if (visited.contains(output.destination.gateId)) {
 					continue;
 				}
+				GateType outputGateType = simulatorOptimizer.getGateType(output.destination.gateId);
+				if (outputGateType == GateType::JUNCTION) {
+					queue.push(output.destination.gateId);
+					visited.insert(output.destination.gateId);
+					continue;
+				}
+				result.inputsPullingFromJunctions.push_back(output);
+			}
+			for (const auto& input : inputs) {
+				if (visited.contains(input.source.gateId)) {
+					continue;
+				}
+				GateType inputGateType = simulatorOptimizer.getGateType(input.source.gateId);
+				if (inputGateType == GateType::JUNCTION) {
+					queue.push(input.source.gateId);
+					visited.insert(input.source.gateId);
+					continue;
+				}
+				result.outputsGoingIntoJunctions.push_back(input.source);
 			}
 		}
 		return result;
