@@ -132,6 +132,8 @@ public:
 
 	void endEdit(SimPauseGuard& pauseGuard) {
 		cleanReplacements();
+		// do junction merging here
+
 		simulatorOptimizer.endEdit(pauseGuard);
 	}
 
@@ -144,19 +146,19 @@ public:
 	}
 
 	logic_state_t getState(EvalConnectionPoint point) const {
-		return simulatorOptimizer.getState(point);
+		return simulatorOptimizer.getState(getReplacementConnectionPoint(point));
 	}
 
 	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
-		return simulatorOptimizer.getStates(points);
+		return simulatorOptimizer.getStates(getReplacementConnectionPoints(points));
 	}
 
-	void setState(middle_id_t id, logic_state_t state) {
-		simulatorOptimizer.setState(id, state);
+	void setState(EvalConnectionPoint id, logic_state_t state) {
+		simulatorOptimizer.setState(getReplacementConnectionPoint(id), state);
 	}
 
-	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
-		simulatorOptimizer.setStates(ids, states);
+	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+		simulatorOptimizer.setStates(getReplacementConnectionPoints(points), states);
 	}
 
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
@@ -180,6 +182,7 @@ private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;
 	std::vector<Replacement> replacements;
+	std::unordered_map<middle_id_t, middle_id_t> replacedIds;
 	Replacement& makeReplacement() {
 		replacements.push_back(Replacement(&simulatorOptimizer));
 		return replacements.back();
@@ -202,6 +205,32 @@ private:
 		for (auto& replacement : replacements) {
 			replacement.pingInput(pauseGuard, id);
 		}
+	}
+	middle_id_t getReplacementId(middle_id_t id) const {
+		auto it = replacedIds.find(id);
+		if (it != replacedIds.end()) {
+			return it->second;
+		}
+		return id;
+	}
+	EvalConnectionPoint getReplacementConnectionPoint(EvalConnectionPoint point) const {
+		return EvalConnectionPoint(getReplacementId(point.gateId), point.portId);
+	}
+	std::vector<middle_id_t> getReplacementIds(const std::vector<middle_id_t>& ids) {
+		std::vector<middle_id_t> result;
+		result.reserve(ids.size());
+		for (const auto& id : ids) {
+			result.push_back(getReplacementId(id));
+		}
+		return result;
+	}
+	std::vector<EvalConnectionPoint> getReplacementConnectionPoints(const std::vector<EvalConnectionPoint>& points) const {
+		std::vector<EvalConnectionPoint> result;
+		result.reserve(points.size());
+		for (const auto& point : points) {
+			result.push_back(getReplacementConnectionPoint(point));
+		}
+		return result;
 	}
 };
 

@@ -56,28 +56,37 @@ public:
 		simIds.reserve(points.size());
 		for (const auto& point : points) {
 			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
-			if (simIdOpt.has_value()) {
-				simIds.push_back(simIdOpt.value());
-			} else {
-				simIds.push_back(0);
-			}
+			simIds.push_back(simIdOpt.value_or(0));
 		}
 		return simulator.getStates(simIds);
 	}
-	void setState(middle_id_t id, logic_state_t state) {
-		simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
-		simulator.setState(simId, state);
+	void setState(EvalConnectionPoint point, logic_state_t state) {
+		// simulator_id_t simId = getSimIdFromMiddleId(id).value_or(0);
+		// simulator.setState(simId, state);
+		std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
+		if (!simIdOpt.has_value()) {
+			logError("Sim ID not found for connection point", "SimulatorOptimizer::setState");
+			return;
+		}
+		simulator.setState(simIdOpt.value(), state);
 	}
-	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
+	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+		// std::vector<simulator_id_t> simIds;
+		// simIds.reserve(ids.size());
+		// for (const auto& id : ids) {
+		// 	std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
+		// 	if (simIdOpt.has_value()) {
+		// 		simIds.push_back(simIdOpt.value());
+		// 	} else {
+		// 		simIds.push_back(0);
+		// 	}
+		// }
+		// simulator.setStates(simIds, states);
 		std::vector<simulator_id_t> simIds;
-		simIds.reserve(ids.size());
-		for (const auto& id : ids) {
-			std::optional<simulator_id_t> simIdOpt = getSimIdFromMiddleId(id);
-			if (simIdOpt.has_value()) {
-				simIds.push_back(simIdOpt.value());
-			} else {
-				simIds.push_back(0);
-			}
+		simIds.reserve(points.size());
+		for (const auto& point : points) {
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
+			simIds.push_back(simIdOpt.value_or(0));
 		}
 		simulator.setStates(simIds, states);
 	}

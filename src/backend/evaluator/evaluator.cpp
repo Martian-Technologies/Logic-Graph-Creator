@@ -315,12 +315,28 @@ logic_state_t Evaluator::getState(const Address& address) {
 }
 
 void Evaluator::setState(const Address& address, logic_state_t state) {
-	std::optional<middle_id_t> middleIdOpt = getMiddleId(address);
-	if (!middleIdOpt.has_value()) {
-		logError("Failed to get middle ID for address {}", "Evaluator::setState", address.toString());
+	std::optional<eval_circuit_id_t> evalCircuitIdOpt = evalCircuitContainer.traverseToTopLevelIC(address);
+	if (!evalCircuitIdOpt.has_value()) {
+		logError("Failed to traverse to top-level IC for address {}", "Evaluator::setState", address.toString());
 		return;
 	}
-	evalSimulator.setState(middleIdOpt.value(), state);
+	std::optional<EvalConnectionPoint> connectionPointOpt = getConnectionPoint(evalCircuitIdOpt.value(), address.getPosition(address.size() - 1), Direction::OUT);
+	if (connectionPointOpt.has_value()) {
+		evalSimulator.setState(connectionPointOpt.value(), state);
+		return;
+	}
+	std::optional<EvalConnectionPoint> connectionPointOptIn = getConnectionPoint(evalCircuitIdOpt.value(), address.getPosition(address.size() - 1), Direction::IN);
+	if (connectionPointOptIn.has_value()) {
+		evalSimulator.setState(connectionPointOptIn.value(), state);
+		return;
+	}
+	std::optional<middle_id_t> middleIdOpt = getMiddleId(evalCircuitIdOpt.value(), address);
+	if (middleIdOpt.has_value()) {
+		EvalConnectionPoint connectionPoint(middleIdOpt.value(), 0);
+		evalSimulator.setState(connectionPoint, state);
+		return;
+	}
+	logError("Failed to get connection point for address {}", "Evaluator::setState", address.toString());
 }
 
 std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {

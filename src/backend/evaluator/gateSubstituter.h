@@ -112,11 +112,11 @@ public:
 	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getStates(points);
 	}
-	void setState(middle_id_t id, logic_state_t state) {
-		replacer.setState(id, state);
+	void setState(EvalConnectionPoint point, logic_state_t state) {
+		replacer.setState(point, state);
 	}
-	void setStates(const std::vector<middle_id_t>& ids, const std::vector<logic_state_t>& states) {
-		replacer.setStates(ids, states);
+	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+		replacer.setStates(points, states);
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		middle_id_t sourceGateId = connection.source.gateId;
