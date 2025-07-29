@@ -121,8 +121,6 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 	simulator_id_t simulatorId = simulatorIdProvider.getNewId();
 
-	logInfo("Adding gate of type {} with simulator_id_t {}", "LogicSimulator::addGate", static_cast<int>(gateType), simulatorId);
-
 	// extend the states if necessary
 	if (statesA.size() <= simulatorId) {
 		statesA.resize(simulatorId + 1, logic_state_t::UNDEFINED);
@@ -196,11 +194,8 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		return;
 	}
 
-	logInfo("Removing gate with simulator_id_t {}", "LogicSimulator::removeGate", simulatorId);
-
 	// First, remove all references to this gate's outputs from other gates
 	for (const auto& id : outputIdsOpt.value()) {
-		logInfo("Removing all references to simulator_id_t {}", "LogicSimulator::removeGate", id);
 		for (auto& gate : andGates) {
 			gate.removeIdRefs(id);
 		}
@@ -261,18 +256,12 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-	logInfo("Making connection from simulator_id_t {} port {} to simulator_id_t {} port {}", "LogicSimulator::makeConnection",
-		sourceId, sourcePort, destinationId, destinationPort);
-
 	std::optional<simulator_id_t> actualSourceId = getOutputPortId(sourceId, sourcePort);
 
 	if (!actualSourceId.has_value()) {
 		logError("Cannot resolve actual source ID for connection", "LogicSimulator::makeConnection");
 		return;
 	}
-
-	logInfo("Source simulator_id_t {} port {} resolved to actual source ID {}", "LogicSimulator::makeConnection",
-		sourceId, sourcePort, actualSourceId.value());
 
 	addInputToGate(destinationId, actualSourceId.value(), destinationPort);
 }
