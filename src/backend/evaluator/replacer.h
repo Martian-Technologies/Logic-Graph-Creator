@@ -10,16 +10,21 @@
 #include "gateType.h"
 #include "logicSimulator.h"
 
+struct ReplacementGate {
+	middle_id_t id;
+	GateType type;
+};
+
 class Replacement {
 public:
-	Replacement(SimulatorOptimizer& optimizer)
+	Replacement(SimulatorOptimizer* optimizer)
 		: simulatorOptimizer(optimizer) {}
 
 	void removeGate(SimPauseGuard& pauseGuard, middle_id_t gateId) {
 		isEmpty = false;
 		// track connection removals
-		std::vector<EvalConnection> outputs = simulatorOptimizer.getOutputs(gateId);
-		std::vector<EvalConnection> inputs = simulatorOptimizer.getInputs(gateId);
+		std::vector<EvalConnection> outputs = simulatorOptimizer->getOutputs(gateId);
+		std::vector<EvalConnection> inputs = simulatorOptimizer->getInputs(gateId);
 		for (const auto& conn : outputs) {
 			if (conn.destination.gateId != conn.source.gateId) {
 				deletedConnections.push_back(conn);
@@ -28,22 +33,22 @@ public:
 		for (const auto& conn : inputs) {
 			deletedConnections.push_back(conn);
 		}
-		deletedGates.push_back({ gateId, simulatorOptimizer.getGateType(gateId) });
+		deletedGates.push_back({ gateId, simulatorOptimizer->getGateType(gateId) });
 		idsToTrackInputs.insert(gateId);
 		idsToTrackOutputs.insert(gateId);
-		simulatorOptimizer.removeGate(pauseGuard, gateId);
+		simulatorOptimizer->removeGate(pauseGuard, gateId);
 	}
 
 	void addGate(SimPauseGuard& pauseGuard, GateType gateType, middle_id_t gateId) {
 		isEmpty = false;
-		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
+		simulatorOptimizer->addGate(pauseGuard, gateType, gateId);
 		// we don't need to track, because nothing can happen to this gate
 		addedGates.push_back({ gateId, gateType });
 	}
 
 	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		isEmpty = false;
-		simulatorOptimizer.removeConnection(pauseGuard, connection);
+		simulatorOptimizer->removeConnection(pauseGuard, connection);
 		idsToTrackInputs.insert(connection.destination.gateId);
 		idsToTrackOutputs.insert(connection.source.gateId);
 		deletedConnections.push_back(connection);
@@ -51,7 +56,7 @@ public:
 
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		isEmpty = false;
-		simulatorOptimizer.makeConnection(pauseGuard, connection);
+		simulatorOptimizer->makeConnection(pauseGuard, connection);
 		idsToTrackInputs.insert(connection.destination.gateId);
 		idsToTrackOutputs.insert(connection.source.gateId);
 		addedConnections.push_back(connection);
@@ -60,16 +65,16 @@ public:
 	void revert(SimPauseGuard& pauseGuard) {
 		isEmpty = true;
 		for (const auto& conn : addedConnections) {
-			simulatorOptimizer.removeConnection(pauseGuard, conn);
+			simulatorOptimizer->removeConnection(pauseGuard, conn);
 		}
 		for (const auto& conn : addedGates) {
-			simulatorOptimizer.removeGate(pauseGuard, conn.id);
+			simulatorOptimizer->removeGate(pauseGuard, conn.id);
 		}
 		for (const auto& gate : deletedGates) {
-			simulatorOptimizer.addGate(pauseGuard, gate.type, gate.id);
+			simulatorOptimizer->addGate(pauseGuard, gate.type, gate.id);
 		}
 		for (const auto& conn : deletedConnections) {
-			simulatorOptimizer.makeConnection(pauseGuard, conn);
+			simulatorOptimizer->makeConnection(pauseGuard, conn);
 		}
 		addedConnections.clear();
 		addedGates.clear();
@@ -91,15 +96,12 @@ public:
 		}
 	}
 
-	struct ReplacementGate {
-		middle_id_t id;
-		GateType type;
-	};
 	bool getIsEmpty() const {
 		return isEmpty;
 	}
+
 private:
-	SimulatorOptimizer& simulatorOptimizer;
+	SimulatorOptimizer* simulatorOptimizer;
 	std::vector<ReplacementGate> addedGates;
 	std::vector<ReplacementGate> deletedGates;
 	std::vector<EvalConnection> addedConnections;
@@ -179,12 +181,17 @@ private:
 	IdProvider<middle_id_t>& middleIdProvider;
 	std::vector<Replacement> replacements;
 	Replacement& makeReplacement() {
-		replacements.push_back(Replacement(simulatorOptimizer));
+		replacements.push_back(Replacement(&simulatorOptimizer));
 		return replacements.back();
 	}
 	void cleanReplacements() {
-		replacements.erase(std::remove_if(replacements.begin(), replacements.end(),
-			[](const Replacement& r) { return r.getIsEmpty(); }), replacements.end());
+		for (auto it = replacements.begin(); it != replacements.end();) {
+			if (it->getIsEmpty()) {
+				it = replacements.erase(it);
+			} else {
+				++it;
+			}
+		}
 	}
 	void pingOutputs(SimPauseGuard& pauseGuard, middle_id_t id) {
 		for (auto& replacement : replacements) {
