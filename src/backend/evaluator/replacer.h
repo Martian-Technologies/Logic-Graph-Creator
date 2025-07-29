@@ -85,13 +85,13 @@ public:
 	}
 
 	void pingOutput(SimPauseGuard& pauseGuard, middle_id_t id) {
-		if (idsToTrackOutputs.find(id) != idsToTrackOutputs.end()) {
+		if (idsToTrackOutputs.contains(id)) {
 			revert(pauseGuard);
 		}
 	}
 
 	void pingInput(SimPauseGuard& pauseGuard, middle_id_t id) {
-		if (idsToTrackInputs.find(id) != idsToTrackInputs.end()) {
+		if (idsToTrackInputs.contains(id)) {
 			revert(pauseGuard);
 		}
 	}
@@ -132,7 +132,7 @@ public:
 
 	void endEdit(SimPauseGuard& pauseGuard) {
 		cleanReplacements();
-		// do junction merging here
+		mergeJunctions(pauseGuard);
 
 		simulatorOptimizer.endEdit(pauseGuard);
 	}
@@ -207,9 +207,8 @@ private:
 		}
 	}
 	middle_id_t getReplacementId(middle_id_t id) const {
-		auto it = replacedIds.find(id);
-		if (it != replacedIds.end()) {
-			return it->second;
+		if (replacedIds.contains(id)) {
+			return replacedIds.at(id);
 		}
 		return id;
 	}
@@ -229,6 +228,51 @@ private:
 		result.reserve(points.size());
 		for (const auto& point : points) {
 			result.push_back(getReplacementConnectionPoint(point));
+		}
+		return result;
+	}
+
+	struct JunctionFloodFillResult {
+		std::vector<EvalConnectionPoint> outputsGoingIntoJunctions;
+		std::vector<EvalConnection> inputsPullingFromJunctions;
+		std::vector<middle_id_t> junctionIds;
+	};
+
+	void mergeJunctions(SimPauseGuard& pauseGuard) {
+		logInfo("Merging junctions", "Replacer::mergeJunctions");
+		std::vector<middle_id_t> allMiddleIds = middleIdProvider.getUsedIds();
+		for (const middle_id_t id : allMiddleIds) {
+			// if this id is in the replacedIds map, it means we can skip it / it's already been scanned and replaced
+			if (replacedIds.contains(id)) {
+				continue;
+			}
+			// check if we're a junction
+			GateType gateType = simulatorOptimizer.getGateType(id);
+			if (gateType != GateType::JUNCTION) {
+				continue;
+			}
+			logInfo("Found junction with ID {}", "Replacer::mergeJunctions", id);
+			
+		}
+	}
+
+	JunctionFloodFillResult junctionFloodFill(middle_id_t junctionId) {
+		JunctionFloodFillResult result;
+		std::set<middle_id_t> visited;
+		std::queue<middle_id_t> queue;
+		queue.push(junctionId);
+		visited.insert(junctionId);
+		while (!queue.empty()) {
+			middle_id_t currentId = queue.front();
+			queue.pop();
+			result.junctionIds.push_back(currentId);
+			std::vector<EvalConnection> outputs = simulatorOptimizer.getOutputs(currentId);
+			std::vector<EvalConnection> inputs = simulatorOptimizer.getInputs(currentId);
+			for (const auto& output : outputs) {
+				if (visited.contains(output.destination.gateId)) {
+					continue;
+				}
+			}
 		}
 		return result;
 	}

@@ -121,14 +121,12 @@ public:
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		middle_id_t sourceGateId = connection.source.gateId;
 		middle_id_t destinationGateId = connection.destination.gateId;
-		auto it = trackedGates.find(sourceGateId);
-		if (it != trackedGates.end()) {
-			TrackedGate& trackedGate = it->second;
+		if (trackedGates.contains(sourceGateId)) {
+			TrackedGate& trackedGate = trackedGates.at(sourceGateId);
 			trackedGate.addOutput(connection);
 		}
-		it = trackedGates.find(destinationGateId);
-		if (it != trackedGates.end()) {
-			TrackedGate& trackedGate = it->second;
+		if (trackedGates.contains(destinationGateId)) {
+			TrackedGate& trackedGate = trackedGates.at(destinationGateId);
 			trackedGate.addInput(connection);
 			GateType newState = trackedGate.evaluate();
 			if (newState != trackedGate.currentState) {
@@ -152,14 +150,12 @@ public:
 		replacer.removeConnection(pauseGuard, connection);
 		middle_id_t sourceGateId = connection.source.gateId;
 		middle_id_t destinationGateId = connection.destination.gateId;
-		auto it = trackedGates.find(sourceGateId);
-		if (it != trackedGates.end()) {
-			TrackedGate& trackedGate = it->second;
+		if (trackedGates.contains(sourceGateId)) {
+			TrackedGate& trackedGate = trackedGates.at(sourceGateId);
 			trackedGate.removeOutput(connection);
 		}
-		it = trackedGates.find(destinationGateId);
-		if (it != trackedGates.end()) {
-			TrackedGate& trackedGate = it->second;
+		if (trackedGates.contains(destinationGateId)) {
+			TrackedGate& trackedGate = trackedGates.at(destinationGateId);
 			trackedGate.removeInput(connection);
 			GateType newState = trackedGate.evaluate();
 			if (newState != trackedGate.currentState) {
@@ -193,7 +189,7 @@ private:
 		trackedGates.erase(gateId);
 	}
 	bool isTrackedGate(middle_id_t gateId) const {
-		return trackedGates.find(gateId) != trackedGates.end();
+		return trackedGates.contains(gateId);
 	}
 };
 

@@ -9,9 +9,8 @@ class DiffCache {
 public:
 	DiffCache(CircuitManager& circuitManager) : circuitManager(circuitManager) {}
 	inline DifferenceSharedPtr getDifference(circuit_id_t circuitId) {
-		auto it = cache.find(circuitId);
-		if (it != cache.end()) {
-			return it->second;
+		if (cache.contains(circuitId)) {
+			return cache.at(circuitId);
 		}
 		auto circuit = circuitManager.getCircuit(circuitId);
 		if (circuit) {
