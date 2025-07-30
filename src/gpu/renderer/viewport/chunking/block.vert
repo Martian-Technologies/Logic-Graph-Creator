@@ -22,7 +22,7 @@ const int vertsPerBlock = 6;
 
 // magic rotation bitmasks for getting rotation coordinates
 uint bitmasksX[4] = uint[4](0x1C, 0x0E, 0x23, 0x31);
-uint bitmasksY[4] = uint[4](0x0E, 0x1C, 0x31, 0x23);
+uint bitmasksY[4] = uint[4](0x0E, 0x23, 0x31, 0x1C);
 
 void main() {
 	// extract state from states array

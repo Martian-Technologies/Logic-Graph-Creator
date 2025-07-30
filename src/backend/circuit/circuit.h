@@ -7,7 +7,7 @@
 #include "backend/container/copiedBlocks.h"
 #include "backend/selection.h"
 #include "undoSystem.h"
-#include "renderManager.h"
+#include "render/renderManager.h"
 
 class GeneratedCircuit;
 class ParsedCircuit;

@@ -6,21 +6,6 @@
 
 class Circuit;
 
-struct RenderConnectionEnd {
-	Position otherBlock;
-	bool isInput;
-};
-
-struct WireHash {
-    std::size_t operator () (const std::pair<Position,Position> &p) const {
-        auto h1 = std::hash<Position>{}(p.first);
-        auto h2 = std::hash<Position>{}(p.second);
-
-		// temp hash
-        return h1 ^ h2;
-    }
-};
-
 // probably should have just used a messaging system for this, but I want a thread safe queue dangit
 class CircuitRenderer {
 public:
@@ -44,15 +29,19 @@ public:
 
 private:
 	void addDifference(DifferenceSharedPtr diff, const std::set<CircuitRenderer*>& renderers);
-	Address getAddressOfConnection(std::pair<Position, Position> connection);
 
 private:
+	struct RenderedBlock {
+		RenderedBlock(BlockType type, Rotation rotation) : type(type), rotation(rotation) {}
+		std::unordered_map<std::pair<Position, Position>, Position> connectionsToOtherBlock;
+		BlockType type;
+		Rotation rotation;
+	};
+
 	Circuit* circuit;
 	std::set<CircuitRenderer*> connectedRenderers;
 
-	std::unordered_map<Position, std::unordered_map<std::pair<Position, Position>, RenderConnectionEnd, WireHash>> blockToConnections;
-	std::unordered_map<Position, Rotation> blockToRotation;
-	std::unordered_map<Position, BlockType> blockToType;
+	std::unordered_map<Position, RenderedBlock> renderedBlocks;
 };
 
-#endif
+#endif /* renderManager_h */

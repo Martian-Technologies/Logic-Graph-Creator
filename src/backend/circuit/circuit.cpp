@@ -4,7 +4,6 @@
 	#include <tracy/Tracy.hpp>
 #endif
 
-#include "backend/circuit/renderManager.h"
 #include "backend/proceduralCircuits/generatedCircuit.h"
 #include "logging/logging.h"
 #include "parsedCircuit.h"

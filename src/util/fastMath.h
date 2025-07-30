@@ -26,8 +26,6 @@ constexpr char signum(T x) {
 	return T(0) < x;
 }
 
-
-
 inline float decPart(float x) { return (float)signum(x) * fmodf(Fabs(x), 1.f); }
 
 template <typename T>

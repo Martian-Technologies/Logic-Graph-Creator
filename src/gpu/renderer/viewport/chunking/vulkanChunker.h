@@ -7,7 +7,6 @@
 
 #include "backend/address.h"
 #include "backend/circuit/circuit.h"
-#include "backend/circuit/renderManager.h"
 #include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
@@ -108,7 +107,7 @@ struct RenderedWire {
 };
 
 typedef std::unordered_map<Position, RenderedBlock> RenderedBlocks;
-typedef std::unordered_map<std::pair<Position, Position>, RenderedWire, WireHash> RenderedWires;
+typedef std::unordered_map<std::pair<Position, Position>, RenderedWire> RenderedWires;
 
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
@@ -194,7 +193,7 @@ private:
 	
 private:
 	std::unordered_map<Position, Chunk> chunks;
-	std::unordered_map<std::pair<Position, Position>, std::vector<Position>, WireHash> chunksUnderWire;
+	std::unordered_map<std::pair<Position, Position>, std::vector<Position>> chunksUnderWire;
 	std::mutex mux; // sync can be relaxed in the future
 
 	// while edits are being made

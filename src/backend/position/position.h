@@ -239,7 +239,17 @@ struct std::hash<Position> {
 	inline std::size_t operator()(Position pos) const noexcept {
 		std::size_t x = std::hash<cord_t> {}(pos.x);
 		std::size_t y = std::hash<cord_t> {}(pos.y);
-		return (std::size_t)x ^ ((std::size_t)y << 32);
+		return x ^ (y << 32);
+		// TODO hash speed dif: return x + 0x9e3779b9 + (x << 6) + ( >> 2);
+	}
+};
+
+template<>
+struct std::hash<std::pair<Position,Position>> {
+	inline std::size_t operator()(const std::pair<Position,Position>& posPair) const noexcept {
+		std::size_t a = std::hash<Position> {}(posPair.first);
+		std::size_t b = std::hash<Position> {}(posPair.second);
+		return a + 0x9e3779b9 + (b << 6) + (b >> 2);
 	}
 };
 
