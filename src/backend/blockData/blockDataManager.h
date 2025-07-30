@@ -107,7 +107,6 @@ public:
 		if (!blockExists(type)) return { 0, false };
 		return blockData[type - 1].getOutputConnectionId(vector, rotation);
 	}
-
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return { Vector(), false };
 		return blockData[type - 1].getConnectionVector(connectionId);

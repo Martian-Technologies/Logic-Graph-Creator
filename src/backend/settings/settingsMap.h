@@ -7,12 +7,14 @@ enum SettingType {
 	VOID,
 	STRING,
 	INT,
+	BOOL,
 	KEYBIND
 };
 template<SettingType settingType> struct SettingTypeToType;
 template<> struct SettingTypeToType<SettingType::VOID> { using type = char; };
 template<> struct SettingTypeToType<SettingType::STRING> { using type = std::string; };
 template<> struct SettingTypeToType<SettingType::INT> { using type = int; };
+template<> struct SettingTypeToType<SettingType::BOOL> { using type = bool; };
 template<> struct SettingTypeToType<SettingType::KEYBIND> { using type = Keybind; };
 
 class SettingsMap {

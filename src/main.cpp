@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", makeKeybind(Rml::Input::KeyIdentifier::KI_UNKNOWN, Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::BOOL>("Keybinds/Camera/Scroll Panning", true);
 #else
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT));
@@ -53,6 +55,8 @@ int main(int argc, char* argv[]) {
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
 		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", makeKeybind(Rml::Input::KeyIdentifier::KI_UNKNOWN, Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::BOOL>("Keybinds/Camera/Scroll Panning", true);
 #endif
 
 		App app;

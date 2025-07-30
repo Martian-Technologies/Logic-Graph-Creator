@@ -161,6 +161,17 @@ Rml::ElementPtr ContentManager::generateItem(const std::string& key) {
 	switch (Settings::getType(key)) {
 	case SettingType::INT:
 		break;
+	case SettingType::BOOL: {
+		Rml::ElementPtr button = document->CreateElement("button");
+		button->AppendChild(std::move(document->CreateTextNode((*Settings::get<SettingType::BOOL>(key)) ? "Enabled" : "Disabled")));
+		button->AddEventListener(Rml::EventId::Click, new EventPasser([this, key](Rml::Event& event){
+			bool newVal = !*Settings::get<SettingType::BOOL>(key);
+			Settings::set<SettingType::BOOL>(key, newVal);
+			event.GetCurrentElement()->SetInnerRML(newVal ? "Enabled" : "Disabled");
+		}));
+		item->AppendChild(std::move(button));
+		break;
+	}
 	case SettingType::KEYBIND: {
 		item->AppendChild(std::move(document->CreateTextNode("Keybind: " + key)));
 		Rml::ElementPtr keybindText = document->CreateElement("div");

@@ -1,5 +1,9 @@
 #include "viewportRenderer.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 void ViewportRenderer::init(VulkanDevice* device, VkRenderPass renderPass) {
 	gridRenderer.init(device, renderPass);
 	chunkRenderer.init(device, renderPass);
@@ -13,6 +17,9 @@ void ViewportRenderer::cleanup() {
 }
 
 void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	// get view data
 	ViewportViewData viewData = viewport->getViewData();
 

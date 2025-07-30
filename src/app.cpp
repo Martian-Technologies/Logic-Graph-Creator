@@ -1,5 +1,9 @@
 #include "app.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 Rml::EventId pinchEventId = Rml::EventId::Invalid;
 
 Rml::EventId getPinchEventId() {
@@ -15,13 +19,19 @@ App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFile
 	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
 }
 
+#ifdef TRACY_PROFILER
+const char * const addLoopTracyName = "appLoop";
+#endif
+
 void App::runLoop() {
 	bool firstPass = true;
 	running = true;
 	while (running) {
 		// Wait for the next event (so we don't overload the cpu)
 		SDL_WaitEvent(nullptr);
-		
+#ifdef TRACY_PROFILER
+		FrameMarkStart(addLoopTracyName);
+#endif
 		// process events (TODO - should probably just have a map of window ids to windows)
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -73,5 +83,8 @@ void App::runLoop() {
 				window->getCircuitViewWidget()->handleResize();
 			}
 		}
+#ifdef TRACY_PROFILER
+		FrameMarkEnd(addLoopTracyName);
+#endif
 	}
 }

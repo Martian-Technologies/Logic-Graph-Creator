@@ -1,5 +1,9 @@
 #include "vulkanChunker.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 #include "../sharedLogic/logicRenderingUtils.h"
 #include "backend/position/position.h"
 #include "logging/logging.h"
@@ -109,6 +113,9 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // =========================================================================================================
 
 void Chunk::rebuildAllocation(VulkanDevice* device) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
 		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(device, blocks, wires);
@@ -172,7 +179,6 @@ void VulkanChunker::startMakingEdits() {
 }
 
 void VulkanChunker::stopMakingEdits() {
-
 	for (const Position& chunk : chunksToUpdate) {
 		chunks[chunk].rebuildAllocation(device);
 	}
