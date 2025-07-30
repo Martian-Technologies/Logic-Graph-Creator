@@ -1,7 +1,7 @@
 #include "circuitView.h"
 #include "backend/backend.h"
 
-CircuitView::CircuitView(Renderer* renderer) : renderer(renderer), toolManager(&eventRegister, renderer, this) {
+CircuitView::CircuitView(CircuitViewRenderer* renderer) : renderer(renderer), toolManager(&eventRegister, renderer, this) {
 	renderer->updateView(&viewManager);
 	viewManager.setUpEvents(eventRegister);
 	viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
@@ -32,7 +32,6 @@ void CircuitView::setCircuit(SharedCircuit circuit) {
 		this->circuit = circuit;
 		toolManager.setCircuit(circuit.get());
 		renderer->setCircuit(circuit.get());
-		circuit->connectListener(this, std::bind(&CircuitView::circuitChanged, this, std::placeholders::_1, std::placeholders::_2));
 	} else {
 		this->circuit = circuit;
 		toolManager.setCircuit(nullptr);
@@ -49,8 +48,4 @@ void CircuitView::setAddress(const Address& address) {
 void CircuitView::viewChanged() {
 	eventRegister.doEvent(PositionEvent("Pointer Move", viewManager.getPointerPosition()));
 	renderer->updateView(&viewManager);
-}
-
-void CircuitView::circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId) {
-	renderer->updateCircuit(difference);
 }

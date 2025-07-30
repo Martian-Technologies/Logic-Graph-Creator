@@ -3,6 +3,7 @@
 #include "../sharedLogic/logicRenderingUtils.h"
 #include "backend/position/position.h"
 #include "logging/logging.h"
+#include <mutex>
 
 const int CHUNK_SIZE = 64;
 cord_t getChunk(cord_t in) {
@@ -36,8 +37,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 
 			BlockInstance instance;
 			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
-			instance.sizeX = block.second.realWidth;
-			instance.sizeY = block.second.realHeight;
+			instance.sizeX = block.second.size.dx;
+			instance.sizeY = block.second.size.dy;
 			instance.rotation = block.second.rotation;
 			instance.texX = uvOrigin.x;
 
@@ -162,203 +163,105 @@ VulkanChunker::VulkanChunker(VulkanDevice* device)
 
 }
 
-void VulkanChunker::setCircuit(Circuit* circuit) {
+VulkanChunker::~VulkanChunker() {
 	std::lock_guard<std::mutex> lock(mux);
-
-	this->circuit = circuit;
-
-	// remove all existing chunking data
-	chunks.clear();
-
-	if (circuit) {
-		// TODO - this should be improved to happen deferred
-		Difference creationDiff = circuit->getBlockContainer()->getCreationDifference();
-		updateCircuit(&creationDiff);
-	}
 }
 
-void VulkanChunker::updateCircuit(DifferenceSharedPtr diff) {
-	std::lock_guard<std::mutex> lock(mux);
-
-	updateCircuit(diff.get());
+void VulkanChunker::startMakingEdits() {
+	mux.lock();
 }
 
-void VulkanChunker::updateCircuit(Difference* diff) {
-	std::unordered_set<Position> chunksToUpdate;
+void VulkanChunker::stopMakingEdits() {
 
-	for (const auto& modification : diff->getModifications()) {
-		const auto& [modificationType, modificationData] = modification;
-		const BlockDataManager* blockDataManager = circuit->getBlockContainer()->getBlockDataManager();
-
-		switch (modificationType) {
-		case Difference::ModificationType::REMOVED_BLOCK:
-		{
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-
-			// Remove block
-			Position chunk = getChunk(position);
-			chunks[chunk].getRenderedBlocks().erase(position);
-			chunksToUpdate.insert(chunk);
-
-			break;
-		}
-		case Difference::ModificationType::PLACE_BLOCK:
-		{
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-
-			// Add block
-			Position chunk = getChunk(position);
-			Vector blockSize = blockDataManager->getBlockSize(blockType, rotation);
-			chunks[chunk].getRenderedBlocks()[position] = RenderedBlock(blockType, rotation, blockSize.dx, blockSize.dy);
-			chunksToUpdate.insert(chunk);
-
-			break;
-		}
-		case Difference::ModificationType::REMOVED_CONNECTION:
-		{
-			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-
-			// TODO - technically removing connections could use a faster algorithm since it doesn't need to know the input/output points of each chunk
-			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getRenderedBlocks()[outputBlockPosition].rotation;
-			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getRenderedBlocks()[inputBlockPosition].rotation;
-			updateWireOverChunks(outputPosition, outputRotation, inputPosition, inputRotation, false, chunksToUpdate);
-
-			// remove from block connection registry
-			blockToConnections[inputBlockPosition].erase({ outputPosition, inputPosition });
-			blockToConnections[outputBlockPosition].erase({ outputPosition, inputPosition });
-
-			break;
-		}
-		case Difference::ModificationType::CREATED_CONNECTION:
-		{
-			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-
-			Rotation outputRotation = chunks[getChunk(outputBlockPosition)].getRenderedBlocks()[outputBlockPosition].rotation;
-			Rotation inputRotation = chunks[getChunk(inputBlockPosition)].getRenderedBlocks()[inputBlockPosition].rotation;
-			updateWireOverChunks(outputPosition, outputRotation, inputPosition, inputRotation, true, chunksToUpdate);
-
-			// add to block connection registry
-			blockToConnections[inputBlockPosition][{outputPosition, inputPosition}] = { outputBlockPosition, true };
-			blockToConnections[outputBlockPosition][{outputPosition, inputPosition}] = { inputBlockPosition, false };
-
-			break;
-		}
-		case Difference::ModificationType::MOVE_BLOCK:
-		{
-			const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
-
-			if (curPosition == newPosition) continue;
-
-			// MOVE BLOCK
-
-			// get chunk
-			Position curChunk = getChunk(curPosition);
-			Position newChunk = getChunk(newPosition);
-			chunksToUpdate.insert(curChunk);
-			chunksToUpdate.insert(newChunk);
-
-			// find original block
-			auto& curBlocksForUpdating = chunks[curChunk].getRenderedBlocks();
-			auto itr = curBlocksForUpdating.find(curPosition);
-			if (itr == curBlocksForUpdating.end()) {
-				logError("Renderer could not find block to move.", "Vulkan");
-				continue;
-			}
-
-			// add block to new position
-			auto& newBlocksForUpdating = chunks[newChunk].getRenderedBlocks();
-			itr->second.rotation = newRotation;
-			newBlocksForUpdating[newPosition] = itr->second;
-			BlockType blockType = itr->second.blockType;
-			// remove block from original chunk
-			curBlocksForUpdating.erase(itr);
-
-			// MOVE CONNECTIONS
-			Rotation rotation = chunks[getChunk(newPosition)].getRenderedBlocks()[newPosition].rotation;
-			Vector moveVector = newPosition - curPosition;
-
-			// Move all input connections
-			for (const auto& end : blockToConnections[curPosition]) {
-				if (end.second.otherBlock != curPosition) {
-					Rotation otherRotation = chunks[getChunk(end.second.otherBlock)].getRenderedBlocks()[end.second.otherBlock].rotation;
-
-					// remove old wire
-					blockToConnections[end.second.otherBlock].erase(end.first); // remove other's entry
-					if (end.second.isInput) updateWireOverChunks(end.first.first, otherRotation, end.first.second, rotation, false, chunksToUpdate);
-					else updateWireOverChunks(end.first.first, rotation, end.first.second, otherRotation, false, chunksToUpdate);
-
-					// calculate new wire
-					std::pair<connection_end_id_t, bool> idSucPair = (
-						end.second.isInput ?
-						(circuit->getBlockContainer()->getBlockDataManager()->getInputConnectionId(blockType, curRotation, end.first.second - curPosition)) :
-						(circuit->getBlockContainer()->getBlockDataManager()->getOutputConnectionId(blockType, curRotation, end.first.first - curPosition))
-					);
-					Position newEndPos;
-					if (idSucPair.second) {
-						newEndPos = newPosition + circuit->getBlockContainer()->getBlockDataManager()->getConnectionVector(blockType, newRotation, idSucPair.first).first;
-					} else {
-						logError("Can not find connection ID for wire move.", "Vulkan");
-						newEndPos = (end.second.isInput ? end.first.second : end.first.first) + moveVector;
-					}
-					std::pair<Position, Position> newConnection;
-					if (end.second.isInput) newConnection = {end.first.first, newEndPos};
-					else newConnection = {newEndPos, end.first.second};
-
-					// add new wire to registry
-					blockToConnections[newPosition][newConnection] = { end.second.otherBlock, end.second.isInput };
-					blockToConnections[end.second.otherBlock][newConnection] = { newPosition, !end.second.isInput };
-
-					// add new wire to chunks
-					if (end.second.isInput) updateWireOverChunks(newConnection.first, otherRotation, newConnection.second, rotation, true, chunksToUpdate);
-					else updateWireOverChunks(newConnection.first, rotation, newConnection.second, otherRotation, true, chunksToUpdate);
-				} else {
-					// if we are a self connection
-
-					// remove old wire (we don't need to remove from registry, because we do that for ourselves later)
-					updateWireOverChunks(end.first.first, rotation, end.first.second, rotation, false, chunksToUpdate);
-
-					// calculate new wire
-					std::pair<connection_end_id_t, bool> inputIdSucPair = circuit->getBlockContainer()->getBlockDataManager()->getInputConnectionId(blockType, curRotation, end.first.second - curPosition);
-					std::pair<connection_end_id_t, bool> outputIdSucPair = circuit->getBlockContainer()->getBlockDataManager()->getOutputConnectionId(blockType, curRotation, end.first.first - curPosition);
-					Position inputNewEndPos;
-					if (inputIdSucPair.second) {
-						inputNewEndPos = newPosition + circuit->getBlockContainer()->getBlockDataManager()->getConnectionVector(blockType, newRotation, inputIdSucPair.first).first;
-					} else {
-						logError("Can not find connection ID for wire move.", "Vulkan");
-						inputNewEndPos = end.first.second + moveVector;
-					}
-					Position outputNewEndPos;
-					if (outputIdSucPair.second) {
-						outputNewEndPos = newPosition + circuit->getBlockContainer()->getBlockDataManager()->getConnectionVector(blockType, newRotation, outputIdSucPair.first).first;
-					} else {
-						logError("Can not find connection ID for wire move.", "Vulkan");
-						outputNewEndPos = end.first.first + moveVector;
-					}
-
-					std::pair<Position, Position> newConnection = { outputNewEndPos, outputNewEndPos };
-
-					// add new wire to registry
-					blockToConnections[newPosition][newConnection] = { newPosition, end.second.isInput };
-
-					// add new wire to chunks
-					updateWireOverChunks(newConnection.first, rotation, newConnection.second, rotation, true, chunksToUpdate);
-				}
-
-
-			}
-			blockToConnections.erase(curPosition); // remove all of our old entries
-
-			break;
-		}
-		default:
-			break;
-		}
-	}
-
-	// rebuild all modified chunks
 	for (const Position& chunk : chunksToUpdate) {
 		chunks[chunk].rebuildAllocation(device);
 	}
+	chunksToUpdate.clear();
+
+	mux.unlock();
+}
+
+void VulkanChunker::addBlock(BlockType type, Position position, Vector size, Rotation rotation) {
+	Position chunk = getChunk(position);
+	chunks[chunk].getRenderedBlocks()[position] = RenderedBlock(type, rotation, size.free());
+	chunksToUpdate.insert(chunk);
+}
+
+void VulkanChunker::removeBlock(Position position) {
+	Position chunk = getChunk(position);
+	chunks[chunk].getRenderedBlocks().erase(position);
+	chunksToUpdate.insert(chunk);
+}
+
+void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) {
+	Position curChunk = getChunk(curPos);
+	Position newChunk = getChunk(newPos);
+
+	auto itr = chunks[curChunk].getRenderedBlocks().find(curPos);
+	if (itr != chunks[curChunk].getRenderedBlocks().end()) {
+		RenderedBlock block = itr->second;
+		block.rotation = newRotation;
+		block.size = newSize.free();
+		chunks[curChunk].getRenderedBlocks().erase(itr);
+		chunks[newChunk].getRenderedBlocks()[newPos] = block;
+
+		chunksToUpdate.insert(curChunk);
+		chunksToUpdate.insert(newChunk);
+	} else {
+		logError("Could not move block from ({}, {}) to ({}, {}) because it could not be found", "Vulkan", curPos.x, curPos.y, newPos.x, newPos.y);
+	}
+}
+
+void VulkanChunker::addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address) {
+	FPosition a = points.first.free() + socketOffsets.first;
+	FPosition b = points.second.free() + socketOffsets.second;
+	for (const ChunkIntersection& intersection : getChunkIntersections(a, b)) {
+		chunks[intersection.chunk].getRenderedWires()[points] = { intersection.start, intersection.end, address };
+		chunksUnderWire[points].push_back(intersection.chunk);
+		chunksToUpdate.insert(intersection.chunk);
+	}
+}
+
+void VulkanChunker::removeWire(std::pair<Position, Position> points) {
+	auto itr = chunksUnderWire.find(points);
+	if (itr == chunksUnderWire.end()) {
+		logError("Could not find wire ({}, {}) to remove", "VulkanChunker", points.first, points.second);
+		return;
+	}
+	for (Position p : itr->second) {
+		chunks[p].getRenderedWires().erase(points);
+		chunksToUpdate.insert(p);
+	}
+	chunksUnderWire.erase(itr);
+}
+
+void VulkanChunker::reset() {
+	std::lock_guard<std::mutex> lock(mux);
+
+	chunks.clear();
+	chunksUnderWire.clear();
+}
+
+std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {
+	std::lock_guard<std::mutex> lock(mux);
+
+	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
+	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
+	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
+
+	// go through each chunk in view and collect it if it exists and has an allocation
+	std::vector<std::shared_ptr<VulkanChunkAllocation>> seen;
+	for (cord_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
+		for (cord_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
+			auto chunk = chunks.find({ chunkX, chunkY });
+			if (chunk != chunks.end()) {
+				auto allocation = chunk->second.getAllocation();
+				if (allocation.has_value()) seen.push_back(allocation.value());
+			}
+		}
+	}
+
+	return seen;
 }
 
 std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition start, FPosition end) {
@@ -434,57 +337,3 @@ std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition st
 	return intersections;
 }
 
-void VulkanChunker::updateWireOverChunks(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate) {
-
-	// TODO - handle same position
-	std::pair<Position, Position> wire = { start, end };
-
-	// get state address for connection
-	Address relativeAddress = start; // TODO - use actual address
-
-	// get start line position
-	FPosition startF = start.free() + getOutputOffset(startRotation);
-	FPosition endF = end.free() + getInputOffset(endRotation);
-
-	// update all wires in intersecting chunks
-	if (add) {
-		for (const ChunkIntersection& intersection : getChunkIntersections(startF, endF)) {
-			chunks[intersection.chunk].getRenderedWires()[wire] = { intersection.start, intersection.end, relativeAddress };
-			wireToChunks[{start, end}].push_back(intersection.chunk);
-			chunksToUpdate.insert(intersection.chunk);
-		}
-	} else {
-		auto itr = wireToChunks.find({start, end});
-		if (itr == wireToChunks.end()) {
-			logError("Could not find wire {{{}, {}}} to remove", "VulkanChunker", start, end);
-			return;
-		}
-		for (Position p : itr->second) {
-			chunks[p].getRenderedWires().erase(wire);
-			chunksToUpdate.insert(p);
-		}
-		wireToChunks.erase(itr);
-	}
-}
-
-std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {
-	std::lock_guard<std::mutex> lock(mux);
-
-	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
-	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
-	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
-
-	// go through each chunk in view and collect it if it exists and has an allocation
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> seen;
-	for (cord_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
-		for (cord_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
-			auto chunk = chunks.find({ chunkX, chunkY });
-			if (chunk != chunks.end()) {
-				auto allocation = chunk->second.getAllocation();
-				if (allocation.has_value()) seen.push_back(allocation.value());
-			}
-		}
-	}
-
-	return seen;
-}

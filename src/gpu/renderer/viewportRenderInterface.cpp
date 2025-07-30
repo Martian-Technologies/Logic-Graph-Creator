@@ -4,6 +4,7 @@
 
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
+#include "logging/logging.h"
 #include "viewport/sharedLogic/logicRenderingUtils.h"
 #include "backend/selection.h"
 
@@ -12,6 +13,7 @@ ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Elem
 }
 
 ViewportRenderInterface::~ViewportRenderInterface() {
+	if (circuit != nullptr) circuit->getRenderManager()->disconnect(&chunker);
 	if (linkedWindowRenderer != nullptr) linkedWindowRenderer->deregisterViewportRenderInterface(this);
 }
 
@@ -31,8 +33,18 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	std::lock_guard<std::mutex> lock(circuitMux);
 	
+	if (this->circuit)
+	{
+		circuit->getRenderManager()->disconnect(&chunker);
+		chunker.reset();
+	}
+
 	this->circuit = circuit;
-	chunker.setCircuit(circuit);
+
+	if (this->circuit) {
+		circuit->getRenderManager()->getMeUpToSpeed(&chunker);
+		circuit->getRenderManager()->connect(&chunker);
+	}
 }
 
 void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
@@ -63,10 +75,6 @@ void ViewportRenderInterface::updateView(ViewManager* viewManager) {
 	viewData.viewBounds = { topLeft, bottomRight };
 
 	viewData.viewScale = viewManager->getViewScale();
-}
-
-void ViewportRenderInterface::updateCircuit(DifferenceSharedPtr diff) {
-	chunker.updateCircuit(diff);
 }
 
 float ViewportRenderInterface::getLastFrameTimeMs() const {

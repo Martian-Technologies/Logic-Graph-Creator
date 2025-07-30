@@ -46,7 +46,7 @@ void CircuitTool::activate() {
 	updateElements();
 }
 
-void CircuitTool::setup(Renderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit) {
+void CircuitTool::setup(CircuitViewRenderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit) {
 	setEvaluatorStateInterface(evaluatorStateInterface);
 	this->toolStackInterface = toolStackInterface;
 	this->elementCreator.setup(renderer);

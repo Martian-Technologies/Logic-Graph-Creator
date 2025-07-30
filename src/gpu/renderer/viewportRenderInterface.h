@@ -18,7 +18,7 @@ struct ViewportViewData {
 	VkViewport viewport;
 };
 
-class ViewportRenderInterface : public Renderer {
+class ViewportRenderInterface : public CircuitViewRenderer {
 public:
 	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element);
 	~ViewportRenderInterface();
@@ -43,7 +43,6 @@ public:
 	void setAddress(const Address& address) override final;
 
 	void updateView(ViewManager* viewManager) override final;
-	void updateCircuit(DifferenceSharedPtr diff) override final;
 
 	float getLastFrameTimeMs() const override final;
 

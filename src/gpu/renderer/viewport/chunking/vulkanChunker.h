@@ -7,6 +7,7 @@
 
 #include "backend/address.h"
 #include "backend/circuit/circuit.h"
+#include "backend/circuit/renderManager.h"
 #include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
@@ -94,30 +95,16 @@ struct WireInstance {
 };
 
 // ====================================================================================================================
-// TODO - not sure if this should be stored, maybe it would be faster to just
-// query from blockContainer sometimes. We also don't have to store the width
-// and height
 struct RenderedBlock {
 	BlockType blockType;
 	Rotation rotation;
-	int realWidth;
-	int realHeight;
+	FVector size;
 };
 
 struct RenderedWire {
 	FPosition start;
 	FPosition end;
 	Address relativeStateAddress;
-};
-
-struct WireHash {
-    std::size_t operator () (const std::pair<Position,Position> &p) const {
-        auto h1 = std::hash<Position>{}(p.first);
-        auto h2 = std::hash<Position>{}(p.second);
-
-		// temp hash
-        return h1 ^ h2;
-    }
 };
 
 typedef std::unordered_map<Position, RenderedBlock> RenderedBlocks;
@@ -179,39 +166,40 @@ private:
 
 // ====================================================================================================================
 
-struct ChunkerConnectionEnd {
-	Position otherBlock;
-	bool isInput;
-};
-
 struct ChunkIntersection {
 	Position chunk;
 	FPosition start;
 	FPosition end;
 };
 
-class VulkanChunker {
+class VulkanChunker : public CircuitRenderer {
 public:
 	VulkanChunker(VulkanDevice* device);
-	
-	void setCircuit(Circuit* circuit);
-	void updateCircuit(DifferenceSharedPtr diff);
+	~VulkanChunker();
+
+	void startMakingEdits();
+	void stopMakingEdits();
+	void addBlock(BlockType type, Position position, Vector size, Rotation rotation);
+	void removeBlock(Position position);
+	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize);
+	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address);
+	void removeWire(std::pair<Position, Position> points);
+
+	void reset();
 	
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 
 private:
-	void updateCircuit(Difference* diff);
 	std::vector<ChunkIntersection> getChunkIntersections(FPosition start, FPosition end);
-	void updateWireOverChunks(Position start, Rotation startRotation, Position end, Rotation endRotation, bool add, std::unordered_set<Position>& chunksToUpdate);
 	
 private:
 	std::unordered_map<Position, Chunk> chunks;
-	std::unordered_map<Position, std::unordered_map<std::pair<Position, Position>, ChunkerConnectionEnd, WireHash>> blockToConnections;
-	std::unordered_map<std::pair<Position, Position>, std::vector<Position>, WireHash> wireToChunks;
+	std::unordered_map<std::pair<Position, Position>, std::vector<Position>, WireHash> chunksUnderWire;
 	std::mutex mux; // sync can be relaxed in the future
 
-	// refs
-	Circuit* circuit = nullptr;
+	// while edits are being made
+	std::unordered_set<Position> chunksToUpdate;
+
 	VulkanDevice* device = nullptr;
 };
 

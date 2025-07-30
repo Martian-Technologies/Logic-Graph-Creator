@@ -7,6 +7,7 @@
 #include "backend/container/copiedBlocks.h"
 #include "backend/selection.h"
 #include "undoSystem.h"
+#include "renderManager.h"
 
 class GeneratedCircuit;
 class ParsedCircuit;
@@ -22,6 +23,7 @@ public:
 	Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
 
 	void clear(bool clearUndoTree = false);
+	CircuitRenderManager* getRenderManager() { return &renderManager; }
 
 	inline BlockType getBlockType() const { return blockContainer.getBlockType(); }
 	inline const std::string& getUUID() const { return circuitUUID; }
@@ -104,6 +106,7 @@ private:
 		if (difference->empty()) return;
 		editCount++;
 		if (!midUndo) undoSystem.addDifference(difference);
+		renderManager.addDifference(difference);
 		for (auto pair : listenerFunctions) pair.second(difference, circuitId);
 	}
 
@@ -119,6 +122,8 @@ private:
 	UndoSystem undoSystem;
 	bool midUndo = false;
 	bool editable = true;
+
+	CircuitRenderManager renderManager;
 
 	unsigned long long editCount = 0;
 };

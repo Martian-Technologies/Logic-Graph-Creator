@@ -12,7 +12,7 @@ class ToolManager;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, Renderer* renderer, CircuitView* circuitView, ToolManager* toolManager) :
+	inline ToolStack(EventRegister* eventRegister, CircuitViewRenderer* renderer, CircuitView* circuitView, ToolManager* toolManager) :
 		eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
@@ -63,7 +63,7 @@ private:
 	ToolStackInterface toolStackInterface;
 	EventRegister* eventRegister;
 
-	Renderer* renderer;
+	CircuitViewRenderer* renderer;
 	EvaluatorStateInterface* evaluatorStateInterface;
 
 	bool isActive = false;

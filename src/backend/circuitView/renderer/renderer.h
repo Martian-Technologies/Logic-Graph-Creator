@@ -75,7 +75,7 @@ struct HalfConnectionPreview {
 
 // Renderer -----------------------------------
 
-class Renderer {
+class CircuitViewRenderer {
 	friend class ElementCreator;
 public:
 	// main flow
@@ -84,7 +84,6 @@ public:
 	virtual void setAddress(const Address& address) = 0;
 
 	virtual void updateView(ViewManager* viewManager) = 0;
-	virtual void updateCircuit(DifferenceSharedPtr diff) = 0;
 
 	virtual float getLastFrameTimeMs() const = 0;
 

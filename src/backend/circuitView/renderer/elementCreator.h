@@ -6,13 +6,13 @@
 class ElementCreator {
 public:
 	ElementCreator() : renderer(nullptr) { }
-	ElementCreator(Renderer* renderer) : renderer(renderer), ids() { assert(renderer); }
+	ElementCreator(CircuitViewRenderer* renderer) : renderer(renderer), ids() { assert(renderer); }
 	ElementCreator(const ElementCreator& elementCreator) = delete;
 	ElementCreator& operator=(const ElementCreator& elementCreator) = delete;
 
 	~ElementCreator() { clear(); }
 
-	void setup(Renderer* renderer) { if (this->renderer) clear(); this->renderer = renderer; }
+	void setup(CircuitViewRenderer* renderer) { if (this->renderer) clear(); this->renderer = renderer; }
 	bool isSetup() { return (bool)renderer; }
 
 	void removeElement(ElementID id) {
@@ -112,7 +112,7 @@ private:
 		BlockPreview,
 	};
 
-	Renderer* renderer;
+	CircuitViewRenderer* renderer;
 	std::map<ElementID, ElementType> ids;
 };
 
