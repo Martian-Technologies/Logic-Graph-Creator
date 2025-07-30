@@ -125,7 +125,7 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 
 					// calculate height and origin
 					SharedDimensionalSelection dSel = dimensionalSelection;
-					Position origin; // this variable used to be called 'orgin' because Ben can't spell (or maybe it's a typo)
+					Position origin;
 					unsigned int height = 0;
 					while (dSel) {
 						SharedSelection sel = dSel->getSelection(0);

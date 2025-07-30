@@ -1,8 +1,7 @@
 #include "renderManager.h"
 
-#include "backend/container/block/blockDefs.h"
-#include "circuit.h"
 #include "gpu/renderer/viewport/sharedLogic/logicRenderingUtils.h"
+#include "circuit.h"
 
 CircuitRenderManager::CircuitRenderManager(Circuit* circuit) : circuit(circuit) {
 

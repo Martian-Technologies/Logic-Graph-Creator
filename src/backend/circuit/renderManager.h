@@ -1,11 +1,8 @@
 #ifndef renderManager_h
 #define renderManager_h
 
-#include <functional>
-
-#include "backend/address.h"
-#include "backend/container/block/blockDefs.h"
 #include "backend/container/difference.h"
+#include "backend/address.h"
 
 class Circuit;
 
