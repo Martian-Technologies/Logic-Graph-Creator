@@ -19,6 +19,20 @@ typedef unsigned int evaluator_id_t;
 
 class DataUpdateEventManager;
 
+struct CircuitPortDependency {
+	circuit_id_t circuitId;
+	connection_end_id_t connectionEndId;
+	auto operator<=>(const CircuitPortDependency& other) const {
+		return std::tie(circuitId, connectionEndId) <=> std::tie(other.circuitId, other.connectionEndId);
+	}
+};
+
+struct InterCircuitConnection {
+	EvalConnection connection;
+	std::set<CircuitPortDependency> circuitPortDependencies;
+	std::set<CircuitNode> circuitNodeDependencies;
+};
+
 class Evaluator {
 public:
 	typedef std::tuple<BlockType, connection_end_id_t, Position> RemoveCircuitIOData; // I hate tuples, but this is how I get the data
@@ -120,7 +134,8 @@ private:
 	void edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
 
-	void removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, circuit_id_t circuitId, connection_end_id_t connectionEndId);
+	void removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, CircuitPortDependency circuitPortDependency);
+	void removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, CircuitNode node);
 	void removeCircuitIO(const DataUpdateEventManager::EventData* data);
 	void setCircuitIO(const DataUpdateEventManager::EventData* data);
 
@@ -132,10 +147,23 @@ private:
 	std::optional<connection_port_id_t> getPortId(const BlockContainer* blockContainer, const Position blockPosition, const Position portPosition, Direction direction) const;
 	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction) const;
 	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction) const;
-	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const;
-	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const;
+	std::optional<EvalConnectionPoint> getConnectionPoint(
+		const eval_circuit_id_t evalCircuitId,
+		const Position portPosition,
+		Direction direction,
+		std::set<CircuitPortDependency>& circuitPortDependencies,
+		std::set<CircuitNode>& circuitNodeDependencies
+	) const;
+	std::optional<EvalConnectionPoint> getConnectionPoint(
+		const eval_circuit_id_t evalCircuitId,
+		const BlockContainer* blockContainer,
+		const Position portPosition,
+		Direction direction,
+		std::set<CircuitPortDependency>& circuitPortDependencies,
+		std::set<CircuitNode>& circuitNodeDependencies
+	) const;
 
-	std::vector<std::pair<EvalConnection, std::set<std::pair<circuit_id_t, connection_end_id_t>>>> interCircuitConnections;
+	std::vector<InterCircuitConnection> interCircuitConnections;
 
 	mutable std::shared_mutex simMutex;
 };

@@ -197,7 +197,7 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
 	auto it = std::find_if(interCircuitConnections.begin(), interCircuitConnections.end(),
 		[&connection](const auto& pair) {
-			return pair.first == connection;
+			return pair.connection == connection;
 		});
 	if (it != interCircuitConnections.end()) {
 		interCircuitConnections.erase(it);
@@ -206,29 +206,42 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 }
 
 void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
-	std::set<std::pair<circuit_id_t, connection_end_id_t>> traceSet;
-	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, blockContainer, outputPosition, Direction::OUT, traceSet);
+	std::set<CircuitPortDependency> circuitPortDependencies;
+	std::set<CircuitNode> circuitNodeDependencies;
+
+	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, blockContainer, outputPosition, Direction::OUT, circuitPortDependencies, circuitNodeDependencies);
 	if (!outputPoint.has_value()) {
 		logError("Output connection point not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
 		return;
 	}
-	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, blockContainer, inputPosition, Direction::IN, traceSet);
+	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, blockContainer, inputPosition, Direction::IN, circuitPortDependencies, circuitNodeDependencies);
 	if (!inputPoint.has_value()) {
 		logError("Input connection point not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
 		return;
 	}
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
-	if (!traceSet.empty()) {
-		interCircuitConnections.emplace_back(connection, traceSet);
+	if (!circuitPortDependencies.empty()) {
+		interCircuitConnections.push_back({ connection, circuitPortDependencies, circuitNodeDependencies });
 	}
 	evalSimulator.makeConnection(pauseGuard, connection);
 }
 
-void Evaluator::removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, circuit_id_t circuitId, connection_end_id_t connectionEndId) {
+void Evaluator::removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, CircuitPortDependency circuitPortDependency) {
 	// delete any connections that have the pair {circuitId, connectionEndId} in their traceSet
 	for (auto it = interCircuitConnections.begin(); it != interCircuitConnections.end();) {
-		if (it->second.find({circuitId, connectionEndId}) != it->second.end()) {
-			evalSimulator.removeConnection(pauseGuard, it->first);
+		if (it->circuitPortDependencies.find(circuitPortDependency) != it->circuitPortDependencies.end()) {
+			evalSimulator.removeConnection(pauseGuard, it->connection);
+			it = interCircuitConnections.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
+void Evaluator::removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, CircuitNode node) {
+	for (auto it = interCircuitConnections.begin(); it != interCircuitConnections.end();) {
+		if (it->circuitNodeDependencies.find(node) != it->circuitNodeDependencies.end()) {
+			evalSimulator.removeConnection(pauseGuard, it->connection);
 			it = interCircuitConnections.erase(it);
 		} else {
 			++it;
@@ -249,7 +262,7 @@ void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
 
 	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
-	removeDependentInterCircuitConnections(pauseGuard, circuitId, connectionEndId);
+	removeDependentInterCircuitConnections(pauseGuard, {circuitId, connectionEndId});
 }
 
 void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
@@ -264,7 +277,7 @@ void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
 
 	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
-	removeDependentInterCircuitConnections(pauseGuard, circuitId, connectionEndId);
+	removeDependentInterCircuitConnections(pauseGuard, {circuitId, connectionEndId});
 	logError("not fully implemented yet", "Evaluator::setCircuitIO");
 }
 
@@ -386,7 +399,13 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 	return EvalConnectionPoint(node->getId(), portId.value());
 }
 
-std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const {
+std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
+	const eval_circuit_id_t evalCircuitId,
+	const Position portPosition,
+	Direction direction,
+	std::set<CircuitPortDependency>& circuitPortDependencies,
+	std::set<CircuitNode>& circuitNodeDependencies
+	) const {
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		return std::nullopt;
@@ -400,10 +419,17 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 	if (!blockContainer) {
 		return std::nullopt;
 	}
-	return getConnectionPoint(evalCircuitId, blockContainer, portPosition, direction, trace);
+	return getConnectionPoint(evalCircuitId, blockContainer, portPosition, direction, circuitPortDependencies, circuitNodeDependencies);
 }
 
-std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const {
+std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
+	const eval_circuit_id_t evalCircuitId,
+	const BlockContainer* blockContainer,
+	const Position portPosition,
+	Direction direction,
+	std::set<CircuitPortDependency>& circuitPortDependencies,
+	std::set<CircuitNode>& circuitNodeDependencies
+) const {
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		return std::nullopt;
@@ -418,6 +444,7 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 	if (!node.has_value()) {
 		return std::nullopt;
 	}
+	circuitNodeDependencies.insert(node.value());
 	if (blockType == BlockType::SWITCH || blockType == BlockType::BUTTON || blockType == BlockType::TICK_BUTTON) {
 		// For switches and buttons, we can use the position directly
 		if (direction == Direction::IN) {
@@ -446,8 +473,8 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 			logError("Internal position for port ID {} not found in CircuitBlockData for type {}", "Evaluator::getConnectionPoint", portId.value(), blockType);
 			return std::nullopt;
 		}
-		trace.insert({circuitId, portId.value()});
-		return getConnectionPoint(node->getId(), *internalPosition, direction, trace);
+		circuitPortDependencies.insert({ circuitId, portId.value() });
+		return getConnectionPoint(node->getId(), *internalPosition, direction, circuitPortDependencies, circuitNodeDependencies);
 	}
 	return EvalConnectionPoint(node->getId(), portId.value());
 }
@@ -458,6 +485,13 @@ void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eval
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_moveBlock", evalCircuitId);
 		return;
 	}
+	// delete interCircuit connections that are dependent on the block being moved
+	std::optional<CircuitNode> node = evalCircuit->getNode(curPosition);
+	if (!node.has_value()) {
+		logError("Node at position {} not found", "Evaluator::edit_moveBlock", curPosition.toString());
+		return;
+	}
+	removeDependentInterCircuitConnections(pauseGuard, node.value());
 	evalCircuit->moveNode(curPosition, newPosition);
 }
 
@@ -653,7 +687,7 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	for (size_t i = 0; i < addresses.size(); ++i) {
 		const Address& addr = addresses[i];
 		eval_circuit_id_t evalCircuitId = evalCircuitIds[i];
-		
+
 		const CircuitCacheEntry& cacheEntry = circuitCache[evalCircuitId];
 		if (!cacheEntry.blockContainer || !cacheEntry.evalCircuit) {
 			logError("Failed to get cached resources for evalCircuitId {}", "Evaluator::getBulkStates", evalCircuitId);
@@ -662,6 +696,12 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 		}
 		
 		Position portPosition = addr.getPosition(addr.size() - 1);
+
+		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(evalCircuitId, cacheEntry.blockContainer, portPosition, Direction::OUT);
+		if (connectionPoint.has_value()) {
+			connectionPoints.push_back(connectionPoint.value());
+			continue;
+		}
 		
 		// Inline optimized getConnectionPoint logic to avoid function call overhead
 		const Block* block = cacheEntry.blockContainer->getBlock(portPosition);
@@ -669,27 +709,21 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 			connectionPoints.emplace_back(0, 0);
 			continue;
 		}
-		
+
 		Position blockPosition = block->getPosition();
 		std::optional<CircuitNode> node = cacheEntry.evalCircuit->getNode(blockPosition);
 		if (!node.has_value()) {
 			connectionPoints.emplace_back(0, 0);
 			continue;
 		}
-		
+
 		if (node->isIC()) {
 			connectionPoints.emplace_back(0, 0);
 			continue;
 		}
-		
-		// Try OUTPUT direction first (most common case)
-		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(evalCircuitId, cacheEntry.blockContainer, portPosition, Direction::OUT);
-		if (connectionPoint.has_value()) {
-			connectionPoints.push_back(connectionPoint.value());
-		} else {
-			connectionPoints.emplace_back(node->getId(), 0);
-		}
+
+		connectionPoints.emplace_back(node->getId(), 0);
 	}
-	
+
 	return evalSimulator.getStates(connectionPoints);
 }

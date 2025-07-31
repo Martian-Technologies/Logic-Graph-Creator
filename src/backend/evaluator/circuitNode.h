@@ -16,6 +16,9 @@ public:
 	bool operator==(const CircuitNode& other) const {
 		return id_and_type == other.id_and_type;
 	}
+	auto operator<=>(const CircuitNode& other) const {
+		return id_and_type <=> other.id_and_type;
+	}
 private:
 	explicit CircuitNode(unsigned int value) : id_and_type(value) {}
 	unsigned int id_and_type;
