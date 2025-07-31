@@ -1,5 +1,9 @@
 #include "logger.h"
 
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
+
 #define ANSI_INFO "\033[1;37m"
 #define ANSI_WARNING "\033[1;33m"
 #define ANSI_ERROR "\033[1;31m"
@@ -41,6 +45,10 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 	}
 
 	// and output to the log file
+	#ifdef TRACY_PROFILER
+		std::string msg = "[" + categoryText + "] " + message;
+		TracyMessage(msg.c_str(), msg.size());
+	#endif
 	outputFileStream << "[" << categoryText << "] " << message << "\n";
 	outputFileStream.flush();
 }

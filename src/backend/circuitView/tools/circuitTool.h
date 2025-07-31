@@ -51,7 +51,7 @@ protected:
 
 private:
 	// This will also tell the tool to reset.
-	void setup(Renderer* elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit);
+	void setup(CircuitViewRenderer* elementCreator, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit);
 	void unsetup();
 	inline void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) { this->evaluatorStateInterface = evaluatorStateInterface; }
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }

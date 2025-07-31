@@ -298,9 +298,11 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 		bool isInput = block.isConnectionInput(endId);
 		auto [connectionPosition, success] = block.getConnectionPosition(endId);
 		if (!success) continue;
-		const std::unordered_set<ConnectionEnd>* connections = block.getConnectionContainer().getConnections(endId);
+		const ConnectionContainer& connectionContainer = block.getConnectionContainer();
+		const std::unordered_set<ConnectionEnd>* connections = connectionContainer.getConnections(endId);
 		if (!connections) continue;
-		for (auto& connectionEnd : *connections) {
+		const std::unordered_set<ConnectionEnd> connectionsCopy = *connections;
+		for (auto& connectionEnd : connectionsCopy) {
 			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), endId))) {
 				assert(block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd));

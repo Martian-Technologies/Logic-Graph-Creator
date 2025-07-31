@@ -13,7 +13,19 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CONNECTION_MACHINE_BUILD_APP": "ON",
-				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"RUN_TRACY_PROFILER": "OFF"
+			}
+		},
+		{
+			"name": "debug&profiler",
+			"displayName": "Debug & Profiler",
+			"binaryDir": "build",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CONNECTION_MACHINE_BUILD_APP": "ON",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"RUN_TRACY_PROFILER": "ON"
 			}
 		},
 		{
@@ -23,7 +35,19 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
 				"CONNECTION_MACHINE_BUILD_APP": "ON",
-				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"RUN_TRACY_PROFILER": "OFF"
+			}
+		},
+		{
+			"name": "release&profiler",
+			"displayName": "Release & Profiler",
+			"binaryDir": "build-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"CONNECTION_MACHINE_BUILD_APP": "ON",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"RUN_TRACY_PROFILER": "ON"
 			}
 		},
 		{
@@ -33,7 +57,8 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
 				"CONNECTION_MACHINE_BUILD_APP": "ON",
-				"CONNECTION_MACHINE_DISTRIBUTE_APP": "ON"
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "ON",
+				"RUN_TRACY_PROFILER": "OFF"
 			}
 		},
 		{
@@ -44,7 +69,21 @@
 			    "CMAKE_BUILD_TYPE": "Debug",
 			    "CONNECTION_MACHINE_BUILD_TESTS": "ON",
 				"CONNECTION_MACHINE_BUILD_APP": "OFF",
-				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF"
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"RUN_TRACY_PROFILER": "OFF"
+			}
+		},
+		{
+			"name": "tests&Coverage",
+			"displayName": "Tests & Coverage",
+			"binaryDir": "build-tests",
+			"cacheVariables": {
+			    "CMAKE_BUILD_TYPE": "Debug",
+			    "CONNECTION_MACHINE_BUILD_TESTS": "ON",
+				"CONNECTION_MACHINE_BUILD_APP": "OFF",
+				"CONNECTION_MACHINE_DISTRIBUTE_APP": "OFF",
+				"CONNECTION_MACHINE_CODE_COVERAGE": "ON",
+				"RUN_TRACY_PROFILER": "OFF"
 			}
 		}
 	],
@@ -57,9 +96,22 @@
 			"jobs": 8
 		},
 		{
+			"name": "debug&profiler",
+			"displayName": "Build Debug & Profiler",
+			"configurePreset": "debug&profiler",
+			"configuration": "Debug"
+		},
+		{
 			"name": "release",
 			"displayName": "Build Release",
 			"configurePreset": "release",
+			"configuration": "Release",
+			"jobs": 8
+		},
+		{
+			"name": "release&profiler",
+			"displayName": "Build Release & Profiler",
+			"configurePreset": "release&profiler",
 			"configuration": "Release",
 			"jobs": 8
 		},
@@ -74,6 +126,13 @@
 			"name": "tests",
 			"displayName": "Build Tests",
 			"configurePreset": "tests",
+			"configuration": "Debug",
+			"jobs": 8
+		},
+		{
+			"name": "tests&Coverage",
+			"displayName": "Build Tests & Coverages",
+			"configurePreset": "tests&Coverage",
 			"configuration": "Debug",
 			"jobs": 8
 		}

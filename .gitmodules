@@ -28,3 +28,6 @@
 [submodule "external/wasmtime"]
 	path = external/wasmtime
 	url = https://github.com/bytecodealliance/wasmtime
+[submodule "external/tracy"]
+	path = external/tracy
+	url = https://github.com/wolfpld/tracy

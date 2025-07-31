@@ -1,24 +1,23 @@
 #include "viewportRenderInterface.h"
 
+#include <RmlUi/Core/Element.h>
+
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
-#include "viewport/sharedLogic/logicRenderingUtils.h"
+#include "logging/logging.h"
+#include "logic/sharedLogic/logicRenderingUtils.h"
 #include "backend/selection.h"
 
-ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element)
-	: element(element), chunker(device) {
+ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
+	: element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
+	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
 ViewportRenderInterface::~ViewportRenderInterface() {
+	if (circuit != nullptr) renderManager->disconnect(&chunker);
 	if (linkedWindowRenderer != nullptr) linkedWindowRenderer->deregisterViewportRenderInterface(this);
-}
-
-
-void ViewportRenderInterface::linkToWindowRenderer(WindowRenderer* windowRenderer) {
-	linkedWindowRenderer = windowRenderer;
-	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
 ViewportViewData ViewportRenderInterface::getViewData() {
@@ -30,9 +29,19 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 
 void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	std::lock_guard<std::mutex> lock(circuitMux);
-	
+
+	if (this->circuit) {
+		chunker.reset();
+		renderManager->disconnect(&chunker);
+		renderManager.reset();
+		this->circuit = nullptr;
+	}
 	this->circuit = circuit;
-	chunker.setCircuit(circuit);
+
+	if (this->circuit) {
+		renderManager.emplace(circuit);
+		renderManager->connect(&chunker);
+	}
 }
 
 void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
@@ -63,10 +72,6 @@ void ViewportRenderInterface::updateView(ViewManager* viewManager) {
 	viewData.viewBounds = { topLeft, bottomRight };
 
 	viewData.viewScale = viewManager->getViewScale();
-}
-
-void ViewportRenderInterface::updateCircuit(DifferenceSharedPtr diff) {
-	chunker.updateCircuit(diff);
 }
 
 float ViewportRenderInterface::getLastFrameTimeMs() const {
@@ -117,7 +122,7 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 
 					// calculate height and origin
 					SharedDimensionalSelection dSel = dimensionalSelection;
-					Position origin; // this variable used to be called 'orgin' because Ben can't spell (or maybe it's a typo)
+					Position origin;
 					unsigned int height = 0;
 					while (dSel) {
 						SharedSelection sel = dSel->getSelection(0);

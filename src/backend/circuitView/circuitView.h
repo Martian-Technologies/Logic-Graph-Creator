@@ -13,7 +13,7 @@ class Backend;
 class CircuitView {
 	friend class Backend;
 public:
-	CircuitView(Renderer* renderer);
+	CircuitView(CircuitViewRenderer* renderer);
 
 	// --------------- Gettters ---------------
 
@@ -35,8 +35,8 @@ public:
 	inline ViewManager& getViewManager() { return viewManager; }
 	inline const ViewManager& getViewManager() const { return viewManager; }
 
-	inline Renderer* getRenderer() { return renderer; }
-	inline const Renderer* getRenderer() const { return renderer; }
+	inline CircuitViewRenderer* getRenderer() { return renderer; }
+	inline const CircuitViewRenderer* getRenderer() const { return renderer; }
 
 	inline Backend* getBackend() { return backend; }
 	inline const Backend* getBackend() const { return backend; }
@@ -50,14 +50,13 @@ private:
 	void setAddress(const Address& address);
 
 	void viewChanged();
-	void circuitChanged(DifferenceSharedPtr difference, circuit_id_t circuitId);
 
 private:
 	Backend* backend;
 
 	Address address;
 	SharedCircuit circuit;
-	Renderer* renderer;
+	CircuitViewRenderer* renderer;
 	std::shared_ptr<Evaluator> evaluator;
 
 	DataUpdateEventManager* dataUpdateEventManager = nullptr;

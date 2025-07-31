@@ -8,7 +8,7 @@ FVector getOutputOffset(Position position, Circuit* circuit) {
 }
 
 FVector getInputOffset(Position position, Circuit* circuit) {
-	return getInputOffset(circuit->getBlockContainer()->getBlock(position)->getRotation());return getOutputOffset(circuit->getBlockContainer()->getBlock(position)->getRotation());
+	return getInputOffset(circuit->getBlockContainer()->getBlock(position)->getRotation());
 }
 
 FVector getOutputOffset(Rotation rotation) {

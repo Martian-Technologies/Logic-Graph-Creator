@@ -48,6 +48,27 @@ file(GLOB_RECURSE PROJECT_SOURCES
 option(CONNECTION_MACHINE_BUILD_APP "Build Connection Machine App" ON)
 option(CONNECTION_MACHINE_DISTRIBUTE_APP "Distribute App" OFF)
 option(CONNECTION_MACHINE_BUILD_TESTS "Build Connection Machine Tests" OFF)
+option(CONNECTION_MACHINE_CODE_COVERAGE "Enable code coverage reporting" OFF)
+option(RUN_TRACY_PROFILER "Enable runtime profiler" OFF)
+
+# ======================================= COVERAGE SETUP ========================================
+
+if(CONNECTION_MACHINE_CODE_COVERAGE)
+	if (CONNECTION_MACHINE_BUILD_TESTS)
+		if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+			message(STATUS "Code coverage enabled")
+			add_compile_options(--coverage -O0 -g)
+			add_link_options(--coverage)
+		elseif(MSVC)
+			message(WARNING "Code coverage not supported with MSVC. Use Clang-cl or OpenCppCoverage.")
+		else()
+			message(WARNING "Code coverage not working with: \"${CMAKE_CXX_COMPILER_ID}\"")
+		endif()
+	else()
+		message(WARNING "Code coverage cant not be used without also enabling tests.")
+	endif()
+	
+endif()
 
 # ======================================= SHARED DEPENDENCY SETUP ========================================
 
@@ -71,6 +92,14 @@ endif()
 set(CONNECTION_MACHINE_JSON_LIB_NAME "json")
 add_library(${CONNECTION_MACHINE_JSON_LIB_NAME} INTERFACE)
 target_include_directories(${CONNECTION_MACHINE_JSON_LIB_NAME} INTERFACE "${EXTERNAL_DIR}/json/")
+
+# tracy
+if (RUN_TRACY_PROFILER)
+	message("tracy is ON")
+	option(TRACY_ENABLE "" ON)
+	option(TRACY_ON_DEMAND "" ON)
+	add_subdirectory("${EXTERNAL_DIR}/tracy")
+endif()
 
 if (CONNECTION_MACHINE_BUILD_APP)
 	# ======================================= APP DEPENDENCY SETUP =======================================
@@ -126,27 +155,50 @@ if (CONNECTION_MACHINE_BUILD_APP)
 	endif()
 
 	# Add executable
-	set(EXTERNAL_LINKS
-		freetype
-		RmlUi::RmlUi
-		RmlUi::Debugger
-		SDL3::SDL3
-		volk
-		vk-bootstrap::vk-bootstrap
-		cpplocate::cpplocate
-		VulkanMemoryAllocator
-		glm
-		${CONNECTION_MACHINE_JSON_LIB_NAME}
-		${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
-		wasmtime
-	)
+	if (RUN_TRACY_PROFILER)
+		set(EXTERNAL_LINKS
+			freetype
+			RmlUi::RmlUi
+			RmlUi::Debugger
+			SDL3::SDL3
+			volk
+			vk-bootstrap::vk-bootstrap
+			cpplocate::cpplocate
+			VulkanMemoryAllocator
+			glm
+			${CONNECTION_MACHINE_JSON_LIB_NAME}
+			${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
+			wasmtime
+			Tracy::TracyClient
+		)
+	else()
+		set(EXTERNAL_LINKS
+			freetype
+			RmlUi::RmlUi
+			RmlUi::Debugger
+			SDL3::SDL3
+			volk
+			vk-bootstrap::vk-bootstrap
+			cpplocate::cpplocate
+			VulkanMemoryAllocator
+			glm
+			${CONNECTION_MACHINE_JSON_LIB_NAME}
+			${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
+			wasmtime
+		)
+	endif()
 
 	add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} ${Vulkan_INCLUDE_DIRS})
+	target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} PUBLIC ${Vulkan_INCLUDE_DIRS})
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 	target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-	target_compile_definitions(${PROJECT_NAME} PRIVATE VK_NO_PROTOTYPES)
+	if (RUN_TRACY_PROFILER)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE VK_NO_PROTOTYPES "TRACY_PROFILER")
+	else()
+		target_compile_definitions(${PROJECT_NAME} PRIVATE VK_NO_PROTOTYPES)
+	endif()
+
 	set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${APP_NAME}")
 
 	# Platform specific business after add_executable
@@ -315,6 +367,7 @@ if (CONNECTION_MACHINE_BUILD_TESTS)
 		gtest gtest_main
 		${CONNECTION_MACHINE_JSON_LIB_NAME}
 		wasmtime
+
 	)
 
 	if(APPLE)
@@ -325,5 +378,31 @@ if (CONNECTION_MACHINE_BUILD_TESTS)
 	add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
 	target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}wasmtime")
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
+
+	if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	target_compile_options(${PROJECT_NAME}_tests PRIVATE --coverage -O0 -g)
+	target_link_options(${PROJECT_NAME}_tests PRIVATE --coverage)
+	endif()
+
 	target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
+	
+	if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+		find_program(GCOVR_PATH gcovr)
+		if(NOT GCOVR_PATH)
+			message(FATAL_ERROR "gcovr not found! Please install it via pip: pip install gcovr")
+		endif()
+
+		add_custom_target(coverage
+			COMMAND ${GCOVR_PATH}
+				--root ${CMAKE_SOURCE_DIR}
+				--filter ${SOURCE_DIR}
+				--exclude-unreachable-branches
+				--print-summary
+				--html --html-details -o coverage.html
+				--gcov-executable gcov
+				--exclude '${EXTERNAL_DIR}'
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+			COMMENT "Generating code coverage report with gcovr"
+		)
+	endif()
 endif()
