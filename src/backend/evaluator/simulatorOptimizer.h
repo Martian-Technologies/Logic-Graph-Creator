@@ -36,7 +36,7 @@ public:
 	std::optional<simulator_id_t> getSimIdFromConnectionPoint(const EvalConnectionPoint& point) const {
 		std::optional<simulator_id_t> gateId = getSimIdFromMiddleId(point.gateId);
 		if (!gateId.has_value()) {
-			logError("Gate ID not found for connection point", "SimulatorOptimizer::getSimIdFromConnectionPoint");
+			// logError("Gate ID not found for connection point", "SimulatorOptimizer::getSimIdFromConnectionPoint");
 			return std::nullopt;
 		}
 		return simulator.getOutputPortId(gateId.value(), point.portId);

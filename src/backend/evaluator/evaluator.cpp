@@ -1,8 +1,15 @@
 #include "evaluator.h"
 
-Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, CircuitBlockDataManager& circuitBlockDataManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager)
-	: evaluatorId(evaluatorId),
+Evaluator::Evaluator(
+	evaluator_id_t evaluatorId,
+	CircuitManager& circuitManager,
+	BlockDataManager& blockDataManager,
+	CircuitBlockDataManager& circuitBlockDataManager,
+	circuit_id_t circuitId,
+	DataUpdateEventManager* dataUpdateEventManager
+) : evaluatorId(evaluatorId),
 	circuitManager(circuitManager),
+	blockDataManager(blockDataManager),
 	circuitBlockDataManager(circuitBlockDataManager),
 	evalCircuitContainer(),
 	receiver(dataUpdateEventManager),
@@ -18,7 +25,7 @@ Evaluator::Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager,
 	evalCircuitContainer.addCircuit(circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
-	// receiver.linkFunction("blockDataRemoveConnection", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
+	receiver.linkFunction("circuitBlockDataConnectionPositionRemove", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
 
 	makeEdit(std::make_shared<Difference>(difference), circuitId);
 }
@@ -203,6 +210,36 @@ void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 	}
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
 	evalSimulator.makeConnection(pauseGuard, connection);
+}
+
+void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
+	logError("not yet implemented", "Evaluator::removeCircuitIO");
+	return;
+	const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>*>(data);
+	if (!eventData) {
+		logError("Invalid event data type for removeCircuitIO", "Evaluator::removeCircuitIO");
+		return;
+	}
+	std::tuple<BlockType, connection_end_id_t, Position> dataValue = eventData->get();
+	BlockType blockType = std::get<0>(dataValue);
+	connection_end_id_t connectionEndId = std::get<1>(dataValue);
+	Position position = std::get<2>(dataValue);
+
+	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
+	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
+		if (evalCircuitContainer.getCircuitId(evalCircuitId) == circuitId) {
+			removeCircuitIOWithPosition(pauseGuard, evalCircuitId, position);
+		}
+	}
+}
+
+void Evaluator::removeCircuitIOWithPosition(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, const Position& position) {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::removeCircuitIOWithPosition", evalCircuitId);
+		return;
+	}
 }
 
 std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const {

@@ -21,9 +21,16 @@ class DataUpdateEventManager;
 
 class Evaluator {
 public:
-	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData; // I hate pairs, but this is how I get the data
+	typedef std::tuple<BlockType, connection_end_id_t, Position> RemoveCircuitIOData; // I hate tuples, but this is how I get the data
 
-	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, CircuitBlockDataManager& circuitBlockDataManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
+	Evaluator(
+		evaluator_id_t evaluatorId,
+		CircuitManager& circuitManager,
+		BlockDataManager& blockDataManager,
+		CircuitBlockDataManager& circuitBlockDataManager,
+		circuit_id_t circuitId,
+		DataUpdateEventManager* dataUpdateEventManager
+	);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const {
@@ -94,6 +101,7 @@ private:
 
 	evaluator_id_t evaluatorId;
 	CircuitManager& circuitManager;
+	BlockDataManager& blockDataManager;
 	CircuitBlockDataManager& circuitBlockDataManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 	EvalCircuitContainer evalCircuitContainer;
@@ -110,6 +118,9 @@ private:
 	void edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition);
 	void edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
+
+	void removeCircuitIO(const DataUpdateEventManager::EventData* eventData);
+	void removeCircuitIOWithPosition(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, const Position& position);
 
 	std::optional<middle_id_t> getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const;
 	std::optional<middle_id_t> getMiddleId(const eval_circuit_id_t startingPoint, const Address& address, const BlockContainer* blockContainer) const;
