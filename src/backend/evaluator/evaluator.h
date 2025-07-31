@@ -120,7 +120,7 @@ private:
 	void edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation);
 
 	void removeCircuitIO(const DataUpdateEventManager::EventData* eventData);
-	void removeCircuitIOWithPosition(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, const Position& position);
+	void setCircuitIO(const DataUpdateEventManager::EventData* eventData);
 
 	std::optional<middle_id_t> getMiddleId(const eval_circuit_id_t startingPoint, const Address& address) const;
 	std::optional<middle_id_t> getMiddleId(const eval_circuit_id_t startingPoint, const Address& address, const BlockContainer* blockContainer) const;
@@ -130,6 +130,10 @@ private:
 	std::optional<connection_port_id_t> getPortId(const BlockContainer* blockContainer, const Position blockPosition, const Position portPosition, Direction direction) const;
 	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction) const;
 	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction) const;
+	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const;
+	std::optional<EvalConnectionPoint> getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction, std::set<std::pair<circuit_id_t, connection_end_id_t>>& trace) const;
+
+	std::vector<std::pair<EvalConnection, std::set<std::pair<circuit_id_t, connection_end_id_t>>>> interCircuitConnections;
 
 	mutable std::shared_mutex simMutex;
 };
