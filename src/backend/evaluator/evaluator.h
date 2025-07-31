@@ -23,7 +23,7 @@ class Evaluator {
 public:
 	typedef std::pair<BlockType, connection_end_id_t> RemoveCircuitIOData; // I hate pairs, but this is how I get the data
 
-	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
+	Evaluator(evaluator_id_t evaluatorId, CircuitManager& circuitManager, CircuitBlockDataManager& circuitBlockDataManager, circuit_id_t circuitId, DataUpdateEventManager* dataUpdateEventManager);
 
 	inline evaluator_id_t getEvaluatorId() const { return evaluatorId; }
 	std::string getEvaluatorName() const {
@@ -94,6 +94,7 @@ private:
 
 	evaluator_id_t evaluatorId;
 	CircuitManager& circuitManager;
+	CircuitBlockDataManager& circuitBlockDataManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 	EvalCircuitContainer evalCircuitContainer;
 	EvalConfig evalConfig;

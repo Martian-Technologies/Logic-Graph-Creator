@@ -24,7 +24,7 @@ public:
 
 	inline evaluator_id_t createNewEvaluator(CircuitManager& circuitManager, circuit_id_t circuitId) {
 		evaluator_id_t id = getNewEvaluatorId();
-		evaluators.emplace(id, std::make_shared<Evaluator>(id, circuitManager, circuitId, dataUpdateEventManager));
+		evaluators.emplace(id, std::make_shared<Evaluator>(id, circuitManager, *circuitManager.getCircuitBlockDataManager(), circuitId, dataUpdateEventManager));
 		dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 		return id;
 	}
