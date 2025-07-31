@@ -10,6 +10,8 @@ LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) 
 	});
 
 	simulationThread = std::jthread(&LogicSimulator::simulationLoop, this);
+	statesA.resize(1, logic_state_t::UNDEFINED);
+	statesB.resize(1, logic_state_t::UNDEFINED);
 }
 
 LogicSimulator::~LogicSimulator() {

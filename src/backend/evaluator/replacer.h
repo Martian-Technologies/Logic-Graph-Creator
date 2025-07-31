@@ -254,7 +254,6 @@ private:
 	};
 
 	void mergeJunctions(SimPauseGuard& pauseGuard) {
-		logInfo("Merging junctions", "Replacer::mergeJunctions");
 		std::vector<middle_id_t> allMiddleIds = middleIdProvider.getUsedIds();
 		for (const middle_id_t id : allMiddleIds) {
 			// if this id is in the replacedIds map, it means we can skip it / it's already been scanned and replaced
@@ -266,7 +265,6 @@ private:
 			if (gateType != GateType::JUNCTION) {
 				continue;
 			}
-			logInfo("Found junction with ID {}", "Replacer::mergeJunctions", id);
 			JunctionFloodFillResult floodFillResult = junctionFloodFill(id);
 			// print the result for debug
 			if (floodFillResult.junctionIds.size() < 2) {

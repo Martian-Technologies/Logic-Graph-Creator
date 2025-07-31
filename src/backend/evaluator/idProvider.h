@@ -6,7 +6,7 @@ class IdProvider {
 public:
 	IdProvider() : lastId(0) {}
 
-	T getNewId() {
+	inline T getNewId() {
 		if (unusedIds.empty()) {
 			return lastId++;
 		} else {
@@ -15,23 +15,23 @@ public:
 			return id;
 		}
 	}
-	void releaseId(T id) {
+	inline void releaseId(T id) {
 		if (id > lastId || unusedIds.contains(id)) {
-			throw std::invalid_argument("Invalid ID release attempt");
+			return;
 		}
 		unusedIds.insert(id);
 	}
-	bool isIdUsed(T id) const {
+	inline bool isIdUsed(T id) const {
 		return id <= lastId && !unusedIds.contains(id);
 	}
-	T getLastId() const {
+	inline T getLastId() const {
 		return lastId;
 	}
-	void reset() {
+	inline void reset() {
 		lastId = 0;
 		unusedIds.clear();
 	}
-	std::vector<T> getUsedIds() const {
+	inline std::vector<T> getUsedIds() const {
 		std::vector<T> usedIds;
 		for (T id = 0; id < lastId; ++id) {
 			if (!unusedIds.contains(id)) {

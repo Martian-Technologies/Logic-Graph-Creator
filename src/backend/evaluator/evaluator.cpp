@@ -99,12 +99,30 @@ void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t ev
 		return;
 	}
 	if (node->isIC()) {
-		logError("Cannot remove IC nodes yet", "Evaluator::edit_removeBlock", position.toString());
+		edit_deleteICContents(pauseGuard, node->getId());
+		evalCircuit->removeNode(position);
 		return;
 	}
 	evalSimulator.removeGate(pauseGuard, node->getId());
 	middleIdProvider.releaseId(node->getId());
 	evalCircuit->removeNode(position);
+}
+
+void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId) {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_deleteIC", evalCircuitId);
+		return;
+	}
+	evalCircuit->forEachNode([&](Position pos, const CircuitNode& node) {
+		if (node.isIC()) {
+			edit_deleteICContents(pauseGuard, node.getId());
+			return;
+		}
+		evalSimulator.removeGate(pauseGuard, node.getId());
+		middleIdProvider.releaseId(node.getId());
+	});
+	evalCircuitContainer.removeCircuit(evalCircuitId);
 }
 
 void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
@@ -125,6 +143,11 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	case BlockType::LIGHT: gateType = GateType::JUNCTION; break;
 	}
 	if (gateType == GateType::NONE) {
+		const circuit_id_t ICId = circuitManager.getCircuitBlockDataManager()->getCircuitId(type);
+		if (ICId != 0) {
+			edit_placeIC(pauseGuard, evalCircuitId, diffCache, position, rotation, ICId);
+			return;
+		}
 		logError("Unsupported BlockType {}", "Evaluator::edit_placeBlock", type);
 		return;
 	}
@@ -137,6 +160,18 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	}
 	CircuitNode node = CircuitNode::fromMiddle(gateId);
 	evalCircuit->setNode(position, node);
+}
+
+void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, circuit_id_t circuitId) {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::edit_placeIC", evalCircuitId);
+		return;
+	}
+	eval_circuit_id_t newEvalCircuitId = evalCircuitContainer.addCircuit(circuitId);
+	DifferenceSharedPtr diff = diffCache.getDifference(circuitId);
+	makeEditInPlace(pauseGuard, newEvalCircuitId, diff, diffCache);
+	evalCircuit->setNode(position, CircuitNode::fromIC(newEvalCircuitId));
 }
 
 void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {

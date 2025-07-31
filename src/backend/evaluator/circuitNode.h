@@ -13,6 +13,9 @@ public:
 	}
 	bool isIC() const { return (id_and_type & 1) == 1; }
 	unsigned int getId() const { return id_and_type >> 1; }
+	bool operator==(const CircuitNode& other) const {
+		return id_and_type == other.id_and_type;
+	}
 private:
 	explicit CircuitNode(unsigned int value) : id_and_type(value) {}
 	unsigned int id_and_type;
