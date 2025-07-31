@@ -18,6 +18,17 @@ struct EvalConnectionPoint {
 	bool operator!=(const EvalConnectionPoint& other) const {
 		return !(*this == other);
 	}
+
+	bool operator<(const EvalConnectionPoint& other) const noexcept {
+        return std::tie(gateId, portId) < std::tie(other.gateId, other.portId);
+	}
+
+	struct Hash {
+        std::size_t operator()(const EvalConnectionPoint& point) const noexcept {
+            return std::hash<middle_id_t>{}(point.gateId) ^
+                   (std::hash<connection_port_id_t>{}(point.portId) << 1);
+        }
+    };
 };
 
 struct EvalConnection {
@@ -38,6 +49,13 @@ struct EvalConnection {
 	bool operator!=(const EvalConnection& other) const {
 		return !(*this == other);
 	}
+
+    struct Hash {
+        std::size_t operator()(const EvalConnection& connection) const noexcept {
+            EvalConnectionPoint::Hash pointHash;
+            return pointHash(connection.source) ^ (pointHash(connection.destination) << 1);
+        }
+    };
 };
 
 #endif // evalConnection_h

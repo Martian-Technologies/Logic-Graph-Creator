@@ -251,6 +251,7 @@ private:
 		std::vector<EvalConnectionPoint> outputsGoingIntoJunctions;
 		std::vector<EvalConnection> inputsPullingFromJunctions;
 		std::vector<middle_id_t> junctionIds;
+		std::vector<EvalConnection> connectionsToReroute;
 	};
 
 	void mergeJunctions(SimPauseGuard& pauseGuard) {
@@ -284,12 +285,18 @@ private:
 			for (const auto& output : floodFillResult.outputsGoingIntoJunctions) {
 				replacement.makeConnection(pauseGuard, EvalConnection(output, EvalConnectionPoint(newJunctionId, 0)));
 			}
+			for (const auto& conn : floodFillResult.connectionsToReroute) {
+				EvalConnection newConnection = EvalConnection(EvalConnectionPoint(newJunctionId, 0), conn.destination);
+				replacement.removeConnection(pauseGuard, conn);
+				replacement.makeConnection(pauseGuard, newConnection);
+			}
 		}
 	}
 
 	JunctionFloodFillResult junctionFloodFill(middle_id_t junctionId) {
 		JunctionFloodFillResult result;
 		std::set<middle_id_t> visited;
+		std::set<EvalConnectionPoint> visitedOutputs;
 		std::queue<middle_id_t> queue;
 		queue.push(junctionId);
 		visited.insert(junctionId);
@@ -321,7 +328,28 @@ private:
 					visited.insert(input.source.gateId);
 					continue;
 				}
+				// not a junction going into a junction
+				if (visitedOutputs.contains(input.source)) {
+					continue;
+				}
+				visitedOutputs.insert(input.source);
 				result.outputsGoingIntoJunctions.push_back(input.source);
+				std::vector<EvalConnection> nodeOutputs = simulatorOptimizer.getOutputs(input.source.gateId);
+				for (const auto& nodeOutput : nodeOutputs) {
+					if (nodeOutput.source.portId != input.source.portId) {
+						continue; // only consider outputs from the same port
+					}
+					GateType nodeOutputGateType = simulatorOptimizer.getGateType(nodeOutput.destination.gateId);
+					if (nodeOutputGateType == GateType::JUNCTION) {
+						if (visited.contains(nodeOutput.destination.gateId)) {
+							continue;
+						}
+						queue.push(nodeOutput.destination.gateId);
+						visited.insert(nodeOutput.destination.gateId);
+					} else {
+						result.connectionsToReroute.push_back(nodeOutput);
+					}
+				}
 			}
 		}
 		return result;
