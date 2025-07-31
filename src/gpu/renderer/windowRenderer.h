@@ -9,7 +9,7 @@
 
 #include "gpu/renderer/frameManager.h"
 #include "gpu/renderer/viewport/viewportRenderer.h"
-#include "gpu/renderer/viewportRenderInterface.h"
+#include "gpu/renderer/viewport/viewportRenderInterface.h"
 #include "gpu/abstractions/vulkanSwapchain.h"
 
 class WindowRenderer {

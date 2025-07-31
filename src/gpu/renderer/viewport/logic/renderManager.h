@@ -22,8 +22,8 @@ public:
 class CircuitRenderManager {
 public:
 	CircuitRenderManager(Circuit* circuit);
+	~CircuitRenderManager();
 	void addDifference(DifferenceSharedPtr diff);
-	void getMeUpToSpeed(CircuitRenderer* renderer);
 	void connect(CircuitRenderer* circuitRenderer);
 	void disconnect(CircuitRenderer* circuitRenderer);
 

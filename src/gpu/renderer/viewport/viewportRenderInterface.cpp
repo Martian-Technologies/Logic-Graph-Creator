@@ -1,26 +1,23 @@
 #include "viewportRenderInterface.h"
 
+#include <RmlUi/Core/Element.h>
+
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
 #include "logging/logging.h"
-#include "viewport/sharedLogic/logicRenderingUtils.h"
+#include "logic/sharedLogic/logicRenderingUtils.h"
 #include "backend/selection.h"
 
-ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element)
-	: element(element), chunker(device) {
+ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
+	: element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
+	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
 ViewportRenderInterface::~ViewportRenderInterface() {
-	if (circuit != nullptr) circuit->getRenderManager()->disconnect(&chunker);
+	if (circuit != nullptr) renderManager->disconnect(&chunker);
 	if (linkedWindowRenderer != nullptr) linkedWindowRenderer->deregisterViewportRenderInterface(this);
-}
-
-
-void ViewportRenderInterface::linkToWindowRenderer(WindowRenderer* windowRenderer) {
-	linkedWindowRenderer = windowRenderer;
-	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
 ViewportViewData ViewportRenderInterface::getViewData() {
@@ -32,18 +29,18 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 
 void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	std::lock_guard<std::mutex> lock(circuitMux);
-	
-	if (this->circuit)
-	{
-		circuit->getRenderManager()->disconnect(&chunker);
-		chunker.reset();
-	}
 
+	if (this->circuit) {
+		chunker.reset();
+		renderManager->disconnect(&chunker);
+		renderManager.reset();
+		this->circuit = nullptr;
+	}
 	this->circuit = circuit;
 
 	if (this->circuit) {
-		circuit->getRenderManager()->getMeUpToSpeed(&chunker);
-		circuit->getRenderManager()->connect(&chunker);
+		renderManager.emplace(circuit);
+		renderManager->connect(&chunker);
 	}
 }
 

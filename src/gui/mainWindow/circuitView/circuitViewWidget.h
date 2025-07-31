@@ -4,7 +4,7 @@
 #include <RmlUi/Core.h>
 #include <SDL3/SDL.h>
 
-#include "gpu/renderer/viewportRenderInterface.h"
+#include "gpu/renderer/viewport/viewportRenderInterface.h"
 #include "gpu/renderer/windowRenderer.h"
 #include "gui/sdl/sdlWindow.h"
 

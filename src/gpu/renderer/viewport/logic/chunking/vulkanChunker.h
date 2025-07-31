@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "backend/address.h"
+#include "../renderManager.h"
 #include "backend/circuit/circuit.h"
 #include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
