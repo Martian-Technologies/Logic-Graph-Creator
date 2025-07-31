@@ -224,21 +224,7 @@ void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 	evalSimulator.makeConnection(pauseGuard, connection);
 }
 
-void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
-	logError("not yet implemented", "Evaluator::removeCircuitIO");
-	return;
-	const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>*>(data);
-	if (!eventData) {
-		logError("Invalid event data type for removeCircuitIO", "Evaluator::removeCircuitIO");
-		return;
-	}
-	std::tuple<BlockType, connection_end_id_t, Position> dataValue = eventData->get();
-	BlockType blockType = std::get<0>(dataValue);
-	connection_end_id_t connectionEndId = std::get<1>(dataValue);
-	Position position = std::get<2>(dataValue);
-
-	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
-	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+void Evaluator::removeDependentInterCircuitConnections(SimPauseGuard& pauseGuard, circuit_id_t circuitId, connection_end_id_t connectionEndId) {
 	// delete any connections that have the pair {circuitId, connectionEndId} in their traceSet
 	for (auto it = interCircuitConnections.begin(); it != interCircuitConnections.end();) {
 		if (it->second.find({circuitId, connectionEndId}) != it->second.end()) {
@@ -250,9 +236,36 @@ void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
 	}
 }
 
-void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* eventData) {
-	logError("not yet implemented", "Evaluator::setCircuitIO");
-	return;
+void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
+	const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<RemoveCircuitIOData>*>(data);
+	if (!eventData) {
+		logError("Invalid event data type", "Evaluator::removeCircuitIO");
+		return;
+	}
+	std::tuple<BlockType, connection_end_id_t, Position> dataValue = eventData->get();
+	BlockType blockType = std::get<0>(dataValue);
+	connection_end_id_t connectionEndId = std::get<1>(dataValue);
+	Position position = std::get<2>(dataValue);
+
+	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
+	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+	removeDependentInterCircuitConnections(pauseGuard, circuitId, connectionEndId);
+}
+
+void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
+	const DataUpdateEventManager::EventDataWithValue<SetCircuitIOData>* eventData = dynamic_cast<const DataUpdateEventManager::EventDataWithValue<SetCircuitIOData>*>(data);
+	if (!eventData) {
+		logError("Invalid event data type", "Evaluator::setCircuitIO");
+		return;
+	}
+	std::pair<BlockType, connection_end_id_t> dataValue = eventData->get();
+	BlockType blockType = dataValue.first;
+	connection_end_id_t connectionEndId = dataValue.second;
+
+	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
+	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+	removeDependentInterCircuitConnections(pauseGuard, circuitId, connectionEndId);
+	logError("not fully implemented yet", "Evaluator::setCircuitIO");
 }
 
 std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const {
