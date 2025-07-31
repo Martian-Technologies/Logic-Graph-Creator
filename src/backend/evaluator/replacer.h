@@ -268,7 +268,7 @@ private:
 			}
 			JunctionFloodFillResult floodFillResult = junctionFloodFill(id);
 			// print the result for debug
-			if (floodFillResult.junctionIds.size() < 2) {
+			if (floodFillResult.junctionIds.size() < 2 && floodFillResult.connectionsToReroute.empty()) {
 				continue;
 			}
 			logInfo("Junction flood fill result for ID {}: {} inputs, {} outputs, {} junctions", "Replacer::mergeJunctions",
