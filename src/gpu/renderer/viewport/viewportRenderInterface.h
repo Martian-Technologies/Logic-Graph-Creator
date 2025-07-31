@@ -1,13 +1,13 @@
 #ifndef viewportRenderInterface_h
 #define viewportRenderInterface_h
 
-#include <RmlUi/Core/Element.h>
 #include <glm/ext/matrix_float4x4.hpp>
 
 #include "backend/circuitView/renderer/renderer.h"
-#include "gpu/renderer/viewport/chunking/vulkanChunker.h"
+#include "elements/elementRenderer.h"
+#include "logic/chunking/vulkanChunker.h"
 
-#include "gpu/renderer/viewport/elements/elementRenderer.h"
+namespace Rml { class Element; }
 
 struct WindowRenderer;
 
@@ -20,11 +20,9 @@ struct ViewportViewData {
 
 class ViewportRenderInterface : public CircuitViewRenderer {
 public:
-	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element);
+	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
 	~ViewportRenderInterface();
 
-	void linkToWindowRenderer(WindowRenderer* windowRenderer);
-	
 	ViewportViewData getViewData();
 	inline bool hasCircuit() { std::lock_guard<std::mutex> lock(circuitMux); return circuit != nullptr; }
 	inline VulkanChunker& getChunker() { return chunker; }
@@ -35,7 +33,7 @@ public:
 	std::vector<BoxSelectionRenderData> getBoxSelections();
 	std::vector<ConnectionPreviewRenderData> getConnectionPreviews();
 	std::vector<ArrowRenderData> getArrows();
-	
+
 public:
 	// main flow
 	void setCircuit(Circuit* circuit) override final;
@@ -68,7 +66,7 @@ private:
 	// From the UI Side
 	Rml::Element* element;
 	WindowRenderer* linkedWindowRenderer = nullptr;
-	
+
 	std::shared_ptr<Evaluator> evaluator = nullptr;
 	std::mutex evaluatorMux;
 	Circuit* circuit = nullptr;
@@ -78,6 +76,7 @@ private:
 
 	// Vulkan
 	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view
+	std::optional<CircuitRenderManager> renderManager;
 
 	// Elements
 	ElementID currentElementID = 0;

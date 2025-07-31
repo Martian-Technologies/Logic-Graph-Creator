@@ -1,17 +1,18 @@
 #include "renderManager.h"
 
-#include "gpu/renderer/viewport/sharedLogic/logicRenderingUtils.h"
+#include "sharedLogic/logicRenderingUtils.h"
 #include "backend/circuit/circuit.h"
 
 CircuitRenderManager::CircuitRenderManager(Circuit* circuit) : circuit(circuit) {
-
+	circuit->connectListener(this, [this](DifferenceSharedPtr diff, circuit_id_t circuitId) {if (circuitId == this->circuit->getCircuitId()) addDifference(diff); });
 }
 
-void CircuitRenderManager::getMeUpToSpeed(CircuitRenderer* renderer) {
-	addDifference(circuit->getBlockContainer()->getCreationDifferenceShared(), std::set<CircuitRenderer*>{ renderer });
+CircuitRenderManager::~CircuitRenderManager() {
+	circuit->disconnectListener(this);
 }
 
 void CircuitRenderManager::connect(CircuitRenderer* circuitRenderer) {
+	addDifference(circuit->getBlockContainer()->getCreationDifferenceShared(), std::set<CircuitRenderer*>{ circuitRenderer });
 	connectedRenderers.insert(circuitRenderer);
 }
 

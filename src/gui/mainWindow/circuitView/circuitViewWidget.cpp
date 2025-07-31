@@ -50,7 +50,7 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window) {
 	// create circuitView
 	element = document->GetElementById("circuit-view-rendering-area");
-	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element);
+	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element, windowRenderer);
 	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
 	
 	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
@@ -66,9 +66,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	// set initial view
 	element->AddEventListener(Rml::EventId::Resize, new EventPasser([this](Rml::Event&){handleResize();}));
 	handleResize();
-
-	// link render interface to windowRenderer
-	rendererInterface->linkToWindowRenderer(windowRenderer);
 	
 	// create keybind shortcuts and connect them
 	document->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
