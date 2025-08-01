@@ -176,10 +176,10 @@ struct JunctionGate : public SimulatorGate {
 
 	JunctionGate(simulator_id_t id) : SimulatorGate(id) {}
 
-	inline void tick(std::vector<logic_state_t>& statesA) {
+	inline void tick(std::vector<logic_state_t>& states) {
 		logic_state_t outputState = logic_state_t::FLOATING;
 		for (const auto& inputId : inputs) {
-			logic_state_t state = statesA[inputId];
+			logic_state_t state = states[inputId];
 			if (state == logic_state_t::UNDEFINED) {
 				outputState = logic_state_t::UNDEFINED;
 				break;
@@ -194,7 +194,7 @@ struct JunctionGate : public SimulatorGate {
 				break;
 			}
 		}
-		statesA[id] = outputState; // we write to statesA because junctions need to act instantly, and we simulate them first in the tick
+		states[id] = outputState; // we write to statesA because junctions need to act instantly, and we simulate them first in the tick
 	}
 
 	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {

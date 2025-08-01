@@ -16,6 +16,7 @@ Evaluator::Evaluator(
 	blockDataManager(blockDataManager),
 	circuitBlockDataManager(circuitBlockDataManager),
 	evalCircuitContainer(),
+	dataUpdateEventManager(dataUpdateEventManager),
 	receiver(dataUpdateEventManager),
 	evalConfig(),
 	middleIdProvider(),
@@ -39,17 +40,23 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId)
 	#ifdef TRACY_PROFILER
 		ZoneScoped;
 	#endif
+	changedICs = false;
 	// logInfo("_________________________________________________________________________________________");
 	// logInfo("Applying edit to Evaluator with ID {} for Circuit ID {}", "Evaluator::makeEdit", evaluatorId, circuitId);
-	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
-	std::unique_lock lk(simMutex);
-	DiffCache diffCache(circuitManager);
-	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
-		if (evalCircuitContainer.getCircuitId(evalCircuitId) == circuitId) {
-			makeEditInPlace(pauseGuard, evalCircuitId, difference, diffCache);
+	{
+		SimPauseGuard pauseGuard = evalSimulator.beginEdit();
+		std::unique_lock lk(simMutex);
+		DiffCache diffCache(circuitManager);
+		for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
+			if (evalCircuitContainer.getCircuitId(evalCircuitId) == circuitId) {
+				makeEditInPlace(pauseGuard, evalCircuitId, difference, diffCache);
+			}
 		}
+		evalSimulator.endEdit(pauseGuard);
 	}
-	evalSimulator.endEdit(pauseGuard);
+	if (changedICs) {
+		dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
+	}
 }
 
 void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache) {
@@ -134,6 +141,7 @@ void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id
 	#ifdef TRACY_PROFILER
 		ZoneScoped;
 	#endif
+	changedICs = true;
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_deleteIC", evalCircuitId);
@@ -195,6 +203,7 @@ void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCi
 	#ifdef TRACY_PROFILER
 		ZoneScoped;
 	#endif
+	changedICs = true;
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_placeIC", evalCircuitId);
@@ -861,10 +870,6 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 	// logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
 	for (const auto& [connectionId, connectionOffset] : connections) {
 		// Check if the connection is valid
-		if (!connectionOffset.second) {
-			// logInfo("Skipping connection {} at position {} because it is not valid", "Evaluator::checkToCreateExternalConnections", connectionId, connectionOffset.first.toString());
-			continue;
-		}
 		Vector portOffset = connectionOffset.first;
 		Position portPosition = block->getPosition() + portOffset;
 		// Determine direction (input or output)

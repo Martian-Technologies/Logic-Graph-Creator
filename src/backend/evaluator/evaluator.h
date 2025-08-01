@@ -124,11 +124,14 @@ private:
 	CircuitManager& circuitManager;
 	BlockDataManager& blockDataManager;
 	CircuitBlockDataManager& circuitBlockDataManager;
+	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver receiver;
 	EvalCircuitContainer evalCircuitContainer;
 	EvalConfig evalConfig;
 	IdProvider<middle_id_t> middleIdProvider;
 	EvalSimulator evalSimulator;
+
+	bool changedICs = false;
 
 	void makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache);
 
