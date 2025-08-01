@@ -69,7 +69,7 @@ public:
 			if (numOutputs == 1) {
 				std::vector<EvalConnection> outputs = getOutputs(point.gateId);
 				EvalConnection output = outputs.at(0);
-				GateType gateType = getGateType(point.gateId);
+				GateType gateType = getGateType(output.destination.gateId);
 				if (gateType == GateType::JUNCTION) {
 					// get the simId of the output
 					std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(output.destination);
