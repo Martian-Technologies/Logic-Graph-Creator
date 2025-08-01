@@ -1,11 +1,11 @@
 #include "evalCircuitContainer.h"
 
-eval_circuit_id_t EvalCircuitContainer::addCircuit(circuit_id_t circuitId) {
+eval_circuit_id_t EvalCircuitContainer::addCircuit(eval_circuit_id_t parentEvalId, circuit_id_t circuitId) {
 	eval_circuit_id_t newCircuitId = evalCircuitIdProvider.getNewId();
 	if (newCircuitId >= circuits.size()) {
 		circuits.resize(newCircuitId + 1, nullptr);
 	}
-	circuits[newCircuitId] = new EvalCircuit(circuitId);
+	circuits[newCircuitId] = new EvalCircuit(newCircuitId, parentEvalId, circuitId);
 	return newCircuitId;
 }
 

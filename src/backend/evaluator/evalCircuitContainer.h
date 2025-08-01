@@ -21,7 +21,7 @@ public:
 	EvalCircuitContainer() = default;
 	EvalCircuitContainer(const EvalCircuitContainer&) = delete;
 	EvalCircuitContainer& operator=(const EvalCircuitContainer&) = delete;
-	eval_circuit_id_t addCircuit(circuit_id_t circuitId);
+	eval_circuit_id_t addCircuit(eval_circuit_id_t parentEvalId, circuit_id_t circuitId);
 	void removeCircuit(eval_circuit_id_t evalCircuitId);
 	std::optional<CircuitNode> getNode(EvalPosition pos) const noexcept;
 	std::optional<CircuitNode> getNode(Position pos, eval_circuit_id_t evalCircuitId) const noexcept;

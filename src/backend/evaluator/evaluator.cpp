@@ -22,7 +22,7 @@ Evaluator::Evaluator(
 		return;
 	}
 	logInfo("Creating Evaluator with ID {} for Circuit ID {}", "Evaluator", evaluatorId, circuitId);
-	evalCircuitContainer.addCircuit(circuitId);
+	evalCircuitContainer.addCircuit(0, circuitId);
 	const auto blockContainer = circuit->getBlockContainer();
 	const Difference difference = blockContainer->getCreationDifference();
 	receiver.linkFunction("circuitBlockDataConnectionPositionRemove", std::bind(&Evaluator::removeCircuitIO, this, std::placeholders::_1));
@@ -169,6 +169,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	}
 	CircuitNode node = CircuitNode::fromMiddle(gateId);
 	evalCircuit->setNode(position, node);
+	checkToCreateExternalConnections(pauseGuard, evalCircuitId, position);
 }
 
 void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, circuit_id_t circuitId) {
@@ -177,7 +178,7 @@ void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCi
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_placeIC", evalCircuitId);
 		return;
 	}
-	eval_circuit_id_t newEvalCircuitId = evalCircuitContainer.addCircuit(circuitId);
+	eval_circuit_id_t newEvalCircuitId = evalCircuitContainer.addCircuit(evalCircuitId, circuitId);
 	DifferenceSharedPtr diff = diffCache.getDifference(circuitId);
 	makeEditInPlace(pauseGuard, newEvalCircuitId, diff, diffCache);
 	evalCircuit->setNode(position, CircuitNode::fromIC(newEvalCircuitId));
@@ -493,6 +494,7 @@ void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eval
 	}
 	removeDependentInterCircuitConnections(pauseGuard, node.value());
 	evalCircuit->moveNode(curPosition, newPosition);
+	checkToCreateExternalConnections(pauseGuard, evalCircuitId, newPosition);
 }
 
 const EvalAddressTree Evaluator::buildAddressTree() const {
@@ -726,4 +728,225 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	}
 
 	return evalSimulator.getStates(connectionPoints);
+}
+
+void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, Position position) {
+	logInfo("Checking to create external connections for evalCircuitId {} at position {}", "Evaluator::checkToCreateExternalConnections", evalCircuitId, position.toString());
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::checkToCreateExternalConnections", evalCircuitId);
+		return;
+	}
+	if (evalCircuit->isRoot()) {
+		logInfo("EvalCircuit is root, no external connections to create", "Evaluator::checkToCreateExternalConnections");
+		return;
+	}
+	std::optional<CircuitNode> node = evalCircuit->getNode(position);
+	if (!node.has_value()) {
+		logError("Node at position {} not found", "Evaluator::checkToCreateExternalConnections", position.toString());
+		return;
+	}
+	logInfo("Node found: {}", "Evaluator::checkToCreateExternalConnections", node->toString());
+	SharedCircuit circuit = circuitManager.getCircuit(evalCircuit->getCircuitId());
+	if (!circuit) {
+		logError("Circuit with id {} not found", "Evaluator::makeEditInPlace", evalCircuit->getCircuitId());
+		return;
+	}
+	const BlockContainer* blockContainer = circuit->getBlockContainer();
+	if (!blockContainer) {
+		logError("BlockContainer not found", "Evaluator::makeEditInPlace");
+		return;
+	}
+	const Block* block = blockContainer->getBlock(position);
+	if (!block) {
+		logError("Block not found at position {}", "Evaluator::checkToCreateExternalConnections", position.toString());
+		return;
+	}
+
+	// Get block data to iterate through all connections
+	const BlockData* blockData = blockDataManager.getBlockData(block->type());
+	if (!blockData) {
+		logError("BlockData not found for block type {}", "Evaluator::checkToCreateExternalConnections", static_cast<int>(block->type()));
+		return;
+	}
+
+	// Iterate through all connections of the block
+	const auto& connections = blockData->getConnections();
+	logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
+	struct ConnectionData {
+		Position portPosition;
+		connection_end_id_t connectionId;
+		Direction direction;
+	};
+	std::vector<ConnectionData> connectionDataList;
+	for (const auto& [connectionId, connectionOffset] : connections) {
+		// Check if the connection is valid
+		if (!connectionOffset.second) {
+			logInfo("Skipping connection {} at position {} because it is not valid", "Evaluator::checkToCreateExternalConnections", connectionId, connectionOffset.first.toString());
+			continue;
+		}
+		Vector portOffset = connectionOffset.first;
+		Position portPosition = block->getPosition() + portOffset;
+		// Determine direction (input or output)
+		Direction direction = block->isConnectionInput(connectionId) ? Direction::IN : Direction::OUT;
+		logInfo("Connection {} at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", connectionId, portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
+		connectionDataList.push_back({ portPosition, connectionId, direction });
+	}
+	if (block->type() == BlockType::SWITCH || block->type() == BlockType::BUTTON || block->type() == BlockType::TICK_BUTTON) {
+		connectionDataList.push_back({ position, 1, Direction::IN });
+	}
+	if (block->type() == BlockType::LIGHT) {
+		connectionDataList.push_back({ position, 0, Direction::OUT });
+	}
+	for (const auto& connectionData : connectionDataList) {
+		Position portPosition = connectionData.portPosition;
+		Direction direction = connectionData.direction;
+
+		logInfo("Checking connection at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
+
+		std::set<CircuitPortDependency> circuitPortDependencies;
+		std::set<CircuitNode> circuitNodeDependencies;
+		circuitNodeDependencies.insert(node.value());
+		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(
+			evalCircuitId, blockContainer, portPosition, direction, circuitPortDependencies, circuitNodeDependencies);
+
+		if (connectionPoint.has_value()) {
+			traceOutwardsIC(
+				pauseGuard,
+				evalCircuitId,
+				position,
+				direction,
+				connectionPoint.value(),
+				circuitPortDependencies,
+				circuitNodeDependencies
+			);
+		} else {
+			logError("Connection point not found for position {}", "Evaluator::checkToCreateExternalConnections", portPosition.toString());
+		}
+	}
+}
+
+void Evaluator::traceOutwardsIC(
+	SimPauseGuard& pauseGuard,
+	eval_circuit_id_t evalCircuitId,
+	Position position,
+	Direction direction,
+	const EvalConnectionPoint& targetConnectionPoint,
+	std::set<CircuitPortDependency>& circuitPortDependencies,
+	std::set<CircuitNode>& circuitNodeDependencies
+) {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::traceOutwardsIC", evalCircuitId);
+		return;
+	}
+	if (evalCircuit->isRoot()) {
+		return;
+	}
+	circuit_id_t circuitId = evalCircuit->getCircuitId();
+	CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(circuitId);
+	if (!circuitBlockData) {
+		logError("CircuitBlockData for circuit ID {} not found", "Evaluator::traceOutwardsIC", circuitId);
+		return;
+	}
+	BidirectionalMultiSecondKeyMap<connection_end_id_t, Position>::constIteratorPairT2 connectionIds = circuitBlockData->getConnectionPositionToId(position);
+	// go through all the connection_end_ids
+	eval_circuit_id_t parentEvalCircuitId = evalCircuit->getParentEvalId();
+	EvalCircuit* parentEvalCircuit = evalCircuitContainer.getCircuit(parentEvalCircuitId);
+	if (!parentEvalCircuit) {
+		logError("Parent EvalCircuit with id {} not found", "Evaluator::traceOutwardsIC", parentEvalCircuitId);
+		return;
+	}
+
+	SharedCircuit parentCircuit = circuitManager.getCircuit(parentEvalCircuit->getCircuitId());
+	if (!parentCircuit) {
+		logError("Circuit with id {} not found", "Evaluator::traceOutwardsIC", parentEvalCircuit->getCircuitId());
+		return;
+	}
+	const BlockContainer* parentCircuitBlockContainer = parentCircuit->getBlockContainer();
+	if (!parentCircuitBlockContainer) {
+		logError("BlockContainer not found", "Evaluator::traceOutwardsIC");
+		return;
+	}
+	std::optional<Position> parentCircuitPositionOpt = parentEvalCircuit->getPosition(CircuitNode::fromIC(evalCircuitId));
+	if (!parentCircuitPositionOpt.has_value()) {
+		logError("Parent circuit position not found for evalCircuitId {}", "Evaluator::traceOutwardsIC", evalCircuitId);
+		return;
+	}
+	const Block* parentCircuitBlock = parentCircuitBlockContainer->getBlock(parentCircuitPositionOpt.value());
+	if (!parentCircuitBlock) {
+		logError("Block not found at position {}", "Evaluator::traceOutwardsIC", parentCircuitPositionOpt.value().toString());
+		return;
+	}
+
+	circuitNodeDependencies.insert(CircuitNode::fromIC(evalCircuitId));
+
+	for (auto iter = connectionIds.first; iter != connectionIds.second; ++iter) {
+		connection_end_id_t connectionEndId = iter->second;
+		if (parentCircuitBlock->isConnectionInput(connectionEndId) != (direction == Direction::IN)) {
+			continue;
+		}
+		std::pair<Position, bool> connectionPosition = parentCircuitBlock->getConnectionPosition(connectionEndId);
+		if (!connectionPosition.second) {
+			logError("Connection position not found at connectionEndId {}", "Evaluator::traceOutwardsIC", connectionEndId);
+			continue;
+		}
+		Position connectionPos = connectionPosition.first;
+		const std::unordered_set<ConnectionEnd>* connectionEnds = (direction == Direction::IN) ? 
+			parentCircuitBlock->getInputConnections(connectionPos) : parentCircuitBlock->getOutputConnections(connectionPos);
+		if (!connectionEnds) {
+			logError("Connection ends not found at position {}", "Evaluator::traceOutwardsIC", connectionPos.toString());
+			continue;
+		}
+
+		circuitPortDependencies.insert({ circuitId, connectionEndId });
+
+		for (const ConnectionEnd& connectionEnd : *connectionEnds) {
+			const Block* targetBlock = parentCircuitBlockContainer->getBlock(connectionEnd.getBlockId());
+			if (!targetBlock) {
+				logError("Target block not found for connectionEnd {}", "Evaluator::traceOutwardsIC", connectionEnd.toString());
+				continue;
+			}
+			std::pair<Position, bool> targetConnectionPointPositionOpt = targetBlock->getConnectionPosition(connectionEnd.getConnectionId());
+			if (!targetConnectionPointPositionOpt.second) {
+				logError("Target connection position not found for connectionEnd {}", "Evaluator::traceOutwardsIC", connectionEnd.toString());
+				continue;
+			}
+			Position targetConnectionPointPosition = targetConnectionPointPositionOpt.first;
+			std::set<CircuitPortDependency> circuitPortDependenciesCopy = circuitPortDependencies;
+			std::set<CircuitNode> circuitNodeDependenciesCopy = circuitNodeDependencies;
+			// get connection point
+			std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(
+				parentEvalCircuitId, parentCircuitBlockContainer, targetConnectionPointPosition, !direction, circuitPortDependenciesCopy, circuitNodeDependenciesCopy);
+			if (!connectionPoint.has_value()) {
+				continue;
+			}
+			if (connectionPoint->gateId == targetConnectionPoint.gateId && direction == Direction::OUT) {
+				// this is a safety against a gate wiring to itself twice if it connects to itself in a round-about way
+				continue;
+			}
+			// If we reached here, we found a valid connection point
+			EvalConnection evalConnection(connectionPoint.value(), targetConnectionPoint);
+			evalSimulator.makeConnection(pauseGuard, evalConnection);
+			interCircuitConnections.push_back({
+				evalConnection,
+				circuitPortDependenciesCopy,
+				circuitNodeDependenciesCopy
+			});
+
+			traceOutwardsIC(
+				pauseGuard,
+				parentEvalCircuitId,
+				targetConnectionPointPosition,
+				direction,
+				targetConnectionPoint,
+				circuitPortDependencies,
+				circuitNodeDependencies
+			);
+		}
+
+		circuitPortDependencies.erase({ circuitId, connectionEndId });
+	}
+
+	circuitNodeDependencies.erase(CircuitNode::fromIC(evalCircuitId));
 }

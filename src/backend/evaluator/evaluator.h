@@ -33,6 +33,12 @@ struct InterCircuitConnection {
 	std::set<CircuitNode> circuitNodeDependencies;
 };
 
+struct DependentConnectionPoint {
+	EvalConnectionPoint connectionPoint;
+	std::set<CircuitPortDependency> circuitPortDependencies;
+	std::set<CircuitNode> circuitNodeDependencies;
+};
+
 class Evaluator {
 public:
 	typedef std::tuple<BlockType, connection_end_id_t, Position> RemoveCircuitIOData; // I hate tuples, but this is how I get the data
@@ -164,6 +170,16 @@ private:
 	) const;
 
 	std::vector<InterCircuitConnection> interCircuitConnections;
+	void checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, Position position);
+	void traceOutwardsIC(
+		SimPauseGuard& pauseGuard,
+		eval_circuit_id_t evalCircuitId,
+		Position position,
+		Direction direction,
+		const EvalConnectionPoint& targetConnectionPoint,
+		std::set<CircuitPortDependency>& circuitPortDependencies,
+		std::set<CircuitNode>& circuitNodeDependencies
+	);
 
 	mutable std::shared_mutex simMutex;
 };

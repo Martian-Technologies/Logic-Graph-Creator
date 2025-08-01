@@ -8,8 +8,8 @@
 
 class EvalCircuit {
 public:
-	EvalCircuit(circuit_id_t circuitId)
-		: circuitId(circuitId) {};
+	EvalCircuit(eval_circuit_id_t id, eval_circuit_id_t parentEvalId, circuit_id_t circuitId)
+		: id(id), parentEvalId(parentEvalId), circuitId(circuitId) {}
 	EvalCircuit(const EvalCircuit&) = delete;
 	EvalCircuit& operator=(const EvalCircuit&) = delete;
 	EvalCircuit(EvalCircuit&&) = default;
@@ -39,7 +39,27 @@ public:
 			func(pos, node);
 		});
 	}
+	bool isRoot() const noexcept {
+		return parentEvalId == id;
+	}
+	eval_circuit_id_t getId() const noexcept {
+		return id;
+	}
+	eval_circuit_id_t getParentEvalId() const noexcept {
+		return parentEvalId;
+	}
+	std::optional<Position> getPosition(CircuitNode node) const noexcept {
+		std::optional<Position> result = std::nullopt;
+		circuitNodes.forEach([&](Position pos, CircuitNode n) {
+			if (n == node) {
+				result = pos;
+			}
+		});
+		return result;
+	}
 private:
+	eval_circuit_id_t id;
+	eval_circuit_id_t parentEvalId;
 	circuit_id_t circuitId;
 	Sparse2dArray<CircuitNode> circuitNodes;
 };

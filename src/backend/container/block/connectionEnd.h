@@ -16,6 +16,9 @@ public:
 
 	bool operator==(ConnectionEnd other) const { return other.connectionId == connectionId && other.blockId == blockId; }
 
+	std::string toString() const {
+		return "ConnectionEnd(blockId=" + std::to_string(blockId) + ", connectionId=" + std::to_string(connectionId) + ")"; 
+	}
 private:
 	void setBlockId(block_id_t id) { blockId = id; }
 	void setConnectionId(connection_end_id_t id) { connectionId = id; }
