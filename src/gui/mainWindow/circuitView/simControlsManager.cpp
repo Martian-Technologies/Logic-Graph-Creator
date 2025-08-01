@@ -7,10 +7,12 @@
 
 SimControlsManager::SimControlsManager(Rml::ElementDocument* document, std::shared_ptr<CircuitViewWidget> circuitViewWidget, DataUpdateEventManager* dataUpdateEventManager) : circuitViewWidget(circuitViewWidget), dataUpdateEventReceiver(dataUpdateEventManager) {
 	toggleSimElement = document->GetElementById("toggle-simulation");
+	realisticElement = document->GetElementById("realistic-button");
 	limitSpeedElement = document->GetElementById("limit-speed-checkbox");
 	tpsInputElement = document->GetElementById("tps-input");
 
 	toggleSimElement->AddEventListener("click", new EventPasser(std::bind(&SimControlsManager::toggleSimulation, this)));
+	realisticElement->AddEventListener("click", new EventPasser(std::bind(&SimControlsManager::setRealistic, this)));
 	limitSpeedElement->AddEventListener("click", new EventPasser([this](Rml::Event& event) {
 		limitSpeed();
 		event.StopPropagation();
@@ -29,6 +31,13 @@ void SimControlsManager::update() {
 		} else {
 			toggleSimElement->SetClass("checked", true);
 		}
+		if (evaluator->isRealistic()) {
+			realisticElement->SetClass("checked", true);
+			realisticElement->SetInnerRML("R");
+		} else {
+			realisticElement->SetClass("checked", false);
+			realisticElement->SetInnerRML("S");
+		}
 		if (evaluator->getUseTickrate()) {
 			limitSpeedElement->SetAttribute("checked", true);
 		} else {
@@ -41,6 +50,8 @@ void SimControlsManager::update() {
 		tpsInputElement->SetAttribute<Rml::String>("value", tpsStr);
 	} else {
 		toggleSimElement->SetClass("checked", false);
+		realisticElement->SetClass("checked", false);
+		realisticElement->SetInnerRML("S");
 		limitSpeedElement->RemoveAttribute("checked");
 		tpsInputElement->SetInnerRML("tps");
 		tpsInputElement->SetAttribute<Rml::String>("value", "");
@@ -55,6 +66,14 @@ void SimControlsManager::toggleSimulation() {
 		} else {
 			evaluator->setPause(true);
 		}
+	}
+	update();
+}
+
+void SimControlsManager::setRealistic() {
+	Evaluator* evaluator = circuitViewWidget->getCircuitView()->getEvaluator();
+	if (evaluator) {
+		evaluator->setRealistic(!(evaluator->isRealistic()));
 	}
 	update();
 }
