@@ -30,7 +30,7 @@ public:
 	unsigned int getAverageTickrate() const;
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
-	
+
 	// Synchronous state setting methods (blocking, for initialization or critical operations)
 	void setStateImmediate(simulator_id_t id, logic_state_t state);
 	void setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);

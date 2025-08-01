@@ -88,6 +88,8 @@ public:
 		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
 	};
 	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
+	std::vector<logic_state_t> getBulkStates(const std::vector<Position>& positions, const Address& addressOrigin);
+	std::vector<logic_state_t> getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin);
 	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
 		logWarning("not implemented yet", "Evaluator::setBulkStates");
 	};

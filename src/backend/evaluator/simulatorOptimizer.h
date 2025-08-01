@@ -60,6 +60,28 @@ public:
 		}
 		return simulator.getStates(simIds);
 	}
+	std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+		std::vector<simulator_id_t> simIds;
+		simIds.reserve(points.size());
+		for (const auto& point : points) {
+			// get num outputs
+			int numOutputs = getNumOutputs(point.gateId);
+			if (numOutputs == 1) {
+				std::vector<EvalConnection> outputs = getOutputs(point.gateId);
+				EvalConnection output = outputs.at(0);
+				GateType gateType = getGateType(point.gateId);
+				if (gateType == GateType::JUNCTION) {
+					// get the simId of the output
+					std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(output.destination);
+					simIds.push_back(simIdOpt.value_or(0));
+					continue;
+				}
+			}
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
+			simIds.push_back(simIdOpt.value_or(0));
+		}
+		return simulator.getStates(simIds);
+	}
 	void setState(EvalConnectionPoint point, logic_state_t state) {
 		std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
 		if (!simIdOpt.has_value()) {
@@ -82,6 +104,18 @@ public:
 
 	std::vector<EvalConnection> getInputs(middle_id_t middleId) const;
 	std::vector<EvalConnection> getOutputs(middle_id_t middleId) const;
+	int getNumInputs(middle_id_t middleId) const {
+		if (middleId < inputConnections.size()) {
+			return static_cast<int>(inputConnections[middleId].size());
+		}
+		return 0;
+	}
+	int getNumOutputs(middle_id_t middleId) const {
+		if (middleId < outputConnections.size()) {
+			return static_cast<int>(outputConnections[middleId].size());
+		}
+		return 0;
+	}
 	GateType getGateType(middle_id_t middleId) const {
 		if (middleId < gateTypes.size()) {
 			return gateTypes[middleId];

@@ -31,6 +31,9 @@ public:
 	inline std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
 		return evaluator ? evaluator->getBulkStates(addresses, addressOrigin) : getEmptyVector<logic_state_t>();
 	}
+	inline std::vector<logic_state_t> getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin) {
+		return evaluator ? evaluator->getBulkPinStates(positions, addressOrigin) : getEmptyVector<logic_state_t>();
+	}
 	inline void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
 		if (evaluator) evaluator->setBulkStates(addresses, states);
 	}

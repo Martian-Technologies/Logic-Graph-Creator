@@ -48,6 +48,12 @@ public:
 		#endif
 		return gateSubstituter.getStates(points);
 	}
+	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
+		return gateSubstituter.getPinStates(points);
+	}
 	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 		#ifdef TRACY_PROFILER
 			ZoneScoped;

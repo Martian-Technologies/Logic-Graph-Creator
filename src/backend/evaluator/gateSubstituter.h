@@ -112,6 +112,9 @@ public:
 	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getStates(points);
 	}
+	std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+		return replacer.getPinStates(points);
+	}
 	void setState(EvalConnectionPoint point, logic_state_t state) {
 		replacer.setState(point, state);
 	}

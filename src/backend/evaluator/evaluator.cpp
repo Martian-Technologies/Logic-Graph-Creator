@@ -838,6 +838,32 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 	return evalSimulator.getStates(connectionPoints);
 }
 
+std::vector<logic_state_t> Evaluator::getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin) {
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
+	if (positions.empty()) {
+		return {};
+	}
+	std::shared_lock lk(simMutex);
+	eval_circuit_id_t startingPoint = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
+
+	std::vector<EvalConnectionPoint> connectionPoints;
+	connectionPoints.reserve(positions.size());
+
+	for (size_t i = 0; i < positions.size(); ++i) {
+		Position portPosition = positions[i];
+		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(startingPoint, portPosition, Direction::OUT);
+		if (connectionPoint.has_value()) {
+			connectionPoints.push_back(connectionPoint.value());
+		} else {
+			connectionPoints.emplace_back(0, 0);
+		}
+	}
+
+	return evalSimulator.getPinStates(connectionPoints);
+}
+
 void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, Position position) {
 	#ifdef TRACY_PROFILER
 		ZoneScoped;

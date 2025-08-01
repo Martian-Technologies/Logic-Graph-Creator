@@ -167,6 +167,10 @@ public:
 		return simulatorOptimizer.getStates(getReplacementConnectionPoints(points));
 	}
 
+	std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+		return simulatorOptimizer.getPinStates(getReplacementConnectionPoints(points));
+	}
+
 	void setState(EvalConnectionPoint id, logic_state_t state) {
 		simulatorOptimizer.setState(getReplacementConnectionPoint(id), state);
 	}
