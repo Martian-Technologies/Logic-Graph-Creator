@@ -1,5 +1,8 @@
 #include "logicSimulator.h"
 #include "gateType.h"
+#ifdef TRACY_PROFILER
+	#include <tracy/Tracy.hpp>
+#endif
 
 LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) {
 	// Subscribe to EvalConfig changes to update the simulator accordingly
@@ -190,6 +193,9 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 }
 
 void LogicSimulator::removeGate(simulator_id_t simulatorId) {
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
 	std::optional<std::vector<simulator_id_t>> outputIdsOpt = getOutputSimIdsFromGate(simulatorId);
 	if (!outputIdsOpt.has_value()) {
 		logError("Cannot remove gate: no output IDs found for simulator_id_t " + std::to_string(simulatorId), "LogicSimulator::removeGate");
