@@ -32,8 +32,8 @@ Evaluator::Evaluator(
 }
 
 void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId) {
-	logInfo("_________________________________________________________________________________________");
-	logInfo("Applying edit to Evaluator with ID {} for Circuit ID {}", "Evaluator::makeEdit", evaluatorId, circuitId);
+	// logInfo("_________________________________________________________________________________________");
+	// logInfo("Applying edit to Evaluator with ID {} for Circuit ID {}", "Evaluator::makeEdit", evaluatorId, circuitId);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
 	std::unique_lock lk(simMutex);
 	DiffCache diffCache(circuitManager);
@@ -731,14 +731,14 @@ std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& 
 }
 
 void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, Position position) {
-	logInfo("Checking to create external connections for evalCircuitId {} at position {}", "Evaluator::checkToCreateExternalConnections", evalCircuitId, position.toString());
+	// logInfo("Checking to create external connections for evalCircuitId {} at position {}", "Evaluator::checkToCreateExternalConnections", evalCircuitId, position.toString());
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::checkToCreateExternalConnections", evalCircuitId);
 		return;
 	}
 	if (evalCircuit->isRoot()) {
-		logInfo("EvalCircuit is root, no external connections to create", "Evaluator::checkToCreateExternalConnections");
+		// logInfo("EvalCircuit is root, no external connections to create", "Evaluator::checkToCreateExternalConnections");
 		return;
 	}
 	std::optional<CircuitNode> node = evalCircuit->getNode(position);
@@ -746,7 +746,7 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 		logError("Node at position {} not found", "Evaluator::checkToCreateExternalConnections", position.toString());
 		return;
 	}
-	logInfo("Node found: {}", "Evaluator::checkToCreateExternalConnections", node->toString());
+	// logInfo("Node found: {}", "Evaluator::checkToCreateExternalConnections", node->toString());
 	SharedCircuit circuit = circuitManager.getCircuit(evalCircuit->getCircuitId());
 	if (!circuit) {
 		logError("Circuit with id {} not found", "Evaluator::makeEditInPlace", evalCircuit->getCircuitId());
@@ -778,23 +778,23 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 	};
 	std::vector<ConnectionData> connectionDataList;
 	if (blockData->isDefaultData()) {
-		logInfo("Block type {} is default data", "Evaluator::checkToCreateExternalConnections", static_cast<int>(block->type()));
+		// logInfo("Block type {} is default data", "Evaluator::checkToCreateExternalConnections", static_cast<int>(block->type()));
 		connectionDataList.push_back({ position, 0, Direction::IN });
 		connectionDataList.push_back({ position, 1, Direction::OUT });
 	} else {
 	const auto& connections = blockData->getConnections();
-	logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
+	// logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
 	for (const auto& [connectionId, connectionOffset] : connections) {
 		// Check if the connection is valid
 		if (!connectionOffset.second) {
-			logInfo("Skipping connection {} at position {} because it is not valid", "Evaluator::checkToCreateExternalConnections", connectionId, connectionOffset.first.toString());
+			// logInfo("Skipping connection {} at position {} because it is not valid", "Evaluator::checkToCreateExternalConnections", connectionId, connectionOffset.first.toString());
 			continue;
 		}
 		Vector portOffset = connectionOffset.first;
 		Position portPosition = block->getPosition() + portOffset;
 		// Determine direction (input or output)
 		Direction direction = block->isConnectionInput(connectionId) ? Direction::IN : Direction::OUT;
-		logInfo("Connection {} at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", connectionId, portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
+		// logInfo("Connection {} at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", connectionId, portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
 		connectionDataList.push_back({ portPosition, connectionId, direction });
 	}
 	if (block->type() == BlockType::SWITCH || block->type() == BlockType::BUTTON || block->type() == BlockType::TICK_BUTTON) {
@@ -807,7 +807,7 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 		Position portPosition = connectionData.portPosition;
 		Direction direction = connectionData.direction;
 
-		logInfo("Checking connection at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
+		// logInfo("Checking connection at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
 
 		std::set<CircuitPortDependency> circuitPortDependencies;
 		std::set<CircuitNode> circuitNodeDependencies;

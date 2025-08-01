@@ -271,8 +271,8 @@ private:
 			if (floodFillResult.junctionIds.size() < 2 && floodFillResult.connectionsToReroute.empty()) {
 				continue;
 			}
-			logInfo("Junction flood fill result for ID {}: {} inputs, {} outputs, {} junctions", "Replacer::mergeJunctions",
-				id, floodFillResult.inputsPullingFromJunctions.size(), floodFillResult.outputsGoingIntoJunctions.size(), floodFillResult.junctionIds.size());
+			// logInfo("Junction flood fill result for ID {}: {} inputs, {} outputs, {} junctions", "Replacer::mergeJunctions",
+			// 	id, floodFillResult.inputsPullingFromJunctions.size(), floodFillResult.outputsGoingIntoJunctions.size(), floodFillResult.junctionIds.size());
 			Replacement& replacement = makeReplacement();
 			middle_id_t newJunctionId = replacement.getNewId();
 			replacement.addGate(pauseGuard, GateType::JUNCTION, newJunctionId);

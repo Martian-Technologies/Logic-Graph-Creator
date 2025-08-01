@@ -69,7 +69,7 @@ public:
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 		if (gateType == GateType::DUMMY_INPUT || gateType == GateType::TICK_INPUT) {
-			logInfo("Begining to track gate with ID {}", "GateSubstituter::addGate", gateId);
+			// logInfo("Begining to track gate with ID {}", "GateSubstituter::addGate", gateId);
 			addTrackedGate({ gateId, gateType, gateType, GateType::JUNCTION, {}, {}, 1 });
 		}
 		replacer.addGate(pauseGuard, gateType, gateId); // this may need to be conditional in the future if we add more conditional gates

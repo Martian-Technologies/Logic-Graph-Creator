@@ -80,8 +80,8 @@ void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnectio
 	simulator_id_t sourceId = sourceSimId.value();
 	simulator_id_t destinationId = destinationSimId.value();
 
-	logInfo("Making connection from gate {} (simulator_id_t {}) port {} to gate {} (simulator_id_t {}) port {}", "SimulatorOptimizer::makeConnection",
-		sourceGateId, sourceId, sourcePort, destinationGateId, destinationId, destinationPort);
+	// logInfo("Making connection from gate {} (simulator_id_t {}) port {} to gate {} (simulator_id_t {}) port {}", "SimulatorOptimizer::makeConnection",
+	// 	sourceGateId, sourceId, sourcePort, destinationGateId, destinationId, destinationPort);
 
 	simulator.makeConnection(sourceId, sourcePort, destinationId, destinationPort);
 
