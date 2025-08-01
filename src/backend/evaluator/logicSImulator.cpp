@@ -352,9 +352,6 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 }
 
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
-	#ifdef TRACY_PROFILER
-		ZoneScoped;
-	#endif
 	auto locationIt = gateLocations.find(simId);
 	if (locationIt != gateLocations.end()) {
 		SimGateType gateType = locationIt->second.first;
