@@ -102,7 +102,7 @@ struct ANDLikeGate : public MultiInputGate {
 	bool inputsInverted;
 	bool outputInverted;
 
-	ANDLikeGate(simulator_id_t id, bool inputsInverted = false, bool outputInverted = false) 
+	ANDLikeGate(simulator_id_t id, bool inputsInverted = false, bool outputInverted = false)
 		: MultiInputGate(id), inputsInverted(inputsInverted), outputInverted(outputInverted) {}
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) override {
@@ -144,7 +144,7 @@ struct XORLikeGate : public MultiInputGate {
 	// Can be used for XOR and XNOR
 	bool outputInverted;
 
-	XORLikeGate(simulator_id_t id, bool outputInverted = false) 
+	XORLikeGate(simulator_id_t id, bool outputInverted = false)
 		: MultiInputGate(id), outputInverted(outputInverted) {}
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) override {

@@ -31,10 +31,9 @@ public:
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
 
-	// Synchronous state setting methods (blocking, for initialization or critical operations)
 	void setStateImmediate(simulator_id_t id, logic_state_t state);
 	void setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
-	
+
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
 
@@ -44,7 +43,6 @@ public:
 	void removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 
-	// EvalConfig integration methods
 	bool isRunning() const { return evalConfig.isRunning(); }
 	void setRunning(bool running) { evalConfig.setRunning(running); }
 	bool isTickrateLimiterEnabled() const { return evalConfig.isTickrateLimiterEnabled(); }
@@ -70,7 +68,6 @@ private:
 	mutable std::shared_mutex statesAMutex;
 	std::mutex statesBMutex;
 
-	// Non-blocking state change queue
 	struct StateChange {
 		simulator_id_t id;
 		logic_state_t state;
@@ -90,11 +87,27 @@ private:
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
-	// Performance optimization data structures
-	// Maps output ID to gates that depend on it (gate type, gate index within that type)
-	std::unordered_map<simulator_id_t, std::vector<std::pair<SimGateType, size_t>>> outputDependencies;
-	// Maps simulator ID to gate location (gate type, gate index within that type)
-	std::unordered_map<simulator_id_t, std::pair<SimGateType, size_t>> gateLocations;
+	struct GateDependency {
+		SimGateType gateType;
+		size_t gateIndex;
+
+		GateDependency(SimGateType type, size_t index) : gateType(type), gateIndex(index) {}
+
+		bool operator==(const GateDependency& other) const {
+			return gateType == other.gateType && gateIndex == other.gateIndex;
+		}
+	};
+
+	struct GateLocation {
+		SimGateType gateType;
+		size_t gateIndex;
+
+		GateLocation() : gateType(SimGateType::AND), gateIndex(0) {}
+		GateLocation(SimGateType type, size_t index) : gateType(type), gateIndex(index) {}
+	};
+
+	std::unordered_map<simulator_id_t, std::vector<GateDependency>> outputDependencies;
+	std::unordered_map<simulator_id_t, GateLocation> gateLocations;
 
 	void simulationLoop();
 	inline void tickOnce();
@@ -104,7 +117,6 @@ private:
 	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;
 
-	// Performance optimization helper methods
 	void updateGateLocation(simulator_id_t gateId, SimGateType gateType, size_t gateIndex);
 	void removeGateLocation(simulator_id_t gateId);
 	void addOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);

@@ -15,8 +15,8 @@ struct ReplacementGate {
 
 class Replacement {
 public:
-	Replacement(SimulatorOptimizer* optimizer, IdProvider<middle_id_t>* middleIdProvider, 
-	            std::unordered_map<middle_id_t, middle_id_t>* replacedIds) :
+	Replacement(SimulatorOptimizer* optimizer, IdProvider<middle_id_t>* middleIdProvider,
+				std::unordered_map<middle_id_t, middle_id_t>* replacedIds) :
 		simulatorOptimizer(optimizer), middleIdProvider(middleIdProvider), replacedIds(replacedIds) {}
 
 	void removeGate(SimPauseGuard& pauseGuard, middle_id_t gateId, middle_id_t replacementId) {

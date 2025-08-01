@@ -67,13 +67,13 @@ void LogicSimulator::simulationLoop()
 		} else {
 			// simulation is paused, but still process pending state changes
 			processPendingStateChanges();
-			
+
 			// wait for state change or resume signal
 			std::unique_lock lk(cvMutex);
-			cv.wait(lk, [&]{ 
+			cv.wait(lk, [&]{
 				// Check for pending state changes under lock to avoid race conditions
 				std::lock_guard<std::mutex> stateLock(stateChangeQueueMutex);
-				return pauseRequest || !running || evalConfig.isRunning() || !pendingStateChanges.empty(); 
+				return pauseRequest || !running || evalConfig.isRunning() || !pendingStateChanges.empty();
 			});
 			// reset nextTick when resuming simulation
 			nextTick = clock::now();
@@ -84,7 +84,7 @@ void LogicSimulator::simulationLoop()
 inline void LogicSimulator::tickOnce() {
 	// Process any pending state changes first
 	processPendingStateChanges();
-	
+
 	std::unique_lock lkNext(statesBMutex);
 	{
 		{
@@ -112,19 +112,19 @@ void LogicSimulator::processPendingStateChanges() {
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		std::swap(localQueue, pendingStateChanges);
 	}
-	
+
 	// Apply all pending state changes
 	if (!localQueue.empty()) {
 		std::scoped_lock lk(statesBMutex, statesAMutex);
 		while (!localQueue.empty()) {
 			const StateChange& change = localQueue.front();
-			
+
 			// Ensure the states vectors are large enough
 			if (statesA.size() <= change.id) {
 				statesA.resize(change.id + 1, logic_state_t::UNDEFINED);
 				statesB.resize(change.id + 1, logic_state_t::UNDEFINED);
 			}
-			
+
 			statesA[change.id] = change.state;
 			statesB[change.id] = change.state;
 			localQueue.pop();
@@ -196,7 +196,6 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 	return result;
 }
 
-// Gate management methods (moved from SimulatorOptimizer)
 simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 	simulator_id_t simulatorId = simulatorIdProvider.getNewId();
 
@@ -291,52 +290,52 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 	for (const auto& id : outputIdsOpt.value()) {
 		auto depIt = outputDependencies.find(id);
 		if (depIt != outputDependencies.end()) {
-			for (const auto& [gateType, gateIndex] : depIt->second) {
+			for (const auto& dependency : depIt->second) {
 				// Remove the reference from the specific gate
-				switch (gateType) {
+				switch (dependency.gateType) {
 				case SimGateType::AND:
-					if (gateIndex < andGates.size()) {
-						andGates[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < andGates.size()) {
+						andGates[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::XOR:
-					if (gateIndex < xorGates.size()) {
-						xorGates[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < xorGates.size()) {
+						xorGates[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::JUNCTION:
-					if (gateIndex < junctions.size()) {
-						junctions[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < junctions.size()) {
+						junctions[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::BUFFER:
-					if (gateIndex < buffers.size()) {
-						buffers[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < buffers.size()) {
+						buffers[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::SINGLE_BUFFER:
-					if (gateIndex < singleBuffers.size()) {
-						singleBuffers[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < singleBuffers.size()) {
+						singleBuffers[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::TRISTATE_BUFFER:
-					if (gateIndex < tristateBuffers.size()) {
-						tristateBuffers[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < tristateBuffers.size()) {
+						tristateBuffers[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::CONSTANT:
-					if (gateIndex < constantGates.size()) {
-						constantGates[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < constantGates.size()) {
+						constantGates[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::CONSTANT_RESET:
-					if (gateIndex < constantResetGates.size()) {
-						constantResetGates[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < constantResetGates.size()) {
+						constantResetGates[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				case SimGateType::COPY_SELF_OUTPUT:
-					if (gateIndex < copySelfOutputGates.size()) {
-						copySelfOutputGates[gateIndex].removeIdRefs(id);
+					if (dependency.gateIndex < copySelfOutputGates.size()) {
+						copySelfOutputGates[dependency.gateIndex].removeIdRefs(id);
 					}
 					break;
 				}
@@ -346,12 +345,10 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		simulatorIdProvider.releaseId(id);
 	}
 
-
-
 	auto locationIt = gateLocations.find(simulatorId);
 	if (locationIt != gateLocations.end()) {
-		SimGateType gateType = locationIt->second.first;
-		size_t gateIndex = locationIt->second.second;
+		SimGateType gateType = locationIt->second.gateType;
+		size_t gateIndex = locationIt->second.gateIndex;
 
 		switch (gateType) {
 		case SimGateType::AND:
@@ -431,9 +428,9 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
 	auto locationIt = gateLocations.find(simId);
 	if (locationIt != gateLocations.end()) {
-		SimGateType gateType = locationIt->second.first;
-		size_t gateIndex = locationIt->second.second;
-		
+		SimGateType gateType = locationIt->second.gateType;
+		size_t gateIndex = locationIt->second.gateIndex;
+
 		switch (gateType) {
 		case SimGateType::AND:
 			if (gateIndex < andGates.size()) {
@@ -487,12 +484,11 @@ std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t sim
 }
 
 void LogicSimulator::addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId) {
-	// Use optimized lookup instead of linear search
 	auto locationIt = gateLocations.find(simId);
 	if (locationIt != gateLocations.end()) {
-		SimGateType gateType = locationIt->second.first;
-		size_t gateIndex = locationIt->second.second;
-		
+		SimGateType gateType = locationIt->second.gateType;
+		size_t gateIndex = locationIt->second.gateIndex;
+
 		switch (gateType) {
 		case SimGateType::AND:
 			if (gateIndex < andGates.size()) {
@@ -556,12 +552,11 @@ void LogicSimulator::addInputToGate(simulator_id_t simId, simulator_id_t inputId
 }
 
 void LogicSimulator::removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId) {
-	// Use optimized lookup instead of linear search
 	auto locationIt = gateLocations.find(simId);
 	if (locationIt != gateLocations.end()) {
-		SimGateType gateType = locationIt->second.first;
-		size_t gateIndex = locationIt->second.second;
-		
+		SimGateType gateType = locationIt->second.gateType;
+		size_t gateIndex = locationIt->second.gateIndex;
+
 		switch (gateType) {
 		case SimGateType::AND:
 			if (gateIndex < andGates.size()) {
@@ -682,9 +677,8 @@ std::optional<std::vector<simulator_id_t>> LogicSimulator::getOutputSimIdsFromGa
 	return std::nullopt;
 }
 
-// Performance optimization helper methods
 void LogicSimulator::updateGateLocation(simulator_id_t gateId, SimGateType gateType, size_t gateIndex) {
-	gateLocations[gateId] = {gateType, gateIndex};
+	gateLocations[gateId] = GateLocation(gateType, gateIndex);
 }
 
 void LogicSimulator::removeGateLocation(simulator_id_t gateId) {
@@ -699,7 +693,7 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, SimGateType
 	auto it = outputDependencies.find(outputId);
 	if (it != outputDependencies.end()) {
 		auto& deps = it->second;
-		deps.erase(std::remove(deps.begin(), deps.end(), std::make_pair(gateType, gateIndex)), deps.end());
+		deps.erase(std::remove(deps.begin(), deps.end(), GateDependency(gateType, gateIndex)), deps.end());
 		if (deps.empty()) {
 			outputDependencies.erase(it);
 		}
@@ -707,17 +701,15 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, SimGateType
 }
 
 void LogicSimulator::updateGateIndicesAfterRemoval(SimGateType gateType, size_t removedIndex) {
-	// Update gateLocations - decrement indices for gates that were shifted down
 	for (auto& [gateId, location] : gateLocations) {
-		if (location.first == gateType && location.second > removedIndex) {
-			location.second--;
+		if (location.gateType == gateType && location.gateIndex > removedIndex) {
+			location.gateIndex--;
 		}
 	}
-	// Update outputDependencies - decrement indices for gates that were shifted down
 	for (auto& [outputId, deps] : outputDependencies) {
 		for (auto& dep : deps) {
-			if (dep.first == gateType && dep.second > removedIndex) {
-				dep.second--;
+			if (dep.gateType == gateType && dep.gateIndex > removedIndex) {
+				dep.gateIndex--;
 			}
 		}
 	}

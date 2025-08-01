@@ -2,13 +2,13 @@
 
 void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 	simulator_id_t simulatorId = simulator.addGate(gateType);
-	
+
 	// if simulatorIds is too short, extend it
 	if (simulatorIds.size() <= simulatorId) {
 		simulatorIds.resize(simulatorId + 1);
 	}
 	simulatorIds[simulatorId] = gateId;
-	
+
 	// Ensure connection tracking vectors are large enough
 	if (inputConnections.size() <= gateId) {
 		inputConnections.resize(gateId + 1);
@@ -119,10 +119,10 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, EvalConnect
 		auto& connections = inputConnections[destinationGateId];
 		connections.erase(std::remove_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
-				return conn.source.gateId == connection.source.gateId && 
-				       conn.source.portId == connection.source.portId &&
-				       conn.destination.gateId == connection.destination.gateId && 
-				       conn.destination.portId == connection.destination.portId;
+				return conn.source.gateId == connection.source.gateId &&
+					   conn.source.portId == connection.source.portId &&
+					   conn.destination.gateId == connection.destination.gateId &&
+					   conn.destination.portId == connection.destination.portId;
 			}), connections.end());
 	}
 
@@ -130,10 +130,10 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, EvalConnect
 		auto& connections = outputConnections[sourceGateId];
 		connections.erase(std::remove_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
-				return conn.source.gateId == connection.source.gateId && 
-				       conn.source.portId == connection.source.portId &&
-				       conn.destination.gateId == connection.destination.gateId && 
-				       conn.destination.portId == connection.destination.portId;
+				return conn.source.gateId == connection.source.gateId &&
+					   conn.source.portId == connection.source.portId &&
+					   conn.destination.gateId == connection.destination.gateId &&
+					   conn.destination.portId == connection.destination.portId;
 			}), connections.end());
 	}
 }

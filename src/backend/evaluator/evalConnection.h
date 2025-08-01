@@ -21,14 +21,14 @@ struct EvalConnectionPoint {
 	}
 
 	bool operator<(const EvalConnectionPoint& other) const noexcept {
-        return std::tie(gateId, portId) < std::tie(other.gateId, other.portId);
+		return std::tie(gateId, portId) < std::tie(other.gateId, other.portId);
 	}
 
 	struct Hash {
-        std::size_t operator()(const EvalConnectionPoint& point) const noexcept {
-            return std::hash<middle_id_t>{}(point.gateId) ^
-                   (std::hash<connection_port_id_t>{}(point.portId) << 1);
-        }
+		std::size_t operator()(const EvalConnectionPoint& point) const noexcept {
+			return std::hash<middle_id_t>{}(point.gateId) ^
+				   (std::hash<connection_port_id_t>{}(point.portId) << 1);
+		}
 	};
 
 	std::string toString() const {
@@ -56,15 +56,15 @@ struct EvalConnection {
 		return !(*this == other);
 	}
 
-    struct Hash {
-        std::size_t operator()(const EvalConnection& connection) const noexcept {
-            EvalConnectionPoint::Hash pointHash;
-            return pointHash(connection.source) ^ (pointHash(connection.destination) << 1);
-        }
+	struct Hash {
+		std::size_t operator()(const EvalConnection& connection) const noexcept {
+			EvalConnectionPoint::Hash pointHash;
+			return pointHash(connection.source) ^ (pointHash(connection.destination) << 1);
+		}
 	};
 	std::string toString() const {
 		return "EC( (" + std::to_string(source.gateId) + ", " + std::to_string(source.portId) + ") -> (" +
-		       std::to_string(destination.gateId) + ", " + std::to_string(destination.portId) + ") )";
+			   std::to_string(destination.gateId) + ", " + std::to_string(destination.portId) + ") )";
 	}
 };
 
