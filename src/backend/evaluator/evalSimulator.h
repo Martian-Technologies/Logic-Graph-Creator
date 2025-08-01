@@ -61,15 +61,15 @@ public:
 		gateSubstituter.setStates(points, states);
 	}
 	inline void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
-		#ifdef TRACY_PROFILER
-			ZoneScoped;
-		#endif
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 		gateSubstituter.makeConnection(pauseGuard, connection);
 	}
 	inline void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
-		#ifdef TRACY_PROFILER
-			ZoneScoped;
-		#endif
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
 	inline unsigned int getAverageTickrate() const {

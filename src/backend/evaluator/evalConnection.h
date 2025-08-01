@@ -8,6 +8,7 @@ struct EvalConnectionPoint {
 	middle_id_t gateId;
 	connection_port_id_t portId;
 
+	EvalConnectionPoint() = default;
 	EvalConnectionPoint(middle_id_t gateId, connection_port_id_t portId)
 		: gateId(gateId), portId(portId) {}
 
@@ -28,13 +29,18 @@ struct EvalConnectionPoint {
             return std::hash<middle_id_t>{}(point.gateId) ^
                    (std::hash<connection_port_id_t>{}(point.portId) << 1);
         }
-    };
+	};
+
+	std::string toString() const {
+		return "ECP(" + std::to_string(gateId) + ", " + std::to_string(portId) + ")";
+	}
 };
 
 struct EvalConnection {
 	EvalConnectionPoint source;
 	EvalConnectionPoint destination;
 
+	EvalConnection() = default;
 	EvalConnection(EvalConnectionPoint source, EvalConnectionPoint destination)
 		: source(source), destination(destination) {}
 	connection_port_id_t destinationGatePort;
@@ -55,7 +61,11 @@ struct EvalConnection {
             EvalConnectionPoint::Hash pointHash;
             return pointHash(connection.source) ^ (pointHash(connection.destination) << 1);
         }
-    };
+	};
+	std::string toString() const {
+		return "EC( (" + std::to_string(source.gateId) + ", " + std::to_string(source.portId) + ") -> (" +
+		       std::to_string(destination.gateId) + ", " + std::to_string(destination.portId) + ") )";
+	}
 };
 
 #endif // evalConnection_h

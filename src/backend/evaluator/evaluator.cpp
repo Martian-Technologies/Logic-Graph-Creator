@@ -210,9 +210,9 @@ void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCi
 		return;
 	}
 	eval_circuit_id_t newEvalCircuitId = evalCircuitContainer.addCircuit(evalCircuitId, circuitId);
+	evalCircuit->setNode(position, CircuitNode::fromIC(newEvalCircuitId));
 	DifferenceSharedPtr diff = diffCache.getDifference(circuitId);
 	makeEditInPlace(pauseGuard, newEvalCircuitId, diff, diffCache);
-	evalCircuit->setNode(position, CircuitNode::fromIC(newEvalCircuitId));
 }
 
 void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, const BlockContainer* blockContainer, Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) {
@@ -1014,7 +1014,13 @@ void Evaluator::traceOutwardsIC(
 				continue;
 			}
 			// If we reached here, we found a valid connection point
-			EvalConnection evalConnection(connectionPoint.value(), targetConnectionPoint);
+			// EvalConnection evalConnection(connectionPoint.value(), targetConnectionPoint);
+			EvalConnection evalConnection;
+			if (direction == Direction::IN) {
+				evalConnection = EvalConnection(connectionPoint.value(), targetConnectionPoint);
+			} else {
+				evalConnection = EvalConnection(targetConnectionPoint, connectionPoint.value());
+			}
 			evalSimulator.makeConnection(pauseGuard, evalConnection);
 			interCircuitConnections.push_back({
 				evalConnection,
