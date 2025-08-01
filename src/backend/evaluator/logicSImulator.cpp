@@ -51,8 +51,13 @@ void LogicSimulator::simulationLoop()
 			nextTick = clock::now();
 		}
 
+		processPendingStateChanges();
 		if (evalConfig.isRunning()) {
-			tickOnce();
+			if (evalConfig.isRealistic()) {
+				realisticTickOnce();
+			} else {
+				tickOnce();
+			}
 
 			// handle timing after ticking
 			if (evalConfig.isTickrateLimiterEnabled()) {
@@ -65,9 +70,6 @@ void LogicSimulator::simulationLoop()
 				}
 			}
 		} else {
-			// simulation is paused, but still process pending state changes
-			processPendingStateChanges();
-
 			// wait for state change or resume signal
 			std::unique_lock lk(cvMutex);
 			cv.wait(lk, [&]{
@@ -82,14 +84,10 @@ void LogicSimulator::simulationLoop()
 }
 
 inline void LogicSimulator::tickOnce() {
-	// Process any pending state changes first
-	processPendingStateChanges();
-
 	std::unique_lock lkNext(statesBMutex);
 	{
 		{
 			std::unique_lock lkJunctions(statesAMutex);
-			// junctions are special because they need to act instantly, so they run at the start of the tick
 			for (auto& gate : junctions) gate.tick(statesA);
 		}
 
@@ -100,6 +98,26 @@ inline void LogicSimulator::tickOnce() {
 		for (auto& gate : constantResetGates) gate.tick(statesB);
 		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 		for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
+	}
+	std::unique_lock lkCurEx(statesAMutex);
+	std::swap(statesA, statesB);
+}
+
+inline void LogicSimulator::realisticTickOnce() {
+	std::unique_lock lkNext(statesBMutex);
+	{
+		{
+			std::unique_lock lkJunctions(statesAMutex);
+			for (auto& gate : junctions) gate.tick(statesA);
+		}
+
+		std::shared_lock lkCur(statesAMutex);
+
+		for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
+		for (auto& gate : xorGates) gate.realisticTick(statesA, statesB);
+		for (auto& gate : constantResetGates) gate.realisticTick(statesB);
+		for (auto& gate : copySelfOutputGates) gate.realisticTick(statesA, statesB);
+		for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
 	}
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);

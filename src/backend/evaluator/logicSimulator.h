@@ -111,6 +111,7 @@ private:
 
 	void simulationLoop();
 	inline void tickOnce();
+	inline void realisticTickOnce();
 	void processPendingStateChanges();
 
 	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
