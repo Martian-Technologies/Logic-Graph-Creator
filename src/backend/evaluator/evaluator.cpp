@@ -591,7 +591,7 @@ const EvalAddressTree Evaluator::buildAddressTree(eval_circuit_id_t evalCircuitI
 		if (node.isIC()) {
 			root.addBranch(pos, buildAddressTree(node.getId()));
 		}
-	});
+		});
 	return root;
 }
 
@@ -857,32 +857,31 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 	// Iterate through all connections of the block
 	struct ConnectionData {
 		Position portPosition;
-		connection_end_id_t connectionId;
 		Direction direction;
 	};
 	std::vector<ConnectionData> connectionDataList;
 	if (blockData->isDefaultData()) {
 		// logInfo("Block type {} is default data", "Evaluator::checkToCreateExternalConnections", static_cast<int>(block->type()));
-		connectionDataList.push_back({ position, 0, Direction::IN });
-		connectionDataList.push_back({ position, 1, Direction::OUT });
+		connectionDataList.push_back({ position, Direction::IN });
+		connectionDataList.push_back({ position, Direction::OUT });
 	} else {
-	const auto& connections = blockData->getConnections();
-	// logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
-	for (const auto& [connectionId, connectionOffset] : connections) {
-		// Check if the connection is valid
-		Vector portOffset = connectionOffset.first;
-		Position portPosition = block->getPosition() + portOffset;
-		// Determine direction (input or output)
-		Direction direction = block->isConnectionInput(connectionId) ? Direction::IN : Direction::OUT;
-		// logInfo("Connection {} at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", connectionId, portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
-		connectionDataList.push_back({ portPosition, connectionId, direction });
+		const auto& connections = blockData->getConnections();
+		// logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
+		for (const auto& [connectionId, connectionOffset] : connections) {
+			Vector portOffset = connectionOffset.first;
+			Position portPosition = block->getPosition() + portOffset;
+			// Determine direction (input or output)
+			Direction direction = block->isConnectionInput(connectionId) ? Direction::IN : Direction::OUT;
+			// logInfo("Connection {} at position {} with direction {}", "Evaluator::checkToCreateExternalConnections", connectionId, portPosition.toString(), (direction == Direction::IN ? "IN" : "OUT"));
+			connectionDataList.push_back({ portPosition, direction });
+		}
+		if (block->type() == BlockType::SWITCH || block->type() == BlockType::BUTTON || block->type() == BlockType::TICK_BUTTON) {
+			connectionDataList.push_back({ position, Direction::IN });
+		}
+		if (block->type() == BlockType::LIGHT) {
+			connectionDataList.push_back({ position, Direction::OUT });
+		}
 	}
-	if (block->type() == BlockType::SWITCH || block->type() == BlockType::BUTTON || block->type() == BlockType::TICK_BUTTON) {
-		connectionDataList.push_back({ position, 1, Direction::IN });
-	}
-	if (block->type() == BlockType::LIGHT) {
-		connectionDataList.push_back({ position, 0, Direction::OUT });
-	}}
 	for (const auto& connectionData : connectionDataList) {
 		Position portPosition = connectionData.portPosition;
 		Direction direction = connectionData.direction;
@@ -899,7 +898,7 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 			traceOutwardsIC(
 				pauseGuard,
 				evalCircuitId,
-				position,
+				portPosition,
 				direction,
 				connectionPoint.value(),
 				circuitPortDependencies,
@@ -937,7 +936,6 @@ void Evaluator::traceOutwardsIC(
 		logError("CircuitBlockData for circuit ID {} not found", "Evaluator::traceOutwardsIC", circuitId);
 		return;
 	}
-	BidirectionalMultiSecondKeyMap<connection_end_id_t, Position>::constIteratorPairT2 connectionIds = circuitBlockData->getConnectionPositionToId(position);
 	// go through all the connection_end_ids
 	eval_circuit_id_t parentEvalCircuitId = evalCircuit->getParentEvalId();
 	EvalCircuit* parentEvalCircuit = evalCircuitContainer.getCircuit(parentEvalCircuitId);
@@ -968,6 +966,8 @@ void Evaluator::traceOutwardsIC(
 	}
 
 	circuitNodeDependencies.insert(CircuitNode::fromIC(evalCircuitId));
+
+	BidirectionalMultiSecondKeyMap<connection_end_id_t, Position>::constIteratorPairT2 connectionIds = circuitBlockData->getConnectionPositionToId(position);
 
 	for (auto iter = connectionIds.first; iter != connectionIds.second; ++iter) {
 		connection_end_id_t connectionEndId = iter->second;
