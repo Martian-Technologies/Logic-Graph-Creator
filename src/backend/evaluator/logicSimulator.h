@@ -7,6 +7,19 @@
 #include "evalConnection.h"
 #include "evalConfig.h"
 
+// Gate type indices for performance optimization
+enum class SimGateType : int {
+	AND = 0,
+	XOR = 1,
+	JUNCTION = 2,
+	BUFFER = 3,
+	SINGLE_BUFFER = 4,
+	TRISTATE_BUFFER = 5,
+	CONSTANT = 6,
+	CONSTANT_RESET = 7,
+	COPY_SELF_OUTPUT = 8
+};
+
 class LogicSimulator {
 friend class SimulatorOptimizer;
 friend class SimPauseGuard;
@@ -64,12 +77,25 @@ private:
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
+	// Performance optimization data structures
+	// Maps output ID to gates that depend on it (gate type, gate index within that type)
+	std::unordered_map<simulator_id_t, std::vector<std::pair<SimGateType, size_t>>> outputDependencies;
+	// Maps simulator ID to gate location (gate type, gate index within that type)
+	std::unordered_map<simulator_id_t, std::pair<SimGateType, size_t>> gateLocations;
+
 	void simulationLoop();
 	inline void tickOnce();
 
 	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;
+
+	// Performance optimization helper methods
+	void updateGateLocation(simulator_id_t gateId, SimGateType gateType, size_t gateIndex);
+	void removeGateLocation(simulator_id_t gateId);
+	void addOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
+	void removeOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
+	void updateGateIndicesAfterRemoval(SimGateType gateType, size_t removedIndex);
 };
 
 class SimPauseGuard {
