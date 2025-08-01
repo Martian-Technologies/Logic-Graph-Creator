@@ -74,15 +74,19 @@ void LogicSimulator::simulationLoop()
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
 	{
+		{
+			std::unique_lock lkJunctions(statesAMutex);
+			// junctions are special because they need to act instantly, so they run at the start of the tick
+			for (auto& gate : junctions) gate.tick(statesA);
+		}
+
 		std::shared_lock lkCur(statesAMutex);
+
 		for (auto& gate : andGates) gate.tick(statesA, statesB);
 		for (auto& gate : xorGates) gate.tick(statesA, statesB);
 		for (auto& gate : constantResetGates) gate.tick(statesB);
 		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 		for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
-
-		// junctions are special because they need to act instantly, so they run at the end of the tick
-		for (auto& gate : junctions) gate.tick(statesB);
 	}
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);
