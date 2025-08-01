@@ -305,9 +305,35 @@ void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
 	connection_end_id_t connectionEndId = dataValue.second;
 
 	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
+	if (circuitId == 0) {
+		logError("Circuit ID for BlockType {} is 0, cannot set IO", "Evaluator::setCircuitIO", blockType);
+		return;
+	}
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
-	removeDependentInterCircuitConnections(pauseGuard, {circuitId, connectionEndId});
-	logError("not fully implemented yet", "Evaluator::setCircuitIO");
+	removeDependentInterCircuitConnections(pauseGuard, { circuitId, connectionEndId });
+	// get the new position
+	CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(circuitId);
+	if (!circuitBlockData) {
+		logError("CircuitBlockData for Circuit ID {} not found", "Evaluator::setCircuitIO", circuitId);
+		return;
+	}
+	const Position* position = circuitBlockData->getConnectionIdToPosition(connectionEndId);
+	if (!position) {
+		logError("Position for connection end ID {} not found in CircuitBlockData for Circuit ID {}", "Evaluator::setCircuitIO", connectionEndId, circuitId);
+		return;
+	}
+	// use checkToCreateExternalConnections
+	// iterate over eval_circuit_id_t
+	for (eval_circuit_id_t evalCircuitId = 0; evalCircuitId < evalCircuitContainer.size(); evalCircuitId++) {
+		EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+		if (!evalCircuit) {
+			continue;
+		}
+		if (evalCircuit->getCircuitId() != circuitId) {
+			continue;
+		}
+		checkToCreateExternalConnections(pauseGuard, evalCircuitId, *position);
+	}
 }
 
 std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const {
