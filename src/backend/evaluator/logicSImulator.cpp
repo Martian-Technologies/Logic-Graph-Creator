@@ -216,139 +216,129 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		return;
 	}
 
-	// First, remove all references to this gate's outputs from other gates - OPTIMIZED VERSION
-	{
-		#ifdef TRACY_PROFILER
-			ZoneScopedN("Removing references to gate outputs");
-		#endif
-		for (const auto& id : outputIdsOpt.value()) {
-			auto depIt = outputDependencies.find(id);
-			if (depIt != outputDependencies.end()) {
-				for (const auto& [gateType, gateIndex] : depIt->second) {
-					// Remove the reference from the specific gate
-					switch (gateType) {
-					case SimGateType::AND:
-						if (gateIndex < andGates.size()) {
-							andGates[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::XOR:
-						if (gateIndex < xorGates.size()) {
-							xorGates[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::JUNCTION:
-						if (gateIndex < junctions.size()) {
-							junctions[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::BUFFER:
-						if (gateIndex < buffers.size()) {
-							buffers[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::SINGLE_BUFFER:
-						if (gateIndex < singleBuffers.size()) {
-							singleBuffers[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::TRISTATE_BUFFER:
-						if (gateIndex < tristateBuffers.size()) {
-							tristateBuffers[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::CONSTANT:
-						if (gateIndex < constantGates.size()) {
-							constantGates[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::CONSTANT_RESET:
-						if (gateIndex < constantResetGates.size()) {
-							constantResetGates[gateIndex].removeIdRefs(id);
-						}
-						break;
-					case SimGateType::COPY_SELF_OUTPUT:
-						if (gateIndex < copySelfOutputGates.size()) {
-							copySelfOutputGates[gateIndex].removeIdRefs(id);
-						}
-						break;
+	// First, remove all references to this gate's outputs from other gates
+	for (const auto& id : outputIdsOpt.value()) {
+		auto depIt = outputDependencies.find(id);
+		if (depIt != outputDependencies.end()) {
+			for (const auto& [gateType, gateIndex] : depIt->second) {
+				// Remove the reference from the specific gate
+				switch (gateType) {
+				case SimGateType::AND:
+					if (gateIndex < andGates.size()) {
+						andGates[gateIndex].removeIdRefs(id);
 					}
+					break;
+				case SimGateType::XOR:
+					if (gateIndex < xorGates.size()) {
+						xorGates[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::JUNCTION:
+					if (gateIndex < junctions.size()) {
+						junctions[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::BUFFER:
+					if (gateIndex < buffers.size()) {
+						buffers[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::SINGLE_BUFFER:
+					if (gateIndex < singleBuffers.size()) {
+						singleBuffers[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::TRISTATE_BUFFER:
+					if (gateIndex < tristateBuffers.size()) {
+						tristateBuffers[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::CONSTANT:
+					if (gateIndex < constantGates.size()) {
+						constantGates[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::CONSTANT_RESET:
+					if (gateIndex < constantResetGates.size()) {
+						constantResetGates[gateIndex].removeIdRefs(id);
+					}
+					break;
+				case SimGateType::COPY_SELF_OUTPUT:
+					if (gateIndex < copySelfOutputGates.size()) {
+						copySelfOutputGates[gateIndex].removeIdRefs(id);
+					}
+					break;
 				}
-				outputDependencies.erase(depIt);
 			}
-			simulatorIdProvider.releaseId(id);
+			outputDependencies.erase(depIt);
 		}
+		simulatorIdProvider.releaseId(id);
 	}
 
-	{
-		#ifdef TRACY_PROFILER
-			ZoneScopedN("Removing gate from simulator");
-		#endif
-		// Find and remove the gate using the optimized lookup - OPTIMIZED VERSION
-		auto locationIt = gateLocations.find(simulatorId);
-		if (locationIt != gateLocations.end()) {
-			SimGateType gateType = locationIt->second.first;
-			size_t gateIndex = locationIt->second.second;
-			
-			switch (gateType) {
-			case SimGateType::AND:
-				if (gateIndex < andGates.size()) {
-					andGates.erase(andGates.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::AND, gateIndex);
-				}
-				break;
-			case SimGateType::XOR:
-				if (gateIndex < xorGates.size()) {
-					xorGates.erase(xorGates.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::XOR, gateIndex);
-				}
-				break;
-			case SimGateType::JUNCTION:
-				if (gateIndex < junctions.size()) {
-					junctions.erase(junctions.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::JUNCTION, gateIndex);
-				}
-				break;
-			case SimGateType::BUFFER:
-				if (gateIndex < buffers.size()) {
-					buffers.erase(buffers.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::BUFFER, gateIndex);
-				}
-				break;
-			case SimGateType::SINGLE_BUFFER:
-				if (gateIndex < singleBuffers.size()) {
-					singleBuffers.erase(singleBuffers.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::SINGLE_BUFFER, gateIndex);
-				}
-				break;
-			case SimGateType::TRISTATE_BUFFER:
-				if (gateIndex < tristateBuffers.size()) {
-					tristateBuffers.erase(tristateBuffers.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::TRISTATE_BUFFER, gateIndex);
-				}
-				break;
-			case SimGateType::CONSTANT:
-				if (gateIndex < constantGates.size()) {
-					constantGates.erase(constantGates.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::CONSTANT, gateIndex);
-				}
-				break;
-			case SimGateType::CONSTANT_RESET:
-				if (gateIndex < constantResetGates.size()) {
-					constantResetGates.erase(constantResetGates.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::CONSTANT_RESET, gateIndex);
-				}
-				break;
-			case SimGateType::COPY_SELF_OUTPUT:
-				if (gateIndex < copySelfOutputGates.size()) {
-					copySelfOutputGates.erase(copySelfOutputGates.begin() + gateIndex);
-					updateGateIndicesAfterRemoval(SimGateType::COPY_SELF_OUTPUT, gateIndex);
-				}
-				break;
+
+
+	auto locationIt = gateLocations.find(simulatorId);
+	if (locationIt != gateLocations.end()) {
+		SimGateType gateType = locationIt->second.first;
+		size_t gateIndex = locationIt->second.second;
+
+		switch (gateType) {
+		case SimGateType::AND:
+			if (gateIndex < andGates.size()) {
+				andGates.erase(andGates.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::AND, gateIndex);
 			}
-			
-			removeGateLocation(simulatorId);
+			break;
+		case SimGateType::XOR:
+			if (gateIndex < xorGates.size()) {
+				xorGates.erase(xorGates.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::XOR, gateIndex);
+			}
+			break;
+		case SimGateType::JUNCTION:
+			if (gateIndex < junctions.size()) {
+				junctions.erase(junctions.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::JUNCTION, gateIndex);
+			}
+			break;
+		case SimGateType::BUFFER:
+			if (gateIndex < buffers.size()) {
+				buffers.erase(buffers.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::BUFFER, gateIndex);
+			}
+			break;
+		case SimGateType::SINGLE_BUFFER:
+			if (gateIndex < singleBuffers.size()) {
+				singleBuffers.erase(singleBuffers.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::SINGLE_BUFFER, gateIndex);
+			}
+			break;
+		case SimGateType::TRISTATE_BUFFER:
+			if (gateIndex < tristateBuffers.size()) {
+				tristateBuffers.erase(tristateBuffers.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::TRISTATE_BUFFER, gateIndex);
+			}
+			break;
+		case SimGateType::CONSTANT:
+			if (gateIndex < constantGates.size()) {
+				constantGates.erase(constantGates.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::CONSTANT, gateIndex);
+			}
+			break;
+		case SimGateType::CONSTANT_RESET:
+			if (gateIndex < constantResetGates.size()) {
+				constantResetGates.erase(constantResetGates.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::CONSTANT_RESET, gateIndex);
+			}
+			break;
+		case SimGateType::COPY_SELF_OUTPUT:
+			if (gateIndex < copySelfOutputGates.size()) {
+				copySelfOutputGates.erase(copySelfOutputGates.begin() + gateIndex);
+				updateGateIndicesAfterRemoval(SimGateType::COPY_SELF_OUTPUT, gateIndex);
+			}
+			break;
 		}
+		removeGateLocation(simulatorId);
 	}
 }
 
@@ -627,6 +617,9 @@ void LogicSimulator::updateGateLocation(simulator_id_t gateId, SimGateType gateT
 }
 
 void LogicSimulator::removeGateLocation(simulator_id_t gateId) {
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
 	gateLocations.erase(gateId);
 }
 
@@ -652,7 +645,6 @@ void LogicSimulator::updateGateIndicesAfterRemoval(SimGateType gateType, size_t 
 			location.second--;
 		}
 	}
-	
 	// Update outputDependencies - decrement indices for gates that were shifted down
 	for (auto& [outputId, deps] : outputDependencies) {
 		for (auto& dep : deps) {
