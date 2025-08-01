@@ -8,10 +8,6 @@
 #include "idProvider.h"
 #include "gateType.h"
 #include "logicSimulator.h"
-
-#ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
-#endif
 struct ReplacementGate {
 	middle_id_t id;
 	GateType type;
@@ -139,9 +135,6 @@ public:
 	}
 
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
-		#ifdef TRACY_PROFILER
-			ZoneScoped;
-		#endif
 		pingOutputs(pauseGuard, gateId);
 		pingInputs(pauseGuard, gateId);
 		simulatorOptimizer.removeGate(pauseGuard, gateId);

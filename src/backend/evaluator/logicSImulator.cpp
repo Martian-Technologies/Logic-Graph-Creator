@@ -1,8 +1,5 @@
 #include "logicSimulator.h"
 #include "gateType.h"
-#ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
-#endif
 
 LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) {
 	// Subscribe to EvalConfig changes to update the simulator accordingly
@@ -207,9 +204,6 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 }
 
 void LogicSimulator::removeGate(simulator_id_t simulatorId) {
-	#ifdef TRACY_PROFILER
-		ZoneScoped;
-	#endif
 	std::optional<std::vector<simulator_id_t>> outputIdsOpt = getOutputSimIdsFromGate(simulatorId);
 	if (!outputIdsOpt.has_value()) {
 		logError("Cannot remove gate: no output IDs found for simulator_id_t " + std::to_string(simulatorId), "LogicSimulator::removeGate");
@@ -358,58 +352,61 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 }
 
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
-	auto andIt = std::find_if(andGates.begin(), andGates.end(),
-		[simId](const ANDLikeGate& gate) { return gate.getId() == simId; });
-	if (andIt != andGates.end()) {
-		return andIt->getIdOfOutputPort(portId);
-	}
-
-	auto xorIt = std::find_if(xorGates.begin(), xorGates.end(),
-		[simId](const XORLikeGate& gate) { return gate.getId() == simId; });
-	if (xorIt != xorGates.end()) {
-		return xorIt->getIdOfOutputPort(portId);
-	}
-
-	auto junctionIt = std::find_if(junctions.begin(), junctions.end(),
-		[simId](const JunctionGate& gate) { return gate.getId() == simId; });
-	if (junctionIt != junctions.end()) {
-		return junctionIt->getIdOfOutputPort(portId);
-	}
-
-	auto bufferIt = std::find_if(buffers.begin(), buffers.end(),
-		[simId](const BufferGate& gate) { return gate.getId() == simId; });
-	if (bufferIt != buffers.end()) {
-		return bufferIt->getIdOfOutputPort(portId);
-	}
-
-	auto singleBufferIt = std::find_if(singleBuffers.begin(), singleBuffers.end(),
-		[simId](const SingleBufferGate& gate) { return gate.getId() == simId; });
-	if (singleBufferIt != singleBuffers.end()) {
-		return singleBufferIt->getIdOfOutputPort(portId);
-	}
-
-	auto tristateIt = std::find_if(tristateBuffers.begin(), tristateBuffers.end(),
-		[simId](const TristateBufferGate& gate) { return gate.getId() == simId; });
-	if (tristateIt != tristateBuffers.end()) {
-		return tristateIt->getIdOfOutputPort(portId);
-	}
-
-	auto constantIt = std::find_if(constantGates.begin(), constantGates.end(),
-		[simId](const ConstantGate& gate) { return gate.getId() == simId; });
-	if (constantIt != constantGates.end()) {
-		return constantIt->getIdOfOutputPort(portId);
-	}
-
-	auto constantResetIt = std::find_if(constantResetGates.begin(), constantResetGates.end(),
-		[simId](const ConstantResetGate& gate) { return gate.getId() == simId; });
-	if (constantResetIt != constantResetGates.end()) {
-		return constantResetIt->getIdOfOutputPort(portId);
-	}
-
-	auto copySelfIt = std::find_if(copySelfOutputGates.begin(), copySelfOutputGates.end(),
-		[simId](const CopySelfOutputGate& gate) { return gate.getId() == simId; });
-	if (copySelfIt != copySelfOutputGates.end()) {
-		return copySelfIt->getIdOfOutputPort(portId);
+	#ifdef TRACY_PROFILER
+		ZoneScoped;
+	#endif
+	auto locationIt = gateLocations.find(simId);
+	if (locationIt != gateLocations.end()) {
+		SimGateType gateType = locationIt->second.first;
+		size_t gateIndex = locationIt->second.second;
+		
+		switch (gateType) {
+		case SimGateType::AND:
+			if (gateIndex < andGates.size()) {
+				return andGates[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::XOR:
+			if (gateIndex < xorGates.size()) {
+				return xorGates[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::JUNCTION:
+			if (gateIndex < junctions.size()) {
+				return junctions[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::BUFFER:
+			if (gateIndex < buffers.size()) {
+				return buffers[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::SINGLE_BUFFER:
+			if (gateIndex < singleBuffers.size()) {
+				return singleBuffers[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::TRISTATE_BUFFER:
+			if (gateIndex < tristateBuffers.size()) {
+				return tristateBuffers[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::CONSTANT:
+			if (gateIndex < constantGates.size()) {
+				return constantGates[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::CONSTANT_RESET:
+			if (gateIndex < constantResetGates.size()) {
+				return constantResetGates[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		case SimGateType::COPY_SELF_OUTPUT:
+			if (gateIndex < copySelfOutputGates.size()) {
+				return copySelfOutputGates[gateIndex].getIdOfOutputPort(portId);
+			}
+			break;
+		}
 	}
 
 	return std::nullopt;
@@ -617,9 +614,6 @@ void LogicSimulator::updateGateLocation(simulator_id_t gateId, SimGateType gateT
 }
 
 void LogicSimulator::removeGateLocation(simulator_id_t gateId) {
-	#ifdef TRACY_PROFILER
-		ZoneScoped;
-	#endif
 	gateLocations.erase(gateId);
 }
 

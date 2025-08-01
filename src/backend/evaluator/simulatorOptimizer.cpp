@@ -1,7 +1,4 @@
 #include "simulatorOptimizer.h"
-#ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
-#endif
 
 void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 	simulator_id_t simulatorId = simulator.addGate(gateType);
@@ -26,26 +23,16 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 }
 
 void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
-	#ifdef TRACY_PROFILER
-		ZoneScoped;
-	#endif
 	// Find the gate in the simulator and remove it
-	{
-		#ifdef TRACY_PROFILER
-			ZoneScopedN("Removing gate from simulator");
-		#endif
-		auto it = std::find(simulatorIds.begin(), simulatorIds.end(), gateId);
-		if (it != simulatorIds.end()) {
-			simulator_id_t simulatorId = std::distance(simulatorIds.begin(), it);
-			simulator.removeGate(simulatorId);
-		}
+
+	auto it = std::find(simulatorIds.begin(), simulatorIds.end(), gateId);
+	if (it != simulatorIds.end()) {
+		simulator_id_t simulatorId = std::distance(simulatorIds.begin(), it);
+		simulator.removeGate(simulatorId);
 	}
 
 	// Clean up connection tracking
 	if (gateId < inputConnections.size()) {
-		#ifdef TRACY_PROFILER
-			ZoneScopedN("Removing input connections for gate");
-		#endif
 		// Remove all input connections to this gate
 		for (const auto& connection : inputConnections[gateId]) {
 			middle_id_t sourceId = connection.source.gateId;
@@ -61,9 +48,6 @@ void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t
 	}
 
 	if (gateId < outputConnections.size()) {
-		#ifdef TRACY_PROFILER
-			ZoneScopedN("Removing output connections for gate");
-		#endif
 		// Remove all output connections from this gate
 		for (const auto& connection : outputConnections[gateId]) {
 			middle_id_t destId = connection.destination.gateId;

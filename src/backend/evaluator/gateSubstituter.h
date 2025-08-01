@@ -10,10 +10,6 @@
 #include "logicSimulator.h"
 #include <vector>
 
-#ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
-#endif
-
 struct TrackedGate {
 	middle_id_t id;
 	GateType currentState;
@@ -79,9 +75,6 @@ public:
 		replacer.addGate(pauseGuard, gateType, gateId); // this may need to be conditional in the future if we add more conditional gates
 	}
 	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
-		#ifdef TRACY_PROFILER
-			ZoneScoped;
-		#endif
 		replacer.removeGate(pauseGuard, gateId);
 		deleteTrackedGate(gateId);
 		for (auto& trackedGate : trackedGates) {

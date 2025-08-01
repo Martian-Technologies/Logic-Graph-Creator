@@ -1,5 +1,8 @@
 #ifndef evalSimulator_h
 #define evalSimulator_h
+#ifdef TRACY_PROFILER
+#include <tracy/Tracy.hpp>
+#endif
 
 #include "gateSubstituter.h"
 
@@ -9,37 +12,70 @@ public:
 		evalConfig(evalConfig),
 		middleIdProvider(middleIdProvider), gateSubstituter(evalConfig, middleIdProvider) {
 	}
-	SimPauseGuard beginEdit() {
+	inline SimPauseGuard beginEdit() {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		return gateSubstituter.beginEdit();
 	}
-	void endEdit(SimPauseGuard& pauseGuard) {
+	inline void endEdit(SimPauseGuard& pauseGuard) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.endEdit(pauseGuard);
 	}
-	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
+	inline void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.addGate(pauseGuard, gateType, gateId);
 	}
-	void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
+	inline void removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.removeGate(pauseGuard, gateId);
 	}
-	logic_state_t getState(EvalConnectionPoint point) const {
+	inline logic_state_t getState(EvalConnectionPoint point) const {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		return gateSubstituter.getState(point);
 	}
-	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+	inline std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		return gateSubstituter.getStates(points);
 	}
-	void setState(EvalConnectionPoint point, logic_state_t state) {
+	inline void setState(EvalConnectionPoint point, logic_state_t state) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.setState(point, state);
 	}
-	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+	inline void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.setStates(points, states);
 	}
-	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+	inline void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.makeConnection(pauseGuard, connection);
 	}
-	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+	inline void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
-	unsigned int getAverageTickrate() const {
+	inline unsigned int getAverageTickrate() const {
+		#ifdef TRACY_PROFILER
+			ZoneScoped;
+		#endif
 		return gateSubstituter.getAverageTickrate();
 	}
 private:
