@@ -59,7 +59,7 @@ private:
 	std::atomic<long long int> targetTickrate = 0; // in ticks per minute
 	std::atomic<bool> tickrateLimiter = true;
 	std::atomic<bool> running = false;
-	std::atomic<bool> realistic = true;
+	std::atomic<bool> realistic = false;
 
 	std::vector<std::function<void()>> subscribers;
 	std::mutex subscribersMutex;
