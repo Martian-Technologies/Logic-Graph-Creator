@@ -30,6 +30,11 @@ public:
 	unsigned int getAverageTickrate() const;
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
+	
+	// Synchronous state setting methods (blocking, for initialization or critical operations)
+	void setStateImmediate(simulator_id_t id, logic_state_t state);
+	void setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
+	
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
 
@@ -65,6 +70,14 @@ private:
 	mutable std::shared_mutex statesAMutex;
 	std::mutex statesBMutex;
 
+	// Non-blocking state change queue
+	struct StateChange {
+		simulator_id_t id;
+		logic_state_t state;
+	};
+	std::queue<StateChange> pendingStateChanges;
+	std::mutex stateChangeQueueMutex;
+
 	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
 	std::vector<JunctionGate> junctions;
@@ -85,6 +98,7 @@ private:
 
 	void simulationLoop();
 	inline void tickOnce();
+	void processPendingStateChanges();
 
 	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);

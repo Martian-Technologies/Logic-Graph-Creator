@@ -65,9 +65,16 @@ void LogicSimulator::simulationLoop()
 				}
 			}
 		} else {
-			// simulation is paused, so we wait for state change
+			// simulation is paused, but still process pending state changes
+			processPendingStateChanges();
+			
+			// wait for state change or resume signal
 			std::unique_lock lk(cvMutex);
-			cv.wait(lk, [&]{ return pauseRequest || !running || evalConfig.isRunning(); });
+			cv.wait(lk, [&]{ 
+				// Check for pending state changes under lock to avoid race conditions
+				std::lock_guard<std::mutex> stateLock(stateChangeQueueMutex);
+				return pauseRequest || !running || evalConfig.isRunning() || !pendingStateChanges.empty(); 
+			});
 			// reset nextTick when resuming simulation
 			nextTick = clock::now();
 		}
@@ -75,6 +82,9 @@ void LogicSimulator::simulationLoop()
 }
 
 inline void LogicSimulator::tickOnce() {
+	// Process any pending state changes first
+	processPendingStateChanges();
+	
 	std::unique_lock lkNext(statesBMutex);
 	{
 		{
@@ -95,18 +105,78 @@ inline void LogicSimulator::tickOnce() {
 	std::swap(statesA, statesB);
 }
 
+void LogicSimulator::processPendingStateChanges() {
+	// Process pending state changes without blocking the calling thread
+	std::queue<StateChange> localQueue;
+	{
+		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
+		std::swap(localQueue, pendingStateChanges);
+	}
+	
+	// Apply all pending state changes
+	if (!localQueue.empty()) {
+		std::scoped_lock lk(statesBMutex, statesAMutex);
+		while (!localQueue.empty()) {
+			const StateChange& change = localQueue.front();
+			
+			// Ensure the states vectors are large enough
+			if (statesA.size() <= change.id) {
+				statesA.resize(change.id + 1, logic_state_t::UNDEFINED);
+				statesB.resize(change.id + 1, logic_state_t::UNDEFINED);
+			}
+			
+			statesA[change.id] = change.state;
+			statesB[change.id] = change.state;
+			localQueue.pop();
+		}
+	}
+}
+
 void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
-	std::scoped_lock lk(statesBMutex, statesAMutex);
-	statesA[id] = st;
-	statesB[id] = st;
+	{
+		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
+		pendingStateChanges.push({id, st});
+	}
+	// Wake up the simulation thread to process state changes
+	cv.notify_one();
 }
 
 void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
 	if (ids.size() != states.size()) {
 		throw std::invalid_argument("ids and states must have the same size");
 	}
+	{
+		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
+		for (size_t i = 0; i < ids.size(); ++i) {
+			pendingStateChanges.push({ids[i], states[i]});
+		}
+	}
+	// Wake up the simulation thread to process state changes
+	cv.notify_one();
+}
+
+void LogicSimulator::setStateImmediate(simulator_id_t id, logic_state_t st) {
+	std::scoped_lock lk(statesBMutex, statesAMutex);
+	// Ensure the states vectors are large enough
+	if (statesA.size() <= id) {
+		statesA.resize(id + 1, logic_state_t::UNDEFINED);
+		statesB.resize(id + 1, logic_state_t::UNDEFINED);
+	}
+	statesA[id] = st;
+	statesB[id] = st;
+}
+
+void LogicSimulator::setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
+	if (ids.size() != states.size()) {
+		throw std::invalid_argument("ids and states must have the same size");
+	}
 	std::scoped_lock lk(statesBMutex, statesAMutex);
 	for (size_t i = 0; i < ids.size(); ++i) {
+		// Ensure the states vectors are large enough
+		if (statesA.size() <= ids[i]) {
+			statesA.resize(ids[i] + 1, logic_state_t::UNDEFINED);
+			statesB.resize(ids[i] + 1, logic_state_t::UNDEFINED);
+		}
 		statesA[ids[i]] = states[i];
 		statesB[ids[i]] = states[i];
 	}
