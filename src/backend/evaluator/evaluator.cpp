@@ -771,14 +771,19 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 	}
 
 	// Iterate through all connections of the block
-	const auto& connections = blockData->getConnections();
-	logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
 	struct ConnectionData {
 		Position portPosition;
 		connection_end_id_t connectionId;
 		Direction direction;
 	};
 	std::vector<ConnectionData> connectionDataList;
+	if (blockData->isDefaultData()) {
+		logInfo("Block type {} is default data", "Evaluator::checkToCreateExternalConnections", static_cast<int>(block->type()));
+		connectionDataList.push_back({ position, 0, Direction::IN });
+		connectionDataList.push_back({ position, 1, Direction::OUT });
+	} else {
+	const auto& connections = blockData->getConnections();
+	logInfo("Found {} connections for block type {}", "Evaluator::checkToCreateExternalConnections", connections.size(), static_cast<int>(block->type()));
 	for (const auto& [connectionId, connectionOffset] : connections) {
 		// Check if the connection is valid
 		if (!connectionOffset.second) {
@@ -797,7 +802,7 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 	}
 	if (block->type() == BlockType::LIGHT) {
 		connectionDataList.push_back({ position, 0, Direction::OUT });
-	}
+	}}
 	for (const auto& connectionData : connectionDataList) {
 		Position portPosition = connectionData.portPosition;
 		Direction direction = connectionData.direction;
