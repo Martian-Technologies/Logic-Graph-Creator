@@ -193,11 +193,13 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 	}
 	logInfo("all blocks can be placed");
 
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+
 	std::unordered_map<block_id_t, block_id_t> realIds;
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		Position targetPos = block.position.snap();
 		block_id_t newId;
-		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
+		if (!blockContainer.tryInsertBlock(targetPos, block.rotation, block.type, difference.get())) {
 			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
@@ -217,10 +219,11 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputEndId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputEndId);
-		if (!tryCreateConnection(output, input)) {
+		if (!blockContainer.tryCreateConnection(output, input, difference.get())) {
 			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 		}
 	}
+	sendDifference(difference);
 	return true;
 }
 
@@ -237,11 +240,13 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 	}
 	logInfo("all blocks can be placed");
 
+	DifferenceSharedPtr difference = std::make_shared<Difference>();
+
 	std::unordered_map<block_id_t, block_id_t> realIds;
 	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
 		Position targetPos = block.position;
 		block_id_t newId;
-		if (!tryInsertBlock(targetPos, block.rotation, block.type)) {
+		if (!blockContainer.tryInsertBlock(targetPos, block.rotation, block.type, difference.get())) {
 			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
@@ -261,7 +266,7 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 
 		ConnectionEnd output(realIds[conn.outputBlockId], conn.outputId);
 		ConnectionEnd input(realIds[conn.inputBlockId], conn.inputId);
-		if (!tryCreateConnection(output, input)) {
+		if (!blockContainer.tryCreateConnection(output, input, difference.get())) {
 			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
