@@ -51,7 +51,7 @@ public:
 
 private:
 	EvalConfig& evalConfig;
-	std::jthread simulationThread;
+	std::thread simulationThread;
 	std::atomic<bool> running { true };
 
 	std::atomic<bool> pauseRequest { false };

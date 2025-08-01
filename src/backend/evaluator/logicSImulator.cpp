@@ -9,7 +9,7 @@ LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) 
 		cv.notify_all();
 	});
 
-	simulationThread = std::jthread(&LogicSimulator::simulationLoop, this);
+	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
 	statesA.resize(1, logic_state_t::UNDEFINED);
 	statesB.resize(1, logic_state_t::UNDEFINED);
 }
@@ -19,6 +19,9 @@ LogicSimulator::~LogicSimulator() {
 		std::lock_guard<std::mutex> lk(cvMutex);
 		running = false;
 		cv.notify_all();
+	}
+	if (simulationThread.joinable()) {
+		simulationThread.join();
 	}
 }
 
