@@ -384,9 +384,6 @@ std::optional<connection_port_id_t> Evaluator::getPortId(const BlockContainer* b
 }
 
 std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circuit_id_t evalCircuitId, const Position portPosition, Direction direction) const {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) [[unlikely]] {
 		return std::nullopt;
@@ -404,9 +401,6 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 }
 
 std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circuit_id_t evalCircuitId, const BlockContainer* blockContainer, const Position portPosition, Direction direction) const {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	// Get the block first - this is the most likely failure point
 	const Block* block = blockContainer->getBlock(portPosition);
 	if (!block) [[unlikely]] {
@@ -487,9 +481,6 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 	std::set<CircuitPortDependency>& circuitPortDependencies,
 	std::set<CircuitNode>& circuitNodeDependencies
 ) const {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) [[unlikely]] {
 		return std::nullopt;
@@ -514,9 +505,6 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 	std::set<CircuitPortDependency>& circuitPortDependencies,
 	std::set<CircuitNode>& circuitNodeDependencies
 ) const {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	const Block* block = blockContainer->getBlock(portPosition);
 	if (!block) [[unlikely]] {
 		return std::nullopt;
@@ -1003,9 +991,6 @@ void Evaluator::traceOutwardsIC(
 	std::set<CircuitPortDependency>& circuitPortDependencies,
 	std::set<CircuitNode>& circuitNodeDependencies
 ) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::traceOutwardsIC", evalCircuitId);
