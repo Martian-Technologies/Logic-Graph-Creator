@@ -177,26 +177,56 @@ void LogicSimulator::processPendingStateChanges() {
 }
 
 void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
-	{
+	// Try to acquire locks non-blockingly first
+	std::unique_lock lkB(statesBMutex, std::try_to_lock);
+	std::unique_lock lkA(statesAMutex, std::try_to_lock);
+	
+	if (lkB.owns_lock() && lkA.owns_lock()) {
+		// Successfully acquired both locks, apply immediately
+		if (statesA.size() <= id) {
+			statesA.resize(id + 1, logic_state_t::UNDEFINED);
+			statesB.resize(id + 1, logic_state_t::UNDEFINED);
+		}
+		statesA[id] = st;
+		statesB[id] = st;
+	} else {
+		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		pendingStateChanges.push({id, st});
+		// Wake up the simulation thread to process state changes
+		cv.notify_one();
 	}
-	// Wake up the simulation thread to process state changes
-	cv.notify_one();
 }
 
 void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
 	if (ids.size() != states.size()) {
 		throw std::invalid_argument("ids and states must have the same size");
 	}
-	{
+	
+	// Try to acquire locks non-blockingly first
+	std::unique_lock lkB(statesBMutex, std::try_to_lock);
+	std::unique_lock lkA(statesAMutex, std::try_to_lock);
+	
+	if (lkB.owns_lock() && lkA.owns_lock()) {
+		// Successfully acquired both locks, apply immediately
+		for (size_t i = 0; i < ids.size(); ++i) {
+			// Ensure the states vectors are large enough
+			if (statesA.size() <= ids[i]) {
+				statesA.resize(ids[i] + 1, logic_state_t::UNDEFINED);
+				statesB.resize(ids[i] + 1, logic_state_t::UNDEFINED);
+			}
+			statesA[ids[i]] = states[i];
+			statesB[ids[i]] = states[i];
+		}
+	} else {
+		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		for (size_t i = 0; i < ids.size(); ++i) {
 			pendingStateChanges.push({ids[i], states[i]});
 		}
+		// Wake up the simulation thread to process state changes
+		cv.notify_one();
 	}
-	// Wake up the simulation thread to process state changes
-	cv.notify_one();
 }
 
 void LogicSimulator::setStateImmediate(simulator_id_t id, logic_state_t st) {
