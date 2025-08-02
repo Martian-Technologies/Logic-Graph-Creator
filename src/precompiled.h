@@ -24,6 +24,7 @@
 #include <map>
 #include <set>
 #include <mutex>
+#include <shared_mutex>
 
 #include <cstdint>
 #include <cmath>

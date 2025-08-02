@@ -16,12 +16,14 @@ public:
 
 private:
 	void toggleSimulation();
+	void setRealistic();
 	void limitSpeed();
 	void setTPS();
 
 	bool doSetTPS = false;
 
 	Rml::Element* toggleSimElement;
+	Rml::Element* realisticElement;
 	Rml::Element* limitSpeedElement;
 	Rml::Element* tpsInputElement;
 	std::shared_ptr<CircuitViewWidget> circuitViewWidget;

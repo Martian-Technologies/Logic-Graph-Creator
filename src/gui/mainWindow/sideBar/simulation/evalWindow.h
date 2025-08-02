@@ -24,7 +24,7 @@ public:
 
 private:
 	void updateSelected(std::string string);
-	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree);
+	void makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const EvalAddressTree& addressTree);
 
 	MenuTree menuTree;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;

@@ -426,8 +426,8 @@ void BlockCreationWindow::addListItem(bool isInput) {
 	}
 }
 
-void BlockCreationWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree) {
-	auto& branches = addressTree.getBranchs();
+void BlockCreationWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const EvalAddressTree& addressTree) {
+	auto& branches = addressTree.getBranches();
 	if (branches.empty()) {
 		paths.push_back(path);
 	} else {

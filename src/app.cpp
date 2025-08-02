@@ -76,6 +76,8 @@ void App::runLoop() {
 		// tell all windows to update rml
 		for (auto& window : windows) {
 			window->updateRml(rmlRenderInterface);
+			// update circuit view widget UI components like TPS display
+			window->getCircuitViewWidget()->render();
 		}
 		if (firstPass) {
 			firstPass = false;

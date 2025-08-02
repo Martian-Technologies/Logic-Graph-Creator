@@ -1,6 +1,7 @@
 #include "circuitViewWidget.h"
 
 #include <SDL3/SDL.h>
+#include <format>
 
 #include "backend/circuitView/circuitView.h"
 #include "computerAPI/directoryManager.h"
@@ -245,35 +246,23 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 }
 
 
-// removing this for now, will re implement later
-// void CircuitViewWidget::render() {
-// 	if (doResize) {
-// 		doResize = false;
-// 		int w = this->parent->GetClientWidth();
-// 		int h = this->parent->GetClientHeight();
-// 		int x = this->parent->GetAbsoluteLeft() + this->parent->GetClientLeft();
-// 		int y = this->parent->GetAbsoluteTop() + this->parent->GetClientTop();
-
-// 		circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-
-// 		renderer->resize(w, h);
-// 		renderer->reposition(x, y);
-// 	}
-// 	Evaluator* evaluator = circuitView->getEvaluator();
-// 	std::string tpsText = "Real tps: N/A";
-// 	if (evaluator) {
-// 		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
-// 	}
-// 	Rml::Element* realTpsDisplay = parent->GetElementById("real-tps-display");
-// 	Rml::Element* realTpsDisplayElement = realTpsDisplay->GetChild(0);
-// 	if (!realTpsDisplayElement)
-// 		realTpsDisplayElement = realTpsDisplay->AppendChild(std::move(realTpsDisplay->GetOwnerDocument()->CreateTextNode("")));
-// 	Rml::ElementText* realTpsDisplayText = rmlui_dynamic_cast<Rml::ElementText*>(realTpsDisplayElement);
-// 	if (realTpsDisplayText->GetText() != tpsText) {
-// 		realTpsDisplayText->SetText(tpsText);
-// 	}
-// 	renderer->render();
-// }
+void CircuitViewWidget::render() {
+	Evaluator* evaluator = circuitView->getEvaluator();
+	std::string tpsText = "Real tps: N/A";
+	if (evaluator) {
+		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
+	}
+	Rml::Element* realTpsDisplay = document->GetElementById("real-tps-display");
+	if (realTpsDisplay) {
+		Rml::Element* realTpsDisplayElement = realTpsDisplay->GetChild(0);
+		if (!realTpsDisplayElement)
+			realTpsDisplayElement = realTpsDisplay->AppendChild(std::move(realTpsDisplay->GetOwnerDocument()->CreateTextNode("")));
+		Rml::ElementText* realTpsDisplayText = rmlui_dynamic_cast<Rml::ElementText*>(realTpsDisplayElement);
+		if (realTpsDisplayText && realTpsDisplayText->GetText() != tpsText) {
+			realTpsDisplayText->SetText(tpsText);
+		}
+	}
+}
 
 void CircuitViewWidget::setSimState(bool state) {
 	if (circuitView->getEvaluator())

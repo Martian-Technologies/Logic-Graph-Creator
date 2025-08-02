@@ -24,13 +24,13 @@ void EvalWindow::updateList() {
 	std::vector<std::vector<std::string>> paths;
 	for (auto pair : evaluatorManager->getEvaluators()) {
 		std::vector<std::string> path({ pair.second->getEvaluatorName() });
-		makePaths(paths, path, pair.second->getAddressTree());
+		makePaths(paths, path, pair.second->buildAddressTree());
 	}
 	menuTree.setPaths(paths);
 }
 
-void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const AddressTreeNode<Evaluator::EvaluatorGate>& addressTree) {
-	auto& branches = addressTree.getBranchs();
+void EvalWindow::makePaths(std::vector<std::vector<std::string>>& paths, std::vector<std::string>& path, const EvalAddressTree& addressTree) {
+	auto& branches = addressTree.getBranches();
 	if (branches.empty()) {
 		paths.push_back(path);
 	} else {

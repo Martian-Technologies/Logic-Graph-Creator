@@ -7,24 +7,23 @@
 
 class DiffCache {
 public:
-    DiffCache(CircuitManager& circuitManager) : circuitManager(circuitManager) {}
-    inline DifferenceSharedPtr getDifference(circuit_id_t circuitId) {
-        auto it = cache.find(circuitId);
-        if (it != cache.end()) {
-            return it->second;
-        }
-        auto circuit = circuitManager.getCircuit(circuitId);
-        if (circuit) {
-            auto difference = std::make_shared<Difference>(circuit->getBlockContainer()->getCreationDifference());
-            cache[circuitId] = difference;
-            return difference;
-        }
-        return nullptr;
-    }
+	DiffCache(CircuitManager& circuitManager) : circuitManager(circuitManager) {}
+	inline DifferenceSharedPtr getDifference(circuit_id_t circuitId) {
+		if (cache.contains(circuitId)) {
+			return cache.at(circuitId);
+		}
+		auto circuit = circuitManager.getCircuit(circuitId);
+		if (circuit) {
+			auto difference = std::make_shared<Difference>(circuit->getBlockContainer()->getCreationDifference());
+			cache[circuitId] = difference;
+			return difference;
+		}
+		return nullptr;
+	}
 
 private:
-    std::unordered_map<circuit_id_t, DifferenceSharedPtr> cache;
-    CircuitManager& circuitManager;
+	std::unordered_map<circuit_id_t, DifferenceSharedPtr> cache;
+	CircuitManager& circuitManager;
 };
 
 #endif // diffCache_h

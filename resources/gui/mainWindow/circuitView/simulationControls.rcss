@@ -42,6 +42,30 @@
 	background-color: #c5c5c590;;
 }
 
+#realistic-button {
+	color: #ffffff;
+	height: 20dp;
+	width: 20dp;
+	background-color: #4d6fb8e0;
+	font-size: 12dp;
+	font-weight: bold;
+	border-radius: 0.3em;
+	padding: 0.2em;
+	text-align: center;
+}
+
+#realistic-button:hover {
+	background-color: #376cdee0;
+}
+
+#realistic-button:active, #realistic-button.checked {
+	background-color: #b84d4de0;
+}
+
+#realistic-button:active:hover, #realistic-button.checked:hover {
+	background-color: #de3737e0;
+}
+
 #limit-speed {
 	margin: 0;
 }

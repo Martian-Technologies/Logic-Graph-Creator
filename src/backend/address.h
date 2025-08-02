@@ -15,6 +15,16 @@ public:
 	inline void nestPosition(Position position) {
 		addresses.insert(addresses.begin(), position);
 	}
+	std::string toString() const {
+		std::string result;
+		for (const auto& pos : addresses) {
+			if (!result.empty()) {
+				result += ".";
+			}
+			result += pos.toString();
+		}
+		return result;
+	}
 
 private:
 	std::vector<Position> addresses;

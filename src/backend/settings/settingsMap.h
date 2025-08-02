@@ -10,7 +10,19 @@ enum SettingType {
 	BOOL,
 	KEYBIND
 };
-template<SettingType settingType> struct SettingTypeToType;
+
+template<SettingType settingType>
+struct SettingTypeToType {
+	static_assert(
+		settingType == SettingType::VOID ||
+		settingType == SettingType::STRING ||
+		settingType == SettingType::INT ||
+		settingType == SettingType::KEYBIND,
+		"Invalid SettingType. Must be one of VOID, STRING, INT, or KEYBIND."
+	);
+	using type = void;
+};
+
 template<> struct SettingTypeToType<SettingType::VOID> { using type = char; };
 template<> struct SettingTypeToType<SettingType::STRING> { using type = std::string; };
 template<> struct SettingTypeToType<SettingType::INT> { using type = int; };

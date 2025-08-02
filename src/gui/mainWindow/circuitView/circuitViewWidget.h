@@ -26,6 +26,7 @@ public:
 	void setSimSpeed(double speed);
 	void setStatusBar(const std::string& text = "");
 
+	void render();
 	void handleResize();
 
 	void newCircuit();

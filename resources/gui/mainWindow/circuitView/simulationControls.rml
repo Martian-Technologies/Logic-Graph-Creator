@@ -8,6 +8,7 @@
 		<div id="sim-controls-area">
 			<div id="sim-controls-buttons">
 				<button id="toggle-simulation">Toggle Simulation</button>
+				<button id="realistic-button">S</button>
 				<input id="limit-speed-checkbox" type="checkbox" /> 
 				<pre><textarea id="tps-input" rows="1" cols="10" maxlength="7"></textarea></pre>
 			</div>

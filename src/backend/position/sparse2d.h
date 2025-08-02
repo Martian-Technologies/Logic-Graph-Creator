@@ -35,6 +35,13 @@ public:
 	inline void remove(Position position);
 	inline void clear();
 
+	template<typename F>
+	void forEach(F&& func) const {
+		for (auto& [pos, value] : data) {
+			func(pos, value);
+		}
+	}
+
 private:
 	std::unordered_map<Position, T> data;
 
