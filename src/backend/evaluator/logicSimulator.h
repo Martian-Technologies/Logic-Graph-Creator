@@ -125,7 +125,7 @@ private:
 	void updateGateIndicesAfterRemoval(SimGateType gateType, size_t removedIndex);
 
 	std::atomic<float> averageTickrate { 0.0 };
-	float alphaTickrate { 0.07 }; // smoothing factor for tickrate calculation
+	float tickrateHalflife { 0.25 };
 };
 
 class SimPauseGuard {
