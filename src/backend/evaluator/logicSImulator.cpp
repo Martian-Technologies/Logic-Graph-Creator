@@ -95,6 +95,7 @@ void LogicSimulator::simulationLoop()
 			}
 		} else {
 			// wait for state change or resume signal
+			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock lk(cvMutex);
 			cv.wait(lk, [&]{
 				// Check for pending state changes under lock to avoid race conditions
