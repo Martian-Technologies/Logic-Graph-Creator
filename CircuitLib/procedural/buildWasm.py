@@ -1,7 +1,8 @@
 import os
+import pathlib
 
-file_path = os.path.realpath(__file__)
-os.chdir("/".join(file_path.split("/")[:-1]))
+file_path = pathlib.Path(__file__).resolve()
+os.chdir(file_path.parent)
 
 file = "adder.cpp"
 
