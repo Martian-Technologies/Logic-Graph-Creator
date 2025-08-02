@@ -22,6 +22,7 @@ public:
 
 	inline bool empty() const { return modifications.empty(); }
 	inline const std::vector<Modification>& getModifications() const { return modifications; }
+	inline bool clearsAll() const { return isClear; }
 
 private:
 	void addRemovedBlock(Position position, Rotation rotation, BlockType type) { modifications.push_back({ ModificationType::REMOVED_BLOCK, std::make_tuple(position, rotation, type) }); }
@@ -29,7 +30,9 @@ private:
 	void addMovedBlock(Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) { modifications.push_back({ ModificationType::MOVE_BLOCK, std::make_tuple(curPosition, curRotation, newPosition, newRotation) }); }
 	void addRemovedConnection(Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) { modifications.push_back({ ModificationType::REMOVED_CONNECTION, std::make_tuple(outputBlockPosition, outputPosition, inputBlockPosition, inputPosition) }); }
 	void addCreatedConnection(Position outputBlockPosition, Position outputPosition, Position inputBlockPosition, Position inputPosition) { modifications.push_back({ ModificationType::CREATED_CONNECTION, std::make_tuple(outputBlockPosition, outputPosition, inputBlockPosition, inputPosition) }); }
+	void setIsClear() { isClear = true; }
 
+	bool isClear = false;
 	std::vector<Modification> modifications;
 };
 typedef std::shared_ptr<Difference> DifferenceSharedPtr;

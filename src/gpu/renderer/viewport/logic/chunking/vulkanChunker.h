@@ -177,15 +177,15 @@ public:
 	VulkanChunker(VulkanDevice* device);
 	~VulkanChunker();
 
-	void startMakingEdits();
-	void stopMakingEdits();
-	void addBlock(BlockType type, Position position, Vector size, Rotation rotation);
-	void removeBlock(Position position);
-	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize);
-	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address);
-	void removeWire(std::pair<Position, Position> points);
+	void startMakingEdits() override final;
+	void stopMakingEdits() override final;
+	void addBlock(BlockType type, Position position, Vector size, Rotation rotation) override final;
+	void removeBlock(Position position) override final;
+	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) override final;
+	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address) override final;
+	void removeWire(std::pair<Position, Position> points) override final;
 
-	void reset();
+	void reset() override final;
 	
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 

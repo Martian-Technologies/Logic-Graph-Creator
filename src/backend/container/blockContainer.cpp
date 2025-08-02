@@ -3,6 +3,7 @@
 #include "backend/blockData/blockDataManager.h"
 
 void BlockContainer::clear(Difference* difference) {
+	difference->setIsClear();
 	for (auto iter : blocks) {
 		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
 	}

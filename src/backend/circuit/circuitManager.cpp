@@ -228,10 +228,12 @@ void CircuitManager::updateExistingCircuit(circuit_id_t id, const GeneratedCircu
 	blockData->setSize(generatedCircuit->getSize());
 
 	// Circuit Block Data
-	circuitBlockDataManager.newCircuitBlockData(id, blockType);
-	circuit->setBlockType(blockType);
-
 	CircuitBlockData* circuitBlockData = circuitBlockDataManager.getCircuitBlockData(id);
+	if (!circuitBlockData) {
+		circuitBlockDataManager.newCircuitBlockData(id, blockType);
+		circuit->setBlockType(blockType);
+	}
+
 	if (!circuitBlockData) {
 		logError("Did not find newly created circuit block data with circuit id: {}", "CircuitManager", (unsigned int)id);
 		return;
