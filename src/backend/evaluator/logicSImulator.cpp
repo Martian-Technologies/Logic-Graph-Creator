@@ -141,8 +141,8 @@ inline void LogicSimulator::realisticTickOnce() {
 
 		for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
 		for (auto& gate : xorGates) gate.realisticTick(statesA, statesB);
-		for (auto& gate : constantResetGates) gate.realisticTick(statesB);
-		for (auto& gate : copySelfOutputGates) gate.realisticTick(statesA, statesB);
+		for (auto& gate : constantResetGates) gate.tick(statesB);
+		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 		for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
 	}
 	std::unique_lock lkCurEx(statesAMutex);

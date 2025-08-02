@@ -23,13 +23,14 @@ public:
 protected:
 	simulator_id_t id;
 
-	// Helper function for realistic tick behavior
-	inline void applyRealisticTick(logic_state_t targetState, std::vector<logic_state_t>& statesB) {
-		logic_state_t currentState = statesB[id];
+	inline void applyRealisticTick(logic_state_t targetState, const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		logic_state_t currentState = statesA[id];
 		if (currentState == logic_state_t::UNDEFINED) {
 			statesB[id] = targetState;
 		} else if (targetState != currentState) {
 			statesB[id] = logic_state_t::UNDEFINED;
+		} else {
+			statesB[id] = currentState;
 		}
 	}
 };
@@ -149,7 +150,7 @@ struct ANDLikeGate : public MultiInputGate {
 
 	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesB);
+		applyRealisticTick(targetState, statesA, statesB);
 	}
 };
 
@@ -187,7 +188,7 @@ struct XORLikeGate : public MultiInputGate {
 
 	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesB);
+		applyRealisticTick(targetState, statesA, statesB);
 	}
 };
 
@@ -284,7 +285,7 @@ struct SingleBufferGate : public BufferGateBase {
 
 	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesB);
+		applyRealisticTick(targetState, statesA, statesB);
 	}
 };
 
@@ -388,7 +389,7 @@ struct TristateBufferGate : public SimulatorGate {
 
 	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesB);
+		applyRealisticTick(targetState, statesA, statesB);
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
@@ -442,11 +443,6 @@ struct ConstantResetGate : public ConstantGateBase {
 	inline void tick(std::vector<logic_state_t>& statesB) {
 		statesB[id] = calculate();
 	}
-
-	inline void realisticTick(std::vector<logic_state_t>& statesB) {
-		logic_state_t targetState = calculate();
-		applyRealisticTick(targetState, statesB);
-	}
 };
 
 struct CopySelfOutputGate : public LogicGate {
@@ -464,11 +460,6 @@ struct CopySelfOutputGate : public LogicGate {
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
 		statesB[id] = calculate(statesA);
-	}
-
-	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
-		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesB);
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
