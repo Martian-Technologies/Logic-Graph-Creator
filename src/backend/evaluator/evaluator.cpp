@@ -221,12 +221,12 @@ void Evaluator::edit_removeConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 	#endif
 	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, blockContainer, outputPosition, Direction::OUT);
 	if (!outputPoint.has_value()) {
-		logError("Output connection point not found for position {}", "Evaluator::edit_removeConnection", outputPosition.toString());
+		// logError("Output connection point not found for position {}", "Evaluator::edit_removeConnection", outputPosition.toString());
 		return;
 	}
 	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, blockContainer, inputPosition, Direction::IN);
 	if (!inputPoint.has_value()) {
-		logError("Input connection point not found for position {}", "Evaluator::edit_removeConnection", inputPosition.toString());
+		// logError("Input connection point not found for position {}", "Evaluator::edit_removeConnection", inputPosition.toString());
 		return;
 	}
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
@@ -1057,7 +1057,7 @@ void Evaluator::traceOutwardsIC(
 		const std::unordered_set<ConnectionEnd>* connectionEnds = (direction == Direction::IN) ?
 			parentCircuitBlock->getInputConnections(connectionPos) : parentCircuitBlock->getOutputConnections(connectionPos);
 		if (!connectionEnds) {
-			logError("Connection ends not found at position {}", "Evaluator::traceOutwardsIC", connectionPos.toString());
+			// logError("Connection ends not found at position {}", "Evaluator::traceOutwardsIC", connectionPos.toString());
 			continue;
 		}
 
