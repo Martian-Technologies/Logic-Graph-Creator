@@ -27,4 +27,4 @@ private:
 	unsigned int id_and_type;
 };
 
-#endif // circuitNode_h
+#endif /* circuitNode_h */

@@ -64,4 +64,4 @@ private:
 	Sparse2dArray<CircuitNode> circuitNodes;
 };
 
-#endif // evalCircuit_h
+#endif /* evalCircuit_h */

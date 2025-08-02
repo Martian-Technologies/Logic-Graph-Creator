@@ -478,4 +478,4 @@ struct CopySelfOutputGate : public LogicGate {
 
 
 
-#endif // simulatorGates_h
+#endif /* simulatorGates_h */

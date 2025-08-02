@@ -196,4 +196,4 @@ private:
 	}
 };
 
-#endif // gateSubstituter_h
+#endif /* gateSubstituter_h */

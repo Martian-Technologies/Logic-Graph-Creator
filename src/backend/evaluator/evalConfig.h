@@ -72,4 +72,4 @@ private:
 	}
 };
 
-#endif // evalConfig_h
+#endif /* evalConfig_h */

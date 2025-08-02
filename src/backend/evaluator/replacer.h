@@ -359,4 +359,4 @@ private:
 	}
 };
 
-#endif // replacer_h
+#endif /* replacer_h */

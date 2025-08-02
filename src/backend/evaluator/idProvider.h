@@ -45,4 +45,4 @@ private:
 	std::set<T> unusedIds;
 };
 
-#endif // idProvider_h
+#endif /* idProvider_h */

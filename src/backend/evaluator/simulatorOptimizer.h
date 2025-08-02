@@ -138,4 +138,4 @@ private:
 	std::vector<GateType> gateTypes; // maps middle_id_t to GateType
 };
 
-#endif // simulatorOptimizer_h
+#endif /* simulatorOptimizer_h */
