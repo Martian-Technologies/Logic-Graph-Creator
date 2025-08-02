@@ -26,4 +26,4 @@ private:
 	CircuitManager& circuitManager;
 };
 
-#endif // diffCache_h
+#endif /* diffCache_h */

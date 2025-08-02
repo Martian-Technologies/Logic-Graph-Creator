@@ -28,4 +28,4 @@ inline logic_state_t fromBool(bool value) {
 	return value ? logic_state_t::HIGH : logic_state_t::LOW;
 }
 
-#endif // logicState_h
+#endif /* logicState_h */

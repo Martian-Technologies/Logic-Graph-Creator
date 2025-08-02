@@ -68,4 +68,4 @@ struct EvalConnection {
 	}
 };
 
-#endif // evalConnection_h
+#endif /* evalConnection_h */

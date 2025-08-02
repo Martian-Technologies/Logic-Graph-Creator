@@ -193,4 +193,4 @@ private:
 
 typedef std::shared_ptr<Evaluator> SharedEvaluator;
 
-#endif // evaluator_h
+#endif /* evaluator_h */

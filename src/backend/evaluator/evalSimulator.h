@@ -90,4 +90,4 @@ private:
 	GateSubstituter gateSubstituter;
 };
 
-#endif // evalSimulator_h
+#endif /* evalSimulator_h */

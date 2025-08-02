@@ -46,4 +46,4 @@ private:
 	IdProvider<eval_circuit_id_t> evalCircuitIdProvider;
 };
 
-#endif // evalCircuitContainer_h
+#endif /* evalCircuitContainer_h */

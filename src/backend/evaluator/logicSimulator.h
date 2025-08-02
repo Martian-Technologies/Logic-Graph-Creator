@@ -152,4 +152,4 @@ private:
 	LogicSimulator& sim;
 };
 
-#endif // logicSimulator_h
+#endif /* logicSimulator_h */

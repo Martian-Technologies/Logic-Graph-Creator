@@ -19,4 +19,4 @@ enum class GateType {
 	TRISTATE_BUFFER_INVERTED = 14,
 };
 
-#endif // gateType_h
+#endif /* gateType_h */

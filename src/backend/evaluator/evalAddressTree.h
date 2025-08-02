@@ -22,4 +22,4 @@ private:
 	std::unordered_map<Position, EvalAddressTree> branches;
 };
 
-#endif // evalAddressTree_h
+#endif /* evalAddressTree_h */
