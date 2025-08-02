@@ -168,7 +168,7 @@ void LogicSimulator::processPendingStateChanges() {
 			statesB[change.id] = change.state;
 			localQueue.pop();
 		}
-		for (auto& gate : junctions) gate.tick(statesB);
+		for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
 	}
 }
 
@@ -185,7 +185,7 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
 		}
 		statesA[id] = st;
 		statesB[id] = st;
-		for (auto& gate : junctions) gate.tick(statesB);
+		for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
 	} else {
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
@@ -215,7 +215,7 @@ void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std
 			statesA[ids[i]] = states[i];
 			statesB[ids[i]] = states[i];
 		}
-		for (auto& gate : junctions) gate.tick(statesB);
+		for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
 	} else {
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);

@@ -226,6 +226,12 @@ struct JunctionGate : public SimulatorGate {
 		states[id] = calculate(states);
 	}
 
+	inline void doubleTick(std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) {
+		logic_state_t state = calculate(statesB);
+		statesA[id] = state;
+		statesB[id] = state;
+	}
+
 	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
 		inputs.push_back(inputId);
 	}
