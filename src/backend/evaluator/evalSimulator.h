@@ -78,7 +78,7 @@ public:
 #endif
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
-	inline unsigned int getAverageTickrate() const {
+	inline float getAverageTickrate() const {
 		#ifdef TRACY_PROFILER
 			ZoneScoped;
 		#endif

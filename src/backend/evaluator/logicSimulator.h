@@ -27,7 +27,7 @@ public:
 	LogicSimulator(EvalConfig& evalConfig);
 	~LogicSimulator();
 	void clearState();
-	unsigned int getAverageTickrate() const;
+	float getAverageTickrate() const;
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
 
@@ -123,6 +123,9 @@ private:
 	void addOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
 	void removeOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
 	void updateGateIndicesAfterRemoval(SimGateType gateType, size_t removedIndex);
+
+	std::atomic<float> averageTickrate { 0.0 };
+	float alphaTickrate { 0.07 }; // smoothing factor for tickrate calculation
 };
 
 class SimPauseGuard {

@@ -130,7 +130,7 @@ public:
 	Replacer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
 		simulatorOptimizer(evalConfig, middleIdProvider), evalConfig(evalConfig), middleIdProvider(middleIdProvider) {}
 
-	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
+	inline void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
 	}
 
@@ -140,7 +140,7 @@ public:
 		simulatorOptimizer.removeGate(pauseGuard, gateId);
 	}
 
-	SimPauseGuard beginEdit() {
+	inline SimPauseGuard beginEdit() {
 		return simulatorOptimizer.beginEdit();
 	}
 
@@ -151,31 +151,31 @@ public:
 		simulatorOptimizer.endEdit(pauseGuard);
 	}
 
-	std::optional<simulator_id_t> getSimIdFromMiddleId(middle_id_t middleId) const {
+	inline std::optional<simulator_id_t> getSimIdFromMiddleId(middle_id_t middleId) const {
 		return simulatorOptimizer.getSimIdFromMiddleId(middleId);
 	}
 
-	std::optional<simulator_id_t> getSimIdFromConnectionPoint(const EvalConnectionPoint& point) const {
+	inline std::optional<simulator_id_t> getSimIdFromConnectionPoint(const EvalConnectionPoint& point) const {
 		return simulatorOptimizer.getSimIdFromConnectionPoint(point);
 	}
 
-	logic_state_t getState(EvalConnectionPoint point) const {
+	inline logic_state_t getState(EvalConnectionPoint point) const {
 		return simulatorOptimizer.getState(getReplacementConnectionPoint(point));
 	}
 
-	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+	inline std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
 		return simulatorOptimizer.getStates(getReplacementConnectionPoints(points));
 	}
 
-	std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
 		return simulatorOptimizer.getPinStates(getReplacementConnectionPoints(points));
 	}
 
-	void setState(EvalConnectionPoint id, logic_state_t state) {
+	inline void setState(EvalConnectionPoint id, logic_state_t state) {
 		simulatorOptimizer.setState(getReplacementConnectionPoint(id), state);
 	}
 
-	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+	inline void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
 		simulatorOptimizer.setStates(getReplacementConnectionPoints(points), states);
 	}
 
@@ -191,7 +191,7 @@ public:
 		simulatorOptimizer.removeConnection(pauseGuard, connection);
 	}
 
-	unsigned int getAverageTickrate() const {
+	inline float getAverageTickrate() const {
 		return simulatorOptimizer.getAverageTickrate();
 	}
 

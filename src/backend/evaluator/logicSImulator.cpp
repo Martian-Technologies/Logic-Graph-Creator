@@ -27,20 +27,21 @@ LogicSimulator::~LogicSimulator() {
 
 void LogicSimulator::clearState() {}
 
-unsigned int LogicSimulator::getAverageTickrate() const {
-	// TODO: Implement a proper tickrate calculation
-	long long targetTickrate = evalConfig.getTargetTickrate();
-	return static_cast<unsigned int>(targetTickrate > 0 ? targetTickrate : 0);
+float LogicSimulator::getAverageTickrate() const {
+	return averageTickrate.load(std::memory_order_acquire);
 }
 
 void LogicSimulator::simulationLoop()
 {
 	using clock = std::chrono::steady_clock;
 	auto nextTick = clock::now();
+	auto lastTickTime = clock::now();
+	bool isFirstTick = true;
 
 	while (running) {
 		if (pauseRequest.load(std::memory_order_acquire))
 		{
+			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock<std::mutex> lk(cvMutex);
 			isPaused.store(true, std::memory_order_release);
 			cv.notify_all();
@@ -49,15 +50,36 @@ void LogicSimulator::simulationLoop()
 			if (!running) break;
 			// reset nextTick after resuming from pause
 			nextTick = clock::now();
+			lastTickTime = clock::now();
+			isFirstTick = true;
 		}
 
 		processPendingStateChanges();
 		if (evalConfig.isRunning()) {
+			auto currentTime = clock::now();
+
 			if (evalConfig.isRealistic()) {
 				realisticTickOnce();
 			} else {
 				tickOnce();
 			}
+
+			// Calculate EMA for tickrate after each tick
+			if (!isFirstTick) {
+				auto deltaTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - lastTickTime);
+				if (deltaTime.count() > 0) {
+					// Calculate current tickrate in Hz (ticks per second)
+					double currentTickrate = 1.0e9 / static_cast<double>(deltaTime.count());
+
+					// Apply EMA: EMA_new = alpha * current + (1 - alpha) * EMA_old
+					float currentEMA = averageTickrate.load(std::memory_order_acquire);
+					float newEMA = alphaTickrate * static_cast<float>(currentTickrate) + (1.0f - alphaTickrate) * currentEMA;
+					averageTickrate.store(newEMA, std::memory_order_release);
+				}
+			} else {
+				isFirstTick = false;
+			}
+			lastTickTime = currentTime;
 
 			// handle timing after ticking
 			if (evalConfig.isTickrateLimiterEnabled()) {
@@ -79,6 +101,8 @@ void LogicSimulator::simulationLoop()
 			});
 			// reset nextTick when resuming simulation
 			nextTick = clock::now();
+			lastTickTime = clock::now();
+			isFirstTick = true;
 		}
 	}
 }

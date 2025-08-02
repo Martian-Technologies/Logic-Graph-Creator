@@ -99,26 +99,26 @@ public:
 			}
 		}
 	}
-	SimPauseGuard beginEdit() {
+	inline SimPauseGuard beginEdit() {
 		return replacer.beginEdit();
 	}
-	void endEdit(SimPauseGuard& pauseGuard) {
+	inline void endEdit(SimPauseGuard& pauseGuard) {
 		replacer.endEdit(pauseGuard);
 	}
 
-	logic_state_t getState(EvalConnectionPoint point) const {
+	inline logic_state_t getState(EvalConnectionPoint point) const {
 		return replacer.getState(point);
 	}
-	std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
+	inline std::vector<logic_state_t> getStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getStates(points);
 	}
-	std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
+	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getPinStates(points);
 	}
-	void setState(EvalConnectionPoint point, logic_state_t state) {
+	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 		replacer.setState(point, state);
 	}
-	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
+	inline void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
 		replacer.setStates(points, states);
 	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
@@ -178,7 +178,7 @@ public:
 		}
 	}
 
-	unsigned int getAverageTickrate() const {
+	inline float getAverageTickrate() const {
 		return replacer.getAverageTickrate();
 	}
 

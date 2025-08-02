@@ -123,7 +123,7 @@ public:
 		return GateType::NONE;
 	}
 
-	unsigned int getAverageTickrate() const {
+	inline float getAverageTickrate() const {
 		return simulator.getAverageTickrate();
 	}
 

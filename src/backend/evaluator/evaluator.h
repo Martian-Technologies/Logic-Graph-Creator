@@ -75,7 +75,7 @@ public:
 	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
 	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
 	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
-	long long int getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
+	float getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address) {
