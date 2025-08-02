@@ -44,7 +44,7 @@ public:
 		Vector positionOnBlock;
 		block_id_t internalBlockId;
 		connection_end_id_t internalBlockConnectionEndId;
-		const std::string& portName;
+		std::string portName;
 	};
 
 	void addConnectionPort(
