@@ -113,11 +113,6 @@ void LogicSimulator::simulationLoop()
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
 	{
-		{
-			std::unique_lock lkJunctions(statesAMutex);
-			for (auto& gate : junctions) gate.tick(statesA);
-		}
-
 		std::shared_lock lkCur(statesAMutex);
 
 		for (auto& gate : andGates) gate.tick(statesA, statesB);
@@ -125,6 +120,8 @@ inline void LogicSimulator::tickOnce() {
 		for (auto& gate : constantResetGates) gate.tick(statesB);
 		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 		for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
+
+		for (auto& gate : junctions) gate.tick(statesB);
 	}
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);
@@ -133,11 +130,6 @@ inline void LogicSimulator::tickOnce() {
 inline void LogicSimulator::realisticTickOnce() {
 	std::unique_lock lkNext(statesBMutex);
 	{
-		{
-			std::unique_lock lkJunctions(statesAMutex);
-			for (auto& gate : junctions) gate.tick(statesA);
-		}
-
 		std::shared_lock lkCur(statesAMutex);
 
 		for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
@@ -145,6 +137,8 @@ inline void LogicSimulator::realisticTickOnce() {
 		for (auto& gate : constantResetGates) gate.tick(statesB);
 		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
 		for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
+
+		for (auto& gate : junctions) gate.tick(statesB);
 	}
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);
@@ -174,6 +168,7 @@ void LogicSimulator::processPendingStateChanges() {
 			statesB[change.id] = change.state;
 			localQueue.pop();
 		}
+		for (auto& gate : junctions) gate.tick(statesB);
 	}
 }
 
@@ -190,6 +185,7 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
 		}
 		statesA[id] = st;
 		statesB[id] = st;
+		for (auto& gate : junctions) gate.tick(statesB);
 	} else {
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
@@ -219,6 +215,7 @@ void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std
 			statesA[ids[i]] = states[i];
 			statesB[ids[i]] = states[i];
 		}
+		for (auto& gate : junctions) gate.tick(statesB);
 	} else {
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
