@@ -137,6 +137,7 @@ void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t ev
 		eval_circuit_id_t icId = node->getId();
 		edit_deleteICContents(pauseGuard, icId);
 		evalCircuitContainer.removeCircuit(icId);
+		changedICs = true;
 		evalCircuit->removeNode(position);
 		return;
 	}
@@ -149,7 +150,6 @@ void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id
 	#ifdef TRACY_PROFILER
 		ZoneScoped;
 	#endif
-	changedICs = true;
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_deleteIC", evalCircuitId);
@@ -160,6 +160,7 @@ void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id
 			eval_circuit_id_t icId = node.getId();
 			edit_deleteICContents(pauseGuard, icId);
 			evalCircuitContainer.removeCircuit(icId);
+			changedICs = true;
 			return;
 		}
 		evalSimulator.removeGate(pauseGuard, node.getId());
