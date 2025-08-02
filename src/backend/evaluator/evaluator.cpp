@@ -63,6 +63,12 @@ void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	#ifdef TRACY_PROFILER
 		ZoneScoped;
 	#endif
+
+	// if (difference->clearsAll()) {
+	// 	edit_deleteICContents(pauseGuard, evalCircuitId);
+	// 	return;
+	// }
+
 	std::optional<eval_circuit_id_t> circuitId = evalCircuitContainer.getCircuitId(evalCircuitId);
 	if (!circuitId.has_value()) {
 		logError("EvalCircuit with id {} not found", "Evaluator::makeEditInPlace", evalCircuitId);
@@ -128,7 +134,9 @@ void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t ev
 		return;
 	}
 	if (node->isIC()) {
-		edit_deleteICContents(pauseGuard, node->getId());
+		eval_circuit_id_t icId = node->getId();
+		edit_deleteICContents(pauseGuard, icId);
+		evalCircuitContainer.removeCircuit(icId);
 		evalCircuit->removeNode(position);
 		return;
 	}
@@ -149,13 +157,14 @@ void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id
 	}
 	evalCircuit->forEachNode([&](Position pos, const CircuitNode& node) {
 		if (node.isIC()) {
-			edit_deleteICContents(pauseGuard, node.getId());
+			eval_circuit_id_t icId = node.getId();
+			edit_deleteICContents(pauseGuard, icId);
+			evalCircuitContainer.removeCircuit(icId);
 			return;
 		}
 		evalSimulator.removeGate(pauseGuard, node.getId());
 		middleIdProvider.releaseId(node.getId());
 	});
-	evalCircuitContainer.removeCircuit(evalCircuitId);
 }
 
 void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
