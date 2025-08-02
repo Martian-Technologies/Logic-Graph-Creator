@@ -279,73 +279,91 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 		statesA.resize(simulatorId + 1, logic_state_t::UNDEFINED);
 		statesB.resize(simulatorId + 1, logic_state_t::UNDEFINED);
 	}
-	statesA[simulatorId] = logic_state_t::UNDEFINED;
-	statesB[simulatorId] = logic_state_t::UNDEFINED;
 
 	switch (gateType) {
 	case GateType::AND:
 		andGates.push_back({ simulatorId, false, false });
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
+		andGates.back().resetState(evalConfig.isRealistic(), statesA);
+		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::OR:
 		andGates.push_back({ simulatorId, true, true });
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
+		andGates.back().resetState(evalConfig.isRealistic(), statesA);
+		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::NAND:
 		andGates.push_back({ simulatorId, false, true });
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
+		andGates.back().resetState(evalConfig.isRealistic(), statesA);
+		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::NOR:
 		andGates.push_back({ simulatorId, true, false });
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
+		andGates.back().resetState(evalConfig.isRealistic(), statesA);
+		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::XOR:
 		xorGates.push_back({ simulatorId, false });
 		updateGateLocation(simulatorId, SimGateType::XOR, xorGates.size() - 1);
+		xorGates.back().resetState(evalConfig.isRealistic(), statesA);
+		xorGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::XNOR:
 		xorGates.push_back({ simulatorId, true });
 		updateGateLocation(simulatorId, SimGateType::XOR, xorGates.size() - 1);
+		xorGates.back().resetState(evalConfig.isRealistic(), statesA);
+		xorGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::JUNCTION:
 		junctions.push_back({ simulatorId });
 		updateGateLocation(simulatorId, SimGateType::JUNCTION, junctions.size() - 1);
+		junctions.back().resetState(evalConfig.isRealistic(), statesA);
+		junctions.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::TRISTATE_BUFFER:
 		tristateBuffers.push_back({ simulatorId, false });
 		updateGateLocation(simulatorId, SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
+		tristateBuffers.back().resetState(evalConfig.isRealistic(), statesA);
+		tristateBuffers.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::TRISTATE_BUFFER_INVERTED:
 		tristateBuffers.push_back({ simulatorId, true });
 		updateGateLocation(simulatorId, SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
+		tristateBuffers.back().resetState(evalConfig.isRealistic(), statesA);
+		tristateBuffers.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::CONSTANT_OFF:
 		constantGates.push_back({ simulatorId, logic_state_t::LOW });
 		updateGateLocation(simulatorId, SimGateType::CONSTANT, constantGates.size() - 1);
-		statesA[simulatorId] = logic_state_t::LOW;
-		statesB[simulatorId] = logic_state_t::LOW;
+		constantGates.back().resetState(evalConfig.isRealistic(), statesA);
+		constantGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::CONSTANT_ON:
 		constantGates.push_back({ simulatorId, logic_state_t::HIGH });
 		updateGateLocation(simulatorId, SimGateType::CONSTANT, constantGates.size() - 1);
-		statesA[simulatorId] = logic_state_t::HIGH;
-		statesB[simulatorId] = logic_state_t::HIGH;
+		constantGates.back().resetState(evalConfig.isRealistic(), statesA);
+		constantGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::DUMMY_INPUT:
 		copySelfOutputGates.push_back({ simulatorId });
 		updateGateLocation(simulatorId, SimGateType::COPY_SELF_OUTPUT, copySelfOutputGates.size() - 1);
-		statesA[simulatorId] = logic_state_t::LOW;
-		statesB[simulatorId] = logic_state_t::LOW;
+		copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesA);
+		copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::THROUGH:
 		singleBuffers.push_back({ simulatorId, false });
 		updateGateLocation(simulatorId, SimGateType::SINGLE_BUFFER, singleBuffers.size() - 1);
+		singleBuffers.back().resetState(evalConfig.isRealistic(), statesA);
+		singleBuffers.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::TICK_INPUT:
 		constantResetGates.push_back({ simulatorId, logic_state_t::LOW });
 		updateGateLocation(simulatorId, SimGateType::CONSTANT_RESET, constantResetGates.size() - 1);
-		statesA[simulatorId] = logic_state_t::LOW;
-		statesB[simulatorId] = logic_state_t::LOW;
+		constantResetGates.back().resetState(evalConfig.isRealistic(), statesA);
+		constantResetGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::NONE:
 		logError("Cannot add gate of type NONE", "LogicSimulator::addGate");

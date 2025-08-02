@@ -15,7 +15,7 @@ public:
 	virtual void removeInput(simulator_id_t inputId, connection_port_id_t portId) = 0;
 	virtual void removeIdRefs(simulator_id_t otherId) = 0;
 	virtual simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const = 0;
-	virtual void resetState(std::vector<logic_state_t>& states) = 0;
+	virtual void resetState(bool realistic, std::vector<logic_state_t>& states) = 0;
 	virtual std::vector<simulator_id_t> getOutputSimIds() const = 0;
 
 	simulator_id_t getId() const { return id; }
@@ -39,8 +39,12 @@ class LogicGate : public SimulatorGate {
 public:
 	LogicGate(simulator_id_t id) : SimulatorGate(id) {}
 
-	void resetState(std::vector<logic_state_t>& states) override {
-		states[id] = logic_state_t::UNDEFINED;
+	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
+		if (realistic) {
+			states[id] = logic_state_t::UNDEFINED;
+		} else {
+			states[id] = logic_state_t::LOW;
+		}
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
@@ -237,8 +241,8 @@ struct JunctionGate : public SimulatorGate {
 		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
 	}
 
-	void resetState(std::vector<logic_state_t>& states) override {
-		states[id] = logic_state_t::UNDEFINED;
+	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
+		states[id] = logic_state_t::FLOATING;
 	}
 
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
@@ -324,8 +328,12 @@ struct TristateBufferGate : public SimulatorGate {
 		enableInputs.erase(std::remove(enableInputs.begin(), enableInputs.end(), otherId), enableInputs.end());
 	}
 
-	void resetState(std::vector<logic_state_t>& states) override {
-		states[id] = logic_state_t::UNDEFINED;
+	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
+		if (realistic) {
+			states[id] = logic_state_t::UNDEFINED;
+		} else {
+			states[id] = logic_state_t::FLOATING;
+		}
 	}
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const {
@@ -412,7 +420,7 @@ public:
 
 	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {}
 
-	void resetState(std::vector<logic_state_t>& states) override {
+	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
 		states[id] = outputState;
 	}
 
