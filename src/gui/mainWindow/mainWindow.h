@@ -41,6 +41,7 @@ public:
 	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
 	void setMode(std::string tool);
+	void addPopup(const std::string& message, const std::vector<std::string>& options);
 
 private:
 	Backend* backend;
