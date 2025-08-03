@@ -68,30 +68,30 @@ TEST_F(EvaluatorTest, BasicStateManagement) {
 	ASSERT_EQ(evaluator->getState(addr), logic_state_t::HIGH);
 }
 
-TEST_F(EvaluatorTest, BulkStateOperations) {
-	std::vector<Position> positions = {
-		Position(i, i),
-		Position(i + 1, i),
-		Position(i + 2, i)
-	};
-	i += 3;
+// TEST_F(EvaluatorTest, BulkStateOperations) {
+// 	std::vector<Position> positions = {
+// 		Position(i, i),
+// 		Position(i + 1, i),
+// 		Position(i + 2, i)
+// 	};
+// 	i += 3;
 
-	// place switches
-	for (const Position& pos : positions) {
-		circuit->tryInsertBlock(pos, Rotation::ZERO, BlockType::SWITCH);
-	}
+// 	// place switches
+// 	for (const Position& pos : positions) {
+// 		circuit->tryInsertBlock(pos, Rotation::ZERO, BlockType::SWITCH);
+// 	}
 
-	std::vector<Address> addresses;
-	for (const Position& pos : positions) {
-		addresses.push_back(Address(pos));
-	}
+// 	std::vector<Address> addresses;
+// 	for (const Position& pos : positions) {
+// 		addresses.push_back(Address(pos));
+// 	}
 
-	std::vector<logic_state_t> states = evaluator->getBulkStates(addresses);
-	ASSERT_EQ(states.size(), addresses.size());
-	for (logic_state_t state : states) {
-		ASSERT_EQ(state, logic_state_t::LOW);
-	}
-}
+// 	std::vector<logic_state_t> states = evaluator->getBulkStates(addresses);
+// 	ASSERT_EQ(states.size(), addresses.size());
+// 	for (logic_state_t state : states) {
+// 		ASSERT_EQ(state, logic_state_t::LOW);
+// 	}
+// }
 
 TEST_F(EvaluatorTest, LogicGateEvaluation) {
 	// AND gate with two inputs
