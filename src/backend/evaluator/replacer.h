@@ -15,9 +15,13 @@ struct ReplacementGate {
 
 class Replacement {
 public:
-	Replacement(SimulatorOptimizer* optimizer, IdProvider<middle_id_t>* middleIdProvider,
-				std::unordered_map<middle_id_t, middle_id_t>* replacedIds) :
-		simulatorOptimizer(optimizer), middleIdProvider(middleIdProvider), replacedIds(replacedIds) {}
+	Replacement(
+		SimulatorOptimizer* optimizer,
+		IdProvider<middle_id_t>* middleIdProvider,
+		std::unordered_map<middle_id_t, middle_id_t>* replacedIds) :
+		simulatorOptimizer(optimizer),
+		middleIdProvider(middleIdProvider),
+		replacedIds(replacedIds) {}
 
 	void removeGate(SimPauseGuard& pauseGuard, middle_id_t gateId, middle_id_t replacementId) {
 		isEmpty = false;
@@ -127,8 +131,13 @@ private:
 
 class Replacer {
 public:
-	Replacer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
-		simulatorOptimizer(evalConfig, middleIdProvider), evalConfig(evalConfig), middleIdProvider(middleIdProvider) {}
+	Replacer(
+		EvalConfig& evalConfig,
+		IdProvider<middle_id_t>& middleIdProvider,
+		std::vector<simulator_id_t>& dirtySimulatorIds) :
+		simulatorOptimizer(evalConfig, middleIdProvider, dirtySimulatorIds),
+		evalConfig(evalConfig),
+		middleIdProvider(middleIdProvider) {}
 
 	inline void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 		simulatorOptimizer.addGate(pauseGuard, gateType, gateId);
@@ -169,6 +178,10 @@ public:
 
 	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
 		return simulatorOptimizer.getPinStates(getReplacementConnectionPoints(points));
+	}
+
+	inline std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
+		return simulatorOptimizer.getSimulatorIds(getReplacementConnectionPoints(points));
 	}
 
 	inline void setState(EvalConnectionPoint id, logic_state_t state) {

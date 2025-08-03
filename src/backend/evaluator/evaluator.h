@@ -187,6 +187,13 @@ private:
 		std::set<CircuitPortDependency>& circuitPortDependencies,
 		std::set<CircuitNode>& circuitNodeDependencies
 	);
+	std::vector<simulator_id_t> dirtySimulatorIds;
+	std::unordered_set<EvalPosition> dirtyNodes;
+	std::unordered_multimap<simulator_id_t, EvalPosition> portSimulatorIdToEvalPositionMap;
+	std::unordered_multimap<simulator_id_t, EvalPosition> pinSimulatorIdToEvalPositionMap;
+
+	void processDirtyNodes();
+	void dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId);
 
 	mutable std::shared_mutex simMutex;
 };

@@ -13,6 +13,23 @@ struct EvalPosition {
 
 	inline EvalPosition(Position position, eval_circuit_id_t evalCircuitId)
 		: position(position), evalCircuitId(evalCircuitId) {}
+
+	inline std::string toString() const {
+		return position.toString() + " in evalCircuitId " + std::to_string(evalCircuitId);
+	}
+
+	inline bool operator==(const EvalPosition& other) const {
+		return position == other.position && evalCircuitId == other.evalCircuitId;
+	}
+};
+
+template<>
+struct std::hash<EvalPosition> {
+	inline std::size_t operator()(const EvalPosition& ep) const noexcept {
+		std::size_t h1 = std::hash<Position>()(ep.position);
+		std::size_t h2 = std::hash<eval_circuit_id_t>()(ep.evalCircuitId);
+		return h1 ^ (h2 << 1);
+	}
 };
 
 class EvalCircuitContainer {

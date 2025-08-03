@@ -63,9 +63,11 @@ struct TrackedGate {
 
 class GateSubstituter {
 public:
-	GateSubstituter(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
-		replacer(evalConfig, middleIdProvider) {
-	}
+	GateSubstituter(
+		EvalConfig& evalConfig,
+		IdProvider<middle_id_t>& middleIdProvider,
+		std::vector<simulator_id_t>& dirtySimulatorIds) :
+		replacer(evalConfig, middleIdProvider, dirtySimulatorIds) {}
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId) {
 		if (gateType == GateType::DUMMY_INPUT || gateType == GateType::TICK_INPUT) {
@@ -114,6 +116,9 @@ public:
 	}
 	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getPinStates(points);
+	}
+	inline std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
+		return replacer.getSimulatorIds(points);
 	}
 	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 		replacer.setState(point, state);

@@ -24,7 +24,9 @@ class LogicSimulator {
 friend class SimulatorOptimizer;
 friend class SimPauseGuard;
 public:
-	LogicSimulator(EvalConfig& evalConfig);
+	LogicSimulator(
+		EvalConfig& evalConfig,
+		std::vector<simulator_id_t>& dirtySimulatorIds);
 	~LogicSimulator();
 	void clearState();
 	float getAverageTickrate() const;
@@ -126,6 +128,8 @@ private:
 
 	std::atomic<float> averageTickrate { 0.0 };
 	float tickrateHalflife { 0.25 };
+
+	std::vector<simulator_id_t>& dirtySimulatorIds;
 };
 
 class SimPauseGuard {

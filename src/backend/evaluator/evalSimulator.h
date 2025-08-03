@@ -8,9 +8,10 @@
 
 class EvalSimulator {
 public:
-	EvalSimulator(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
+	EvalSimulator(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider, std::vector<simulator_id_t>& dirtySimulatorIds) :
 		evalConfig(evalConfig),
-		middleIdProvider(middleIdProvider), gateSubstituter(evalConfig, middleIdProvider) { }
+		middleIdProvider(middleIdProvider),
+		gateSubstituter(evalConfig, middleIdProvider, dirtySimulatorIds) {}
 	inline SimPauseGuard beginEdit() {
 #ifdef TRACY_PROFILER
 		ZoneScoped;
@@ -52,6 +53,12 @@ public:
 		ZoneScoped;
 #endif
 		return gateSubstituter.getPinStates(points);
+	}
+	inline std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
+#ifdef TRACY_PROFILER
+		ZoneScoped;
+#endif
+		return gateSubstituter.getSimulatorIds(points);
 	}
 	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 #ifdef TRACY_PROFILER
