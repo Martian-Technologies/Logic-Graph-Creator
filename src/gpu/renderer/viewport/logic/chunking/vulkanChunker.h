@@ -124,7 +124,7 @@ public:
 
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
-	inline std::vector<Address>& getRelativeAddresses() { return relativeAdresses; }
+	inline std::vector<Position>& getStatePositions() { return statePositions; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -138,7 +138,7 @@ private:
 	std::optional<NBuffer> stateBuffer;
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
 	
-	std::vector<Address> relativeAdresses;
+	std::vector<Position> statePositions;
 };
 
 // ====================================================================================================================

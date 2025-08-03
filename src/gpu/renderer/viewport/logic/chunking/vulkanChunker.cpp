@@ -49,8 +49,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 			blockInstances.push_back(instance);
 
 			// blocks are added to state array
-			posToAddressIdx[blockPosition] = relativeAdresses.size();
-			relativeAdresses.push_back(blockPosition);
+			posToAddressIdx[blockPosition] = statePositions.size();
+			statePositions.push_back(blockPosition);
 		}
 
 		// upload block vertices
@@ -74,9 +74,9 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 				stateIdx = itr->second;
 			} else {
 				// add address to state buffer
-				stateIdx = relativeAdresses.size();
-				relativeAdresses.push_back(wire.second.relativeStateAddress);
+				stateIdx = statePositions.size();
 				posToAddressIdx[wire.first.first] = stateIdx;
+				statePositions.push_back(wire.first.first);
 			}
 
 			WireInstance instance;
@@ -94,12 +94,12 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		vmaCopyMemoryToAllocation(device->getAllocator(), wireInstances.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
-	if (!relativeAdresses.empty()) {
+	if (!statePositions.empty()) {
 		// Create state buffer
-		size_t stateBufferSize = relativeAdresses.size() * sizeof(logic_state_t);
+		size_t stateBufferSize = statePositions.size() * sizeof(logic_state_t);
 		stateBuffer.emplace();
 		stateBuffer->init(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		std::vector<logic_state_t> defaultStates(relativeAdresses.size(), logic_state_t::HIGH);
+		std::vector<logic_state_t> defaultStates(statePositions.size(), logic_state_t::HIGH);
 	}
 }
 

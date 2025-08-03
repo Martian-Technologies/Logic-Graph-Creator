@@ -87,9 +87,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		if (chunk->getStateBuffer().has_value()) {
 			chunk->getStateBuffer()->incrementBufferFrame();
 
-			std::vector<logic_state_t> states(chunk->getRelativeAddresses().size());
+			std::vector<logic_state_t> states(chunk->getStatePositions().size());
 			if (evaluator != nullptr) {
-				states = evaluator->getBulkStates(chunk->getRelativeAddresses(), address);
+				states = evaluator->getBulkPinStates(chunk->getStatePositions(), address);
 			}
 			
 			vmaCopyMemoryToAllocation(device->getAllocator(), states.data(), chunk->getStateBuffer()->getCurrentBuffer().allocation, 0, states.size());
