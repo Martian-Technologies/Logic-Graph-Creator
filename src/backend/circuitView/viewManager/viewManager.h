@@ -1,9 +1,11 @@
 #ifndef viewManager_h
 #define viewManager_h
 
-#include "backend/circuitView/events/eventRegister.h"
 #include "backend/position/position.h"
 #include "util/vec2.h"
+
+class EventRegister;
+class Event;
 
 class ViewManager {
 public:
@@ -60,6 +62,8 @@ private:
 	FPosition viewCenter;
 	float viewScale;
 	float aspectRatio;
+
+	EventRegister* eventRegister = nullptr;
 
 	// event
 	std::function<void()> viewChangedListener;

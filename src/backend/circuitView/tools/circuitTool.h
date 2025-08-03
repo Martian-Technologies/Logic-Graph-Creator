@@ -9,6 +9,8 @@
 
 class CircuitView;
 class ToolStack;
+typedef std::function<bool(const Event* event)> EventFunction;
+typedef unsigned long long EventRegistrationSignature;
 
 class CircuitTool {
 	friend class ToolStack;

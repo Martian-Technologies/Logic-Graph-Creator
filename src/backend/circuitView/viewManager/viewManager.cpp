@@ -1,12 +1,15 @@
 #include "viewManager.h"
+
 #include "backend/circuitView/events/customEvents.h"
+#include "backend/circuitView/events/eventRegister.h"
 
 void ViewManager::setUpEvents(EventRegister& eventRegister) {
+	this->eventRegister = &eventRegister;
 	eventRegister.registerFunction("view zoom", std::bind(&ViewManager::zoom, this, std::placeholders::_1));
 	eventRegister.registerFunction("view pan", std::bind(&ViewManager::pan, this, std::placeholders::_1));
 	eventRegister.registerFunction("View Attach Anchor", std::bind(&ViewManager::attachAnchor, this, std::placeholders::_1));
 	eventRegister.registerFunction("View Dettach Anchor", std::bind(&ViewManager::dettachAnchor, this, std::placeholders::_1));
-	eventRegister.registerFunction("Pointer Move", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
+	eventRegister.registerFunction("Pointer Move On View", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
 	eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
 	eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
 }
@@ -53,21 +56,25 @@ bool ViewManager::dettachAnchor(const Event* event) {
 
 bool ViewManager::pointerMove(const Event* event) {
 	if (!pointerActive) return false;
-	const PositionEvent* positionEvent = event->cast<PositionEvent>();
-	if (!positionEvent) return false;
+	const ViewPositionEvent* viewPositionEvent = event->cast<ViewPositionEvent>();
+	if (!viewPositionEvent) return false;
 
-	pointerViewPosition = gridToView(positionEvent->getFPosition());
+	FPosition gridPos = viewToGrid(viewPositionEvent->getPosition());
+
+	pointerViewPosition = viewPositionEvent->getPosition();
 
 	if (anchored) {
-		FVector delta = pointerPosition - positionEvent->getFPosition();
+		FVector delta = pointerPosition - gridPos;
 		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos
 		viewCenter += delta;
 		applyLimits();
 		viewChanged();
+		eventRegister->doEvent(PositionEvent("Pointer Move", pointerPosition));
 		return false;
 	}
 
-	pointerPosition = positionEvent->getFPosition();
+	pointerPosition = gridPos;
+	eventRegister->doEvent(PositionEvent("Pointer Move", gridPos));
 
 	return false;
 }

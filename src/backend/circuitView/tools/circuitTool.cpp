@@ -1,5 +1,7 @@
 #include "circuitTool.h"
 
+#include "backend/circuitView/events/eventRegister.h"
+
 bool CircuitTool::sendEvent(const Event* event) {
 	auto events = registeredEvents;
 	for (const auto& pair : events) {

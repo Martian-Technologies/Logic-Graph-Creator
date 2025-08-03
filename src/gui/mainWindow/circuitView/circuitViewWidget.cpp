@@ -161,7 +161,7 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 			SDL_FPoint point(event.GetParameter<int>("mouse_x", 0), event.GetParameter<int>("mouse_y", 0));
 			if (insideWindow(point)) { // inside the widget
 				Vec2 viewPos = pixelsToView(point);
-				circuitView->getEventRegister().doEvent(PositionEvent("Pointer Move", circuitView->getViewManager().viewToGrid(viewPos)));
+				circuitView->getEventRegister().doEvent(ViewPositionEvent("Pointer Move On View", viewPos));
 			}
 		}
 	));

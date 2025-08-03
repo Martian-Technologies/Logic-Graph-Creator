@@ -2,7 +2,18 @@
 #define customEvents_h
 
 #include "backend/position/position.h"
+#include "util/vec2.h"
 #include "event.h"
+
+class ViewPositionEvent : public Event {
+public:
+	inline ViewPositionEvent(const std::string& name, const Vec2& viewPosition) : Event(name), viewPosition(viewPosition) { }
+
+	inline Vec2 getPosition() const { return viewPosition; }
+
+private:
+	Vec2 viewPosition;
+};
 
 class PositionEvent : public Event {
 public:
