@@ -69,7 +69,7 @@ protected:
 
 	// changing data
 	Position position;
-	Rotation rotation;
+	Rotation rotation = Rotation::ZERO;
 };
 
 inline Block getBlockClass(const BlockDataManager* blockDataManager, BlockType type) { return Block(blockDataManager, type); }
