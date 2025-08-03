@@ -99,12 +99,12 @@ struct RenderedBlock {
 	BlockType blockType;
 	Rotation rotation;
 	FVector size;
+	Position statePosition;
 };
 
 struct RenderedWire {
 	FPosition start;
 	FPosition end;
-	Address relativeStateAddress;
 };
 
 typedef std::unordered_map<Position, RenderedBlock> RenderedBlocks;
@@ -179,10 +179,10 @@ public:
 
 	void startMakingEdits() override final;
 	void stopMakingEdits() override final;
-	void addBlock(BlockType type, Position position, Vector size, Rotation rotation) override final;
+	void addBlock(BlockType type, Position position, Vector size, Rotation rotation, Position statePosition) override final;
 	void removeBlock(Position position) override final;
 	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) override final;
-	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address) override final;
+	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) override final;
 	void removeWire(std::pair<Position, Position> points) override final;
 
 	void reset() override final;

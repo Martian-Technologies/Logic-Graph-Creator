@@ -49,8 +49,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 			blockInstances.push_back(instance);
 
 			// blocks are added to state array
-			posToAddressIdx[blockPosition] = statePositions.size();
-			statePositions.push_back(blockPosition);
+			posToAddressIdx[block.second.statePosition] = statePositions.size();
+			statePositions.push_back(block.second.statePosition);
 		}
 
 		// upload block vertices
@@ -184,9 +184,9 @@ void VulkanChunker::stopMakingEdits() {
 	mux.unlock();
 }
 
-void VulkanChunker::addBlock(BlockType type, Position position, Vector size, Rotation rotation) {
+void VulkanChunker::addBlock(BlockType type, Position position, Vector size, Rotation rotation, Position statePosition) {
 	Position chunk = getChunk(position);
-	chunks[chunk].getRenderedBlocks()[position] = RenderedBlock(type, rotation, size.free());
+	chunks[chunk].getRenderedBlocks()[position] = RenderedBlock(type, rotation, size.free(), statePosition);
 	chunksToUpdate.insert(chunk);
 }
 
@@ -215,11 +215,11 @@ void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRota
 	}
 }
 
-void VulkanChunker::addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets, Address address) {
+void VulkanChunker::addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) {
 	FPosition a = points.first.free() + socketOffsets.first;
 	FPosition b = points.second.free() + socketOffsets.second;
 	for (const ChunkIntersection& intersection : getChunkIntersections(a, b)) {
-		chunks[intersection.chunk].getRenderedWires()[points] = { intersection.start, intersection.end, address };
+		chunks[intersection.chunk].getRenderedWires()[points] = { intersection.start, intersection.end };
 		chunksUnderWire[points].push_back(intersection.chunk);
 		chunksToUpdate.insert(intersection.chunk);
 	}

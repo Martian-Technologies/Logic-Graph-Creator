@@ -25,27 +25,25 @@ LogicSimulator::~LogicSimulator() {
 	}
 }
 
-void LogicSimulator::clearState() {}
+void LogicSimulator::clearState() { }
 
 float LogicSimulator::getAverageTickrate() const {
 	return averageTickrate.load(std::memory_order_acquire);
 }
 
-void LogicSimulator::simulationLoop()
-{
+void LogicSimulator::simulationLoop() {
 	using clock = std::chrono::steady_clock;
 	auto nextTick = clock::now();
 	auto lastTickTime = clock::now();
 	bool isFirstTick = true;
 
 	while (running) {
-		if (pauseRequest.load(std::memory_order_acquire))
-		{
+		if (pauseRequest.load(std::memory_order_acquire)) {
 			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock<std::mutex> lk(cvMutex);
 			isPaused.store(true, std::memory_order_release);
 			cv.notify_all();
-			cv.wait(lk, [&]{ return !pauseRequest || !running; });
+			cv.wait(lk, [&] { return !pauseRequest || !running; });
 			isPaused.store(false, std::memory_order_release);
 			if (!running) break;
 			// reset nextTick after resuming from pause
@@ -90,14 +88,14 @@ void LogicSimulator::simulationLoop()
 					auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes { 1 }) / targetTickrate;
 					nextTick += period;
 					std::unique_lock lk(cvMutex);
-					cv.wait_until(lk, nextTick, [&]{ return pauseRequest || !running || !evalConfig.isRunning(); });
+					cv.wait_until(lk, nextTick, [&] { return pauseRequest || !running || !evalConfig.isRunning(); });
 				}
 			}
 		} else {
 			// wait for state change or resume signal
 			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock lk(cvMutex);
-			cv.wait(lk, [&]{
+			cv.wait(lk, [&] {
 				// Check for pending state changes under lock to avoid race conditions
 				std::lock_guard<std::mutex> stateLock(stateChangeQueueMutex);
 				return pauseRequest || !running || evalConfig.isRunning() || !pendingStateChanges.empty();
@@ -176,7 +174,7 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
 	// Try to acquire locks non-blockingly first
 	std::unique_lock lkB(statesBMutex, std::try_to_lock);
 	std::unique_lock lkA(statesAMutex, std::try_to_lock);
-	
+
 	if (lkB.owns_lock() && lkA.owns_lock()) {
 		// Successfully acquired both locks, apply immediately
 		if (statesA.size() <= id) {
@@ -189,7 +187,7 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
 	} else {
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
-		pendingStateChanges.push({id, st});
+		pendingStateChanges.push({ id, st });
 		// Wake up the simulation thread to process state changes
 		cv.notify_one();
 	}
@@ -199,11 +197,11 @@ void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std
 	if (ids.size() != states.size()) {
 		throw std::invalid_argument("ids and states must have the same size");
 	}
-	
+
 	// Try to acquire locks non-blockingly first
 	std::unique_lock lkB(statesBMutex, std::try_to_lock);
 	std::unique_lock lkA(statesAMutex, std::try_to_lock);
-	
+
 	if (lkB.owns_lock() && lkA.owns_lock()) {
 		// Successfully acquired both locks, apply immediately
 		for (size_t i = 0; i < ids.size(); ++i) {
@@ -220,7 +218,7 @@ void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std
 		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		for (size_t i = 0; i < ids.size(); ++i) {
-			pendingStateChanges.push({ids[i], states[i]});
+			pendingStateChanges.push({ ids[i], states[i] });
 		}
 		// Wake up the simulation thread to process state changes
 		cv.notify_one();

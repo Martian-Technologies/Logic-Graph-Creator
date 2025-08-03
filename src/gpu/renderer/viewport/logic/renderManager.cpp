@@ -48,7 +48,12 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 				const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 
 				for (CircuitRenderer* renderer : renderers) {
-					renderer->addBlock(blockType, position, blockDataManager->getBlockSize(blockType, rotation), rotation);
+					Position statePosition = Position(1000000, 1000000);
+					if (blockType < BlockType::CUSTOM) {
+						if (blockType == BlockType::TRISTATE_BUFFER) statePosition = position + rotateVectorWithArea(Vector(0, 1), Vector(1, 2), rotation);
+						else statePosition = position;
+					}
+					renderer->addBlock(blockType, position, blockDataManager->getBlockSize(blockType, rotation), rotation, statePosition);
 				}
 				renderedBlocks.emplace(position, RenderedBlock(blockType, rotation));
 				break;
@@ -93,11 +98,11 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					}
 					inputIter->second.connectionsToOtherBlock.emplace(newConnection, outputBlockPosition);
 					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(inputIter->second.rotation) }, outputPosition);
+						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(inputIter->second.rotation) });
 					}
 				} else {
 					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(outputIter->second.rotation) }, outputPosition);
+						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(outputIter->second.rotation) });
 					}
 				}
 				break;
@@ -165,7 +170,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 						Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
 						Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
 						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ outputPos, inputPos }, { getOutputOffset(newRotation), getInputOffset(newRotation) }, outputPos);
+							renderer->addWire({ outputPos, inputPos }, { getOutputOffset(newRotation), getInputOffset(newRotation) });
 						}
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, inputPos), newPosition);
 					} else {
@@ -179,14 +184,14 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 						if (isInput) {
 							Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
 							for (CircuitRenderer* renderer : renderers) {
-								renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.rotation), getInputOffset(newRotation) }, posPair.first);
+								renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.rotation), getInputOffset(newRotation) });
 							}
 							iter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), otherBlockPos);
 							otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), newPosition);
 						} else {
 							Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
 							for (CircuitRenderer* renderer : renderers) {
-								renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(newRotation), getInputOffset(otherIter->second.rotation) }, outputPos);
+								renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(newRotation), getInputOffset(otherIter->second.rotation) });
 							}
 							iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), otherBlockPos);
 							otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), newPosition);

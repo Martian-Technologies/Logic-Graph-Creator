@@ -10,6 +10,10 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 	simulatorIds[simulatorId] = gateId;
 
 	// Ensure connection tracking vectors are large enough
+	if (middleIds.size() <= gateId) {
+		middleIds.resize(gateId + 1);
+	}
+	middleIds[gateId] = simulatorId;
 	if (inputConnections.size() <= gateId) {
 		inputConnections.resize(gateId + 1);
 	}
@@ -25,10 +29,8 @@ void SimulatorOptimizer::addGate(SimPauseGuard& pauseGuard, const GateType gateT
 void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t gateId) {
 	// Find the gate in the simulator and remove it
 
-	auto it = std::find(simulatorIds.begin(), simulatorIds.end(), gateId);
-	if (it != simulatorIds.end()) {
-		simulator_id_t simulatorId = std::distance(simulatorIds.begin(), it);
-		simulator.removeGate(simulatorId);
+	if (gateId < middleIds.size()) {
+		simulator.removeGate(middleIds[gateId]);
 	}
 
 	// Clean up connection tracking
@@ -65,7 +67,7 @@ void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t
 	gateTypes[gateId] = GateType::NONE;
 }
 
-void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) {}
+void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) { }
 
 void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 	middle_id_t sourceGateId = connection.source.gateId;
@@ -120,9 +122,9 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, EvalConnect
 		connections.erase(std::remove_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
 				return conn.source.gateId == connection.source.gateId &&
-					   conn.source.portId == connection.source.portId &&
-					   conn.destination.gateId == connection.destination.gateId &&
-					   conn.destination.portId == connection.destination.portId;
+					conn.source.portId == connection.source.portId &&
+					conn.destination.gateId == connection.destination.gateId &&
+					conn.destination.portId == connection.destination.portId;
 			}), connections.end());
 	}
 
@@ -131,9 +133,9 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, EvalConnect
 		connections.erase(std::remove_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
 				return conn.source.gateId == connection.source.gateId &&
-					   conn.source.portId == connection.source.portId &&
-					   conn.destination.gateId == connection.destination.gateId &&
-					   conn.destination.portId == connection.destination.portId;
+					conn.source.portId == connection.source.portId &&
+					conn.destination.gateId == connection.destination.gateId &&
+					conn.destination.portId == connection.destination.portId;
 			}), connections.end());
 	}
 }

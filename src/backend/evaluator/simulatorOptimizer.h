@@ -17,6 +17,7 @@ public:
 		middleIdProvider(middleIdProvider) {
 		inputConnections.resize(1000);
 		outputConnections.resize(1000);
+		middleIds.resize(1000);
 	}
 
 	void addGate(SimPauseGuard& pauseGuard, const GateType gateType, const middle_id_t gateId);
@@ -27,9 +28,8 @@ public:
 	void endEdit(SimPauseGuard& pauseGuard);
 
 	std::optional<simulator_id_t> getSimIdFromMiddleId(middle_id_t middleId) const {
-		auto it = std::find(simulatorIds.begin(), simulatorIds.end(), middleId);
-		if (it != simulatorIds.end()) {
-			return static_cast<simulator_id_t>(std::distance(simulatorIds.begin(), it));
+		if (middleId < middleIds.size()) {
+			return middleIds[middleId];
 		}
 		return std::nullopt;
 	}
@@ -132,6 +132,7 @@ private:
 	EvalConfig& evalConfig;
 	IdProvider<middle_id_t>& middleIdProvider;
 	std::vector<middle_id_t> simulatorIds; // maps simulator_id_t to middle_id_t
+	std::vector<simulator_id_t> middleIds; // maps middle_id_t to simulator_id_t
 
 	std::vector<std::vector<EvalConnection>> inputConnections;  // inputConnections[middleId] = connections TO this gate
 	std::vector<std::vector<EvalConnection>> outputConnections; // outputConnections[middleId] = connections FROM this gate
