@@ -37,7 +37,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		blockInstances.reserve(blocks.size());
 		for (const auto& block : blocks) {
 			Position blockPosition = block.first;
-			Vec2 uvOrigin = device->getBlockTextureManager()->getTileset().getTopLeftUV(block.second.blockType + 1, 0);
+			Vec2 uvOrigin = device->getBlockTextureManager()->getTileset().getTopLeftUV(block.second.blockType + 1 + (block.second.blockType >= BlockType::CUSTOM), 0);
 
 			BlockInstance instance;
 			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
