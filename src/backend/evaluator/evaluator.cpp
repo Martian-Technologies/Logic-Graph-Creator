@@ -20,7 +20,7 @@ dataUpdateEventManager(dataUpdateEventManager),
 receiver(dataUpdateEventManager),
 evalConfig(),
 middleIdProvider(),
-evalSimulator(evalConfig, middleIdProvider) {
+evalSimulator(evalConfig, middleIdProvider, dirtySimulatorIds) {
 	const auto circuit = circuitManager.getCircuit(circuitId);
 	if (!circuit) {
 		logError("Circuit with ID {} not found", "Evaluator::Evaluator", circuitId);
@@ -57,6 +57,7 @@ void Evaluator::makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId)
 	if (changedICs) {
 		dataUpdateEventManager->sendEvent("addressTreeMakeBranch");
 	}
+	processDirtyNodes();
 }
 
 void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DifferenceSharedPtr difference, DiffCache& diffCache) {
@@ -206,6 +207,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	}
 	CircuitNode node = CircuitNode::fromMiddle(gateId);
 	evalCircuit->setNode(position, node);
+	dirtyBlockAt(position, evalCircuitId);
 	checkToCreateExternalConnections(pauseGuard, evalCircuitId, position);
 }
 
@@ -221,6 +223,7 @@ void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCi
 	}
 	eval_circuit_id_t newEvalCircuitId = evalCircuitContainer.addCircuit(evalCircuitId, circuitId);
 	evalCircuit->setNode(position, CircuitNode::fromIC(newEvalCircuitId));
+	dirtyBlockAt(position, evalCircuitId);
 	DifferenceSharedPtr diff = diffCache.getDifference(circuitId);
 	makeEditInPlace(pauseGuard, newEvalCircuitId, diff, diffCache);
 }
@@ -598,6 +601,7 @@ void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eval
 	removeDependentInterCircuitConnections(pauseGuard, node.value());
 	evalCircuit->moveNode(curPosition, newPosition);
 	checkToCreateExternalConnections(pauseGuard, evalCircuitId, newPosition);
+	dirtyBlockAt(newPosition, evalCircuitId);
 }
 
 const EvalAddressTree Evaluator::buildAddressTree() const {
@@ -1112,4 +1116,93 @@ void Evaluator::traceOutwardsIC(
 	}
 
 	circuitNodeDependencies.erase(CircuitNode::fromIC(evalCircuitId));
+}
+
+void Evaluator::processDirtyNodes() {
+	for (const simulator_id_t id : dirtySimulatorIds) {
+		{
+			auto it = portSimulatorIdToEvalPositionMap.equal_range(id);
+			for (auto iter = it.first; iter != it.second; ++iter) {
+				const auto& [simulatorId, evalPosition] = *iter;
+				dirtyNodes.insert(evalPosition);
+			}
+			portSimulatorIdToEvalPositionMap.erase(id);
+		}
+		{
+			auto it = pinSimulatorIdToEvalPositionMap.equal_range(id);
+			for (auto iter = it.first; iter != it.second; ++iter) {
+				const auto& [simulatorId, evalPosition] = *iter;
+				dirtyNodes.insert(evalPosition);
+			}
+			pinSimulatorIdToEvalPositionMap.erase(id);
+		}
+	}
+	dirtySimulatorIds.clear();
+
+	std::vector<EvalPosition> dirtyNodesToProcess;
+	std::vector<EvalConnectionPoint> connectionPointsToRequest;
+
+	for (const EvalPosition& evalPosition : dirtyNodes) {
+		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(evalPosition.evalCircuitId, evalPosition.position, Direction::OUT);
+		if (!connectionPoint.has_value()) {
+			continue;
+		}
+		dirtyNodesToProcess.push_back(evalPosition);
+		connectionPointsToRequest.push_back(connectionPoint.value());
+	}
+	dirtyNodes.clear();
+
+	std::vector<SimulatorStateAndPinSimId> simulatorIdPairs = evalSimulator.getSimulatorIds(connectionPointsToRequest);
+
+	for (size_t i = 0; i < dirtyNodesToProcess.size(); ++i) {
+		const EvalPosition& evalPosition = dirtyNodesToProcess.at(i);
+		const SimulatorStateAndPinSimId& simulatorIdPair = simulatorIdPairs.at(i);
+		simulator_id_t portSimId = simulatorIdPair.portSimId;
+		simulator_id_t pinSimId = simulatorIdPair.pinSimId;
+		portSimulatorIdToEvalPositionMap.insert({portSimId, evalPosition});
+		pinSimulatorIdToEvalPositionMap.insert({pinSimId, evalPosition});
+	}
+}
+
+void Evaluator::dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId) {
+	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
+	if (!evalCircuit) {
+		logError("EvalCircuit with id {} not found", "Evaluator::dirtyBlockAt", evalCircuitId);
+		return;
+	}
+	circuit_id_t circuitId = evalCircuit->getCircuitId();
+	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
+	if (!circuit) {
+		logError("Circuit with id {} not found", "Evaluator::dirtyBlockAt", circuitId);
+		return;
+	}
+	const BlockContainer* blockContainer = circuit->getBlockContainer();
+	if (!blockContainer) {
+		logError("BlockContainer not found", "Evaluator::dirtyBlockAt");
+		return;
+	}
+	const Block* block = blockContainer->getBlock(position);
+	if (!block) {
+		logError("Block not found at position {}", "Evaluator::dirtyBlockAt", position.toString());
+		return;
+	}
+	if (block->type() == BlockType::LIGHT) {
+		dirtyNodes.insert({position, evalCircuitId});
+		return;
+	}
+	const BlockData* blockData = blockDataManager.getBlockData(block->type());
+	if (!blockData) {
+		logError("BlockData not found for block type {}", "Evaluator::dirtyBlockAt", static_cast<int>(block->type()));
+		return;
+	}
+	for (size_t i = 0; i < blockData->getConnectionCount(); ++i) {
+		if (block->isConnectionOutput(i)) {
+			std::pair<Position, bool> portPositionOpt = block->getConnectionPosition(i);
+			if (!portPositionOpt.second) {
+				logError("Port position not found for connection ID {}", "Evaluator::dirtyBlockAt", i);
+				continue;
+			}
+			dirtyNodes.insert({portPositionOpt.first, evalCircuitId});
+		}
+	}
 }

@@ -1,7 +1,11 @@
 #include "logicSimulator.h"
 #include "gateType.h"
 
-LogicSimulator::LogicSimulator(EvalConfig& evalConfig) : evalConfig(evalConfig) {
+LogicSimulator::LogicSimulator(
+	EvalConfig& evalConfig,
+	std::vector<simulator_id_t>& dirtySimulatorIds) :
+	evalConfig(evalConfig),
+	dirtySimulatorIds(dirtySimulatorIds) {
 	// Subscribe to EvalConfig changes to update the simulator accordingly
 	evalConfig.subscribe([this]() {
 		// Notify the simulation thread about config changes
@@ -431,6 +435,7 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 			outputDependencies.erase(depIt);
 		}
 		simulatorIdProvider.releaseId(id);
+		dirtySimulatorIds.push_back(id);
 	}
 
 	auto locationIt = gateLocations.find(simulatorId);

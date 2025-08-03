@@ -9,10 +9,18 @@
 #include "logicSimulator.h"
 #include "simulatorGates.h"
 
+struct SimulatorStateAndPinSimId {
+	simulator_id_t portSimId;
+	simulator_id_t pinSimId;
+};
+
 class SimulatorOptimizer {
 public:
-	SimulatorOptimizer(EvalConfig& evalConfig, IdProvider<middle_id_t>& middleIdProvider) :
-		simulator(evalConfig),
+	SimulatorOptimizer(
+		EvalConfig& evalConfig,
+		IdProvider<middle_id_t>& middleIdProvider,
+		std::vector<simulator_id_t>& dirtySimulatorIds) :
+		simulator(evalConfig, dirtySimulatorIds),
 		evalConfig(evalConfig),
 		middleIdProvider(middleIdProvider) {
 		inputConnections.resize(1000);
@@ -81,6 +89,33 @@ public:
 			simIds.push_back(simIdOpt.value_or(0));
 		}
 		return simulator.getStates(simIds);
+	}
+	std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
+		std::vector<SimulatorStateAndPinSimId> result;
+		result.reserve(points.size());
+		for (const auto& point : points) {
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
+			if (!simIdOpt.has_value()) {
+				result.push_back({0, 0});
+				continue;
+			}
+			int numOutputs = getNumOutputs(point.gateId);
+			if (numOutputs == 1) {
+				std::vector<EvalConnection> outputs = getOutputs(point.gateId);
+				EvalConnection output = outputs.at(0);
+				GateType gateType = getGateType(output.destination.gateId);
+				if (gateType == GateType::JUNCTION) {
+					// get the simId of the output
+					std::optional<simulator_id_t> pinSimIdOpt = getSimIdFromConnectionPoint(output.destination);
+					if (pinSimIdOpt.has_value()) {
+						result.push_back({simIdOpt.value(), pinSimIdOpt.value()});
+						continue;
+					}
+				}
+			}
+			result.push_back({simIdOpt.value(), simIdOpt.value()});
+		}
+		return result;
 	}
 	void setState(EvalConnectionPoint point, logic_state_t state) {
 		std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
