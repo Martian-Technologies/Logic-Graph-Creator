@@ -4,15 +4,18 @@ constexpr float edgeDistance = 0.48f;
 constexpr float sideShift = 0.25f;
 
 FVector getOutputOffset(Position position, Circuit* circuit) {
-	return getOutputOffset(circuit->getBlockContainer()->getBlock(position)->getRotation());
+	const Block* block = circuit->getBlockContainer()->getBlock(position);
+	return getOutputOffset(block->type(), block->getRotation());
 }
 
 FVector getInputOffset(Position position, Circuit* circuit) {
-	return getInputOffset(circuit->getBlockContainer()->getBlock(position)->getRotation());
+	const Block* block = circuit->getBlockContainer()->getBlock(position);
+	return getInputOffset(block->type(), block->getRotation());
 }
 
-FVector getOutputOffset(Rotation rotation) {
+FVector getOutputOffset(BlockType blockType, Rotation rotation) {
 	FVector offset = { 0.5, 0.5 };
+	if (blockType == BlockType::JUNCTION) return offset;
 	
 	switch (rotation) {
 	case Rotation::ZERO: offset += { edgeDistance, sideShift }; break;
@@ -24,8 +27,9 @@ FVector getOutputOffset(Rotation rotation) {
 	return offset;
 }
 
-FVector getInputOffset(Rotation rotation) {
+FVector getInputOffset(BlockType blockType, Rotation rotation) {
 	FVector offset = { 0.5, 0.5 };
+	if (blockType == BlockType::JUNCTION) return offset;
 	
 	switch (rotation) {
 	case Rotation::ZERO: offset += { -edgeDistance, -sideShift }; break;

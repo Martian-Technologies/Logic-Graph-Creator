@@ -51,11 +51,7 @@ body {
       width: 60%;
       height: 60%;
       z-index: 1001;
-      background-color: rgba(0, 0, 0, 0.4);
-      display: flex;
       align-items: center;
-      justify-content: center;
-	  pointer-events: none;
 }
 
 .invisible {

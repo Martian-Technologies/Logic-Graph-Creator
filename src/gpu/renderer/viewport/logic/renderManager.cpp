@@ -98,11 +98,11 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					}
 					inputIter->second.connectionsToOtherBlock.emplace(newConnection, outputBlockPosition);
 					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(inputIter->second.rotation) });
+						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.rotation), getInputOffset(inputIter->second.type, inputIter->second.rotation) });
 					}
 				} else {
 					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.rotation), getInputOffset(outputIter->second.rotation) });
+						renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.rotation), getInputOffset(outputIter->second.type, outputIter->second.rotation) });
 					}
 				}
 				break;
@@ -170,7 +170,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 						Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
 						Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
 						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ outputPos, inputPos }, { getOutputOffset(newRotation), getInputOffset(newRotation) });
+							renderer->addWire({ outputPos, inputPos }, { getOutputOffset(iter->second.type, newRotation), getInputOffset(iter->second.type, newRotation) });
 						}
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, inputPos), newPosition);
 					} else {
@@ -184,14 +184,14 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 						if (isInput) {
 							Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
 							for (CircuitRenderer* renderer : renderers) {
-								renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.rotation), getInputOffset(newRotation) });
+								renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.type, otherIter->second.rotation), getInputOffset(iter->second.type, newRotation) });
 							}
 							iter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), otherBlockPos);
 							otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), newPosition);
 						} else {
 							Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
 							for (CircuitRenderer* renderer : renderers) {
-								renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(newRotation), getInputOffset(otherIter->second.rotation) });
+								renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(iter->second.type, newRotation), getInputOffset(otherIter->second.type, otherIter->second.rotation) });
 							}
 							iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), otherBlockPos);
 							otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), newPosition);

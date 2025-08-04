@@ -203,6 +203,7 @@ void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRota
 	auto itr = chunks[curChunk].getRenderedBlocks().find(curPos);
 	if (itr != chunks[curChunk].getRenderedBlocks().end()) {
 		RenderedBlock block = itr->second;
+		block.statePosition = newPos + rotateVectorWithArea(block.statePosition - curPos, block.size.snap(), subRotations(newRotation, block.rotation));
 		block.rotation = newRotation;
 		block.size = newSize.free();
 		chunks[curChunk].getRenderedBlocks().erase(itr);
