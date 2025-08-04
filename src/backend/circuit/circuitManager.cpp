@@ -39,7 +39,7 @@ CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, E
 		linkedFunctionForUpdates<connection_end_id_t>(eventData);
 	});
 	dataUpdateEventReceiver.linkFunction("blockDataConnectionNameSet", [this](const DataUpdateEventManager::EventData* eventData) {
-		linkedFunctionForUpdates<Vector>(eventData);
+		linkedFunctionForUpdates<connection_end_id_t>(eventData);
 	});
 }
 

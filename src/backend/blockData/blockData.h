@@ -202,7 +202,7 @@ public:
 		connectionIdNames.set(endId, name);
 		dataUpdateEventManager->sendEvent(
 			"blockDataConnectionNameSet",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, Vector>>({ blockType, Vector(1) })
+			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId })
 		);
 	}
 	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const {
