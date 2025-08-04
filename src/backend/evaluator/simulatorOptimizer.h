@@ -117,6 +117,50 @@ public:
 		}
 		return result;
 	}
+	inline std::vector<logic_state_t> getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
+		return simulator.getStates(simulatorIds);
+	}
+	std::vector<simulator_id_t> getBlockSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		std::vector<simulator_id_t> result;
+		result.reserve(points.size());
+		for (const auto& pointOpt : points) {
+			if (!pointOpt.has_value()) {
+				result.push_back(0);
+				continue;
+			}
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(pointOpt.value());
+			result.push_back(simIdOpt.value_or(0));
+		}
+		return result;
+	}
+	std::vector<simulator_id_t> getPinSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		std::vector<simulator_id_t> result;
+		result.reserve(points.size());
+		for (const auto& pointOpt : points) {
+			if (!pointOpt.has_value()) {
+				result.push_back(0);
+				continue;
+			}
+			int numOutputs = getNumOutputs(pointOpt->gateId);
+			if (numOutputs == 1) {
+				std::vector<EvalConnection> outputs = getOutputs(pointOpt->gateId);
+				EvalConnection output = outputs.at(0);
+				GateType gateType = getGateType(output.destination.gateId);
+				if (gateType == GateType::JUNCTION) {
+					// get the simId of the output
+					std::optional<simulator_id_t> pinSimIdOpt = getSimIdFromConnectionPoint(output.destination);
+					result.push_back(pinSimIdOpt.value_or(0));
+					continue;
+				}
+			}
+			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(pointOpt.value());
+			if (!simIdOpt.has_value()) {
+				result.push_back(0);
+				continue;
+			}
+		}
+		return result;
+	}
 	void setState(EvalConnectionPoint point, logic_state_t state) {
 		std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
 		if (!simIdOpt.has_value()) {

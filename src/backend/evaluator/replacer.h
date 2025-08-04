@@ -180,8 +180,20 @@ public:
 		return simulatorOptimizer.getPinStates(getReplacementConnectionPoints(points));
 	}
 
+	inline std::vector<logic_state_t> getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
+		return simulatorOptimizer.getStatesFromSimulatorIds(simulatorIds);
+	}
+
 	inline std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
 		return simulatorOptimizer.getSimulatorIds(getReplacementConnectionPoints(points));
+	}
+
+	inline std::vector<simulator_id_t> getBlockSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		return simulatorOptimizer.getBlockSimulatorIds(getReplacementConnectionPoints(points));
+	}
+
+	inline std::vector<simulator_id_t> getPinSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		return simulatorOptimizer.getPinSimulatorIds(getReplacementConnectionPoints(points));
 	}
 
 	inline void setState(EvalConnectionPoint id, logic_state_t state) {
@@ -259,6 +271,18 @@ private:
 		result.reserve(points.size());
 		for (const auto& point : points) {
 			result.push_back(getReplacementConnectionPoint(point));
+		}
+		return result;
+	}
+	std::vector<std::optional<EvalConnectionPoint>> getReplacementConnectionPoints(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		std::vector<std::optional<EvalConnectionPoint>> result;
+		result.reserve(points.size());
+		for (const auto& point : points) {
+			if (!point.has_value()) {
+				result.push_back(std::nullopt);
+				continue;
+			}
+			result.push_back(getReplacementConnectionPoint(point.value()));
 		}
 		return result;
 	}

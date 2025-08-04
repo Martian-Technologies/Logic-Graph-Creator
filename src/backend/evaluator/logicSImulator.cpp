@@ -16,6 +16,7 @@ LogicSimulator::LogicSimulator(
 	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
 	statesA.resize(1, logic_state_t::UNDEFINED);
 	statesB.resize(1, logic_state_t::UNDEFINED);
+	simulatorIdProvider.getNewId(); // reserve the 0th id to be used as an invalid id
 }
 
 LogicSimulator::~LogicSimulator() {

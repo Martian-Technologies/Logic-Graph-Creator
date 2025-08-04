@@ -117,8 +117,17 @@ public:
 	inline std::vector<logic_state_t> getPinStates(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getPinStates(points);
 	}
+	inline std::vector<logic_state_t> getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
+		return replacer.getStatesFromSimulatorIds(simulatorIds);
+	}
 	inline std::vector<SimulatorStateAndPinSimId> getSimulatorIds(const std::vector<EvalConnectionPoint>& points) const {
 		return replacer.getSimulatorIds(points);
+	}
+	inline std::vector<simulator_id_t> getBlockSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		return replacer.getBlockSimulatorIds(points);
+	}
+	inline std::vector<simulator_id_t> getPinSimulatorIds(const std::vector<std::optional<EvalConnectionPoint>>& points) const {
+		return replacer.getPinSimulatorIds(points);
 	}
 	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 		replacer.setState(point, state);

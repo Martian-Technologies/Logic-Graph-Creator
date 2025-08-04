@@ -1206,3 +1206,27 @@ void Evaluator::dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId)
 		}
 	}
 }
+
+std::vector<simulator_id_t> Evaluator::getBlockSimulatorIds(const Address& addressOrigin, const std::vector<Position>& positions) const {
+	eval_circuit_id_t evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
+	std::vector<std::optional<EvalConnectionPoint>> connectionPoints;
+	connectionPoints.reserve(positions.size());
+	for (const Position& portPosition : positions) {
+		connectionPoints.push_back(getConnectionPoint(evalCircuitId, portPosition, Direction::OUT));
+	}
+	return evalSimulator.getBlockSimulatorIds(connectionPoints);
+}
+
+std::vector<simulator_id_t> Evaluator::getPinSimulatorIds(const Address& addressOrigin, const std::vector<Position>& positions) const {
+	eval_circuit_id_t evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
+	std::vector<std::optional<EvalConnectionPoint>> connectionPoints;
+	connectionPoints.reserve(positions.size());
+	for (const Position& portPosition : positions) {
+		connectionPoints.push_back(getConnectionPoint(evalCircuitId, portPosition, Direction::OUT));
+	}
+	return evalSimulator.getPinSimulatorIds(connectionPoints);
+}
+
+std::vector<logic_state_t> Evaluator::getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
+	return evalSimulator.getStatesFromSimulatorIds(simulatorIds);
+}
