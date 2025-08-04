@@ -9,11 +9,11 @@
 		<link type="text/template" href="sideBar/sideBar.rml"/>
 		<link type="text/template" href="circuitView/circuitView.rml"/>
 		<link type="text/template" href="settingsWindow/settingsWindow.rml"/>
+		<link type="text/template" href="popUpWindow/popUpWindow.rml"/>
 	</head>
 
 	<body>
 		<div id="main-container">
-
 			<div id="top-container">
 				<template src="menuBar"></template>
 			</div>
@@ -33,6 +33,9 @@
 
 			<div id="settings-overlay" class="invisible">
 				<template src="settingsWindow"></template>
+			</div>
+			<div id="pop-up-overlay" class="invisible">
+				<template src="popUpWindow"></template>
 			</div>
 		</div>
 	</body>

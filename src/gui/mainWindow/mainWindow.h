@@ -41,9 +41,11 @@ public:
 	void setBlock(std::string blockPath);
 	void setTool(std::string tool);
 	void setMode(std::string tool);
-	void addPopup(const std::string& message, const std::vector<std::string>& options);
+	void addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
 
 private:
+	void createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
+
 	Backend* backend;
 	CircuitFileManager* circuitFileManager;
 	FileListener* fileListener;
@@ -58,6 +60,8 @@ private:
 	
 	Rml::Context* rmlContext;
 	Rml::ElementDocument* rmlDocument;
+
+	std::vector<std::pair<std::string,const std::vector<std::pair<std::string, std::function<void()>>>>> popUpsToAdd;
 };
 
 #endif

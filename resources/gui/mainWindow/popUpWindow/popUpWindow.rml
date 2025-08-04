@@ -1,0 +1,17 @@
+<template name="popUpWindow" content="content">
+
+	<head>
+		<link type="text/rcss" href="popUpWindow.rcss" />
+	</head>
+
+	<body>
+		<div id="pop-up-window">
+			<span id="pop-up-text"></span>
+			<div id="pop-up-actions">
+				<button class="pop-up-action" id="23">Close2</button>
+				<button class="pop-up-action" id="33">Close3</button>
+				<button class="pop-up-action" id="13">Close1</button>
+			</div>
+		</div>
+	</body>
+</template>

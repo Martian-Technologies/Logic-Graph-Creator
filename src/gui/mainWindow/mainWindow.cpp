@@ -7,6 +7,7 @@
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
 #include "backend/settings/settings.h"
+#include "../helper/eventPasser.h"
 #include "menuBar/menuBar.h"
 
 MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
@@ -21,6 +22,9 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 
 	renderer.activateRml(renderInterface);
 	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow/mainWindow.rml");
+
+	// Rml::Debugger::Initialise(rmlContext);
+	// Rml::Debugger::SetVisible(true);
 
 	// get widget for circuit view
 	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), &renderer);
@@ -41,7 +45,7 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 
 	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
 	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
-	
+
 	simControlsManager.emplace(rmlDocument, circuitViewWidget, backend->getDataUpdateEventManager());
 
 	// Settings::serializeData();
@@ -54,6 +58,13 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 
 	// show rmlUi document
 	rmlDocument->Show();
+
+	// example pop up
+	// addPopUp("this is a test", {
+	// 	std::make_pair<std::string, std::function<void()>>("A", [](){logInfo("A");}),
+	// 	std::make_pair<std::string, std::function<void()>>("B", [](){logInfo("B");}),
+	// 	std::make_pair<std::string, std::function<void()>>("C", [](){logInfo("C");})
+	// });
 }
 
 MainWindow::~MainWindow() {
@@ -84,13 +95,13 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 				}
 			}
 		}
-		
+
 		// send event to RML
 		RmlSDL::InputEventHandler(rmlContext, sdlWindow.getHandle(), event, getSdlWindowScalingSize());
 
 		// let renderer know we if resized the window
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
-			renderer.resize({event.window.data1, event.window.data2});
+			renderer.resize({ event.window.data1, event.window.data2 });
 			rmlContext->Update();
 			circuitViewWidget->handleResize();
 		}
@@ -102,7 +113,7 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 
 void MainWindow::updateRml(RmlRenderInterface& renderInterface) {
 	rmlContext->Update();
-	
+
 	renderer.prepareForRml(renderInterface);
 	rmlContext->Render();
 	renderer.endRml();
@@ -120,3 +131,31 @@ void MainWindow::setTool(std::string tool) {
 void MainWindow::setMode(std::string mode) {
 	backend->getToolManagerManager().setMode(mode);
 }
+
+void MainWindow::addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options) {
+	if (popUpsToAdd.empty()) {
+		createPopUp(message, options);
+	} else {
+		popUpsToAdd.emplace_back(message, options);
+	}
+}
+
+void MainWindow::createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options) {
+	rmlDocument->GetElementById("pop-up-overlay")->SetClass("invisible", false);
+	rmlDocument->GetElementById("pop-up-text")->SetInnerRML(message);
+	Rml::Element* actionsElement = rmlDocument->GetElementById("pop-up-actions");
+	while (actionsElement->HasChildNodes()) { actionsElement->RemoveChild(actionsElement->GetChild(0)); }
+	for (const auto& option : options) {
+		Rml::ElementPtr setPositionButton = rmlDocument->CreateElement("button");
+		setPositionButton->AppendChild(std::move(rmlDocument->CreateTextNode(option.first)));
+		setPositionButton->AddEventListener(Rml::EventId::Click, new EventPasser(
+			[this, func = option.second](Rml::Event& event) {
+				rmlDocument->GetElementById("pop-up-overlay")->SetClass("invisible", true);
+				func();
+			}
+		));
+		setPositionButton->SetClass("pop-up-action", true);
+		actionsElement->AppendChild(std::move(setPositionButton));
+	}
+}
+
