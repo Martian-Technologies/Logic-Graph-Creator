@@ -82,3 +82,6 @@ CppProperties.json
 build_error.txt
 /releaseFiles
 /docs/Doxygen
+
+# coverage results
+/coverage
