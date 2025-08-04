@@ -524,7 +524,7 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 	removeInputFromGate(destinationId, actualSourceId.value(), destinationPort);
 }
 
-void LogicSimulator::endEdit(SimPauseGuard& pauseGuard) {
+void LogicSimulator::endEdit() {
 	for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
 }
 
