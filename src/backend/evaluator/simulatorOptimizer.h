@@ -33,7 +33,9 @@ public:
 	SimPauseGuard beginEdit() {
 		return SimPauseGuard(simulator);
 	}
-	void endEdit(SimPauseGuard& pauseGuard);
+	void endEdit(SimPauseGuard& pauseGuard) {
+		simulator.endEdit(pauseGuard);
+	};
 
 	std::optional<simulator_id_t> getSimIdFromMiddleId(middle_id_t middleId) const {
 		if (middleId < middleIds.size()) {

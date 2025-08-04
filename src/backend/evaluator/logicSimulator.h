@@ -44,6 +44,7 @@ public:
 	void makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	void removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
+	void endEdit(SimPauseGuard& pauseGuard);
 
 	bool isRunning() const { return evalConfig.isRunning(); }
 	void setRunning(bool running) { evalConfig.setRunning(running); }

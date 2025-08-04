@@ -524,6 +524,10 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 	removeInputFromGate(destinationId, actualSourceId.value(), destinationPort);
 }
 
+void LogicSimulator::endEdit(SimPauseGuard& pauseGuard) {
+	for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
+}
+
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
 	auto locationIt = gateLocations.find(simId);
 	if (locationIt != gateLocations.end()) {

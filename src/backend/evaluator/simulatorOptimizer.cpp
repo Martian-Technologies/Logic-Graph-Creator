@@ -67,8 +67,6 @@ void SimulatorOptimizer::removeGate(SimPauseGuard& pauseGuard, const middle_id_t
 	gateTypes[gateId] = GateType::NONE;
 }
 
-void SimulatorOptimizer::endEdit(SimPauseGuard& pauseGuard) { }
-
 void SimulatorOptimizer::makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 	middle_id_t sourceGateId = connection.source.gateId;
 	middle_id_t destinationGateId = connection.destination.gateId;
