@@ -401,7 +401,7 @@ blockId 136 AND 7 2 ZERO
 	(connId:1) (137 0)
 blockId 137 NOR 8 1 ZERO
 	(connId:0) (138 1) (136 1)
-	(connId:1) (213 0) (138 0) (140 0)
+	(connId:1) (220 0) (138 0) (140 0)
 blockId 138 NOR 8 2 ONE_EIGHTY
 	(connId:0) (137 1) (133 1)
 	(connId:1) (137 0) (142 0)
@@ -611,13 +611,10 @@ blockId 208 NOR 8 7 ONE_EIGHTY
 blockId 209 JUNCTION 6 14 ZERO
 	(connId:0)
 	(connId:1) (207 0) (110 0) (150 0)
-blockId 213 JUNCTION 11 -3 ZERO
-	(connId:0) (137 1)
-	(connId:1) (220 0)
-blockId 214 JUNCTION 15 -2 ZERO
+blockId 214 JUNCTION 14 -2 ZERO
 	(connId:0) (121 1)
 	(connId:1) (219 0)
-blockId 215 JUNCTION 24 -1 ZERO
+blockId 215 JUNCTION 24 -3 ZERO
 	(connId:0) (134 1)
 	(connId:1) (218 0)
 blockId 216 JUNCTION 20 3 ZERO
@@ -626,14 +623,14 @@ blockId 216 JUNCTION 20 3 ZERO
 blockId 217 JUNCTION 25 3 ZERO
 	(connId:0) (216 1)
 	(connId:1) (222 0)
-blockId 218 JUNCTION 9 -1 ZERO
+blockId 218 JUNCTION 9 -3 ZERO
 	(connId:0) (215 1)
 	(connId:1) (233 0)
 blockId 219 JUNCTION 9 -2 ZERO
 	(connId:0) (214 1)
 	(connId:1) (233 0)
-blockId 220 JUNCTION 9 -3 ZERO
-	(connId:0) (213 1)
+blockId 220 JUNCTION 9 -1 ZERO
+	(connId:0) (137 1)
 	(connId:1) (233 0)
 blockId 221 JUNCTION 9 -4 ZERO
 	(connId:0) (222 1)
