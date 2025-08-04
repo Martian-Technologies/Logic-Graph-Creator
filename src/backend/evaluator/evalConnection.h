@@ -43,7 +43,6 @@ struct EvalConnection {
 	EvalConnection() = default;
 	EvalConnection(EvalConnectionPoint source, EvalConnectionPoint destination)
 		: source(source), destination(destination) {}
-	connection_port_id_t destinationGatePort;
 
 	EvalConnection(middle_id_t srcId, connection_port_id_t srcPort, middle_id_t destId, connection_port_id_t destPort)
 		: source(srcId, srcPort), destination(destId, destPort) {}
