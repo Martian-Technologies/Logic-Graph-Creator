@@ -1154,13 +1154,28 @@ void Evaluator::processDirtyNodes() {
 
 	std::vector<SimulatorStateAndPinSimId> simulatorIdPairs = evalSimulator.getSimulatorIds(connectionPointsToRequest);
 
+	std::unordered_map<eval_circuit_id_t, std::vector<SimulatorMappingUpdate>> simulatorMappingUpdates;
+
 	for (size_t i = 0; i < dirtyNodesToProcess.size(); ++i) {
 		const EvalPosition& evalPosition = dirtyNodesToProcess.at(i);
 		const SimulatorStateAndPinSimId& simulatorIdPair = simulatorIdPairs.at(i);
 		simulator_id_t portSimId = simulatorIdPair.portSimId;
 		simulator_id_t pinSimId = simulatorIdPair.pinSimId;
-		portSimulatorIdToEvalPositionMap.insert({portSimId, evalPosition});
-		pinSimulatorIdToEvalPositionMap.insert({pinSimId, evalPosition});
+		portSimulatorIdToEvalPositionMap.insert({ portSimId, evalPosition });
+		pinSimulatorIdToEvalPositionMap.insert({ pinSimId, evalPosition });
+		simulatorMappingUpdates[evalPosition.evalCircuitId].push_back({
+			evalPosition.position,
+			portSimId,
+			SimulatorMappingUpdateType::BLOCK
+		});
+		simulatorMappingUpdates[evalPosition.evalCircuitId].push_back({
+			evalPosition.position,
+			pinSimId,
+			SimulatorMappingUpdateType::PIN
+		});
+	}
+	for (const auto& [evalCircuitId, updates] : simulatorMappingUpdates) {
+		sendSimulatorMappingUpdate(evalCircuitId, updates);
 	}
 }
 

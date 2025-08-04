@@ -17,6 +17,24 @@
 
 typedef unsigned int evaluator_id_t;
 
+enum class SimulatorMappingUpdateType {
+	BLOCK,
+	PIN
+};
+
+struct SimulatorMappingUpdate {
+	Position portPosition;
+	simulator_id_t simulatorId;
+	SimulatorMappingUpdateType type;
+};
+
+typedef std::function<void(const std::vector<SimulatorMappingUpdate>&)> SimulatorMappingUpdateListenerFunction;
+
+struct SimulatorMappingUpdateListener {
+	eval_circuit_id_t evalCircuitId;
+	std::function<void(const std::vector<SimulatorMappingUpdate>&)> callback;
+};
+
 class DataUpdateEventManager;
 
 struct CircuitPortDependency {
@@ -126,6 +144,25 @@ public:
 	std::vector<simulator_id_t> getPinSimulatorIds(const Address& addressOrigin, const std::vector<Position>& positions) const;
 	std::vector<logic_state_t> getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const;
 
+	void connectListener(
+		void* object,
+		const Address& address,
+		SimulatorMappingUpdateListenerFunction func
+	) {
+		eval_circuit_id_t evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(address);
+		if (!evalCircuitId) {
+			logError("Failed to connect listener for address {}: No top-level IC found", "Evaluator::connectListener", address.toString());
+			return;
+		}
+		listeners[object] = { evalCircuitId, func };
+	}
+	void disconnectListener(void* object) {
+		auto iter = listeners.find(object);
+		if (iter != listeners.end()) {
+			listeners.erase(iter);
+		}
+	}
+
 private:
 
 	evaluator_id_t evaluatorId;
@@ -196,6 +233,16 @@ private:
 	std::unordered_multimap<simulator_id_t, EvalPosition> portSimulatorIdToEvalPositionMap;
 	std::unordered_multimap<simulator_id_t, EvalPosition> pinSimulatorIdToEvalPositionMap;
 
+	std::map<void*, SimulatorMappingUpdateListener> listeners;
+	void sendSimulatorMappingUpdate(eval_circuit_id_t targetEvalCircuitId, const std::vector<SimulatorMappingUpdate>& updates) {
+		for (const auto& listener : listeners) {
+			if (listener.second.evalCircuitId == targetEvalCircuitId) {
+				listener.second.callback(updates);
+			}
+		}
+	}
+
+private:
 	void processDirtyNodes();
 	void dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId);
 
