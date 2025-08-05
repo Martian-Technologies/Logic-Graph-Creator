@@ -1,13 +1,13 @@
 #include "vulkanChunker.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 #include "../sharedLogic/logicRenderingUtils.h"
+#include "backend/evaluator/evaluator.h"
 #include "backend/position/position.h"
 #include "logging/logging.h"
-#include <mutex>
 
 const int CHUNK_SIZE = 64;
 cord_t getChunk(cord_t in) {
@@ -24,12 +24,9 @@ Position getChunk(Position in) {
 // VulkanChunkAllocation
 // =========================================================================================================
 
-VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlocks& blocks, RenderedWires& wires) {
+VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const RenderedBlocks& blocks,const RenderedWires& wires) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
-
-	// Maps "state position" to a position in the address list so that multiple objects can index the same array
-	std::unordered_map<Position, size_t> posToAddressIdx;
 
 	// Generate block instances
 	if (blocks.size() > 0) {
@@ -49,8 +46,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 			blockInstances.push_back(instance);
 
 			// blocks are added to state array
-			posToAddressIdx[block.second.statePosition] = statePositions.size();
-			statePositions.push_back(block.second.statePosition);
+			blockStateIndex[block.second.statePosition] = simIds.size();
+			simIds.push_back(0);
 		}
 
 		// upload block vertices
@@ -68,15 +65,15 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 
 			// get wire's index in state buffer
 			size_t stateIdx;
-			auto itr = posToAddressIdx.find(wire.first.first);
+			auto itr = portStateIndex.find(wire.first.first);
 			// check if wire state position is already in the state array
-			if (itr != posToAddressIdx.end()) {
+			if (itr != portStateIndex.end()) {
 				stateIdx = itr->second;
 			} else {
 				// add address to state buffer
-				stateIdx = statePositions.size();
-				posToAddressIdx[wire.first.first] = stateIdx;
-				statePositions.push_back(wire.first.first);
+				stateIdx = simIds.size();
+				portStateIndex[wire.first.first] = stateIdx;
+				simIds.push_back(0);
 			}
 
 			WireInstance instance;
@@ -94,12 +91,12 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device, RenderedBlock
 		vmaCopyMemoryToAllocation(device->getAllocator(), wireInstances.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
-	if (!statePositions.empty()) {
+	if (!simIds.empty()) {
 		// Create state buffer
-		size_t stateBufferSize = statePositions.size() * sizeof(logic_state_t);
+		size_t stateBufferSize = simIds.size() * sizeof(logic_state_t);
 		stateBuffer.emplace();
 		stateBuffer->init(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		std::vector<logic_state_t> defaultStates(statePositions.size(), logic_state_t::HIGH);
+		std::vector<logic_state_t> defaultStates(simIds.size(), logic_state_t::HIGH);
 	}
 }
 
@@ -176,8 +173,9 @@ void VulkanChunker::startMakingEdits() {
 }
 
 void VulkanChunker::stopMakingEdits() {
-	for (const Position& chunk : chunksToUpdate) {
-		chunks[chunk].rebuildAllocation(device);
+	for (const Position& chunkPos : chunksToUpdate) {
+		auto iter = chunks.find(chunkPos);
+		if (iter != chunks.end()) iter->second.rebuildAllocation(device);
 	}
 	chunksToUpdate.clear();
 
@@ -185,34 +183,48 @@ void VulkanChunker::stopMakingEdits() {
 }
 
 void VulkanChunker::addBlock(BlockType type, Position position, Vector size, Rotation rotation, Position statePosition) {
-	Position chunk = getChunk(position);
-	chunks[chunk].getRenderedBlocks()[position] = RenderedBlock(type, rotation, size.free(), statePosition);
-	chunksToUpdate.insert(chunk);
+	Position chunkPos = getChunk(position);
+	auto iter = chunks.find(chunkPos);
+	chunks[chunkPos].getRenderedBlocks().emplace(position, RenderedBlock(type, rotation, size.free(), statePosition));
+	chunksToUpdate.insert(chunkPos);
 }
 
 void VulkanChunker::removeBlock(Position position) {
-	Position chunk = getChunk(position);
-	chunks[chunk].getRenderedBlocks().erase(position);
-	chunksToUpdate.insert(chunk);
+	Position chunkPos = getChunk(position);
+	auto iter = chunks.find(chunkPos);
+	if (iter != chunks.end()) {
+		iter->second.getRenderedBlocks().erase(position);
+		chunksToUpdate.insert(chunkPos);
+	}
 }
 
 void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) {
-	Position curChunk = getChunk(curPos);
-	Position newChunk = getChunk(newPos);
+	Position curChunkPos = getChunk(curPos);
+	Position newChunkPos = getChunk(newPos);
 
-	auto itr = chunks[curChunk].getRenderedBlocks().find(curPos);
-	if (itr != chunks[curChunk].getRenderedBlocks().end()) {
-		RenderedBlock block = itr->second;
+	
+	auto curChunkIter = chunks.find(curChunkPos);
+	if (curChunkIter == chunks.end()) {
+		logError("Cound not find chunk {} to move block at {}", "VulkanChunker", curChunkPos, curPos);
+		return;
+	}
+	auto blockIter = curChunkIter->second.getRenderedBlocks().find(curPos);
+	if (blockIter != curChunkIter->second.getRenderedBlocks().end()) {
+		RenderedBlock block = blockIter->second;
 		block.statePosition = newPos + rotateVectorWithArea(block.statePosition - curPos, block.size.snap(), subRotations(newRotation, block.rotation));
 		block.rotation = newRotation;
 		block.size = newSize.free();
-		chunks[curChunk].getRenderedBlocks().erase(itr);
-		chunks[newChunk].getRenderedBlocks()[newPos] = block;
+		curChunkIter->second.getRenderedBlocks().erase(blockIter);
+		chunksToUpdate.insert(curChunkPos);
 
-		chunksToUpdate.insert(curChunk);
-		chunksToUpdate.insert(newChunk);
+		if (newChunkPos != curChunkPos) {
+			chunks[newChunkPos].getRenderedBlocks().emplace(newPos, block);
+			chunksToUpdate.insert(newChunkPos);
+		} else {
+			curChunkIter->second.getRenderedBlocks().emplace(newPos, block);
+		}
 	} else {
-		logError("Could not move block from ({}, {}) to ({}, {}) because it could not be found", "Vulkan", curPos.x, curPos.y, newPos.x, newPos.y);
+		logError("Could not move block from {} to {} because it could not be found", "Vulkan", curPos, newPos);
 	}
 }
 
@@ -232,9 +244,12 @@ void VulkanChunker::removeWire(std::pair<Position, Position> points) {
 		logError("Could not find wire ({}, {}) to remove", "VulkanChunker", points.first, points.second);
 		return;
 	}
-	for (Position p : itr->second) {
-		chunks[p].getRenderedWires().erase(points);
-		chunksToUpdate.insert(p);
+	for (Position chunkPos : itr->second) {
+		auto iter = chunks.find(chunkPos);
+		if (iter != chunks.end()) {
+			iter->second.getRenderedWires().erase(points);
+			chunksToUpdate.insert(chunkPos);
+		}
 	}
 	chunksUnderWire.erase(itr);
 }
@@ -281,21 +296,19 @@ std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition st
 	Position chunk = getChunk(start.snap());
 
 	//length of ray from one x or y-side to next x or y-side
-	FVector rayUnitStepSize = FVector( sqrt(1 + (dir.dy / dir.dx) * (dir.dy / dir.dx)), sqrt(1 + (dir.dx / dir.dy) * (dir.dx / dir.dy)) ) * CHUNK_SIZE;
+	FVector rayUnitStepSize = FVector(sqrt(1 + (dir.dy / dir.dx) * (dir.dy / dir.dx)), sqrt(1 + (dir.dx / dir.dy) * (dir.dx / dir.dy))) * CHUNK_SIZE;
 
 	// starting conditions
 	FVector rayLength1D;
 	Vector step;
-	if (dir.dx < 0)
-	{
+	if (dir.dx < 0) {
 		step.dx = -CHUNK_SIZE;
 		rayLength1D.dx = ((start.x - float(chunk.x)) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
 	} else {
 		step.dx = CHUNK_SIZE;
 		rayLength1D.dx = ((float(chunk.x + CHUNK_SIZE) - start.x) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
 	}
-	if (dir.dy < 0)
-	{
+	if (dir.dy < 0) {
 		step.dy = -CHUNK_SIZE;
 		rayLength1D.dy = ((start.y - float(chunk.y)) / float(CHUNK_SIZE)) * rayUnitStepSize.dy;
 	} else {
@@ -310,8 +323,7 @@ std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition st
 		Position oldChunk = chunk;
 
 		// decide which direction we walk
-		if (rayLength1D.dx < rayLength1D.dy)
-		{
+		if (rayLength1D.dx < rayLength1D.dy) {
 			chunk.x += step.dx;
 			currentDistance = rayLength1D.dx;
 			rayLength1D.dx += rayUnitStepSize.dx;
@@ -334,7 +346,7 @@ std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition st
 
 		// add point at current distance
 		FPosition newPos = start + dir * currentDistance;
-		intersections.push_back({oldChunk, currentPos, newPos});
+		intersections.push_back({ oldChunk, currentPos, newPos });
 		currentPos = newPos;
 	}
 

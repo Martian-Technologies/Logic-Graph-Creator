@@ -164,7 +164,6 @@ public:
 	}
 
 private:
-
 	evaluator_id_t evaluatorId;
 	CircuitManager& circuitManager;
 	BlockDataManager& blockDataManager;

@@ -87,9 +87,32 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		if (chunk->getStateBuffer().has_value()) {
 			chunk->getStateBuffer()->incrementBufferFrame();
 
-			std::vector<logic_state_t> states(chunk->getStatePositions().size());
+			std::vector<logic_state_t> states(chunk->getStateSimIds().size());
 			if (evaluator != nullptr) {
-				states = evaluator->getBulkPinStates(chunk->getStatePositions(), address);
+				std::vector<Position> positions;
+				positions.reserve(chunk->getBlockStateIndex().size());
+				std::vector<size_t> indexes;
+				indexes.reserve(chunk->getBlockStateIndex().size());
+				for (const auto& pair : chunk->getBlockStateIndex()) {
+					positions.push_back(pair.first);
+					indexes.push_back(pair.second);
+				}
+				std::vector<logic_state_t> blockStates = evaluator->getBulkStates(positions, address);
+				for (size_t i = 0; i < chunk->getBlockStateIndex().size(); i++) {
+					states[indexes[i]] = blockStates[i];
+				}
+				positions.clear();
+				positions.reserve(chunk->getPortStateIndex().size());
+				indexes.clear();
+				indexes.reserve(chunk->getPortStateIndex().size());
+				for (const auto& pair : chunk->getPortStateIndex()) {
+					positions.push_back(pair.first);
+					indexes.push_back(pair.second);
+				}
+				std::vector<logic_state_t> pinStates = evaluator->getBulkPinStates(positions, address);
+				for (size_t i = 0; i < chunk->getPortStateIndex().size(); i++) {
+					states[indexes[i]] = pinStates[i];
+				}
 			}
 			
 			vmaCopyMemoryToAllocation(device->getAllocator(), states.data(), chunk->getStateBuffer()->getCurrentBuffer().allocation, 0, states.size());

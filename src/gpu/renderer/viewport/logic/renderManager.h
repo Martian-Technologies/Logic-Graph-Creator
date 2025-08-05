@@ -5,6 +5,7 @@
 #include "backend/address.h"
 
 class Circuit;
+class SimulatorMappingUpdate;
 
 // probably should have just used a messaging system for this, but I want a thread safe queue dangit
 class CircuitRenderer {

@@ -1,6 +1,7 @@
 #include "renderManager.h"
 
 #include "sharedLogic/logicRenderingUtils.h"
+#include "backend/evaluator/evaluator.h"
 #include "backend/circuit/circuit.h"
 
 CircuitRenderManager::CircuitRenderManager(Circuit* circuit) : circuit(circuit) {

@@ -5,6 +5,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
+#include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
 #include "../renderManager.h"
 #include "backend/circuit/circuit.h"
@@ -12,6 +13,8 @@
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
 #include "gpu/helper/nBuffer.h"
+
+class SimulatorMappingUpdate;
 
 // ====================================================================================================================
 
@@ -113,7 +116,7 @@ typedef std::unordered_map<std::pair<Position, Position>, RenderedWire> Rendered
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(VulkanDevice* device, RenderedBlocks& blocks, RenderedWires& wires);
+	VulkanChunkAllocation(VulkanDevice* device, const RenderedBlocks& blocks, const RenderedWires& wires);
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
@@ -124,7 +127,9 @@ public:
 
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
-	inline std::vector<Position>& getStatePositions() { return statePositions; }
+	inline std::vector<simulator_id_t>& getStateSimIds() { return simIds; }
+	const std::unordered_map<Position, size_t>& getBlockStateIndex() const { return blockStateIndex; }
+	const std::unordered_map<Position, size_t>& getPortStateIndex() const { return portStateIndex; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -138,7 +143,9 @@ private:
 	std::optional<NBuffer> stateBuffer;
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
 	
-	std::vector<Position> statePositions;
+	std::vector<simulator_id_t> simIds;
+	std::unordered_map<Position, size_t> blockStateIndex;
+	std::unordered_map<Position, size_t> portStateIndex;
 };
 
 // ====================================================================================================================
@@ -161,7 +168,7 @@ private:
 
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> newestAllocation;
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> currentlyAllocating;
-	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // gay baby jail (deleted chunks mid allocation go here)
+	std::vector<std::shared_ptr<VulkanChunkAllocation>> gbJail; // deleted chunks mid allocation go here
 };
 
 // ====================================================================================================================
@@ -183,8 +190,7 @@ public:
 	void removeBlock(Position position) override final;
 	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) override final;
 	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) override final;
-	void removeWire(std::pair<Position, Position> points) override final;
-
+	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;
 	
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
