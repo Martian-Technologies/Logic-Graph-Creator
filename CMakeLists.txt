@@ -373,6 +373,7 @@ if (CONNECTION_MACHINE_BUILD_TESTS)
 		cpplocate::cpplocate
 		gtest gtest_main
 		${CONNECTION_MACHINE_JSON_LIB_NAME}
+		${CONNECTION_MACHINE_PARALLEL_HASHMAP_LIB_NAME}
 		wasmtime
 
 	)
