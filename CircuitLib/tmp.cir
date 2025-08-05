@@ -1,0 +1,29 @@
+version_6
+Circuit: "circuit1"
+UUID: 5b9a7fae-a8b4-4b5d-9dce-9f7d767def2d
+size: <1, 1>
+ports:
+blockId 12 SWITCH -4 1 ZERO
+	(connId:0) (4 0) (8 0)
+blockId 11 SWITCH -4 0 ZERO
+	(connId:0) (3 0) (7 0)
+blockId 10 SWITCH -4 -1 ZERO
+	(connId:0) (2 0) (6 0)
+blockId 9 SWITCH -4 -2 ZERO
+	(connId:0) (1 0) (5 0)
+blockId 8 AND 0 1 ZERO
+	(connId:0) (12 0)
+blockId 7 AND 0 0 ZERO
+	(connId:0) (11 0)
+blockId 6 AND 0 -1 ZERO
+	(connId:0) (10 0)
+blockId 5 AND 0 -2 ZERO
+	(connId:0) (9 0)
+blockId 4 AND -2 1 ZERO
+	(connId:0) (12 0)
+blockId 3 AND -2 0 ZERO
+	(connId:0) (11 0)
+blockId 2 AND -2 -1 ZERO
+	(connId:0) (10 0)
+blockId 1 AND -2 -2 ZERO
+	(connId:0) (9 0)
