@@ -2,6 +2,10 @@
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
 
+#ifdef TRACY_PROFILER
+#include <tracy/Tracy.hpp>
+#endif
+
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();
 	for (auto iter : blocks) {
@@ -38,6 +42,9 @@ bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockT
 }
 
 bool BlockContainer::tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType))
 		return false;
 	block_id_t id = getNewId();
@@ -63,7 +70,7 @@ bool BlockContainer::tryRemoveBlock(Position position, Difference* difference) {
 		auto [connectionPosition, success] = block.getConnectionPosition(connectionIter.first);
 		if (!success) continue;
 		bool isInput = block.isConnectionInput(connectionIter.first);
-		const std::unordered_set<ConnectionEnd>* connections = block.getConnectionContainer().getConnections(connectionIter.first);
+		const phmap::flat_hash_set<ConnectionEnd>* connections = block.getConnectionContainer().getConnections(connectionIter.first);
 		if (!connections) continue;
 		for (auto& connectionEnd : *connections) {
 			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
@@ -104,7 +111,7 @@ bool BlockContainer::trySetType(Position positionOfBlock, BlockType type, Differ
 	if (oldBlock->type() == type) return true;
 	Position pos = oldBlock->getPosition();
 	Rotation rot = oldBlock->getRotation();
-	std::unordered_map<connection_end_id_t, std::unordered_set<ConnectionEnd>> connections = oldBlock->getConnectionContainer().getConnections();
+	auto connections = oldBlock->getConnectionContainer().getConnections();
 	tryRemoveBlock(positionOfBlock, difference);
 	tryInsertBlock(pos, rot, type, difference);
 	Block* newBlock = getBlock_(pos);
@@ -151,6 +158,7 @@ void BlockContainer::resizeBlockType(BlockType blockType, Vector newSize, Differ
 }
 
 bool BlockContainer::connectionExists(Position outputPosition, Position inputPosition) const {
+	
 	const Block* input = getBlock(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
@@ -162,12 +170,12 @@ bool BlockContainer::connectionExists(Position outputPosition, Position inputPos
 	return input->getConnectionContainer().hasConnection(inputConnectionId, ConnectionEnd(output->id(), outputConnectionId));
 }
 
-const std::unordered_set<ConnectionEnd>* BlockContainer::getInputConnections(Position position) const {
+const phmap::flat_hash_set<ConnectionEnd>* BlockContainer::getInputConnections(Position position) const {
 	const Block* block = getBlock(position);
 	return block ? block->getInputConnections(position) : nullptr;
 }
 
-const std::unordered_set<ConnectionEnd>* BlockContainer::getOutputConnections(Position position) const {
+const phmap::flat_hash_set<ConnectionEnd>* BlockContainer::getOutputConnections(Position position) const {
 	const Block* block = getBlock(position);
 	return block ? block->getOutputConnections(position) : nullptr;
 }
@@ -189,6 +197,9 @@ const std::optional<ConnectionEnd> BlockContainer::getOutputConnectionEnd(Positi
 }
 
 bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd, Difference* difference) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	Block* input = getBlock_(inputConnectionEnd.getBlockId());
 	if (!input || !input->connectionExists(inputConnectionEnd.getConnectionId())) return false;
 	Block* output = getBlock_(outputConnectionEnd.getBlockId());
@@ -211,6 +222,9 @@ bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, Conn
 }
 
 bool BlockContainer::tryCreateConnection(Position outputPosition, Position inputPosition, Difference* difference) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);
@@ -300,9 +314,9 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 		auto [connectionPosition, success] = block.getConnectionPosition(endId);
 		if (!success) continue;
 		const ConnectionContainer& connectionContainer = block.getConnectionContainer();
-		const std::unordered_set<ConnectionEnd>* connections = connectionContainer.getConnections(endId);
+		const phmap::flat_hash_set<ConnectionEnd>* connections = connectionContainer.getConnections(endId);
 		if (!connections) continue;
-		const std::unordered_set<ConnectionEnd> connectionsCopy = *connections;
+		const phmap::flat_hash_set<ConnectionEnd> connectionsCopy = *connections;
 		for (auto& connectionEnd : connectionsCopy) {
 			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), endId))) {
@@ -348,7 +362,7 @@ Difference BlockContainer::getCreationDifference() const {
 	for (auto iter : blocks) {
 		for (auto& connectionIter : iter.second.getConnectionContainer().getConnections()) {
 			if (iter.second.isConnectionInput(connectionIter.first)) continue;
-			const std::unordered_set<ConnectionEnd>* connections = iter.second.getConnectionContainer().getConnections(connectionIter.first);
+			const auto connections = iter.second.getConnectionContainer().getConnections(connectionIter.first);
 			if (!connections) continue;
 			for (auto otherConnectionIter : *connections) {
 				const Block* otherBlock = getBlock(otherConnectionIter.getBlockId());
@@ -367,7 +381,7 @@ DifferenceSharedPtr BlockContainer::getCreationDifferenceShared() const {
 	for (auto iter : blocks) {
 		for (auto& connectionIter : iter.second.getConnectionContainer().getConnections()) {
 			if (iter.second.isConnectionInput(connectionIter.first)) continue;
-			const std::unordered_set<ConnectionEnd>* connections = iter.second.getConnectionContainer().getConnections(connectionIter.first);
+			const phmap::flat_hash_set<ConnectionEnd>* connections = iter.second.getConnectionContainer().getConnections(connectionIter.first);
 			if (!connections) continue;
 			for (auto otherConnectionIter : *connections) {
 				difference->addCreatedConnection(

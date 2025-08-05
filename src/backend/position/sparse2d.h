@@ -1,6 +1,8 @@
 #ifndef sparse2d_h
 #define sparse2d_h
 
+#include <greg7mdp/phmap.h>
+
 #include "position.h"
 
 /*
@@ -43,10 +45,10 @@ public:
 	}
 
 private:
-	std::unordered_map<Position, T> data;
+	phmap::parallel_flat_hash_map<Position, T> data;
 
-	typedef typename std::unordered_map<Position, T>::iterator iterator;
-	typedef typename std::unordered_map<Position, T>::const_iterator const_iterator;
+	typedef typename phmap::parallel_flat_hash_map<Position, T>::iterator iterator;
+	typedef typename phmap::parallel_flat_hash_map<Position, T>::const_iterator const_iterator;
 };
 
 template<class T>

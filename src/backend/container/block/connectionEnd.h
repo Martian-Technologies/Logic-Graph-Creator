@@ -32,7 +32,7 @@ struct std::hash<ConnectionEnd> {
 	inline std::size_t operator()(ConnectionEnd connectionEnd) const noexcept {
 		std::size_t a = std::hash<connection_end_id_t> {}(connectionEnd.getConnectionId());
 		std::size_t b = std::hash<block_id_t> {}(connectionEnd.getBlockId());
-		return a ^ (b << 32);
+		return a + 0x9e3779b9 + (b << 6) + (b >> 2);
 	}
 };
 

@@ -54,8 +54,8 @@ public:
 	/* ----------- connections ----------- */
 	// -- getters --
 	bool connectionExists(Position outputPosition, Position inputPosition) const;
-	const std::unordered_set<ConnectionEnd>* getInputConnections(Position position) const;
-	const std::unordered_set<ConnectionEnd>* getOutputConnections(Position position) const;
+	const phmap::flat_hash_set<ConnectionEnd>* getInputConnections(Position position) const;
+	const phmap::flat_hash_set<ConnectionEnd>* getOutputConnections(Position position) const;
 	const std::optional<ConnectionEnd> getInputConnectionEnd(Position position) const;
 	const std::optional<ConnectionEnd> getOutputConnectionEnd(Position position) const;
 
