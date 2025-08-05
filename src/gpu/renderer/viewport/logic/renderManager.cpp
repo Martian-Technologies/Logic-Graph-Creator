@@ -26,6 +26,9 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff) {
 }
 
 void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::set<CircuitRenderer*>& renderers) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	if (diff->clearsAll()) {
 		renderedBlocks.clear();
 		for (CircuitRenderer* renderer : renderers) {

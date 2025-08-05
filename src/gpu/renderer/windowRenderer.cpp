@@ -1,7 +1,7 @@
 #include "windowRenderer.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 #include "gpu/vulkanInstance.h"
@@ -140,9 +140,9 @@ void WindowRenderer::renderLoop() {
 
 		//increase the number of frames drawn
 		frames.incrementFrame();
-		#ifdef TRACY_PROFILER
-			FrameMark;
-		#endif
+#ifdef TRACY_PROFILER
+		FrameMark;
+#endif
 	}
 
 	device->waitIdle();

@@ -193,52 +193,9 @@ public:
 	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;
 	
-	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates) {
-		for (auto& pair : chunks) {
-			std::optional<std::shared_ptr<VulkanChunkAllocation>> allocation = pair.second.getAllocation();
-			std::shared_ptr<VulkanChunkAllocation> vulkanChunkAllocation = allocation.value_or(nullptr);
-			if (vulkanChunkAllocation) {
-				for (const SimulatorMappingUpdate& simulatorMappingUpdate : simulatorMappingUpdates) {
-					if (simulatorMappingUpdate.type == SimulatorMappingUpdateType::BLOCK) {
-						auto iter = vulkanChunkAllocation->getBlockStateIndex().find(simulatorMappingUpdate.portPosition);
-						if (iter != vulkanChunkAllocation->getBlockStateIndex().end()) {
-							vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
-						}
-					} else {
-						auto iter = vulkanChunkAllocation->getPortStateIndex().find(simulatorMappingUpdate.portPosition);
-						if (iter != vulkanChunkAllocation->getPortStateIndex().end()) {
-							vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
-						}
-					}
-
-				}
-			}
-		}
-	}
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
-		if (this->evaluator) {
-			this->evaluator->disconnectListener(this);
-		}
-		this->evaluator = evaluator;
-		if (evaluator) {
-			logInfo("setEvaluator > connectListener");
-			evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
-		}
-		for (auto& pair : chunks) {
-			pair.second.rebuildAllocation(device, evaluator.get(), address);
-		}
-	}
-	void setAddress(const Address& address) {
-		this->address = address;
-		if (evaluator) {
-			evaluator->disconnectListener(this);
-			logInfo("setAddress > connectListener");
-			evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
-		}
-		for (auto& pair : chunks) {
-			pair.second.rebuildAllocation(device, evaluator.get(), address);
-		}
-	}
+	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
+	void setAddress(const Address& address);
 
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 

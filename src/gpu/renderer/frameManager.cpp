@@ -1,5 +1,8 @@
 #include "frameManager.h"
-#include <thread>
+
+#ifdef TRACY_PROFILER
+#include <tracy/Tracy.hpp>
+#endif
 
 void Frame::init(VulkanDevice* device) {
 	this->device = device;
@@ -58,6 +61,10 @@ void FrameManager::incrementFrame() {
 }
 
 float FrameManager::waitForCurrentFrameCompletion() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
+
 	// wait until current frame has finished rendering
 	vkWaitForFences(frames[frameIndex].device->getDevice(), 1, &frames[frameIndex].renderFence, VK_TRUE, UINT64_MAX);
 

@@ -25,6 +25,9 @@ Position getChunk(Position in) {
 // =========================================================================================================
 
 VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const RenderedBlocks& blocks,const RenderedWires& wires, const Evaluator* evaluator, const Address& address) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
 
@@ -283,6 +286,58 @@ void VulkanChunker::reset() {
 
 	chunks.clear();
 	chunksUnderWire.clear();
+}
+
+void VulkanChunker::updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
+	for (auto& pair : chunks) {
+		std::optional<std::shared_ptr<VulkanChunkAllocation>> allocation = pair.second.getAllocation();
+		std::shared_ptr<VulkanChunkAllocation> vulkanChunkAllocation = allocation.value_or(nullptr);
+		if (vulkanChunkAllocation) {
+			for (const SimulatorMappingUpdate& simulatorMappingUpdate : simulatorMappingUpdates) {
+				if (simulatorMappingUpdate.type == SimulatorMappingUpdateType::BLOCK) {
+					auto iter = vulkanChunkAllocation->getBlockStateIndex().find(simulatorMappingUpdate.portPosition);
+					if (iter != vulkanChunkAllocation->getBlockStateIndex().end()) {
+						vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
+					}
+				} else {
+					auto iter = vulkanChunkAllocation->getPortStateIndex().find(simulatorMappingUpdate.portPosition);
+					if (iter != vulkanChunkAllocation->getPortStateIndex().end()) {
+						vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
+					}
+				}
+
+			}
+		}
+	}
+}
+
+void VulkanChunker::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+	if (this->evaluator) {
+		this->evaluator->disconnectListener(this);
+	}
+	this->evaluator = evaluator;
+	if (evaluator) {
+		logInfo("setEvaluator > connectListener");
+		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
+	}
+	for (auto& pair : chunks) {
+		pair.second.rebuildAllocation(device, evaluator.get(), address);
+	}
+}
+
+void VulkanChunker::setAddress(const Address& address) {
+	this->address = address;
+	if (evaluator) {
+		evaluator->disconnectListener(this);
+		logInfo("setAddress > connectListener");
+		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
+	}
+	for (auto& pair : chunks) {
+		pair.second.rebuildAllocation(device, evaluator.get(), address);
+	}
 }
 
 std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocations(Position min, Position max) {
