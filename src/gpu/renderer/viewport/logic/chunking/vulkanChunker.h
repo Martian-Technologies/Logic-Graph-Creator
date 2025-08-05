@@ -5,6 +5,8 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
+#include <greg7mdp/phmap.h>
+
 #include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
 #include "../renderManager.h"
@@ -13,7 +15,6 @@
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
 #include "gpu/helper/nBuffer.h"
-
 class SimulatorMappingUpdate;
 
 // ====================================================================================================================
@@ -110,8 +111,8 @@ struct RenderedWire {
 	FPosition end;
 };
 
-typedef std::unordered_map<Position, RenderedBlock> RenderedBlocks;
-typedef std::unordered_map<std::pair<Position, Position>, RenderedWire> RenderedWires;
+typedef phmap::flat_hash_map<Position, RenderedBlock> RenderedBlocks;
+typedef phmap::flat_hash_map<std::pair<Position, Position>, RenderedWire> RenderedWires;
 
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
@@ -128,8 +129,8 @@ public:
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
 	inline std::vector<simulator_id_t>& getStateSimulatorIds() { return simulatorIds; }
-	inline const std::unordered_map<Position, size_t>& getBlockStateIndex() const { return blockStateIndex; }
-	inline const std::unordered_map<Position, size_t>& getPortStateIndex() const { return portStateIndex; }
+	inline const phmap::flat_hash_map<Position, size_t>& getBlockStateIndex() const { return blockStateIndex; }
+	inline const phmap::flat_hash_map<Position, size_t>& getPortStateIndex() const { return portStateIndex; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -144,8 +145,8 @@ private:
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
 	
 	std::vector<simulator_id_t> simulatorIds;
-	std::unordered_map<Position, size_t> blockStateIndex;
-	std::unordered_map<Position, size_t> portStateIndex;
+	phmap::flat_hash_map<Position, size_t> blockStateIndex;
+	phmap::flat_hash_map<Position, size_t> portStateIndex;
 };
 
 // ====================================================================================================================
@@ -203,8 +204,8 @@ private:
 	std::vector<ChunkIntersection> getChunkIntersections(FPosition start, FPosition end);
 	
 private:
-	std::unordered_map<Position, Chunk> chunks;
-	std::unordered_map<std::pair<Position, Position>, std::vector<Position>> chunksUnderWire;
+	phmap::flat_hash_map<Position, Chunk> chunks;
+	phmap::flat_hash_map<std::pair<Position, Position>, std::vector<Position>> chunksUnderWire;
 	std::mutex mux; // sync can be relaxed in the future
 
 	// while edits are being made

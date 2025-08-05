@@ -44,8 +44,6 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 	const BlockDataManager* blockDataManager = circuit->getBlockContainer()->getBlockDataManager();
 	for (const auto& modification : diff->getModifications()) {
 		const auto& [modificationType, modificationData] = modification;
-
-		
 			switch (modificationType) {
 			case Difference::ModificationType::PLACE_BLOCK:
 			{

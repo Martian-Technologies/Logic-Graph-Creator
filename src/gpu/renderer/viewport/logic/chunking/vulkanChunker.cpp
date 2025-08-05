@@ -258,9 +258,12 @@ void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRota
 void VulkanChunker::addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) {
 	FPosition a = points.first.free() + socketOffsets.first;
 	FPosition b = points.second.free() + socketOffsets.second;
-	for (const ChunkIntersection& intersection : getChunkIntersections(a, b)) {
+	std::vector<ChunkIntersection> intersections = getChunkIntersections(a, b);
+	std::vector<Position>& chunksUnderThisWire = chunksUnderWire[points];
+	chunksUnderThisWire.reserve(intersections.size());
+	for (const ChunkIntersection& intersection : intersections) {
 		chunks[intersection.chunk].getRenderedWires()[points] = { intersection.start, intersection.end };
-		chunksUnderWire[points].push_back(intersection.chunk);
+		chunksUnderThisWire.push_back(intersection.chunk);
 		chunksToUpdate.insert(intersection.chunk);
 	}
 }
@@ -289,9 +292,6 @@ void VulkanChunker::reset() {
 }
 
 void VulkanChunker::updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	for (auto& pair : chunks) {
 		std::optional<std::shared_ptr<VulkanChunkAllocation>> allocation = pair.second.getAllocation();
 		std::shared_ptr<VulkanChunkAllocation> vulkanChunkAllocation = allocation.value_or(nullptr);
