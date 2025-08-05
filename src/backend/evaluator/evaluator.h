@@ -149,12 +149,12 @@ public:
 		const Address& address,
 		SimulatorMappingUpdateListenerFunction func
 	) {
-		eval_circuit_id_t evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(address);
+		std::optional<eval_circuit_id_t> evalCircuitId = evalCircuitContainer.traverse(address);
 		if (!evalCircuitId) {
 			logError("Failed to connect listener for address {}: No top-level IC found", "Evaluator::connectListener", address.toString());
 			return;
 		}
-		listeners[object] = { evalCircuitId, func };
+		listeners[object] = { evalCircuitId.value(), func };
 	}
 	void disconnectListener(void* object) {
 		auto iter = listeners.find(object);

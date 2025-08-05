@@ -143,6 +143,7 @@ public:
 				result.push_back(0);
 				continue;
 			}
+			// -- Is this needed???
 			int numOutputs = getNumOutputs(pointOpt->gateId);
 			if (numOutputs == 1) {
 				std::vector<EvalConnection> outputs = getOutputs(pointOpt->gateId);
@@ -155,11 +156,13 @@ public:
 					continue;
 				}
 			}
+			// --
 			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(pointOpt.value());
 			if (!simIdOpt.has_value()) {
 				result.push_back(0);
 				continue;
 			}
+			result.push_back(simIdOpt.value());
 		}
 		return result;
 	}

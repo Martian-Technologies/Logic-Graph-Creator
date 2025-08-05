@@ -1,7 +1,7 @@
 #include "circuit.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 #include "backend/proceduralCircuits/generatedCircuit.h"
@@ -22,6 +22,17 @@ void Circuit::clear(bool clearUndoTree) {
 	if (clearUndoTree) {
 		undoSystem.clear();
 	}
+}
+
+void Circuit::connectListener(void* object, CircuitDiffListenerFunction func, unsigned int priority) {
+	listenerFunctions.emplace_back(object, priority, func);
+	std::sort(listenerFunctions.begin(), listenerFunctions.end(), [](const CircuitDiffListenerData& a, const CircuitDiffListenerData& b) { return a.priority < b.priority; });
+}
+
+void Circuit::disconnectListener(void* object) {
+	auto iter = std::find_if(listenerFunctions.begin(), listenerFunctions.end(), [object](const CircuitDiffListenerData& other) { return object == other.obj; });
+	if (iter != listenerFunctions.end())
+		listenerFunctions.erase(iter);
 }
 
 bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
@@ -115,7 +126,7 @@ void Circuit::setType(SharedSelection selection, BlockType type) {
 }
 
 void Circuit::setType(SharedSelection selection, BlockType type, Difference* difference) {
-	
+
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {

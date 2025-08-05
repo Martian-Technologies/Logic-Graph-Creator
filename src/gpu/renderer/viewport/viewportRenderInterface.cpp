@@ -44,14 +44,16 @@ void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	}
 }
 
-void ViewportRenderInterface::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+void ViewportRenderInterface::setEvaluator(SharedEvaluator evaluator) {
 	std::lock_guard<std::mutex> lock(evaluatorMux);
 	this->evaluator = evaluator;
+	chunker.setEvaluator(evaluator);
 }
 
 void ViewportRenderInterface::setAddress(const Address& address) {
 	std::lock_guard<std::mutex> lock(addressMux);
 	this->address = address;
+	chunker.setAddress(address);
 }
 
 void ViewportRenderInterface::updateView(ViewManager* viewManager) {

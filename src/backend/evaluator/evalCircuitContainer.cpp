@@ -37,54 +37,43 @@ std::optional<CircuitNode> EvalCircuitContainer::getNode(Position pos, eval_circ
 }
 
 EvalCircuit* EvalCircuitContainer::getCircuit(eval_circuit_id_t evalCircuitId) const noexcept {
-	if (evalCircuitId < 0 || evalCircuitId >= static_cast<eval_circuit_id_t>(circuits.size())) {
+	if (evalCircuitId >= static_cast<eval_circuit_id_t>(circuits.size())) {
 		return nullptr;
 	}
 	return circuits.at(evalCircuitId);
 }
 
 std::optional<eval_circuit_id_t> EvalCircuitContainer::getCircuitId(eval_circuit_id_t evalCircuitId) const noexcept {
-	if (evalCircuitId < 0 || evalCircuitId >= static_cast<eval_circuit_id_t>(circuits.size())) {
+	if (evalCircuitId >= static_cast<eval_circuit_id_t>(circuits.size())) {
 		return std::nullopt;
 	}
-	if (circuits.at(evalCircuitId) == nullptr) {
+	if (circuits[evalCircuitId] == nullptr) {
 		return std::nullopt;
 	}
-	return circuits.at(evalCircuitId)->getCircuitId();
+	return circuits[evalCircuitId]->getCircuitId();
 }
 
-std::optional<CircuitNode> EvalCircuitContainer::traverse(const eval_circuit_id_t startingPoint, const Address& address) const {
-	if (address.size() == 0) {
-		return std::nullopt;
-	}
-	EvalPosition evalPos(address.getPosition(0), startingPoint);
+std::optional<eval_circuit_id_t> EvalCircuitContainer::traverse(eval_circuit_id_t startingPoint, const Address& address) const {
+	eval_circuit_id_t currentCircuitId = startingPoint;
 	for (int i = 1; i < address.size(); i++) {
-		std::optional<CircuitNode> node = getNode(evalPos);
+		std::optional<CircuitNode> node = getNode(address.getPosition(i), currentCircuitId);
 		if (!node.has_value() || !node->isIC()) {
 			return std::nullopt; // invalid path
 		}
-		evalPos.evalCircuitId = node->getId();
-		evalPos.position = address.getPosition(i);
+		currentCircuitId = node->getId();
 	}
-	std::optional<CircuitNode> node = getNode(evalPos);
-	return node;
+	return currentCircuitId;
 }
 
-std::optional<CircuitNode> EvalCircuitContainer::traverse(const Address& address) const {
+std::optional<eval_circuit_id_t> EvalCircuitContainer::traverse(const Address& address) const {
 	return traverse(0, address);
 }
 
-eval_circuit_id_t EvalCircuitContainer::traverseToTopLevelIC(const eval_circuit_id_t startingPoint, const Address& address) const {
-	if (address.size() == 0) {
-		return startingPoint;
-	}
+eval_circuit_id_t EvalCircuitContainer::traverseToTopLevelIC(eval_circuit_id_t startingPoint, const Address& address) const {
 	eval_circuit_id_t currentCircuitId = startingPoint;
 	for (int i = 0; i < address.size(); i++) {
 		std::optional<CircuitNode> node = getNode(address.getPosition(i), currentCircuitId);
-		if (!node.has_value()) {
-			return currentCircuitId;
-		}
-		if (!node->isIC()) {
+		if (!node.has_value() || !node->isIC()) {
 			return currentCircuitId;
 		}
 		currentCircuitId = node->getId();

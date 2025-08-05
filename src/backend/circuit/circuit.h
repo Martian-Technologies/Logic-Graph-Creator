@@ -38,9 +38,9 @@ public:
 
 	/* ----------- listener ----------- */
 	// subject to change
-	void connectListener(void* object, CircuitDiffListenerFunction func) { listenerFunctions[object] = func; }
+	void connectListener(void* object, CircuitDiffListenerFunction func, unsigned int priority = 100);
 	// subject to change
-	void disconnectListener(void* object) { auto iter = listenerFunctions.find(object); if (iter != listenerFunctions.end()) listenerFunctions.erase(iter); }
+	void disconnectListener(void* object);
 
 	// allows accese to BlockContainer getters
 	inline const BlockContainer* getBlockContainer() const { return &blockContainer; }
@@ -104,7 +104,7 @@ private:
 		if (difference->empty()) return;
 		editCount++;
 		if (!midUndo) undoSystem.addDifference(difference);
-		for (auto pair : listenerFunctions) pair.second(difference, circuitId);
+		for (const CircuitDiffListenerData& circuitDiffListenerData : listenerFunctions) circuitDiffListenerData.circuitDiffListenerFunction(difference, circuitId);
 	}
 
 	std::string circuitName;
@@ -114,7 +114,13 @@ private:
 	DataUpdateEventManager* dataUpdateEventManager;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
 
-	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
+	struct CircuitDiffListenerData {
+		void* obj;
+		unsigned int priority;
+		CircuitDiffListenerFunction circuitDiffListenerFunction;
+	};
+
+	std::vector<CircuitDiffListenerData> listenerFunctions;
 
 	UndoSystem undoSystem;
 	bool midUndo = false;

@@ -116,7 +116,7 @@ typedef std::unordered_map<std::pair<Position, Position>, RenderedWire> Rendered
 // TODO - maybe these should just be split into two different types
 class VulkanChunkAllocation {
 public:
-	VulkanChunkAllocation(VulkanDevice* device, const RenderedBlocks& blocks, const RenderedWires& wires);
+	VulkanChunkAllocation(VulkanDevice* device, const RenderedBlocks& blocks, const RenderedWires& wires, const Evaluator* evaluator, const Address& address);
 	~VulkanChunkAllocation();
 
 	inline const std::optional<AllocatedBuffer>& getBlockBuffer() const { return blockBuffer; }
@@ -127,9 +127,9 @@ public:
 
 	inline std::optional<NBuffer>& getStateBuffer() { return stateBuffer; }
 
-	inline std::vector<simulator_id_t>& getStateSimIds() { return simIds; }
-	const std::unordered_map<Position, size_t>& getBlockStateIndex() const { return blockStateIndex; }
-	const std::unordered_map<Position, size_t>& getPortStateIndex() const { return portStateIndex; }
+	inline std::vector<simulator_id_t>& getStateSimulatorIds() { return simulatorIds; }
+	inline const std::unordered_map<Position, size_t>& getBlockStateIndex() const { return blockStateIndex; }
+	inline const std::unordered_map<Position, size_t>& getPortStateIndex() const { return portStateIndex; }
 
 	inline bool isAllocationComplete() const { return true; }
 	
@@ -143,7 +143,7 @@ private:
 	std::optional<NBuffer> stateBuffer;
 	VkDescriptorBufferInfo stateDescriptorBufferInfo;
 	
-	std::vector<simulator_id_t> simIds;
+	std::vector<simulator_id_t> simulatorIds;
 	std::unordered_map<Position, size_t> blockStateIndex;
 	std::unordered_map<Position, size_t> portStateIndex;
 };
@@ -154,7 +154,7 @@ class Chunk {
 public:
 	inline RenderedBlocks& getRenderedBlocks() { allocationDirty = true; return blocks; }
 	inline RenderedWires& getRenderedWires() { allocationDirty = true; return wires; }
-	void rebuildAllocation(VulkanDevice* device);
+	void rebuildAllocation(VulkanDevice* device, const Evaluator* evaluator, const Address& address);
 	
 	std::optional<std::shared_ptr<VulkanChunkAllocation>> getAllocation();
 	
@@ -193,6 +193,36 @@ public:
 	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;
 	
+	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdate) {
+		for (auto& pair : chunks) {
+			pair.second.rebuildAllocation(device, evaluator.get(), address);
+		}
+	}
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+		if (this->evaluator) {
+			this->evaluator->disconnectListener(this);
+		}
+		this->evaluator = evaluator;
+		if (evaluator) {
+			logInfo("setEvaluator > connectListener");
+			evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
+		}
+		for (auto& pair : chunks) {
+			pair.second.rebuildAllocation(device, evaluator.get(), address);
+		}
+	}
+	void setAddress(const Address& address) {
+		this->address = address;
+		if (evaluator) {
+			evaluator->disconnectListener(this);
+			logInfo("setAddress > connectListener");
+			evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
+		}
+		for (auto& pair : chunks) {
+			pair.second.rebuildAllocation(device, evaluator.get(), address);
+		}
+	}
+
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 
 private:
@@ -207,6 +237,8 @@ private:
 	std::unordered_set<Position> chunksToUpdate;
 
 	VulkanDevice* device = nullptr;
+	std::shared_ptr<Evaluator> evaluator = nullptr;
+	Address address;
 };
 
 #endif

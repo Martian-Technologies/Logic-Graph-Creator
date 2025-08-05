@@ -9,8 +9,8 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 	const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, name, uuid);
 	circuits.emplace(id, circuit);
 	UUIDToCircuits.emplace(uuid, circuit);
-	for (auto& [object, func] : listenerFunctions) {
-		circuit->connectListener(object, func);
+	for (auto& [object, funcData] : listenerFunctions) {
+		circuit->connectListener(object, funcData.second, funcData.first);
 	}
 
 	setupBlockData(id);

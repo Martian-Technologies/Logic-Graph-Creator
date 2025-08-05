@@ -33,7 +33,6 @@ struct std::hash<EvalPosition> {
 };
 
 class EvalCircuitContainer {
-
 public:
 	EvalCircuitContainer() = default;
 	EvalCircuitContainer(const EvalCircuitContainer&) = delete;
@@ -51,10 +50,10 @@ public:
 		return circuits.empty();
 	}
 
-	std::optional<CircuitNode> traverse(const Address& address) const;
-	std::optional<CircuitNode> traverse(const eval_circuit_id_t startingPoint, const Address& address) const;
+	std::optional<eval_circuit_id_t> traverse(const Address& address) const;
+	std::optional<eval_circuit_id_t> traverse(eval_circuit_id_t startingPoint, const Address& address) const;
 	eval_circuit_id_t traverseToTopLevelIC(const Address& address) const;
-	eval_circuit_id_t traverseToTopLevelIC(const eval_circuit_id_t startingPoint, const Address& address) const;
+	eval_circuit_id_t traverseToTopLevelIC(eval_circuit_id_t startingPoint, const Address& address) const;
 
 	std::optional<eval_circuit_id_t> getCircuitId(eval_circuit_id_t evalCircuitId) const noexcept;
 

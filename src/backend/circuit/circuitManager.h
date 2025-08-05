@@ -130,11 +130,11 @@ public:
 	inline const_iterator end() const { return circuits.end(); }
 	inline int getCircuitCount() const { return circuits.size(); }
 
-	void connectListener(void* object, CircuitDiffListenerFunction func) {
+	void connectListener(void* object, CircuitDiffListenerFunction func, unsigned int priority = 100) {
 		for (auto& [id, circuit] : circuits) {
-			circuit->connectListener(object, func);
+			circuit->connectListener(object, func, priority);
 		}
-		listenerFunctions[object] = func;
+		listenerFunctions[object] = {priority, func};
 	}
 	void disconnectListener(void* object) {
 		for (auto& [id, circuit] : circuits) {
@@ -164,7 +164,7 @@ private:
 	circuit_id_t lastId = 0;
 	std::map<circuit_id_t, SharedCircuit> circuits;
 	std::map<std::string, SharedCircuit> UUIDToCircuits;
-	std::map<void*, CircuitDiffListenerFunction> listenerFunctions;
+	std::map<void*, std::pair<unsigned int, CircuitDiffListenerFunction>> listenerFunctions;
 };
 
 #endif /* circuitManager_h */

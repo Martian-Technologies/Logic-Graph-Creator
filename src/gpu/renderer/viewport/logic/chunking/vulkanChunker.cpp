@@ -24,10 +24,13 @@ Position getChunk(Position in) {
 // VulkanChunkAllocation
 // =========================================================================================================
 
-VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const RenderedBlocks& blocks,const RenderedWires& wires) {
+VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const RenderedBlocks& blocks,const RenderedWires& wires, const Evaluator* evaluator, const Address& address) {
 	// TODO - should pre-allocate buffers with size and pool them
 	// TODO - maybe should use smaller size coordinates with one big offset
 
+	std::vector<Position> positions;
+	std::vector<size_t> indexes;
+	
 	// Generate block instances
 	if (blocks.size() > 0) {
 		std::vector<BlockInstance> blockInstances;
@@ -46,9 +49,21 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 			blockInstances.push_back(instance);
 
 			// blocks are added to state array
-			blockStateIndex[block.second.statePosition] = simIds.size();
-			simIds.push_back(0);
+			blockStateIndex[block.second.statePosition] = simulatorIds.size();
+			positions.push_back(block.second.statePosition);
+			indexes.push_back(simulatorIds.size());
+			simulatorIds.push_back(0);
 		}
+
+		if (evaluator) {
+			std::vector<simulator_id_t> simIds = evaluator->getBlockSimulatorIds(address, positions);
+			for (size_t i = 0; i < simIds.size(); i++) {
+				simulatorIds[indexes[i]] = simIds[i];
+			}
+		}
+
+		positions.clear();
+		indexes.clear();
 
 		// upload block vertices
 		numBlockInstances = blockInstances.size();
@@ -71,9 +86,11 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 				stateIdx = itr->second;
 			} else {
 				// add address to state buffer
-				stateIdx = simIds.size();
+				stateIdx = simulatorIds.size();
 				portStateIndex[wire.first.first] = stateIdx;
-				simIds.push_back(0);
+				positions.push_back(wire.first.first);
+				indexes.push_back(stateIdx);
+				simulatorIds.push_back(0);
 			}
 
 			WireInstance instance;
@@ -84,6 +101,13 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 			wireInstances.push_back(instance);
 		}
 
+		if (evaluator) {
+			std::vector<simulator_id_t> simIds = evaluator->getPinSimulatorIds(address, positions);
+			for (size_t i = 0; i < simIds.size(); i++) {
+				simulatorIds[indexes[i]] = simIds[i];
+			}
+		}
+
 		// upload wire vertices
 		numWireInstances = wireInstances.size();
 		size_t wireBufferSize = sizeof(WireInstance) * numWireInstances;
@@ -91,12 +115,12 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 		vmaCopyMemoryToAllocation(device->getAllocator(), wireInstances.data(), wireBuffer->allocation, 0, wireBufferSize);
 	}
 
-	if (!simIds.empty()) {
+	if (!simulatorIds.empty()) {
 		// Create state buffer
-		size_t stateBufferSize = simIds.size() * sizeof(logic_state_t);
+		size_t stateBufferSize = simulatorIds.size() * sizeof(logic_state_t);
 		stateBuffer.emplace();
 		stateBuffer->init(device, stateBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		std::vector<logic_state_t> defaultStates(simIds.size(), logic_state_t::HIGH);
+		std::vector<logic_state_t> defaultStates(simulatorIds.size(), logic_state_t::HIGH);
 	}
 }
 
@@ -109,10 +133,10 @@ VulkanChunkAllocation::~VulkanChunkAllocation() {
 // ChunkChain
 // =========================================================================================================
 
-void Chunk::rebuildAllocation(VulkanDevice* device) {
+void Chunk::rebuildAllocation(VulkanDevice* device, const Evaluator* evaluator, const Address& address) {
 	if (!blocks.empty() || !wires.empty()) { // if we have data to upload
 		// allocate new date
-		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(device, blocks, wires);
+		std::shared_ptr<VulkanChunkAllocation> newAllocation = std::make_unique<VulkanChunkAllocation>(device, blocks, wires, evaluator, address);
 		// replace currently allocating data
 		if (currentlyAllocating.has_value()) {
 			gbJail.push_back(currentlyAllocating.value());
@@ -175,7 +199,7 @@ void VulkanChunker::startMakingEdits() {
 void VulkanChunker::stopMakingEdits() {
 	for (const Position& chunkPos : chunksToUpdate) {
 		auto iter = chunks.find(chunkPos);
-		if (iter != chunks.end()) iter->second.rebuildAllocation(device);
+		if (iter != chunks.end()) iter->second.rebuildAllocation(device, evaluator.get(), address);
 	}
 	chunksToUpdate.clear();
 
