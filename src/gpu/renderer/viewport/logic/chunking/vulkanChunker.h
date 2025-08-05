@@ -193,9 +193,26 @@ public:
 	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;
 	
-	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdate) {
+	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates) {
 		for (auto& pair : chunks) {
-			pair.second.rebuildAllocation(device, evaluator.get(), address);
+			std::optional<std::shared_ptr<VulkanChunkAllocation>> allocation = pair.second.getAllocation();
+			std::shared_ptr<VulkanChunkAllocation> vulkanChunkAllocation = allocation.value_or(nullptr);
+			if (vulkanChunkAllocation) {
+				for (const SimulatorMappingUpdate& simulatorMappingUpdate : simulatorMappingUpdates) {
+					if (simulatorMappingUpdate.type == SimulatorMappingUpdateType::BLOCK) {
+						auto iter = vulkanChunkAllocation->getBlockStateIndex().find(simulatorMappingUpdate.portPosition);
+						if (iter != vulkanChunkAllocation->getBlockStateIndex().end()) {
+							vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
+						}
+					} else {
+						auto iter = vulkanChunkAllocation->getPortStateIndex().find(simulatorMappingUpdate.portPosition);
+						if (iter != vulkanChunkAllocation->getPortStateIndex().end()) {
+							vulkanChunkAllocation->getStateSimulatorIds()[iter->second] = simulatorMappingUpdate.simulatorId;
+						}
+					}
+
+				}
+			}
 		}
 	}
 	void setEvaluator(std::shared_ptr<Evaluator> evaluator) {
