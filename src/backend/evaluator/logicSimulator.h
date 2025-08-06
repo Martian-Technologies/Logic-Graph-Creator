@@ -46,15 +46,6 @@ public:
 	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 	void endEdit();
 
-	bool isRunning() const { return evalConfig.isRunning(); }
-	void setRunning(bool running) { evalConfig.setRunning(running); }
-	bool isTickrateLimiterEnabled() const { return evalConfig.isTickrateLimiterEnabled(); }
-	void setTickrateLimiter(bool enabled) { evalConfig.setTickrateLimiter(enabled); }
-	long long getTargetTickrate() const { return evalConfig.getTargetTickrate(); }
-	void setTargetTickrate(long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
-	bool isRealistic() const { return evalConfig.isRealistic(); }
-	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
-
 private:
 	EvalConfig& evalConfig;
 	std::thread simulationThread;
