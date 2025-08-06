@@ -42,7 +42,7 @@ public:
 	// subject to change
 	void disconnectListener(void* object);
 
-	// allows accese to BlockContainer getters
+	// allows accese to BlockContainer getters (never null)
 	inline const BlockContainer* getBlockContainer() const { return &blockContainer; }
 
 	/* ----------- blocks ----------- */

@@ -2,10 +2,6 @@
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
 
-#ifdef TRACY_PROFILER
-#include <tracy/Tracy.hpp>
-#endif
-
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();
 	for (auto iter : blocks) {
@@ -42,9 +38,6 @@ bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockT
 }
 
 bool BlockContainer::tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType))
 		return false;
 	block_id_t id = getNewId();
@@ -197,9 +190,6 @@ const std::optional<ConnectionEnd> BlockContainer::getOutputConnectionEnd(Positi
 }
 
 bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd, Difference* difference) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	Block* input = getBlock_(inputConnectionEnd.getBlockId());
 	if (!input || !input->connectionExists(inputConnectionEnd.getConnectionId())) return false;
 	Block* output = getBlock_(outputConnectionEnd.getBlockId());
@@ -222,9 +212,6 @@ bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, Conn
 }
 
 bool BlockContainer::tryCreateConnection(Position outputPosition, Position inputPosition, Difference* difference) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
 	Block* input = getBlock_(inputPosition);
 	if (!input) return false;
 	auto [inputConnectionId, inputSuccess] = input->getInputConnectionId(inputPosition);

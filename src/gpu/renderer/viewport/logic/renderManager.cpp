@@ -1,5 +1,9 @@
 #include "renderManager.h"
 
+#ifdef TRACY_PROFILER
+#include <tracy/Tracy.hpp>
+#endif
+
 #include "sharedLogic/logicRenderingUtils.h"
 #include "backend/evaluator/evaluator.h"
 #include "backend/circuit/circuit.h"
