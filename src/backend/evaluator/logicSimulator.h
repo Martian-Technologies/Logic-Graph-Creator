@@ -38,12 +38,12 @@ public:
 
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
+	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 
 	simulator_id_t addGate(const GateType gateType);
 	void removeGate(simulator_id_t gateId);
 	void makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	void removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
-	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 	void endEdit();
 
 private:
@@ -76,19 +76,19 @@ private:
 	std::vector<SingleBufferGate> singleBuffers;
 	std::vector<TristateBufferGate> tristateBuffers;
 	std::vector<ConstantGate> constantGates;
-	std::vector<ConstantResetGate> constantResetGates; // for tick buttons mainly
+	std::vector<ConstantResetGate> constantResetGates;
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
 	struct GateDependency {
-		SimGateType gateType;
-		size_t gateIndex;
+		simulator_id_t gateId;
 
-		GateDependency(SimGateType type, size_t index) : gateType(type), gateIndex(index) {}
+		GateDependency() : gateId(0) {}
+		explicit GateDependency(simulator_id_t id) : gateId(id) {}
 
 		bool operator==(const GateDependency& other) const {
-			return gateType == other.gateType && gateIndex == other.gateIndex;
+			return gateId == other.gateId;
 		}
 	};
 
@@ -114,9 +114,8 @@ private:
 
 	void updateGateLocation(simulator_id_t gateId, SimGateType gateType, size_t gateIndex);
 	void removeGateLocation(simulator_id_t gateId);
-	void addOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
-	void removeOutputDependency(simulator_id_t outputId, SimGateType gateType, size_t gateIndex);
-	void updateGateIndicesAfterRemoval(SimGateType gateType, size_t removedIndex);
+	void addOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
+	void removeOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
 
 	std::atomic<float> averageTickrate { 0.0 };
 	float tickrateHalflife { 0.25 };
