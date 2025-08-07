@@ -524,9 +524,9 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}
-	auto data = eventData->cast<std::pair<BlockType, Vector>>();
+	auto data = eventData->cast<std::pair<BlockType, Size>>();
 	if (!data) {
-		logError("Could not get std::pair<BlockType, Vector>> from eventData", "Circuit");
+		logError("Could not get std::pair<BlockType, Size>> from eventData", "Circuit");
 		undoSystem.addBlocker(); // cant undo after changing block size!
 		return;
 	}

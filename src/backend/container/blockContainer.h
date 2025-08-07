@@ -49,7 +49,7 @@ public:
 	// Trys to set the type of a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool trySetType(Position positionOfBlock, BlockType type, Difference* difference);
 	// moves blocks until they 
-	void resizeBlockType(BlockType blockType, Vector size, Difference* difference);
+	void resizeBlockType(BlockType blockType, Size size, Difference* difference);
 
 	/* ----------- connections ----------- */
 	// -- getters --
@@ -92,7 +92,7 @@ private:
 	inline Cell* getCell(Position position) { return grid.get(position); }
 	inline void insertCell(Position position, Cell cell) { grid.insert(position, cell); }
 	inline void removeCell(Position position) { grid.remove(position); }
-	void placeBlockCells(block_id_t id, Position position, Vector size);
+	void placeBlockCells(block_id_t id, Position position, Size size);
 	void placeBlockCells(Position position, Rotation rotation, BlockType type, block_id_t blockId);
 	void placeBlockCells(const Block* block);
 	void removeBlockCells(const Block* block);

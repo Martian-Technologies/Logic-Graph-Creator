@@ -22,7 +22,7 @@ public:
 		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 1), 0);
 		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionInput(Vector(0, 0), 1);
 		getBlockData(BlockType::TRISTATE_BUFFER)->setConnectionOutput(Vector(0, 1), 2);
-		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Vector(1, 2));
+		getBlockData(BlockType::TRISTATE_BUFFER)->setSize(Size(1, 2));
 		// BUTTON
 		getBlockData(BlockType::BUTTON)->setName("Button");
 		getBlockData(BlockType::BUTTON)->setDefaultData(false);
@@ -82,12 +82,12 @@ public:
 		return blockData[type - 1].getPath();
 	}
 
-	inline Vector getBlockSize(BlockType type) const noexcept {
-		if (!blockExists(type)) return Vector();
+	inline Size getBlockSize(BlockType type) const noexcept {
+		if (!blockExists(type)) return Size();
 		return blockData[type - 1].getSize();
 	}
-	inline Vector getBlockSize(BlockType type, Rotation rotation) const noexcept {
-		if (!blockExists(type)) return Vector();
+	inline Size getBlockSize(BlockType type, Rotation rotation) const noexcept {
+		if (!blockExists(type)) return Size();
 		return blockData[type - 1].getSize(rotation);
 	}
 

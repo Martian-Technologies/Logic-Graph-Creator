@@ -47,7 +47,7 @@ void BlockCreationWindow::updateFromMenu() {
 	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
 	BlockData* blockData = circuitManager->getBlockDataManager()->getBlockData(circuitBlockData->getBlockType());
 	std::string name;
-	Vector size;
+	Size size;
 	std::vector<std::tuple<connection_end_id_t, std::string, bool, Vector, Position>> portsData;
 	try {
 		// we dont update till the end because setting data will cause the UI to update
@@ -65,7 +65,7 @@ void BlockCreationWindow::updateFromMenu() {
 		Rml::ElementFormControlInput* widthElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
 		ele = menu->GetElementById("height-input");
 		Rml::ElementFormControlInput* heightElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
-		size = Vector(std::stoi(widthElement->GetValue()), std::stoi(heightElement->GetValue()));
+		size = Size(std::stoi(widthElement->GetValue()), std::stoi(heightElement->GetValue()));
 
 		for (unsigned int i = 0; i < inputList->GetNumChildren(); i++) {
 			Rml::Element* row = inputList->GetChild(i);
@@ -131,7 +131,7 @@ void BlockCreationWindow::updateFromMenu() {
 	}
 
 	// check that data is good
-	if (size.hasZeros()) {
+	if (size.isValid()) {
 		logWarning("Can't update block data. Size of block cant be less than 1 currently is {}.", "BlockCreationWindow", size.toString());
 		return;
 	}
@@ -219,10 +219,10 @@ void BlockCreationWindow::resetMenu() {
 
 	ele = menu->GetElementById("width-input");
 	Rml::ElementFormControlInput* widthElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
-	widthElement->SetValue(std::to_string(blockData->getSize().dx));
+	widthElement->SetValue(std::to_string(blockData->getSize().h));
 	ele = menu->GetElementById("height-input");
 	Rml::ElementFormControlInput* heightElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
-	heightElement->SetValue(std::to_string(blockData->getSize().dy));
+	heightElement->SetValue(std::to_string(blockData->getSize().w));
 
 	const std::unordered_map<connection_end_id_t, std::pair<Vector, bool>>& conncections = blockData->getConnections();
 	for (auto& iter : conncections) {

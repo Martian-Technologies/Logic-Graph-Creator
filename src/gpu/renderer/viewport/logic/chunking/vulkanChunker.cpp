@@ -44,8 +44,8 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 
 			BlockInstance instance;
 			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
-			instance.sizeX = block.second.size.dx;
-			instance.sizeY = block.second.size.dy;
+			instance.sizeX = block.second.size.w;
+			instance.sizeY = block.second.size.h;
 			instance.rotation = block.second.rotation;
 			instance.texX = uvOrigin.x;
 
@@ -209,7 +209,7 @@ void VulkanChunker::stopMakingEdits() {
 	mux.unlock();
 }
 
-void VulkanChunker::addBlock(BlockType type, Position position, Vector size, Rotation rotation, Position statePosition) {
+void VulkanChunker::addBlock(BlockType type, Position position, Size size, Rotation rotation, Position statePosition) {
 	Position chunkPos = getChunk(position);
 	auto iter = chunks.find(chunkPos);
 	chunks[chunkPos].getRenderedBlocks().emplace(position, RenderedBlock(type, rotation, size.free(), statePosition));
@@ -225,7 +225,7 @@ void VulkanChunker::removeBlock(Position position) {
 	}
 }
 
-void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) {
+void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRotation, Size newSize) {
 	Position curChunkPos = getChunk(curPos);
 	Position newChunkPos = getChunk(newPos);
 

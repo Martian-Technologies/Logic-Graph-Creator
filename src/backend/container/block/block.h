@@ -16,11 +16,11 @@ public:
 	BlockType type() const { return blockType; }
 
 	inline Position getPosition() const { return position; }
-	inline Position getLargestPosition() const { return position + size(); }
+	inline Position getLargestPosition() const { return position + size().getLargestVectorInArea(); }
 	inline Rotation getRotation() const { return rotation; }
 
-	inline Vector size() const { return blockDataManager->getBlockSize(type(), getRotation()); }
-	inline Vector sizeNoRotation() const { return blockDataManager->getBlockSize(type()); }
+	inline Size size() const { return blockDataManager->getBlockSize(type(), getRotation()); }
+	inline Size sizeNoRotation() const { return blockDataManager->getBlockSize(type()); }
 
 	inline bool withinBlock(Position position) const { return position.withinArea(getPosition(), getLargestPosition()); }
 

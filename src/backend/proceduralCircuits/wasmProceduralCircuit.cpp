@@ -103,7 +103,7 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module, Circu
 
 	wasmtime::Func setSizeFunc = wasmtime::Func::wrap(*Wasm::getStore(),
 		[thisPtrPtr](int32_t width, int32_t height) {
-			(*thisPtrPtr)->generatedCircuit->setSize(Vector(width, height));
+			(*thisPtrPtr)->generatedCircuit->setSize(Size(width, height));
 		});
 
 	wasmtime::Func logInfoFunc = wasmtime::Func::wrap(*Wasm::getStore(),

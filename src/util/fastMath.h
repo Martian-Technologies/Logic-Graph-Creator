@@ -28,11 +28,6 @@ constexpr char signum(T x) {
 
 inline float decPart(float x) { return (float)signum(x) * fmodf(Fabs(x), 1.f); }
 
-template <typename T>
-constexpr int downwardFloor(T x) { return (x < 0) ? (((float)(int)x == x) ? x : (x - 1)) : x; }
-
-constexpr float downwardDecPart(float x) { return x - downwardFloor(x); }
-
 inline bool approx_equals(float a, float b) {
 	return Fabs(a - b) <= nexttowardf(std::max(a, b), HUGE_VALL) - std::max(a, b);
 }

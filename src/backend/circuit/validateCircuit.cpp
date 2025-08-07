@@ -14,13 +14,13 @@ void CircuitValidator::validate() {
 }
 
 bool CircuitValidator::validateBlockData() {
-	Vector size = parsedCircuit.getSize();
-	if (parsedCircuit.getSize().dx == 0)
-		size.dx = 1;
-	if (parsedCircuit.getSize().dy == 0)
-		size.dy = 1;
+	Size size = parsedCircuit.getSize();
+	if (size.w == 0)
+		size.w = 1;
+	if (size.h == 0)
+		size.h = 1;
 	for (auto& port : parsedCircuit.getConnectionPorts()) {
-		size.extentToFit(port.positionOnBlock + Vector(1));
+		size.extentToFit(port.positionOnBlock);
 	}
 	parsedCircuit.setSize(size);
 	return true;
@@ -100,7 +100,7 @@ bool CircuitValidator::setOverlapsUnpositioned() {
 
 		std::vector<Position> takenPositions;
 		bool hasOverlap = false;
-		for (auto iter = (blockData->getSize(block.rotation) - Vector(1)).iter(); iter; iter++) {
+		for (auto iter = blockData->getSize(block.rotation).iter(); iter; iter++) {
 			Position checkPos(intPos + *iter);
 			if (occupiedPositions.contains(checkPos)) {
 				hasOverlap = true;
@@ -313,7 +313,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 				if (!blockData) {
 					logError("Could not find block type data for block type: {}", "CircuitValidator", (unsigned int)block.type);
 				}
-				Vector blockSize = blockData->getSize(block.rotation);
+				Size blockSize = blockData->getSize(block.rotation);
 
 				const int layer = layers[id];
 				const int x = (layer - 1) * xSpacing;
@@ -333,7 +333,7 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 					takenPositions.clear();
 					std::vector<Position> takenPositions;
 					canPlace = true;
-					for (auto iter = (blockSize - Vector(1)).iter(); iter; iter++) {
+					for (auto iter = blockSize.iter(); iter; iter++) {
 						Position checkPos(Position(x, y) + *iter);
 						if (occupiedPositions.count(checkPos)) {
 							canPlace = false;
@@ -349,10 +349,9 @@ bool CircuitValidator::handleUnpositionedBlocks() {
 				occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
 
 				block.position = FPosition(x, y);
-				layerYcounter[x] = y + blockSize.dy;
+				layerYcounter[x] = y + blockSize.h;
 
-				float blockMaxX = x + blockSize.dx - 1;
-				float blockMaxY = y + blockSize.dy - 1;
+				float blockMaxY = y + blockSize.h - 1;
 
 				maxYPlaced = std::max(maxYPlaced, static_cast<int>(blockMaxY));
 			}

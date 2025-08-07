@@ -115,7 +115,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 			currentParsedCircuit->markAsCustom();
 			unsigned int width, height;
 			inputFile >> cToken >> width >> cToken >> height >> cToken;
-			currentParsedCircuit->setSize(Vector(width, height));
+			currentParsedCircuit->setSize(Size(width, height));
 		} else if (token == "ports" || token == "ports:") {
 			currentParsedCircuit->markAsCustom();
 			if (version <= 5) getline(inputFile, token);

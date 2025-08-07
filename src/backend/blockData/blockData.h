@@ -16,19 +16,19 @@ public:
 	inline void setDefaultData(bool defaultData) noexcept {
 		if (defaultData == this->defaultData) return;
 		bool sentPre = false;
-		if (defaultData && getSize() != Vector(1)) {
-			dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
+		if (defaultData && getSize() != Size(1)) {
+			dataUpdateEventManager->sendEvent<std::pair<BlockType, Size>>(
 				"preBlockSizeChange",
-				{ blockType, Vector(1) }
+				{ blockType, Size(1) }
 			);
 			sentPre = true;
 		}
 		this->defaultData = defaultData;
-		blockSize = Vector(1);
+		blockSize = Size(1);
 		if (sentPre) {
-			dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
+			dataUpdateEventManager->sendEvent<std::pair<BlockType, Size>>(
 				"postBlockSizeChange",
-				{ blockType, Vector(1) }
+				{ blockType, Size(1) }
 			);
 		}
 		sendBlockDataUpdate();
@@ -38,21 +38,21 @@ public:
 	inline void setPrimitive(bool primitive) noexcept { this->primitive = primitive; sendBlockDataUpdate(); }
 	inline bool isPrimitive() const noexcept { return primitive; }
 
-	inline void setSize(Vector size) noexcept {
+	inline void setSize(Size size) noexcept {
 		if (getSize() == size) return;
-		dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, Size>>(
 			"preBlockSizeChange",
 			{ blockType, size }
 		);
 		blockSize = size;
-		dataUpdateEventManager->sendEvent<std::pair<BlockType, Vector>>(
+		dataUpdateEventManager->sendEvent<std::pair<BlockType, Size>>(
 			"postBlockSizeChange",
 			{ blockType, getSize() }
 		);
 		sendBlockDataUpdate();
 	}
-	inline Vector getSize() const noexcept { return blockSize; }
-	inline Vector getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
+	inline Size getSize() const noexcept { return blockSize; }
+	inline Size getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
 
 	inline BlockType getBlockType() const { return blockType; }
 
@@ -217,7 +217,7 @@ private:
 	bool placeable = true;
 	std::string name = "Unnamed Block";
 	std::string path = "Basic";
-	Vector blockSize = Vector(1);
+	Size blockSize = Size(1);
 	connection_end_id_t inputConnectionCount = 0;
 	std::unordered_map<connection_end_id_t, std::pair<Vector, bool>> connections;
 	BidirectionalMultiSecondKeyMap<connection_end_id_t, std::string> connectionIdNames;

@@ -81,8 +81,8 @@ public:
 	void setName(const std::string& name) { this->name = name; }
 	const std::string& getName() const { return name; }
 
-	Vector getSize() const { return size; }
-	void setSize(Vector size) { this->size = size; valid = false; }
+	Size getSize() const { return size; }
+	void setSize(Size size) { this->size = size; valid = false; }
 
 	void markAsCustom() { isCustomBlock = true; }
 	bool isCustom() const { return isCustomBlock; }
@@ -96,7 +96,7 @@ private:
 	std::string name;
 
 	bool isCustomBlock;
-	Vector size;
+	Size size;
 	std::vector<ConnectionPort> ports;
 
 	std::unordered_map<block_id_t, GeneratedCircuitBlockData> blocks;

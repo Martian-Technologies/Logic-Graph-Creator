@@ -6,10 +6,12 @@
 typedef int cord_t;
 typedef float f_cord_t;
 
-struct Position;
-struct FPosition;
 struct Vector;
 struct FVector;
+struct Size;
+struct FSize;
+struct Position;
+struct FPosition;
 
 struct Vector {
 	class Iterator;
@@ -27,7 +29,7 @@ struct Vector {
 	inline bool operator!=(Vector other) const noexcept { return !operator==(other); }
 
 	inline bool hasZeros() const noexcept { return !(dx && dy); }
-	inline bool widthInSize(Vector size) const noexcept { return dx < size.dx && dy < size.dy; }
+	inline bool widthInSize(Size size) const noexcept;
 
 	inline cord_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
 	inline f_cord_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
@@ -143,6 +145,118 @@ struct std::formatter<FVector> : std::formatter<std::string> {
 	}
 };
 
+struct Size {
+	class Iterator;
+
+	inline Size() noexcept : w(0), h(0) { }
+	inline Size(cord_t w, cord_t h) noexcept : w(w), h(h) { }
+	// makes the size for hypercube with some edges length
+	inline Size(cord_t sideLength) noexcept : w(sideLength), h(sideLength) { }
+	inline FSize free() const noexcept;
+
+	inline void extentToFit(Vector vector) noexcept { w = std::max(w, vector.dx + 1); h = std::max(h, vector.dy + 1); }
+	inline std::string toString() const noexcept { return std::to_string(w) + "x" + std::to_string(h); }
+
+	inline bool operator==(Size other) const noexcept { return w == other.w && h == other.h; }
+	inline bool operator!=(Size other) const noexcept { return !operator==(other); }
+
+	// w != 0 and h != 0
+	inline bool isValid() const noexcept { return w > 0 && h > 0; }
+
+	inline cord_t area() const noexcept { return w * h; }
+	inline cord_t perimeter() const noexcept { return w * 2 + h * 2; }
+
+	inline Iterator iter() const noexcept;
+
+	inline Vector getLargestVectorInArea() { return Vector(w-1, h-1); }
+
+	cord_t w, h;
+};
+
+template <>
+struct std::formatter<Size> : std::formatter<std::string> {
+	auto format(Size v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
+};
+
+class Size::Iterator {
+public:
+	inline Iterator(Size size) {
+		if (!size.isValid()) {
+			notDone = false;
+			end = 0;
+			width = 0;
+			return;
+		}
+		width = size.w;
+		end = size.area() - 1;
+	}
+	inline Iterator& operator++() { next(); return *this; }
+	inline Iterator& operator--() { prev(); return *this; }
+	inline Iterator operator++(int) { Iterator tmp = *this; next(); return tmp; }
+	inline Iterator operator--(int) { Iterator tmp = *this; prev(); return tmp; }
+	inline explicit operator bool() const { return notDone; }
+	inline Vector operator*() const {
+#ifndef DEBUG // I dont know if this works
+		if (!width) {
+			logError("Reading Size::Iterator iterating over invalid size not valid. Fix this!");
+		}
+#endif
+		return  Vector(cur % width, cur / width);
+	}
+	// inline Vector operator->() const { return *(*this); }
+
+private:
+
+	inline void next() {
+		notDone = cur != end;
+		cur += notDone;
+	}
+	inline void prev() {
+		cur -= cur != 0;
+		notDone = (bool)end;
+	}
+	unsigned int end;
+	unsigned int cur = 0;
+	unsigned width;
+	bool notDone = true;
+};
+
+Size::Iterator Size::iter() const noexcept { return Iterator(*this); }
+
+bool Vector::widthInSize(Size size) const noexcept { return dx < size.w && dx >= 0 && dy < size.h && dy >= 0; }
+
+struct FSize {
+	// class Iterator;
+
+	inline FSize() noexcept : w(0), h(0) { }
+	inline FSize(f_cord_t w, f_cord_t h) noexcept : w(w), h(h) { }
+	inline Size snap() const noexcept;
+
+	inline void extentToFit(FVector vector) noexcept { w = std::max(w, vector.dx + 1); h = std::max(h, vector.dy + 1); }
+	inline std::string toString() const noexcept { return std::to_string(w) + "x" + std::to_string(h); }
+
+	inline bool operator==(FSize other) const noexcept { return w == other.w && h == other.h; }
+	inline bool operator!=(FSize other) const noexcept { return !operator==(other); }
+
+	// w != 0 and h != 0
+	inline bool isValid() const noexcept { return !(w && h); }
+
+	inline f_cord_t area() const noexcept { return w * h; }
+	inline f_cord_t perimeter() const noexcept { return w * 2 + h * 2; }
+
+	// inline Iterator iter() const noexcept;
+
+	f_cord_t w, h;
+};
+
+template <>
+struct std::formatter<FSize> : std::formatter<std::string> {
+	auto format(FSize v, format_context& ctx) const {
+		return formatter<string>::format(v.toString(), ctx);
+	}
+};
 
 struct Position {
 	class Iterator;
@@ -245,7 +359,7 @@ struct std::hash<Position> {
 
 template<>
 struct std::hash<std::pair<Position, Position>> {
-	inline std::size_t operator()(const std::pair<Position,Position>& posPair) const noexcept {
+	inline std::size_t operator()(const std::pair<Position, Position>& posPair) const noexcept {
 		std::size_t a = std::hash<Position> {}(posPair.first);
 		std::size_t b = std::hash<Position> {}(posPair.second);
 		return a + 0x9e3779b9 + (b << 6) + (b >> 2);
@@ -311,11 +425,12 @@ struct std::formatter<FPosition> : std::formatter<std::string> {
 };
 
 // conversion
-inline FPosition Position::free() const noexcept { return FPosition(x, y); }
-inline Position FPosition::snap() const noexcept { return Position(downwardFloor(x), downwardFloor(y)); }
 inline FVector Vector::free() const noexcept { return FVector(dx, dy); }
-inline Vector FVector::snap() const noexcept { return Vector(downwardFloor(dx), downwardFloor(dy)); }
-
+inline Vector FVector::snap() const noexcept { return Vector(std::floor(dx), std::floor(dy)); }
+inline FSize Size::free() const noexcept { return FSize(w, h); }
+inline Size FSize::snap() const noexcept { return Size(std::floor(w), std::floor(h)); }
+inline FPosition Position::free() const noexcept { return FPosition(x, y); }
+inline Position FPosition::snap() const noexcept { return Position(std::floor(x), std::floor(y)); }
 
 // ---- we also define block rotation here so ----
 enum Rotation : char {
@@ -333,8 +448,8 @@ inline Vector rotateVector(Vector vector, Rotation rotationAmount) noexcept {
 	default: return vector;
 	}
 }
-inline Vector rotateSize(Rotation rotationAmount, Vector size) noexcept {
-	if (rotationAmount & 1) return Vector(size.dy, size.dx);
+inline Size rotateSize(Rotation rotationAmount, Size size) noexcept {
+	if (rotationAmount & 1) return Size(size.h, size.w);
 	return size;
 }
 inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
@@ -356,37 +471,86 @@ inline constexpr Rotation subRotations(Rotation rotationA, Rotation rotationB) {
 	return addRotations(rotationA, rotationNeg(rotationB));
 }
 inline constexpr int getDegrees(Rotation rotation) { return rotation * 90; }
-inline Vector rotateVectorWithArea(Vector vector, Vector size, Rotation rotationAmount) {
+inline Vector rotateVectorWithArea(Vector vector, Size size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return Vector(size.dy - vector.dy - 1, vector.dx);
-	case Rotation::ONE_EIGHTY: return Vector(size.dx - vector.dx - 1, size.dy - vector.dy - 1);
-	case Rotation::TWO_SEVENTY: return Vector(vector.dy, size.dx - vector.dx - 1);
+	case Rotation::NINETY: return Vector(size.h - vector.dy - 1, vector.dx);
+	case Rotation::ONE_EIGHTY: return Vector(size.w - vector.dx - 1, size.h - vector.dy - 1);
+	case Rotation::TWO_SEVENTY: return Vector(vector.dy, size.w - vector.dx - 1);
 	default: return vector;
 	}
 }
-inline Vector reverseRotateVectorWithArea(Vector vector, Vector size, Rotation rotationAmount) {
+inline Vector reverseRotateVectorWithArea(Vector vector, Size size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return Vector(vector.dy, size.dy - vector.dx - 1);
-	case Rotation::ONE_EIGHTY: return Vector(size.dx - vector.dx - 1, size.dy - vector.dy - 1);
-	case Rotation::TWO_SEVENTY: return Vector(size.dx - vector.dy - 1, vector.dx);
+	case Rotation::NINETY: return Vector(vector.dy, size.h - vector.dx - 1);
+	case Rotation::ONE_EIGHTY: return Vector(size.w - vector.dx - 1, size.h - vector.dy - 1);
+	case Rotation::TWO_SEVENTY: return Vector(size.w - vector.dy - 1, vector.dx);
 	default: return vector;
 	}
 }
-inline FVector rotateVectorWithArea(FVector vector, FVector size, Rotation rotationAmount) {
+inline FVector rotateVectorWithArea(FVector vector, FSize size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return FVector(size.dy - vector.dy - 1.f, vector.dx);
-	case Rotation::ONE_EIGHTY: return FVector(size.dx - vector.dx - 1.f, size.dy - vector.dy - 1.f);
-	case Rotation::TWO_SEVENTY: return FVector(vector.dy, size.dx - vector.dx - 1.f);
+	case Rotation::NINETY: return FVector(size.h - vector.dy - 1.f, vector.dx);
+	case Rotation::ONE_EIGHTY: return FVector(size.w - vector.dx - 1.f, size.h - vector.dy - 1.f);
+	case Rotation::TWO_SEVENTY: return FVector(vector.dy, size.w - vector.dx - 1.f);
 	default: return vector;
 	}
 }
-inline FVector reverseRotateVectorWithArea(FVector vector, FVector size, Rotation rotationAmount) {
+inline FVector reverseRotateVectorWithArea(FVector vector, FSize size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return FVector(vector.dy, size.dy - vector.dx - 1.f);
-	case Rotation::ONE_EIGHTY: return FVector(size.dx - vector.dx - 1.f, size.dy - vector.dy - 1.f);
-	case Rotation::TWO_SEVENTY: return FVector(size.dx - vector.dy - 1.f, vector.dx);
+	case Rotation::NINETY: return FVector(vector.dy, size.h - vector.dx - 1.f);
+	case Rotation::ONE_EIGHTY: return FVector(size.w - vector.dx - 1.f, size.h - vector.dy - 1.f);
+	case Rotation::TWO_SEVENTY: return FVector(size.w - vector.dy - 1.f, vector.dx);
 	default: return vector;
 	}
 }
+
+// change to 1 byte later
+// flip then rotate
+struct Orientation {
+	Rotation rotation = Rotation::ZERO;
+	bool flipped = false;
+
+	Orientation(Rotation rotation = Rotation::ZERO, bool flipped = false) : rotation(rotation), flipped(flipped) { }
+
+	inline Vector operator*(Vector vector) noexcept {
+		Vector vec(flipped ? (-vector.dx) : vector.dx, vector.dy);
+		return rotateVector(vec, rotation);
+	}
+	inline Size operator*(Size size) noexcept {
+		return rotateSize(rotation, size);
+	}
+	inline void rotate(bool clockWise) { rotation = ::rotate(rotation, clockWise); }
+	inline void flip() { flipped = !flipped; }
+	inline Orientation operator*(Orientation other) {
+		return Orientation(addRotations(rotation, flipped ? rotationNeg(other.rotation) : other.rotation), other.flipped ^ flipped);
+	}
+	inline const Orientation& operator*=(Orientation other) {
+		flipped ^= other.flipped;
+		rotation = addRotations(rotation, flipped ? rotationNeg(other.rotation) : other.rotation);
+		return *this;
+	}
+	inline Orientation inverse() {
+		return Orientation(flipped ? rotation : rotationNeg(rotation), flipped);
+	}
+	inline Orientation relativeTo(Orientation orientation) {
+		return (*this) * (orientation.inverse());
+	}
+	inline Vector transformVectorWithArea(Vector vector, Size size) {
+		Vector vec(flipped ? (size.w - vector.dx - 1) : vector.dx, vector.dy);
+		return rotateVectorWithArea(vec, size, rotation);
+	}
+	inline Vector inverseTransformVectorWithArea(Vector vector, Size size) {
+		Vector vec(flipped ? (size.w - vector.dx - 1) : vector.dx, vector.dy);
+		return reverseRotateVectorWithArea(vec, size, rotation);
+	}
+	inline FVector transformVectorWithArea(FVector vector, FSize size) {
+		FVector vec(flipped ? (size.w - vector.dx - 1.f) : vector.dx, vector.dy);
+		return rotateVectorWithArea(vec, size, rotation);
+	}
+	inline FVector inverseTransformVectorWithArea(FVector vector, FSize size) {
+		FVector vec(flipped ? (size.w - vector.dx - 1.f) : vector.dx, vector.dy);
+		return reverseRotateVectorWithArea(vec, size, rotation);
+	}
+};
 
 #endif /* position_h */

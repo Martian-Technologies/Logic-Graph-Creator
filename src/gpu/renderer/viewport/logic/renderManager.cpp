@@ -56,7 +56,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 				for (CircuitRenderer* renderer : renderers) {
 					Position statePosition = Position(1000000, 1000000);
 					if (blockType < BlockType::CUSTOM) {
-						if (blockType == BlockType::TRISTATE_BUFFER) statePosition = position + rotateVectorWithArea(Vector(0, 1), Vector(1, 2), rotation);
+						if (blockType == BlockType::TRISTATE_BUFFER) statePosition = position + rotateVectorWithArea(Vector(0, 1), Size(1, 2), rotation);
 						else statePosition = position;
 					}
 					renderer->addBlock(blockType, position, blockDataManager->getBlockSize(blockType, rotation), rotation, statePosition);
@@ -161,7 +161,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					renderer->moveBlock(curPosition, newPosition, newRotation, blockDataManager->getBlockSize(iter->second.type, newRotation));
 				}
 
-				Vector blockSize = blockDataManager->getBlockSize(iter->second.type, curRotation);
+				Size blockSize = blockDataManager->getBlockSize(iter->second.type, curRotation);
 				Rotation rotationAmount = subRotations(newRotation, curRotation);
 
 				// MOVE CONNECTIONS
@@ -186,7 +186,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 							continue;
 						}
 						otherIter->second.connectionsToOtherBlock.erase(posPair);
-						bool isInput = posPair.second.withinArea(curPosition, curPosition + blockSize - Vector(1));
+						bool isInput = posPair.second.withinArea(curPosition, curPosition + blockSize.getLargestVectorInArea());
 						if (isInput) {
 							Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
 							for (CircuitRenderer* renderer : renderers) {

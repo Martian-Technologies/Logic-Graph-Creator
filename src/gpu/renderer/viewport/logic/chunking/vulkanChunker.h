@@ -102,7 +102,7 @@ struct WireInstance {
 struct RenderedBlock {
 	BlockType blockType;
 	Rotation rotation;
-	FVector size;
+	FSize size;
 	Position statePosition;
 };
 
@@ -187,9 +187,9 @@ public:
 
 	void startMakingEdits() override final;
 	void stopMakingEdits() override final;
-	void addBlock(BlockType type, Position position, Vector size, Rotation rotation, Position statePosition) override final;
+	void addBlock(BlockType type, Position position, Size size, Rotation rotation, Position statePosition) override final;
 	void removeBlock(Position position) override final;
-	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Vector newSize) override final;
+	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Size newSize) override final;
 	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) override final;
 	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;

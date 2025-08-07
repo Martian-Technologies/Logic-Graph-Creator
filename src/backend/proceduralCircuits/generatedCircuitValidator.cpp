@@ -15,11 +15,11 @@ void GeneratedCircuitValidator::validate() {
 }
 
 bool GeneratedCircuitValidator::validateBlockData() {
-	Vector size = generatedCircuit.getSize();
-	if (generatedCircuit.getSize().dx == 0)
-		size.dx = 1;
-	if (generatedCircuit.getSize().dy == 0)
-		size.dy = 1;
+	Size size = generatedCircuit.getSize();
+	if (size.w == 0)
+		size.w = 1;
+	if (size.h == 0)
+		size.h = 1;
 	for (auto& port : generatedCircuit.getConnectionPorts()) {
 		size.extentToFit(port.positionOnBlock);
 	}
@@ -93,7 +93,7 @@ bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 
 		std::vector<Position> takenPositions;
 		bool hasOverlap = false;
-		for (auto iter = (blockData->getSize(block.rotation) - Vector(1)).iter(); iter; iter++) {
+		for (auto iter = blockData->getSize(block.rotation).iter(); iter; iter++) {
 			Position checkPos(intPos + *iter);
 			if (occupiedPositions.count(checkPos)) {
 				hasOverlap = true;
@@ -306,7 +306,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				if (!blockData) {
 					logError("Could not find block type data for block type: {}", "GeneratedCircuitValidator", (unsigned int)block.type);
 				}
-				Vector blockSize = blockData->getSize(block.rotation);
+				Size blockSize = blockData->getSize(block.rotation);
 
 				const int layer = layers[id];
 				const int x = (layer - 1) * xSpacing;
@@ -326,7 +326,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 					takenPositions.clear();
 					std::vector<Position> takenPositions;
 					canPlace = true;
-					for (auto iter = (blockSize - Vector(1)).iter(); iter; iter++) {
+					for (auto iter = blockSize.iter(); iter; iter++) {
 						Position checkPos(Position(x, y) + *iter);
 						if (occupiedPositions.count(checkPos)) {
 							canPlace = false;
@@ -342,10 +342,9 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
 
 				block.position = Position(x, y);
-				layerYcounter[x] = y + blockSize.dy;
+				layerYcounter[x] = y + blockSize.h;
 
-				cord_t blockMaxX = x + blockSize.dx - 1;
-				cord_t blockMaxY = y + blockSize.dy - 1;
+				cord_t blockMaxY = y + blockSize.h - 1;
 
 				maxYPlaced = std::max(maxYPlaced, blockMaxY);
 			}

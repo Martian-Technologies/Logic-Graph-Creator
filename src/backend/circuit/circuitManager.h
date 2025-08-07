@@ -76,7 +76,7 @@ public:
 		blockData->setDefaultData(false);
 		blockData->setPrimitive(false);
 		blockData->setPath("Custom");
-		blockData->setSize(Vector(1));
+		blockData->setSize(Size(1));
 
 		// Circuit Block Data
 		circuitBlockDataManager.newCircuitBlockData(circuitId, blockType);
@@ -101,7 +101,7 @@ public:
 			blockData->setDefaultData(false);
 			blockData->setPrimitive(false);
 			blockData->setPath("Custom");
-			blockData->setSize(Vector(1));
+			blockData->setSize(Size(1));
 		}
 
 		// Circuit Block Data

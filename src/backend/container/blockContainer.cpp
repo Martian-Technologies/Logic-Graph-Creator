@@ -30,11 +30,11 @@ bool BlockContainer::checkCollision(Position positionSmall, Position positionLar
 }
 
 bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType) const {
-	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation) - Vector(1));
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation).getLargestVectorInArea());
 }
 
 bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType, block_id_t idToIgnore) const {
-	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation) - Vector(1), idToIgnore);
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation).getLargestVectorInArea(), idToIgnore);
 }
 
 bool BlockContainer::tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference) {
@@ -120,14 +120,14 @@ bool BlockContainer::trySetType(Position positionOfBlock, BlockType type, Differ
 	return true;
 }
 
-void BlockContainer::resizeBlockType(BlockType blockType, Vector newSize, Difference* difference) {
+void BlockContainer::resizeBlockType(BlockType blockType, Size newSize, Difference* difference) {
 	if (blockTypeCounts.size() <= blockType || blockTypeCounts[blockType] == 0) return;
 	for (auto& pair : blocks) {
 		Block* block = &(pair.second);
 		if (block->type() != blockType) continue;
 		removeBlockCells(block);
 		Position position = block->getPosition();
-		Vector newRotatedSize = rotateSize(block->getRotation(), newSize);
+		Size newRotatedSize = rotateSize(block->getRotation(), newSize);
 
 		while (true) {
 			bool hitCell = false;
@@ -318,25 +318,25 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 }
 
 void BlockContainer::placeBlockCells(Position position, Rotation rotation, BlockType type, block_id_t blockId) {
-	for (auto iter = (blockDataManager->getBlockSize(type, rotation) - Vector(1)).iter(); iter; iter++) {
+	for (auto iter = blockDataManager->getBlockSize(type, rotation).iter(); iter; iter++) {
 		insertCell(position + *iter, Cell(blockId));
 	}
 }
 
-void BlockContainer::placeBlockCells(block_id_t id, Position position, Vector size) {
-	for (auto iter = (size - Vector(1)).iter(); iter; iter++) {
+void BlockContainer::placeBlockCells(block_id_t id, Position position, Size size) {
+	for (auto iter = size.iter(); iter; iter++) {
 		insertCell(position + *iter, Cell(id));
 	}
 }
 
 void BlockContainer::placeBlockCells(const Block* block) {
-	for (auto iter = (block->size() - Vector(1)).iter(); iter; iter++) {
+	for (auto iter = block->size().iter(); iter; iter++) {
 		insertCell(block->getPosition() + *iter, Cell(block->id()));
 	}
 }
 
 void BlockContainer::removeBlockCells(const Block* block) {
-	for (auto iter = (block->size() - Vector(1)).iter(); iter; iter++) {
+	for (auto iter = block->size().iter(); iter; iter++) {
 		removeCell(block->getPosition() + *iter);
 	}
 }
