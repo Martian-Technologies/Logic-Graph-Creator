@@ -197,7 +197,7 @@ TEST_F(CircuitTest, CircuitPlacement) {
 
 	ASSERT_NE(blockType, NONE);
 	ASSERT_TRUE(circuitManager.getBlockDataManager()->blockExists(blockType));
-	circuitManager.getBlockDataManager()->getBlockData(blockType)->setSize(Vector(2, 2));
+	circuitManager.getBlockDataManager()->getBlockData(blockType)->setSize(Size(2, 2));
 	ASSERT_TRUE(circuit->tryInsertBlock(Position(), Rotation::ZERO, blockType));
 
 

@@ -21,7 +21,6 @@ TEST_F(BlockTest, constructor) {
 			ASSERT_EQ(block.size(), blockDataManager->getBlockSize(blockType));
 		} else {
 			ASSERT_FALSE(blockDataManager->getBlockData(blockType));
-			ASSERT_EQ(blockDataManager->getBlockSize(blockType), Vector());
 		}
 	}
 }
