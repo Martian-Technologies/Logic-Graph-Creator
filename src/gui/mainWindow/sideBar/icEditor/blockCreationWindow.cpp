@@ -131,7 +131,7 @@ void BlockCreationWindow::updateFromMenu() {
 	}
 
 	// check that data is good
-	if (size.isValid()) {
+	if (!size.isValid()) {
 		logWarning("Can't update block data. Size of block cant be less than 1 currently is {}.", "BlockCreationWindow", size.toString());
 		return;
 	}
