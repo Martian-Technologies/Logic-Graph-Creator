@@ -1,0 +1,42 @@
+BasedOnStyle: Microsoft
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeLambdaBody: false
+  BeforeCatch: false
+  AfterClass: false
+  AfterNamespace: false
+  AfterStruct: false
+  SplitEmptyFunction: false
+  AfterFunction: false
+  BeforeElse: false
+  AfterControlStatement: Never
+# AllowShortNamespacesOnASingleLine: true # ITS FUCK BREAKING SHIT I HATE CLANG FORMAT
+SpaceBeforeCtorInitializerColon: true
+IndentWidth: 4
+UseTab: Always
+AccessModifierOffset: -4
+ColumnLimit: 0
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseExpressionOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: true
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowBreakBeforeNoexceptSpecifier: Never
+BinPackArguments: false
+BitFieldColonSpacing: None
+BreakFunctionDefinitionParameters: false
+BreakInheritanceList: AfterComma
+EmptyLineAfterAccessModifier: Leave
+EmptyLineBeforeAccessModifier: Leave
+SpaceInEmptyBlock: true
+Cpp11BracedListStyle: false
+CompactNamespaces: true
+
