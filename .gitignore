@@ -32,7 +32,7 @@
 *.app
 
 #VSC
-/.vscode
+.vscode
 
 # Cmake
 /*build*/

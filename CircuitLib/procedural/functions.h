@@ -1,7 +1,11 @@
 #ifndef functions_h
 #define functions_h
 
+#if defined(__clang__) || defined(__GNUC__)
 #define externalFunction(functionName) __attribute__((import_module("env"))) __attribute__((import_name(#functionName)))
+#else
+#define externalFunction(functionName) // for MSVC
+#endif
 // #define exportedVar(type, name) type name; type getname
 #define exportedVar(type, name, Name) extern const type name; const type get##Name() { return name; }
 
