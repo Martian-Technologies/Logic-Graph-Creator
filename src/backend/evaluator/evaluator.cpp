@@ -364,11 +364,9 @@ std::optional<connection_port_id_t> Evaluator::getPortId(const BlockContainer* b
 
 	// Directly return the result based on direction
 	if (direction == Direction::IN) {
-		const auto port = block->getInputConnectionId(portPosition);
-		return port.second ? std::make_optional(port.first) : std::nullopt;
+		return block->getInputConnectionId(portPosition);
 	} else {
-		const auto port = block->getOutputConnectionId(portPosition);
-		return port.second ? std::make_optional(port.first) : std::nullopt;
+		return block->getOutputConnectionId(portPosition);
 	}
 }
 
@@ -428,14 +426,14 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(const eval_circ
 
 	std::optional<connection_port_id_t> portId;
 	if (direction == Direction::IN) {
-		const auto port = block->getInputConnectionId(portPosition);
-		if (port.second) [[likely]] {
-			portId = port.first;
+		const std::optional<connection_port_id_t> port = block->getInputConnectionId(portPosition);
+		if (port) [[likely]] {
+			portId = port.value();
 		}
 	} else {
-		const auto port = block->getOutputConnectionId(portPosition);
-		if (port.second) [[likely]] {
-			portId = port.first;
+		const std::optional<connection_port_id_t> port = block->getOutputConnectionId(portPosition);
+		if (port) [[likely]] {
+			portId = port.value();
 		}
 	}
 
@@ -528,14 +526,14 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 
 	std::optional<connection_port_id_t> portId;
 	if (direction == Direction::IN) {
-		const auto port = block->getInputConnectionId(portPosition);
-		if (port.second) [[likely]] {
-			portId = port.first;
+		const std::optional<connection_port_id_t> port = block->getInputConnectionId(portPosition);
+		if (port) [[likely]] {
+			portId = port.value();
 		}
 	} else {
-		const auto port = block->getOutputConnectionId(portPosition);
-		if (port.second) [[likely]] {
-			portId = port.first;
+		const std::optional<connection_port_id_t> port = block->getOutputConnectionId(portPosition);
+		if (port) [[likely]] {
+			portId = port.value();
 		}
 	}
 
@@ -1022,12 +1020,12 @@ void Evaluator::traceOutwardsIC(
 		if (parentCircuitBlock->isConnectionInput(connectionEndId) != (direction == Direction::IN)) {
 			continue;
 		}
-		std::pair<Position, bool> connectionPosition = parentCircuitBlock->getConnectionPosition(connectionEndId);
-		if (!connectionPosition.second) {
+		std::optional<Position> connectionPosOpt = parentCircuitBlock->getConnectionPosition(connectionEndId);
+		if (!connectionPosOpt) {
 			logError("Connection position not found at connectionEndId {}", "Evaluator::traceOutwardsIC", connectionEndId);
 			continue;
 		}
-		Position connectionPos = connectionPosition.first;
+		Position connectionPos = connectionPosOpt.value();
 		const phmap::flat_hash_set<ConnectionEnd>* connectionEnds = (direction == Direction::IN) ?
 			parentCircuitBlock->getInputConnections(connectionPos) : parentCircuitBlock->getOutputConnections(connectionPos);
 		if (!connectionEnds) {
@@ -1043,12 +1041,12 @@ void Evaluator::traceOutwardsIC(
 				logError("Target block not found for connectionEnd {}", "Evaluator::traceOutwardsIC", connectionEnd.toString());
 				continue;
 			}
-			std::pair<Position, bool> targetConnectionPointPositionOpt = targetBlock->getConnectionPosition(connectionEnd.getConnectionId());
-			if (!targetConnectionPointPositionOpt.second) {
+			std::optional<Position> targetConnectionPointPositionOpt = targetBlock->getConnectionPosition(connectionEnd.getConnectionId());
+			if (!targetConnectionPointPositionOpt) {
 				logError("Target connection position not found for connectionEnd {}", "Evaluator::traceOutwardsIC", connectionEnd.toString());
 				continue;
 			}
-			Position targetConnectionPointPosition = targetConnectionPointPositionOpt.first;
+			Position targetConnectionPointPosition = targetConnectionPointPositionOpt.value();
 			std::set<CircuitPortDependency> circuitPortDependenciesCopy = circuitPortDependencies;
 			std::set<CircuitNode> circuitNodeDependenciesCopy = circuitNodeDependencies;
 			// get connection point
@@ -1187,12 +1185,12 @@ void Evaluator::dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId)
 	}
 	for (size_t i = 0; i < blockData->getConnectionCount(); ++i) {
 		if (block->isConnectionOutput(i)) {
-			std::pair<Position, bool> portPositionOpt = block->getConnectionPosition(i);
-			if (!portPositionOpt.second) {
+			std::optional<Position> portPositionOpt = block->getConnectionPosition(i);
+			if (!portPositionOpt) {
 				logError("Port position not found for connection ID {}", "Evaluator::dirtyBlockAt", i);
 				continue;
 			}
-			dirtyNodes.insert({portPositionOpt.first, evalCircuitId});
+			dirtyNodes.insert({portPositionOpt.value(), evalCircuitId});
 		}
 	}
 }

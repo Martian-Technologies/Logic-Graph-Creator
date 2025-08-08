@@ -108,24 +108,33 @@ public:
 		sendBlockDataUpdate();
 	}
 
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector) const noexcept {
-		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
+	inline std::optional<connection_end_id_t> getInputConnectionId(Vector vector) const noexcept {
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 0;
+			return std::nullopt;
+		}
 		for (auto& pair : connections) {
 			if (pair.second.first == vector && pair.second.second)
-				return { pair.first, true };
+				return pair.first;
 		}
-		return { 0, false };
+		return std::nullopt;
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector) const noexcept {
-		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
+	inline std::optional<connection_end_id_t> getOutputConnectionId(Vector vector) const noexcept {
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 1;
+			return std::nullopt;
+		}
 		for (auto& pair : connections) {
 			if (pair.second.first == vector && !pair.second.second)
-				return { pair.first, true };
+				return pair.first;
 		}
-		return { 0, false };
+		return std::nullopt;
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector, Rotation rotation) const noexcept {
-		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
+	inline std::optional<connection_end_id_t> getInputConnectionId(Vector vector, Rotation rotation) const noexcept {
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 0;
+			return std::nullopt;
+		}
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
 			blockSize,
@@ -133,12 +142,15 @@ public:
 		);
 		for (auto& pair : connections) {
 			if (pair.second.first == noRotationVec && pair.second.second)
-				return { pair.first, true };
+				return pair.first;
 		}
-		return { 0, false };
+		return std::nullopt;
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector, Rotation rotation) const noexcept {
-		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
+	inline std::optional<connection_end_id_t> getOutputConnectionId(Vector vector, Rotation rotation) const noexcept {
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 1;
+			return std::nullopt;
+		}
 		Vector noRotationVec = reverseRotateVectorWithArea(
 			vector,
 			blockSize,
@@ -146,28 +158,31 @@ public:
 		);
 		for (auto& pair : connections) {
 			if (pair.second.first == noRotationVec && !pair.second.second)
-				return { pair.first, true };
+				return pair.first;
 		}
-		return { 0, false };
+		return std::nullopt;
 	}
-	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId) const noexcept {
-		if (defaultData) return { Vector(0), connectionId <= 1 };
+	inline std::optional<Vector> getConnectionVector(connection_end_id_t connectionId) const noexcept {
+		if (defaultData) {
+			if (connectionId <= 1) return Vector(0);
+			return std::nullopt;
+		}
 		auto iter = connections.find(connectionId);
-		if (iter == connections.end()) return { Vector(), false };
-		return { iter->second.first, true };
+		if (iter == connections.end()) return std::nullopt;
+		return iter->second.first;
 	}
-	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId, Rotation rotation) const noexcept {
-		if (defaultData) return { Vector(0), connectionId <= 1 };
+	inline std::optional<Vector> getConnectionVector(connection_end_id_t connectionId, Rotation rotation) const noexcept {
+		if (defaultData) {
+			if (connectionId <= 1) return Vector(0);
+			return std::nullopt;
+		}
 		auto iter = connections.find(connectionId);
-		if (iter == connections.end()) return { Vector(), false };
-		return {
-			rotateVectorWithArea(
-				iter->second.first,
-				blockSize,
-				rotation
-			),
-			true
-		};
+		if (iter == connections.end()) return std::nullopt;
+		return rotateVectorWithArea(
+			iter->second.first,
+			blockSize,
+			rotation
+		);
 	}
 	inline connection_end_id_t getConnectionCount() const noexcept {
 		if (defaultData) return 2;

@@ -27,9 +27,9 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 		);
 		const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
 		for (auto& iter : block->getConnectionContainer().getConnections()) {
-			auto pair = blockData->getConnectionVector(iter.first, block->getRotation());
-			if (!pair.second) continue;
-			Position connectionPosition = block->getPosition() + pair.first;
+			auto connectionVector = blockData->getConnectionVector(iter.first, block->getRotation());
+			if (!connectionVector) continue;
+			Position connectionPosition = block->getPosition() + connectionVector.value();
 			bool isInput = blockData->isConnectionInput(iter.first);
 			const phmap::flat_hash_set<ConnectionEnd>* otherConnections = block->getConnectionContainer().getConnections(iter.first);
 			if (!otherConnections) continue;
@@ -41,11 +41,11 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 					if (positions.contains(*iter)) { skipConnection = false; break; }
 				}
 				if (skipConnection) continue;
-				auto otherPair = blockContainer->getBlockDataManager()->getBlockData(otherBlock->type())->getConnectionVector(
+				auto otherConnectionVector = blockContainer->getBlockDataManager()->getBlockData(otherBlock->type())->getConnectionVector(
 					connectionEnd.getConnectionId(), otherBlock->getRotation()
 				);
-				if (!otherPair.second) continue;
-				Position otherConnectionPosition = otherBlock->getPosition() + otherPair.first;
+				if (!otherConnectionVector) continue;
+				Position otherConnectionPosition = otherBlock->getPosition() + otherConnectionVector.value();
 				if (isInput) connections.emplace_back(connectionPosition, otherConnectionPosition);
 				// else connections.emplace_back(otherConnectionPosition, connectionPosition);
 			}

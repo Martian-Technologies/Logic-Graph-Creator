@@ -91,28 +91,28 @@ public:
 		return blockData[type - 1].getSize(rotation);
 	}
 
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Vector vector) const noexcept {
-		if (!blockExists(type)) return { 0, false };
+	inline std::optional<connection_end_id_t> getInputConnectionId(BlockType type, Vector vector) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getInputConnectionId(vector);
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Vector vector) const noexcept {
-		if (!blockExists(type)) return { 0, false };
+	inline std::optional<connection_end_id_t> getOutputConnectionId(BlockType type, Vector vector) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getOutputConnectionId(vector);
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
-		if (!blockExists(type)) return { 0, false };
+	inline std::optional<connection_end_id_t> getInputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getInputConnectionId(vector, rotation);
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
-		if (!blockExists(type)) return { 0, false };
+	inline std::optional<connection_end_id_t> getOutputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getOutputConnectionId(vector, rotation);
 	}
-	inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
-		if (!blockExists(type)) return { Vector(), false };
+	inline std::optional<Vector> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getConnectionVector(connectionId);
 	}
-	inline std::pair<Vector, bool> getConnectionVector(BlockType type, Rotation rotation, connection_end_id_t connectionId) const noexcept {
-		if (!blockExists(type)) return { Vector(), false };
+	inline std::optional<Vector> getConnectionVector(BlockType type, Rotation rotation, connection_end_id_t connectionId) const noexcept {
+		if (!blockExists(type)) return std::nullopt;
 		return blockData[type - 1].getConnectionVector(connectionId, rotation);
 	}
 
