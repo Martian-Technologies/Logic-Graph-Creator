@@ -296,6 +296,8 @@ void Evaluator::removeCircuitIO(const DataUpdateEventManager::EventData* data) {
 	circuit_id_t circuitId = circuitBlockDataManager.getCircuitId(blockType);
 	SimPauseGuard pauseGuard = evalSimulator.beginEdit();
 	removeDependentInterCircuitConnections(pauseGuard, { circuitId, connectionEndId });
+	evalSimulator.endEdit(pauseGuard);
+	processDirtyNodes();
 }
 
 void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
@@ -338,6 +340,8 @@ void Evaluator::setCircuitIO(const DataUpdateEventManager::EventData* data) {
 		}
 		checkToCreateExternalConnections(pauseGuard, evalCircuitId, *position);
 	}
+	evalSimulator.endEdit(pauseGuard);
+	processDirtyNodes();
 }
 
 std::optional<connection_port_id_t> Evaluator::getPortId(const circuit_id_t circuitId, const Position blockPosition, const Position portPosition, Direction direction) const {
