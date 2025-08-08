@@ -4,11 +4,11 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include "backend/selection.h"
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
 #include "logging/logging.h"
 #include "logic/sharedLogic/logicRenderingUtils.h"
-#include "backend/selection.h"
 
 ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
 	: element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
@@ -58,7 +58,7 @@ void ViewportRenderInterface::setAddress(const Address& address) {
 
 void ViewportRenderInterface::updateView(ViewManager* viewManager) {
 	std::lock_guard<std::mutex> lock(viewMux);
-	
+
 	// Update vulkan viewport
 	viewData.viewport.x = element->GetAbsoluteOffset().x;
 	viewData.viewport.y = element->GetAbsoluteOffset().y;
@@ -106,11 +106,10 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 			boxSelections[newElement].push_back(newBoxSelection);
 		}
 
-		
 		SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selectionObj);
 		// if we're dimensional and stuff we gotta do stuff
 		if (dimensionalSelection) {
-			
+
 			if (selection.renderMode != SelectionObjectElement::RenderMode::ARROWS) {
 				// go through dimensions if we are normal
 				for (int i = 0; i < dimensionalSelection->size(); i++) {
@@ -136,9 +135,9 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 						height++;
 						dSel = selectionCast<DimensionalSelection>(sel);
 					}
-				
+
 					selectionsLeft.push(dimensionalSelection->getSelection(0)); // no idea why we do this, I don't understand the selection system
-				
+
 					if (projectionSelection->size() == 1) {
 						// add this kind of arrow
 						arrows[newElement].push_back(ArrowRenderData(origin, origin, height));
@@ -193,7 +192,7 @@ void ViewportRenderInterface::removeSelectionElement(ElementID id) {
 
 std::vector<ArrowRenderData> ViewportRenderInterface::getArrows() {
 	std::lock_guard<std::mutex> lock(elementsMux);
-	
+
 	std::vector<ArrowRenderData> returnArrows;
 	returnArrows.reserve(arrows.size());
 
@@ -225,7 +224,7 @@ ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) 
 	for (const BlockPreview::Block& block : blockPreview.blocks) {
 		BlockPreviewRenderData newPreview;
 		newPreview.position = glm::vec2(block.position.x, block.position.y);
-		newPreview.rotation = block.rotation;
+		newPreview.orientation = block.orientation;
 		{
 			std::lock_guard<std::mutex> lock(circuitMux);
 			Size size(1);
@@ -329,6 +328,4 @@ std::vector<ConnectionPreviewRenderData> ViewportRenderInterface::getConnectionP
 }
 
 void ViewportRenderInterface::spawnConfetti(FPosition start) {
-
 }
-

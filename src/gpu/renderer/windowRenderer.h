@@ -7,10 +7,10 @@
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
 
-#include "gpu/renderer/frameManager.h"
-#include "gpu/renderer/viewport/viewportRenderer.h"
-#include "gpu/renderer/viewport/viewportRenderInterface.h"
 #include "gpu/abstractions/vulkanSwapchain.h"
+#include "gpu/renderer/frameManager.h"
+#include "gpu/renderer/viewport/viewportRenderInterface.h"
+#include "gpu/renderer/viewport/viewportRenderer.h"
 
 class WindowRenderer {
 public:
@@ -37,14 +37,14 @@ private:
 	void renderToCommandBuffer(Frame& frame, uint32_t imageIndex);
 	void createRenderPass();
 	void recreateSwapchain();
-	
+
 private:
 	// screen
 	Swapchain swapchain;
 	std::atomic<bool> swapchainRecreationNeeded = false;
 	std::pair<uint32_t, uint32_t> windowSize;
 	std::mutex windowSizeMux;
-	
+
 	// main vulkan
 	VkSurfaceKHR surface;
 	VkRenderPass renderPass;
@@ -68,4 +68,4 @@ private:
 	VulkanDevice* device;
 };
 
-#endif
+#endif /* windowRenderer_h */

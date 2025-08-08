@@ -21,8 +21,8 @@ public:
 	inline bool checkCollision(Position position) const { return getCell(position); }
 	bool checkCollision(Position positionSmall, Position positionLarge) const;
 	bool checkCollision(Position positionSmall, Position positionLarge, block_id_t idToIgnore) const;
-	bool checkCollision(Position position, Rotation rotation, BlockType blockType) const;
-	bool checkCollision(Position position, Rotation rotation, BlockType blockType, block_id_t idToIgnore) const;
+	bool checkCollision(Position position, Orientation orientation, BlockType blockType) const;
+	bool checkCollision(Position position, Orientation orientation, BlockType blockType, block_id_t idToIgnore) const;
 
 	/* ----------- blocks ----------- */
 	// -- getters --
@@ -41,11 +41,11 @@ public:
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference);
+	bool tryInsertBlock(Position position, Orientation orientation, BlockType blockType, Difference* difference);
 	// Trys to remove a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool tryRemoveBlock(Position position, Difference* difference);
 	// Trys to move a block. Returns if successful. Pass a Difference* to read the what changes were made.
-	bool tryMoveBlock(Position positionOfBlock, Position position, Rotation amountToRotate, Difference* difference);
+	bool tryMoveBlock(Position positionOfBlock, Position position, Orientation transformAmount, Difference* difference);
 	// Trys to set the type of a block. Returns if successful. Pass a Difference* to read the what changes were made.
 	bool trySetType(Position positionOfBlock, BlockType type, Difference* difference);
 	// moves blocks until they 
@@ -93,7 +93,7 @@ private:
 	inline void insertCell(Position position, Cell cell) { grid.insert(position, cell); }
 	inline void removeCell(Position position) { grid.remove(position); }
 	void placeBlockCells(block_id_t id, Position position, Size size);
-	void placeBlockCells(Position position, Rotation rotation, BlockType type, block_id_t blockId);
+	void placeBlockCells(Position position, Orientation orientation, BlockType type, block_id_t blockId);
 	void placeBlockCells(const Block* block);
 	void removeBlockCells(const Block* block);
 	block_id_t getNewId() { return ++lastId; }

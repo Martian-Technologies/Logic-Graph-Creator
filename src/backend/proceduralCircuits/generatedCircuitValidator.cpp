@@ -93,7 +93,7 @@ bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 
 		std::vector<Position> takenPositions;
 		bool hasOverlap = false;
-		for (auto iter = blockData->getSize(block.rotation).iter(); iter; iter++) {
+		for (auto iter = blockData->getSize(block.orientation).iter(); iter; iter++) {
 			Position checkPos(intPos + *iter);
 			if (occupiedPositions.count(checkPos)) {
 				hasOverlap = true;
@@ -306,7 +306,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				if (!blockData) {
 					logError("Could not find block type data for block type: {}", "GeneratedCircuitValidator", (unsigned int)block.type);
 				}
-				Size blockSize = blockData->getSize(block.rotation);
+				Size blockSize = blockData->getSize(block.orientation);
 
 				const int layer = layers[id];
 				const int x = (layer - 1) * xSpacing;

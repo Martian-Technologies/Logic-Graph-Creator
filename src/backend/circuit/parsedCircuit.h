@@ -11,11 +11,11 @@ class ParsedCircuit {
 	friend class CircuitValidator;
 public:
 	struct BlockData {
-		BlockData(FPosition position, Rotation rotation, BlockType type) : position(position), rotation(rotation), type(type) { }
+		BlockData(FPosition position, Orientation orientation, BlockType type) : position(position), orientation(orientation), type(type) { }
 		BlockData(BlockType type) : type(type) { }
 
 		FPosition position = FPosition::getInvalid(); // will be validated into integer values
-		Rotation rotation = Rotation::ZERO; // todo: make into integer value to generalize the rotation
+		Orientation orientation = Orientation(Rotation::ZERO, false);
 		BlockType type = BlockType::NONE;
 	};
 
@@ -73,7 +73,7 @@ public:
 	);
 	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
 
-	void addBlock(block_id_t id, FPosition pos, Rotation rotation, BlockType type);
+	void addBlock(block_id_t id, FPosition pos, Orientation orientation, BlockType type);
 	void addBlock(block_id_t id, BlockType type);
 	void addConnection(block_id_t outputBlockId, connection_end_id_t outputEndId, block_id_t inputBlockId, connection_end_id_t inputEndId);
 

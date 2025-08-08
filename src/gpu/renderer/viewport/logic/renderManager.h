@@ -2,7 +2,6 @@
 #define renderManager_h
 
 #include "backend/container/difference.h"
-#include "backend/address.h"
 
 class Circuit;
 class SimulatorMappingUpdate;
@@ -35,10 +34,10 @@ private:
 
 private:
 	struct RenderedBlock {
-		RenderedBlock(BlockType type, Rotation rotation) : type(type), rotation(rotation) {}
+		RenderedBlock(BlockType type, Orientation orientation) : type(type), orientation(orientation) {}
 		std::unordered_map<std::pair<Position, Position>, Position> connectionsToOtherBlock;
 		BlockType type;
-		Rotation rotation;
+		Orientation orientation;
 	};
 
 	Circuit* circuit;

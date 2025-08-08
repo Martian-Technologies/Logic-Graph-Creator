@@ -1,7 +1,7 @@
 #include "viewportRenderer.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 void ViewportRenderer::init(VulkanDevice* device, VkRenderPass renderPass) {
@@ -26,8 +26,8 @@ void ViewportRenderer::render(Frame& frame, ViewportRenderInterface* viewport) {
 	// set dynamic state
 	vkCmdSetViewport(frame.mainCommandBuffer, 0, 1, &viewData.viewport);
 	VkRect2D scissor{};
-	scissor.offset = {static_cast<int32_t>(viewData.viewport.x), static_cast<int32_t>(viewData.viewport.y)};
-	scissor.extent = {static_cast<uint32_t>(viewData.viewport.width), static_cast<uint32_t>(viewData.viewport.height)};
+	scissor.offset = { static_cast<int32_t>(viewData.viewport.x), static_cast<int32_t>(viewData.viewport.y) };
+	scissor.extent = { static_cast<uint32_t>(viewData.viewport.width), static_cast<uint32_t>(viewData.viewport.height) };
 	vkCmdSetScissor(frame.mainCommandBuffer, 0, 1, &scissor);
 
 	// render subrenderers

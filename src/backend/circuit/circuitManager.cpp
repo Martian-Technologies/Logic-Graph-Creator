@@ -181,7 +181,7 @@ circuit_id_t CircuitManager::createNewCircuit(const GeneratedCircuit* generatedC
 			const GeneratedCircuit::GeneratedCircuitBlockData* blockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				blockData->position + blockDataManager.getConnectionVector(blockData->type, blockData->rotation, port.internalBlockConnectionEndId).first
+				blockData->position + blockDataManager.getConnectionVector(blockData->type, blockData->orientation, port.internalBlockConnectionEndId).first
 			);
 		}
 	}
@@ -253,7 +253,7 @@ void CircuitManager::updateExistingCircuit(circuit_id_t id, const GeneratedCircu
 			const GeneratedCircuit::GeneratedCircuitBlockData* generatedBlockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->rotation, port.internalBlockConnectionEndId).first
+				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).first
 			);
 		}
 	}
@@ -290,7 +290,7 @@ void CircuitManager::updateExistingCircuit(circuit_id_t id, const GeneratedCircu
 			const GeneratedCircuit::GeneratedCircuitBlockData* generatedBlockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->rotation, port.internalBlockConnectionEndId).first
+				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).first
 			);
 		}
 	}

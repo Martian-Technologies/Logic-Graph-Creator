@@ -40,16 +40,16 @@ struct SelectionObjectElement {
 
 struct BlockPreview {
 	struct Block {
-		Block(BlockType type, Position position, Rotation rotation)
-		: type(type), position(position), rotation(rotation) { }
+		Block(BlockType type, Position position, Orientation orientation)
+		: type(type), position(position), orientation(orientation) { }
 		BlockType type;
 		Position position;
-		Rotation rotation;
+		Orientation orientation;
 	};
 
 	BlockPreview() = default;
-	BlockPreview(BlockType type, Position position, Rotation rotation)
-		: blocks({BlockPreview::Block(type, position, rotation)}) { }
+	BlockPreview(BlockType type, Position position, Orientation orientation)
+		: blocks({BlockPreview::Block(type, position, orientation)}) { }
 	BlockPreview(std::vector<Block>&& blocks) : blocks(std::move(blocks)) {}
 
 	std::vector<Block> blocks;

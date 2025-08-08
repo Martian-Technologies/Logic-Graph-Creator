@@ -52,7 +52,7 @@ public:
 		sendBlockDataUpdate();
 	}
 	inline Size getSize() const noexcept { return blockSize; }
-	inline Size getSize(Rotation rotation) const noexcept { return rotateSize(rotation, blockSize); }
+	inline Size getSize(Orientation orientation) const noexcept { return orientation * blockSize; }
 
 	inline BlockType getBlockType() const { return blockType; }
 
@@ -124,28 +124,20 @@ public:
 		}
 		return { 0, false };
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector, Rotation rotation) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Vector vector, Orientation orientation) const noexcept {
 		if (defaultData) return { 0, vector.dx == 0 && vector.dy == 0 };
-		Vector noRotationVec = reverseRotateVectorWithArea(
-			vector,
-			blockSize,
-			rotation
-		);
+		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
 		for (auto& pair : connections) {
-			if (pair.second.first == noRotationVec && pair.second.second)
+			if (pair.second.first == noOrientationVec && pair.second.second)
 				return { pair.first, true };
 		}
 		return { 0, false };
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector, Rotation rotation) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Vector vector, Orientation orientation) const noexcept {
 		if (defaultData) return { 1, vector.dx == 0 && vector.dy == 0 };
-		Vector noRotationVec = reverseRotateVectorWithArea(
-			vector,
-			blockSize,
-			rotation
-		);
+		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
 		for (auto& pair : connections) {
-			if (pair.second.first == noRotationVec && !pair.second.second)
+			if (pair.second.first == noOrientationVec && !pair.second.second)
 				return { pair.first, true };
 		}
 		return { 0, false };
@@ -156,15 +148,14 @@ public:
 		if (iter == connections.end()) return { Vector(), false };
 		return { iter->second.first, true };
 	}
-	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId, Rotation rotation) const noexcept {
+	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId, Orientation orientation) const noexcept {
 		if (defaultData) return { Vector(0), connectionId <= 1 };
 		auto iter = connections.find(connectionId);
 		if (iter == connections.end()) return { Vector(), false };
 		return {
-			rotateVectorWithArea(
+			orientation.transformVectorWithArea(
 				iter->second.first,
-				blockSize,
-				rotation
+				blockSize
 			),
 			true
 		};

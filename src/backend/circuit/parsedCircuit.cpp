@@ -22,8 +22,8 @@ void ParsedCircuit::addConnectionPort(
 	valid = false;
 }
 
-void ParsedCircuit::addBlock(block_id_t blockId, FPosition position, Rotation rotation, BlockType type) {
-	blocks.emplace(blockId, ParsedCircuit::BlockData(position, rotation, type));
+void ParsedCircuit::addBlock(block_id_t blockId, FPosition position, Orientation orientation, BlockType type) {
+	blocks.emplace(blockId, ParsedCircuit::BlockData(position, orientation, type));
 	valid = false;
 }
 

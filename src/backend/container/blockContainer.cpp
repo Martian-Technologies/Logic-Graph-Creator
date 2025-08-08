@@ -5,7 +5,7 @@
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();
 	for (auto iter : blocks) {
-		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getOrientation(), iter.second.type());
 	}
 
 	lastId = 0;
@@ -29,26 +29,26 @@ bool BlockContainer::checkCollision(Position positionSmall, Position positionLar
 	return false;
 }
 
-bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType) const {
-	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation).getLargestVectorInArea());
+bool BlockContainer::checkCollision(Position position, Orientation orientation, BlockType blockType) const {
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, orientation).getLargestVectorInArea());
 }
 
-bool BlockContainer::checkCollision(Position position, Rotation rotation, BlockType blockType, block_id_t idToIgnore) const {
-	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, rotation).getLargestVectorInArea(), idToIgnore);
+bool BlockContainer::checkCollision(Position position, Orientation orientation, BlockType blockType, block_id_t idToIgnore) const {
+	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, orientation).getLargestVectorInArea(), idToIgnore);
 }
 
-bool BlockContainer::tryInsertBlock(Position position, Rotation rotation, BlockType blockType, Difference* difference) {
-	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, rotation, blockType))
+bool BlockContainer::tryInsertBlock(Position position, Orientation orientation, BlockType blockType, Difference* difference) {
+	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, orientation, blockType))
 		return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
 	iter->second.setId(id);
 	iter->second.setPosition(position);
-	iter->second.setRotation(rotation);
+	iter->second.setOrientation(orientation);
 	if (blockTypeCounts.size() <= blockType) blockTypeCounts.resize(blockType + 1);
 	blockTypeCounts[blockType]++;
 	placeBlockCells(&iter->second);
-	difference->addPlacedBlock(position, rotation, blockType);
+	difference->addPlacedBlock(position, orientation, blockType);
 	return true;
 }
 
@@ -76,23 +76,23 @@ bool BlockContainer::tryRemoveBlock(Position position, Difference* difference) {
 		}
 	}
 	blockTypeCounts[block.type()]--;
-	difference->addRemovedBlock(block.getPosition(), block.getRotation(), block.type());
+	difference->addRemovedBlock(block.getPosition(), block.getOrientation(), block.type());
 	block.destroy();
 	blocks.erase(iter);
 	return true;
 }
 
-bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, Rotation amountToRotate, Difference* difference) {
+bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, Orientation transformAmount, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
-	Rotation newRotation = addRotations(block->getRotation(), amountToRotate);
+	Orientation newOrientation = block->getOrientation() * transformAmount;
 	Position newPosition = position + (block->getPosition() - positionOfBlock);
-	if (checkCollision(newPosition, newRotation, block->type(), block->id())) return false;
+	if (checkCollision(newPosition, newOrientation, block->type(), block->id())) return false;
 	// do move
-	difference->addMovedBlock(block->getPosition(), block->getRotation(), newPosition, newRotation);
+	difference->addMovedBlock(block->getPosition(), block->getOrientation(), newPosition, newOrientation);
 	removeBlockCells(block);
 	block->setPosition(newPosition);
-	block->setRotation(newRotation);
+	block->setOrientation(newOrientation);
 	placeBlockCells(block);
 	return true;
 }
@@ -103,7 +103,7 @@ bool BlockContainer::trySetType(Position positionOfBlock, BlockType type, Differ
 	if (!oldBlock) return false;
 	if (oldBlock->type() == type) return true;
 	Position pos = oldBlock->getPosition();
-	Rotation rot = oldBlock->getRotation();
+	Orientation rot = oldBlock->getOrientation();
 	auto connections = oldBlock->getConnectionContainer().getConnections();
 	tryRemoveBlock(positionOfBlock, difference);
 	tryInsertBlock(pos, rot, type, difference);
@@ -127,7 +127,7 @@ void BlockContainer::resizeBlockType(BlockType blockType, Size newSize, Differen
 		if (block->type() != blockType) continue;
 		removeBlockCells(block);
 		Position position = block->getPosition();
-		Size newRotatedSize = rotateSize(block->getRotation(), newSize);
+		Size newRotatedSize = block->getOrientation() * newSize;
 
 		while (true) {
 			bool hitCell = false;
@@ -145,7 +145,7 @@ void BlockContainer::resizeBlockType(BlockType blockType, Size newSize, Differen
 		}
 		placeBlockCells(block->id(), position, newRotatedSize);
 		if (block->getPosition() == position) continue;
-		difference->addMovedBlock(block->getPosition(), block->getRotation(), position, block->getRotation());
+		difference->addMovedBlock(block->getPosition(), block->getOrientation(), position, block->getOrientation());
 		block->setPosition(position);
 	}
 }
@@ -317,8 +317,8 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 	}
 }
 
-void BlockContainer::placeBlockCells(Position position, Rotation rotation, BlockType type, block_id_t blockId) {
-	for (auto iter = blockDataManager->getBlockSize(type, rotation).iter(); iter; iter++) {
+void BlockContainer::placeBlockCells(Position position, Orientation orientation, BlockType type, block_id_t blockId) {
+	for (auto iter = blockDataManager->getBlockSize(type, orientation).iter(); iter; iter++) {
 		insertCell(position + *iter, Cell(blockId));
 	}
 }
@@ -344,7 +344,7 @@ void BlockContainer::removeBlockCells(const Block* block) {
 Difference BlockContainer::getCreationDifference() const {
 	Difference difference;
 	for (auto iter : blocks) {
-		difference.addPlacedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+		difference.addPlacedBlock(iter.second.getPosition(), iter.second.getOrientation(), iter.second.type());
 	}
 	for (auto iter : blocks) {
 		for (auto& connectionIter : iter.second.getConnectionContainer().getConnections()) {
@@ -363,7 +363,7 @@ Difference BlockContainer::getCreationDifference() const {
 DifferenceSharedPtr BlockContainer::getCreationDifferenceShared() const {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	for (auto iter : blocks) {
-		difference->addPlacedBlock(iter.second.getPosition(), iter.second.getRotation(), iter.second.type());
+		difference->addPlacedBlock(iter.second.getPosition(), iter.second.getOrientation(), iter.second.type());
 	}
 	for (auto iter : blocks) {
 		for (auto& connectionIter : iter.second.getConnectionContainer().getConnections()) {

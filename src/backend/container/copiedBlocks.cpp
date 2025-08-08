@@ -23,11 +23,11 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 		blocks.emplace_back(
 			block->type(),
 			block->getPosition(),
-			block->getRotation()
+			block->getOrientation()
 		);
 		const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());
 		for (auto& iter : block->getConnectionContainer().getConnections()) {
-			auto pair = blockData->getConnectionVector(iter.first, block->getRotation());
+			auto pair = blockData->getConnectionVector(iter.first, block->getOrientation());
 			if (!pair.second) continue;
 			Position connectionPosition = block->getPosition() + pair.first;
 			bool isInput = blockData->isConnectionInput(iter.first);
@@ -42,7 +42,7 @@ CopiedBlocks::CopiedBlocks(const BlockContainer* blockContainer, SharedSelection
 				}
 				if (skipConnection) continue;
 				auto otherPair = blockContainer->getBlockDataManager()->getBlockData(otherBlock->type())->getConnectionVector(
-					connectionEnd.getConnectionId(), otherBlock->getRotation()
+					connectionEnd.getConnectionId(), otherBlock->getOrientation()
 				);
 				if (!otherPair.second) continue;
 				Position otherConnectionPosition = otherBlock->getPosition() + otherPair.first;

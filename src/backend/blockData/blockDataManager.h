@@ -86,9 +86,9 @@ public:
 		if (!blockExists(type)) return Size();
 		return blockData[type - 1].getSize();
 	}
-	inline Size getBlockSize(BlockType type, Rotation rotation) const noexcept {
+	inline Size getBlockSize(BlockType type, Orientation orientation) const noexcept {
 		if (!blockExists(type)) return Size();
-		return blockData[type - 1].getSize(rotation);
+		return blockData[type - 1].getSize(orientation);
 	}
 
 	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Vector vector) const noexcept {
@@ -99,21 +99,21 @@ public:
 		if (!blockExists(type)) return { 0, false };
 		return blockData[type - 1].getOutputConnectionId(vector);
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getInputConnectionId(BlockType type, Orientation orientation, Vector vector) const noexcept {
 		if (!blockExists(type)) return { 0, false };
-		return blockData[type - 1].getInputConnectionId(vector, rotation);
+		return blockData[type - 1].getInputConnectionId(vector, orientation);
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Rotation rotation, Vector vector) const noexcept {
+	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(BlockType type, Orientation orientation, Vector vector) const noexcept {
 		if (!blockExists(type)) return { 0, false };
-		return blockData[type - 1].getOutputConnectionId(vector, rotation);
+		return blockData[type - 1].getOutputConnectionId(vector, orientation);
 	}
 	inline std::pair<Vector, bool> getConnectionVector(BlockType type, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return { Vector(), false };
 		return blockData[type - 1].getConnectionVector(connectionId);
 	}
-	inline std::pair<Vector, bool> getConnectionVector(BlockType type, Rotation rotation, connection_end_id_t connectionId) const noexcept {
+	inline std::pair<Vector, bool> getConnectionVector(BlockType type, Orientation orientation, connection_end_id_t connectionId) const noexcept {
 		if (!blockExists(type)) return { Vector(), false };
-		return blockData[type - 1].getConnectionVector(connectionId, rotation);
+		return blockData[type - 1].getConnectionVector(connectionId, orientation);
 	}
 
 	inline connection_end_id_t getConnectionCount(BlockType type) const noexcept {

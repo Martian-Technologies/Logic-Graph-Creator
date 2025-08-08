@@ -11,9 +11,9 @@ void GeneratedCircuit::addConnectionPort(
 	ports.emplace_back(isInput, connectionEndId, positionOnBlock, internalBlockId, internalBlockConnectionEndId, portName);
 }
 
-block_id_t GeneratedCircuit::addBlock(Position position, Rotation rotation, BlockType type) {
+block_id_t GeneratedCircuit::addBlock(Position position, Orientation orientation, BlockType type) {
 	block_id_t id = getNewBlockId();
-	blocks.emplace(id, GeneratedCircuitBlockData(position, rotation, type));
+	blocks.emplace(id, GeneratedCircuitBlockData(position, orientation, type));
 	positionMap.insert(position, id);
 	valid = false;
 	return id;
@@ -21,7 +21,7 @@ block_id_t GeneratedCircuit::addBlock(Position position, Rotation rotation, Bloc
 
 block_id_t GeneratedCircuit::addBlock(BlockType type) {
 	block_id_t id = getNewBlockId();
-	blocks.emplace(id, GeneratedCircuitBlockData(Position(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), Rotation::ZERO, type));
+	blocks.emplace(id, GeneratedCircuitBlockData(Position(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), Orientation(), type));
 	valid = false;
 	return id;
 }

@@ -10,7 +10,7 @@ void MoveTool::reset() {
 		mode = "Area";
 		activeSelectionHelper = std::make_shared<AreaCreationTool>();
 	}
-	amountToRotate = Rotation::ZERO;
+	transformAmount = Rotation::ZERO;
 	activeSelectionHelper->restart();
 	updateElements();
 }
@@ -44,14 +44,14 @@ void MoveTool::setMode(std::string toolMode) {
 }
 
 bool MoveTool::rotateCW(const Event* event) {
-	amountToRotate = rotate(amountToRotate, true);
+	transformAmount.rotate(true);
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool MoveTool::rotateCCW(const Event* event) {
-	amountToRotate = rotate(amountToRotate, false);
+	transformAmount.rotate(false);
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
@@ -62,7 +62,7 @@ bool MoveTool::click(const Event* event) {
 	if (circuit->tryMoveBlocks(
 		activeSelectionHelper->getSelection(),
 		lastPointerPosition - getSelectionOrigin(activeSelectionHelper->getSelection()),
-		amountToRotate
+		transformAmount
 	)) {
 		reset();
 		toolStackInterface->pushTool(activeSelectionHelper);
@@ -116,8 +116,8 @@ void MoveTool::updateElements() {
 			blocksSet.insert(block);
 			blocks.emplace_back(
 				block->type(),
-				lastPointerPosition + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
-				addRotations(block->getRotation(), amountToRotate)
+				lastPointerPosition + transformAmount * (block->getPosition() - selectionOrigin) - transformAmount.transformVectorWithArea(Vector(0), block->size()),
+				block->getOrientation() * transformAmount
 			);
 
 			// const BlockData* blockData = blockContainer->getBlockDataManager()->getBlockData(block->type());

@@ -12,9 +12,9 @@ public:
 	struct CopiedBlockData {
 		BlockType blockType;
 		Position position;
-		Rotation rotation;
-	    CopiedBlockData(BlockType type, Position pos, Rotation rot)
-	        : blockType(type), position(pos), rotation(rot) {}
+		Orientation orientation;
+	    CopiedBlockData(BlockType type, Position pos, Orientation rot)
+	        : blockType(type), position(pos), orientation(rot) {}
 	};
 
 	const std::vector<CopiedBlockData> getCopiedBlocks() const { return blocks; }

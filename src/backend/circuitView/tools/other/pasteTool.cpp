@@ -9,14 +9,14 @@ void PasteTool::activate() {
 }
 
 bool PasteTool::rotateCW(const Event* event) {
-	amountToRotate = rotate(amountToRotate, true);
+	transformAmount.rotate(true);
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool PasteTool::rotateCCW(const Event* event) {
-	amountToRotate = rotate(amountToRotate, false);
+	transformAmount.rotate(false);
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
@@ -24,7 +24,7 @@ bool PasteTool::rotateCCW(const Event* event) {
 
 bool PasteTool::place(const Event* event) {
 	SharedCopiedBlocks copiedBlocks = circuitView->getBackend()->getClipboard();
-	if (copiedBlocks) circuit->tryInsertCopiedBlocks(copiedBlocks, lastPointerPosition, amountToRotate);
+	if (copiedBlocks) circuit->tryInsertCopiedBlocks(copiedBlocks, lastPointerPosition, transformAmount);
 
 	return true;
 }
@@ -51,8 +51,8 @@ void PasteTool::updateElements() {
 		for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 			blocks.emplace_back(
 				block.blockType,
-				lastPointerPosition + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
-				addRotations(block.rotation, amountToRotate)
+				lastPointerPosition + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
+				block.orientation * transformAmount
 			);
 		}
 		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));

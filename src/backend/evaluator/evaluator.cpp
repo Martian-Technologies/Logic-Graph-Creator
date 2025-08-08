@@ -91,18 +91,18 @@ void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 		const auto& [modificationType, modificationData] = modification;
 		switch (modificationType) {
 		case Difference::ModificationType::REMOVED_BLOCK: {
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			edit_removeBlock(pauseGuard, evalCircuitId, diffCache, position, rotation, blockType);
+			const auto& [position, orientation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+			edit_removeBlock(pauseGuard, evalCircuitId, diffCache, position, orientation, blockType);
 			break;
 		}
 		case Difference::ModificationType::PLACE_BLOCK: {
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-			edit_placeBlock(pauseGuard, evalCircuitId, diffCache, position, rotation, blockType);
+			const auto& [position, orientation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+			edit_placeBlock(pauseGuard, evalCircuitId, diffCache, position, orientation, blockType);
 			break;
 		}
 		case Difference::ModificationType::MOVE_BLOCK: {
-			const auto& [curPosition, curRotation, newPosition, newRotation] = std::get<Difference::move_modification_t>(modificationData);
-			edit_moveBlock(pauseGuard, evalCircuitId, diffCache, curPosition, curRotation, newPosition, newRotation);
+			const auto& [curPosition, curOrientation, newPosition, newOrientation] = std::get<Difference::move_modification_t>(modificationData);
+			edit_moveBlock(pauseGuard, evalCircuitId, diffCache, curPosition, curOrientation, newPosition, newOrientation);
 			break;
 		}
 		case Difference::ModificationType::REMOVED_CONNECTION: {
@@ -119,7 +119,7 @@ void Evaluator::makeEditInPlace(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	}
 }
 
-void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+void Evaluator::edit_removeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Orientation orientation, BlockType type) {
 	// Find the circuit and remove the block
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
@@ -163,7 +163,7 @@ void Evaluator::edit_deleteICContents(SimPauseGuard& pauseGuard, eval_circuit_id
 	});
 }
 
-void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, BlockType type) {
+void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Orientation orientation, BlockType type) {
 	GateType gateType = GateType::NONE;
 	switch (type) {
 	case BlockType::AND: gateType = GateType::AND; break;
@@ -183,7 +183,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	if (gateType == GateType::NONE) {
 		const circuit_id_t ICId = circuitBlockDataManager.getCircuitId(type);
 		if (ICId != 0) {
-			edit_placeIC(pauseGuard, evalCircuitId, diffCache, position, rotation, ICId);
+			edit_placeIC(pauseGuard, evalCircuitId, diffCache, position, orientation, ICId);
 			return;
 		}
 		logError("Unsupported BlockType {}", "Evaluator::edit_placeBlock", type);
@@ -202,7 +202,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	checkToCreateExternalConnections(pauseGuard, evalCircuitId, position);
 }
 
-void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Rotation rotation, circuit_id_t circuitId) {
+void Evaluator::edit_placeIC(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position position, Orientation orientation, circuit_id_t circuitId) {
 	changedICs = true;
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
@@ -560,7 +560,7 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 	return getConnectionPoint(node->getId(), *internalPosition, direction, circuitPortDependencies, circuitNodeDependencies);
 }
 
-void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) {
+void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Orientation curOrientation, Position newPosition, Orientation newOrientation) {
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) {
 		logError("EvalCircuit with id {} not found", "Evaluator::edit_moveBlock", evalCircuitId);

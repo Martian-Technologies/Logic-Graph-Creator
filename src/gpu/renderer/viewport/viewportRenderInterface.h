@@ -24,10 +24,19 @@ public:
 	~ViewportRenderInterface();
 
 	ViewportViewData getViewData();
-	inline bool hasCircuit() { std::lock_guard<std::mutex> lock(circuitMux); return circuit != nullptr; }
+	inline bool hasCircuit() {
+		std::lock_guard<std::mutex> lock(circuitMux);
+		return circuit != nullptr;
+	}
 	inline VulkanChunker& getChunker() { return chunker; }
-	inline std::shared_ptr<Evaluator> getEvaluator() { std::lock_guard<std::mutex> lock(evaluatorMux); return evaluator; }
-	inline const Address& getAddress() { std::lock_guard<std::mutex> lock(addressMux); return address; }
+	inline std::shared_ptr<Evaluator> getEvaluator() {
+		std::lock_guard<std::mutex> lock(evaluatorMux);
+		return evaluator;
+	}
+	inline const Address& getAddress() {
+		std::lock_guard<std::mutex> lock(addressMux);
+		return address;
+	}
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	std::vector<BoxSelectionRenderData> getBoxSelections();

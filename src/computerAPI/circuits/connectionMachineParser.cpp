@@ -329,7 +329,7 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 
 			outputFile << "blockId " << itr->first << ' '
 				<< blockTypeStr << ' ' << pos.x << ' '
-				<< pos.y << ' ' << rotationToString(block.getRotation()) << '\n';
+				<< pos.y << ' ' << block.getOrientation().toString() << '\n';
 			const ConnectionContainer& connectionContainer = block.getConnectionContainer();
 
 			for (auto& connectionIter : connectionContainer.getConnections()) {

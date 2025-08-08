@@ -8,9 +8,9 @@ class GeneratedCircuit {
 	friend class GeneratedCircuitValidator;
 public:
 	struct GeneratedCircuitBlockData {
-		GeneratedCircuitBlockData(Position position, Rotation rotation, BlockType type) : position(position), rotation(rotation), type(type) { }
+		GeneratedCircuitBlockData(Position position, Orientation orientation, BlockType type) : position(position), orientation(orientation), type(type) { }
 		Position position;
-		Rotation rotation;
+		Orientation orientation;
 		BlockType type;
 	};
 
@@ -58,7 +58,7 @@ public:
 	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
 
 
-	block_id_t addBlock(Position pos, Rotation rotation, BlockType type);
+	block_id_t addBlock(Position pos, Orientation orientation, BlockType type);
 	block_id_t addBlock(BlockType type);
 	void addConnection(block_id_t outputBlockId, connection_end_id_t outputId, block_id_t inputBlockId, connection_end_id_t inputId);
 

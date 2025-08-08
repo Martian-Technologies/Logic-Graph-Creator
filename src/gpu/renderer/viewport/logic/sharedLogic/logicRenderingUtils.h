@@ -5,7 +5,7 @@
 
 FVector getOutputOffset(Position position, Circuit* circuit);
 FVector getInputOffset(Position position, Circuit* circuit);
-FVector getOutputOffset(BlockType blockType, Rotation rotation);
-FVector getInputOffset(BlockType blockType, Rotation rotation);
+FVector getOutputOffset(BlockType blockType, Orientation orientation);
+FVector getInputOffset(BlockType blockType, Orientation orientation);
 
 #endif

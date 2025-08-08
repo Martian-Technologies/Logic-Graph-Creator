@@ -25,7 +25,7 @@ private:
 	Position lastElementPosition;
 	ElementID elementID = 0;
 	unsigned long long lastClipboardEditCounter = 0;
-	Rotation amountToRotate = Rotation::ZERO;
+	Orientation transformAmount = Orientation();
 	bool validatePlacement() const;
 };
 

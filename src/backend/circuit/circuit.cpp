@@ -35,12 +35,12 @@ void Circuit::disconnectListener(void* object) {
 		listenerFunctions.erase(iter);
 }
 
-bool Circuit::tryInsertBlock(Position position, Rotation rotation, BlockType blockType) {
+bool Circuit::tryInsertBlock(Position position, Orientation orientation, BlockType blockType) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.tryInsertBlock(position, rotation, blockType, difference.get());
+	bool out = blockContainer.tryInsertBlock(position, orientation, blockType, difference.get());
 	sendDifference(difference);
 	return out;
 }
@@ -60,13 +60,13 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 	ZoneScoped;
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, Rotation::ZERO, difference.get());
+	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, Orientation(), difference.get());
 	assert(out != difference->empty());
 	sendDifference(difference);
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation amountToRotate) {
+bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Orientation transformAmount) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
@@ -81,10 +81,10 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation
 		if (block) {
 			if (blocks.contains(block)) continue;
 			if (
-				// !positions.contains(newSelectionOrigin + rotateVector(*iter - selectionOrigin, amountToRotate)) &&
+				// !positions.contains(newSelectionOrigin + rotateVector(*iter - selectionOrigin, transformAmount)) &&
 				blockContainer.checkCollision(
-					newSelectionOrigin + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
-					addRotations(block->getRotation(), amountToRotate),
+					newSelectionOrigin + transformAmount * (block->getPosition() - selectionOrigin) - transformAmount.transformVectorWithArea(Vector(0), block->size()),
+					block->getOrientation() * transformAmount,
 					block->type(),
 					block->id()
 				)
@@ -99,8 +99,8 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Rotation
 			const Block* block = *iter;
 			if (blockContainer.tryMoveBlock(
 				block->getPosition(),
-				newSelectionOrigin + rotateVector(block->getPosition() - selectionOrigin, amountToRotate) - rotateVectorWithArea(Vector(0), block->size(), amountToRotate),
-				amountToRotate,
+				newSelectionOrigin + transformAmount * (block->getPosition() - selectionOrigin) - transformAmount.transformVectorWithArea(Vector(0), block->size()),
+				transformAmount,
 				difference.get())
 			) {
 				iter = blocks.erase(iter);
@@ -142,7 +142,7 @@ void Circuit::setType(SharedSelection selection, BlockType type, Difference* dif
 	}
 }
 
-void Circuit::tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType) {
+void Circuit::tryInsertOverArea(Position cellA, Position cellB, Orientation transformAmount, BlockType blockType) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
@@ -152,7 +152,7 @@ void Circuit::tryInsertOverArea(Position cellA, Position cellB, Rotation rotatio
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	for (cord_t x = cellA.x; x <= cellB.x; x++) {
 		for (cord_t y = cellA.y; y <= cellB.y; y++) {
-			blockContainer.tryInsertBlock(Position(x, y), rotation, blockType, difference.get());
+			blockContainer.tryInsertBlock(Position(x, y), transformAmount, blockType, difference.get());
 		}
 	}
 	sendDifference(difference);
@@ -198,7 +198,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 	if (!parsedCircuit.isValid()) return false;
 
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
-		if (blockContainer.checkCollision(block.position.snap(), block.rotation, block.type)) {
+		if (blockContainer.checkCollision(block.position.snap(), block.orientation, block.type)) {
 			return false;
 		}
 	}
@@ -210,7 +210,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 	for (const auto& [oldId, block] : parsedCircuit.getBlocks()) {
 		Position targetPos = block.position.snap();
 		block_id_t newId;
-		if (!blockContainer.tryInsertBlock(targetPos, block.rotation, block.type, difference.get())) {
+		if (!blockContainer.tryInsertBlock(targetPos, block.orientation, block.type, difference.get())) {
 			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
@@ -245,7 +245,7 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 	if (!generatedCircuit.isValid()) return false;
 
 	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
-		if (blockContainer.checkCollision(block.position, block.rotation, block.type)) {
+		if (blockContainer.checkCollision(block.position, block.orientation, block.type)) {
 			return false;
 		}
 	}
@@ -257,7 +257,7 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 	for (const auto& [oldId, block] : generatedCircuit.getBlocks()) {
 		Position targetPos = block.position;
 		block_id_t newId;
-		if (!blockContainer.tryInsertBlock(targetPos, block.rotation, block.type, difference.get())) {
+		if (!blockContainer.tryInsertBlock(targetPos, block.orientation, block.type, difference.get())) {
 			logError("Failed to insert block while inserting block.", "Circuit");
 		} else {
 			realIds[oldId] = blockContainer.getBlock(targetPos)->id();
@@ -285,15 +285,15 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 	return true;
 }
 
-bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation amountToRotate) {
+bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Orientation transformAmount) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	Vector totalOffset = Vector(position.x, position.y) + (Position() - copiedBlocks->getMinPosition());
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (blockContainer.checkCollision(
-			position + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
-			addRotations(block.rotation, amountToRotate),
+			position + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
+			block.orientation * transformAmount,
 			block.blockType
 		)) {
 			return false;
@@ -302,8 +302,8 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (!blockContainer.tryInsertBlock(
-			position + rotateVector(block.position - copiedBlocks->getMinPosition(), amountToRotate) - rotateVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.rotation), amountToRotate),
-			addRotations(block.rotation, amountToRotate),
+			position + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
+			block.orientation * transformAmount,
 			block.blockType, difference.get()
 		)) {
 			logError("Failed to insert block while inserting block.");
@@ -311,8 +311,8 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	}
 	for (const std::pair<Position, Position>& conn : copiedBlocks->getCopiedConnections()) {
 		if (!blockContainer.tryCreateConnection(
-			position + rotateVector(conn.second - copiedBlocks->getMinPosition(), amountToRotate),
-			position + rotateVector(conn.first - copiedBlocks->getMinPosition(), amountToRotate),
+			position + transformAmount * (conn.second - copiedBlocks->getMinPosition()),
+			position + transformAmount * (conn.first - copiedBlocks->getMinPosition()),
 			difference.get()
 		)) {
 			logError("Failed to create connection while inserting block.");
@@ -472,7 +472,7 @@ void Circuit::undo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), subRotations(std::get<1>(moveModification), std::get<3>(moveModification)), newDifference.get());
+			blockContainer.tryMoveBlock(std::get<2>(moveModification), std::get<0>(moveModification), std::get<1>(moveModification).relativeTo(std::get<3>(moveModification)), newDifference.get());
 			break;
 		}
 	}
@@ -510,7 +510,7 @@ void Circuit::redo() {
 			break;
 		case MinimalDifference::MOVE_BLOCK:
 			moveModification = std::get<MinimalDifference::move_modification_t>(modification.second);
-			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), subRotations(std::get<3>(moveModification), std::get<1>(moveModification)), newDifference.get());
+			blockContainer.tryMoveBlock(std::get<0>(moveModification), std::get<2>(moveModification), std::get<3>(moveModification).relativeTo(std::get<1>(moveModification)), newDifference.get());
 			break;
 		}
 	}

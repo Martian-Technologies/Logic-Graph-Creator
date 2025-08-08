@@ -1,19 +1,19 @@
 #include "blockTextureManager.h"
 
-#include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
+#include "computerAPI/fileLoader.h"
 
 #include <stb_image.h>
 
-void BlockTextureManager::init(VulkanDevice *device) {
+void BlockTextureManager::init(VulkanDevice* device) {
 	this->device = device;
-	
-	descriptorAllocator.init(device, 100, {{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f}});
+
+	descriptorAllocator.init(device, 100, { { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1.0f } });
 
 	// upload texture
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	VkExtent3D size { (uint32_t)texWidth, (uint32_t)texHeight, 1};
+	VkExtent3D size{ (uint32_t)texWidth, (uint32_t)texHeight, 1 };
 	mainTexture.image = createImage(device, pixels, size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 	stbi_image_free(pixels);
 
@@ -42,9 +42,7 @@ void BlockTextureManager::cleanup() {
 	destroyImage(mainTexture.image);
 	vkDestroySampler(device->getDevice(), mainTexture.sampler, nullptr);
 	vkDestroyDescriptorSetLayout(device->getDevice(), descriptorLayout, nullptr);
-	
+
 	// destroy descriptor allocator
 	descriptorAllocator.cleanup();
 }
-
-

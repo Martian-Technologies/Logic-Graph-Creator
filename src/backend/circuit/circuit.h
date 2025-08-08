@@ -47,17 +47,17 @@ public:
 
 	/* ----------- blocks ----------- */
 	// Trys to insert a block. Returns if successful.
-	bool tryInsertBlock(Position position, Rotation rotation, BlockType blockType);
+	bool tryInsertBlock(Position position, Orientation transformAmount, BlockType blockType);
 	// Trys to remove a block. Returns if successful.
 	bool tryRemoveBlock(Position position);
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(Position positionOfBlock, Position position);
 	// Trys to move blocks. Wont move any if one cant move. Returns if successful.
-	bool tryMoveBlocks(SharedSelection selection, Vector movement, Rotation amountToRotate);
+	bool tryMoveBlocks(SharedSelection selection, Vector movement, Orientation transformAmount);
 	// Sets the type of blocks. Will set as many of the blocks as possible.
 	void setType(SharedSelection selection, BlockType type);
 
-	void tryInsertOverArea(Position cellA, Position cellB, Rotation rotation, BlockType blockType);
+	void tryInsertOverArea(Position cellA, Position cellB, Orientation transformAmount, BlockType blockType);
 	void tryRemoveOverArea(Position cellA, Position cellB);
 
 	bool checkCollision(const SharedSelection& selection);
@@ -65,7 +65,7 @@ public:
 	// Trys to place a parsed circuit at a position
 	bool tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Position position);
 	bool tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit, Position position);
-	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Rotation rotation);
+	bool tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Position position, Orientation transformAmount);
 
 	/* ----------- connections ----------- */
 	// Trys to creates a connection. Returns if successful.

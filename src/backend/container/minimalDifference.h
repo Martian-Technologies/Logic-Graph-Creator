@@ -46,8 +46,8 @@ public:
 		REMOVED_CONNECTION,
 		CREATED_CONNECTION,
 	};
-	typedef std::tuple<Position, Rotation, BlockType> block_modification_t;
-	typedef std::tuple<Position, Rotation, Position, Rotation> move_modification_t;
+	typedef std::tuple<Position, Orientation, BlockType> block_modification_t;
+	typedef std::tuple<Position, Orientation, Position, Orientation> move_modification_t;
 	typedef std::pair<Position, Position> connection_modification_t;
 
 	typedef std::pair<ModificationType, std::variant<block_modification_t, move_modification_t, connection_modification_t>> Modification;
@@ -56,9 +56,9 @@ public:
 	inline const std::vector<Modification>& getModifications() const { return modifications; }
 
 private:
-	void addRemovedBlock(Position position, Rotation rotation, BlockType type) { modifications.push_back({ ModificationType::REMOVED_BLOCK, std::make_tuple(position, rotation, type) }); }
-	void addPlacedBlock(Position position, Rotation rotation, BlockType type) { modifications.push_back({ ModificationType::PLACE_BLOCK, std::make_tuple(position, rotation, type) }); }
-	void addMovedBlock(Position curPosition, Rotation curRotation, Position newPosition, Rotation newRotation) { modifications.push_back({ ModificationType::MOVE_BLOCK, std::make_tuple(curPosition, curRotation, newPosition, newRotation) }); }
+	void addRemovedBlock(Position position, Orientation orientation, BlockType type) { modifications.push_back({ ModificationType::REMOVED_BLOCK, std::make_tuple(position, orientation, type) }); }
+	void addPlacedBlock(Position position, Orientation orientation, BlockType type) { modifications.push_back({ ModificationType::PLACE_BLOCK, std::make_tuple(position, orientation, type) }); }
+	void addMovedBlock(Position curPosition, Orientation curOrientation, Position newPosition, Orientation newOrientation) { modifications.push_back({ ModificationType::MOVE_BLOCK, std::make_tuple(curPosition, curOrientation, newPosition, newOrientation) }); }
 	void addRemovedConnection(Position outputPosition, Position inputPosition) { modifications.push_back({ ModificationType::REMOVED_CONNECTION, std::make_pair(outputPosition, inputPosition) }); }
 	void addCreatedConnection(Position outputPosition, Position inputPosition) { modifications.push_back({ ModificationType::CREATED_CONNECTION, std::make_pair(outputPosition, inputPosition) }); }
 

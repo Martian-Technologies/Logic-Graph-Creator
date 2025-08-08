@@ -22,7 +22,7 @@ struct BlockPreviewPushConstant {
 struct BlockPreviewRenderData {
 	glm::vec2 position;
 	glm::vec2 size;
-	Rotation rotation;
+	Orientation orientation;
 	BlockType type;
 };
 
