@@ -12,9 +12,9 @@ public:
 	virtual ~CircuitRenderer() = default;
 	virtual void startMakingEdits() = 0;
 	virtual void stopMakingEdits() = 0;
-	virtual void addBlock(BlockType type, Position position, Size size, Rotation rotation, Position statePosition) = 0;
+	virtual void addBlock(BlockType type, Position position, Size size, Orientation orientation, Position statePosition) = 0;
 	virtual void removeBlock(Position position) = 0;
-	virtual void moveBlock(Position curPos, Position newPos, Rotation newRotation, Size size) = 0; // moves JUST the block
+	virtual void moveBlock(Position curPos, Position newPos, Orientation newOrientation, Size size) = 0; // moves JUST the block
 	virtual void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) = 0;
 	virtual void removeWire(std::pair<Position, Position> points) = 0;
 	virtual void reset() = 0;

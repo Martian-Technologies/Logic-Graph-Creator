@@ -228,7 +228,7 @@ ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) 
 		{
 			std::lock_guard<std::mutex> lock(circuitMux);
 			Size size(1);
-			if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.rotation);
+			if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.orientation);
 			newPreview.size = glm::vec2(size.w, size.h);
 		}
 		newPreview.type = block.type;

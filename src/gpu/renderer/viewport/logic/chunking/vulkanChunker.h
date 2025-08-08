@@ -10,10 +10,8 @@
 #include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
 #include "../renderManager.h"
-#include "backend/circuit/circuit.h"
 #include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
-#include "gpu/abstractions/vulkanDescriptor.h"
 #include "gpu/helper/nBuffer.h"
 class SimulatorMappingUpdate;
 
@@ -24,7 +22,7 @@ struct BlockInstance {
 	uint32_t sizeX;
 	uint32_t sizeY;
 	float texX;
-	uint32_t rotation;
+	uint32_t orientation;
 
 	inline static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
@@ -56,7 +54,7 @@ struct BlockInstance {
 		attributeDescriptions[3].binding = 0;
 		attributeDescriptions[3].location = 3;
 		attributeDescriptions[3].format = VK_FORMAT_R32_UINT;
-		attributeDescriptions[3].offset = offsetof(BlockInstance, rotation);
+		attributeDescriptions[3].offset = offsetof(BlockInstance, orientation);
 
 		return attributeDescriptions;
 	}
@@ -101,7 +99,7 @@ struct WireInstance {
 // ====================================================================================================================
 struct RenderedBlock {
 	BlockType blockType;
-	Rotation rotation;
+	Orientation orientation;
 	FSize size;
 	Position statePosition;
 };
@@ -187,9 +185,9 @@ public:
 
 	void startMakingEdits() override final;
 	void stopMakingEdits() override final;
-	void addBlock(BlockType type, Position position, Size size, Rotation rotation, Position statePosition) override final;
+	void addBlock(BlockType type, Position position, Size size, Orientation orientation, Position statePosition) override final;
 	void removeBlock(Position position) override final;
-	void moveBlock(Position curPos, Position newPos, Rotation newRotation, Size newSize) override final;
+	void moveBlock(Position curPos, Position newPos, Orientation newOrientation, Size newSize) override final;
 	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) override final;
 	void removeWire(std::pair<Position, Position> points) override final;	
 	void reset() override final;

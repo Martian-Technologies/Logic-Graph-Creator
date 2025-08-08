@@ -65,7 +65,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 		}
 		case Difference::ModificationType::REMOVED_BLOCK:
 		{
-			const auto& [position, rotation, blockType] = std::get<Difference::block_modification_t>(modificationData);
+			const auto& [position, orientation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 
 			for (CircuitRenderer* renderer : renderers) {
 				renderer->removeBlock(position);
@@ -103,11 +103,11 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 				}
 				inputIter->second.connectionsToOtherBlock.emplace(newConnection, outputBlockPosition);
 				for (CircuitRenderer* renderer : renderers) {
-					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.rotation), getInputOffset(inputIter->second.type, inputIter->second.rotation) });
+					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(inputIter->second.type, inputIter->second.orientation) });
 				}
 			} else {
 				for (CircuitRenderer* renderer : renderers) {
-					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.rotation), getInputOffset(outputIter->second.type, outputIter->second.rotation) });
+					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(outputIter->second.type, outputIter->second.orientation) });
 				}
 			}
 			break;
@@ -157,11 +157,11 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 
 			// MOVE BLOCK
 			for (CircuitRenderer* renderer : renderers) {
-				renderer->moveBlock(curPosition, newPosition, newOrientation, blockDataManager->getBlockSize(iter->second.type, newRotation));
+				renderer->moveBlock(curPosition, newPosition, newOrientation, blockDataManager->getBlockSize(iter->second.type, newOrientation));
 			}
 
-			Size blockSize = blockDataManager->getBlockSize(iter->second.type, curRotation);
-			Rotation rotationAmount = subRotations(newRotation, curRotation);
+			Size blockSize = blockDataManager->getBlockSize(iter->second.type, curOrientation);
+			Orientation transformAmount = newOrientation.relativeTo(curOrientation);
 
 			// MOVE CONNECTIONS
 			std::unordered_map<std::pair<Position, Position>, Position> oldConnectionsToOtherBlock = std::move(iter->second.connectionsToOtherBlock);
@@ -172,10 +172,10 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					renderer->removeWire(posPair);
 				}
 				if (otherBlockPos == curPosition) {
-					Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
-					Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
+					Position outputPos = newPosition + transformAmount.transformVectorWithArea(posPair.first - curPosition, blockSize);
+					Position inputPos = newPosition + transformAmount.transformVectorWithArea(posPair.second - curPosition, blockSize);
 					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire({ outputPos, inputPos }, { getOutputOffset(iter->second.type, newRotation), getInputOffset(iter->second.type, newRotation) });
+						renderer->addWire({ outputPos, inputPos }, { getOutputOffset(iter->second.type, newOrientation), getInputOffset(iter->second.type, newOrientation) });
 					}
 					iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, inputPos), newPosition);
 				} else {
@@ -187,16 +187,16 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					otherIter->second.connectionsToOtherBlock.erase(posPair);
 					bool isInput = posPair.second.withinArea(curPosition, curPosition + blockSize.getLargestVectorInArea());
 					if (isInput) {
-						Position inputPos = newPosition + rotateVectorWithArea(posPair.second - curPosition, blockSize, rotationAmount);
+						Position inputPos = newPosition + transformAmount.transformVectorWithArea(posPair.second - curPosition, blockSize);
 						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.type, otherIter->second.rotation), getInputOffset(iter->second.type, newRotation) });
+							renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.type, otherIter->second.orientation), getInputOffset(iter->second.type, newOrientation) });
 						}
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), newPosition);
 					} else {
-						Position outputPos = newPosition + rotateVectorWithArea(posPair.first - curPosition, blockSize, rotationAmount);
+						Position outputPos = newPosition + transformAmount.transformVectorWithArea(posPair.first - curPosition, blockSize);
 						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(iter->second.type, newRotation), getInputOffset(otherIter->second.type, otherIter->second.rotation) });
+							renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(iter->second.type, newOrientation), getInputOffset(otherIter->second.type, otherIter->second.orientation) });
 						}
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), newPosition);

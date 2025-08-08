@@ -4,7 +4,6 @@
 #include <tracy/Tracy.hpp>
 #endif
 
-#include "../sharedLogic/logicRenderingUtils.h"
 #include "backend/evaluator/evaluator.h"
 #include "backend/position/position.h"
 #include "logging/logging.h"
@@ -46,7 +45,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
 			instance.sizeX = block.second.size.w;
 			instance.sizeY = block.second.size.h;
-			instance.rotation = block.second.rotation;
+			instance.orientation = block.second.orientation.rotation;
 			instance.texX = uvOrigin.x;
 
 			blockInstances.push_back(instance);
@@ -209,10 +208,10 @@ void VulkanChunker::stopMakingEdits() {
 	mux.unlock();
 }
 
-void VulkanChunker::addBlock(BlockType type, Position position, Size size, Rotation rotation, Position statePosition) {
+void VulkanChunker::addBlock(BlockType type, Position position, Size size, Orientation orientation, Position statePosition) {
 	Position chunkPos = getChunk(position);
 	auto iter = chunks.find(chunkPos);
-	chunks[chunkPos].getRenderedBlocks().emplace(position, RenderedBlock(type, rotation, size.free(), statePosition));
+	chunks[chunkPos].getRenderedBlocks().emplace(position, RenderedBlock(type, orientation, size.free(), statePosition));
 	chunksToUpdate.insert(chunkPos);
 }
 
@@ -225,7 +224,7 @@ void VulkanChunker::removeBlock(Position position) {
 	}
 }
 
-void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRotation, Size newSize) {
+void VulkanChunker::moveBlock(Position curPos, Position newPos, Orientation newOrientation, Size newSize) {
 	Position curChunkPos = getChunk(curPos);
 	Position newChunkPos = getChunk(newPos);
 
@@ -238,8 +237,8 @@ void VulkanChunker::moveBlock(Position curPos, Position newPos, Rotation newRota
 	auto blockIter = curChunkIter->second.getRenderedBlocks().find(curPos);
 	if (blockIter != curChunkIter->second.getRenderedBlocks().end()) {
 		RenderedBlock block = blockIter->second;
-		block.statePosition = newPos + rotateVectorWithArea(block.statePosition - curPos, block.size.snap(), subRotations(newRotation, block.rotation));
-		block.rotation = newRotation;
+		block.statePosition = newPos + newOrientation.relativeTo(block.orientation).transformVectorWithArea(block.statePosition - curPos, block.size.snap());
+		block.orientation = newOrientation;
 		block.size = newSize.free();
 		curChunkIter->second.getRenderedBlocks().erase(blockIter);
 		chunksToUpdate.insert(curChunkPos);

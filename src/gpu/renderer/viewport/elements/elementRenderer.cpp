@@ -1,15 +1,18 @@
 #include "elementRenderer.h"
 
-#include "computerAPI/directoryManager.h"
-#include "computerAPI/fileLoader.h"
-#include "gpu/abstractions/vulkanShader.h"
 #include <cstddef>
 #include <glm/ext/vector_float2.hpp>
 #include <vulkan/vulkan_core.h>
 
+#include "computerAPI/directoryManager.h"
+#include "computerAPI/fileLoader.h"
+#include "gpu/abstractions/vulkanShader.h"
+#include "util/vec2.h"
+#include "gpu/renderer/viewport/blockTextureManager.h"
+
 void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	this->device = device;
-	
+
 	// block preview
 	VkShaderModule blockPreviewVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/blockPreview.vert.spv"));
 	VkShaderModule blockPreviewFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/blockPreview.frag.spv"));
@@ -18,10 +21,10 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	blockPreviewPipelineInfo.vertShader = blockPreviewVertShader;
 	blockPreviewPipelineInfo.fragShader = blockPreviewFragShader;
 	blockPreviewPipelineInfo.renderPass = renderPass;
-	blockPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(BlockPreviewPushConstant)});
+	blockPreviewPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_VERTEX_BIT, sizeof(BlockPreviewPushConstant) });
 	blockPreviewPipelineInfo.descriptorSets.push_back(device->getBlockTextureManager()->getDescriptorLayout());
 	blockPreviewPipeline.init(device, blockPreviewPipelineInfo);
-	
+
 	destroyShaderModule(device->getDevice(), blockPreviewVertShader);
 	destroyShaderModule(device->getDevice(), blockPreviewFragShader);
 
@@ -33,10 +36,10 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	boxSelectionPipelineInfo.vertShader = boxSelectionVertShader;
 	boxSelectionPipelineInfo.fragShader = boxSelectionFragShader;
 	boxSelectionPipelineInfo.renderPass = renderPass;
-	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(BoxSelectionPushConstant, state)});
-	boxSelectionPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
+	boxSelectionPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_VERTEX_BIT, offsetof(BoxSelectionPushConstant, state) });
+	boxSelectionPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t) });
 	boxSelectionPipeline.init(device, boxSelectionPipelineInfo);
-	
+
 	destroyShaderModule(device->getDevice(), boxSelectionVertShader);
 	destroyShaderModule(device->getDevice(), boxSelectionFragShader);
 
@@ -48,12 +51,12 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	connectionPreviewPipelineInfo.vertShader = connectionPreviewVertShader;
 	connectionPreviewPipelineInfo.fragShader = connectionPreviewFragShader;
 	connectionPreviewPipelineInfo.renderPass = renderPass;
-	connectionPreviewPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, sizeof(ConnectionPreviewPushConstant)});
+	connectionPreviewPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_VERTEX_BIT, sizeof(ConnectionPreviewPushConstant) });
 	connectionPreviewPipeline.init(device, connectionPreviewPipelineInfo);
-	
+
 	destroyShaderModule(device->getDevice(), connectionPreviewVertShader);
 	destroyShaderModule(device->getDevice(), connectionPreviewFragShader);
-	
+
 	// arrow circle
 	VkShaderModule arrowCircleVertShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrowCircle.vert.spv"));
 	VkShaderModule arrowCircleFragShader = createShaderModule(device->getDevice(), readFileAsBytes(DirectoryManager::getResourceDirectory() / "shaders/arrowCircle.frag.spv"));
@@ -62,10 +65,10 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	arrowCirclePipelineInfo.vertShader = arrowCircleVertShader;
 	arrowCirclePipelineInfo.fragShader = arrowCircleFragShader;
 	arrowCirclePipelineInfo.renderPass = renderPass;
-	arrowCirclePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowCirclePushConstant, depth)});
-	arrowCirclePipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
+	arrowCirclePipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowCirclePushConstant, depth) });
+	arrowCirclePipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t) });
 	arrowCirclePipeline.init(device, arrowCirclePipelineInfo);
-	
+
 	destroyShaderModule(device->getDevice(), arrowCircleVertShader);
 	destroyShaderModule(device->getDevice(), arrowCircleFragShader);
 
@@ -77,10 +80,10 @@ void ElementRenderer::init(VulkanDevice* device, VkRenderPass& renderPass) {
 	arrowPipelineInfo.vertShader = arrowVertShader;
 	arrowPipelineInfo.fragShader = arrowFragShader;
 	arrowPipelineInfo.renderPass = renderPass;
-	arrowPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowPushConstant, depth)});
-	arrowPipelineInfo.pushConstants.push_back({VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t)});
+	arrowPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_VERTEX_BIT, offsetof(ArrowPushConstant, depth) });
+	arrowPipelineInfo.pushConstants.push_back({ VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(uint32_t) });
 	arrowPipeline.init(device, arrowPipelineInfo);
-	
+
 	destroyShaderModule(device->getDevice(), arrowVertShader);
 	destroyShaderModule(device->getDevice(), arrowFragShader);
 }
@@ -97,16 +100,16 @@ void ElementRenderer::renderBlockPreviews(Frame& frame, const glm::mat4& viewMat
 	if (!blockPreviews.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPreviewPipeline.getHandle());
 		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPreviewPipeline.getLayout(), 0, 1, &device->getBlockTextureManager()->getTexture().descriptor, 0, nullptr);
-	
+
 		BlockPreviewPushConstant blockPreviewConstant;
 		blockPreviewConstant.mvp = viewMatrix;
 		Vec2 uvCellSize = device->getBlockTextureManager()->getTileset().getCellUVSize();
 		blockPreviewConstant.uvCellSizeX = uvCellSize.x;
 		blockPreviewConstant.uvCellSizeY = uvCellSize.y;
-		for (const BlockPreviewRenderData& preview : blockPreviews){
+		for (const BlockPreviewRenderData& preview : blockPreviews) {
 			blockPreviewConstant.position = preview.position;
 			blockPreviewConstant.size = preview.size;
-			blockPreviewConstant.rotation = preview.rotation;
+			blockPreviewConstant.orientation = preview.orientation.rotation;
 			blockPreviewConstant.uvOffsetX = device->getBlockTextureManager()->getTileset().getTopLeftUV(preview.type + 1 + (preview.type >= BlockType::CUSTOM), 0).x;
 
 			blockPreviewPipeline.cmdPushConstants(frame.mainCommandBuffer, &blockPreviewConstant);
@@ -118,11 +121,11 @@ void ElementRenderer::renderBlockPreviews(Frame& frame, const glm::mat4& viewMat
 void ElementRenderer::renderBoxSelections(Frame& frame, const glm::mat4& viewMatrix, const std::vector<BoxSelectionRenderData>& boxSelections) {
 	if (!boxSelections.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, boxSelectionPipeline.getHandle());
-	
+
 		BoxSelectionPushConstant boxSelectionConstant;
 		boxSelectionConstant.mvp = viewMatrix;
-		
-		for (const BoxSelectionRenderData& boxSelection : boxSelections){
+
+		for (const BoxSelectionRenderData& boxSelection : boxSelections) {
 			boxSelectionConstant.position = boxSelection.topLeft;
 			boxSelectionConstant.size = boxSelection.size;
 			boxSelectionConstant.state = boxSelection.state;
@@ -136,11 +139,11 @@ void ElementRenderer::renderBoxSelections(Frame& frame, const glm::mat4& viewMat
 void ElementRenderer::renderConnectionPreviews(Frame& frame, const glm::mat4& viewMatrix, const std::vector<ConnectionPreviewRenderData>& connectionPreviews) {
 	if (!connectionPreviews.empty()) {
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, connectionPreviewPipeline.getHandle());
-	
+
 		ConnectionPreviewPushConstant connectionPreviewConstant;
 		connectionPreviewConstant.mvp = viewMatrix;
-		
-		for (const ConnectionPreviewRenderData& connectionPreview : connectionPreviews){
+
+		for (const ConnectionPreviewRenderData& connectionPreview : connectionPreviews) {
 			connectionPreviewConstant.pointA = connectionPreview.pointA;
 			connectionPreviewConstant.pointB = connectionPreview.pointB;
 
@@ -156,7 +159,7 @@ void ElementRenderer::renderArrows(Frame& frame, const glm::mat4& viewMatrix, co
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, arrowCirclePipeline.getHandle());
 		ArrowCirclePushConstant arrowCircleConstant;
 		arrowCircleConstant.mvp = viewMatrix;
-		for (const ArrowRenderData& arrow : arrows){
+		for (const ArrowRenderData& arrow : arrows) {
 			if (arrow.pointA != arrow.pointB) continue;
 
 			arrowCircleConstant.topLeft = glm::vec2(arrow.pointA.x, arrow.pointA.y);
@@ -170,7 +173,7 @@ void ElementRenderer::renderArrows(Frame& frame, const glm::mat4& viewMatrix, co
 		vkCmdBindPipeline(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, arrowPipeline.getHandle());
 		ArrowPushConstant arrowConstant;
 		arrowConstant.mvp = viewMatrix;
-		for (const ArrowRenderData& arrow : arrows){
+		for (const ArrowRenderData& arrow : arrows) {
 			if (arrow.pointA == arrow.pointB) continue;
 
 			arrowConstant.pointA = glm::vec2(arrow.pointA.x + 0.5f, arrow.pointA.y + 0.5f);

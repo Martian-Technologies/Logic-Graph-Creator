@@ -22,7 +22,10 @@ struct Vector {
 	inline Vector(cord_t d) noexcept : dx(d), dy(d) { }
 	inline FVector free() const noexcept;
 
-	inline void extentToFit(Vector vector) noexcept { dx = std::max(dx, vector.dx); dy = std::max(dy, vector.dy); }
+	inline void extentToFit(Vector vector) noexcept {
+		dx = std::max(dx, vector.dx);
+		dy = std::max(dy, vector.dy);
+	}
 	inline std::string toString() const noexcept { return "<" + std::to_string(dx) + ", " + std::to_string(dy) + ">"; }
 
 	inline bool operator==(Vector other) const noexcept { return dx == other.dx && dy == other.dy; }
@@ -36,14 +39,30 @@ struct Vector {
 	inline f_cord_t length() const noexcept { return sqrt(lengthSquared()); }
 
 	inline Vector operator+(Vector other) const noexcept { return Vector(dx + other.dx, dy + other.dy); }
-	inline Vector& operator+=(Vector other) noexcept { dx += other.dx; dy += other.dy; return *this; }
+	inline Vector& operator+=(Vector other) noexcept {
+		dx += other.dx;
+		dy += other.dy;
+		return *this;
+	}
 	inline Vector operator-(Vector other) const noexcept { return Vector(dx - other.dx, dy - other.dy); }
-	inline Vector& operator-=(Vector other) noexcept { dx -= other.dx; dy -= other.dy; return *this; }
+	inline Vector& operator-=(Vector other) noexcept {
+		dx -= other.dx;
+		dy -= other.dy;
+		return *this;
+	}
 	inline cord_t operator*(Vector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
 	inline Vector operator*(cord_t scalar) const noexcept { return Vector(dx * scalar, dy * scalar); }
-	inline Vector& operator*=(cord_t scalar) noexcept { dx *= scalar; dy *= scalar; return *this; }
+	inline Vector& operator*=(cord_t scalar) noexcept {
+		dx *= scalar;
+		dy *= scalar;
+		return *this;
+	}
 	inline Vector operator/(cord_t scalar) const noexcept { return Vector(dx / scalar, dy / scalar); }
-	inline Vector& operator/=(cord_t scalar) noexcept { dx /= scalar; dy /= scalar; return *this; }
+	inline Vector& operator/=(cord_t scalar) noexcept {
+		dx /= scalar;
+		dy /= scalar;
+		return *this;
+	}
 
 	inline Iterator iter() const noexcept;
 
@@ -63,12 +82,26 @@ public:
 		yNeg = 1 - 2 * (vector.dy < 0);
 		end = (yNeg * vector.dy + 1) * width - 1;
 	}
-	inline Iterator& operator++() { next(); return *this; }
-	inline Iterator& operator--() { prev(); return *this; }
-	inline Iterator operator++(int) { Iterator tmp = *this; next(); return tmp; }
-	inline Iterator operator--(int) { Iterator tmp = *this; prev(); return tmp; }
+	inline Iterator& operator++() {
+		next();
+		return *this;
+	}
+	inline Iterator& operator--() {
+		prev();
+		return *this;
+	}
+	inline Iterator operator++(int) {
+		Iterator tmp = *this;
+		next();
+		return tmp;
+	}
+	inline Iterator operator--(int) {
+		Iterator tmp = *this;
+		prev();
+		return tmp;
+	}
 	inline explicit operator bool() const { return notDone; }
-	inline Vector operator*() const { return  Vector(xNeg * cur % width, yNeg * cur / width); }
+	inline Vector operator*() const { return Vector(xNeg * cur % width, yNeg * cur / width); }
 	// inline Vector operator->() const { return *(*this); }
 
 private:
@@ -90,11 +123,11 @@ private:
 
 Vector::Iterator Vector::iter() const noexcept { return Iterator(*this); }
 
-template<>
+template <>
 struct std::hash<Vector> {
 	inline std::size_t operator()(Vector vec) const noexcept {
-		std::size_t x = std::hash<cord_t> {}(vec.dx);
-		std::size_t y = std::hash<cord_t> {}(vec.dy);
+		std::size_t x = std::hash<cord_t>{}(vec.dx);
+		std::size_t y = std::hash<cord_t>{}(vec.dy);
 		return (std::size_t)x ^ ((std::size_t)y << 32);
 	}
 };
@@ -123,14 +156,29 @@ struct FVector {
 	inline f_cord_t length() const noexcept { return sqrt(FastPower<2>(dx) + FastPower<2>(dy)); }
 
 	inline FVector operator+(FVector other) const noexcept { return FVector(dx + other.dx, dy + other.dy); }
-	inline FVector& operator+=(FVector other) noexcept { dx += other.dx; dy += other.dy; return *this; }
+	inline FVector& operator+=(FVector other) noexcept {
+		dx += other.dx;
+		dy += other.dy;
+		return *this;
+	}
 	inline FVector operator-(FVector other) const noexcept { return FVector(dx - other.dx, dy - other.dy); }
-	inline FVector& operator-=(FVector other) noexcept { dx -= other.dx; dy -= other.dy; return *this; }
+	inline FVector& operator-=(FVector other) noexcept {
+		dx -= other.dx;
+		dy -= other.dy;
+		return *this;
+	}
 	inline FVector operator*(f_cord_t scalar) const noexcept { return FVector(dx * scalar, dy * scalar); }
-	inline FVector& operator*=(f_cord_t scalar) noexcept { dx *= scalar, dy *= scalar; return *this; }
+	inline FVector& operator*=(f_cord_t scalar) noexcept {
+		dx *= scalar, dy *= scalar;
+		return *this;
+	}
 	inline f_cord_t operator*(FVector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
 	inline FVector operator/(f_cord_t scalar) noexcept { return FVector(dx / scalar, dy / scalar); }
-	inline FVector& operator/=(f_cord_t scalar) noexcept { dx /= scalar; dy /= scalar; return *this; }
+	inline FVector& operator/=(f_cord_t scalar) noexcept {
+		dx /= scalar;
+		dy /= scalar;
+		return *this;
+	}
 
 	inline f_cord_t lengthAlongProjectToVec(FVector vector) const noexcept { return (*this * vector) / vector.length(); }
 	inline FVector projectToVec(FVector vector) const noexcept { return vector * (*this * vector) / vector.lengthSquared(); }
@@ -154,7 +202,10 @@ struct Size {
 	inline Size(cord_t sideLength) noexcept : w(sideLength), h(sideLength) { }
 	inline FSize free() const noexcept;
 
-	inline void extentToFit(Vector vector) noexcept { w = std::max(w, vector.dx + 1); h = std::max(h, vector.dy + 1); }
+	inline void extentToFit(Vector vector) noexcept {
+		w = std::max(w, vector.dx + 1);
+		h = std::max(h, vector.dy + 1);
+	}
 	inline std::string toString() const noexcept { return std::to_string(w) + "x" + std::to_string(h); }
 
 	inline bool operator==(Size other) const noexcept { return w == other.w && h == other.h; }
@@ -168,7 +219,7 @@ struct Size {
 
 	inline Iterator iter() const noexcept;
 
-	inline Vector getLargestVectorInArea() { return Vector(w-1, h-1); }
+	inline Vector getLargestVectorInArea() { return Vector(w - 1, h - 1); }
 
 	cord_t w, h;
 };
@@ -192,10 +243,24 @@ public:
 		width = size.w;
 		end = size.area() - 1;
 	}
-	inline Iterator& operator++() { next(); return *this; }
-	inline Iterator& operator--() { prev(); return *this; }
-	inline Iterator operator++(int) { Iterator tmp = *this; next(); return tmp; }
-	inline Iterator operator--(int) { Iterator tmp = *this; prev(); return tmp; }
+	inline Iterator& operator++() {
+		next();
+		return *this;
+	}
+	inline Iterator& operator--() {
+		prev();
+		return *this;
+	}
+	inline Iterator operator++(int) {
+		Iterator tmp = *this;
+		next();
+		return tmp;
+	}
+	inline Iterator operator--(int) {
+		Iterator tmp = *this;
+		prev();
+		return tmp;
+	}
 	inline explicit operator bool() const { return notDone; }
 	inline Vector operator*() const {
 #ifndef DEBUG // I dont know if this works
@@ -203,7 +268,7 @@ public:
 			logError("Reading Size::Iterator iterating over invalid size not valid. Fix this!");
 		}
 #endif
-		return  Vector(cur % width, cur / width);
+		return Vector(cur % width, cur / width);
 	}
 	// inline Vector operator->() const { return *(*this); }
 
@@ -234,7 +299,10 @@ struct FSize {
 	inline FSize(f_cord_t w, f_cord_t h) noexcept : w(w), h(h) { }
 	inline Size snap() const noexcept;
 
-	inline void extentToFit(FVector vector) noexcept { w = std::max(w, vector.dx + 1); h = std::max(h, vector.dy + 1); }
+	inline void extentToFit(FVector vector) noexcept {
+		w = std::max(w, vector.dx + 1);
+		h = std::max(h, vector.dy + 1);
+	}
 	inline std::string toString() const noexcept { return std::to_string(w) + "x" + std::to_string(h); }
 
 	inline bool operator==(FSize other) const noexcept { return w == other.w && h == other.h; }
@@ -279,10 +347,18 @@ struct Position {
 	inline f_cord_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
 
 	inline Position operator+(Vector vector) const noexcept { return Position(x + vector.dx, y + vector.dy); }
-	inline Position& operator+=(Vector vector) noexcept { x += vector.dx; y += vector.dy; return *this; }
+	inline Position& operator+=(Vector vector) noexcept {
+		x += vector.dx;
+		y += vector.dy;
+		return *this;
+	}
 	inline Vector operator-(Position position) const noexcept { return Vector(x - position.x, y - position.y); }
 	inline Position operator-(Vector vector) const noexcept { return Position(x - vector.dx, y - vector.dy); }
-	inline Position& operator-=(Vector vector) noexcept { x -= vector.dx; y -= vector.dy; return *this; }
+	inline Position& operator-=(Vector vector) noexcept {
+		x -= vector.dx;
+		y -= vector.dy;
+		return *this;
+	}
 
 	inline Iterator iterTo(Position other) const noexcept;
 
@@ -313,10 +389,24 @@ public:
 			this->start.y = start.y;
 		}
 	}
-	inline Iterator& operator++() noexcept { next(); return *this; }
-	inline Iterator& operator--() noexcept { prev(); return *this; }
-	inline Iterator operator++(int) noexcept { Iterator tmp = *this; next(); return tmp; }
-	inline Iterator operator--(int) noexcept { Iterator tmp = *this; prev(); return tmp; }
+	inline Iterator& operator++() noexcept {
+		next();
+		return *this;
+	}
+	inline Iterator& operator--() noexcept {
+		prev();
+		return *this;
+	}
+	inline Iterator operator++(int) noexcept {
+		Iterator tmp = *this;
+		next();
+		return tmp;
+	}
+	inline Iterator operator--(int) noexcept {
+		Iterator tmp = *this;
+		prev();
+		return tmp;
+	}
 	inline explicit operator bool() const noexcept { return notDone; }
 	inline const Position operator*() const noexcept { return start + Vector(cur % width, cur / width); }
 	inline const Position operator->() const noexcept { return *(*this); }
@@ -344,24 +434,23 @@ inline bool areaWithinArea(Position area1Small, Position area1Large, Position ar
 		area2Small.withinArea(area1Small, area1Large) ||
 		area2Large.withinArea(area1Small, area1Large) ||
 		area1Small.withinArea(area2Small, area2Large) ||
-		area2Large.withinArea(area2Small, area2Large)
-	);
+		area2Large.withinArea(area2Small, area2Large));
 }
 
-template<>
+template <>
 struct std::hash<Position> {
 	inline std::size_t operator()(Position pos) const noexcept {
-		std::size_t x = std::hash<cord_t> {}(pos.x);
-		std::size_t y = std::hash<cord_t> {}(pos.y);
+		std::size_t x = std::hash<cord_t>{}(pos.x);
+		std::size_t y = std::hash<cord_t>{}(pos.y);
 		return y + 0x9e3779b9 + (x << 6) + (x >> 2);
 	}
 };
 
-template<>
+template <>
 struct std::hash<std::pair<Position, Position>> {
 	inline std::size_t operator()(const std::pair<Position, Position>& posPair) const noexcept {
-		std::size_t a = std::hash<Position> {}(posPair.first);
-		std::size_t b = std::hash<Position> {}(posPair.second);
+		std::size_t a = std::hash<Position>{}(posPair.first);
+		std::size_t b = std::hash<Position>{}(posPair.second);
 		return a + 0x9e3779b9 + (b << 6) + (b >> 2);
 	}
 };
@@ -397,10 +486,18 @@ struct FPosition {
 	inline f_cord_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
 
 	inline FPosition operator+(FVector vector) const noexcept { return FPosition(x + vector.dx, y + vector.dy); }
-	inline FPosition& operator+=(FVector vector) noexcept { x += vector.dx; y += vector.dy; return *this; }
+	inline FPosition& operator+=(FVector vector) noexcept {
+		x += vector.dx;
+		y += vector.dy;
+		return *this;
+	}
 	inline FVector operator-(FPosition position) const noexcept { return FVector(x - position.x, y - position.y); }
 	inline FPosition operator-(FVector vector) const noexcept { return FPosition(x - vector.dx, y - vector.dy); }
-	inline FPosition& operator-=(FVector vector) noexcept { x -= vector.dx; y -= vector.dy; return *this; }
+	inline FPosition& operator-=(FVector vector) noexcept {
+		x -= vector.dx;
+		y -= vector.dy;
+		return *this;
+	}
 	inline FPosition operator*(f_cord_t scalar) const noexcept { return FPosition(x * scalar, y * scalar); }
 	inline f_cord_t lengthAlongProjectToVec(FPosition orginOfVec, FVector vector) const noexcept { return (*this - orginOfVec).lengthAlongProjectToVec(vector); }
 	inline FPosition projectToVec(FPosition orginOfVec, FVector vector) const noexcept { return orginOfVec + (*this - orginOfVec).projectToVec(vector); }
@@ -413,8 +510,7 @@ inline bool areaWithinArea(FPosition area1Small, FPosition area1Large, FPosition
 		area2Small.withinArea(area1Small, area1Large) ||
 		area2Large.withinArea(area1Small, area1Large) ||
 		area1Small.withinArea(area2Small, area2Large) ||
-		area2Large.withinArea(area2Small, area2Large)
-	);
+		area2Large.withinArea(area2Small, area2Large));
 }
 
 template <>
@@ -433,7 +529,8 @@ inline FPosition Position::free() const noexcept { return FPosition(x, y); }
 inline Position FPosition::snap() const noexcept { return Position(std::floor(x), std::floor(y)); }
 
 // ---- we also define block rotation here so ----
-enum Rotation : char {
+enum Rotation : char
+{
 	ZERO = 0,
 	NINETY = 1,
 	ONE_EIGHTY = 2,
@@ -443,12 +540,12 @@ enum Rotation : char {
 template <>
 struct std::formatter<Rotation> : std::formatter<std::string> {
 	auto format(Rotation v, format_context& ctx) const {
-			switch (v) {
-			case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
-			case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
-			case Rotation::NINETY: return "NINETY";
-			default: return "ZERO";
-	}
+		switch (v) {
+		case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
+		case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
+		case Rotation::NINETY: return "NINETY";
+		default: return "ZERO";
+		}
 	}
 };
 
@@ -541,9 +638,9 @@ struct Orientation {
 		FVector vec(flipped ? (-vector.dx) : vector.dx, vector.dy);
 		return rotateVector(vec, rotation);
 	}
-	inline Size operator*(Size size) const noexcept {
-		return rotateSize(rotation, size);
-	}
+	inline Size operator*(Size size) const noexcept { return rotateSize(rotation, size); }
+	inline bool operator==(Orientation other) const noexcept { return this->rotation == other.rotation && this->flipped == other.flipped; }
+	inline bool operator!=(Orientation other) { return !(*this == other); }
 	inline void rotate(bool clockWise) { rotation = ::rotate(rotation, clockWise); }
 	inline void flip() { flipped = !flipped; }
 	inline Orientation operator*(Orientation other) const noexcept {
