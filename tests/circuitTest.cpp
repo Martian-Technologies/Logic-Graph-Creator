@@ -86,8 +86,8 @@ TEST_F(CircuitTest, ConnectionCreationConnectionEnd) {
 	const BlockContainer* container = circuit->getBlockContainer();
 
 	bool connected = circuit->tryCreateConnection(
-		ConnectionEnd(container->getBlock(pos1)->id(), container->getBlock(pos1)->getOutputConnectionId(pos1).first),
-		ConnectionEnd(container->getBlock(pos2)->id(), container->getBlock(pos2)->getInputConnectionId(pos2).first)
+		ConnectionEnd(container->getBlock(pos1)->id(), container->getBlock(pos1)->getOutputConnectionId(pos1).value()),
+		ConnectionEnd(container->getBlock(pos2)->id(), container->getBlock(pos2)->getInputConnectionId(pos2).value())
 	);
 	ASSERT_TRUE(connected);
 
@@ -179,8 +179,8 @@ TEST_F(CircuitTest, ConnectionRemovalConnectionEnd) {
 	const BlockContainer* container = circuit->getBlockContainer();
 
 	bool removed = circuit->tryRemoveConnection(
-		ConnectionEnd(container->getBlock(pos1)->id(), container->getBlock(pos1)->getOutputConnectionId(pos1).first),
-		ConnectionEnd(container->getBlock(pos2)->id(), container->getBlock(pos2)->getInputConnectionId(pos2).first)
+		ConnectionEnd(container->getBlock(pos1)->id(), container->getBlock(pos1)->getOutputConnectionId(pos1).value()),
+		ConnectionEnd(container->getBlock(pos2)->id(), container->getBlock(pos2)->getInputConnectionId(pos2).value())
 	);
 	ASSERT_TRUE(removed);
 
