@@ -53,6 +53,24 @@ scrollbarvertical {
 	margin: 0.15em;
 }
 
+/* Step 6: Connection list item improvements */
+.connection-list-item {
+	line-height: 1.1em;
+	min-height: 18dp;
+	padding: 2dp 4dp;
+	border-left: 2dp transparent;
+	transition: background-color 120ms, border-color 120ms;
+}
+.connection-list-item:hover { background-color: #3b3b3b; }
+.connection-list-item:active { background-color: #1d1d1d; }
+.connection-list-item.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
+
+/* Alternating rows opt-in */
+#connection-list-output.alt-rows .connection-list-item:nth-child(even),
+#connection-list-input.alt-rows .connection-list-item:nth-child(even) { background-color: #242424; }
+#connection-list-output.alt-rows .connection-list-item:nth-child(even):hover,
+#connection-list-input.alt-rows .connection-list-item:nth-child(even):hover { background-color: #3b3b3b; }
+
 .connection-list-item input, #name-input, #width-input, #height-input {
 	background-color: #1d1d1d;
 	border-radius: 0.1em;

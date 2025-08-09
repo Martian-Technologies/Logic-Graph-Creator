@@ -34,3 +34,33 @@
 .collapsed div ul {
 	display: none;
 }
+
+/* Step 6: Tree/List improvements (amber accent) */
+/* Base row styling */
+.menutree li {
+	line-height: 1.2em;
+	min-height: 18dp;
+	border-left: 2dp transparent; /* space for accent on selection */
+	border-radius: 4dp;
+	transition: background-color 120ms, color 120ms, border-color 120ms;
+}
+
+/* Hover styling applied only when JS/C++ adds the hovered-leaf class (avoids ancestor chain highlighting) */
+.menutree li.hovered-leaf { background-color: #1d1d1d; }
+.menutree li.hovered-leaf:active { background-color: #151515; }
+
+/* Selected state hook (apply class externally) */
+.menutree li.selected {
+	background-color: #2e2e2e;
+	border-left-color: #d1963a; /* amber */
+	color: #f5f5f5;
+}
+
+/* Optional alternating rows when parent has .alt-rows */
+.menutree.alt-rows > ul > li:nth-child(even) {
+	background-color: #101010;
+}
+
+.menutree.alt-rows > ul > li:nth-child(even):hover {
+	background-color: #1d1d1d;
+}

@@ -99,6 +99,75 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 				}
 			));
 		}
+		// Unified selection handling (applies .selected to clicked li, clears others). Runs in addition to any existing click callback.
+		newItem->AddEventListener("click", new EventPasser(
+			[](Rml::Event& e) {
+				Rml::Element* current = e.GetCurrentElement();
+				if (!current) return;
+				// Skip if the immediate target is the expand/collapse arrow span to preserve prior selection.
+				Rml::Element* rawTarget = e.GetTargetElement();
+				if (rawTarget && rawTarget->GetTagName() == "span" && rawTarget->GetInnerRML() == ">") return;
+				// Conditionally disallow selecting parent nodes if tree root has class no-parent-select.
+				if (current->IsClassSet("parent")) {
+					Rml::Element* rootCheck = current;
+					while (rootCheck && !rootCheck->IsClassSet("menutree")) rootCheck = rootCheck->GetParentNode();
+					if (rootCheck && rootCheck->IsClassSet("no-parent-select")) return;
+				}
+				Rml::Element* root = current;
+				while (root && !root->IsClassSet("menutree")) root = root->GetParentNode();
+				if (!root) return;
+				Rml::ElementList rows;
+				root->GetElementsByTagName(rows, "li");
+				for (auto* r : rows) r->SetClass("selected", false);
+				current->SetClass("selected", true);
+			}
+		));
+		// Precise hover highlighting: only the deepest target under the cursor should have the class.
+		newItem->AddEventListener("mouseover", new EventPasser(
+			[](Rml::Event& e) {
+				Rml::Element* current = e.GetCurrentElement();
+				Rml::Element* target  = e.GetTargetElement();
+				if (!current || !target) return;
+				// Determine the nearest ancestor <li> of the real target.
+				Rml::Element* nearestLi = target;
+				while (nearestLi && nearestLi->GetTagName() != "li") nearestLi = nearestLi->GetParentNode();
+				// Only highlight if THIS li is that nearest li (prevents ancestor highlight while allowing arrow/text children).
+				if (nearestLi != current) return;
+				Rml::Element* root = current;
+				while (root && !root->IsClassSet("menutree")) root = root->GetParentNode();
+				if (!root) return;
+				Rml::ElementList rows;
+				root->GetElementsByTagName(rows, "li");
+				for (auto* r : rows) r->SetClass("hovered-leaf", false);
+				current->SetClass("hovered-leaf", true);
+			}
+		));
+		newItem->AddEventListener("mouseout", new EventPasser(
+			[](Rml::Event& e) {
+				Rml::Element* current = e.GetCurrentElement();
+				Rml::Element* target  = e.GetTargetElement();
+				if (!current || !target) return;
+				// Similar logic: only clear if leaving the nearest li (not moving within children)
+				Rml::Element* nearestLi = target;
+				while (nearestLi && nearestLi->GetTagName() != "li") nearestLi = nearestLi->GetParentNode();
+				if (nearestLi != current) return;
+				current->SetClass("hovered-leaf", false);
+				// Attempt to highlight parent li (so parent shows hover when pointer moves from child into its padding region)
+				Rml::Element* parentLi = current->GetParentNode();
+				while (parentLi && parentLi->GetTagName() != "li" && !parentLi->IsClassSet("menutree")) parentLi = parentLi->GetParentNode();
+				if (parentLi && parentLi->GetTagName() == "li") {
+					// Find menutree root to clear any stale hovered-leaf classes first
+					Rml::Element* root = parentLi;
+					while (root && !root->IsClassSet("menutree")) root = root->GetParentNode();
+					if (root) {
+						Rml::ElementList rows;
+						root->GetElementsByTagName(rows, "li");
+						for (auto* r : rows) if (r != parentLi) r->SetClass("hovered-leaf", false);
+					}
+					parentLi->SetClass("hovered-leaf", true);
+				}
+			}
+		));
 		// set id
 		newItem->SetId(pathStr + iter.first + "-menu");
 		// create div for text

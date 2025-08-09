@@ -128,6 +128,24 @@ Nord Color Pallete:
 	padding: 0.1em 0.1em;
 }
 
+/* Step 6: Settings tree & content row polishing */
+.settings-tree li {
+	line-height: 1.25em;
+	min-height: 19dp;
+	padding: 2dp 4dp;
+	border-left: 2dp transparent;
+	border-radius: 4dp;
+	transition: background-color 120ms, border-color 120ms;
+}
+
+.settings-tree li:hover { background-color: #1d1d1d; }
+.settings-tree li:active { background-color: #151515; }
+.settings-tree li.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
+
+/* Alternate rows opt-in */
+.settings-tree.alt-rows > ul > li:nth-child(even) { background-color: #101010; }
+.settings-tree.alt-rows > ul > li:nth-child(even):hover { background-color: #1d1d1d; }
+
 .collapsed div ul {
 	display: none;
 }

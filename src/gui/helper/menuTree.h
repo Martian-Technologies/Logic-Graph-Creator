@@ -14,6 +14,9 @@ public:
 	// Modifying items
 	void setPaths(const std::vector<std::string>& paths);
 	void setPaths(const std::vector<std::vector<std::string>>& paths) { setPaths(paths, parent); }
+
+	// Control whether parent (expandable) nodes are selectable. Default: selectable.
+	void disallowParentSelection(bool disallow = true) { if (parent) parent->SetClass("no-parent-select", disallow); }
 	
 private:
 	std::string getPath(Rml::Element* item);
