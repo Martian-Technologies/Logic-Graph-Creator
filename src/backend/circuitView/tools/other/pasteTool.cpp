@@ -9,14 +9,14 @@ void PasteTool::activate() {
 }
 
 bool PasteTool::rotateCW(const Event* event) {
-	transformAmount.rotate(true);
+	transformAmount.nextOrientation();
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool PasteTool::rotateCCW(const Event* event) {
-	transformAmount.rotate(false);
+	transformAmount.lastOrientation();
 	elementID = 0; // remake elements
 	updateElements();
 	return true;

@@ -9,11 +9,14 @@ BraceWrapping:
   SplitEmptyFunction: false
   AfterFunction: false
   BeforeElse: false
+  AfterEnum: false
   AfterControlStatement: Never
 AllowShortNamespacesOnASingleLine: true
+AlignOperands: Align
 SpaceBeforeCtorInitializerColon: true
 IndentWidth: 4
 UseTab: Always
+BreakTemplateDeclarations: MultiLine
 AccessModifierOffset: -4
 ColumnLimit: 170
 ObjCBinPackProtocolList: Never
@@ -43,4 +46,3 @@ SpaceInEmptyBlock: true
 Cpp11BracedListStyle: false
 AlignAfterOpenBracket: BlockIndent
 CompactNamespaces: true
-

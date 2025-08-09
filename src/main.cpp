@@ -1,13 +1,11 @@
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_main.h>
 
-#include "computerAPI/directoryManager.h"
-#include "backend/settings/settings.h"
 #include "app.h"
-
-#include "computerAPI/fileListener/fileListener.h"
-
-#include "backend/wasm/wasm.h"
+#include "backend/settings/keybind.h"
+#include "backend/settings/settings.h"
+#include "backend/settings/settingsMap.h"
+#include "computerAPI/directoryManager.h"
 
 int main(int argc, char* argv[]) {
 	try {
@@ -16,46 +14,46 @@ int main(int argc, char* argv[]) {
 
 		// register settings
 #ifdef __APPLE__
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_META | Rml::Input::KeyModifier::KM_SHIFT));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Open", makeKeybind(Rml::Input::KeyIdentifier::KI_O, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/New", makeKeybind(Rml::Input::KeyIdentifier::KI_N, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Undo", makeKeybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Redo", makeKeybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_META | Rml::Input::KeyModifier::KM_SHIFT));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Copy", makeKeybind(Rml::Input::KeyIdentifier::KI_C, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Paste", makeKeybind(Rml::Input::KeyIdentifier::KI_V, Rml::Input::KeyModifier::KM_META));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/State Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_I));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Connection", makeKeybind(Rml::Input::KeyIdentifier::KI_C));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Move", makeKeybind(Rml::Input::KeyIdentifier::KI_M));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_T));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", makeKeybind(Rml::Input::KeyIdentifier::KI_P));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", makeKeybind(Rml::Input::KeyIdentifier::KI_S));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", makeKeybind(Rml::Input::KeyIdentifier::KI_UNKNOWN, Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", Keybind(Keybind::KeyId::KI_S, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", Keybind(Keybind::KeyId::KI_S, Keybind::KeyMod::KM_META | Keybind::KeyMod::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Open", Keybind(Keybind::KeyId::KI_O, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/New", Keybind(Keybind::KeyId::KI_N, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Undo", Keybind(Keybind::KeyId::KI_Z, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Redo", Keybind(Keybind::KeyId::KI_Z, Keybind::KeyMod::KM_META | Keybind::KeyMod::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Copy", Keybind(Keybind::KeyId::KI_C, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Paste", Keybind(Keybind::KeyId::KI_V, Keybind::KeyMod::KM_META));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/State Changer", Keybind(Keybind::KeyId::KI_I));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Connection", Keybind(Keybind::KeyId::KI_C));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Move", Keybind(Keybind::KeyId::KI_M));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", Keybind(Keybind::KeyId::KI_T));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", Keybind(Keybind::KeyId::KI_P));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", Keybind(Keybind::KeyId::KI_S));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", Keybind(Keybind::KeyId::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", Keybind(Keybind::KeyId::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", Keybind(Keybind::KeyId::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", Keybind(Keybind::KeyId::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", Keybind(Keybind::KeyId::KI_UNKNOWN, Keybind::KeyMod::KM_SHIFT));
 		Settings::registerSetting<SettingType::BOOL>("Keybinds/Camera/Scroll Panning", true);
 #else
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", makeKeybind(Rml::Input::KeyIdentifier::KI_S, Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Open", makeKeybind(Rml::Input::KeyIdentifier::KI_O, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/New", makeKeybind(Rml::Input::KeyIdentifier::KI_N, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Undo", makeKeybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Redo", makeKeybind(Rml::Input::KeyIdentifier::KI_Z, Rml::Input::KeyModifier::KM_CTRL | Rml::Input::KeyModifier::KM_SHIFT));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Copy", makeKeybind(Rml::Input::KeyIdentifier::KI_C, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Paste", makeKeybind(Rml::Input::KeyIdentifier::KI_V, Rml::Input::KeyModifier::KM_CTRL));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/State Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_I));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Connection", makeKeybind(Rml::Input::KeyIdentifier::KI_C));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Move", makeKeybind(Rml::Input::KeyIdentifier::KI_M));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", makeKeybind(Rml::Input::KeyIdentifier::KI_T));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", makeKeybind(Rml::Input::KeyIdentifier::KI_P));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", makeKeybind(Rml::Input::KeyIdentifier::KI_S));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", makeKeybind(Rml::Input::KeyIdentifier::KI_E));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", makeKeybind(Rml::Input::KeyIdentifier::KI_Q));
-		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", makeKeybind(Rml::Input::KeyIdentifier::KI_UNKNOWN, Rml::Input::KeyModifier::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save", Keybind(Keybind::KeyId::KI_S, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Save As", Keybind(Keybind::KeyId::KI_S, Keybind::KeyMod::KM_CTRL | Keybind::KeyMod::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/Open", Keybind(Keybind::KeyId::KI_O, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/File/New", Keybind(Keybind::KeyId::KI_N, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Undo", Keybind(Keybind::KeyId::KI_Z, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Redo", Keybind(Keybind::KeyId::KI_Z, Keybind::KeyMod::KM_CTRL | Keybind::KeyMod::KM_SHIFT));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Copy", Keybind(Keybind::KeyId::KI_C, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Paste", Keybind(Keybind::KeyId::KI_V, Keybind::KeyMod::KM_CTRL));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/State Changer", Keybind(Keybind::KeyId::KI_I));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Connection", Keybind(Keybind::KeyId::KI_C));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Move", Keybind(Keybind::KeyId::KI_M));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Mode Changer", Keybind(Keybind::KeyId::KI_T));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Placement", Keybind(Keybind::KeyId::KI_P));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tools/Selection Maker", Keybind(Keybind::KeyId::KI_S));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CCW", Keybind(Keybind::KeyId::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Rotate CW", Keybind(Keybind::KeyId::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Confirm", Keybind(Keybind::KeyId::KI_E));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Editing/Tool Invert Mode", Keybind(Keybind::KeyId::KI_Q));
+		Settings::registerSetting<SettingType::KEYBIND>("Keybinds/Camera/Zoom", Keybind(Keybind::KeyId::KI_UNKNOWN, Keybind::KeyMod::KM_SHIFT));
 		Settings::registerSetting<SettingType::BOOL>("Keybinds/Camera/Scroll Panning", true);
 #endif
 

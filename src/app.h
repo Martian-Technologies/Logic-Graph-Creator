@@ -2,11 +2,11 @@
 #define app_h
 
 #include "gpu/vulkanInstance.h"
-#include "gui/sdl/sdlInstance.h"
+#include "gui/mainWindow/mainWindow.h"
 #include "gui/rml/rmlInstance.h"
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "gui/mainWindow/mainWindow.h"
+#include "gui/sdl/sdlInstance.h"
 
 #include "backend/backend.h"
 #include "computerAPI/circuits/circuitFileManager.h"
@@ -19,7 +19,7 @@ public:
 	App();
 
 	void runLoop();
-	
+
 private:
 	Backend backend;
 	CircuitFileManager circuitFileManager;

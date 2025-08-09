@@ -2,7 +2,6 @@
 
 #include "../selectionHelpers/tensorCreationTool.h"
 #include "../selectionHelpers/areaCreationTool.h"
-#include "backend/tools/toolManagerManager.h"
 
 void MoveTool::reset() {
 	CircuitTool::reset();
@@ -44,14 +43,14 @@ void MoveTool::setMode(std::string toolMode) {
 }
 
 bool MoveTool::rotateCW(const Event* event) {
-	transformAmount.rotate(true);
+	transformAmount.nextOrientation();
 	elementID = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool MoveTool::rotateCCW(const Event* event) {
-	transformAmount.rotate(false);
+	transformAmount.lastOrientation();
 	elementID = 0; // remake elements
 	updateElements();
 	return true;

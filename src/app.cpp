@@ -1,7 +1,7 @@
 #include "app.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 Rml::EventId pinchEventId = Rml::EventId::Invalid;
@@ -14,13 +14,15 @@ Rml::EventId getPinchEventId() {
 	return pinchEventId;
 }
 
-App::App() : rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFileManager), circuitFileManager(&(backend.getCircuitManager())), fileListener(std::chrono::milliseconds(200)) {
+App::App() :
+	rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFileManager), circuitFileManager(&(backend.getCircuitManager())),
+	fileListener(std::chrono::milliseconds(200)) {
 	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
 	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
 }
 
 #ifdef TRACY_PROFILER
-const char * const addLoopTracyName = "appLoop";
+const char* const addLoopTracyName = "appLoop";
 #endif
 
 void App::runLoop() {
@@ -44,7 +46,7 @@ void App::runLoop() {
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
 				// Single window was closed, check which window was closed and remove it
 				auto itr = windows.begin();
-				while (itr != windows.end()) {	
+				while (itr != windows.end()) {
 					if ((*itr)->recieveEvent(event)) {
 						windows.erase(itr);
 						break;
