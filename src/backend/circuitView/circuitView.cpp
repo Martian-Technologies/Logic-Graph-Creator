@@ -32,10 +32,12 @@ void CircuitView::setCircuit(SharedCircuit circuit) {
 		this->circuit = circuit;
 		toolManager.setCircuit(circuit.get());
 		renderer->setCircuit(circuit.get());
+		viewManager.setCircuit(circuit.get());
 	} else {
 		this->circuit = circuit;
 		toolManager.setCircuit(nullptr);
 		renderer->setCircuit(nullptr);
+		viewManager.setCircuit(nullptr);
 	}
 	if (dataUpdateEventManager) dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
 }

@@ -1,6 +1,7 @@
 #ifndef viewManager_h
 #define viewManager_h
 
+#include "backend/circuit/circuit.h"
 #include "backend/position/position.h"
 #include "util/vec2.h"
 
@@ -8,6 +9,12 @@ class EventRegister;
 class Event;
 
 class ViewManager {
+private:
+	struct ViewPositioningData {
+		ViewPositioningData(FPosition viewCenter, float viewScale) : viewCenter(viewCenter), viewScale(viewScale) {}
+		FPosition viewCenter;
+		float viewScale;
+	};
 public:
 	// initialization
 	ViewManager() : viewCenter(), viewScale(8.0f), aspectRatio(16.0f / 9.0f) { }
@@ -17,6 +24,7 @@ public:
 	inline void connectViewChanged(const std::function<void()>& func) { viewChangedListener = func; }
 
 	// setters
+	void setCircuit(Circuit* circuit);
 	inline void setAspectRatio(float value) { if (value > 10000.f || value < 0.0001f) return; aspectRatio = value; viewChanged(); }
 	inline void setViewCenter(FPosition value) { viewCenter = value; viewChanged(); }
 
@@ -58,9 +66,14 @@ private:
 	FPosition pointerPosition;
 	Vec2 pointerViewPosition;
 
+	// view data per circuit
+	std::map<circuit_id_t, ViewPositioningData> perCircuitViewData;
+	circuit_id_t currentCircuitId = 0;
+	
 	// view
 	FPosition viewCenter;
 	float viewScale;
+	
 	float aspectRatio;
 
 	EventRegister* eventRegister = nullptr;

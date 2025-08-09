@@ -1,7 +1,9 @@
 #include "viewManager.h"
 
+#include "backend/circuit/circuit.h"
 #include "backend/circuitView/events/customEvents.h"
 #include "backend/circuitView/events/eventRegister.h"
+#include "backend/position/position.h"
 
 void ViewManager::setUpEvents(EventRegister& eventRegister) {
 	this->eventRegister = &eventRegister;
@@ -12,6 +14,28 @@ void ViewManager::setUpEvents(EventRegister& eventRegister) {
 	eventRegister.registerFunction("Pointer Move On View", std::bind(&ViewManager::pointerMove, this, std::placeholders::_1));
 	eventRegister.registerFunction("pointer enter view", std::bind(&ViewManager::pointerEnterView, this, std::placeholders::_1));
 	eventRegister.registerFunction("pointer exit view", std::bind(&ViewManager::pointerExitView, this, std::placeholders::_1));
+}
+
+void ViewManager::setCircuit(Circuit* circuit) {
+	if (currentCircuitId != 0) {
+		perCircuitViewData.insert_or_assign(currentCircuitId, ViewPositioningData(viewCenter, viewScale));
+	}
+	if (circuit) {
+		currentCircuitId = circuit->getCircuitId();
+		auto iter = perCircuitViewData.find(currentCircuitId);
+		if (iter == perCircuitViewData.end()) {
+			viewCenter = FPosition();
+			viewScale = 8.0f;
+		} else {
+			viewCenter = iter->second.viewCenter;
+			viewScale = iter->second.viewScale;
+		}
+	} else {
+		currentCircuitId = 0;
+		viewCenter = FPosition();
+		viewScale = 8.0f;
+	}
+	viewChanged();
 }
 
 bool ViewManager::zoom(const Event* event) {
