@@ -49,6 +49,9 @@
 .menutree li.hovered-leaf { background-color: #1d1d1d; }
 .menutree li.hovered-leaf:active { background-color: #151515; }
 
+/* Do not highlight non-selectable parent categories at any depth when root has no-parent-select */
+.menutree.no-parent-select li.parent.hovered-leaf { background-color: transparent; }
+
 /* Selected state hook (apply class externally) */
 .menutree li.selected {
 	background-color: #2e2e2e;

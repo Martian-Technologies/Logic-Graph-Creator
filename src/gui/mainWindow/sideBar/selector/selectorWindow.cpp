@@ -13,6 +13,8 @@ SelectorWindow::SelectorWindow(
 	Rml::Element* itemTreeParent = document->GetElementById("item-selection-tree");
 	menuTree.emplace(document, itemTreeParent, false);
 	menuTree->setListener(std::bind(&SelectorWindow::updateSelected, this, std::placeholders::_1));
+	// In Blocks/Tools tree, prevent selecting category dropdown parents ("Blocks" / "Tools")
+	menuTree->disallowParentSelection(true);
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&SelectorWindow::updateList, this));
 	dataUpdateEventReceiver.linkFunction("proceduralCircuitPathUpdate", std::bind(&SelectorWindow::updateList, this));
 
@@ -78,6 +80,7 @@ void SelectorWindow::updateToolModeOptions() {
 	modeMenuTree->setPaths(modes.value_or(std::vector<std::string>()));
 }
 
+
 void SelectorWindow::updateSelected(const std::string& string) {
 	std::vector parts = stringSplit(string, '/');
 	if (parts.size() <= 1) return;
@@ -96,7 +99,36 @@ void SelectorWindow::updateSelected(const std::string& string) {
 		toolManagerManager->setBlock(blockType);
 		if (!selectedProceduralCircuit) hideProceduralCircuitParameterMenu();
 	} else if (parts[0] == "Tools") {
-		toolManagerManager->setTool(string.substr(6, string.size() - 6));
+		std::string toolPath = string.substr(6, string.size() - 6);
+		toolManagerManager->setTool(toolPath);
+		// Refresh available modes.
+		updateToolModeOptions();
+		// After modes are populated, attempt to reapply previously stored mode; if none stored, default to first mode.
+		auto modes = toolManagerManager->getActiveToolModes();
+		if (modes && !modes->empty()) {
+			std::string modeToApply;
+			if (auto stored = toolManagerManager->getActiveToolStoredMode(); stored && std::find(modes->begin(), modes->end(), *stored) != modes->end()) {
+				modeToApply = *stored;
+			} else {
+				modeToApply = (*modes)[0];
+			}
+			toolManagerManager->setMode(modeToApply);
+			// Mark this mode as selected in the mode tree UI if present.
+			if (modeMenuTree) {
+				Rml::Element* root = document->GetElementById("mode-selection-tree");
+				if (root) {
+					Rml::ElementList rows; root->GetElementsByTagName(rows, "li");
+					for (auto* r : rows) r->SetClass("selected", false);
+					for (auto* r : rows) {
+						std::string id = r->GetId();
+						if (id.size() > 5 && id.substr(id.size()-5) == "-menu") {
+							std::string path = id.substr(0, id.size()-5);
+							if (path == modeToApply) { r->SetClass("selected", true); break; }
+						}
+					}
+				}
+			}
+		}
 	} else {
 		logError("Do not recognize cadegory {}", "SelectorWindow", parts[0]);
 	}
