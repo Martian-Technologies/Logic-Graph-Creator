@@ -20,7 +20,7 @@ body {
 }
 
 #circuit-view-container {
-	flex: 1;  /* Takes available space between sidebars */
+	flex: 1;
 	display: flex;
 }
 

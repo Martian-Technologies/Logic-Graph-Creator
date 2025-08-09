@@ -1,7 +1,7 @@
 /* Circuit View */
 
 #circuit-view-rendering-area {
-	flex: 1;  /* Takes available space between sidebars */
+	flex: 1;
 	display: flex;
 	position: relative;
 }

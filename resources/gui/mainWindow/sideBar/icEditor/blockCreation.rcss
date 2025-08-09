@@ -1,18 +1,14 @@
-/* Block Creation (IC Editor) Layout Refresh */
 #block-creation-form {
 	display: flex;
 	flex-direction: column;
-	gap: 4dp; /* tighter vertical rhythm */
+	gap: 4dp;
 	margin: 2dp 2dp 4dp 2dp;
-	padding: 2dp; /* minimal internal padding */
+	padding: 2dp;
 }
 
 scrollbarvertical {
 	width: 0;
 }
-
-/* Add buttons */
-/* (spacing adjusted later in file for vertical rhythm) */
 
 #reset-block-creation, #update-block-creation {
 	display: inline-block;
@@ -24,17 +20,11 @@ scrollbarvertical {
 .section-header button { margin-left: auto; flex: 0 0 auto; white-space: nowrap; overflow: visible; }
 
 .connection-list-headers { background-color: #1d1d1d; border-radius: 3dp; padding: 2dp 4dp; font-size: 11dp; }
-.connection-list { background-color: #1d1d1d; border-radius: 3dp; min-height: 40dp; /* full height, no internal scroll */ max-height: none; overflow: visible; padding: 1dp; }
+.connection-list { background-color: #1d1d1d; border-radius: 3dp; min-height: 40dp; max-height: none; overflow: visible; padding: 1dp; }
 .scroll-y { overflow-y: auto; }
 
-/* Legacy list item block collapsed into improved styling below */
-
-/* Step 6: Connection list item improvements */
 .connection-list-item { line-height: 1.15em; min-height: 18dp; padding: 2dp 4dp; margin: 1dp 1dp; border-left: 2dp transparent; border-radius: 3dp; background:#2e2e2e; transition: background-color 120ms, border-color 120ms; display: flex; align-items: center; gap: 2dp; flex-wrap: wrap; }
-/* Row layout: first line = name + port X/Y (on-block X/Y). Force wrap AFTER port Y. */
-/* New wrap strategy: explicit flex breaker element */
 .connection-list-item .connection-break { flex-basis: 100%; height: 0; padding: 0; margin: 0; }
-/* Second line group's vertical offset */
 .connection-list-item .connection-list-item-pos-x,
 .connection-list-item .connection-list-item-pos-y,
 .connection-list-item .set-position-button,
@@ -46,13 +36,11 @@ scrollbarvertical {
 .connection-list-item .set-position-button,
 .connection-list-item .remove-connection-button { padding: 0 4dp; min-width: 16dp; height: 16dp; line-height: 14dp; font-size: 10dp; }
 
-/* Add buttons breathing room */
 #connection-list-add-input, #connection-list-add-output { margin: 2dp 4dp 2dp auto; }
 .connection-list-item:hover { background-color: #3b3b3b; }
 .connection-list-item:active { background-color: #1d1d1d; }
 .connection-list-item.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
 
-/* Alternating rows opt-in */
 #connection-list-output.alt-rows .connection-list-item:nth-child(even),
 #connection-list-input.alt-rows .connection-list-item:nth-child(even) { background-color: #242424; }
 #connection-list-output.alt-rows .connection-list-item:nth-child(even):hover,
@@ -74,7 +62,6 @@ scrollbarvertical {
 .number { width: 40dp; }
 .number-long { width: 56dp; }
 
-/* Responsive wrap for narrow sidebars */
 @media (max-width: 260px) {
 	.form-row { flex-direction: column; align-items: stretch; }
 	.form-row label { width: auto; }

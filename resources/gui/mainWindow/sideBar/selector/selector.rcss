@@ -38,7 +38,6 @@
 	vertical-align: top;
 }
 
-/* Step 6: Parameter rows polishing */
 #parameter-menu .parameter {
 	min-height: 18dp;
 	padding: 2dp 4dp;
@@ -50,11 +49,9 @@
 #parameter-menu .parameter:active { background-color: #1d1d1d; }
 #parameter-menu .parameter.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
 
-/* Optional alternating parameters */
 #parameter-menu.alt-rows .parameter:nth-child(even) { background-color: #242424; }
 #parameter-menu.alt-rows .parameter:nth-child(even):hover { background-color: #3b3b3b; }
 
-/* Parameter input restyle */
 #parameter-menu .parameter input {
 	display: inline-block;
 	background-color: #1d1d1d;

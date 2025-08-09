@@ -22,37 +22,31 @@ tabset panels panel {
 	overflow-y: scroll;
 }
 
-/* Step 5: Tab visual refresh */
 tabset tabs tab {
-	margin: 0 0.35em 0 0; /* tighter vertical spacing, consistent horizontal rhythm */
+	margin: 0 0.35em 0 0;
 	padding: 0.25em 0.55em;
-	border-radius: 0.4em 0.4em 0 0; /* emphasize top attachment */
+	border-radius: 0.4em 0.4em 0 0;
 	background-color: #0b0b0b; /* base (bg-0) */
 	color: #c9c9c9;
 	display: inline-block;
 	border: 1dp #1d1d1d;
-	border-bottom: 0dp; /* blend into panel below */
+	border-bottom: 0dp;
 	transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
-/* Hover: subtle lift */
 tabset tabs tab:hover {
 	background-color: #1d1d1d;
 	color: #f5f5f5;
 }
 
-/* Active (assumes engine applies :checked or .active class; include both) */
-/* Active tab: RmlUi applies the pseudo-class `selected` to the active tab title.
-	Retain previous selectors for potential future engine changes, but `:selected` is authoritative. */
 tabset tabs tab:selected,
 tabset tabs tab:checked,
 tabset tabs tab.active {
-	background-color: #2e2e2e; /* raised surface */
+	background-color: #2e2e2e;
 	color: #f5f5f5;
-	border-color: #d1963a; /* warm accent bordering */
+	border-color: #d1963a;
 }
 
-/* Optional accent variant (apply class in markup if desired later) */
 tabset tabs tab.accent {
 	background-color: #d1963a;
 	color: #1d1d1d;
