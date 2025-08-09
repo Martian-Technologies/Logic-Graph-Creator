@@ -15,13 +15,9 @@ private:
 	void Initialize();
 	void queryContext(const std::string& text);
 
-	// returns true if there's a substr inside, false otherwise to remove the group from settings sidenav
-	bool querySubcategory(const std::vector<std::vector<std::string>>& haystack, const std::string& needle, std::vector<std::string>& out);
-	bool queryCategories(const std::string& text, const int category); // looks if there is a change of info being inside 
-
-
-	void renderGroups(const std::vector<std::string>& tmp); // queries groups for specific items
-	void resetGroups(); // brings all settings back to original form
+	static bool match(const std::string& haystack, const std::string& needle);
+	void applyFilter(const std::string& needle);
+	void clearFilter();
 
 
 	Rml::Element* context;

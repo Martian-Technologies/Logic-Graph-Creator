@@ -6,47 +6,17 @@ Nord Color Pallete:
 #4c566a
 */
 
-#settings-window {
-	display: flex;
-	flex-direction: column;
-	/* align-items: center; */
-	justify-content: center;
-	height: 100%;
-}
+#settings-window { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #1b1b1c; border: 1dp solid #2a2a2b; border-radius: 6dp; }
 
-#settings-overlay {
-	background-color: #6d6d6d;
-}
+#settings-overlay { background-color: rgba(25,25,25,0.92); }
 
-/* ---------- NAVIGATION ---------- */
-#settings-navigation {
-	height: 3em;
-	background-color: #403f3c;
-	align-items: center;
-}
+#settings-top-bar { display: flex; flex-direction: row; align-items: center; gap: 0.9rem; padding: 0.65rem 1rem; background: linear-gradient(180deg,#323232,#242424); border-bottom: 1dp solid #3a3a3a; }
 	
-/* 
---- search ---
-#navigation-top-container {
-	height: 20%;
-}
-
-#navigation-top-container h1 {
-	margin-top: 10rem;
-	font-size: 18dp;
-}
-
-#settings-search {
-	width: 100%;
-	height: 100%;
-	margin-left: 10dp;
-	font-size: 14dp;
-	border-radius: 6dp;
-	border: 1dp;
-	border-color: #ccc;
-	box-sizing: border-box;
-	margin-top: 20dp;
-}
+.settings-search-wrapper { display: flex; align-items: center; gap: 0.4rem; flex: 1; background: #2e2e2e; border: 1dp solid #6a4d28; border-radius: 6dp; padding: 4dp 8dp; transition: background 120ms, border 120ms; }
+.settings-search-wrapper:focus-within { background: #2d281f; border: 2dp solid #d1963a; padding: 3dp 7dp; }
+#settings-search { flex: 1; padding: 4dp 2dp; font-size: 14dp; border-radius: 4dp; border: 0; background-color: transparent; color: #f0e9df; }
+#settings-search:focus { outline: none; }
+#settings-search::placeholder { color: #8b7a63; }
 
 --- nav panel ---
 #navigation-panel {
@@ -73,34 +43,13 @@ Nord Color Pallete:
 }*/
 
 /* --- action buttons --- */
-#setting-actions {
-	align-items: center;
-	justify-content: center; 
-	gap: 12dp; 
-	padding: 10dp;
-	width: 100%;
-	margin-top: auto; 
-}
-
-.settings-action {
-	padding: 8dp 16dp;
-	border-radius: 4dp;
-	font-size: 16dp;
-	font-weight: 500;
-	min-width: 80dp; 
-	text-align: center;
-}
+#setting-actions { display: flex; align-items: center; }
+.settings-action { padding: 6dp 14dp; border-radius: 4dp; font-size: 13dp; font-weight: 500; background-color: #2a2a2a; color: #e2dccf; border: 1dp solid #5a4933; cursor: pointer; transition: background 120ms, border-color 120ms, color 120ms; }
+.settings-action:hover { background-color: #3a2f22; border-color: #d1963a; color: #f5e7d3; }
+.settings-action:active { background-color: #4a3928; }
 
 /* ---------- CONTENT ---------- */
-#settings-content-panel {
-	width: 70%;
-	display: flex;
-	flex-direction: column;
-	box-sizing: border-box;
-	overflow-y: auto;
-	flex: 1;
-	padding: 10dp;
-}
+#settings-content-panel { flex: 1; display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto; padding: 0.25rem 1rem 1rem 1rem; gap: 0.1rem; }
 
 .settings-tree ul ul {
 	display: block;
@@ -123,24 +72,14 @@ Nord Color Pallete:
 	display: block;
 }
 
-.settings-tree li {
-	display: block;
-	padding: 0.1em 0.1em;
-}
+/* Tree item base */
+.settings-tree li { display: block; padding: 0.1em 0.1em; position: relative; }
 
 /* Step 6: Settings tree & content row polishing */
-.settings-tree li {
-	line-height: 1.25em;
-	min-height: 19dp;
-	padding: 2dp 4dp;
-	border-left: 2dp transparent;
-	border-radius: 4dp;
-	transition: background-color 120ms, border-color 120ms;
-}
-
+/* Polished rows */
+.settings-tree li { line-height: 1.3em; min-height: 20dp; padding: 4dp 6dp; border-left: 2dp solid transparent; border-radius: 4dp; transition: background-color 100ms, border-color 100ms; }
 .settings-tree li:hover { background-color: transparent; }
-.settings-tree li:active { background-color: transparent; }
-.settings-tree li.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
+.settings-tree li.selected { background-color: #2f2a24; border-left-color: #d1963a; }
 
 /* Alternate rows opt-in */
 .settings-tree.alt-rows > ul > li:nth-child(even) { background-color: #101010; }
@@ -149,6 +88,13 @@ Nord Color Pallete:
 .collapsed div ul {
 	display: none;
 }
+
+/* Search filtering hide */
+.search-hide { display: none; }
+.search-nonresult-hide { display: none; }
+/* Increase specificity so it overrides base li display rule */
+.settings-tree li.search-hide { display: none; }
+.settings-tree-header.search-nonresult-hide { display: none; }
 
 .settings-tree li .settings-tree-item input {
 	display: block;
