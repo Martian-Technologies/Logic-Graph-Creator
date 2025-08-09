@@ -115,34 +115,26 @@ void LogicSimulator::simulationLoop() {
 
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
-	{
-		std::shared_lock lkCur(statesAMutex);
+	for (auto& gate : andGates) gate.tick(statesA, statesB);
+	for (auto& gate : xorGates) gate.tick(statesA, statesB);
+	for (auto& gate : constantResetGates) gate.tick(statesB);
+	for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
+	for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
 
-		for (auto& gate : andGates) gate.tick(statesA, statesB);
-		for (auto& gate : xorGates) gate.tick(statesA, statesB);
-		for (auto& gate : constantResetGates) gate.tick(statesB);
-		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
-		for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
-
-		for (auto& gate : junctions) gate.tick(statesB);
-	}
+	for (auto& gate : junctions) gate.tick(statesB);
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);
 }
 
 inline void LogicSimulator::realisticTickOnce() {
 	std::unique_lock lkNext(statesBMutex);
-	{
-		std::shared_lock lkCur(statesAMutex);
+	for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
+	for (auto& gate : xorGates) gate.realisticTick(statesA, statesB);
+	for (auto& gate : constantResetGates) gate.tick(statesB);
+	for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
+	for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
 
-		for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
-		for (auto& gate : xorGates) gate.realisticTick(statesA, statesB);
-		for (auto& gate : constantResetGates) gate.tick(statesB);
-		for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
-		for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
-
-		for (auto& gate : junctions) gate.tick(statesB);
-	}
+	for (auto& gate : junctions) gate.tick(statesB);
 	std::unique_lock lkCurEx(statesAMutex);
 	std::swap(statesA, statesB);
 }

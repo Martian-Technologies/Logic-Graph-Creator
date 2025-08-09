@@ -1,7 +1,7 @@
 #include "circuitManager.h"
 
-#include "backend/proceduralCircuits/generatedCircuit.h"
 #include "backend/evaluator/evaluatorManager.h"
+#include "backend/proceduralCircuits/generatedCircuit.h"
 #include "parsedCircuit.h"
 
 circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std::string& uuid, bool createEval) {
@@ -29,18 +29,10 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 CircuitManager::CircuitManager(DataUpdateEventManager* dataUpdateEventManager, EvaluatorManager* evaluatorManager, CircuitFileManager* fileManager) :
 	blockDataManager(dataUpdateEventManager), circuitBlockDataManager(dataUpdateEventManager), proceduralCircuitManager(this, dataUpdateEventManager, fileManager),
 	dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager) {
-	dataUpdateEventReceiver.linkFunction("postBlockSizeChange", [this](const DataUpdateEventManager::EventData* eventData) {
-		linkedFunctionForUpdates<Vector>(eventData);
-	});
-	dataUpdateEventReceiver.linkFunction("blockDataRemoveConnection", [this](const DataUpdateEventManager::EventData* eventData) {
-		linkedFunctionForUpdates<connection_end_id_t>(eventData);
-	});
-	dataUpdateEventReceiver.linkFunction("blockDataSetConnection", [this](const DataUpdateEventManager::EventData* eventData) {
-		linkedFunctionForUpdates<connection_end_id_t>(eventData);
-	});
-	dataUpdateEventReceiver.linkFunction("blockDataConnectionNameSet", [this](const DataUpdateEventManager::EventData* eventData) {
-		linkedFunctionForUpdates<connection_end_id_t>(eventData);
-	});
+	dataUpdateEventReceiver.linkFunction("postBlockSizeChange", [this](const DataUpdateEventManager::EventData* eventData) { linkedFunctionForUpdates<Vector>(eventData); });
+	dataUpdateEventReceiver.linkFunction("blockDataRemoveConnection", [this](const DataUpdateEventManager::EventData* eventData) { linkedFunctionForUpdates<connection_end_id_t>(eventData); });
+	dataUpdateEventReceiver.linkFunction("blockDataSetConnection", [this](const DataUpdateEventManager::EventData* eventData) { linkedFunctionForUpdates<connection_end_id_t>(eventData); });
+	dataUpdateEventReceiver.linkFunction("blockDataConnectionNameSet", [this](const DataUpdateEventManager::EventData* eventData) { linkedFunctionForUpdates<connection_end_id_t>(eventData); });
 }
 
 circuit_id_t CircuitManager::createNewCircuit(const ParsedCircuit* parsedCircuit, bool createEval) {
@@ -116,7 +108,7 @@ circuit_id_t CircuitManager::createNewCircuit(const ParsedCircuit* parsedCircuit
 			const ParsedCircuit::BlockData* parsedBlock = parsedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				parsedBlock->position.snap() + blockDataManager.getConnectionVector(parsedBlock->type, port.internalBlockConnectionEndId).first
+				parsedBlock->position.snap() + blockDataManager.getConnectionVector(parsedBlock->type, port.internalBlockConnectionEndId).value()
 			);
 		}
 	}
@@ -181,7 +173,7 @@ circuit_id_t CircuitManager::createNewCircuit(const GeneratedCircuit* generatedC
 			const GeneratedCircuit::GeneratedCircuitBlockData* blockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				blockData->position + blockDataManager.getConnectionVector(blockData->type, blockData->orientation, port.internalBlockConnectionEndId).first
+				blockData->position + blockDataManager.getConnectionVector(blockData->type, blockData->orientation, port.internalBlockConnectionEndId).value()
 			);
 		}
 	}
@@ -253,11 +245,11 @@ void CircuitManager::updateExistingCircuit(circuit_id_t id, const GeneratedCircu
 			const GeneratedCircuit::GeneratedCircuitBlockData* generatedBlockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).first
+				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).value()
 			);
 		}
 	}
- 
+
 	std::vector<connection_end_id_t> endIdsToRemove;
 	for (auto iter : blockData->getConnections()) {
 		bool found = false;
@@ -290,7 +282,7 @@ void CircuitManager::updateExistingCircuit(circuit_id_t id, const GeneratedCircu
 			const GeneratedCircuit::GeneratedCircuitBlockData* generatedBlockData = generatedCircuit->getBlock(port.internalBlockId);
 			circuitBlockData->setConnectionIdPosition(
 				port.connectionEndId,
-				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).first
+				generatedBlockData->position + blockDataManager.getConnectionVector(generatedBlockData->type, generatedBlockData->orientation, port.internalBlockConnectionEndId).value()
 			);
 		}
 	}

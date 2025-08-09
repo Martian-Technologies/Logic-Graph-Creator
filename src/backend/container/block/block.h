@@ -26,24 +26,27 @@ public:
 
 	inline const ConnectionContainer& getConnectionContainer() const { return connections; }
 	inline const phmap::flat_hash_set<ConnectionEnd>* getInputConnections(Position position) const {
-		auto [connectionId, success] = getInputConnectionId(position);
-		return success ? getConnectionContainer().getConnections(connectionId) : nullptr;
+		std::optional<connection_end_id_t> connectionId = getInputConnectionId(position);
+		return connectionId ? getConnectionContainer().getConnections(connectionId.value()) : nullptr;
 	}
 	inline const phmap::flat_hash_set<ConnectionEnd>* getOutputConnections(Position position) const {
-		auto [connectionId, success] = getOutputConnectionId(position);
-		return success ? getConnectionContainer().getConnections(connectionId) : nullptr;
+		std::optional<connection_end_id_t> connectionId = getOutputConnectionId(position);
+		return connectionId ? getConnectionContainer().getConnections(connectionId.value()) : nullptr;
 	}
-	inline std::pair<connection_end_id_t, bool> getInputConnectionId(Position position) const {
-		return withinBlock(position) ? blockDataManager->getInputConnectionId(type(), getOrientation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+	inline std::optional<connection_end_id_t> getInputConnectionId(Position position) const {
+		if (!withinBlock(position)) return std::nullopt;
+		return blockDataManager->getInputConnectionId(type(), getOrientation(), position - getPosition());
 	}
-	inline std::pair<connection_end_id_t, bool> getOutputConnectionId(Position position) const {
-		return withinBlock(position) ? blockDataManager->getOutputConnectionId(type(), getOrientation(), position - getPosition()) : std::make_pair<connection_end_id_t, bool>(0, false);
+	inline std::optional<connection_end_id_t> getOutputConnectionId(Position position) const {
+		if (!withinBlock(position)) return std::nullopt;
+		return blockDataManager->getOutputConnectionId(type(), getOrientation(), position - getPosition());
 	}
-	inline std::pair<Position, bool> getConnectionPosition(connection_end_id_t connectionId) const {
-		auto output = blockDataManager->getConnectionVector(type(), getOrientation(), connectionId);
-		return {output.second ? (getPosition() + output.first) : Position(), output.second};
+	inline std::optional<Position> getConnectionPosition(connection_end_id_t connectionId) const {
+		std::optional<Vector> output = blockDataManager->getConnectionVector(type(), getOrientation(), connectionId);
+		if (!output) return std::nullopt;
+		return getPosition() + output.value();
 	}
-	inline std::pair<Vector, bool> getConnectionVector(connection_end_id_t connectionId) const {
+	inline std::optional<Vector>  getConnectionVector(connection_end_id_t connectionId) const {
 		return blockDataManager->getConnectionVector(type(), getOrientation(), connectionId);
 	}
 	inline bool connectionExists(connection_end_id_t connectionId) const { return blockDataManager->connectionExists(type(), connectionId); }
