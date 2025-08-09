@@ -66,8 +66,30 @@
 	background-color: #de3737e0;
 }
 
-#limit-speed {
+#limit-speed-checkbox {
 	margin: 0;
+	width: 20dp;
+	height: 20dp;
+	border: 1dp solid #3aa53a;
+	border-radius: 0.3em;
+	background-color: #3aa53a20;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#limit-speed-checkbox:hover {
+	background-color: #3aa53a40;
+}
+
+#limit-speed-checkbox:checked {
+	background-color: #64ff3ae0;
+	border-color: #64ff3a;
+}
+
+#limit-speed-checkbox:checked:hover {
+	background-color: #4be826e0;
 }
 
 #tps-input {
