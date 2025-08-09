@@ -282,8 +282,6 @@ void CircuitViewWidget::setSimSpeed(double speed) {
 void CircuitViewWidget::newCircuit() {
 	circuit_id_t id = circuitView->getBackend()->createCircuit();
 	circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
-	// Notify UI to select the newly created circuit in the simulation tree.
-	circuitView->getBackend()->getDataUpdateEventManager()->sendEvent("circuitCreatedSelect", id);
 	for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
 		if (iter.second->getCircuitId(Address()) == id) {
 			circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());

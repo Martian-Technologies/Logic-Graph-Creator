@@ -59,6 +59,7 @@ bool Backend::unlinkCircuitView(CircuitView* circuitView) {
 }
 
 bool Backend::linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t circuitId) {
+	dataUpdateEventManager.sendEvent("circuitCreatedSelect", circuitId);
 	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
 	if (circuit) {
 		if (circuitView->getCircuit() == circuit.get()) return true;
