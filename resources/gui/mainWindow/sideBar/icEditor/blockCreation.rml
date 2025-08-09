@@ -5,39 +5,31 @@
 	</head>
 
 	<body>
-		<!-- <div id="block-creation-view"> -->
-			<div id="block-creation-form">
-				<div>
-					<label class="form-label" for="name"> Name: </label>
-					<input id="name-input" type="text" name="name" maxlength="15" class="name" /><br />
-				</div>
-				<div>
-					<label class="form-label" for="width"> Width: </label>
-					<input id="width-input" type="text" name="width" maxlength="3" class="number" /><br />
-				</div>
-				<div>
-					<label class="form-label" for="height"> Height: </label>
-					<input id="height-input" type="text" name="height" maxlength="3" class="number" /><br /><br />
-				</div>
-				<div id="connection-menu">
-					<div>
-						Inputs<br />
-						<button id="connection-list-add-input">Add Input</button>
-					</div>
-					<div id="connection-list-input-headers">Name | Port X/Y | Block X/Y</div>
-					<div id="connection-list-input"></div>
-					<div>
-						Outputs<br />
-						<button id="connection-list-add-output">Add Output</button>
-					</div>
-					<div id="connection-list-output-headers">Name | Port X/Y | Block X/Y</div>
-					<div id="connection-list-output"></div>
-				</div>
-				<div>
-					<button id="reset-block-creation" class="">Reset</button>
-					<button id="update-block-creation" class="">Update</button>
-				</div>
+		<div id="block-creation-form" class="surface-alt pad-sm">
+			<div class="form-row">
+				<label class="form-label" for="name">Name</label>
+				<input id="name-input" type="text" name="name" maxlength="15" class="name" />
 			</div>
-		<!-- </div> -->
+			<div class="form-row">
+				<label class="form-label" for="width">Width</label>
+				<input id="width-input" type="text" name="width" maxlength="3" class="number" />
+			</div>
+			<div class="form-row">
+				<label class="form-label" for="height">Height</label>
+				<input id="height-input" type="text" name="height" maxlength="3" class="number" />
+			</div>
+			<div id="connection-menu" class="surface-raised pad-sm">
+				<div class="section-header">Inputs <button id="connection-list-add-input" class="btn btn-outline btn-sm"><span>Add Input</span></button></div>
+				<div id="connection-list-input-headers" class="connection-list-headers">Name | Port X/Y | Block X/Y</div>
+				<div id="connection-list-input" class="connection-list scroll-y alt-rows"></div>
+				<div class="section-header">Outputs <button id="connection-list-add-output" class="btn btn-outline btn-sm"><span>Add Output</span></button></div>
+				<div id="connection-list-output-headers" class="connection-list-headers">Name | Port X/Y | Block X/Y</div>
+				<div id="connection-list-output" class="connection-list scroll-y alt-rows"></div>
+			</div>
+			<div class="form-actions">
+				<button id="reset-block-creation" class="btn btn-text">Reset</button>
+				<button id="update-block-creation" class="btn btn-primary">Update</button>
+			</div>
+		</div>
 	</body>
 </template>

@@ -1,66 +1,53 @@
+/* Block Creation (IC Editor) Layout Refresh */
 #block-creation-form {
-	background-color: #2e2e2e;
-	border-radius: 0.3em;
-	margin: 0.5em 0.1em;
 	display: flex;
 	flex-direction: column;
-	min-height: 2rem;
-	padding-left: 4dp;
+	gap: 4dp; /* tighter vertical rhythm */
+	margin: 2dp 2dp 4dp 2dp;
+	padding: 2dp; /* minimal internal padding */
 }
 
 scrollbarvertical {
 	width: 0;
 }
 
-#connection-list-add-input #connection-list-add-output {
-	display: inline-block;
-	margin: 1em 1em;
-}
+/* Add buttons */
+/* (spacing adjusted later in file for vertical rhythm) */
 
 #reset-block-creation, #update-block-creation {
 	display: inline-block;
 	margin: 0.2em 0.2em;
 }
 
-#connection-menu {
-	display: flex;
-	flex-direction: column;
-	background-color: #3b3b3b;
-	border-radius: 0.3em;
-	margin: 0.3em 0.1em;
-	padding: 0.1em 0.1em;
-}
+#connection-menu { display: flex; flex-direction: column; gap: 2dp; background: transparent; padding: 0; }
+.section-header { font-weight: 600; display: flex; align-items: center; }
+.section-header button { margin-left: auto; flex: 0 0 auto; white-space: nowrap; overflow: visible; }
 
-#connection-list-output-headers, #connection-list-input-headers {
-	display: block;
-	background-color: #1d1d1d;
-	border-radius: 0.3em 0.3em 0.1em 0.1em;
-	margin: 0.15em 0.15em 0 0.15em;
-}
-#connection-list-output, #connection-list-input {
-	display: block;
-	background-color: #1d1d1d;
-	border-radius: 0.1em;
-	margin: 0 0.15em 0.15em 0.15em;
-	min-height: 3rem;
-}
+.connection-list-headers { background-color: #1d1d1d; border-radius: 3dp; padding: 2dp 4dp; font-size: 11dp; }
+.connection-list { background-color: #1d1d1d; border-radius: 3dp; min-height: 40dp; /* full height, no internal scroll */ max-height: none; overflow: visible; padding: 1dp; }
+.scroll-y { overflow-y: auto; }
 
-.connection-list-item {
-	display: block;
-	background-color: #2e2e2e;
-	border-radius: 0.2em;
-	padding: 0.075em;
-	margin: 0.15em;
-}
+/* Legacy list item block collapsed into improved styling below */
 
 /* Step 6: Connection list item improvements */
-.connection-list-item {
-	line-height: 1.1em;
-	min-height: 18dp;
-	padding: 2dp 4dp;
-	border-left: 2dp transparent;
-	transition: background-color 120ms, border-color 120ms;
-}
+.connection-list-item { line-height: 1.15em; min-height: 18dp; padding: 2dp 4dp; margin: 1dp 1dp; border-left: 2dp transparent; border-radius: 3dp; background:#2e2e2e; transition: background-color 120ms, border-color 120ms; display: flex; align-items: center; gap: 2dp; flex-wrap: wrap; }
+/* Row layout: first line = name + port X/Y (on-block X/Y). Force wrap AFTER port Y. */
+/* New wrap strategy: explicit flex breaker element */
+.connection-list-item .connection-break { flex-basis: 100%; height: 0; padding: 0; margin: 0; }
+/* Second line group's vertical offset */
+.connection-list-item .connection-list-item-pos-x,
+.connection-list-item .connection-list-item-pos-y,
+.connection-list-item .set-position-button,
+.connection-list-item .remove-connection-button { margin-top: 2dp; }
+.connection-list-item .connection-list-item-pos-x,
+.connection-list-item .connection-list-item-pos-y { flex: 0 0 auto; }
+.connection-list-item > * { margin-right: 2dp; }
+.connection-list-item > *:last-child { margin-right: 0; }
+.connection-list-item .set-position-button,
+.connection-list-item .remove-connection-button { padding: 0 4dp; min-width: 16dp; height: 16dp; line-height: 14dp; font-size: 10dp; }
+
+/* Add buttons breathing room */
+#connection-list-add-input, #connection-list-add-output { margin: 2dp 4dp 2dp auto; }
 .connection-list-item:hover { background-color: #3b3b3b; }
 .connection-list-item:active { background-color: #1d1d1d; }
 .connection-list-item.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
@@ -71,25 +58,26 @@ scrollbarvertical {
 #connection-list-output.alt-rows .connection-list-item:nth-child(even):hover,
 #connection-list-input.alt-rows .connection-list-item:nth-child(even):hover { background-color: #3b3b3b; }
 
-.connection-list-item input, #name-input, #width-input, #height-input {
-	background-color: #1d1d1d;
-	border-radius: 0.1em;
-	vertical-align: middle;
-	margin: 0 0.1em;
-}
+.connection-list-item input, #name-input, #width-input, #height-input { background-color: #1d1d1d; border-radius: 3dp; vertical-align: middle; margin: 0 2dp; padding: 1dp 4dp; line-height: 1.2em; }
 
-.connection-list-item button {
-	margin: 0 0.1em;
-}
+.connection-list-item button { margin: 0 2dp; padding: 0 4dp; min-width: 16dp; height: 16dp; line-height: 14dp; font-size: 10dp; border-radius: 4dp; }
 
 .name {
 	width: 11rem;
 }
 
-.number {
-	width: 2.4rem;
-}
+.form-row { display: flex; align-items: center; gap: 4dp; }
+.form-row label { width: 44dp; font-size: 11dp; color: #c9c9c9; }
+.form-row input { flex: 1; min-width: 0; }
+.form-actions { display: flex; gap: 4dp; justify-content: flex-end; margin-top: 2dp; }
+.name { width: 140dp; }
+.number { width: 40dp; }
+.number-long { width: 56dp; }
 
-.number-long {
-	width: 4rem
+/* Responsive wrap for narrow sidebars */
+@media (max-width: 260px) {
+	.form-row { flex-direction: column; align-items: stretch; }
+	.form-row label { width: auto; }
+	.form-actions { flex-direction: column; }
 }
+.connection-list-item:active { background-color: #1d1d1d; }

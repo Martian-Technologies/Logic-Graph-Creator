@@ -138,8 +138,8 @@ Nord Color Pallete:
 	transition: background-color 120ms, border-color 120ms;
 }
 
-.settings-tree li:hover { background-color: #1d1d1d; }
-.settings-tree li:active { background-color: #151515; }
+.settings-tree li:hover { background-color: transparent; }
+.settings-tree li:active { background-color: transparent; }
 .settings-tree li.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
 
 /* Alternate rows opt-in */

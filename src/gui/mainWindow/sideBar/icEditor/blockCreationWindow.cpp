@@ -295,6 +295,11 @@ void BlockCreationWindow::resetMenu() {
 		row->AppendChild(std::move(name))->SetClass("connection-list-item-name", true);
 		row->AppendChild(std::move(positionOnBlockX))->SetClass("connection-list-item-on-block-x", true);
 		row->AppendChild(std::move(positionOnBlockY))->SetClass("connection-list-item-on-block-y", true);
+		// Flex wrap breaker to force subsequent elements (block/global position + buttons) onto next line without pushing Port Y down
+		{
+			Rml::ElementPtr breaker = document->CreateElement("div");
+			row->AppendChild(std::move(breaker))->SetClass("connection-break", true);
+		}
 		row->AppendChild(std::move(positionX))->SetClass("connection-list-item-pos-x", true);
 		row->AppendChild(std::move(positionY))->SetClass("connection-list-item-pos-y", true);
 		row->AppendChild(std::move(setPositionButton))->SetClass("set-position-button", true);
@@ -398,6 +403,11 @@ void BlockCreationWindow::addListItem(bool isInput) {
 	row->AppendChild(std::move(name))->SetClass("connection-list-item-name", true);
 	row->AppendChild(std::move(positionOnBlockX))->SetClass("connection-list-item-on-block-x", true);
 	row->AppendChild(std::move(positionOnBlockY))->SetClass("connection-list-item-on-block-y", true);
+	// Flex break element ensures second line starts after Port Y
+	{
+		Rml::ElementPtr breaker = document->CreateElement("div");
+		row->AppendChild(std::move(breaker))->SetClass("connection-break", true);
+	}
 	row->AppendChild(std::move(positionX))->SetClass("connection-list-item-pos-x", true);
 	row->AppendChild(std::move(positionY))->SetClass("connection-list-item-pos-y", true);
 	row->AppendChild(std::move(setPositionButton))->SetClass("set-position-button", true);
