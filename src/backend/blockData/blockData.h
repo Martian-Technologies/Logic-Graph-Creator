@@ -101,14 +101,20 @@ public:
 		return std::nullopt;
 	}
 	inline std::optional<connection_end_id_t> getOutputConnectionId(Vector vector) const noexcept {
-		if (defaultData) return (vector.dx == 0 && vector.dy == 0) ? 1 : std::nullopt;
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 1;
+			return std::nullopt;
+		}
 		for (auto& pair : connections) {
 			if (pair.second.first == vector && !pair.second.second) return pair.first;
 		}
 		return std::nullopt;
 	}
 	inline std::optional<connection_end_id_t> getInputConnectionId(Vector vector, Orientation orientation) const noexcept {
-		if (defaultData) return (vector.dx == 0 && vector.dy == 0) ? 0 : std::nullopt;
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 0;
+			return std::nullopt;
+		}
 		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
 		for (auto& pair : connections) {
 			if (pair.second.first == noOrientationVec && pair.second.second) return pair.first;
@@ -116,7 +122,10 @@ public:
 		return std::nullopt;
 	}
 	inline std::optional<connection_end_id_t> getOutputConnectionId(Vector vector, Orientation orientation) const noexcept {
-		if (defaultData) return (vector.dx == 0 && vector.dy == 0) ? 1 : std::nullopt;
+		if (defaultData) {
+			if (vector.dx == 0 && vector.dy == 0) return 1;
+			return std::nullopt;
+		}
 		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
 		for (auto& pair : connections) {
 			if (pair.second.first == noOrientationVec && !pair.second.second) return pair.first;
@@ -134,11 +143,12 @@ public:
 	}
 	inline std::optional<Vector> getConnectionVector(connection_end_id_t connectionId, Orientation orientation) const noexcept {
 		if (defaultData) {
-			return (connectionId <= 1) ? Vector(0) : std::nullopt;
+			if (connectionId <= 1) return Vector(0);
+			return std::nullopt;
 		}
 		auto iter = connections.find(connectionId);
-		if (iter == connections.end()) return return std::nullopt;
-		return orientation.transformVectorWithArea(iter->second.first, blockSize)
+		if (iter == connections.end()) return std::nullopt;
+		return orientation.transformVectorWithArea(iter->second.first, blockSize);
 	}
 	inline connection_end_id_t getConnectionCount() const noexcept {
 		if (defaultData) return 2;
@@ -167,10 +177,7 @@ public:
 
 	inline void setConnectionIdName(connection_end_id_t endId, const std::string& name) {
 		connectionIdNames.set(endId, name);
-		dataUpdateEventManager->sendEvent(
-			"blockDataConnectionNameSet",
-			DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId })
-		);
+		dataUpdateEventManager->sendEvent("blockDataConnectionNameSet", DataUpdateEventManager::EventDataWithValue<std::pair<BlockType, connection_end_id_t>>({ blockType, endId }));
 	}
 	inline const std::string* getConnectionIdToName(connection_end_id_t endId) const { return connectionIdNames.get(endId); }
 

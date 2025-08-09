@@ -18,7 +18,7 @@ IndentWidth: 4
 UseTab: Always
 BreakTemplateDeclarations: MultiLine
 AccessModifierOffset: -4
-ColumnLimit: 170
+ColumnLimit: 200
 ObjCBinPackProtocolList: Never
 BinPackParameters: OnePerLine
 AllowShortBlocksOnASingleLine: Empty
