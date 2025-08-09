@@ -219,10 +219,10 @@ void BlockCreationWindow::resetMenu() {
 
 	ele = menu->GetElementById("width-input");
 	Rml::ElementFormControlInput* widthElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
-	widthElement->SetValue(std::to_string(blockData->getSize().h));
+	widthElement->SetValue(std::to_string(blockData->getSize().w));
 	ele = menu->GetElementById("height-input");
 	Rml::ElementFormControlInput* heightElement = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(ele);
-	heightElement->SetValue(std::to_string(blockData->getSize().w));
+	heightElement->SetValue(std::to_string(blockData->getSize().h));
 
 	const std::unordered_map<connection_end_id_t, std::pair<Vector, bool>>& conncections = blockData->getConnections();
 	for (auto& iter : conncections) {
