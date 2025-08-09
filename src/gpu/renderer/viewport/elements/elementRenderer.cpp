@@ -109,7 +109,7 @@ void ElementRenderer::renderBlockPreviews(Frame& frame, const glm::mat4& viewMat
 		for (const BlockPreviewRenderData& preview : blockPreviews) {
 			blockPreviewConstant.position = preview.position;
 			blockPreviewConstant.size = preview.size;
-			blockPreviewConstant.orientation = preview.orientation.rotation;
+			blockPreviewConstant.orientation = preview.orientation.rotation + 4 * preview.orientation.flipped;
 			blockPreviewConstant.uvOffsetX = device->getBlockTextureManager()->getTileset().getTopLeftUV(preview.type + 1 + (preview.type >= BlockType::CUSTOM), 0).x;
 
 			blockPreviewPipeline.cmdPushConstants(frame.mainCommandBuffer, &blockPreviewConstant);

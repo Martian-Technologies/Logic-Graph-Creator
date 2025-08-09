@@ -7,13 +7,13 @@ void BaseBlockPlacementTool::activate() {
 }
 
 bool BaseBlockPlacementTool::rotateBlockCW(const Event* event) {
-	rotation = rotate(rotation, true);
+	orientation.nextOrientation();
 	updateElements();
 	return true;
 }
 
 bool BaseBlockPlacementTool::rotateBlockCCW(const Event* event) {
-	rotation = rotate(rotation, false);
+	orientation.lastOrientation();
 	updateElements();
 	return true;
 }

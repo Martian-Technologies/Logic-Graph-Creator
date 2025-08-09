@@ -29,14 +29,12 @@ ProceduralCircuitParameters::ProceduralCircuitParameters(std::istream& ss) {
 }
 
 ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(const ProceduralCircuitParameters& other) {
-	if (this != &other)
-		parameters = other.parameters;
+	if (this != &other) parameters = other.parameters;
 	return *this;
 }
 
 ProceduralCircuitParameters& ProceduralCircuitParameters::operator=(ProceduralCircuitParameters&& other) {
-	if (this != &other)
-		parameters = std::move(other.parameters);
+	if (this != &other) parameters = std::move(other.parameters);
 	return *this;
 }
 
@@ -49,17 +47,13 @@ std::string ProceduralCircuitParameters::toString() const {
 	return str + ")";
 }
 
-ProceduralCircuit::ProceduralCircuit(
-	CircuitManager* circuitManager,
-	DataUpdateEventManager* dataUpdateEventManager,
-	const std::string& name,
-	const std::string& uuid
-) : circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), proceduralCircuitName(name), proceduralCircuitUUID(uuid) { }
+ProceduralCircuit::ProceduralCircuit(CircuitManager* circuitManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
+	circuitManager(circuitManager), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager), proceduralCircuitName(name),
+	proceduralCircuitUUID(uuid) { }
 
 ProceduralCircuit::ProceduralCircuit(ProceduralCircuit&& other) :
-	proceduralCircuitName(std::move(other.proceduralCircuitName)), proceduralCircuitUUID(std::move(other.proceduralCircuitUUID)),
-	circuitManager(other.circuitManager), generatedCircuits(std::move(other.generatedCircuits)),
-	circuitIdToProceduralCircuitParameters(std::move(other.circuitIdToProceduralCircuitParameters)),
+	proceduralCircuitName(std::move(other.proceduralCircuitName)), proceduralCircuitUUID(std::move(other.proceduralCircuitUUID)), circuitManager(other.circuitManager),
+	generatedCircuits(std::move(other.generatedCircuits)), circuitIdToProceduralCircuitParameters(std::move(other.circuitIdToProceduralCircuitParameters)),
 	dataUpdateEventManager(other.dataUpdateEventManager), dataUpdateEventReceiver(std::move(other.dataUpdateEventReceiver)) { }
 
 ProceduralCircuit::~ProceduralCircuit() {
@@ -105,7 +99,7 @@ circuit_id_t ProceduralCircuit::getCircuitId(const ProceduralCircuitParameters& 
 	this->makeCircuit(realParameters, generatedCircuit);
 	generatedCircuit.markAsCustom();
 	GeneratedCircuitValidator validator(generatedCircuit, circuitManager->getBlockDataManager());
-	
+
 	if (!(generatedCircuit.isValid())) return 0;
 
 	// Create the circuit if it has not been generated

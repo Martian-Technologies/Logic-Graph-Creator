@@ -2,12 +2,13 @@
 #define baseBlockPlacementTool_h
 
 #include "../circuitToolHelper.h"
+#include "backend/position/position.h"
 
 class BaseBlockPlacementTool : public CircuitToolHelper {
 public:
 	// This will also tell the tool to reset.
 	inline void selectBlock(BlockType selectedBlock) { this->selectedBlock = selectedBlock; updateElements(); }
-	inline void setRotation(Rotation rotation) { this->rotation = rotation; updateElements(); }
+	inline void setRotation(Orientation orientation) { this->orientation = orientation; updateElements(); }
 
 	void activate() override;
 
@@ -16,7 +17,7 @@ public:
 
 protected:
 	BlockType selectedBlock = BlockType::NONE;
-	Rotation rotation = Rotation::ZERO;
+	Orientation orientation = Orientation();
 };
 
 typedef std::shared_ptr<BaseBlockPlacementTool> SharedBaseBlockPlacementTool;

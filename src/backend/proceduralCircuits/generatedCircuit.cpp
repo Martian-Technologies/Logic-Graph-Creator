@@ -1,12 +1,12 @@
 #include "generatedCircuit.h"
 
 void GeneratedCircuit::addConnectionPort(
-		bool isInput,
-		connection_end_id_t connectionEndId,
-		Vector positionOnBlock,
-		block_id_t internalBlockId,
-		connection_end_id_t internalBlockConnectionEndId,
-		const std::string& portName
+	bool isInput,
+	connection_end_id_t connectionEndId,
+	Vector positionOnBlock,
+	block_id_t internalBlockId,
+	connection_end_id_t internalBlockConnectionEndId,
+	const std::string& portName
 ) {
 	ports.emplace_back(isInput, connectionEndId, positionOnBlock, internalBlockId, internalBlockConnectionEndId, portName);
 }

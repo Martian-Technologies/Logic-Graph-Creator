@@ -16,7 +16,7 @@ bool AreaPlaceTool::startPlaceBlock(const Event* event) {
 		updateElements();
 		break;
 	case 'p':
-		circuit->tryInsertOverArea(clickPosition, lastPointerPosition, rotation, selectedBlock);
+		circuit->tryInsertOverArea(clickPosition, lastPointerPosition, orientation, selectedBlock);
 		click = 'n';
 		updateElements();
 		break;

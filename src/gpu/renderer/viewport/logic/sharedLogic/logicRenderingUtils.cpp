@@ -17,12 +17,12 @@ FVector getOutputOffset(BlockType blockType, Orientation orientation) {
 	FVector offset = { 0.5, 0.5 };
 	if (blockType == BlockType::JUNCTION) return offset;
 	
-	return orientation * FVector(edgeDistance, sideShift);
+	return offset + orientation * FVector(edgeDistance, sideShift);
 }
 
 FVector getInputOffset(BlockType blockType, Orientation orientation) {
 	FVector offset = { 0.5, 0.5 };
 	if (blockType == BlockType::JUNCTION) return offset;
 	
-	return orientation * FVector(-edgeDistance, -sideShift);
+	return offset + orientation * FVector(-edgeDistance, -sideShift);
 }

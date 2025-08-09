@@ -630,12 +630,23 @@ struct Orientation {
 	Orientation(Rotation rotation = Rotation::ZERO, bool flipped = false) noexcept : rotation(rotation), flipped(flipped) { }
 
 	inline std::string toString() const { return "(r:" + std::to_string(rotation) + ", f:" + std::to_string(flipped) + ")"; }
+
+	inline void nextOrientation() {
+		rotate(true);
+		if (rotation == Rotation::ZERO) flip();
+	}
+
+	inline void lastOrientation() {
+		if (rotation == Rotation::ZERO) flip();
+		rotate(false);
+	}
+
 	inline Vector operator*(Vector vector) const noexcept {
-		Vector vec(flipped ? (-vector.dx) : vector.dx, vector.dy);
+		Vector vec(vector.dx, flipped ? -vector.dy : vector.dy);
 		return rotateVector(vec, rotation);
 	}
 	inline FVector operator*(FVector vector) const noexcept {
-		FVector vec(flipped ? (-vector.dx) : vector.dx, vector.dy);
+		FVector vec(vector.dx, flipped ? -vector.dy : vector.dy);
 		return rotateVector(vec, rotation);
 	}
 	inline Size operator*(Size size) const noexcept { return rotateSize(rotation, size); }
@@ -658,19 +669,19 @@ struct Orientation {
 		return (*this) * (orientation.inverse());
 	}
 	inline Vector transformVectorWithArea(Vector vector, Size size) const noexcept {
-		Vector vec(flipped ? (size.w - vector.dx - 1) : vector.dx, vector.dy);
+		Vector vec(vector.dx, flipped ? (size.h - vector.dy - 1) : vector.dy);
 		return rotateVectorWithArea(vec, size, rotation);
 	}
 	inline Vector inverseTransformVectorWithArea(Vector vector, Size size) const noexcept {
-		Vector vec(flipped ? (size.w - vector.dx - 1) : vector.dx, vector.dy);
+		Vector vec(vector.dx, flipped ? (size.h - vector.dy - 1) : vector.dy);
 		return reverseRotateVectorWithArea(vec, size, rotation);
 	}
 	inline FVector transformVectorWithArea(FVector vector, FSize size) const noexcept {
-		FVector vec(flipped ? (size.w - vector.dx - 1.f) : vector.dx, vector.dy);
+		FVector vec(vector.dx, flipped ? (size.h - vector.dy - 1.f) : vector.dy);
 		return rotateVectorWithArea(vec, size, rotation);
 	}
 	inline FVector inverseTransformVectorWithArea(FVector vector, FSize size) const noexcept {
-		FVector vec(flipped ? (size.w - vector.dx - 1.f) : vector.dx, vector.dy);
+		FVector vec(vector.dx, flipped ? (size.h - vector.dy - 1.f) : vector.dy);
 		return reverseRotateVectorWithArea(vec, size, rotation);
 	}
 };

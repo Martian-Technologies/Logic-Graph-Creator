@@ -10,13 +10,16 @@ BraceWrapping:
   AfterFunction: false
   BeforeElse: false
   AfterControlStatement: Never
-# AllowShortNamespacesOnASingleLine: true # ITS FUCK BREAKING SHIT I HATE CLANG FORMAT
+AllowShortNamespacesOnASingleLine: true
 SpaceBeforeCtorInitializerColon: true
 IndentWidth: 4
 UseTab: Always
 AccessModifierOffset: -4
-ColumnLimit: 0
+ColumnLimit: 170
+ObjCBinPackProtocolList: Never
+BinPackParameters: OnePerLine
 AllowShortBlocksOnASingleLine: Empty
+BreakConstructorInitializers: AfterColon
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortCompoundRequirementOnASingleLine: true
@@ -38,5 +41,6 @@ EmptyLineAfterAccessModifier: Leave
 EmptyLineBeforeAccessModifier: Leave
 SpaceInEmptyBlock: true
 Cpp11BracedListStyle: false
+AlignAfterOpenBracket: BlockIndent
 CompactNamespaces: true
 

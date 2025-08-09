@@ -45,7 +45,7 @@ VulkanChunkAllocation::VulkanChunkAllocation(VulkanDevice* device,const Rendered
 			instance.pos = glm::vec2(blockPosition.x, blockPosition.y);
 			instance.sizeX = block.second.size.w;
 			instance.sizeY = block.second.size.h;
-			instance.orientation = block.second.orientation.rotation;
+			instance.orientation = block.second.orientation.rotation + 4 * block.second.orientation.flipped;
 			instance.texX = uvOrigin.x;
 
 			blockInstances.push_back(instance);

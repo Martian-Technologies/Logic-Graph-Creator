@@ -16,10 +16,8 @@ void GeneratedCircuitValidator::validate() {
 
 bool GeneratedCircuitValidator::validateBlockData() {
 	Size size = generatedCircuit.getSize();
-	if (size.w == 0)
-		size.w = 1;
-	if (size.h == 0)
-		size.h = 1;
+	if (size.w == 0) size.w = 1;
+	if (size.h == 0) size.h = 1;
 	for (auto& port : generatedCircuit.getConnectionPorts()) {
 		size.extentToFit(port.positionOnBlock);
 	}
@@ -32,7 +30,7 @@ bool GeneratedCircuitValidator::validateBlockTypes() {
 		if (blockData.second.type == BlockType::NONE) {
 			logWarning("Found a NONE type block, converting to buffer", "GeneratedCircuitValidator");
 			blockData.second.type = BlockType::JUNCTION;
-			//return false;
+			// return false;
 		}
 	}
 	return true;
@@ -51,7 +49,7 @@ bool GeneratedCircuitValidator::handleInvalidConnections() {
 	while (i < (int)generatedCircuit.connections.size()) {
 		GeneratedCircuit::ConnectionData& conn = generatedCircuit.connections[i];
 
-		GeneratedCircuit::ConnectionData reversePair {
+		GeneratedCircuit::ConnectionData reversePair{
 			.outputBlockId = conn.inputBlockId,
 			.outputId = conn.inputId,
 			.inputBlockId = conn.outputBlockId,
@@ -60,7 +58,14 @@ bool GeneratedCircuitValidator::handleInvalidConnections() {
 
 		if (--connectionCounts[reversePair] < 0) {
 			generatedCircuit.connections.push_back(reversePair);
-			logInfo("Added reciprocated connection between: ({} {}) and ({} {})", "GeneratedCircuitValidator", conn.inputBlockId, conn.outputBlockId, reversePair.inputBlockId, reversePair.outputBlockId);
+			logInfo(
+				"Added reciprocated connection between: ({} {}) and ({} {})",
+				"GeneratedCircuitValidator",
+				conn.inputBlockId,
+				conn.outputBlockId,
+				reversePair.inputBlockId,
+				reversePair.outputBlockId
+			);
 			connectionCounts[reversePair] = 0;
 		}
 		++i;
@@ -79,8 +84,7 @@ bool GeneratedCircuitValidator::handleInvalidConnections() {
 
 bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 	for (auto& [id, block] : generatedCircuit.blocks) {
-		if (block.position.x == std::numeric_limits<cord_t>::max() ||
-			block.position.y == std::numeric_limits<cord_t>::max()) {
+		if (block.position.x == std::numeric_limits<cord_t>::max() || block.position.y == std::numeric_limits<cord_t>::max()) {
 			continue;
 		}
 
@@ -105,10 +109,12 @@ bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 
 		if (hasOverlap) {
 			// set the block position as undefined
-			logInfo("Found overlapped block position at {} --> {}, setting to undefined position",
-				   "GeneratedCircuitValidator",
-				   block.position.toString(),
-				   intPos.toString());
+			logInfo(
+				"Found overlapped block position at {} --> {}, setting to undefined position",
+				"GeneratedCircuitValidator",
+				block.position.toString(),
+				intPos.toString()
+			);
 			block.position.x = std::numeric_limits<cord_t>::max();
 			block.position.y = std::numeric_limits<cord_t>::max();
 		} else {
@@ -122,7 +128,9 @@ bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 
 // iterative dfs
 template <class PreVisit, class PostVisit>
-void depthFirstSearch(const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj, block_id_t start, std::unordered_set<block_id_t>& visited, PreVisit preVisit, PostVisit postVisit) {
+void depthFirstSearch(
+	const std::unordered_map<block_id_t, std::vector<block_id_t>>& adj, block_id_t start, std::unordered_set<block_id_t>& visited, PreVisit preVisit, PostVisit postVisit
+) {
 	std::stack<block_id_t> stack;
 	stack.push(start);
 	visited.insert(start);
@@ -167,7 +175,16 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 	for (const auto& [id, block] : generatedCircuit.blocks) {
 		if (!visited.count(id)) {
 			components.push_back({});
-			depthFirstSearch(undirectedAdj, id, visited, [&](block_id_t node) {components.back().insert(node); blockToComponent[node] = components.size() - 1;}, [&](block_id_t) { });
+			depthFirstSearch(
+				undirectedAdj,
+				id,
+				visited,
+				[&](block_id_t node) {
+					components.back().insert(node);
+					blockToComponent[node] = components.size() - 1;
+				},
+				[&](block_id_t) {}
+			);
 		}
 	}
 
@@ -201,7 +218,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 		visited.clear();
 		for (block_id_t id : components[ccIndex]) {
 			if (!visited.count(id)) {
-				depthFirstSearch(adj, id, visited, [&](block_id_t) { }, [&](block_id_t node) {postNumber.push(node);});
+				depthFirstSearch(adj, id, visited, [&](block_id_t) {}, [&](block_id_t node) { postNumber.push(node); });
 			}
 		}
 
@@ -221,7 +238,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 			postNumber.pop();
 			if (!visited.count(node)) {
 				std::vector<block_id_t> revCC;
-				depthFirstSearch(adj, node, visited, [&](block_id_t node) {revCC.push_back(node);}, [&](block_id_t) { });
+				depthFirstSearch(adj, node, visited, [&](block_id_t node) { revCC.push_back(node); }, [&](block_id_t) {});
 				sccs.push_back(revCC);
 			}
 		}
@@ -296,8 +313,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				auto iter = generatedCircuit.blocks.find(id);
 				if (iter == generatedCircuit.blocks.end()) continue;
 				GeneratedCircuit::GeneratedCircuitBlockData& block = iter->second;
-				if (block.position.x != std::numeric_limits<cord_t>::max() &&
-					block.position.y != std::numeric_limits<cord_t>::max()) {
+				if (block.position.x != std::numeric_limits<cord_t>::max() && block.position.y != std::numeric_limits<cord_t>::max()) {
 					continue;
 				}
 

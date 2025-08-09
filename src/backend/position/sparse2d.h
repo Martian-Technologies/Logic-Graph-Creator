@@ -21,7 +21,8 @@ public:
 }
 */
 
-template <class T> class Sparse2dArray;
+template <class T>
+class Sparse2dArray;
 
 template <class T>
 using Sparse2d = Sparse2dArray<T>;
@@ -37,7 +38,7 @@ public:
 	inline void remove(Position position);
 	inline void clear();
 
-	template<typename F>
+	template <typename F>
 	void forEach(F&& func) const {
 		for (auto& [pos, value] : data) {
 			func(pos, value);
@@ -51,7 +52,7 @@ private:
 	typedef typename phmap::parallel_flat_hash_map<Position, T>::const_iterator const_iterator;
 };
 
-template<class T>
+template <class T>
 T* Sparse2dArray<T>::get(Position position) {
 	iterator iter = data.find(position);
 	if (iter == data.end()) {
@@ -61,7 +62,7 @@ T* Sparse2dArray<T>::get(Position position) {
 	}
 }
 
-template<class T>
+template <class T>
 const T* Sparse2dArray<T>::get(Position position) const {
 	const_iterator iter = data.find(position);
 	if (iter == data.end()) {
@@ -71,7 +72,7 @@ const T* Sparse2dArray<T>::get(Position position) const {
 	}
 }
 
-template<class T>
+template <class T>
 void Sparse2dArray<T>::insert(Position position, const T& value) {
 	iterator iter = data.find(position);
 	if (iter == data.end()) {
@@ -81,14 +82,14 @@ void Sparse2dArray<T>::insert(Position position, const T& value) {
 	}
 }
 
-template<class T>
+template <class T>
 void Sparse2dArray<T>::remove(Position position) {
 	iterator iter = data.find(position);
 	if (iter != data.end())
 		data.erase(iter);
 }
 
-template<class T>
+template <class T>
 void Sparse2dArray<T>::clear() {
 	data.clear();
 }

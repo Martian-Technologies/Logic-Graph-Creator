@@ -21,12 +21,7 @@ public:
 		connection_end_id_t inputId;
 
 		bool operator==(const ConnectionData& other) const {
-			return (
-				outputBlockId == other.outputBlockId &&
-				outputId == other.outputId &&
-				inputBlockId == other.inputBlockId &&
-				inputId == other.inputId
-			);
+			return (outputBlockId == other.outputBlockId && outputId == other.outputId && inputBlockId == other.inputBlockId && inputId == other.inputId);
 		}
 	};
 
@@ -38,7 +33,9 @@ public:
 			block_id_t internalBlockId,
 			connection_end_id_t internalBlockConnectionEndId,
 			const std::string& portName
-		) : isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), internalBlockId(internalBlockId), internalBlockConnectionEndId(internalBlockConnectionEndId), portName(portName) { }
+		) :
+			isInput(isInput), connectionEndId(connectionEndId), positionOnBlock(positionOnBlock), internalBlockId(internalBlockId),
+			internalBlockConnectionEndId(internalBlockConnectionEndId), portName(portName) { }
 		bool isInput;
 		connection_end_id_t connectionEndId;
 		Vector positionOnBlock;
@@ -56,7 +53,6 @@ public:
 		const std::string& portName
 	);
 	const std::vector<ConnectionPort>& getConnectionPorts() const { return ports; }
-
 
 	block_id_t addBlock(Position pos, Orientation orientation, BlockType type);
 	block_id_t addBlock(BlockType type);
@@ -82,7 +78,10 @@ public:
 	const std::string& getName() const { return name; }
 
 	Size getSize() const { return size; }
-	void setSize(Size size) { this->size = size; valid = false; }
+	void setSize(Size size) {
+		this->size = size;
+		valid = false;
+	}
 
 	void markAsCustom() { isCustomBlock = true; }
 	bool isCustom() const { return isCustomBlock; }
