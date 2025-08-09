@@ -70,7 +70,7 @@
 	margin: 0;
 	width: 20dp;
 	height: 20dp;
-	border: 1dp solid #3aa53a;
+	border: 1dp solid #3d8d3dff;
 	border-radius: 0.3em;
 	background-color: #3aa53a20;
 	padding: 0;
@@ -84,12 +84,12 @@
 }
 
 #limit-speed-checkbox:checked {
-	background-color: #64ff3ae0;
-	border-color: #64ff3a;
+	background-color: #3d8d3dff;
+	border-color: #3d8d3dff;
 }
 
 #limit-speed-checkbox:checked:hover {
-	background-color: #4be826e0;
+	background-color: #3d8d3da0;
 }
 
 #tps-input {
