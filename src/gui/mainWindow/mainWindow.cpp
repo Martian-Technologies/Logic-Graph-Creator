@@ -6,7 +6,6 @@
 #include "settingsWindow/settingsWindow.h"
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
-#include "backend/settings/settings.h"
 #include "../helper/eventPasser.h"
 #include "menuBar/menuBar.h"
 
