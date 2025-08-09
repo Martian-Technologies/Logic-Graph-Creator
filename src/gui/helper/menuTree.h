@@ -17,6 +17,9 @@ public:
 
 	// Control whether parent (expandable) nodes are selectable. Default: selectable.
 	void disallowParentSelection(bool disallow = true) { if (parent) parent->SetClass("no-parent-select", disallow); }
+
+	// Access underlying root element for external DOM operations (e.g., programmatic selection).
+	Rml::Element* getRootElement() const { return parent; }
 	
 private:
 	std::string getPath(Rml::Element* item);

@@ -16,13 +16,14 @@ EvalWindow::EvalWindow(
 ) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager), circuitViewWidget(circuitViewWidget) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&EvalWindow::updateList, this));
+	dataUpdateEventReceiver.linkFunction("circuitCreatedSelect", std::bind(&EvalWindow::onCircuitCreatedSelect, this, std::placeholders::_1));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
 	updateList();
 }
 
 void EvalWindow::updateList() {
 	std::vector<std::vector<std::string>> paths;
-	for (auto pair : evaluatorManager->getEvaluators()) {
+	for (auto pair : this->evaluatorManager->getEvaluators()) {
 		std::vector<std::string> path({ pair.second->getEvaluatorName() });
 		makePaths(paths, path, pair.second->buildAddressTree());
 	}
@@ -63,4 +64,32 @@ void EvalWindow::updateSelected(std::string string) {
 
 	CircuitView* circuitView = circuitViewWidget->getCircuitView();
 	circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
+}
+
+void EvalWindow::selectEvaluatorForCircuit(circuit_id_t circuitId) {
+	if (!this->evaluatorManager) return;
+	for (auto& pair : this->evaluatorManager->getEvaluators()) {
+		if (pair.second->getCircuitId() == circuitId) {
+			std::string evalName = pair.second->getEvaluatorName();
+			Rml::Element* root = menuTree.getRootElement();
+			if (!root) return;
+			Rml::ElementList rows; root->GetElementsByTagName(rows, "li");
+			for (auto* r : rows) {
+				if (r->GetInnerRML().find(evalName) != std::string::npos) {
+					Rml::ElementList all; root->GetElementsByTagName(all, "li");
+					for (auto* a : all) a->SetClass("selected", false);
+					r->SetClass("selected", true);
+					return;
+				}
+			}
+			return;
+		}
+	}
+}
+
+void EvalWindow::onCircuitCreatedSelect(const DataUpdateEventManager::EventData* eventData) {
+	updateList();
+	const auto* value = eventData ? eventData->cast<circuit_id_t>() : nullptr;
+	if (!value) return;
+	selectEvaluatorForCircuit(**value);
 }

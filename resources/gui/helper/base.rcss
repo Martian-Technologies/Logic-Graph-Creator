@@ -11,7 +11,7 @@ body { color: #f5f5f5; }
 .surface-base    { background-color: #1d1d1d; border: 1dp #2e2e2e; }
 .surface-alt     { background-color: #2e2e2e; border: 1dp #383838; }
 .surface-raised  { background-color: #3b3b3b; border: 1dp #484848; }
-.surface-pop     { background-color: #2e2e2e; border: 1dp #4d6fb8; }
+.surface-pop     { background-color: #2e2e2e; border: 1dp #d1963a; }
 .divider-h       { height: 1dp; background-color: #484848; }
 .divider-v       { width: 1dp; background-color: #484848; }
 
@@ -26,7 +26,7 @@ body { color: #f5f5f5; }
 .text-high { color: #f5f5f5; }
 .text-med  { color: #c9c9c9; }
 .text-low  { color: #9a9a9a; }
-.text-accent { color: #4d6fb8; }
+.text-accent { color: #d1963a; }
 
 .bordered { border: 1dp #484848; }
 
@@ -78,26 +78,26 @@ button:hover, .btn:hover { background-color: #555555; }
 button:active, .btn:active { background-color: #717171; }
 
 button:focus-visible, .btn:focus-visible {
-	border-color: #4d6fb8; /* accent */
+	border-color: #d1963a; /* accent */
 	background-color: #555555;
 }
 
 .btn-primary {
-	background-color: #4d6fb8;
-	border-color: #376cde;
+	background-color: #d1963a;
+	border-color: #c18424;
 }
-.btn-primary:hover { background-color: #376cde; }
-.btn-primary:active { background-color: #274b94; }
-.btn-primary:focus-visible { border-color: #274b94; }
+.btn-primary:hover { background-color: #c18424; }
+.btn-primary:active { background-color: #9d6a1c; }
+.btn-primary:focus-visible { border-color: #9d6a1c; }
 
 .btn-outline {
 	background-color: transparent;
 	color: #f5f5f5;
-	border-color: #4d6fb8;
+	border-color: #d1963a;
 }
 .btn-outline:hover { background-color: #2e2e2e; }
 .btn-outline:active { background-color: #1d1d1d; }
-.btn-outline:focus-visible { border-color: #376cde; }
+.btn-outline:focus-visible { border-color: #c18424; }
 
 .btn-danger { background-color: #b84d4d; border-color: #b84d4d; }
 .btn-danger:hover { background-color: #de3737; }
@@ -116,10 +116,10 @@ button:focus-visible, .btn:focus-visible {
 	cursor: default;
 }
 
-.btn-text { background: transparent; border-color: transparent; color: #4d6fb8; }
+.btn-text { background: transparent; border-color: transparent; color: #d1963a; }
 .btn-text:hover { background: #2e2e2e; }
 .btn-text:active { background: #1d1d1d; }
-.btn-text:focus-visible { border-color: #4d6fb8; }
+.btn-text:focus-visible { border-color: #d1963a; }
 
 .btn-sm { padding: 2dp 6dp; font-size: 11dp; }
 

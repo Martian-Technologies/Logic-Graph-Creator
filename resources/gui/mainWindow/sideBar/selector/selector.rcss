@@ -67,7 +67,7 @@
 	min-width: 40dp;
 	transition: background-color 120ms, border-color 120ms, color 120ms;
 }
-#parameter-menu .parameter input:focus { border-color: #4d6fb8; background-color: #232323; }
+#parameter-menu .parameter input:focus { border-color: #d1963a; background-color: #232323; }
 #parameter-menu .parameter input:disabled { opacity: 0.55; cursor: not-allowed; }
 
 #reset-parameters, #create-block {
