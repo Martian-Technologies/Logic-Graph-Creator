@@ -20,22 +20,31 @@ void ViewManager::setCircuit(Circuit* circuit) {
 	if (currentCircuitId != 0) {
 		perCircuitViewData.insert_or_assign(currentCircuitId, ViewPositioningData(viewCenter, viewScale));
 	}
+
+	FPosition oldCenter = viewCenter;
+	float oldScale = viewScale;
+
 	if (circuit) {
-		currentCircuitId = circuit->getCircuitId();
-		auto iter = perCircuitViewData.find(currentCircuitId);
-		if (iter == perCircuitViewData.end()) {
-			viewCenter = FPosition();
-			viewScale = 8.0f;
-		} else {
-			viewCenter = iter->second.viewCenter;
-			viewScale = iter->second.viewScale;
+		circuit_id_t nextId = circuit->getCircuitId();
+		if (nextId != currentCircuitId) {
+			currentCircuitId = nextId;
+			auto iter = perCircuitViewData.find(currentCircuitId);
+			if (iter == perCircuitViewData.end()) {
+				viewCenter = FPosition();
+				viewScale = 8.0f;
+			} else {
+				viewCenter = iter->second.viewCenter;
+				viewScale = iter->second.viewScale;
+			}
 		}
 	} else {
-		currentCircuitId = 0;
-		viewCenter = FPosition();
-		viewScale = 8.0f;
+	    currentCircuitId = 0;
 	}
-	viewChanged();
+
+	applyLimits();
+	if (oldCenter.x != viewCenter.x || oldCenter.y != viewCenter.y || oldScale != viewScale) {
+		viewChanged();
+	}
 }
 
 bool ViewManager::zoom(const Event* event) {

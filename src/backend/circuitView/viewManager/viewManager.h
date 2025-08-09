@@ -4,6 +4,7 @@
 #include "backend/circuit/circuit.h"
 #include "backend/position/position.h"
 #include "util/vec2.h"
+#include <map>
 
 class EventRegister;
 class Event;
@@ -17,7 +18,9 @@ private:
 	};
 public:
 	// initialization
-	ViewManager() : viewCenter(), viewScale(8.0f), aspectRatio(16.0f / 9.0f) { }
+	ViewManager() : viewCenter(), viewScale(8.0f), aspectRatio(16.0f / 9.0f) {
+		pointerViewPosition = Vec2(0.5f, 0.5f);
+	}
 	void setUpEvents(EventRegister& eventRegister);
 
 	// event output
@@ -48,7 +51,12 @@ public:
 private:
 	// helpers
 	void applyLimits();
-	inline void viewChanged() { pointerPosition = viewToGrid(pointerViewPosition); if (viewChangedListener) viewChangedListener(); }
+	inline void viewChanged() {
+		if (pointerActive) { // only recompute pointer grid position when pointer is actually over the view
+			pointerPosition = viewToGrid(pointerViewPosition);
+		}
+		if (viewChangedListener) viewChangedListener();
+	}
 
 	// input events (called by listeners)
 	bool zoom(const Event* event);
