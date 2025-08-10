@@ -569,6 +569,10 @@ inline Size rotateSize(Rotation rotationAmount, Size size) noexcept {
 	if (rotationAmount & 1) return Size(size.h, size.w);
 	return size;
 }
+inline FSize rotateSize(Rotation rotationAmount, FSize size) noexcept {
+	if (rotationAmount & 1) return FSize(size.h, size.w);
+	return size;
+}
 inline constexpr Rotation rotate(Rotation rotation, bool clockWise) {
 	if (clockWise) {
 		if (rotation == Rotation::TWO_SEVENTY) return Rotation::ZERO;
@@ -598,9 +602,9 @@ inline Vector rotateVectorWithArea(Vector vector, Size size, Rotation rotationAm
 }
 inline Vector reverseRotateVectorWithArea(Vector vector, Size size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return Vector(vector.dy, size.h - vector.dx - 1);
+	case Rotation::NINETY: return Vector(vector.dy, size.w - vector.dx - 1);
 	case Rotation::ONE_EIGHTY: return Vector(size.w - vector.dx - 1, size.h - vector.dy - 1);
-	case Rotation::TWO_SEVENTY: return Vector(size.w - vector.dy - 1, vector.dx);
+	case Rotation::TWO_SEVENTY: return Vector(size.h - vector.dy - 1, vector.dx);
 	default: return vector;
 	}
 }
@@ -614,9 +618,9 @@ inline FVector rotateVectorWithArea(FVector vector, FSize size, Rotation rotatio
 }
 inline FVector reverseRotateVectorWithArea(FVector vector, FSize size, Rotation rotationAmount) {
 	switch (rotationAmount) {
-	case Rotation::NINETY: return FVector(vector.dy, size.h - vector.dx - 1.f);
+	case Rotation::NINETY: return FVector(vector.dy, size.w - vector.dx - 1.f);
 	case Rotation::ONE_EIGHTY: return FVector(size.w - vector.dx - 1.f, size.h - vector.dy - 1.f);
-	case Rotation::TWO_SEVENTY: return FVector(size.w - vector.dy - 1.f, vector.dx);
+	case Rotation::TWO_SEVENTY: return FVector(size.h - vector.dy - 1.f, vector.dx);
 	default: return vector;
 	}
 }
@@ -650,6 +654,7 @@ struct Orientation {
 		return rotateVector(vec, rotation);
 	}
 	inline Size operator*(Size size) const noexcept { return rotateSize(rotation, size); }
+	inline FSize operator*(FSize size) const noexcept { return rotateSize(rotation, size); }
 	inline bool operator==(Orientation other) const noexcept { return this->rotation == other.rotation && this->flipped == other.flipped; }
 	inline bool operator!=(Orientation other) { return !(*this == other); }
 	inline void rotate(bool clockWise) { rotation = ::rotate(rotation, clockWise); }
@@ -673,16 +678,18 @@ struct Orientation {
 		return rotateVectorWithArea(vec, size, rotation);
 	}
 	inline Vector inverseTransformVectorWithArea(Vector vector, Size size) const noexcept {
-		Vector vec(vector.dx, flipped ? (size.h - vector.dy - 1) : vector.dy);
-		return reverseRotateVectorWithArea(vec, size, rotation);
+		return inverse().transformVectorWithArea(vector, size);
+		// Vector vec = reverseRotateVectorWithArea(vector, size, rotation);
+		// return Vector(vec.dx, flipped ? (rotateSize(rotation, size).h - vec.dy - 1) : vec.dy);
 	}
 	inline FVector transformVectorWithArea(FVector vector, FSize size) const noexcept {
 		FVector vec(vector.dx, flipped ? (size.h - vector.dy - 1.f) : vector.dy);
 		return rotateVectorWithArea(vec, size, rotation);
 	}
 	inline FVector inverseTransformVectorWithArea(FVector vector, FSize size) const noexcept {
-		FVector vec(vector.dx, flipped ? (size.h - vector.dy - 1.f) : vector.dy);
-		return reverseRotateVectorWithArea(vec, size, rotation);
+		return inverse().transformVectorWithArea(vector, size);
+		FVector vec = reverseRotateVectorWithArea(vector, size, rotation);
+		return FVector(vec.dx, flipped ? (rotateSize(rotation, size).h - vec.dy - 1) : vec.dy);
 	}
 };
 

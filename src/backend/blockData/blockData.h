@@ -115,7 +115,7 @@ public:
 			if (vector.dx == 0 && vector.dy == 0) return 0;
 			return std::nullopt;
 		}
-		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
+		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, orientation*blockSize);
 		for (auto& pair : connections) {
 			if (pair.second.first == noOrientationVec && pair.second.second) return pair.first;
 		}
@@ -126,7 +126,7 @@ public:
 			if (vector.dx == 0 && vector.dy == 0) return 1;
 			return std::nullopt;
 		}
-		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, blockSize);
+		Vector noOrientationVec = orientation.inverseTransformVectorWithArea(vector, orientation*blockSize);
 		for (auto& pair : connections) {
 			if (pair.second.first == noOrientationVec && !pair.second.second) return pair.first;
 		}
