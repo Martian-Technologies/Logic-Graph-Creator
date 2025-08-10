@@ -179,6 +179,7 @@ void Evaluator::edit_placeBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eva
 	case BlockType::TICK_BUTTON: gateType = GateType::TICK_INPUT; break;
 	case BlockType::CONSTANT: gateType = GateType::CONSTANT_ON; break;
 	case BlockType::LIGHT: gateType = GateType::JUNCTION; break;
+	default: break; // it was giving a warning
 	}
 	if (gateType == GateType::NONE) {
 		const circuit_id_t ICId = circuitBlockDataManager.getCircuitId(type);
