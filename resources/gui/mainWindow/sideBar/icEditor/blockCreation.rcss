@@ -62,7 +62,7 @@ scrollbarvertical {
 .number { width: 40dp; }
 .number-long { width: 56dp; }
 
-@media (max-width: 260px) {
+@media (max-width: 260dp) {
 	.form-row { flex-direction: column; align-items: stretch; }
 	.form-row label { width: auto; }
 	.form-actions { flex-direction: column; }
