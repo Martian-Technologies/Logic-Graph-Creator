@@ -221,10 +221,10 @@ bool BlockContainer::tryCreateConnection(Position outputPosition, Position input
 	std::optional<connection_end_id_t> outputConnectionId = output->getOutputConnectionId(outputPosition);
 	if (
 		!outputConnectionId ||
-		input->type() == BlockType::JUNCTION && output->type() == BlockType::JUNCTION && input->getConnectionContainer().hasConnection(
+		(input->type() == BlockType::JUNCTION && output->type() == BlockType::JUNCTION && input->getConnectionContainer().hasConnection(
 			outputConnectionId.value(),
 			ConnectionEnd(output->id(), inputConnectionId.value())
-		)
+		))
 	) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionId.value(), ConnectionEnd(output->id(), outputConnectionId.value()))) {
 		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value())));
