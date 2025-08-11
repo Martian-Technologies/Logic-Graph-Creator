@@ -6,6 +6,8 @@
 #include "idProvider.h"
 #include "evalConnection.h"
 #include "evalConfig.h"
+#include "atomicIndexScheduler.h"
+#include <memory>
 
 // Gate type indices for performance optimization
 enum class SimGateType : int {
@@ -79,6 +81,72 @@ private:
 	std::vector<ConstantResetGate> constantResetGates;
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 
+	struct JobInstruction {
+		LogicSimulator* self;
+		size_t start;
+		size_t end;
+	};
+
+	// Static job executors (free-function compatible) ---------------------------------
+	static void execAND(void* jobInstruction);
+	static void execANDRealistic(void* jobInstruction);
+	static void execXOR(void* jobInstruction);
+	static void execXORRealistic(void* jobInstruction);
+	static void execTristate(void* jobInstruction);
+	static void execTristateRealistic(void* jobInstruction);
+	static void execConstantReset(void* jobInstruction);
+	static void execCopySelfOutput(void* jobInstruction);
+
+	void tickANDGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			andGates[i].tick(statesA, statesB);
+		}
+	};
+	void tickXORGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			xorGates[i].tick(statesA, statesB);
+		}
+	};
+	void tickTristateBuffers(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			tristateBuffers[i].tick(statesA, statesB);
+		}
+	};
+	void tickConstantResetGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			constantResetGates[i].tick(statesB);
+		}
+	}
+	void tickCopySelfOutputGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			copySelfOutputGates[i].tick(statesA, statesB);
+		}
+	}
+
+	void realisticTickANDGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			andGates[i].realisticTick(statesA, statesB);
+		}
+	};
+	void realisticTickXORGates(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			xorGates[i].realisticTick(statesA, statesB);
+		}
+	};
+	void realisticTickTristateBuffers(void* jobInstruction) {
+		auto* ji = static_cast<JobInstruction*>(jobInstruction);
+		for (size_t i = ji->start; i < ji->end; ++i) {
+			tristateBuffers[i].realisticTick(statesA, statesB);
+		}
+	};
+
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
 	struct GateDependency {
@@ -105,7 +173,6 @@ private:
 
 	void simulationLoop();
 	inline void tickOnce();
-	inline void realisticTickOnce();
 	void processPendingStateChanges();
 
 	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
@@ -121,6 +188,14 @@ private:
 	float tickrateHalflife { 0.25 };
 
 	std::vector<simulator_id_t>& dirtySimulatorIds;
+
+	AtomicIndexScheduler aiScheduler; // guys it's ai trust
+	std::vector<AtomicIndexScheduler::Job> jobs;
+	// Owns the JobInstruction objects whose raw pointers are passed to the
+	// AtomicIndexScheduler::Job entries. Cleared & rebuilt in regenerateJobs().
+	std::vector<std::unique_ptr<JobInstruction>> jobInstructionStorage;
+
+	void regenerateJobs();
 };
 
 class SimPauseGuard {

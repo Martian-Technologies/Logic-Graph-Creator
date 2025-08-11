@@ -8,7 +8,10 @@ LogicSimulator::LogicSimulator(
 	dirtySimulatorIds(dirtySimulatorIds) {
 	// Subscribe to EvalConfig changes to update the simulator accordingly
 	evalConfig.subscribe([this]() {
-		// Notify the simulation thread about config changes
+		{
+			SimPauseGuard pauseGuard(*this);
+			this->regenerateJobs();
+		}
 		std::lock_guard<std::mutex> lk(cvMutex);
 		cv.notify_all();
 	});
@@ -61,11 +64,7 @@ void LogicSimulator::simulationLoop() {
 		if (evalConfig.isRunning()) {
 			auto currentTime = clock::now();
 
-			if (evalConfig.isRealistic()) {
-				realisticTickOnce();
-			} else {
-				tickOnce();
-			}
+			tickOnce();
 
 			// Calculate EMA for tickrate after each tick
 			if (!isFirstTick) {
@@ -115,24 +114,9 @@ void LogicSimulator::simulationLoop() {
 
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
-	for (auto& gate : andGates) gate.tick(statesA, statesB);
-	for (auto& gate : xorGates) gate.tick(statesA, statesB);
-	for (auto& gate : constantResetGates) gate.tick(statesB);
-	for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
-	for (auto& gate : tristateBuffers) gate.tick(statesA, statesB);
 
-	for (auto& gate : junctions) gate.tick(statesB);
-	std::unique_lock lkCurEx(statesAMutex);
-	std::swap(statesA, statesB);
-}
-
-inline void LogicSimulator::realisticTickOnce() {
-	std::unique_lock lkNext(statesBMutex);
-	for (auto& gate : andGates) gate.realisticTick(statesA, statesB);
-	for (auto& gate : xorGates) gate.realisticTick(statesA, statesB);
-	for (auto& gate : constantResetGates) gate.tick(statesB);
-	for (auto& gate : copySelfOutputGates) gate.tick(statesA, statesB);
-	for (auto& gate : tristateBuffers) gate.realisticTick(statesA, statesB);
+	aiScheduler.reset_and_load(jobs);
+	aiScheduler.wait_for_completion();
 
 	for (auto& gate : junctions) gate.tick(statesB);
 	std::unique_lock lkCurEx(statesAMutex);
@@ -458,6 +442,7 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 
 void LogicSimulator::endEdit() {
 	for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
+	regenerateJobs();
 }
 
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
@@ -716,4 +701,78 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, simulator_i
 			outputDependencies.erase(it);
 		}
 	}
+}
+
+void LogicSimulator::regenerateJobs() {
+	// Ensure previous round fully consumed before we invalidate its JobInstruction memory.
+	aiScheduler.wait_for_empty();
+	// Rebuild the job list without leaking JobInstruction allocations.
+	jobs.clear();
+	jobInstructionStorage.clear();
+	bool isRealistic = evalConfig.isRealistic();
+
+	auto makeJI = [&](size_t start, size_t end) -> JobInstruction* {
+		jobInstructionStorage.emplace_back(std::make_unique<JobInstruction>(JobInstruction{ this, start, end }));
+		return jobInstructionStorage.back().get();
+	};
+
+	constexpr size_t batch = 256; // batch size
+
+	// Order: logic gates that read from statesA and write into statesB.
+	// Combine homogeneous gate vectors into batches for better cache use.
+	for (size_t i = 0; i < andGates.size(); i += batch) {
+		JobInstruction* ji = makeJI(i, std::min(i + batch, andGates.size()));
+		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execANDRealistic : &LogicSimulator::execAND, ji });
+	}
+	for (size_t i = 0; i < xorGates.size(); i += batch) {
+		JobInstruction* ji = makeJI(i, std::min(i + batch, xorGates.size()));
+		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execXORRealistic : &LogicSimulator::execXOR, ji });
+	}
+	for (size_t i = 0; i < tristateBuffers.size(); i += batch) {
+		JobInstruction* ji = makeJI(i, std::min(i + batch, tristateBuffers.size()));
+		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execTristateRealistic : &LogicSimulator::execTristate, ji });
+	}
+	for (size_t i = 0; i < constantResetGates.size(); i += batch) {
+		JobInstruction* ji = makeJI(i, std::min(i + batch, constantResetGates.size()));
+		jobs.push_back(AtomicIndexScheduler::Job{ &LogicSimulator::execConstantReset, ji });
+	}
+	for (size_t i = 0; i < copySelfOutputGates.size(); i += batch) {
+		JobInstruction* ji = makeJI(i, std::min(i + batch, copySelfOutputGates.size()));
+		jobs.push_back(AtomicIndexScheduler::Job{ &LogicSimulator::execCopySelfOutput, ji });
+	}
+	logInfo("{} jobs created for the current round", "LogicSimulator::regenerateJobs", jobs.size());
+}
+
+// Static executor definitions ---------------------------------------------------------
+void LogicSimulator::execAND(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->andGates[i].tick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execANDRealistic(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->andGates[i].realisticTick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execXOR(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->xorGates[i].tick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execXORRealistic(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->xorGates[i].realisticTick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execTristate(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->tristateBuffers[i].tick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execTristateRealistic(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->tristateBuffers[i].realisticTick(ji->self->statesA, ji->self->statesB);
+}
+void LogicSimulator::execConstantReset(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->constantResetGates[i].tick(ji->self->statesB);
+}
+void LogicSimulator::execCopySelfOutput(void* jobInstruction) {
+	auto* ji = static_cast<JobInstruction*>(jobInstruction);
+	for (size_t i = ji->start; i < ji->end; ++i) ji->self->copySelfOutputGates[i].tick(ji->self->statesA, ji->self->statesB);
 }
