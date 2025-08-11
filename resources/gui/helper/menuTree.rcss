@@ -41,7 +41,6 @@
 	min-height: 18dp;
 	border-left: 2dp transparent; /* space for accent on selection */
 	border-radius: 4dp;
-	transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
 .menutree li.hovered-leaf { background-color: #1d1d1d; }

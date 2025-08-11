@@ -57,7 +57,6 @@ button {
 	border-radius: 6dp;
 	font-weight: 500;
 	cursor: pointer;
-	transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
 .btn {
@@ -71,7 +70,6 @@ button {
 	border-radius: 6dp;
 	font-weight: 500;
 	cursor: pointer;
-	transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
 button:hover, .btn:hover { background-color: #555555; }

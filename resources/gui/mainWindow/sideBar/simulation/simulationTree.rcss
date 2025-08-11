@@ -21,7 +21,6 @@
 	padding: 2dp 2dp;
 	border-left: 2dp transparent;
 	border-radius: 3dp;
-	transition: background-color 120ms, border-color 120ms;
 }
 
 #eval-tree li:hover { background-color: #1d1d1d; }

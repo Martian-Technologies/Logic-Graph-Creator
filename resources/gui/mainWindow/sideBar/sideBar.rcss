@@ -24,14 +24,13 @@ tabset panels panel {
 
 tabset tabs tab {
 	margin: 0 0.35em 0 0;
-	padding: 0.25em 0.55em;
+	padding: 0.25em 0.35em;
 	border-radius: 0.4em 0.4em 0 0;
 	background-color: #0b0b0b; /* base (bg-0) */
 	color: #c9c9c9;
 	display: inline-block;
 	border: 1dp #1d1d1d;
 	border-bottom: 0dp;
-	transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
 tabset tabs tab:hover {

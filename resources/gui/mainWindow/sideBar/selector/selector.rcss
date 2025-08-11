@@ -43,7 +43,6 @@
 	padding: 2dp 4dp;
 	border-left: 2dp transparent;
 	border-radius: 4dp;
-	transition: background-color 120ms, border-color 120ms;
 }
 #parameter-menu .parameter:hover { background-color: #3b3b3b; }
 #parameter-menu .parameter:active { background-color: #1d1d1d; }
@@ -62,7 +61,6 @@
 	margin: 0 4dp;
 	padding: 2dp 6dp;
 	min-width: 40dp;
-	transition: background-color 120ms, border-color 120ms, color 120ms;
 }
 #parameter-menu .parameter input:focus { border-color: #d1963a; background-color: #232323; }
 #parameter-menu .parameter input:disabled { opacity: 0.55; cursor: not-allowed; }
