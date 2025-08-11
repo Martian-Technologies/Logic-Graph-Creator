@@ -1,11 +1,8 @@
-#include "../blockContainer.h"
-#include "util/algorithm.h"
 #include "connectionContainer.h"
-#include "block.h"
 
 bool ConnectionContainer::tryMakeConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) {
-	connections[thisEndId].emplace(otherConnectionEnd);
-	return true;
+	auto pair = connections[thisEndId].emplace(otherConnectionEnd);
+	return pair.second;
 }
 
 bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) {
@@ -21,7 +18,6 @@ bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, Con
 	}
 	connectionsSet.erase(iter2);
 	return true;
-
 }
 
 bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) const {

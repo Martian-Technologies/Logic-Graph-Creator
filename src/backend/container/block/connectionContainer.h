@@ -3,9 +3,7 @@
 
 #include <greg7mdp/phmap.h>
 
-#include "util/emptyVector.h"
 #include "connectionEnd.h"
-#include "blockDefs.h"
 class BlockContainer;
 
 class ConnectionContainer {
