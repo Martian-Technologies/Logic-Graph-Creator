@@ -283,7 +283,7 @@ bool BlockContainer::tryRemoveConnection(Position outputPosition, Position input
 	if (input->type() == BlockType::JUNCTION && output->type() == BlockType::JUNCTION) {
 		if (input->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(output->id(), inputConnectionId.value()))) {
 			assert(output->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(input->id(), outputConnectionId.value())));
-			difference->addRemovedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
+			difference->addRemovedConnection(input->getPosition(), inputPosition, output->getPosition(), outputPosition);
 			return true;
 		}
 	}
