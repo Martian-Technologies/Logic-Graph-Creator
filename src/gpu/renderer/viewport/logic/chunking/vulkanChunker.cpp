@@ -343,8 +343,8 @@ std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocation
 	std::lock_guard<std::mutex> lock(mux);
 
 	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
-	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
-	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
+	min = getChunk(min - Vector(CHUNK_SIZE) - Vector(1));
+	max = getChunk(max + Vector(CHUNK_SIZE) + Vector(1));
 
 	// go through each chunk in view and collect it if it exists and has an allocation
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> seen;
@@ -495,10 +495,11 @@ std::vector<ChunkIntersection> VulkanChunker::getNeededChunkIntersections(FPosit
 		}
 
 		// add point at current distance
-		FPosition newPos = start + dir * currentDistance;
+		
 		doAdd++;
 		if (currentDistance >= distance || doAdd == 3) {
 			doAdd = 0;
+			FPosition newPos = start + dir * currentDistance;
 			intersections.push_back({ oldOldChunk, currentPos, newPos });
 			currentPos = newPos;
 		}
