@@ -18,40 +18,40 @@ elseif (WIN32) # Windows
 endif()
 
 # Add executable
-if (RUN_TRACY_PROFILER)
-	set(EXTERNAL_LINKS
-		freetype
-		RmlUi::RmlUi
-		RmlUi::Debugger
-		SDL3::SDL3
-		volk
-		vk-bootstrap::vk-bootstrap
-		cpplocate::cpplocate
-		VulkanMemoryAllocator
-		glm
-		json
-		parallel_hashmap
-		stb_image
-		wasmtime
-		Tracy::TracyClient
-	)
-else()
-	set(EXTERNAL_LINKS
-		freetype
-		RmlUi::RmlUi
-		RmlUi::Debugger
-		SDL3::SDL3
-		volk
-		vk-bootstrap::vk-bootstrap
-		cpplocate::cpplocate
-		VulkanMemoryAllocator
-		glm
-		json
-		parallel_hashmap
-		stb_image
-		wasmtime
-	)
-endif()
+# if (RUN_TRACY_PROFILER)
+# 	set(EXTERNAL_LINKS
+# 		freetype
+# 		RmlUi::RmlUi
+# 		RmlUi::Debugger
+# 		SDL3::SDL3
+# 		volk
+# 		vk-bootstrap::vk-bootstrap
+# 		cpplocate::cpplocate
+# 		VulkanMemoryAllocator
+# 		glm
+# 		json
+# 		parallel_hashmap
+# 		stb_image
+# 		wasmtime
+# 		Tracy::TracyClient
+# 	)
+# else()
+# 	set(EXTERNAL_LINKS
+# 		freetype
+# 		RmlUi::RmlUi
+# 		RmlUi::Debugger
+# 		SDL3::SDL3
+# 		volk
+# 		vk-bootstrap::vk-bootstrap
+# 		cpplocate::cpplocate
+# 		VulkanMemoryAllocator
+# 		glm
+# 		json
+# 		parallel_hashmap
+# 		stb_image
+# 		wasmtime
+# 	)
+# endif()
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} PUBLIC ${Vulkan_INCLUDE_DIRS})

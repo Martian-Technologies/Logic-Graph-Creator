@@ -1,0 +1,7 @@
+function(PreProjectAppleSetup)
+	set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" PARENT_SCOPE)
+	if (CONNECTION_MACHINE_DISTRIBUTE_APP)
+		set(CMAKE_OSX_ARCHITECTURES arm64 x86_64 PARENT_SCOPE)
+		set(Vulkan_LIBRARY "${CMAKE_SOURCE_DIR}/lib-binary/libMoltenVK.dylib" PARENT_SCOPE)
+	endif()
+endfunction()

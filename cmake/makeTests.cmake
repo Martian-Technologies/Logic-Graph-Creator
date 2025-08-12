@@ -13,22 +13,28 @@ file(GLOB_RECURSE TEST_FILES
 	"${TEST_DIR}/*.cpp"
 )
 
-set(EXTERNAL_LINKS_TESTS
-	cpplocate::cpplocate
-	gtest gtest_main
-	json
-	wasmtime
-	parallel_hashmap
-)
+set(EXTERNAL_LINKS ${EXTERNAL_LINKS} gtest gtest_main)
+
+message("EXTERNAL_LINKS: ${EXTERNAL_LINKS}")
+
+# set(EXTERNAL_LINKS
+# 	gtest gtest_main
+# )
+# 	cpplocate::cpplocate
+# 	gtest gtest_main
+# 	json
+# 	wasmtime
+# 	parallel_hashmap
+# )
 
 if(APPLE)
 	# Link CoreFoundation explicitly on macOS
-	list(APPEND EXTERNAL_LINKS_TESTS "-framework CoreFoundation")
+	list(APPEND EXTERNAL_LINKS "-framework CoreFoundation")
 endif()
 
 add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
-target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}wasmtime")
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS_TESTS})
+target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}/wasmtime")
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS})
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 target_compile_options(${PROJECT_NAME}_tests PRIVATE --coverage -O0 -g)
