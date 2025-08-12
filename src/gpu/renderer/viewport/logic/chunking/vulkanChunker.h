@@ -200,6 +200,7 @@ public:
 
 private:
 	std::vector<ChunkIntersection> getChunkIntersections(FPosition start, FPosition end);
+	std::vector<ChunkIntersection> getNeededChunkIntersections(FPosition start, FPosition end);
 	
 private:
 	phmap::flat_hash_map<Position, Chunk> chunks;
