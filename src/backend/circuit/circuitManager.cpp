@@ -6,7 +6,7 @@
 
 circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std::string& uuid, bool createEval) {
 	circuit_id_t id = getNewCircuitId();
-	const SharedCircuit circuit = std::make_shared<Circuit>(id, &blockDataManager, dataUpdateEventManager, name, uuid);
+	const SharedCircuit circuit = std::make_shared<Circuit>(id, this, &blockDataManager, dataUpdateEventManager, name, uuid);
 	circuits.emplace(id, circuit);
 	UUIDToCircuits.emplace(uuid, circuit);
 	for (auto& [object, funcData] : listenerFunctions) {

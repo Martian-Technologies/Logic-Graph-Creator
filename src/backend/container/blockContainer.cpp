@@ -1,4 +1,7 @@
 #include "blockContainer.h"
+
+#include "backend/circuit/circuit.h"
+#include "backend/circuit/circuitManager.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
 
@@ -37,8 +40,25 @@ bool BlockContainer::checkCollision(Position position, Orientation orientation, 
 	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, orientation).getLargestVectorInArea(), idToIgnore);
 }
 
+unsigned int BlockContainer::getBlockTypeCountRecursive(BlockType blockType) const {
+	if (selfBlockType == blockType) return 0;
+	unsigned int count = 0;
+	if (blockTypeCounts.size() > blockType) count += blockTypeCounts[blockType];
+	for (unsigned int i = 0; i < blockTypeCounts.size(); i++) {
+		if ((BlockType)i == blockType) continue;
+		circuit_id_t circuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId((BlockType)i);
+		if (circuitId == 0) continue;
+		SharedCircuit circuit = circuitManager->getCircuit(circuitId);
+		count += circuit->getBlockContainer()->getBlockTypeCountRecursive(blockType) * blockTypeCounts[i];
+	}
+	return count;
+}
+
 bool BlockContainer::tryInsertBlock(Position position, Orientation orientation, BlockType blockType, Difference* difference) {
 	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, orientation, blockType))
+		return false;
+	circuit_id_t circuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockType);
+	if (circuitId != 0 && circuitManager->getCircuit(circuitId)->getBlockContainer()->getBlockTypeCountRecursive(selfBlockType) != 0)
 		return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
