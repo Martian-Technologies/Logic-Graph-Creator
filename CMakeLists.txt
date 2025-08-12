@@ -108,9 +108,9 @@ if (CONNECTION_MACHINE_BUILD_APP)
 			cpplocate::cpplocate
 			VulkanMemoryAllocator
 			glm
-			${CONNECTION_MACHINE_JSON_LIB_NAME}
+			json
 			${CONNECTION_MACHINE_PARALLEL_HASHMAP_LIB_NAME}
-			${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
+			stb_image
 			wasmtime
 			Tracy::TracyClient
 		)
@@ -125,9 +125,9 @@ if (CONNECTION_MACHINE_BUILD_APP)
 			cpplocate::cpplocate
 			VulkanMemoryAllocator
 			glm
-			${CONNECTION_MACHINE_JSON_LIB_NAME}
+			json
 			${CONNECTION_MACHINE_PARALLEL_HASHMAP_LIB_NAME}
-			${CONNECTION_MACHINE_STB_IMAGE_LIB_NAME}
+			stb_image
 			wasmtime
 		)
 	endif()
@@ -309,8 +309,8 @@ if (CONNECTION_MACHINE_BUILD_TESTS)
 	set(EXTERNAL_LINKS_TESTS
 		cpplocate::cpplocate
 		gtest gtest_main
-		${CONNECTION_MACHINE_JSON_LIB_NAME}
-		${CONNECTION_MACHINE_PARALLEL_HASHMAP_LIB_NAME}
+		json
+		stb_image
 		wasmtime
 
 	)
