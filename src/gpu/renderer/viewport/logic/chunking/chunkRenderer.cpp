@@ -107,7 +107,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		blockPipeline.cmdPushConstants(frame.mainCommandBuffer, &pushConstants);
 		
 		// bind texture descriptor
-		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &device->getBlockTextureManager()->getTexture().descriptor, 0, nullptr);
+		std::shared_ptr<BlockTexture> blockTexture = device->getBlockTextureManager()->getTexture();
+		frame.lifetime.push(blockTexture);
+		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &blockTexture->descriptor, 0, nullptr);
         
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {
