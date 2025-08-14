@@ -108,27 +108,30 @@ void SelectorWindow::highlightActiveToolInSidebar() {
 	if (activeTool == "placement") {
 		// get the block placement tool
 		SharedCircuitTool blockPlacementTool = toolManagerManager->getToolInstance();
-		if (blockPlacementTool) {
-			SharedBlockPlacementTool placementTool = std::dynamic_pointer_cast<BlockPlacementTool>(blockPlacementTool);
-			if (placementTool) {
-				BlockType selected = placementTool->getSelectedBlock();
-				if (selected != BlockType::NONE) {
-					// Build the element id used by MenuTree: "Blocks/<path>/<name>-menu"
-					std::string blockPath = blockDataManager->getPath(selected);
-					std::string blockName = blockDataManager->getName(selected);
-					std::string elementId = "Blocks/";
-					if (!blockPath.empty()) elementId += blockPath + "/";
-					elementId += blockName + "-menu";
-					if (Rml::Element* blockEl = document->GetElementById(elementId)) {
-						// Highlight and ensure its parents are expanded
-						blockEl->SetClass("selected", true);
-						Rml::Element* p = blockEl->GetParentNode();
-						while (p) {
-							if (p->GetTagName() == "li") p->SetClass("collapsed", false);
-							p = p->GetParentNode();
-						}
-					}
-				}
+		if (!blockPlacementTool) {
+			return;
+		}
+		SharedBlockPlacementTool placementTool = std::dynamic_pointer_cast<BlockPlacementTool>(blockPlacementTool);
+		if (!placementTool) {
+			return;
+		}
+		BlockType selected = placementTool->getSelectedBlock();
+		if (selected == BlockType::NONE) {
+			return;
+		}
+		// Build the element id used by MenuTree: "Blocks/<path>/<name>-menu"
+		std::string blockPath = blockDataManager->getPath(selected);
+		std::string blockName = blockDataManager->getName(selected);
+		std::string elementId = "Blocks/";
+		if (!blockPath.empty()) elementId += blockPath + "/";
+		elementId += blockName + "-menu";
+		if (Rml::Element* blockEl = document->GetElementById(elementId)) {
+			// Highlight and ensure its parents are expanded
+			blockEl->SetClass("selected", true);
+			Rml::Element* p = blockEl->GetParentNode();
+			while (p) {
+				if (p->GetTagName() == "li") p->SetClass("collapsed", false);
+				p = p->GetParentNode();
 			}
 		}
 	}
