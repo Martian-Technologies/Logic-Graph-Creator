@@ -2,6 +2,7 @@
 #include "backend/dataUpdateEventManager.h"
 #include "gui/helper/eventPasser.h"
 #include "util/algorithm.h"
+#include "backend/circuitView/tools/placement/blockPlacementTool.h"
 
 SelectorWindow::SelectorWindow(
 	const BlockDataManager* blockDataManager,
