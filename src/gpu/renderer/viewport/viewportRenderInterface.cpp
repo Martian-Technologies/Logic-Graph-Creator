@@ -7,7 +7,6 @@
 #include "backend/selection.h"
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
-#include "logging/logging.h"
 #include "logic/sharedLogic/logicRenderingUtils.h"
 
 ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
@@ -221,20 +220,21 @@ ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) 
 
 	ElementID newElement = ++currentElementID;
 
+	std::lock_guard<std::mutex> circuitLock(circuitMux);
+
+	blockPreviews.reserve(blockPreviews.size() + blockPreview.blocks.size());
+		
 	for (const BlockPreview::Block& block : blockPreview.blocks) {
 		BlockPreviewRenderData newPreview;
 		newPreview.position = glm::vec2(block.position.x, block.position.y);
 		newPreview.orientation = block.orientation;
-		{
-			std::lock_guard<std::mutex> lock(circuitMux);
-			Size size(1);
-			if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.orientation);
-			newPreview.size = glm::vec2(size.w, size.h);
-		}
+		Size size(1);
+		if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.orientation);
+		newPreview.size = glm::vec2(size.w, size.h);
 		newPreview.type = block.type;
 
 		// insert new block preview into map
-		blockPreviews.emplace(newElement, std::move(newPreview));
+		blockPreviews.emplace(newElement, newPreview);
 	}
 
 	return newElement;

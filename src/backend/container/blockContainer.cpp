@@ -4,6 +4,7 @@
 #include "backend/circuit/circuitManager.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
+#include <cassert>
 
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();
@@ -171,7 +172,6 @@ void BlockContainer::resizeBlockType(BlockType blockType, Size newSize, Differen
 }
 
 bool BlockContainer::connectionExists(Position outputPosition, Position inputPosition) const {
-	
 	const Block* input = getBlock(inputPosition);
 	if (!input) return false;
 	std::optional<connection_end_id_t> inputConnectionId = input->getInputConnectionId(inputPosition);
@@ -221,7 +221,8 @@ bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, Conn
 		)
 	) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionEnd.getConnectionId(), outputConnectionEnd)) {
-		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd));
+		bool secondSuc = output->getConnectionContainer().tryMakeConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd);
+		assert(secondSuc);
 		difference->addCreatedConnection(
 			output->getPosition(), output->getConnectionPosition(outputConnectionEnd.getConnectionId()).value(),
 			input->getPosition(), input->getConnectionPosition(inputConnectionEnd.getConnectionId()).value()
@@ -247,7 +248,8 @@ bool BlockContainer::tryCreateConnection(Position outputPosition, Position input
 		))
 	) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionId.value(), ConnectionEnd(output->id(), outputConnectionId.value()))) {
-		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value())));
+		bool secondSuc = output->getConnectionContainer().tryMakeConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value()));
+		assert(secondSuc);
 		difference->addCreatedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}

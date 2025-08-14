@@ -22,7 +22,7 @@ VulkanInstance::VulkanInstance() {
 	if (!systemInfoRet) { throwFatalError("Could not fetch Vulkan system info. Error: " + systemInfoRet.error().message()); }
 	auto systemInfo = systemInfoRet.value();
 
-#ifdef DEBUG
+#ifndef NDEBUG
 	#if not __APPLE__
 		// Enable validation layers
 		if (systemInfo.validation_layers_available){

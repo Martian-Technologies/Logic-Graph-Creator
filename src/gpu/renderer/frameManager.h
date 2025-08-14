@@ -9,11 +9,9 @@
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 
 struct Frame {
-public:
 	void init(VulkanDevice* device);
 	void cleanup();
 
-public:
 	VkCommandPool commandPool;
 	VkCommandBuffer mainCommandBuffer;
 	VkSemaphore acquireSemaphore;
