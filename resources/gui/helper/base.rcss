@@ -44,8 +44,14 @@ body { color: #f5f5f5; }
 .pad-md { padding: 8dp; }
 .pad-lg { padding: 12dp; }
 
-.flex-row { display: flex; flex-direction: row; }
-.flex-col { display: flex; flex-direction: column; }
+.flex-row {
+	display: flex;
+	flex-direction: row;
+}
+.flex-col {
+	display: flex;
+	flex-direction: column;
+}
 .flex-gap-sm > * { margin: 0 4dp 4dp 0; }
 
 button {
@@ -76,13 +82,14 @@ button:hover, .btn:hover { background-color: #555555; }
 button:active, .btn:active { background-color: #717171; }
 
 button:focus-visible, .btn:focus-visible {
-	border-color: #d1963a; /* accent */
+	border-color: #d1963a;
 	background-color: #555555;
 }
 
 .btn-primary {
 	background-color: #d1963a;
 	border-color: #c18424;
+	color: #000000;
 }
 .btn-primary:hover { background-color: #c18424; }
 .btn-primary:active { background-color: #9d6a1c; }
@@ -93,16 +100,21 @@ button:focus-visible, .btn:focus-visible {
 	color: #f5f5f5;
 	border-color: #d1963a;
 }
-.btn-outline:hover { background-color: #2e2e2e; }
+.btn-outline:hover { background-color: #0000002e; }
 .btn-outline:active { background-color: #1d1d1d; }
 .btn-outline:focus-visible { border-color: #c18424; }
-
-.btn-danger { background-color: #b84d4d; border-color: #b84d4d; }
+.btn-danger {
+	background-color: #b84d4d;
+	border-color: #b84d4d;
+}
 .btn-danger:hover { background-color: #de3737; }
 .btn-danger:active { background-color: #8c2e2e; }
 .btn-danger:focus-visible { border-color: #de3737; }
 
-.btn-success { background-color: #2f8f57; border-color: #2f8f57; }
+.btn-success {
+	background-color: #2f8f57;
+	border-color: #2f8f57;
+}
 .btn-success:hover { background-color: #3fa868; }
 .btn-success:active { background-color: #1f5f3a; }
 .btn-success:focus-visible { border-color: #3fa868; }
@@ -114,14 +126,24 @@ button:focus-visible, .btn:focus-visible {
 	cursor: default;
 }
 
-.btn-text { background: transparent; border-color: transparent; color: #d1963a; }
-.btn-text:hover { background: #2e2e2e; }
+.btn-text {
+	background: transparent;
+	border-color: transparent;
+	color: #d1963a;
+}
+.btn-text:hover { background: #0000002e; }
 .btn-text:active { background: #1d1d1d; }
 .btn-text:focus-visible { border-color: #d1963a; }
 
-.btn-sm { padding: 2dp 6dp; font-size: 11dp; }
+.btn-sm {
+	padding: 2dp 6dp;
+	font-size: 11dp;
+}
 
-.btn-block { display: flex; width: 100%; }
+.btn-block {
+	display: flex;
+	width: 100%;
+}
 
 
 input[type="checkbox"] {
