@@ -21,6 +21,7 @@ public:
 	);
 
 	void updateList();
+	void refreshSidebar(bool rebuildItems = false);
 
 private:
 	void updateSelected(std::string string);
