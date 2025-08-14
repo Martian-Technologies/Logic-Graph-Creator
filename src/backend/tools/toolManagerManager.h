@@ -17,10 +17,13 @@ public:
 	inline void setTool(std::string toolName) {
 		std::transform(toolName.begin(), toolName.end(), toolName.begin(), ::tolower);
 		auto iter = tools.find(toolName);
-		if (iter == tools.end()) return;
+		if (iter == tools.end()) { activeToolInstance = nullptr; return; }
 		activeTool = toolName;
+		activeToolInstance = nullptr;
+		bool first = true;
 		for (auto view : *circuitViews) {
-			view->getToolManager().selectTool(iter->second->getInstance());
+			SharedCircuitTool selected = view->getToolManager().selectTool(iter->second->getInstance());
+			if (first) { activeToolInstance = selected; first = false; }
 		}
 		sendChangedSignal();
 	}
@@ -50,11 +53,7 @@ public:
 		return iter->second->getModes();
 	}
 
-	SharedCircuitTool getToolInstance() const {
-		auto iter = tools.find(activeTool);
-		if (iter == tools.end()) { return nullptr; }
-		return iter->second->getInstance();
-	}
+	SharedCircuitTool getToolInstance() const { return activeToolInstance; }
 
 	const std::map<std::string, std::unique_ptr<void>>& getAllTools() const { return *reinterpret_cast<const std::map<std::string, std::unique_ptr<void>>*>(&tools); }
 
@@ -90,6 +89,7 @@ private:
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
+	SharedCircuitTool activeToolInstance = nullptr;
 	// Persist last selected mode per tool path (lowercased tool key) so switching tools restores user preference.
 	std::map<std::string, std::string> lastToolModes;
 

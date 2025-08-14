@@ -118,8 +118,6 @@ void MenuTree::setPaths(const std::vector<std::vector<std::string>>& paths, Rml:
 				if (!root) return;
 				Rml::ElementList rows;
 				root->GetElementsByTagName(rows, "li");
-				for (auto* r : rows) r->SetClass("selected", false);
-				current->SetClass("selected", true);
 			}
 		));
 		// Precise hover highlighting: only the deepest target under the cursor should have the class.
