@@ -213,7 +213,7 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 		return false;
 	}
 
-	outputFile << "version_6\n";
+	outputFile << "version_7\n";
 
 	// find all required imports
 	// not ideal but if we loop through from maxBlockId down then we will find all dependencies across every circuit, not just this one
