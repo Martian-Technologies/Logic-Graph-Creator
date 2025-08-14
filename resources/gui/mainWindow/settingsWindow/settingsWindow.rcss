@@ -6,17 +6,57 @@ Nord Color Pallete:
 #4c566a
 */
 
-#settings-window { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #1b1b1c; border: 1dp #2a2a2b; border-radius: 6dp; }
+#settings-window {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	box-sizing: border-box;
+	background: #1b1b1c;
+	border: 1dp #2a2a2b;
+	border-radius: 6dp;
+}
 
-#settings-overlay { background-color: rgba(25,25,25,0.92); }
+#settings-overlay {
+	background-color: rgba(25,25,25,0.92);
+}
 
-#settings-top-bar { display: flex; flex-direction: row; align-items: center; gap: 0.9rem; padding: 0.65rem 1rem; border-bottom: 1dp #3a3a3a; }
+#settings-top-bar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.9rem;
+	padding: 0.65rem 1rem;
+	border-bottom: 1dp #3a3a3a;
+}
 	
-.settings-search-wrapper { display: flex; align-items: center; gap: 0.4rem; flex: 1; background: #2e2e2e; border: 1dp #6a4d28; border-radius: 6dp; padding: 4dp 8dp; }
-.settings-search-wrapper:focus-within { background: #2d281f; border: 2dp #d1963a; padding: 3dp 7dp; }
-#settings-search { flex: 1; padding: 4dp 2dp; font-size: 14dp; border-radius: 4dp; border: 0; background-color: transparent; color: #f0e9df; }
+.settings-search-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex: 1;
+	background: #2e2e2e;
+	border: 1dp #6a4d28;
+	border-radius: 6dp;
+	padding: 4dp 8dp;
+}
+.settings-search-wrapper:focus-within {
+	background: #2d281f;
+	border: 2dp #d1963a;
+	padding: 3dp 7dp;
+}
+#settings-search {
+	flex: 1;
+	padding: 4dp 2dp;
+	font-size: 14dp;
+	border-radius: 4dp;
+	border: 0;
+	background-color: transparent;
+	color: #f0e9df;
+}
 /* #settings-search:focus { outline: none } */
-#settings-search::placeholder { color: #8b7a63; }
+#settings-search::placeholder {
+	color: #8b7a63;
+}
 
 --- nav panel ---
 #navigation-panel {
@@ -40,16 +80,40 @@ Nord Color Pallete:
 	background-color: #3d3d3c; 
 	border-left-width: 20dp;
 	border-left-color: #0078d4;
-}*/
+}
 
 /* --- action buttons --- */
-#setting-actions { display: flex; align-items: center; }
-.settings-action { padding: 6dp 14dp; border-radius: 4dp; font-size: 13dp; font-weight: 500; background-color: #2a2a2a; color: #e2dccf; border: 1dp #5a4933; cursor: pointer; }
-.settings-action:hover { background-color: #3a2f22; border-color: #d1963a; color: #f5e7d3; }
-.settings-action:active { background-color: #4a3928; }
+#setting-actions {
+	display: flex;
+	align-items: center;
+}
+.settings-action {
+	padding: 6dp 14dp;
+	border-radius: 4dp;
+	font-size: 13dp;
+	font-weight: 500;
+	background-color: #2a2a2a;
+	color: #e2dccf;
+	border: 1dp #5a4933; cursor: pointer;
+}
+.settings-action:hover {
+	background-color: #3a2f22;
+	border-color: #d1963a;
+	color: #f5e7d3;
+}
+.settings-action:active {
+	background-color: #4a3928;
+}
 
 /* ---------- CONTENT ---------- */
-#settings-content-panel { flex: 1; display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto; padding: 0.25rem 1rem 1rem 1rem; gap: 0.1rem; }
+#settings-content-panel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	overflow-y: auto;
+	padding: 0.25rem 1rem 1rem 1rem;
+	gap: 0.1rem; }
 
 .settings-tree ul ul {
 	display: block;
@@ -73,28 +137,55 @@ Nord Color Pallete:
 }
 
 /* Tree item base */
-.settings-tree li { display: block; padding: 0.1em 0.1em; position: relative; }
+.settings-tree li {
+	display: block;
+	padding: 0.1em 0.1em;
+	position: relative;
+}
 
 /* Step 6: Settings tree & content row polishing */
 /* Polished rows */
-.settings-tree li { line-height: 1.3em; min-height: 20dp; padding: 4dp 6dp; border-left: 2dp transparent; border-radius: 4dp; }
-.settings-tree li:hover { background-color: transparent; }
-.settings-tree li.selected { background-color: #2f2a24; border-left-color: #d1963a; }
+.settings-tree li {
+	line-height: 1.3em;
+	min-height: 20dp;
+	padding: 4dp 6dp;
+	border-left: 2dp transparent;
+	border-radius: 4dp;
+}
+.settings-tree li:hover {
+	background-color: transparent;
+}
+.settings-tree li.selected {
+	background-color: #2f2a24;
+	border-left-color: #d1963a;
+}
 
 /* Alternate rows opt-in */
-.settings-tree.alt-rows > ul > li:nth-child(even) { background-color: #101010; }
-.settings-tree.alt-rows > ul > li:nth-child(even):hover { background-color: #1d1d1d; }
+.settings-tree.alt-rows > ul > li:nth-child(even) {
+	background-color: #101010;
+}
+.settings-tree.alt-rows > ul > li:nth-child(even):hover {
+	background-color: #1d1d1d;
+}
 
 .collapsed div ul {
 	display: none;
 }
 
 /* Search filtering hide */
-.search-hide { display: none; }
-.search-nonresult-hide { display: none; }
+.search-hide {
+	display: none;
+}
+.search-nonresult-hide {
+	display: none;
+}
 /* Increase specificity so it overrides base li display rule */
-.settings-tree li.search-hide { display: none; }
-.settings-tree-header.search-nonresult-hide { display: none; }
+.settings-tree li.search-hide {
+	display: none;
+}
+.settings-tree-header.search-nonresult-hide {
+	display: none;
+}
 
 .settings-tree li .settings-tree-item input {
 	display: block;

@@ -5,7 +5,6 @@ tabset {
 	flex-direction: column;
 	width: 100%;
 	height: 100%;
-	
 }
 
 tabset panels {
@@ -51,8 +50,14 @@ tabset tabs tab.accent {
 	color: #1d1d1d;
 	border-color: #e2a74a;
 }
-tabset tabs tab.accent:hover { background-color: #e2a74a; }
-tabset tabs tab.accent:active { background-color: #9b6d24; }
+
+tabset tabs tab.accent:hover {
+	background-color: #e2a74a;
+}
+
+tabset tabs tab.accent:active {
+	background-color: #9b6d24;
+}
 
 tabset tabs  {
 	width: 100%;

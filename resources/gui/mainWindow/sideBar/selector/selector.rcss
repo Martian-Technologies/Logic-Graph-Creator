@@ -44,12 +44,24 @@
 	border-left: 2dp transparent;
 	border-radius: 4dp;
 }
-#parameter-menu .parameter:hover { background-color: #3b3b3b; }
-#parameter-menu .parameter:active { background-color: #1d1d1d; }
-#parameter-menu .parameter.selected { background-color: #2e2e2e; border-left-color: #d1963a; }
+#parameter-menu .parameter:hover {
+	background-color: #3b3b3b;
+}
+#parameter-menu .parameter:active {
+	background-color: #1d1d1d;
+}
+#parameter-menu .parameter.selected {
+	background-color: #2e2e2e;
+	border-left-color: #d1963a;
+}
 
-#parameter-menu.alt-rows .parameter:nth-child(even) { background-color: #242424; }
-#parameter-menu.alt-rows .parameter:nth-child(even):hover { background-color: #3b3b3b; }
+#parameter-menu.alt-rows .parameter:nth-child(even) {
+	background-color: #242424;
+}
+
+#parameter-menu.alt-rows .parameter:nth-child(even):hover {
+	background-color: #3b3b3b;
+}
 
 #parameter-menu .parameter input {
 	display: inline-block;
@@ -62,8 +74,11 @@
 	padding: 2dp 6dp;
 	min-width: 40dp;
 }
-#parameter-menu .parameter input:focus { border-color: #d1963a; background-color: #232323; }
-#parameter-menu .parameter input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+#parameter-menu .parameter input:focus {
+	border-color: #d1963a;
+	background-color: #232323;
+}
 
 #reset-parameters, #create-block {
 	padding: 0.15em 0.2em;
