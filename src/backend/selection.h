@@ -54,7 +54,7 @@ public:
 	dimensional_selection_size_t size() const override { return dimensionalSelection->size(); }
 
 private:
-	ShiftSelection(SharedDimensionalSelection dimensionalSelection, Vector shift) : dimensionalSelection(dimensionalSelection), shift(shift) { }
+	ShiftSelection(SharedDimensionalSelection dimensionalSelection, Vector shift) : dimensionalSelection(std::move(dimensionalSelection)), shift(shift) { }
 
 	SharedDimensionalSelection dimensionalSelection;
 	Vector shift;
@@ -70,9 +70,9 @@ inline SharedSelection shiftSelection(SharedSelection selection, Vector shift) {
 		if (shiftSelection_) {
 			return shiftSelection(shiftSelection_->dimensionalSelection, shiftSelection_->shift + shift);
 		}
-		return std::static_pointer_cast<const Selection>(std::make_shared<const ShiftSelection>(ShiftSelection(dimensionalSelection, shift)));
+		return std::make_shared<const ShiftSelection>(ShiftSelection(std::move(dimensionalSelection), shift));
 	}
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+	SharedCellSelection cellSelection = selectionCast<CellSelection>(std::move(selection));
 	if (cellSelection) {
 		return std::make_shared<const CellSelection>(cellSelection->getPosition() + shift);
 	}
@@ -107,8 +107,7 @@ inline bool sameSelectionShape(const SharedSelection& selectionA, const SharedSe
 	// check if both cell selections
 	const SharedCellSelection& cellSelectionA = selectionCast<CellSelection>(selectionA);
 	const SharedCellSelection& cellSelectionB = selectionCast<CellSelection>(selectionB);
-	if (cellSelectionA && cellSelectionB) return true;
-	if (cellSelectionA || cellSelectionB) return false;
+	if (cellSelectionA || cellSelectionB) return cellSelectionA && cellSelectionB;
 
 	const SharedDimensionalSelection& dimensionalSelectionA = selectionCast<DimensionalSelection>(selectionA);
 	const SharedDimensionalSelection& dimensionalSelectionB = selectionCast<DimensionalSelection>(selectionB);
