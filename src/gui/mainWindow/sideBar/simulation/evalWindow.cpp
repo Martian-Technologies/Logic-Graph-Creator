@@ -129,18 +129,14 @@ void EvalWindow::updateSelected(std::string string) {
 	Address address;
 	for (unsigned int i = 1; i < parts.size(); i++) {
 		const std::string& part = parts[i];
-		// Only parse segments that contain coordinates like "(...,...)"
-		auto lparen = part.find_last_of('(');
-		if (lparen == std::string::npos) continue;
-		if (part.empty() || part.back() != ')') continue;
-		std::string coord = part.substr(lparen + 1, part.size() - lparen - 2); // inside parens
-		// Expect format: x,y (optional spaces handled by stringstream)
-		std::stringstream posString(coord);
+		size_t index = part.size();
+		while (index != 0 && part[index - 1] != '(') index--;
+		if (index == 0) continue;
+		std::stringstream posString(part.substr(index, part.size() - index - 1));
 		Position position{};
-		char comma = 0;
+		char sep = 0;
 		if (!(posString >> position.x)) continue;
-		posString >> comma;
-		if (comma != ',') continue;
+		if (!(posString >> sep)) continue;
 		if (!(posString >> position.y)) continue;
 		address.addBlockId(position);
 	}

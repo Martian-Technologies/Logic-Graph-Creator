@@ -56,6 +56,11 @@
 	color: #f5f5f5;
 }
 
+/* When a selected row is hovered, prefer the hover background for clear feedback */
+.menutree li.selected.hovered-leaf {
+	background-color: #1d1d1d;
+}
+
 .menutree.alt-rows > ul > li:nth-child(even) {
 	background-color: #101010;
 }
