@@ -16,6 +16,7 @@ public:
 
 	inline void setBlock(BlockType blockType) {
 		setTool("placement");
+		selectedBlock = blockType;
 		for (auto view : circuitViews) {
 			view->getToolManager().selectBlock(blockType);
 		}
@@ -25,9 +26,14 @@ public:
 		std::transform(toolName.begin(), toolName.end(), toolName.begin(), ::tolower);
 		auto iter = tools.find(toolName);
 		if (iter == tools.end()) return;
-		activeTool = toolName;
+		activeTool = std::move(toolName);
 		for (auto view : circuitViews) {
 			view->getToolManager().selectTool(iter->second->getInstance());
+			auto toolModeIter = lastToolModes.begin();
+			if (toolModeIter != lastToolModes.end()) view->getToolManager().setMode(toolModeIter->second);
+			if (activeTool == "placement") {
+				view->getToolManager().selectBlock(selectedBlock);
+			}
 		}
 		sendChangedSignal();
 	}
@@ -36,12 +42,18 @@ public:
 		return activeTool;
 	}
 
-	inline void setMode(std::string tool) {
+	inline BlockType getSelectedBlock() const {
+		return selectedBlock;
+	}
+
+	inline void setMode(const std::string& tool) {
+		if (activeTool.empty()) return; // this should never happen
+
 		for (auto view : circuitViews) {
 			view->getToolManager().setMode(tool);
 		}
-		// Remember last chosen mode for the currently active tool so it can be restored when re-selecting the tool.
-		if (!activeTool.empty()) lastToolModes[activeTool] = tool;
+
+		lastToolModes[activeTool] = tool;
 	}
 
 	// Returns the last stored mode for the active tool, if any.
@@ -91,7 +103,8 @@ private:
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
-	// Persist last selected mode per tool path (lowercased tool key) so switching tools restores user preference.
+	BlockType selectedBlock = BlockType::NONE;
+
 	std::map<std::string, std::string> lastToolModes;
 
 	DataUpdateEventManager* dataUpdateEventManager;

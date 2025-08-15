@@ -2,7 +2,6 @@
 #include "backend/dataUpdateEventManager.h"
 #include "gui/helper/eventPasser.h"
 #include "util/algorithm.h"
-#include "backend/circuitView/tools/placement/blockPlacementTool.h"
 
 SelectorWindow::SelectorWindow(
 	const BlockDataManager* blockDataManager,
@@ -105,26 +104,21 @@ void SelectorWindow::highlightActiveToolInSidebar() {
 	}
 	if (activeTool == "placement") {
 		bool did_highlight = false;
-
-		if (SharedCircuitTool blockPlacementTool = toolManagerManager->getToolInstance()) {
-			if (SharedBlockPlacementTool placementTool = std::dynamic_pointer_cast<BlockPlacementTool>(blockPlacementTool)) {
-				BlockType selected = placementTool->getSelectedBlock();
-				if (selected != BlockType::NONE) {
-					std::string blockPath = blockDataManager->getPath(selected);
-					std::string blockName = blockDataManager->getName(selected);
-					std::string elementId = "Blocks/";
-					if (!blockPath.empty()) elementId += blockPath + "/";
-					elementId += blockName + "-menu";
-					if (Rml::Element* blockEl = document->GetElementById(elementId)) {
-						blockEl->SetClass("selected", true);
-						Rml::Element* p = blockEl->GetParentNode();
-						while (p) {
-							if (p->GetTagName() == "li") p->SetClass("collapsed", false);
-							p = p->GetParentNode();
-						}
-						did_highlight = true;
-					}
+		BlockType selected = toolManagerManager->getSelectedBlock();
+		if (selected != BlockType::NONE) {
+			std::string blockPath = blockDataManager->getPath(selected);
+			std::string blockName = blockDataManager->getName(selected);
+			std::string elementId = "Blocks/";
+			if (!blockPath.empty()) elementId += blockPath + "/";
+			elementId += blockName + "-menu";
+			if (Rml::Element* blockEl = document->GetElementById(elementId)) {
+				blockEl->SetClass("selected", true);
+				Rml::Element* p = blockEl->GetParentNode();
+				while (p) {
+					if (p->GetTagName() == "li") p->SetClass("collapsed", false);
+					p = p->GetParentNode();
 				}
+				did_highlight = true;
 			}
 		}
 
