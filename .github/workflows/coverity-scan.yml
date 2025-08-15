@@ -1,0 +1,43 @@
+name: Coverity Scan
+
+permissions: 
+  contents: read
+
+jobs:
+  coverity:
+    strategy:
+      matrix:
+        os: 
+        c_compiler: gcc
+        cpp_compiler: g++
+        runExecutable: ./Connection_Machine_tests
+
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    
+    - name: Setup `wasmtime`
+      uses: bytecodealliance/actions/wasmtime/setup@v1
+
+    - name: Install Vulkan SDK
+      uses: humbletim/install-vulkan-sdk@v1.2
+      with:
+        version: 1.4.309.0
+        cache: true
+
+    - name: Configure using CMake
+      run: cmake
+               -DCMAKE_BUILD_TYPE=Debug
+               -DCONNECTION_MACHINE_BUILD_TESTS=OFF
+               -DCONNECTION_MACHINE_BUILD_APP=ON
+               -B ${{github.workspace}}/build
+
+    - uses: vapier/coverity-scan-action@v1
+      with:
+        email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        command: make -C ${{github.workspace}}/build
