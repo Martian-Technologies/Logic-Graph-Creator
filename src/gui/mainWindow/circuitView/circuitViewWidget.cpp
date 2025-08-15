@@ -1,13 +1,12 @@
 #include "circuitViewWidget.h"
 
 #include <SDL3/SDL.h>
-#include <format>
 
-#include "backend/circuitView/circuitView.h"
-#include "computerAPI/directoryManager.h"
+#include "gui/viewPortManager/circuitView/circuitView.h"
 #include "backend/settings/settings.h"
 #include "gui/helper/eventPasser.h"
 #include "backend/backend.h"
+#include "gui/viewPortManager/circuitView/events/customEvents.h"
 
 void SaveCallback(void* userData, const char* const* filePaths, int filter) {
 	CircuitViewWidget* circuitViewWidget = (CircuitViewWidget*)userData;
@@ -36,10 +35,12 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 			return;
 		}
 		circuit_id_t id = ids.back();
-		circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+		circuitViewWidget->getCircuitView()->setCircuit(circuitViewWidget->getCircuitView()->getBackend(), id);
+		// circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
 		for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
 			if (iter.second->getCircuitId(Address()) == id) {
-				circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+				circuitViewWidget->getCircuitView()->setEvaluator(circuitViewWidget->getCircuitView()->getBackend(), iter.first);
+				// circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
 				return;
 			}
 		}
@@ -48,9 +49,8 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowRenderer* windowRenderer) : fileManager(fileManager), document(document), window(window) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowRenderer* windowRenderer, Rml::Element* element) : fileManager(fileManager), document(document), window(window), element(element) {
 	// create circuitView
-	element = document->GetElementById("circuit-view-rendering-area");
 	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element, windowRenderer);
 	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
 	
@@ -93,34 +93,6 @@ CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::Eleme
 	keybindHandler.addListener(
 		"Keybinds/Editing/Copy",
 		[this]() { circuitView->getEventRegister().doEvent(Event("Copy")); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Paste",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("paste tool"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/State Changer",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("state changer"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/Connection",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("connection"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/Move",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("move"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/Mode Changer",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("mode changer"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/Placement",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("placement"); }
-	);
-	keybindHandler.addListener(
-		"Keybinds/Editing/Tools/Selection Maker",
-		[this]() { if (circuitView->getBackend()) circuitView->getBackend()->getToolManagerManager().setTool("selection maker"); }
 	);
 	keybindHandler.addListener(
 		"Keybinds/Editing/Rotate CCW",
@@ -280,11 +252,18 @@ void CircuitViewWidget::setSimSpeed(double speed) {
 }
 
 void CircuitViewWidget::newCircuit() {
+	if (circuitView->getBackend() == nullptr) {
+		logError("Can't make circuit when no backend is set", "CircuitViewWidget");
+		return;
+	}
 	circuit_id_t id = circuitView->getBackend()->createCircuit();
-	circuitView->getBackend()->linkCircuitViewWithCircuit(circuitView.get(), id);
+	if (id == 0) return; // other logs shoud happen before this
+	circuitView->setCircuit(circuitView->getBackend(), id);
+	// tmp get eval with this circuit id because circuit manager makes a eval for loaded circuits
 	for (auto& iter : circuitView->getBackend()->getEvaluatorManager().getEvaluators()) {
 		if (iter.second->getCircuitId(Address()) == id) {
-			circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
+			circuitView->setEvaluator(circuitView->getBackend(), iter.second);
+			// circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView.get(), iter.first, Address());
 			return;
 		}
 	}

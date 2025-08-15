@@ -1,5 +1,8 @@
 #include "pasteTool.h"
+
+#include "../../circuitView.h"
 #include "backend/backend.h"
+
 
 void PasteTool::activate() {
 	CircuitTool::activate();

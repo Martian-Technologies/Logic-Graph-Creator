@@ -2,6 +2,8 @@
 #include "menuTreeListener.h"
 #include "eventPasser.h"
 
+#include "util/algorithm.h"
+
 MenuTree::MenuTree(Rml::ElementDocument* document, Rml::Element* parent, bool clickableName, bool startOpen) : document(document), parent(parent), clickableName(clickableName), startOpen(startOpen) {
 	parent->SetClass("menutree", true);
 }

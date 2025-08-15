@@ -1,5 +1,5 @@
 #include "singlePlaceTool.h"
-#include "backend/circuitView/renderer/renderer.h"
+#include "../../renderer/renderer.h"
 
 void SinglePlaceTool::activate() {
 	BaseBlockPlacementTool::activate();

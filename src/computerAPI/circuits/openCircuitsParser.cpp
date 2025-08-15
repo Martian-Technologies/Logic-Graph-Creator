@@ -1,9 +1,5 @@
 #include "openCircuitsParser.h"
 
-#include <math.h>
-
-#include "circuitFileManager.h"
-
 std::vector<circuit_id_t> OpenCircuitsParser::load(const std::string& path) {
 	SharedParsedCircuit out;
 	parse(path, out);

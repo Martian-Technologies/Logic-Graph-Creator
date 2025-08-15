@@ -3,8 +3,6 @@
 
 #include <RmlUi/Core.h>
 
-#include "util/algorithm.h"
-
 class MenuTree {
 public:
 	typedef std::function<void(std::string)> ListenerFunction;

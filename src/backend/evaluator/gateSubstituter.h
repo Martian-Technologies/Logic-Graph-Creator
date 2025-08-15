@@ -8,7 +8,6 @@
 #include "idProvider.h"
 #include "gateType.h"
 #include "logicSimulator.h"
-#include <vector>
 
 struct TrackedGate {
 	middle_id_t id;

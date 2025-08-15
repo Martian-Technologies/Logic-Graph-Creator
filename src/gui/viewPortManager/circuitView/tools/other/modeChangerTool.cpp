@@ -2,7 +2,6 @@
 
 #include "../selectionHelpers/tensorCreationTool.h"
 #include "../selectionHelpers/areaCreationTool.h"
-#include "backend/tools/toolManagerManager.h"
 
 const std::vector<std::pair<BlockType, std::string>> types = {
 	{BlockType::AND, "And"},

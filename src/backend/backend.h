@@ -2,8 +2,6 @@
 #define backend_h
 
 #include "evaluator/evaluatorManager.h"
-#include "tools/toolManagerManager.h"
-#include "circuitView/circuitView.h"
 #include "dataUpdateEventManager.h"
 #include "circuit/circuitManager.h"
 #include "container/copiedBlocks.h"
@@ -28,37 +26,22 @@ public:
 
 	inline const EvaluatorManager& getEvaluatorManager() const { return evaluatorManager; }
 
-	inline ToolManagerManager& getToolManagerManager() { return toolManagerManager; }
-	inline const ToolManagerManager& getToolManagerManager() const { return toolManagerManager; }
-
 	inline DataUpdateEventManager* getDataUpdateEventManager() { return &dataUpdateEventManager; }
 
 	SharedCircuit getCircuit(circuit_id_t circuitId);
 	SharedEvaluator getEvaluator(evaluator_id_t evaluatorId);
-
-	// Attempts to link a CircuitView. Returns success bool.
-	bool linkCircuitView(CircuitView* circuitView);
-	bool unlinkCircuitView(CircuitView* circuitView);
-
-	// Attempts to link a CircuitView and a Circuit. Returns success bool.
-	bool linkCircuitViewWithCircuit(CircuitView* circuitView, circuit_id_t circuitId);
-	// Attempts to link a CircuitView and a Evaluator. Returns success bool.
-	bool linkCircuitViewWithEvaluator(CircuitView* circuitView, evaluator_id_t evalId, const Address& address);
 
 	const SharedCopiedBlocks getClipboard() const { return clipboard; }
 	unsigned long long getClipboardEditCounter() const { return clipboardEditCounter; }
 	void setClipboard(SharedCopiedBlocks copiedBlocks) { clipboard = copiedBlocks; ++clipboardEditCounter; }
 
 private:
-	std::set<CircuitView*> circuitViews;
-
 	SharedCopiedBlocks clipboard = nullptr;
 	unsigned long long clipboardEditCounter = 1;
 
 	DataUpdateEventManager dataUpdateEventManager; // this needs to be constructed first
 	CircuitManager circuitManager;
 	EvaluatorManager evaluatorManager;
-	ToolManagerManager toolManagerManager;
 };
 
 #endif /* backend_h */

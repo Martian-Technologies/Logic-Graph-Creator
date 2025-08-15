@@ -1,6 +1,5 @@
 #include "portSelector.h"
-#include "backend/circuitView/circuitView.h"
-#include "backend/backend.h"
+#include "../../events/customEvents.h"
 
 void PortSelector::activate() {
 	CircuitTool::activate();

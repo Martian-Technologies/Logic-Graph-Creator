@@ -1,8 +1,6 @@
 #ifndef algorithm_h
 #define algorithm_h
 
-#include <iterator>
-
 template <class Iterator, class T>
 inline bool contains(Iterator firstIter, Iterator lastIter, const T& value) {
 	while (firstIter != lastIter) {

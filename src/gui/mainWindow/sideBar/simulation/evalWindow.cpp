@@ -2,18 +2,17 @@
 #include "backend/evaluator/evaluatorManager.h"
 #include "backend/dataUpdateEventManager.h"
 #include "backend/circuit/circuitManager.h"
-#include "gui/mainWindow/circuitView/circuitViewWidget.h"
-#include "backend/backend.h"
+#include "gui/mainWindow/mainWindow.h"
 #include "util/algorithm.h"
 
 EvalWindow::EvalWindow(
 	const EvaluatorManager* evaluatorManager,
 	const CircuitManager* circuitManager,
-	std::shared_ptr<CircuitViewWidget> circuitViewWidget,
+	MainWindow* mainWindow,
 	DataUpdateEventManager* dataUpdateEventManager,
 	Rml::ElementDocument* document,
 	Rml::Element* parent
-) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager), circuitViewWidget(circuitViewWidget) {
+) : menuTree(document, parent, true, false), dataUpdateEventReceiver(dataUpdateEventManager), evaluatorManager(evaluatorManager), circuitManager(circuitManager), mainWindow(mainWindow) {
 	dataUpdateEventReceiver.linkFunction("addressTreeMakeBranch", std::bind(&EvalWindow::updateList, this));
 	dataUpdateEventReceiver.linkFunction("blockDataUpdate", std::bind(&EvalWindow::updateList, this));
 	menuTree.setListener(std::bind(&EvalWindow::updateSelected, this, std::placeholders::_1));
@@ -61,6 +60,7 @@ void EvalWindow::updateSelected(std::string string) {
 		address.addBlockId(position);
 	}
 
-	CircuitView* circuitView = circuitViewWidget->getCircuitView();
-	circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
+	CircuitView* circuitView = mainWindow->getActiveCircuitViewWidget()->getCircuitView();
+	circuitView->setEvaluator(circuitView->getBackend(), evalId, address);
+	// circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
 }

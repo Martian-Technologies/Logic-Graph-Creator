@@ -3,8 +3,8 @@
 #include "../selectionHelpers/tensorCreationTool.h"
 #include "../selectionHelpers/areaCreationTool.h"
 #include "backend/container/copiedBlocks.h"
-#include "backend/tools/toolManagerManager.h"
 #include "backend/backend.h"
+#include "../../circuitView.h"
 
 void SelectionMakerTool::reset() {
 	CircuitTool::reset();

@@ -1,6 +1,5 @@
 #include "blockPlacementTool.h"
 
-#include "backend/tools/toolManagerManager.h"
 #include "singlePlaceTool.h"
 #include "areaPlaceTool.h"
 

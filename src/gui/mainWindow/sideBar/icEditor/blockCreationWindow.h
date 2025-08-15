@@ -1,18 +1,17 @@
 #ifndef blockCreationWindow_h
 #define blockCreationWindow_h
 
-#include "backend/blockData/blockDataManager.h"
-#include "backend/tools/toolManagerManager.h"
-#include "gui/helper/menuTree.h"
+#include "gui/mainWindow/tools/toolManagerManager.h"
+#include <RmlUi/Core.h>
 
 class CircuitManager;
-class CircuitViewWidget;
+class MainWindow;
 
 class BlockCreationWindow {
 public:
 	BlockCreationWindow(
 		CircuitManager* circuitManager,
-		std::shared_ptr<CircuitViewWidget> circuitViewWidget,
+		MainWindow* mainWindow,
 		DataUpdateEventManager* dataUpdateEventManager,
 		ToolManagerManager* toolManagerManager,
 		Rml::ElementDocument* document,
@@ -32,7 +31,7 @@ private:
 	Rml::Element* inputList;
 	Rml::Element* menu;
 	DataUpdateEventManager::DataUpdateEventReceiver dataUpdateEventReceiver;
-	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
+	MainWindow* mainWindow;
 	CircuitManager* circuitManager;
 	ToolManagerManager* toolManagerManager;
 };

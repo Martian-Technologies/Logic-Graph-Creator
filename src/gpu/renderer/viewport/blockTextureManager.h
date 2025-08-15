@@ -1,11 +1,10 @@
 #ifndef blockTextureManager_h
 #define blockTextureManager_h
 
-#include "backend/circuitView/renderer/tileSet.h"
+#include "gui/viewPortManager/circuitView/renderer/tileSet.h"
 #include "gpu/abstractions/vulkanDescriptor.h"
 #include "gpu/abstractions/vulkanImage.h"
 #include "gpu/vulkanDevice.h"
-#include <memory>
 
 struct BlockTexture {
 	~BlockTexture();

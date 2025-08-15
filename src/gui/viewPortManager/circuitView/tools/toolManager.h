@@ -23,9 +23,6 @@ public:
 		this->circuit = circuit;
 		for (auto& toolStack : toolStacks) toolStack.setCircuit(circuit);
 	}
-	inline void setEvaluatorStateInterface(EvaluatorStateInterface* interface) {
-		for (auto& toolStack : toolStacks) toolStack.setEvaluatorStateInterface(interface);
-	}
 
 private:
 	int activeToolStack = 0;

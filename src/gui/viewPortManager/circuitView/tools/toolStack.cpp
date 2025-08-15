@@ -1,6 +1,7 @@
 #include "toolStack.h"
 
 #include "toolManager.h"
+#include "../events/customEvents.h"
 
 void ToolStack::activate() {
 	isActive = true;
@@ -74,7 +75,7 @@ void ToolStack::pushTool(SharedCircuitTool newTool, bool resetTool) {
 	if (!toolStack.empty())
 		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
-	toolStack.back()->setup(renderer, eventRegister, &toolStackInterface, evaluatorStateInterface, circuitView, circuit);
+	toolStack.back()->setup(renderer, eventRegister, &toolStackInterface, circuitView, circuit);
 	if (resetTool) toolStack.back()->reset();
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
@@ -92,7 +93,6 @@ void ToolStack::popTool() {
 	toolStack.pop_back();
 
 	if (toolStack.empty()) return;
-	toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->enterBlockView(&event);
@@ -116,7 +116,6 @@ void ToolStack::popAbove(CircuitTool* toolNotToPop) {
 		toolStack.pop_back();
 	}
 	if (toolStack.empty()) return;
-	toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);
 		toolStack.back()->enterBlockView(&event);
@@ -134,11 +133,6 @@ void ToolStack::switchToStack(int stack) {
 void ToolStack::setCircuit(Circuit* circuit) {
 	this->circuit = circuit;
 	reset();
-}
-
-void ToolStack::setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface) {
-	this->evaluatorStateInterface = evaluatorStateInterface;
-	if (!toolStack.empty()) toolStack.back()->setEvaluatorStateInterface(evaluatorStateInterface);
 }
 
 bool ToolStack::enterBlockView(const Event* event) {

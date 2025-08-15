@@ -1,11 +1,6 @@
 #ifndef evalConfig_h
 #define evalConfig_h
 
-#include <atomic>
-#include <functional>
-#include <vector>
-#include <mutex>
-
 class EvalConfig {
 public:
 	EvalConfig() = default;

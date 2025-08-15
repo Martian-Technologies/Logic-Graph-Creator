@@ -2,20 +2,19 @@
 
 #include "backend/dataUpdateEventManager.h"
 #include "backend/circuit/circuitManager.h"
-#include "gui/mainWindow/circuitView/circuitViewWidget.h"
-#include "backend/backend.h"
 #include "util/algorithm.h"
 #include "gui/helper/eventPasser.h"
-#include "backend/circuitView/tools/other/portSelector.h"
+#include "../../mainWindow.h"
+#include "gui/viewPortManager/circuitView/tools/other/portSelector.h"
 
 BlockCreationWindow::BlockCreationWindow(
 	CircuitManager* circuitManager,
-	std::shared_ptr<CircuitViewWidget> circuitViewWidget,
+	MainWindow* mainWindow,
 	DataUpdateEventManager* dataUpdateEventManager,
 	ToolManagerManager* toolManagerManager,
 	Rml::ElementDocument* document,
 	Rml::Element* menu
-) : document(document), dataUpdateEventReceiver(dataUpdateEventManager), circuitManager(circuitManager), circuitViewWidget(circuitViewWidget), toolManagerManager(toolManagerManager) {
+) : document(document), dataUpdateEventReceiver(dataUpdateEventManager), circuitManager(circuitManager), mainWindow(mainWindow), toolManagerManager(toolManagerManager) {
 	// enuTree(document, parent, true, false)
 	this->menu = menu;
 	outputList = menu->GetElementById("connection-list-output");
@@ -41,7 +40,7 @@ BlockCreationWindow::BlockCreationWindow(
 }
 
 void BlockCreationWindow::updateFromMenu() {
-	Circuit* circuit = circuitViewWidget->getCircuitView()->getCircuit();
+	Circuit* circuit = mainWindow->getActiveCircuitViewWidget()->getCircuitView()->getCircuit();
 	if (!circuit || !(circuit->isEditable())) return;
 	circuit_id_t id = circuit->getCircuitId();
 	CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
@@ -205,7 +204,8 @@ void BlockCreationWindow::resetMenu() {
 	// clear list
 	while (inputList->GetNumChildren() > 0) inputList->RemoveChild(inputList->GetChild(0));
 	while (outputList->GetNumChildren() > 0) outputList->RemoveChild(outputList->GetChild(0));
-	Circuit* circuit = circuitViewWidget->getCircuitView()->getCircuit();
+	if (!mainWindow->getActiveCircuitViewWidget()) return; // nothing to show
+	Circuit* circuit = mainWindow->getActiveCircuitViewWidget()->getCircuitView()->getCircuit();
 	if (!circuit) return;
 	circuit_id_t id = circuit->getCircuitId();
 	Rml::Element* ele = menu->GetElementById("name-input");
@@ -277,7 +277,7 @@ void BlockCreationWindow::resetMenu() {
 		setPositionButton->AppendChild(std::move(document->CreateTextNode("S")));
 		setPositionButton->AddEventListener(Rml::EventId::Click, new EventPasser(
 			[this, endId](Rml::Event& event) {
-				auto tool = std::dynamic_pointer_cast<PortSelector>(circuitViewWidget->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
+				auto tool = std::dynamic_pointer_cast<PortSelector>(mainWindow->getActiveCircuitViewWidget()->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
 				if (tool) {
 					tool->setPort(endId, [this, endId](Position position) {
 						Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
@@ -326,7 +326,7 @@ void BlockCreationWindow::resetMenu() {
 }
 
 void BlockCreationWindow::addListItem(bool isInput) {
-	Circuit* circuit = circuitViewWidget->getCircuitView()->getCircuit();
+	Circuit* circuit = mainWindow->getActiveCircuitViewWidget()->getCircuitView()->getCircuit();
 	if (!circuit) return;
 	circuit_id_t id = circuit->getCircuitId();
 	const CircuitBlockData* circuitBlockData = circuitManager->getCircuitBlockDataManager()->getCircuitBlockData(id);
@@ -380,7 +380,7 @@ void BlockCreationWindow::addListItem(bool isInput) {
 	setPositionButton->AppendChild(std::move(document->CreateTextNode("S")));
 	setPositionButton->AddEventListener(Rml::EventId::Click, new EventPasser(
 		[this, endId](Rml::Event& event) {
-			auto tool = std::dynamic_pointer_cast<PortSelector>(circuitViewWidget->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
+			auto tool = std::dynamic_pointer_cast<PortSelector>(mainWindow->getActiveCircuitViewWidget()->getCircuitView()->getToolManager().selectTool(std::make_shared<PortSelector>()));
 			if (tool) {
 				tool->setPort(endId, [this, endId](Position position) {
 					Rml::Element* row = document->GetElementById("ConnectionListItem Id: " + std::to_string(endId));
@@ -458,6 +458,6 @@ void BlockCreationWindow::updateSelected(std::string string) {
 		address.addBlockId(position);
 	}
 
-	CircuitView* circuitView = circuitViewWidget->getCircuitView();
-	circuitView->getBackend()->linkCircuitViewWithEvaluator(circuitView, evalId, address);
+	CircuitView* circuitView = mainWindow->getActiveCircuitViewWidget()->getCircuitView();
+	circuitView->setEvaluator(circuitView->getBackend(), evalId, address);
 }

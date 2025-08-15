@@ -14,6 +14,7 @@
 
 Rml::EventId getPinchEventId();
 
+
 class App {
 public:
 	App();

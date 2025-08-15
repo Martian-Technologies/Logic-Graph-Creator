@@ -2,7 +2,6 @@
 
 #include "computerAPI/directoryManager.h"
 
-#include <memory>
 #include <stb_image.h>
 
 BlockTexture::~BlockTexture() {

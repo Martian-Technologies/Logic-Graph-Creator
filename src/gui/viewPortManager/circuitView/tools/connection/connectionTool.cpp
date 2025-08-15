@@ -1,6 +1,5 @@
 #include "connectionTool.h"
 
-#include "backend/tools/toolManagerManager.h"
 #include "tensorConnectTool.h"
 #include "singleConnectTool.h"
 

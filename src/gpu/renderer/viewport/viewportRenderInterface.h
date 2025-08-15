@@ -3,7 +3,7 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 
-#include "backend/circuitView/renderer/renderer.h"
+#include "gui/viewPortManager/circuitView/renderer/renderer.h"
 #include "elements/elementRenderer.h"
 #include "logic/chunking/vulkanChunker.h"
 

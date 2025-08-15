@@ -9,10 +9,10 @@ public:
 	EvaluatorStateInterface() : evaluator(nullptr) { }
 	EvaluatorStateInterface(Evaluator* evaluator) : evaluator(evaluator) {}
 
+	inline bool isSetup() const { return evaluator != nullptr; }
 	inline long long int getRealTickrate() const {
 		return evaluator ? evaluator->getRealTickrate() : 0;
 	}
-
 	inline logic_state_t getState(const Address& address) {
 		return evaluator ? evaluator->getState(address) : logic_state_t::UNDEFINED;
 	}

@@ -2,7 +2,7 @@
 #define selectorWindow_h
 
 #include "backend/blockData/blockDataManager.h"
-#include "backend/tools/toolManagerManager.h"
+#include "gui/mainWindow/tools/toolManagerManager.h"
 #include "gui/helper/menuTree.h"
 
 class SelectorWindow {

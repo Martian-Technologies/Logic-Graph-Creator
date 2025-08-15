@@ -1,7 +1,6 @@
 #ifndef toolStack_h
 #define toolStack_h
 
-#include "backend/evaluator/evaluatorStateInterface.h"
 #include "../events/eventRegister.h"
 #include "toolStackInterface.h"
 #include "../renderer/renderer.h"
@@ -38,7 +37,6 @@ public:
 	void setMode(std::string mode);
 
 	void setCircuit(Circuit* circuit);
-	void setEvaluatorStateInterface(EvaluatorStateInterface* evaluatorStateInterface);
 
 private:
 	SharedCircuitTool getCurrentNonHelperTool_();
@@ -64,7 +62,6 @@ private:
 	EventRegister* eventRegister;
 
 	CircuitViewRenderer* renderer;
-	EvaluatorStateInterface* evaluatorStateInterface;
 
 	bool isActive = false;
 	std::vector<SharedCircuitTool> toolStack;

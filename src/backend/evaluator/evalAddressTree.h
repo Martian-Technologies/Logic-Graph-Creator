@@ -1,7 +1,7 @@
 #ifndef evalAddressTree_h
 #define evalAddressTree_h
 
-#include "backend/address.h"
+#include "backend/circuit/circuit.h"
 
 class EvalAddressTree {
 public:

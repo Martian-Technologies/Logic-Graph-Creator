@@ -10,11 +10,7 @@
 #include "menuBar/menuBar.h"
 
 MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
-	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), circuitFileManager(circuitFileManager), fileListener(fileListener) {
-	// create SDL renderer
-	// sdlRenderer = SDL_CreateRenderer(sdlWindow.getHandle(), nullptr);
-	// if (!sdlRenderer) { throw std::runtime_error("SDL could not create renderer! SDL_Error: " + std::string(SDL_GetError())); }
-	// SDL_SetRenderVSync(sdlRenderer, 1);
+	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager), fileListener(fileListener) {
 
 	// create rmlUi context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
@@ -26,34 +22,60 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 	// Rml::Debugger::SetVisible(true);
 
 	// get widget for circuit view
-	circuitViewWidget = std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), &renderer);
-	backend->linkCircuitView(circuitViewWidget->getCircuitView());
+	Rml::Element* circuitViewWidgetElement = rmlDocument->GetElementById("circuit-view-rendering-area");
+	createCircuitViewWidget(circuitViewWidgetElement);
 
 	// eval menutree
 	Rml::Element* evalTreeParent = rmlDocument->GetElementById("eval-tree");
-	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
+	evalWindow.emplace(&(backend->getEvaluatorManager()), &(backend->getCircuitManager()), this, backend->getDataUpdateEventManager(), rmlDocument, evalTreeParent);
 
 	//  blocks/tools menutree
 	selectorWindow.emplace(
 		backend->getBlockDataManager(),
 		backend->getDataUpdateEventManager(),
 		backend->getCircuitManager().getProceduralCircuitManager(),
-		&(backend->getToolManagerManager()),
+		&toolManagerManager,
 		rmlDocument
 	);
 
 	Rml::Element* blockCreationMenu = rmlDocument->GetElementById("block-creation-form");
-	blockCreationWindow.emplace(&(backend->getCircuitManager()), circuitViewWidget, backend->getDataUpdateEventManager(), &(backend->getToolManagerManager()), rmlDocument, blockCreationMenu);
+	blockCreationWindow.emplace(&(backend->getCircuitManager()), this, backend->getDataUpdateEventManager(), &toolManagerManager, rmlDocument, blockCreationMenu);
 
-	simControlsManager.emplace(rmlDocument, circuitViewWidget, backend->getDataUpdateEventManager());
+	simControlsManager.emplace(rmlDocument, getCircuitViewWidget(0), backend->getDataUpdateEventManager());
 
-	// Settings::serializeData();
 	SettingsWindow* settingsWindow = new SettingsWindow(rmlDocument);
 
 	MenuBar* menuBar = new MenuBar(rmlDocument, settingsWindow, this);
 
-	// status of sim
-	// SimControlsManager* simControlsManager = new SimControlsManager(rmlDocument);
+	rmlDocument->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Paste",
+		[this]() { toolManagerManager.setTool("paste tool"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/State Changer",
+		[this]() { toolManagerManager.setTool("state changer"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Connection",
+		[this]() { toolManagerManager.setTool("connection"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Move",
+		[this]() { toolManagerManager.setTool("move"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Mode Changer",
+		[this]() { toolManagerManager.setTool("mode changer"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Placement",
+		[this]() { toolManagerManager.setTool("placement"); }
+	);
+	keybindHandler.addListener(
+		"Keybinds/Editing/Tools/Selection Maker",
+		[this]() { toolManagerManager.setTool("selection maker"); }
+	);
 
 	// show rmlUi document
 	rmlDocument->Show();
@@ -77,7 +99,7 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 		if (event.type == SDL_EVENT_DROP_FILE) {
 			std::string file = event.drop.data;
 			std::cout << file << "\n";
-			std::vector<circuit_id_t> ids = circuitViewWidget->getFileManager()->loadFromFile(file);
+			std::vector<circuit_id_t> ids = getActiveCircuitViewWidget()->getFileManager()->loadFromFile(file);
 			if (ids.empty()) {
 				// logError("Error", "Failed to load circuit file."); // Not a error! It is valid to load 0 circuits.
 			} else {
@@ -85,10 +107,12 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 				if (id == 0) {
 					logError("Error", "Failed to load circuit file.");
 				} else {
-					circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
-					for (auto& iter : circuitViewWidget->getCircuitView()->getBackend()->getEvaluatorManager().getEvaluators()) {
+					getActiveCircuitViewWidget()->getCircuitView()->setCircuit(backend, id);
+					// circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithCircuit(circuitViewWidget->getCircuitView(), id);
+					for (auto& iter : backend->getEvaluatorManager().getEvaluators()) {
 						if (iter.second->getCircuitId(Address()) == id) {
-							circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
+							getActiveCircuitViewWidget()->getCircuitView()->setEvaluator(backend, iter.first);
+							// circuitViewWidget->getCircuitView()->getBackend()->linkCircuitViewWithEvaluator(circuitViewWidget->getCircuitView(), iter.first, Address());
 						}
 					}
 				}
@@ -102,7 +126,9 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
 			renderer.resize({ event.window.data1, event.window.data2 });
 			rmlContext->Update();
-			circuitViewWidget->handleResize();
+			for (auto circuitViewWidget : circuitViewWidgets) {
+				circuitViewWidget->handleResize();
+			}
 		}
 
 		return true;
@@ -118,17 +144,24 @@ void MainWindow::updateRml(RmlRenderInterface& renderInterface) {
 	renderer.endRml();
 }
 
+void MainWindow::createCircuitViewWidget(Rml::Element* element) {
+	circuitViewWidgets.push_back(std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), &renderer, element));
+	circuitViewWidgets.back()->getCircuitView()->setBackend(backend);
+	toolManagerManager.addCircuitView(circuitViewWidgets.back()->getCircuitView());
+	activeCircuitViewWidget = circuitViewWidgets.back(); // if it is created, it should be used
+}
+
 void MainWindow::setBlock(std::string blockPath) {
 	BlockType blockType = backend->getBlockDataManager()->getBlockType(blockPath);
-	backend->getToolManagerManager().setBlock(blockType);
+	toolManagerManager.setBlock(blockType);
 }
 
 void MainWindow::setTool(std::string tool) {
-	backend->getToolManagerManager().setTool(tool);
+	toolManagerManager.setTool(tool);
 }
 
 void MainWindow::setMode(std::string mode) {
-	backend->getToolManagerManager().setMode(mode);
+	toolManagerManager.setMode(mode);
 }
 
 void MainWindow::addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options) {

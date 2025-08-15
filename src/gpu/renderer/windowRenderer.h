@@ -2,7 +2,6 @@
 #define windowRenderer_h
 
 #include <RmlUi/Core/RenderInterface.h>
-#include <thread>
 
 #include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"

@@ -4,8 +4,6 @@
 #include "util/lifetimeExtender.h"
 #include "gpu/vulkanDevice.h"
 
-#include <chrono>
-
 constexpr unsigned int FRAMES_IN_FLIGHT = 2;
 
 struct Frame {

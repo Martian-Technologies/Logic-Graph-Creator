@@ -1,15 +1,22 @@
 #ifndef toolManagerManager_h
 #define toolManagerManager_h
 
-#include "backend/circuitView/circuitView.h"
+#include "gui/viewPortManager/circuitView/circuitView.h"
 
 class ToolManagerManager {
 public:
-	ToolManagerManager(std::set<CircuitView*>* circuitViews, DataUpdateEventManager* dataUpdateEventManager);
+	ToolManagerManager(DataUpdateEventManager* dataUpdateEventManager);
+
+	void addCircuitView(CircuitView* circuitView) {
+		circuitViews.insert(circuitView);
+	}
+	void removeCircuitView(CircuitView* circuitView) {
+		circuitViews.erase(circuitView);
+	}
 
 	inline void setBlock(BlockType blockType) {
 		setTool("placement");
-		for (auto view : *circuitViews) {
+		for (auto view : circuitViews) {
 			view->getToolManager().selectBlock(blockType);
 		}
 	}
@@ -19,7 +26,7 @@ public:
 		auto iter = tools.find(toolName);
 		if (iter == tools.end()) return;
 		activeTool = toolName;
-		for (auto view : *circuitViews) {
+		for (auto view : circuitViews) {
 			view->getToolManager().selectTool(iter->second->getInstance());
 		}
 		sendChangedSignal();
@@ -30,7 +37,7 @@ public:
 	}
 
 	inline void setMode(std::string tool) {
-		for (auto view : *circuitViews) {
+		for (auto view : circuitViews) {
 			view->getToolManager().setMode(tool);
 		}
 	}
@@ -77,7 +84,7 @@ private:
 		for (auto pair : listenerFunctions) pair.second(*this);
 	}
 
-	std::set<CircuitView*>* circuitViews;
+	std::set<CircuitView*> circuitViews;
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;

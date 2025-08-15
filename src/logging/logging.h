@@ -1,8 +1,6 @@
 #ifndef logging_h
 #define logging_h
 
-#include <format>
-
 // basic string logging
 void logInfo(const std::string& message, const std::string& subcategory = "");
 void logWarning(const std::string& message, const std::string& subcategory = "");

@@ -1,6 +1,7 @@
 #include "circuitTool.h"
 
-#include "backend/circuitView/events/eventRegister.h"
+#include "../events/eventRegister.h"
+#include "../events/customEvents.h"
 
 bool CircuitTool::sendEvent(const Event* event) {
 	auto events = registeredEvents;
@@ -48,8 +49,7 @@ void CircuitTool::activate() {
 	updateElements();
 }
 
-void CircuitTool::setup(CircuitViewRenderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, EvaluatorStateInterface* evaluatorStateInterface, CircuitView* circuitView, Circuit* circuit) {
-	setEvaluatorStateInterface(evaluatorStateInterface);
+void CircuitTool::setup(CircuitViewRenderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit) {
 	this->toolStackInterface = toolStackInterface;
 	this->elementCreator.setup(renderer);
 	this->eventRegister = eventRegister;

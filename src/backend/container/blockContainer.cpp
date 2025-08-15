@@ -1,7 +1,6 @@
 #include "blockContainer.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
-#include <cassert>
 
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();

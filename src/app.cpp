@@ -79,12 +79,16 @@ void App::runLoop() {
 		for (auto& window : windows) {
 			window->updateRml(rmlRenderInterface);
 			// update circuit view widget UI components like TPS display
-			window->getCircuitViewWidget()->render();
+			for (auto circuitViewWidget : window->getCircuitViewWidgets()) {
+				circuitViewWidget->render();
+			}
 		}
 		if (firstPass) {
 			firstPass = false;
 			for (auto& window : windows) {
-				window->getCircuitViewWidget()->handleResize();
+				for (auto circuitViewWidget : window->getCircuitViewWidgets()) {
+					circuitViewWidget->handleResize();
+				}
 			}
 		}
 #ifdef TRACY_PROFILER
