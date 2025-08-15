@@ -26,6 +26,10 @@ public:
 		if (activePlacementTool) activePlacementTool->setRotation(rotation);
 	}
 
+	inline BlockType getSelectedBlock() const {
+		return selectedBlock;
+	}
+
 private:
 	std::string mode = "None";
 	SharedBaseBlockPlacementTool activePlacementTool = nullptr;

@@ -40,18 +40,21 @@ public:
 		for (auto view : circuitViews) {
 			view->getToolManager().setMode(tool);
 		}
+		// Remember last chosen mode for the currently active tool so it can be restored when re-selecting the tool.
+		if (!activeTool.empty()) lastToolModes[activeTool] = tool;
+	}
+
+	// Returns the last stored mode for the active tool, if any.
+	inline std::optional<std::string> getActiveToolStoredMode() const {
+		auto it = lastToolModes.find(activeTool);
+		if (it == lastToolModes.end()) return std::nullopt;
+		return it->second;
 	}
 
 	const std::optional<std::vector<std::string>> getActiveToolModes() const {
 		auto iter = tools.find(activeTool);
 		if (iter == tools.end()) { return std::nullopt; }
 		return iter->second->getModes();
-	}
-
-	SharedCircuitTool getToolInstance() const {
-		auto iter = tools.find(activeTool);
-		if (iter == tools.end()) { return nullptr; }
-		return iter->second->getInstance();
 	}
 
 	const std::map<std::string, std::unique_ptr<void>>& getAllTools() const { return *reinterpret_cast<const std::map<std::string, std::unique_ptr<void>>*>(&tools); }
@@ -88,6 +91,8 @@ private:
 
 	std::map<void*, ListenerFunction> listenerFunctions;
 	std::string activeTool;
+	// Persist last selected mode per tool path (lowercased tool key) so switching tools restores user preference.
+	std::map<std::string, std::string> lastToolModes;
 
 	DataUpdateEventManager* dataUpdateEventManager;
 

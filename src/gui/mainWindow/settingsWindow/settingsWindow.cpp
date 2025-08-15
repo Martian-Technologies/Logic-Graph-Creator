@@ -1,6 +1,7 @@
 #include "settingsWindow.h"
 
 #include "gui/helper/eventPasser.h"
+#include "searchBar.h"
 
 #include <RmlUi/Core/Element.h>
 
@@ -9,7 +10,7 @@ SettingsWindow::SettingsWindow(Rml::ElementDocument* document) : contentManager(
 
 	context->GetElementById("settings-close")->AddEventListener(Rml::EventId::Click, new EventPasser([this](Rml::Event& event) { toggleVisibility(); }));
 
-	// SearchBar* sb = new SearchBar(document);
+	searchBar = std::make_unique<SearchBar>(document);
 
 	// connectCategoryListeners();
 	// connectWindowOptions();

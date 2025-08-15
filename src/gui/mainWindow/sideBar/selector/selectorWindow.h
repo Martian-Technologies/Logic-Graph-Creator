@@ -17,12 +17,16 @@ public:
 
 	void updateToolModeOptions();
 	void updateList();
+	void refreshSidebar(bool rebuildItems = false);
 
 private:
 	void updateSelected(const std::string& string);
 	void updateSelectedMode(const std::string& string);
 	void setupProceduralCircuitParameterMenu();
 	void hideProceduralCircuitParameterMenu();
+
+	void highlightActiveToolInSidebar();
+	void applyAndHighlightActiveMode();
 
 	SharedProceduralCircuit selectedProceduralCircuit = nullptr;
 

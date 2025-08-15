@@ -9,57 +9,107 @@ SearchBar::SearchBar(Rml::Element* document) : context(document) {
 
 void SearchBar::Initialize() {
 	Rml::Element* search = context->GetElementById("settings-search");
+	if (!search) return;
 
-	// grabs the current value of the input field at every change
+	search->AddEventListener(Rml::EventId::Keyup, new EventPasser(
+		[this](Rml::Event& event) {
+			auto* input = dynamic_cast<Rml::ElementFormControlInput*>(event.GetCurrentElement());
+			std::string text = input ? input->GetValue() : "";
+			queryContext(text);
+		}
+	));
 	search->AddEventListener(Rml::EventId::Change, new EventPasser(
 		[this](Rml::Event& event) {
-			Rml::Variant* innerText = event.GetCurrentElement()->GetAttribute("value");
-			if (innerText && innerText->GetType() == Rml::Variant::STRING) {
-				std::string text = innerText->Get<Rml::String>();
-				queryContext(text);
-			}
+			auto* input = dynamic_cast<Rml::ElementFormControlInput*>(event.GetCurrentElement());
+			std::string text = input ? input->GetValue() : "";
+			queryContext(text);
 		}
 	));
 }
 
+bool SearchBar::match(const std::string& haystack, const std::string& needle) {
+	if (needle.empty()) return true;
+	std::string h(haystack), n(needle);
+	std::transform(h.begin(), h.end(), h.begin(), ::tolower);
+	std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+	return h.find(n) != std::string::npos;
+}
+
 void SearchBar::queryContext(const std::string& text) {
-	// if (activeCategory == ACTIVE_CATEGORIES::GENERAL) {
-	// 	// std::vector<std::vector<std::string>> stack = Settings::getGraphicsData("general");
-	// 	std::vector<std::string> output;
-
-	// 	// if (querySubcategory(stack, text, output)) {
-	// 		// recall and switch active_category
-	// 	// }
-	// } else if (activeCategory == ACTIVE_CATEGORIES::APPEARANCE) {
-
-	// } else if (activeCategory == ACTIVE_CATEGORIES::KEYBIND) {
-
-	// } else {
-	// 	logWarning("error settings active category gui/settingsWindow/searchbar.cpp");
-	// }
+	if (text.empty()) {
+		clearFilter();
+	} else {
+		applyFilter(text);
+	}
 }
 
-bool SearchBar::querySubcategory(
-	const std::vector<std::vector<std::string>>& haystack,
-	const std::string& needle,
-	std::vector<std::string>& out
-) {
-	for (int i = 0; i < haystack.size(); ++i)
-		if (haystack[i][0].find(needle) != std::string::npos)
-			out.push_back(haystack[i][0]);
-
-	if (out.size() == 0) return false;
-	return true;
+void SearchBar::clearFilter() {
+	Rml::Element* treeRoot = context->GetElementById("settings-content-panel");
+	if (!treeRoot) return;
+	Rml::ElementList all;
+	treeRoot->GetElementsByTagName(all, "li");
+	for (auto* el : all) {
+		el->SetClass("search-hide", false);
+		el->SetClass("search-match", false);
+		Rml::ElementList headers;
+		el->GetElementsByClassName(headers, "settings-tree-header");
+		for (auto* h : headers) h->SetClass("search-nonresult-hide", false);
+	}
 }
 
-bool SearchBar::queryCategories(const std::string& text, const int category) {
-	return false;
-}
+void SearchBar::applyFilter(const std::string& needle) {
+	Rml::Element* treeRoot = context->GetElementById("settings-content-panel");
+	if (!treeRoot) return;
 
-void SearchBar::renderGroups(const std::vector<std::string>& tmp) {
+	Rml::ElementList listItems;
+	treeRoot->GetElementsByTagName(listItems, "li");
 
-}
+	// Reset state
+	for (auto* el : listItems) {
+		el->SetClass("search-hide", true);
+		el->SetClass("search-match", false);
+		Rml::ElementList headers; el->GetElementsByClassName(headers, "settings-tree-header");
+		for (auto* h : headers) h->SetClass("search-nonresult-hide", false);
+	}
 
-void SearchBar::resetGroups() {
+	// Prep structures for ancestor evaluation
+	struct NodeInfo { Rml::Element* el; std::string id; std::string path; bool hasKey; bool matched = false; };
+	std::vector<NodeInfo> nodes; nodes.reserve(listItems.size());
+	for (auto* el : listItems) {
+		std::string id = el->GetId(); if (id.size() < 5) continue; // ignore malformed
+		std::string path = id.substr(0, id.size() - 5); // strip -menu
+		bool hasKey = Settings::hasKey(path);
+		nodes.push_back({el, id, path, hasKey, false});
+	}
 
+	int matchCount = 0;
+	for (auto& n : nodes) {
+		if (!n.hasKey) continue;
+		if (!match(n.path, needle)) continue;
+		n.matched = true; matchCount++;
+		// Unhide chain to root
+		Rml::Element* cur = n.el;
+		while (cur && cur != treeRoot) { cur->SetClass("search-hide", false); cur = cur->GetParentNode(); }
+		n.el->SetClass("search-match", true);
+	}
+
+	if (matchCount == 0) { clearFilter(); return; }
+
+	for (auto& n : nodes) {
+		if (n.el->IsClassSet("search-hide")) continue;
+		if (n.el->IsClassSet("search-match")) continue;
+		bool descendantMatch = false;
+		for (auto& other : nodes) {
+			if (!other.matched) continue;
+			if (other.path.size() > n.path.size() && other.path.compare(0, n.path.size(), n.path) == 0 && other.path[n.path.size()] == '/') {
+				descendantMatch = true; break;
+			}
+		}
+		if (!descendantMatch) {
+			n.el->SetClass("search-hide", true);
+		} else {
+			Rml::ElementList headers; n.el->GetElementsByClassName(headers, "settings-tree-header");
+			for (auto* h : headers) h->SetClass("search-nonresult-hide", true);
+		}
+	}
 }

@@ -6,14 +6,12 @@
 
 	<body>
 		<div id="settings-window">
-			<div id="settings-navigation">
-				<div id="setting-actions">
-					<button class="settings-action" id="settings-close">Close</button>
+			<div id="settings-top-bar">
+				<div class="settings-search-wrapper">
+					<input id="settings-search" type="text" placeholder="Search settings..." autocomplete="off" />
 				</div>
-				<!-- <div id="navigation-top-container">
-					<h1>Settings</h1>
-					<input id="settings-search" type="text" />
-				</div> -->
+				<button class="settings-action" id="settings-close">Close</button>
+			</div>
 				<!-- <div id="navigation-panel">
 					<div class="nav-item" id="nav-general">General</div>
 					<div class="nav-item" id="nav-appearance">Appearance</div>
@@ -24,7 +22,6 @@
 					<button class="settings-action" id="settings-apply">Apply</button>
 					<button class="settings-action" id="settings-cancel">Cancel</button>
 				</div> -->
-			</div>
 
 			<div id="settings-content-panel">
 				<!-- Content here created by "src/gui/settingsWindow/contentManager.h" -->

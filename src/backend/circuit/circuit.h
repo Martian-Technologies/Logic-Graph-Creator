@@ -8,6 +8,7 @@
 #include "backend/selection.h"
 #include "undoSystem.h"
 
+class CircuitManager;
 class GeneratedCircuit;
 class ParsedCircuit;
 
@@ -19,7 +20,7 @@ typedef std::function<void(DifferenceSharedPtr, circuit_id_t)> CircuitDiffListen
 class Circuit {
 	friend class CircuitManager;
 public:
-	Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
+	Circuit(circuit_id_t circuitId, CircuitManager* circuitManager, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid);
 
 	void clear(bool clearUndoTree = false);
 
