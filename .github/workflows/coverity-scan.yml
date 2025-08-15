@@ -1,5 +1,7 @@
 name: Coverity Scan
 
+on:
+
 permissions: 
   contents: read
 
