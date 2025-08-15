@@ -64,7 +64,7 @@ protected:
 
 	// const data
 	BlockType blockType;
-	block_id_t blockId;
+	block_id_t blockId = 0;
 
 	// helpers
 	ConnectionContainer connections;
