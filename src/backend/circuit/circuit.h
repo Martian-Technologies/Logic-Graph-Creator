@@ -53,9 +53,9 @@ public:
 	// Trys to move a block. Returns if successful.
 	bool tryMoveBlock(Position positionOfBlock, Position position);
 	// Trys to move blocks. Wont move any if one cant move. Returns if successful.
-	bool tryMoveBlocks(SharedSelection selection, Vector movement, Orientation transformAmount);
+	bool tryMoveBlocks(const SharedSelection& selection, Vector movement, Orientation transformAmount);
 	// Sets the type of blocks. Will set as many of the blocks as possible.
-	void setType(SharedSelection selection, BlockType type);
+	void setType(const SharedSelection& selection, BlockType type);
 
 	void tryInsertOverArea(Position cellA, Position cellB, Orientation transformAmount, BlockType blockType);
 	void tryRemoveOverArea(Position cellA, Position cellB);
@@ -77,9 +77,9 @@ public:
 	// Trys to remove a connection. Returns if successful.
 	bool tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionEnd inputConnectionEnd);
 	// Trys to creates a connection. Returns if successful.
-	bool tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection);
+	bool tryCreateConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection);
 	// Trys to remove connections.
-	bool tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection);
+	bool tryRemoveConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection);
 
 	/* ----------- undo ----------- */
 	void undo();
@@ -92,10 +92,10 @@ private:
 	void removeConnectionPort(const DataUpdateEventManager::EventData* eventData);
 
 	// helpers
-	void setType(SharedSelection selection, BlockType type, Difference* difference);
+	void setType(const SharedSelection& selection, BlockType type, Difference* difference);
 
-	void createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
-	void removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference);
+	void createConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection, Difference* difference);
+	void removeConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection, Difference* difference);
 
 	void startUndo() { midUndo = true; }
 	void endUndo() { midUndo = false; }

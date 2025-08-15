@@ -6,8 +6,12 @@
 typedef unsigned int dimensional_selection_size_t;
 
 template<class OutputSelectionType, class InputSelectionType>
-inline std::shared_ptr<const OutputSelectionType> selectionCast(std::shared_ptr<const InputSelectionType> selection) {
+inline std::shared_ptr<const OutputSelectionType> selectionCast(const std::shared_ptr<const InputSelectionType>& selection) {
 	return std::dynamic_pointer_cast<const OutputSelectionType>(selection);
+}
+template<class OutputSelectionType, class InputSelectionType>
+inline const OutputSelectionType* selectionCast(const InputSelectionType* selection) {
+	return dynamic_cast<const OutputSelectionType*>(selection);
 }
 
 // ---------------- Base Selection ----------------
@@ -99,15 +103,15 @@ private:
 typedef std::shared_ptr<const ProjectionSelection> SharedProjectionSelection;
 
 // ---------------- helpers ----------------
-inline bool sameSelectionShape(SharedSelection selectionA, SharedSelection selectionB) {
+inline bool sameSelectionShape(const SharedSelection& selectionA, const SharedSelection& selectionB) {
 	// check if both cell selections
-	SharedCellSelection cellSelectionA = selectionCast<CellSelection>(selectionA);
-	SharedCellSelection cellSelectionB = selectionCast<CellSelection>(selectionB);
+	const SharedCellSelection& cellSelectionA = selectionCast<CellSelection>(selectionA);
+	const SharedCellSelection& cellSelectionB = selectionCast<CellSelection>(selectionB);
 	if (cellSelectionA && cellSelectionB) return true;
 	if (cellSelectionA || cellSelectionB) return false;
 
-	SharedDimensionalSelection dimensionalSelectionA = selectionCast<DimensionalSelection>(selectionA);
-	SharedDimensionalSelection dimensionalSelectionB = selectionCast<DimensionalSelection>(selectionB);
+	const SharedDimensionalSelection& dimensionalSelectionA = selectionCast<DimensionalSelection>(selectionA);
+	const SharedDimensionalSelection& dimensionalSelectionB = selectionCast<DimensionalSelection>(selectionB);
 	if (dimensionalSelectionA && dimensionalSelectionB) {
 		if (
 			(dimensionalSelectionA->size() == 1 || dimensionalSelectionB->size() == 1) ||
@@ -118,13 +122,13 @@ inline bool sameSelectionShape(SharedSelection selectionA, SharedSelection selec
 	}
 	return false;
 }
-inline Position getSelectionOrigin(SharedSelection selection) {
-	SharedDimensionalSelection dimensionalSelection = selectionCast<DimensionalSelection>(selection);
+inline Position getSelectionOrigin(const SharedSelection& selection) {
+	const SharedDimensionalSelection& dimensionalSelection = selectionCast<DimensionalSelection>(selection);
 	if (dimensionalSelection) {
 		return getSelectionOrigin(dimensionalSelection->getSelection(0));
 	}
 
-	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
+	const SharedCellSelection& cellSelection = selectionCast<CellSelection>(selection);
 	if (cellSelection) {
 		return cellSelection->getPosition();
 	}
