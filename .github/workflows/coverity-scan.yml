@@ -24,6 +24,13 @@ jobs:
     - name: Setup `wasmtime`
       uses: bytecodealliance/actions/wasmtime/setup@v1
 
+    - uses: libsdl-org/setup-sdl@main
+      id: sdl
+      with:
+        install-linux-dependencies: true
+        version: 3-latest
+        version-sdl-image: 3-latest
+
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
       with:
