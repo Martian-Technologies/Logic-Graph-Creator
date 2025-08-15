@@ -258,7 +258,12 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 	std::vector<logic_state_t> result(ids.size());
 	std::shared_lock lk(statesAMutex);
 	for (size_t i = 0; i < ids.size(); ++i) {
-		result[i] = statesA[ids[i]];
+		const size_t id = ids[i];
+		if (id < statesA.size()) {
+			result[i] = statesA[id];
+		} else {
+			result[i] = logic_state_t::UNDEFINED;
+		}
 	}
 	return result;
 }
