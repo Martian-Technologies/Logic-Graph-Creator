@@ -8,6 +8,7 @@
 #include "idProvider.h"
 #include "gateType.h"
 #include "logicSimulator.h"
+
 struct ReplacementGate {
 	middle_id_t id;
 	GateType type;
