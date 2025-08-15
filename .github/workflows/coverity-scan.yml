@@ -32,7 +32,7 @@ jobs:
 
     - name: Configure using CMake
       run: cmake
-               -DCMAKE_BUILD_TYPE=Debug
+               -DCMAKE_BUILD_TYPE=Release
                -DCONNECTION_MACHINE_BUILD_TESTS=OFF
                -DCONNECTION_MACHINE_BUILD_APP=ON
                -B ${{github.workspace}}/build
@@ -42,3 +42,9 @@ jobs:
         email: ${{ secrets.COVERITY_SCAN_EMAIL }}
         token: ${{ secrets.COVERITY_SCAN_TOKEN }}
         command: make -C ${{github.workspace}}/build
+
+    - name: Offer analysis tarball for inspection
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+      with:
+        path: expat/cov-int.tgz
+        if-no-files-found: error
