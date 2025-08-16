@@ -29,7 +29,7 @@ public:
 		activeTool = std::move(toolName);
 		for (auto view : circuitViews) {
 			view->getToolManager().selectTool(iter->second->getInstance());
-			auto toolModeIter = lastToolModes.begin();
+			auto toolModeIter = lastToolModes.find(activeTool);
 			if (toolModeIter != lastToolModes.end()) view->getToolManager().setMode(toolModeIter->second);
 			if (activeTool == "placement") {
 				view->getToolManager().selectBlock(selectedBlock);

@@ -89,44 +89,42 @@ void SelectorWindow::highlightActiveToolInSidebar() {
 	const std::string& activeTool = toolManagerManager->getActiveTool();
 	if (activeTool.empty()) return;
 	std::string activeToolId = std::string("Tools/") + activeTool + "-menu";
-	if (Rml::Element* activeEl = document->GetElementById(activeToolId)) {
+	if (Rml::Element* activeElement = document->GetElementById(activeToolId)) {
 		if (Rml::Element* itemRoot = document->GetElementById("item-selection-tree")) {
 			Rml::ElementList rows; itemRoot->GetElementsByTagName(rows, "li");
-			for (auto* r : rows) r->SetClass("selected", false);
+			for (auto* row : rows) row->SetClass("selected", false);
 		}
-		activeEl->SetClass("selected", true);
+		activeElement->SetClass("selected", true);
 		// Expand ancestors
-		Rml::Element* p = activeEl->GetParentNode();
+		Rml::Element* p = activeElement->GetParentNode();
 		while (p) {
 			if (p->GetTagName() == "li") p->SetClass("collapsed", false);
 			p = p->GetParentNode();
 		}
 	}
-	if (activeTool == "placement") {
-		bool did_highlight = false;
-		BlockType selected = toolManagerManager->getSelectedBlock();
-		if (selected != BlockType::NONE) {
-			std::string blockPath = blockDataManager->getPath(selected);
-			std::string blockName = blockDataManager->getName(selected);
+	if (selectedProceduralCircuit) {
+		std::string elementId = std::string("Blocks/") + selectedProceduralCircuit->getPath() + "-menu";
+		Rml::Element* blockElement = document->GetElementById(elementId);
+		if (blockElement) {
+			blockElement->SetClass("selected", true);
+			Rml::Element* p = blockElement->GetParentNode();
+			while (p) {
+				if (p->GetTagName() == "li") p->SetClass("collapsed", false);
+				p = p->GetParentNode();
+			}
+		}
+	} else {
+		BlockType selectedBlock = toolManagerManager->getSelectedBlock();
+		if (selectedBlock != BlockType::NONE) {
+			std::string blockPath = blockDataManager->getPath(selectedBlock);
+			std::string blockName = blockDataManager->getName(selectedBlock);
 			std::string elementId = "Blocks/";
 			if (!blockPath.empty()) elementId += blockPath + "/";
 			elementId += blockName + "-menu";
-			if (Rml::Element* blockEl = document->GetElementById(elementId)) {
-				blockEl->SetClass("selected", true);
-				Rml::Element* p = blockEl->GetParentNode();
-				while (p) {
-					if (p->GetTagName() == "li") p->SetClass("collapsed", false);
-					p = p->GetParentNode();
-				}
-				did_highlight = true;
-			}
-		}
-
-		if (!did_highlight && selectedProceduralCircuit) {
-			std::string elementId = std::string("Blocks/") + selectedProceduralCircuit->getPath() + "-menu";
-			if (Rml::Element* blockEl = document->GetElementById(elementId)) {
-				blockEl->SetClass("selected", true);
-				Rml::Element* p = blockEl->GetParentNode();
+			Rml::Element* blockElement = document->GetElementById(elementId);
+			if (blockElement) {
+				blockElement->SetClass("selected", true);
+				Rml::Element* p = blockElement->GetParentNode();
 				while (p) {
 					if (p->GetTagName() == "li") p->SetClass("collapsed", false);
 					p = p->GetParentNode();
@@ -149,12 +147,12 @@ void SelectorWindow::applyAndHighlightActiveMode() {
 	if (!modeMenuTree) return;
 	if (Rml::Element* modeRoot = document->GetElementById("mode-selection-tree")) {
 		Rml::ElementList rows; modeRoot->GetElementsByTagName(rows, "li");
-		for (auto* r : rows) r->SetClass("selected", false);
-		for (auto* r : rows) {
-			std::string id = r->GetId();
+		for (auto* row : rows) row->SetClass("selected", false);
+		for (auto* row : rows) {
+			std::string id = row->GetId();
 			if (id.size() >= 5) {
 				std::string path = id.substr(0, id.size() - 5);
-				if (path == modeToApply) { r->SetClass("selected", true); break; }
+				if (path == modeToApply) { row->SetClass("selected", true); break; }
 			}
 		}
 	}
