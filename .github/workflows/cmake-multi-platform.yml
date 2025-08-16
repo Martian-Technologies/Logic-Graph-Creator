@@ -43,13 +43,9 @@ jobs:
             #   cpp_compiler: clang++
             #   runExecutable: ./Connection Machine_tests
 
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    
-    - name: Setup `wasmtime`
-      uses: bytecodealliance/actions/wasmtime/setup@v1
+    steps:    
+    # - name: Setup `wasmtime`
+    #   uses: bytecodealliance/actions/wasmtime/setup@v1
 
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
