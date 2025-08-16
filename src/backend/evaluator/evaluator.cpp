@@ -1219,3 +1219,26 @@ std::vector<simulator_id_t> Evaluator::getPinSimulatorIds(const Address& address
 std::vector<logic_state_t> Evaluator::getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
 	return evalSimulator.getStatesFromSimulatorIds(simulatorIds);
 }
+
+void Evaluator::connectListener(
+	void* object,
+	const Address& address,
+	SimulatorMappingUpdateListenerFunction func
+) {
+	std::optional<eval_circuit_id_t> evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(address);
+	if (!evalCircuitId) {
+		logError("Failed to connect listener for address {}: No top-level IC found", "Evaluator::connectListener", address.toString());
+		return;
+	}
+	listeners[object] = { evalCircuitId.value(), func };
+	std::unordered_map<eval_circuit_id_t, std::vector<SimulatorMappingUpdate>> simulatorMappingUpdates;
+	auto evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId.value());
+	if (!evalCircuit) {
+		logError("Failed to get eval circuit for ID {}", "Evaluator::connectListener", evalCircuitId.value());
+		return;
+	}
+	evalCircuit->forEachNode([this, evalCircuitId](Position pos, const CircuitNode& node) {
+		this->dirtyBlockAt(pos, evalCircuitId.value());
+	});
+	processDirtyNodes();
+}
