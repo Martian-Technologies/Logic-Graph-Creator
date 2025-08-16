@@ -1184,7 +1184,7 @@ void Evaluator::dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId)
 		logError("BlockData not found for block type {}", "Evaluator::dirtyBlockAt", static_cast<int>(block->type()));
 		return;
 	}
-	for (size_t i = 0; i < blockData->getConnectionCount(); ++i) {
+	for (connection_end_id_t i = 0; i < blockData->getConnectionCount(); ++i) {
 		if (block->isConnectionOutput(i)) {
 			std::optional<Position> portPositionOpt = block->getConnectionPosition(i);
 			if (!portPositionOpt) {

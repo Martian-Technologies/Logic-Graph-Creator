@@ -51,7 +51,7 @@ struct TrackedGate {
 	}
 
 	bool removeReferencesToId(const middle_id_t id) {
-		unsigned int initialSize = inputs.size() + outputs.size();
+		size_t initialSize = inputs.size() + outputs.size();
 		inputs.erase(std::remove_if(inputs.begin(), inputs.end(),
 			[&](const EvalConnection& conn) { return conn.source.gateId == id || conn.destination.gateId == id; }), inputs.end());
 		outputs.erase(std::remove_if(outputs.begin(), outputs.end(),
