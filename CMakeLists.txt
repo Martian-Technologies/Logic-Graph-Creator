@@ -1,5 +1,5 @@
 # ======================================== CMAKE SETUP ========================================
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.10)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/apple.cmake)
 
@@ -7,6 +7,7 @@ if(APPLE)
 	PreProjectAppleSetup()
 endif()
 
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
 # generate compile commands json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -1,7 +1,13 @@
 add_main_dependencies()
 
 # Google Testing
-add_subdirectory("${EXTERNAL_DIR}/googletest" SYSTEM EXCLUDE_FROM_ALL)
+
+CPMAddPackage(
+	NAME gtest
+	GITHUB_REPOSITORY google/googletest
+	GIT_TAG v1.17.0
+	SOURCE_DIR "${EXTERNAL_DIR}/gtest"
+)
 
 set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 set(TEST_FILES)
@@ -16,16 +22,6 @@ file(GLOB_RECURSE TEST_FILES
 set(EXTERNAL_LINKS ${EXTERNAL_LINKS} gtest gtest_main)
 
 message("EXTERNAL_LINKS: ${EXTERNAL_LINKS}")
-
-# set(EXTERNAL_LINKS
-# 	gtest gtest_main
-# )
-# 	cpplocate::cpplocate
-# 	gtest gtest_main
-# 	json
-# 	wasmtime
-# 	parallel_hashmap
-# )
 
 if(APPLE)
 	# Link CoreFoundation explicitly on macOS

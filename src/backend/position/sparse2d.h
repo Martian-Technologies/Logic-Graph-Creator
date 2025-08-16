@@ -1,7 +1,7 @@
 #ifndef sparse2d_h
 #define sparse2d_h
 
-#include <greg7mdp/phmap.h>
+#include <parallel_hashmap/phmap.h>
 
 #include "position.h"
 

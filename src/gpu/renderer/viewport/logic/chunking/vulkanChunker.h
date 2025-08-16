@@ -5,7 +5,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-#include <greg7mdp/phmap.h>
+#include <parallel_hashmap/phmap.h>
 
 #include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
