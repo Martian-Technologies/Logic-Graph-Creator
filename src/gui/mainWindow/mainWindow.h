@@ -21,7 +21,7 @@
 
 class MainWindow {
 public:
-	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
+	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
 	~MainWindow();
 
 	// no copy
@@ -55,7 +55,6 @@ private:
 	Backend* backend;
 	KeybindHandler keybindHandler;
 	CircuitFileManager* circuitFileManager;
-	FileListener* fileListener;
 	SdlWindow sdlWindow;
 	WindowRenderer renderer;
 	ToolManagerManager toolManagerManager;

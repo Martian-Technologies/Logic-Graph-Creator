@@ -4,21 +4,10 @@
 #include <tracy/Tracy.hpp>
 #endif
 
-Rml::EventId pinchEventId = Rml::EventId::Invalid;
-
-Rml::EventId getPinchEventId() {
-	if (pinchEventId == Rml::EventId::Invalid) {
-		logError("Dont call getPinchEventId before initializing the App");
-		return Rml::EventId::Scroll;
-	}
-	return pinchEventId;
-}
-
 App::App() :
 	rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFileManager), circuitFileManager(&(backend.getCircuitManager())),
 	fileListener(std::chrono::milliseconds(200)) {
-	pinchEventId = Rml::RegisterEventType("pinch", true, true, Rml::DefaultActionPhase::None);
-	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, &fileListener, rmlRenderInterface, &vulkan));
+	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, rmlRenderInterface, &vulkan));
 }
 
 #ifdef TRACY_PROFILER
@@ -29,11 +18,13 @@ void App::runLoop() {
 	bool firstPass = true;
 	running = true;
 	while (running) {
-		// Wait for the next event (so we don't overload the cpu)
+		// Wait for the next event (so we don't broork the cpu)
 		SDL_WaitEvent(nullptr);
+
 #ifdef TRACY_PROFILER
 		FrameMarkStart(addLoopTracyName);
 #endif
+
 		// process events (TODO - should probably just have a map of window ids to windows)
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {

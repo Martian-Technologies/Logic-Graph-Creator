@@ -9,12 +9,13 @@
 #include "../helper/eventPasser.h"
 #include "menuBar/menuBar.h"
 
-MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
-	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager), fileListener(fileListener) {
+MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
+	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager) {
 
-	// create rmlUi context
+	// create rmlUI context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 
+	// create rmlUI document
 	renderer.activateRml(renderInterface);
 	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow/mainWindow.rml");
 
@@ -47,6 +48,7 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 
 	MenuBar* menuBar = new MenuBar(rmlDocument, settingsWindow, this);
 
+	// keybind handling
 	rmlDocument->AddEventListener(Rml::EventId::Keydown, &keybindHandler);
 	keybindHandler.addListener(
 		"Keybinds/Editing/Paste",
@@ -133,6 +135,7 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 
 		return true;
 	}
+	
 	return false;
 }
 
