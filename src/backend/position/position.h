@@ -3,8 +3,8 @@
 
 #include "util/fastMath.h"
 
-typedef int cord_t;
-typedef float f_cord_t;
+typedef int coordinate_t;
+typedef float f_coordinate_t;
 
 struct Vector;
 struct FVector;
@@ -17,9 +17,9 @@ struct Vector {
 	class Iterator;
 
 	inline Vector() noexcept : dx(0), dy(0) { }
-	inline Vector(cord_t dx, cord_t dy) noexcept : dx(dx), dy(dy) { }
+	inline Vector(coordinate_t dx, coordinate_t dy) noexcept : dx(dx), dy(dy) { }
 	// allows the easy creation of vectors that are all the same value
-	inline Vector(cord_t d) noexcept : dx(d), dy(d) { }
+	inline Vector(coordinate_t d) noexcept : dx(d), dy(d) { }
 	inline FVector free() const noexcept;
 
 	inline void extentToFit(Vector vector) noexcept {
@@ -34,9 +34,9 @@ struct Vector {
 	inline bool hasZeros() const noexcept { return !(dx && dy); }
 	inline bool widthInSize(Size size) const noexcept;
 
-	inline cord_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
-	inline f_cord_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
-	inline f_cord_t length() const noexcept { return sqrt(lengthSquared()); }
+	inline coordinate_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
+	inline f_coordinate_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
+	inline f_coordinate_t length() const noexcept { return sqrt(lengthSquared()); }
 
 	inline Vector operator+(Vector other) const noexcept { return Vector(dx + other.dx, dy + other.dy); }
 	inline Vector& operator+=(Vector other) noexcept {
@@ -50,15 +50,15 @@ struct Vector {
 		dy -= other.dy;
 		return *this;
 	}
-	inline cord_t operator*(Vector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
-	inline Vector operator*(cord_t scalar) const noexcept { return Vector(dx * scalar, dy * scalar); }
-	inline Vector& operator*=(cord_t scalar) noexcept {
+	inline coordinate_t operator*(Vector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
+	inline Vector operator*(coordinate_t scalar) const noexcept { return Vector(dx * scalar, dy * scalar); }
+	inline Vector& operator*=(coordinate_t scalar) noexcept {
 		dx *= scalar;
 		dy *= scalar;
 		return *this;
 	}
-	inline Vector operator/(cord_t scalar) const noexcept { return Vector(dx / scalar, dy / scalar); }
-	inline Vector& operator/=(cord_t scalar) noexcept {
+	inline Vector operator/(coordinate_t scalar) const noexcept { return Vector(dx / scalar, dy / scalar); }
+	inline Vector& operator/=(coordinate_t scalar) noexcept {
 		dx /= scalar;
 		dy /= scalar;
 		return *this;
@@ -66,7 +66,7 @@ struct Vector {
 
 	inline Iterator iter() const noexcept;
 
-	cord_t dx, dy;
+	coordinate_t dx, dy;
 };
 
 class Vector::Iterator {
@@ -126,8 +126,8 @@ Vector::Iterator Vector::iter() const noexcept { return Iterator(*this); }
 template <>
 struct std::hash<Vector> {
 	inline std::size_t operator()(Vector vec) const noexcept {
-		std::size_t x = std::hash<cord_t>{}(vec.dx);
-		std::size_t y = std::hash<cord_t>{}(vec.dy);
+		std::size_t x = std::hash<coordinate_t>{}(vec.dx);
+		std::size_t y = std::hash<coordinate_t>{}(vec.dy);
 		return (std::size_t)x ^ ((std::size_t)y << 32);
 	}
 };
@@ -141,9 +141,9 @@ struct std::formatter<Vector> : std::formatter<std::string> {
 
 struct FVector {
 	inline FVector() noexcept : dx(0.0f), dy(0.0f) { }
-	inline FVector(f_cord_t dx, f_cord_t dy) noexcept : dx(dx), dy(dy) { }
+	inline FVector(f_coordinate_t dx, f_coordinate_t dy) noexcept : dx(dx), dy(dy) { }
 	// allows the easy creation of fvectors that are all the same value
-	inline FVector(f_cord_t d) noexcept : dx(d), dy(d) { }
+	inline FVector(f_coordinate_t d) noexcept : dx(d), dy(d) { }
 	inline Vector snap() const noexcept;
 
 	inline std::string toString() const noexcept { return "<" + std::to_string(dx) + ", " + std::to_string(dy) + ">"; }
@@ -151,9 +151,9 @@ struct FVector {
 	inline bool operator==(FVector other) const noexcept { return approx_equals(dx, other.dx) && approx_equals(dy, other.dy); }
 	inline bool operator!=(FVector other) const noexcept { return !operator==(other); }
 
-	inline f_cord_t manhattenlength() const noexcept { return fabs(dx) + fabs(dy); }
-	inline f_cord_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
-	inline f_cord_t length() const noexcept { return sqrt(FastPower<2>(dx) + FastPower<2>(dy)); }
+	inline f_coordinate_t manhattenlength() const noexcept { return fabs(dx) + fabs(dy); }
+	inline f_coordinate_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
+	inline f_coordinate_t length() const noexcept { return sqrt(FastPower<2>(dx) + FastPower<2>(dy)); }
 
 	inline FVector operator+(FVector other) const noexcept { return FVector(dx + other.dx, dy + other.dy); }
 	inline FVector& operator+=(FVector other) noexcept {
@@ -167,23 +167,23 @@ struct FVector {
 		dy -= other.dy;
 		return *this;
 	}
-	inline FVector operator*(f_cord_t scalar) const noexcept { return FVector(dx * scalar, dy * scalar); }
-	inline FVector& operator*=(f_cord_t scalar) noexcept {
+	inline FVector operator*(f_coordinate_t scalar) const noexcept { return FVector(dx * scalar, dy * scalar); }
+	inline FVector& operator*=(f_coordinate_t scalar) noexcept {
 		dx *= scalar, dy *= scalar;
 		return *this;
 	}
-	inline f_cord_t operator*(FVector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
-	inline FVector operator/(f_cord_t scalar) noexcept { return FVector(dx / scalar, dy / scalar); }
-	inline FVector& operator/=(f_cord_t scalar) noexcept {
+	inline f_coordinate_t operator*(FVector vector) const noexcept { return dx * vector.dx + dy * vector.dy; }
+	inline FVector operator/(f_coordinate_t scalar) noexcept { return FVector(dx / scalar, dy / scalar); }
+	inline FVector& operator/=(f_coordinate_t scalar) noexcept {
 		dx /= scalar;
 		dy /= scalar;
 		return *this;
 	}
 
-	inline f_cord_t lengthAlongProjectToVec(FVector vector) const noexcept { return (*this * vector) / vector.length(); }
+	inline f_coordinate_t lengthAlongProjectToVec(FVector vector) const noexcept { return (*this * vector) / vector.length(); }
 	inline FVector projectToVec(FVector vector) const noexcept { return vector * (*this * vector) / vector.lengthSquared(); }
 
-	f_cord_t dx, dy;
+	f_coordinate_t dx, dy;
 };
 
 template <>
@@ -197,9 +197,9 @@ struct Size {
 	class Iterator;
 
 	inline Size() noexcept : w(0), h(0) { }
-	inline Size(cord_t w, cord_t h) noexcept : w(w), h(h) { }
+	inline Size(coordinate_t w, coordinate_t h) noexcept : w(w), h(h) { }
 	// makes the size for hypercube with some edges length
-	inline Size(cord_t sideLength) noexcept : w(sideLength), h(sideLength) { }
+	inline Size(coordinate_t sideLength) noexcept : w(sideLength), h(sideLength) { }
 	inline FSize free() const noexcept;
 
 	inline void extentToFit(Vector vector) noexcept {
@@ -214,14 +214,14 @@ struct Size {
 	// w != 0 and h != 0
 	inline bool isValid() const noexcept { return w > 0 && h > 0; }
 
-	inline cord_t area() const noexcept { return w * h; }
-	inline cord_t perimeter() const noexcept { return w * 2 + h * 2; }
+	inline coordinate_t area() const noexcept { return w * h; }
+	inline coordinate_t perimeter() const noexcept { return w * 2 + h * 2; }
 
 	inline Iterator iter() const noexcept;
 
 	inline Vector getLargestVectorInArea() { return Vector(w - 1, h - 1); }
 
-	cord_t w, h;
+	coordinate_t w, h;
 };
 
 template <>
@@ -296,7 +296,7 @@ struct FSize {
 	// class Iterator;
 
 	inline FSize() noexcept : w(0), h(0) { }
-	inline FSize(f_cord_t w, f_cord_t h) noexcept : w(w), h(h) { }
+	inline FSize(f_coordinate_t w, f_coordinate_t h) noexcept : w(w), h(h) { }
 	inline Size snap() const noexcept;
 
 	inline void extentToFit(FVector vector) noexcept {
@@ -311,12 +311,12 @@ struct FSize {
 	// w != 0 and h != 0
 	inline bool isValid() const noexcept { return !(w && h); }
 
-	inline f_cord_t area() const noexcept { return w * h; }
-	inline f_cord_t perimeter() const noexcept { return w * 2 + h * 2; }
+	inline f_coordinate_t area() const noexcept { return w * h; }
+	inline f_coordinate_t perimeter() const noexcept { return w * 2 + h * 2; }
 
 	// inline Iterator iter() const noexcept;
 
-	f_cord_t w, h;
+	f_coordinate_t w, h;
 };
 
 template <>
@@ -330,7 +330,7 @@ struct Position {
 	class Iterator;
 
 	inline Position() noexcept : x(0), y(0) { }
-	inline Position(cord_t x, cord_t y) noexcept : x(x), y(y) { }
+	inline Position(coordinate_t x, coordinate_t y) noexcept : x(x), y(y) { }
 	inline FPosition free() const noexcept;
 
 	inline std::string toString() const noexcept { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
@@ -339,12 +339,12 @@ struct Position {
 	inline bool operator!=(Position position) const noexcept { return !operator==(position); }
 	inline bool withinArea(Position small, Position large) const noexcept { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 
-	inline cord_t manhattenDistanceTo(Position position) const noexcept { return Abs(x - position.x) + Abs(y - position.y); }
-	inline cord_t manhattenDistanceToOrigin() const noexcept { return Abs(x) + Abs(y); }
-	inline cord_t distanceToSquared(Position position) const noexcept { return FastPower<2>(x - position.x) + FastPower<2>(y - position.y); }
-	inline cord_t distanceToOriginSquared() const noexcept { return FastPower<2>(x) + FastPower<2>(y); }
-	inline f_cord_t distanceTo(Position position) const noexcept { return sqrt(FastPower<2>(x - position.x) + FastPower<2>(y - position.y)); }
-	inline f_cord_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
+	inline coordinate_t manhattenDistanceTo(Position position) const noexcept { return Abs(x - position.x) + Abs(y - position.y); }
+	inline coordinate_t manhattenDistanceToOrigin() const noexcept { return Abs(x) + Abs(y); }
+	inline coordinate_t distanceToSquared(Position position) const noexcept { return FastPower<2>(x - position.x) + FastPower<2>(y - position.y); }
+	inline coordinate_t distanceToOriginSquared() const noexcept { return FastPower<2>(x) + FastPower<2>(y); }
+	inline f_coordinate_t distanceTo(Position position) const noexcept { return sqrt(FastPower<2>(x - position.x) + FastPower<2>(y - position.y)); }
+	inline f_coordinate_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
 
 	inline Position operator+(Vector vector) const noexcept { return Position(x + vector.dx, y + vector.dy); }
 	inline Position& operator+=(Vector vector) noexcept {
@@ -362,7 +362,7 @@ struct Position {
 
 	inline Iterator iterTo(Position other) const noexcept;
 
-	cord_t x, y;
+	coordinate_t x, y;
 };
 
 class Position::Iterator {
@@ -440,8 +440,8 @@ inline bool areaWithinArea(Position area1Small, Position area1Large, Position ar
 template <>
 struct std::hash<Position> {
 	inline std::size_t operator()(Position pos) const noexcept {
-		std::size_t x = std::hash<cord_t>{}(pos.x);
-		std::size_t y = std::hash<cord_t>{}(pos.y);
+		std::size_t x = std::hash<coordinate_t>{}(pos.x);
+		std::size_t y = std::hash<coordinate_t>{}(pos.y);
 		return y + 0x9e3779b9 + (x << 6) + (x >> 2);
 	}
 };
@@ -465,7 +465,7 @@ struct std::formatter<Position> : std::formatter<std::string> {
 struct FPosition {
 	static FPosition getInvalid() { return FPosition(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()); }
 	inline FPosition() noexcept : x(0.0f), y(0.0f) { }
-	inline FPosition(f_cord_t x, f_cord_t y) noexcept : x(x), y(y) { }
+	inline FPosition(f_coordinate_t x, f_coordinate_t y) noexcept : x(x), y(y) { }
 	inline Position snap() const noexcept;
 
 	inline std::string toString() const noexcept { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
@@ -478,12 +478,12 @@ struct FPosition {
 	inline bool operator!=(FPosition position) const noexcept { return !operator==(position); }
 	inline bool withinArea(FPosition small, FPosition large) const noexcept { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 
-	inline f_cord_t manhattenDistanceTo(FPosition other) const noexcept { return fabs(x - other.x) + fabs(y - other.y); }
-	inline f_cord_t manhattenDistanceToOrigin() const noexcept { return fabs(x) + fabs(y); }
-	inline f_cord_t distanceToSquared(FPosition other) const noexcept { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
-	inline f_cord_t distanceToOriginSquared() const noexcept { return FastPower<2>(x) + FastPower<2>(y); }
-	inline f_cord_t distanceTo(FPosition other) const noexcept { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }
-	inline f_cord_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
+	inline f_coordinate_t manhattenDistanceTo(FPosition other) const noexcept { return fabs(x - other.x) + fabs(y - other.y); }
+	inline f_coordinate_t manhattenDistanceToOrigin() const noexcept { return fabs(x) + fabs(y); }
+	inline f_coordinate_t distanceToSquared(FPosition other) const noexcept { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
+	inline f_coordinate_t distanceToOriginSquared() const noexcept { return FastPower<2>(x) + FastPower<2>(y); }
+	inline f_coordinate_t distanceTo(FPosition other) const noexcept { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }
+	inline f_coordinate_t distanceToOrigin() const noexcept { return sqrt(FastPower<2>(x) + FastPower<2>(y)); }
 
 	inline FPosition operator+(FVector vector) const noexcept { return FPosition(x + vector.dx, y + vector.dy); }
 	inline FPosition& operator+=(FVector vector) noexcept {
@@ -498,11 +498,11 @@ struct FPosition {
 		y -= vector.dy;
 		return *this;
 	}
-	inline FPosition operator*(f_cord_t scalar) const noexcept { return FPosition(x * scalar, y * scalar); }
-	inline f_cord_t lengthAlongProjectToVec(FPosition orginOfVec, FVector vector) const noexcept { return (*this - orginOfVec).lengthAlongProjectToVec(vector); }
+	inline FPosition operator*(f_coordinate_t scalar) const noexcept { return FPosition(x * scalar, y * scalar); }
+	inline f_coordinate_t lengthAlongProjectToVec(FPosition orginOfVec, FVector vector) const noexcept { return (*this - orginOfVec).lengthAlongProjectToVec(vector); }
 	inline FPosition projectToVec(FPosition orginOfVec, FVector vector) const noexcept { return orginOfVec + (*this - orginOfVec).projectToVec(vector); }
 
-	f_cord_t x, y;
+	f_coordinate_t x, y;
 };
 
 inline bool areaWithinArea(FPosition area1Small, FPosition area1Large, FPosition area2Small, FPosition area2Large) noexcept {

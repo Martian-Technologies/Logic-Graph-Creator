@@ -9,7 +9,7 @@
 #include "logging/logging.h"
 
 const int CHUNK_SIZE = 64;
-cord_t getChunk(cord_t in) {
+coordinate_t getChunk(coordinate_t in) {
 	return std::floor((float)in / (float)CHUNK_SIZE) * (int)CHUNK_SIZE;
 }
 Position getChunk(Position in) {
@@ -348,8 +348,8 @@ std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocation
 
 	// go through each chunk in view and collect it if it exists and has an allocation
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> seen;
-	for (cord_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
-		for (cord_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
+	for (coordinate_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
+		for (coordinate_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
 			auto chunk = chunks.find({ chunkX, chunkY });
 			if (chunk != chunks.end()) {
 				auto allocation = chunk->second.getAllocation();

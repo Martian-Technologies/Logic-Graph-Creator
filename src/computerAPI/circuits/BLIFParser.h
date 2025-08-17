@@ -19,8 +19,8 @@ private:
 		std::unordered_map<std::string, ConnectionEnd> nameToConnectionEnd;
 		std::vector<std::pair<std::string, ConnectionEnd>> connectionsToMake;
 		connection_end_id_t endId;
-		cord_t inPortY;
-		cord_t outPortY;
+		coordinate_t inPortY;
+		coordinate_t outPortY;
 		block_id_t blockIdCounter;
 		BlockType type = BlockType::NONE;
 	};

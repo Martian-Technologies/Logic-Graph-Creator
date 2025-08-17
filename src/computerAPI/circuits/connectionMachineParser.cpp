@@ -137,7 +137,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 				inputFile >> cToken;
 				connection_end_id_t endId;
 				int blockId;
-				cord_t vecX, vecY;
+				coordinate_t vecX, vecY;
 				std::string portName = "";
 				inputFile >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken >> std::quoted(portName) >> cToken;
 				currentParsedCircuit->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, 0, portName);

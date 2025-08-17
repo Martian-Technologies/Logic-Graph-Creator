@@ -150,8 +150,8 @@ void Circuit::tryInsertOverArea(Position cellA, Position cellB, Orientation tran
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	for (cord_t x = cellA.x; x <= cellB.x; x++) {
-		for (cord_t y = cellA.y; y <= cellB.y; y++) {
+	for (coordinate_t x = cellA.x; x <= cellB.x; x++) {
+		for (coordinate_t y = cellA.y; y <= cellB.y; y++) {
 			blockContainer.tryInsertBlock(Position(x, y), transformAmount, blockType, difference.get());
 		}
 	}
@@ -166,8 +166,8 @@ void Circuit::tryRemoveOverArea(Position cellA, Position cellB) {
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	for (cord_t x = cellA.x; x <= cellB.x; x++) {
-		for (cord_t y = cellA.y; y <= cellB.y; y++) {
+	for (coordinate_t x = cellA.x; x <= cellB.x; x++) {
+		for (coordinate_t y = cellA.y; y <= cellB.y; y++) {
 			blockContainer.tryRemoveBlock(Position(x, y), difference.get());
 		}
 	}
