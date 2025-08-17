@@ -261,7 +261,8 @@ bool BlockContainer::tryRemoveConnection(ConnectionEnd outputConnectionEnd, Conn
 	Block* output = getBlock_(outputConnectionEnd.getBlockId());
 	if (!output) return false;
 	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionEnd.getConnectionId(), outputConnectionEnd)) {
-		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd));
+		bool secondSuc = output->getConnectionContainer().tryRemoveConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd);
+		assert(secondSuc);
 		difference->addRemovedConnection(
 			output->getPosition(), output->getConnectionPosition(outputConnectionEnd.getConnectionId()).value(),
 			input->getPosition(), input->getConnectionPosition(inputConnectionEnd.getConnectionId()).value()
@@ -273,10 +274,11 @@ bool BlockContainer::tryRemoveConnection(ConnectionEnd outputConnectionEnd, Conn
 			outputConnectionEnd.getConnectionId(),
 			ConnectionEnd(outputConnectionEnd.getBlockId(), inputConnectionEnd.getConnectionId())
 		)) {
-			assert(output->getConnectionContainer().tryRemoveConnection(
+			bool secondSuc = output->getConnectionContainer().tryRemoveConnection(
 				inputConnectionEnd.getConnectionId(),
 				ConnectionEnd(inputConnectionEnd.getBlockId(), outputConnectionEnd.getConnectionId())
-			));
+			);
+			assert(secondSuc);
 			difference->addRemovedConnection(
 				output->getPosition(), output->getConnectionPosition(inputConnectionEnd.getConnectionId()).value(),
 				input->getPosition(), input->getConnectionPosition(outputConnectionEnd.getConnectionId()).value()
@@ -297,13 +299,14 @@ bool BlockContainer::tryRemoveConnection(Position outputPosition, Position input
 	std::optional<connection_end_id_t> outputConnectionId = output->getOutputConnectionId(outputPosition);
 	if (!outputConnectionId) return false;
 	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(output->id(), outputConnectionId.value()))) {
-		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value())));
+		output->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value()));
 		difference->addRemovedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}
 	if (input->type() == BlockType::JUNCTION && output->type() == BlockType::JUNCTION) {
 		if (input->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(output->id(), inputConnectionId.value()))) {
-			assert(output->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(input->id(), outputConnectionId.value())));
+			bool secondSuc = output->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(input->id(), outputConnectionId.value()));
+			assert(secondSuc);
 			difference->addRemovedConnection(input->getPosition(), inputPosition, output->getPosition(), outputPosition);
 			return true;
 		}
@@ -328,7 +331,8 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 		for (auto& connectionEnd : connectionsCopy) {
 			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), endId))) {
-				assert(block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd));
+				bool secondSuc = block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd);
+				assert(secondSuc);
 				std::optional otherPosition = otherBlock->getConnectionPosition(connectionEnd.getConnectionId());
 				if (!otherPosition) continue;
 				if (isInput) difference->addRemovedConnection(otherBlock->getPosition(), otherPosition.value(), block.getPosition(), connectionPosition.value());
