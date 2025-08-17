@@ -13,7 +13,10 @@ void LogicToucher::activate() {
 
 
 bool LogicToucher::press(const Event* event) {
-	if (!circuitView || !circuit || !circuitView->getEvaluatorStateInterface().isSetup()) return false;
+	if (!circuitView || !circuit) return false;
+	Evaluator* evaluator = circuitView->getEvaluator();
+	if (!evaluator) return false;
+
 	const PositionEvent* positionEvent = event->cast<PositionEvent>();
 	if (!positionEvent) return false;
 
@@ -25,7 +28,7 @@ bool LogicToucher::press(const Event* event) {
 			bool stateToSet = true;
 			Address address = circuitView->getAddress();
 			address.addBlockId(clickPosition);
-			circuitView->getEvaluatorStateInterface().setState(address, !circuitView->getEvaluatorStateInterface().getBoolState(address));
+			evaluator->setState(address, !evaluator->getBoolState(address));
 		}
 		clicked = true;
 		return true;
@@ -33,11 +36,14 @@ bool LogicToucher::press(const Event* event) {
 }
 
 bool LogicToucher::unpress(const Event* event) {
-	if (!circuitView || !circuit || !circuitView->getEvaluatorStateInterface().isSetup()) return false;
+	if (!circuitView || !circuit) return false;
+	Evaluator* evaluator = circuitView->getEvaluator();
+	if (!evaluator) return false;
+
 	if (clicked) {
 		const Block* block = circuit->getBlockContainer()->getBlock(clickPosition);
 		if (block && block->type() == BlockType::BUTTON) {
-			circuitView->getEvaluatorStateInterface().setState(Address(clickPosition), false);
+			evaluator->setState(Address(clickPosition), false);
 		}
 		clicked = false;
 		return true;
@@ -46,16 +52,18 @@ bool LogicToucher::unpress(const Event* event) {
 }
 
 bool LogicToucher::pointerMove(const Event* event) {
-	if (!circuitView || !circuit || !circuitView->getEvaluatorStateInterface().isSetup()) return false;
+	if (!circuitView || !circuit) return false;
+	Evaluator* evaluator = circuitView->getEvaluator();
+	if (!evaluator) return false;
 
 	if (clicked && lastPointerPosition != clickPosition) {
 		const Block* block = circuit->getBlockContainer()->getBlock(clickPosition);
 		if (block && block->type() == BlockType::BUTTON) {
-			circuitView->getEvaluatorStateInterface().setState(Address(clickPosition), false);
+			evaluator->setState(Address(clickPosition), false);
 		}
 		clickPosition = lastPointerPosition;
 		if (circuit->getBlockContainer()->checkCollision(clickPosition)) {
-			circuitView->getEvaluatorStateInterface().setState(Address(clickPosition), !circuitView->getEvaluatorStateInterface().getBoolState(Address(clickPosition)));
+			evaluator->setState(Address(clickPosition), !evaluator->getBoolState(Address(clickPosition)));
 		}
 	}
 	return false;

@@ -16,7 +16,6 @@ void CircuitView::setBackend(Backend* backend) {
 		this->circuit = nullptr;
 		renderer->setEvaluator(nullptr);
 		renderer->setCircuit(nullptr);
-		evaluatorStateInterface = EvaluatorStateInterface();
 		toolManager.setCircuit(nullptr);
 	} else if (this->backend != backend) {
 		this->backend = backend;
@@ -24,7 +23,6 @@ void CircuitView::setBackend(Backend* backend) {
 		this->circuit = nullptr;
 		renderer->setEvaluator(nullptr);
 		renderer->setCircuit(nullptr);
-		evaluatorStateInterface = EvaluatorStateInterface();
 		toolManager.setCircuit(nullptr);
 	}
 }
@@ -39,7 +37,6 @@ void CircuitView::setEvaluator(Backend* backend, evaluator_id_t evaluatorId, con
 			this->circuit = nullptr;
 			renderer->setEvaluator(nullptr);
 			renderer->setCircuit(nullptr);
-			evaluatorStateInterface = EvaluatorStateInterface();
 			toolManager.setCircuit(nullptr);
 		}
 	} else {
@@ -59,7 +56,6 @@ void CircuitView::setEvaluator(Backend* backend, evaluator_id_t evaluatorId, con
 			renderer->setAddress(address);
 			renderer->setCircuit(circuit.get());
 
-			evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 			toolManager.setCircuit(circuit.get());
 		}
 	}
@@ -75,7 +71,6 @@ void CircuitView::setEvaluator(Backend* backend, std::shared_ptr<Evaluator> eval
 			this->circuit = nullptr;
 			renderer->setEvaluator(nullptr);
 			renderer->setCircuit(nullptr);
-			evaluatorStateInterface = EvaluatorStateInterface();
 			toolManager.setCircuit(nullptr);
 		}
 	} else if (backend->getEvaluatorManager().getEvaluator(evaluator->getEvaluatorId()) != evaluator) {
@@ -94,7 +89,6 @@ void CircuitView::setEvaluator(Backend* backend, std::shared_ptr<Evaluator> eval
 		renderer->setAddress(address);
 		renderer->setCircuit(circuit.get());
 		
-		evaluatorStateInterface = EvaluatorStateInterface(evaluator.get());
 		toolManager.setCircuit(circuit.get());
 	}
 }
@@ -109,7 +103,6 @@ void CircuitView::setCircuit(Backend* backend, circuit_id_t circuitId) {
 			this->circuit = nullptr;
 			renderer->setEvaluator(nullptr);
 			renderer->setCircuit(nullptr);
-			evaluatorStateInterface = EvaluatorStateInterface();
 			toolManager.setCircuit(nullptr);
 		}
 	} else {
@@ -124,7 +117,6 @@ void CircuitView::setCircuit(Backend* backend, circuit_id_t circuitId) {
 			this->circuit = circuit;
 			renderer->setEvaluator(nullptr);
 			renderer->setCircuit(circuit.get());
-			evaluatorStateInterface = EvaluatorStateInterface();
 			toolManager.setCircuit(circuit.get());
 		}
 	}
@@ -140,7 +132,6 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 			this->circuit = nullptr;
 			renderer->setEvaluator(nullptr);
 			renderer->setCircuit(nullptr);
-			evaluatorStateInterface = EvaluatorStateInterface();
 			toolManager.setCircuit(nullptr);
 		}
 	} else if (backend->getCircuit(circuit->getCircuitId()) != circuit) {
@@ -153,7 +144,6 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 		this->circuit = circuit;
 		renderer->setEvaluator(nullptr);
 		renderer->setCircuit(circuit.get());
-		evaluatorStateInterface = EvaluatorStateInterface();
 		toolManager.setCircuit(circuit.get());
 	}
 }

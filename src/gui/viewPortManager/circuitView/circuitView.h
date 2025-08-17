@@ -1,7 +1,6 @@
 #ifndef circuitView_h
 #define circuitView_h
 
-#include "backend/evaluator/evaluatorStateInterface.h"
 #include "events/eventRegister.h"
 #include "tools/toolManager.h"
 #include "viewManager/viewManager.h"
@@ -22,9 +21,6 @@ public:
 
 	inline Evaluator* getEvaluator() { return evaluator.get(); }
 	inline const Evaluator* getEvaluator() const { return evaluator.get(); }
-
-	inline EvaluatorStateInterface& getEvaluatorStateInterface() { return evaluatorStateInterface; }
-	inline const EvaluatorStateInterface& getEvaluatorStateInterface() const { return evaluatorStateInterface; }
 
 	inline EventRegister& getEventRegister() { return eventRegister; }
 	inline const EventRegister& getEventRegister() const { return eventRegister; }
@@ -61,7 +57,6 @@ private:
 
 	DataUpdateEventManager* dataUpdateEventManager = nullptr;
 
-	EvaluatorStateInterface evaluatorStateInterface;
 	EventRegister eventRegister;
 	ViewManager viewManager;
 	ToolManager toolManager;
