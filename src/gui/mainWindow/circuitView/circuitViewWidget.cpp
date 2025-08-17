@@ -222,7 +222,7 @@ void CircuitViewWidget::render() {
 	Evaluator* evaluator = circuitView->getEvaluator();
 	std::string tpsText = "Real tps: N/A";
 	if (evaluator) {
-		tpsText = "Real tps: " + std::format("{:.2f}", (double)(evaluator->getRealTickrate()));
+		tpsText = "Real tps: " + std::format("{:.2f}", evaluator->getRealTickrate());
 	}
 	Rml::Element* realTpsDisplay = document->GetElementById("real-tps-display");
 	if (realTpsDisplay) {
