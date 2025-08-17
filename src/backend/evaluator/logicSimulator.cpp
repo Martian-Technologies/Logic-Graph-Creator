@@ -32,7 +32,7 @@ LogicSimulator::~LogicSimulator() {
 
 void LogicSimulator::clearState() { }
 
-float LogicSimulator::getAverageTickrate() const {
+double LogicSimulator::getAverageTickrate() const {
 	return averageTickrate.load(std::memory_order_acquire);
 }
 
@@ -74,11 +74,11 @@ void LogicSimulator::simulationLoop() {
 					// Calculate current tickrate in Hz (ticks per second)
 					double currentTickrate = 1.0e9 / static_cast<double>(deltaTime.count());
 					double dtSeconds = std::chrono::duration<double>(deltaTime).count();
-					float alpha = 1.0 - std::exp(-dtSeconds * std::log(2.0) / tickrateHalflife);
+					double alpha = 1.0 - std::exp(-dtSeconds * std::log(2.0) / tickrateHalflife);
 
 					// Apply EMA: EMA_new = alpha * current + (1 - alpha) * EMA_old
-					float currentEMA = averageTickrate.load(std::memory_order_acquire);
-					float newEMA = alpha * static_cast<float>(currentTickrate) + (1.0f - alpha) * currentEMA;
+					double currentEMA = averageTickrate.load(std::memory_order_acquire);
+					double newEMA = alpha * currentTickrate + (1.0 - alpha) * currentEMA;
 					averageTickrate.store(newEMA, std::memory_order_release);
 				}
 			} else {

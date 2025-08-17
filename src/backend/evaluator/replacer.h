@@ -249,7 +249,7 @@ public:
 		simulatorOptimizer.removeConnection(pauseGuard, connection);
 	}
 
-	inline float getAverageTickrate() const {
+	inline double getAverageTickrate() const {
 		return simulatorOptimizer.getAverageTickrate();
 	}
 

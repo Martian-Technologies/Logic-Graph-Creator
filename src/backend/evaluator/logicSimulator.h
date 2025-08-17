@@ -29,7 +29,7 @@ public:
 		std::vector<simulator_id_t>& dirtySimulatorIds);
 	~LogicSimulator();
 	void clearState();
-	float getAverageTickrate() const;
+	double getAverageTickrate() const;
 	void setState(simulator_id_t id, logic_state_t state);
 	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
 
@@ -117,8 +117,9 @@ private:
 	void addOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
 	void removeOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
 
-	std::atomic<float> averageTickrate { 0.0 };
-	float tickrateHalflife { 0.25 };
+	// Use double precision internally to avoid float rounding sticking near 2^23 (~8,388,608)
+	std::atomic<double> averageTickrate { 0.0 };
+	double tickrateHalflife { 0.25 };
 
 	std::vector<simulator_id_t>& dirtySimulatorIds;
 };

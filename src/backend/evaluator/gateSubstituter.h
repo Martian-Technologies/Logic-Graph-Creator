@@ -191,7 +191,7 @@ public:
 		}
 	}
 
-	inline float getAverageTickrate() const {
+	inline double getAverageTickrate() const {
 		return replacer.getAverageTickrate();
 	}
 
