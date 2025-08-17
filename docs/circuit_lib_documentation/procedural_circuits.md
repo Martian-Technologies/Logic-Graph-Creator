@@ -59,7 +59,7 @@ Available imports (from `functions.h`)
 - Types
   - `BlockType getPrimitiveType(const char* primitiveName)`: primitives like "AND", "XOR", "SWITCH", "LIGHT", etc.
   - `BlockType getNonPrimitiveType(const char* UUID)`: get an existing non-primitive type by UUID.
-  - `BlockType getProceduralCircuitType(const char* UUID, const char* parameters)`: get a procedural circuit type (supports composition); parameters use the same string-encoding as defaults, e.g. `("size": 2)`.
+  - `BlockType getProceduralCircuitType(const char* UUID, const char* parameters)`: get a procedural circuit type; parameters use the same string-encoding as defaults, e.g. `("size": 2)`.
 - Building blocks and wiring
   - `block_id_t createBlock(BlockType type)`
   - `block_id_t createBlockAtPosition(cord_t x, cord_t y, Rotation r, BlockType type)`
@@ -68,7 +68,7 @@ Available imports (from `functions.h`)
   - `void addConnectionOutput(cord_t portX, cord_t portY, block_id_t internalBlock, connection_end_id_t internalPort)`
   - `void setSize(cord_t width, cord_t height)`
 - File composition
-  - `unsigned int importFile(const char* filePath)`: load other modules (e.g., a sibling `.wasm`) before calling `getProceduralCircuitType`. Used to specify dependencies between circuits.
+  - `unsigned int importFile(const char* filePath)`: load other modules (e.g., a sibling `.wasm`) before calling `getProceduralCircuitType` or `getNonPrimitiveType`. Used to specify dependencies between circuits.
 
 Generation contract
 
