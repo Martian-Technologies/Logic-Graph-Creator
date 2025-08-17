@@ -151,7 +151,7 @@ struct FVector {
 	inline bool operator==(FVector other) const noexcept { return approx_equals(dx, other.dx) && approx_equals(dy, other.dy); }
 	inline bool operator!=(FVector other) const noexcept { return !operator==(other); }
 
-	inline f_coordinate_t manhattenlength() const noexcept { return fabs(dx) + fabs(dy); }
+	inline f_coordinate_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
 	inline f_coordinate_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
 	inline f_coordinate_t length() const noexcept { return sqrt(FastPower<2>(dx) + FastPower<2>(dy)); }
 
@@ -478,8 +478,8 @@ struct FPosition {
 	inline bool operator!=(FPosition position) const noexcept { return !operator==(position); }
 	inline bool withinArea(FPosition small, FPosition large) const noexcept { return small.x <= x && small.y <= y && large.x >= x && large.y >= y; }
 
-	inline f_coordinate_t manhattenDistanceTo(FPosition other) const noexcept { return fabs(x - other.x) + fabs(y - other.y); }
-	inline f_coordinate_t manhattenDistanceToOrigin() const noexcept { return fabs(x) + fabs(y); }
+	inline f_coordinate_t manhattenDistanceTo(FPosition other) const noexcept { return Abs(x - other.x) + Abs(y - other.y); }
+	inline f_coordinate_t manhattenDistanceToOrigin() const noexcept { return Abs(x) + Abs(y); }
 	inline f_coordinate_t distanceToSquared(FPosition other) const noexcept { return FastPower<2>(x - other.x) + FastPower<2>(y - other.y); }
 	inline f_coordinate_t distanceToOriginSquared() const noexcept { return FastPower<2>(x) + FastPower<2>(y); }
 	inline f_coordinate_t distanceTo(FPosition other) const noexcept { return sqrt(FastPower<2>(x - other.x) + FastPower<2>(y - other.y)); }

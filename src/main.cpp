@@ -8,6 +8,7 @@
 #include "computerAPI/directoryManager.h"
 
 int main(int argc, char* argv[]) {
+	logInfo(nexttoward(1000000000.0, std::numeric_limits<double>::max()));
 	try {
 		// Set up directory manager
 		DirectoryManager::findDirectories();
