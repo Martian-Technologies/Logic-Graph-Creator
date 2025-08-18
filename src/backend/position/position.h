@@ -34,7 +34,7 @@ struct Vector {
 	inline bool hasZeros() const noexcept { return !(dx && dy); }
 	inline bool widthInSize(Size size) const noexcept;
 
-	inline coordinate_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
+	inline coordinate_t manhattenLength() const noexcept { return Abs(dx) + Abs(dy); }
 	inline f_coordinate_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
 	inline f_coordinate_t length() const noexcept { return sqrt(lengthSquared()); }
 
@@ -151,7 +151,7 @@ struct FVector {
 	inline bool operator==(FVector other) const noexcept { return approx_equals(dx, other.dx) && approx_equals(dy, other.dy); }
 	inline bool operator!=(FVector other) const noexcept { return !operator==(other); }
 
-	inline f_coordinate_t manhattenlength() const noexcept { return Abs(dx) + Abs(dy); }
+	inline f_coordinate_t manhattenLength() const noexcept { return Abs(dx) + Abs(dy); }
 	inline f_coordinate_t lengthSquared() const noexcept { return FastPower<2>(dx) + FastPower<2>(dy); }
 	inline f_coordinate_t length() const noexcept { return sqrt(FastPower<2>(dx) + FastPower<2>(dy)); }
 

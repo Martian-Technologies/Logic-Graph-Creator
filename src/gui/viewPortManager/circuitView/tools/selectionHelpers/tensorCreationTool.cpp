@@ -30,7 +30,7 @@ bool TensorCreationTool::click(const Event* event) {
 		tensorStage = 0;
 	} else if (tensorStage % 2 == 0) { // step
 		step = lastPointerPosition - originPosition;
-		if (step.manhattenlength() == 0) {
+		if (step.manhattenLength() == 0) {
 			selection = std::make_shared<ProjectionSelection>(selection, Vector(), 1);
 			tensorStage += 2;
 		} else if (followingSelection) {
@@ -137,7 +137,7 @@ void TensorCreationTool::updateElements() {
 		);
 		else setStatusBar("Left click to specify the " + formatOrdinal(tensorStage / 2 + 1) + " dimension vector of the tensor. Press E to complete tensor.");
 		step = lastPointerPosition - originPosition;
-		if (step.manhattenlength() == 0) {
+		if (step.manhattenLength() == 0) {
 			displaySelection = std::make_shared<ProjectionSelection>(selection, Vector(), 1);
 		} else if (followingSelection) {
 			dimensional_selection_size_t size = selectionToFollow[selectionToFollow.size() - tensorStage / 2 - 1];

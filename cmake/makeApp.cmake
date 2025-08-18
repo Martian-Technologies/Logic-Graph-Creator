@@ -17,42 +17,6 @@ elseif (WIN32) # Windows
 	list(APPEND PROJECT_SOURCES ${ICON_PATH})
 endif()
 
-# Add executable
-# if (RUN_TRACY_PROFILER)
-# 	set(EXTERNAL_LINKS
-# 		freetype
-# 		RmlUi::RmlUi
-# 		RmlUi::Debugger
-# 		SDL3::SDL3
-# 		volk
-# 		vk-bootstrap::vk-bootstrap
-# 		cpplocate::cpplocate
-# 		VulkanMemoryAllocator
-# 		glm
-# 		json
-# 		parallel_hashmap
-# 		stb_image
-# 		wasmtime
-# 		Tracy::TracyClient
-# 	)
-# else()
-# 	set(EXTERNAL_LINKS
-# 		freetype
-# 		RmlUi::RmlUi
-# 		RmlUi::Debugger
-# 		SDL3::SDL3
-# 		volk
-# 		vk-bootstrap::vk-bootstrap
-# 		cpplocate::cpplocate
-# 		VulkanMemoryAllocator
-# 		glm
-# 		json
-# 		parallel_hashmap
-# 		stb_image
-# 		wasmtime
-# 	)
-# endif()
-
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
@@ -189,7 +153,7 @@ if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
 		)
 
 		set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
-		set(DIRS ${CMAKE_BINARY_DIR})
+		# set(DIRS ${CMAKE_BINARY_DIR})
 		
 		install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION ".")
 
@@ -197,7 +161,7 @@ if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
 
 		install(CODE "
 			include(BundleUtilities)
-			fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\" \"\" \"${DIRS}\")
+			fixup_bundle(\"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\" \"\" \"${CMAKE_BINARY_DIR}\")
 			execute_process(COMMAND codesign --force --deep --sign ${TEAM_ID} \"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\")
 			execute_process(COMMAND codesign --verify --verbose=2 \"${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app\")
 			message(\"To sign the .dgm run\")

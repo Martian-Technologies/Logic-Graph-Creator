@@ -33,8 +33,8 @@ target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DI
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS})
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-target_compile_options(${PROJECT_NAME}_tests PRIVATE --coverage -O0 -g)
-target_link_options(${PROJECT_NAME}_tests PRIVATE --coverage)
+	target_compile_options(${PROJECT_NAME}_tests PRIVATE --coverage -O0 -g)
+	target_link_options(${PROJECT_NAME}_tests PRIVATE --coverage)
 endif()
 
 target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")

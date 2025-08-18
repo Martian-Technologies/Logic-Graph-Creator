@@ -98,7 +98,7 @@ bool ViewManager::pointerMove(const Event* event) {
 
 	if (anchored) {
 		FVector delta = pointerPosition - gridPos;
-		if (delta.manhattenlength() < 0.001f) return false; // no change in pointer pos
+		if (delta.length() < 0.001f) return false; // no change in pointer pos
 		viewCenter += delta;
 		applyLimits();
 		viewChanged();

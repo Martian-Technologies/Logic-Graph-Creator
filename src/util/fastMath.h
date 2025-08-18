@@ -22,7 +22,7 @@ constexpr double Abs(double x) {
 
 constexpr float Abs(float x) {
 	union { float f; uint32_t i; } u = { x };
-	u.i &= 0x7fff;
+	u.i &= 0x7fffffff;
 	return u.f;
 }
 
