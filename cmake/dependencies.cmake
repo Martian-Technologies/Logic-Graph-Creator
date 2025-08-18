@@ -87,6 +87,19 @@ function(add_app_dependencies)
 	)
 	list(APPEND EXTERNAL_LINKS volk)
 
+	# Freetype
+	CPMAddPackage(
+        NAME freetype
+        GITHUB_REPOSITORY libsdl-org/freetype
+        GIT_TAG VER-2-13-3
+        OPTIONS
+			"FT_DISABLE_HARFBUZZ ON"
+            "FT_WITH_HARFBUZZ OFF"
+		SOURCE_DIR "${EXTERNAL_DIR}/freetype"
+    )
+	add_library(Freetype::Freetype ALIAS freetype)
+	list(APPEND EXTERNAL_LINKS freetype)
+
 	# SDL
 	# if (CONNECTION_MACHINE_BUILD_TESTS) # hack to allow SDL to build without window system on linux
 		# set(SDL_UNIX_CONSOLE_BUILD ON)
@@ -113,19 +126,6 @@ function(add_app_dependencies)
 		target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
 	endif()
 	list(APPEND EXTERNAL_LINKS stb_image)
-	
-	# Freetype
-	CPMAddPackage(
-        NAME freetype
-        GITHUB_REPOSITORY libsdl-org/freetype
-        GIT_TAG VER-2-13-3
-        # OPTIONS
-            # "FT_DISABLE_HARFBUZZ ON"
-            # "FT_WITH_HARFBUZZ OFF"
-		SOURCE_DIR "${EXTERNAL_DIR}/freetype"
-    )
-	add_library(Freetype::Freetype ALIAS freetype)
-	list(APPEND EXTERNAL_LINKS freetype)
 
 	# RmlUi
 	CPMAddPackage(
