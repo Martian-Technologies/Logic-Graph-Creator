@@ -1,5 +1,20 @@
 add_main_dependencies()
 
+if(CONNECTION_MACHINE_CODE_COVERAGE)
+	if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+		message(STATUS "Code coverage enabled")
+		add_compile_options(--coverage -O0 -g)
+		add_link_options(--coverage)
+	elseif(MSVC)
+		message(WARNING "Code coverage does nothing with MSVC. Use normal Tests build, and use opencpp_coverage.cmd")
+	else()
+		message(WARNING "Code coverage not working with: \"${CMAKE_CXX_COMPILER_ID}\"")
+	endif()
+else()
+	message(WARNING "Code coverage cant not be used without also enabling tests.")
+endif()
+
+
 # Google Testing
 
 CPMAddPackage(
@@ -35,18 +50,3 @@ target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS})
 
 target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-if(CONNECTION_MACHINE_CODE_COVERAGE)
-	if (CONNECTION_MACHINE_BUILD_TESTS)
-		if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-			message(STATUS "Code coverage enabled")
-			add_compile_options(--coverage -O0 -g)
-			add_link_options(--coverage)
-		elseif(MSVC)
-			message(WARNING "Code coverage does nothing with MSVC. Use normal Tests build, and use opencpp_coverage.cmd")
-		else()
-			message(WARNING "Code coverage not working with: \"${CMAKE_CXX_COMPILER_ID}\"")
-		endif()
-	else()
-		message(WARNING "Code coverage cant not be used without also enabling tests.")
-	endif()
-endif()
