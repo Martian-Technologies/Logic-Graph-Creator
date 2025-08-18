@@ -41,10 +41,13 @@ option(CONNECTION_MACHINE_BUILD_TESTS "Build Connection Machine Tests" OFF)
 option(CONNECTION_MACHINE_CODE_COVERAGE "Enable code coverage reporting" OFF)
 option(RUN_TRACY_PROFILER "Enable runtime profiler" OFF)
 
+# ====================================== SILENCE WARNINGS =======================================
+
 if(MSVC)
 	# C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
 	# C4267: 'var' conversion from 'size_t' to 'type', possible loss of data
-	add_compile_options(/wd4244 /wd4267)
+	# C4018: 'var' signed/unsigned mismatch
+	add_compile_options(/wd4244 /wd4267 /wd4018)
 endif()
 
 # ======================================= COVERAGE SETUP ========================================
