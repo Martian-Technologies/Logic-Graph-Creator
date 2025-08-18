@@ -18,7 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # ======================================== PROJECT SETUP ========================================
 set(BUILD_SHARED_LIBS OFF) # Don't build shared libs
-project(Connection_Machine VERSION 0.9.0)
+project(Connection_Machine VERSION 0.8.0)
 if (APPLE)
 	set(APP_NAME "Connection Machine") # name of the bundle
 else()
@@ -41,28 +41,13 @@ option(CONNECTION_MACHINE_BUILD_TESTS "Build Connection Machine Tests" OFF)
 option(CONNECTION_MACHINE_CODE_COVERAGE "Enable code coverage reporting" OFF)
 option(RUN_TRACY_PROFILER "Enable runtime profiler" OFF)
 
+# ====================================== SILENCE WARNINGS =======================================
+
 if(MSVC)
 	# C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
 	# C4267: 'var' conversion from 'size_t' to 'type', possible loss of data
-	add_compile_options(/wd4244 /wd4267)
-endif()
-
-# ======================================= COVERAGE SETUP ========================================
-
-if(CONNECTION_MACHINE_CODE_COVERAGE)
-	if (CONNECTION_MACHINE_BUILD_TESTS)
-		if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-			message(STATUS "Code coverage enabled")
-			add_compile_options(--coverage -O0 -g)
-			add_link_options(--coverage)
-		elseif(MSVC)
-			message(WARNING "Code coverage not supported with MSVC. Use Clang-cl or OpenCppCoverage.")
-		else()
-			message(WARNING "Code coverage not working with: \"${CMAKE_CXX_COMPILER_ID}\"")
-		endif()
-	else()
-		message(WARNING "Code coverage cant not be used without also enabling tests.")
-	endif()
+	# C4018: 'var' signed/unsigned mismatch
+	add_compile_options(/wd4244 /wd4267 /wd4018)
 endif()
 
 set(EXTERNAL_LINKS)
