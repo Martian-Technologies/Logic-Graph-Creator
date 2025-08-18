@@ -7,6 +7,7 @@ CPMAddPackage(
 	GITHUB_REPOSITORY google/googletest
 	GIT_TAG v1.17.0
 	SOURCE_DIR "${EXTERNAL_DIR}/gtest"
+	OPTIONS "gtest_force_shared_crt ON"
 )
 
 set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
@@ -39,22 +40,30 @@ endif()
 
 target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-	find_program(GCOVR_PATH gcovr)
-	if(NOT GCOVR_PATH)
-		message(FATAL_ERROR "gcovr not found! Please install it via pip: pip install gcovr")
+if(CODE_COVERAGE)
+	if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+		find_program(GCOVR_PATH gcovr)
+		if(NOT GCOVR_PATH)
+			message(FATAL_ERROR "gcovr not found! Please install it via pip: pip install gcovr")
+		endif()
+
+		add_custom_target(coverage
+			COMMAND ${GCOVR_PATH}
+				--root ${CMAKE_SOURCE_DIR}
+				--filter ${SOURCE_DIR}
+				--exclude-unreachable-branches
+				--print-summary
+				--html --html-details -o coverage.html
+				--gcov-executable gcov
+				--exclude '${EXTERNAL_DIR}'
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+			COMMENT "Generating code coverage report with gcovr"
+		)
 	endif()
 
-	add_custom_target(coverage
-		COMMAND ${GCOVR_PATH}
-			--root ${CMAKE_SOURCE_DIR}
-			--filter ${SOURCE_DIR}
-			--exclude-unreachable-branches
-			--print-summary
-			--html --html-details -o coverage.html
-			--gcov-executable gcov
-			--exclude '${EXTERNAL_DIR}'
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		COMMENT "Generating code coverage report with gcovr"
-	)
+	if(MSVC)
+		target_compile_options(${PROJECT_NAME}_tests PRIVATE /Zi /Od /FS)
+		target_link_options(${PROJECT_NAME}_tests PRIVATE /DEBUG:FULL /INCREMENTAL)
+		target_link_options(${PROJECT_NAME}_tests PRIVATE /LTCG:OFF)
+	endif()
 endif()
