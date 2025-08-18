@@ -33,37 +33,19 @@ add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
 target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}/wasmtime")
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS})
 
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-target_compile_options(${PROJECT_NAME}_tests PRIVATE --coverage -O0 -g)
-target_link_options(${PROJECT_NAME}_tests PRIVATE --coverage)
-endif()
-
 target_precompile_headers(${PROJECT_NAME}_tests PRIVATE "${SOURCE_DIR}/precompiled.h")
 
-if(CODE_COVERAGE)
-	if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-		find_program(GCOVR_PATH gcovr)
-		if(NOT GCOVR_PATH)
-			message(FATAL_ERROR "gcovr not found! Please install it via pip: pip install gcovr")
+if(CONNECTION_MACHINE_CODE_COVERAGE)
+	if (CONNECTION_MACHINE_BUILD_TESTS)
+		if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+			message(STATUS "Code coverage enabled")
+			add_compile_options(--coverage -O0 -g)
+			add_link_options(--coverage)
+		elseif(MSVC)
+		else()
+			message(WARNING "Code coverage not working with: \"${CMAKE_CXX_COMPILER_ID}\"")
 		endif()
-
-		add_custom_target(coverage
-			COMMAND ${GCOVR_PATH}
-				--root ${CMAKE_SOURCE_DIR}
-				--filter ${SOURCE_DIR}
-				--exclude-unreachable-branches
-				--print-summary
-				--html --html-details -o coverage.html
-				--gcov-executable gcov
-				--exclude '${EXTERNAL_DIR}'
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-			COMMENT "Generating code coverage report with gcovr"
-		)
-	endif()
-
-	if(MSVC)
-		target_compile_options(${PROJECT_NAME}_tests PRIVATE /Zi /Od /FS)
-		target_link_options(${PROJECT_NAME}_tests PRIVATE /DEBUG:FULL /INCREMENTAL)
-		target_link_options(${PROJECT_NAME}_tests PRIVATE /LTCG:OFF)
+	else()
+		message(WARNING "Code coverage cant not be used without also enabling tests.")
 	endif()
 endif()
