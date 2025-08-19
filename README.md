@@ -1,6 +1,6 @@
 # Connection Machine
 
-[Connection Machine](https://gatality.com) is a desktop application for designing and simulating logic graph systems.
+[Connection Machine](https://connection-machine.com) is a desktop application for designing and simulating logic graph systems.
 Download builds of the app in the [releases tab](https://github.com/Martian-Technologies/Logic-Graph-Creator/releases). Otherwise, read the [build instructions](docs/building.md).
 
 ## Developer Documentation
