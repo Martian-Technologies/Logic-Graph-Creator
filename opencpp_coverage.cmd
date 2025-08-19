@@ -6,6 +6,8 @@ mkdir coverage
 OpenCppCoverage ^
   --sources %PROJ%\src ^
   --cover_children ^
-  --export_type cobertura:coverage\coverage.xml ^
+  --export_type cobertura:coverage\coverage.cobertura ^
   --export_type html:coverage ^
   -- "%TESTEXE%" --gtest_output=xml:coverage\gtest.xml
+
+@REM reportgenerator -reports:coverage\coverage.xml -targetdir:coverage -reporttypes:Html
