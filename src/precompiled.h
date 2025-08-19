@@ -41,6 +41,8 @@
 #include <sstream>
 #include <span>
 
+#include <fmt/core.h>
+
 #include "logging/logging.h"
 #include "util/fatal.h"
 

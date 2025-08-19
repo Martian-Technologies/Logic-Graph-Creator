@@ -88,3 +88,4 @@ build_error.txt
 
 # third-party libs
 /external
+/lib-binary

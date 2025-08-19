@@ -26,9 +26,9 @@ enum BlockType : std::uint16_t {
 };
 
 template <>
-struct std::formatter<BlockType> : std::formatter<std::string> {
+struct fmt::formatter<BlockType> : fmt::formatter<std::string> {
     auto format(BlockType blockType, format_context& ctx) const {
-        return formatter<string>::format(std::to_string((unsigned int)blockType), ctx);
+        return formatter<std::string>::format(to_string((unsigned int)blockType), ctx);
     }
 };
 

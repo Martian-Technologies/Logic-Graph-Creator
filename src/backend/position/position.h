@@ -133,9 +133,9 @@ struct std::hash<Vector> {
 };
 
 template <>
-struct std::formatter<Vector> : std::formatter<std::string> {
+struct fmt::formatter<Vector> : fmt::formatter<std::string> {
 	auto format(Vector v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -187,9 +187,9 @@ struct FVector {
 };
 
 template <>
-struct std::formatter<FVector> : std::formatter<std::string> {
+struct fmt::formatter<FVector> : fmt::formatter<std::string> {
 	auto format(FVector v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -225,9 +225,9 @@ struct Size {
 };
 
 template <>
-struct std::formatter<Size> : std::formatter<std::string> {
+struct fmt::formatter<Size> : fmt::formatter<std::string> {
 	auto format(Size v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -320,9 +320,9 @@ struct FSize {
 };
 
 template <>
-struct std::formatter<FSize> : std::formatter<std::string> {
+struct fmt::formatter<FSize> : fmt::formatter<std::string> {
 	auto format(FSize v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -456,9 +456,9 @@ struct std::hash<std::pair<Position, Position>> {
 };
 
 template <>
-struct std::formatter<Position> : std::formatter<std::string> {
+struct fmt::formatter<Position> : fmt::formatter<std::string> {
 	auto format(Position v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -514,9 +514,9 @@ inline bool areaWithinArea(FPosition area1Small, FPosition area1Large, FPosition
 }
 
 template <>
-struct std::formatter<FPosition> : std::formatter<std::string> {
+struct fmt::formatter<FPosition> : fmt::formatter<std::string> {
 	auto format(FPosition v, format_context& ctx) const {
-		return formatter<string>::format(v.toString(), ctx);
+		return formatter<std::string>::format(v.toString(), ctx);
 	}
 };
 
@@ -538,7 +538,7 @@ enum Rotation : char
 };
 
 template <>
-struct std::formatter<Rotation> : std::formatter<std::string> {
+struct fmt::formatter<Rotation> : fmt::formatter<std::string> {
 	auto format(Rotation v, format_context& ctx) const {
 		switch (v) {
 		case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";

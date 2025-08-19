@@ -153,11 +153,13 @@ if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
 		)
 
 		set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
-		# set(DIRS ${CMAKE_BINARY_DIR})
 		
 		install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION ".")
 
 		set(CPACK_PACKAGE_FILE_NAME "Connection-Machine-${PROJECT_VERSION}-Mac-universal")
+
+		install(FILES ${Vulkan_LIBRARY} DESTINATION "${APP_NAME}.app/Contents/Frameworks")
+		include(InstallRequiredSystemLibraries)
 
 		install(CODE "
 			include(BundleUtilities)

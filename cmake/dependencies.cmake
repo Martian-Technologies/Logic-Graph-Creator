@@ -6,19 +6,34 @@ function(add_main_dependencies)
 		NAME nlohmann_json
 		GITHUB_REPOSITORY nlohmann/json
 		GIT_TAG v3.12.0
-		OPTIONS "OPTION_BUILD_TESTS OFF"
+		OPTIONS
+			"OPTION_BUILD_TESTS OFF"
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/json"
 	)
 	list(APPEND EXTERNAL_LINKS nlohmann_json)
+
+	CPMAddPackage(
+		NAME fmt
+		GITHUB_REPOSITORY fmtlib/fmt
+		GIT_TAG 11.2.0
+		SOURCE_DIR "${EXTERNAL_DIR}/fmt"
+	)
+	list(APPEND EXTERNAL_LINKS fmt)
 
 	# CPPLocate (they have extreme cmake goofyness)
 	CPMAddPackage(
 		NAME cpplocate
 		GITHUB_REPOSITORY cginternals/cpplocate
 		GIT_TAG v2.3.0
+		OPTIONS
+			"OPTION_BUILD_TESTS OFF"
+			"CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true"
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/cpplocate"
 	)
 	list(APPEND EXTERNAL_LINKS cpplocate::cpplocate)
+	list(APPEND EXTERNAL_LINKS cpplocate::liblocate)
 
 	# wasmtime
 	if (APPLE AND CONNECTION_MACHINE_DISTRIBUTE_APP)
@@ -28,6 +43,8 @@ function(add_main_dependencies)
 			GITHUB_REPOSITORY bytecodealliance/wasmtime
 			GIT_TAG v35.0.0
 			DOWNLOAD_ONLY YES
+			OPTIONS
+				"EXCLUDE_FROM_ALL YES"
 			SOURCE_DIR "${EXTERNAL_DIR}/wasmtime"
 		)
 		set_target_properties(wasmtime PROPERTIES
@@ -39,6 +56,8 @@ function(add_main_dependencies)
 			NAME wasmtime
 			GITHUB_REPOSITORY bytecodealliance/wasmtime
 			GIT_TAG v35.0.0
+			OPTIONS
+				"EXCLUDE_FROM_ALL YES"
 			SOURCE_DIR "${EXTERNAL_DIR}/wasmtime"
 		)
 		add_subdirectory("${EXTERNAL_DIR}/wasmtime/crates/c-api")
@@ -50,6 +69,8 @@ function(add_main_dependencies)
 		NAME parallel-hashmap
 		GITHUB_REPOSITORY greg7mdp/parallel-hashmap
 		GIT_TAG v2.0.0
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/parallel-hashmap"
 	)
 	if(parallel-hashmap_ADDED)
@@ -65,7 +86,10 @@ function(add_main_dependencies)
 			NAME tracy
 			GITHUB_REPOSITORY wolfpld/tracy
 			GIT_TAG v2.0.0
-			OPTIONS "TRACY_ENABLE ON" "TRACY_ON_DEMAND ON"
+			OPTIONS
+				"TRACY_ENABLE ON"
+				"TRACY_ON_DEMAND ON"
+				"EXCLUDE_FROM_ALL YES"
 			SOURCE_DIR "${EXTERNAL_DIR}/tracy"
 		)
 		list(APPEND EXTERNAL_LINKS tracy)
@@ -83,6 +107,8 @@ function(add_app_dependencies)
 		NAME volk
 		GITHUB_REPOSITORY zeux/volk
 		GIT_TAG 1.4.304
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/volk"
 	)
 	list(APPEND EXTERNAL_LINKS volk)
@@ -94,7 +120,8 @@ function(add_app_dependencies)
         GIT_TAG VER-2-13-3
         OPTIONS
 			"FT_DISABLE_HARFBUZZ ON"
-            "FT_WITH_HARFBUZZ OFF"
+			"FT_WITH_HARFBUZZ OFF"
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/freetype"
     )
 	add_library(Freetype::Freetype ALIAS freetype)
@@ -108,7 +135,9 @@ function(add_app_dependencies)
 		NAME SDL3
 		GITHUB_REPOSITORY libsdl-org/SDL
 		GIT_TAG release-3.2.20
-		OPTIONS "SDL_STATIC ON"
+		OPTIONS
+			"SDL_STATIC ON"
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/SDL"
 	)
 	add_library(SDL3::SDL3 ALIAS SDL3-static)
@@ -119,6 +148,8 @@ function(add_app_dependencies)
 		NAME stb_image
 		GITHUB_REPOSITORY nothings/stb
 		GIT_TAG f58f558c120e9b32c217290b80bad1a0729fbb2c
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/stb"
 	)
 	if(stb_image_ADDED)
@@ -134,7 +165,7 @@ function(add_app_dependencies)
         GIT_TAG 6.1
         OPTIONS
 			"RMLUI_BACKEND native"
-        EXCLUDE_FROM_ALL FALSE
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/RmlUi"
     )
 	list(APPEND EXTERNAL_LINKS RmlUi::RmlUi)
@@ -145,6 +176,8 @@ function(add_app_dependencies)
 		NAME VulkanMemoryAllocator
 		GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
 		GIT_TAG v3.3.0
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/VulkanMemoryAllocator"
 	)
 	list(APPEND EXTERNAL_LINKS VulkanMemoryAllocator)
@@ -154,6 +187,8 @@ function(add_app_dependencies)
 		NAME vk-bootstrap
 		GITHUB_REPOSITORY charles-lunarg/vk-bootstrap
 		GIT_TAG 4ac01fd98e05bf8a277ca099a63449f6e5c9cedf#v1.4.323
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/vk-bootstrap"
 	)
 	list(APPEND EXTERNAL_LINKS vk-bootstrap::vk-bootstrap)
@@ -163,6 +198,8 @@ function(add_app_dependencies)
 		NAME glm
 		GITHUB_REPOSITORY g-truc/glm
 		GIT_TAG 1.0.1
+		OPTIONS
+			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/glm"
 	)
 	list(APPEND EXTERNAL_LINKS glm)
