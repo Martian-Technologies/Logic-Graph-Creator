@@ -24,4 +24,3 @@ bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, Connectio
 	auto iter = connections.find(thisEndId);
 	return iter != connections.end() && iter->second.contains(otherConnectionEnd);
 }
-
