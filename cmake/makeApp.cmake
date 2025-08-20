@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${EXTERNAL_LINKS})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${SOURCE_DIR}/precompiled.h")
+set_source_files_properties("${SOURCE_DIR}/gui/stbImplementation.cpp" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
 if (RUN_TRACY_PROFILER)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE VK_NO_PROTOTYPES "TRACY_PROFILER")
