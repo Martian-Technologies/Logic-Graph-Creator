@@ -1184,7 +1184,7 @@ void Evaluator::dirtyBlockAt(Position position, eval_circuit_id_t evalCircuitId)
 		logError("BlockData not found for block type {}", "Evaluator::dirtyBlockAt", static_cast<int>(block->type()));
 		return;
 	}
-	for (size_t i = 0; i < blockData->getConnectionCount(); ++i) {
+	for (connection_end_id_t i = 0; i < blockData->getConnectionCount(); ++i) {
 		if (block->isConnectionOutput(i)) {
 			std::optional<Position> portPositionOpt = block->getConnectionPosition(i);
 			if (!portPositionOpt) {
@@ -1218,4 +1218,27 @@ std::vector<simulator_id_t> Evaluator::getPinSimulatorIds(const Address& address
 
 std::vector<logic_state_t> Evaluator::getStatesFromSimulatorIds(const std::vector<simulator_id_t>& simulatorIds) const {
 	return evalSimulator.getStatesFromSimulatorIds(simulatorIds);
+}
+
+void Evaluator::connectListener(
+	void* object,
+	const Address& address,
+	SimulatorMappingUpdateListenerFunction func
+) {
+	std::optional<eval_circuit_id_t> evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(address);
+	if (!evalCircuitId) {
+		logError("Failed to connect listener for address {}: No top-level IC found", "Evaluator::connectListener", address.toString());
+		return;
+	}
+	listeners[object] = { evalCircuitId.value(), func };
+	std::unordered_map<eval_circuit_id_t, std::vector<SimulatorMappingUpdate>> simulatorMappingUpdates;
+	auto evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId.value());
+	if (!evalCircuit) {
+		logError("Failed to get eval circuit for ID {}", "Evaluator::connectListener", evalCircuitId.value());
+		return;
+	}
+	evalCircuit->forEachNode([this, evalCircuitId](Position pos, const CircuitNode& node) {
+		this->dirtyBlockAt(pos, evalCircuitId.value());
+	});
+	processDirtyNodes();
 }

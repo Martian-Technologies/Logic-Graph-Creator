@@ -6,9 +6,11 @@
 #include "difference.h"
 #include "cell.h"
 
+class CircuitManager;
+
 class BlockContainer {
 public:
-	inline BlockContainer(BlockDataManager* blockDataManager) : blockDataManager(blockDataManager) { }
+	inline BlockContainer(CircuitManager* circuitManager, BlockDataManager* blockDataManager) : circuitManager(circuitManager), blockDataManager(blockDataManager) { }
 
 	inline BlockDataManager* getBlockDataManager() const { return blockDataManager; }
 
@@ -38,6 +40,8 @@ public:
 	inline unsigned int getBlockCount() const { return blocks.size(); }
 	// gets the number of times a block with a certain type appears
 	inline unsigned int getBlockTypeCount(BlockType blockType) const { if (blockTypeCounts.size() <= blockType) return 0; return blockTypeCounts[blockType]; }
+	// gets the number of times a block with a certain type appears in this and child block containers
+	inline unsigned int getBlockTypeCountRecursive(BlockType blockType) const;
 
 	// -- setters --
 	// Trys to insert a block. Returns if successful. Pass a Difference* to read the what changes were made.
@@ -99,6 +103,7 @@ private:
 	block_id_t getNewId() { return ++lastId; }
 
 	BlockType selfBlockType = BlockType::NONE;
+	CircuitManager* circuitManager;
 	BlockDataManager* blockDataManager;
 	block_id_t lastId = 0;
 	Sparse2d<Cell> grid;

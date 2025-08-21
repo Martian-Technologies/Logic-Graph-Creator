@@ -13,3 +13,33 @@
 	border-bottom: 1dp;
 	/* border-bottom: 0.5dp; */
 }
+
+/* Step 6: Simulation tree row styling */
+#eval-tree li {
+	line-height: 1.2em;
+	min-height: 18dp;
+	padding: 2dp 2dp;
+	border-left: 2dp transparent;
+	border-radius: 3dp;
+}
+
+#eval-tree li:hover {
+	background-color: #1d1d1d;
+}
+
+#eval-tree li:active {
+	background-color: #151515;
+}
+
+#eval-tree li.selected {
+	background-color: #2e2e2e;
+	border-left-color: #d1963a;
+}
+
+#eval-tree.alt-rows > div > ul > li:nth-child(even) {
+	background-color: #101010;
+}
+
+#eval-tree.alt-rows > div > ul > li:nth-child(even):hover {
+	background-color: #1d1d1d;
+}

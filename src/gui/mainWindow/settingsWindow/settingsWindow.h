@@ -21,6 +21,7 @@ private:
 	Rml::Element* activeNav;
 
 	ContentManager contentManager;
+	std::unique_ptr<class SearchBar> searchBar; // forward-managed search bar
 
 	bool visible;
 };

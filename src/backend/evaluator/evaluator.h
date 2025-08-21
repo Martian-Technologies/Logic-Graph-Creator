@@ -93,7 +93,7 @@ public:
 	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
 	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
 	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
-	float getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
+	double getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
 	bool getBoolState(const Address& address) {
@@ -148,14 +148,7 @@ public:
 		void* object,
 		const Address& address,
 		SimulatorMappingUpdateListenerFunction func
-	) {
-		std::optional<eval_circuit_id_t> evalCircuitId = evalCircuitContainer.traverseToTopLevelIC(address);
-		if (!evalCircuitId) {
-			logError("Failed to connect listener for address {}: No top-level IC found", "Evaluator::connectListener", address.toString());
-			return;
-		}
-		listeners[object] = { evalCircuitId.value(), func };
-	}
+	);
 	void disconnectListener(void* object) {
 		auto iter = listeners.find(object);
 		if (iter != listeners.end()) {

@@ -9,7 +9,7 @@
 #include "logging/logging.h"
 
 const int CHUNK_SIZE = 64;
-cord_t getChunk(cord_t in) {
+coordinate_t getChunk(coordinate_t in) {
 	return std::floor((float)in / (float)CHUNK_SIZE) * (int)CHUNK_SIZE;
 }
 Position getChunk(Position in) {
@@ -257,7 +257,7 @@ void VulkanChunker::moveBlock(Position curPos, Position newPos, Orientation newO
 void VulkanChunker::addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) {
 	FPosition a = points.first.free() + socketOffsets.first;
 	FPosition b = points.second.free() + socketOffsets.second;
-	std::vector<ChunkIntersection> intersections = getChunkIntersections(a, b);
+	std::vector<ChunkIntersection> intersections = getNeededChunkIntersections(a, b);
 	std::vector<Position>& chunksUnderThisWire = chunksUnderWire[points];
 	chunksUnderThisWire.reserve(intersections.size());
 	for (const ChunkIntersection& intersection : intersections) {
@@ -343,13 +343,13 @@ std::vector<std::shared_ptr<VulkanChunkAllocation>> VulkanChunker::getAllocation
 	std::lock_guard<std::mutex> lock(mux);
 
 	// get chunk bounds with padding for large blocks (this will technically goof if there are blocks larger than chunk size)
-	min = getChunk(min) - Vector(CHUNK_SIZE, CHUNK_SIZE);
-	max = getChunk(max) + Vector(CHUNK_SIZE, CHUNK_SIZE);
+	min = getChunk(min - Vector(CHUNK_SIZE) - Vector(1));
+	max = getChunk(max + Vector(CHUNK_SIZE) + Vector(1));
 
 	// go through each chunk in view and collect it if it exists and has an allocation
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> seen;
-	for (cord_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
-		for (cord_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
+	for (coordinate_t chunkX = min.x; chunkX <= max.x; chunkX += CHUNK_SIZE) {
+		for (coordinate_t chunkY = min.y; chunkY <= max.y; chunkY += CHUNK_SIZE) {
 			auto chunk = chunks.find({ chunkX, chunkY });
 			if (chunk != chunks.end()) {
 				auto allocation = chunk->second.getAllocation();
@@ -426,6 +426,84 @@ std::vector<ChunkIntersection> VulkanChunker::getChunkIntersections(FPosition st
 		FPosition newPos = start + dir * currentDistance;
 		intersections.push_back({ oldChunk, currentPos, newPos });
 		currentPos = newPos;
+	}
+
+	return intersections;
+}
+
+std::vector<ChunkIntersection> VulkanChunker::getNeededChunkIntersections(FPosition start, FPosition end) {
+	// the JACLWANICBSBTIOPICG (copyright 2025, released under MIT license) also known as DDA (or Ben is lying)
+	// Thank you One Lone Coder and lodev
+
+	std::vector<ChunkIntersection> intersections;
+
+	FVector diff = end - start;
+	float distance = diff.length();
+	FVector dir = diff / distance;
+
+	Position chunk = getChunk(start.snap());
+
+	//length of ray from one x or y-side to next x or y-side
+	FVector rayUnitStepSize = FVector(sqrt(1 + (dir.dy / dir.dx) * (dir.dy / dir.dx)), sqrt(1 + (dir.dx / dir.dy) * (dir.dx / dir.dy))) * CHUNK_SIZE;
+
+	// starting conditions
+	FVector rayLength1D;
+	Vector step;
+	if (dir.dx < 0) {
+		step.dx = -CHUNK_SIZE;
+		rayLength1D.dx = ((start.x - float(chunk.x)) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
+	} else {
+		step.dx = CHUNK_SIZE;
+		rayLength1D.dx = ((float(chunk.x + CHUNK_SIZE) - start.x) / float(CHUNK_SIZE)) * rayUnitStepSize.dx;
+	}
+	if (dir.dy < 0) {
+		step.dy = -CHUNK_SIZE;
+		rayLength1D.dy = ((start.y - float(chunk.y)) / float(CHUNK_SIZE)) * rayUnitStepSize.dy;
+	} else {
+		step.dy = CHUNK_SIZE;
+		rayLength1D.dy = ((float(chunk.y + CHUNK_SIZE) - start.y) / float(CHUNK_SIZE)) * rayUnitStepSize.dy;
+	}
+
+	FPosition currentPos = start;
+	float currentDistance = 0.0f;
+	unsigned int doAdd = 0;
+	Position oldOldChunk = chunk;
+	while (currentDistance < distance) {
+
+		Position oldChunk = chunk;
+
+		// decide which direction we walk
+		if (rayLength1D.dx < rayLength1D.dy) {
+			chunk.x += step.dx;
+			currentDistance = rayLength1D.dx;
+			rayLength1D.dx += rayUnitStepSize.dx;
+
+		} else if (rayLength1D.dx > rayLength1D.dy) {
+			chunk.y += step.dy;
+			currentDistance = rayLength1D.dy;
+			rayLength1D.dy += rayUnitStepSize.dy;
+		} else {
+			chunk += step;
+			currentDistance = rayLength1D.dx;
+			rayLength1D.dx += rayUnitStepSize.dx;
+			rayLength1D.dy += rayUnitStepSize.dy;
+		}
+
+		// clamp overshoot
+		if (currentDistance > distance) {
+			currentDistance = distance;
+		}
+
+		// add point at current distance
+		
+		doAdd++;
+		if (currentDistance >= distance || doAdd == 3) {
+			doAdd = 0;
+			FPosition newPos = start + dir * currentDistance;
+			intersections.push_back({ oldOldChunk, currentPos, newPos });
+			currentPos = newPos;
+		}
+		oldOldChunk = oldChunk;
 	}
 
 	return intersections;

@@ -1,0 +1,46 @@
+name: Coverity Scan
+
+on:
+  workflow_dispatch
+
+permissions: 
+  contents: read
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+    steps:
+    
+    - name: Install Dependencies
+      run: |
+            sudo apt update
+            sudo apt install -y --no-install-recommends build-essential gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev fcitx-libs-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+
+    - uses: actions/checkout@v4
+
+    - name: Install Vulkan SDK
+      uses: humbletim/install-vulkan-sdk@v1.2
+      with:
+        version: 1.4.309.0
+        cache: true
+
+    - name: Configure using CMake
+      run: cmake
+               -DCMAKE_BUILD_TYPE=Release
+               -DCONNECTION_MACHINE_BUILD_TESTS=OFF
+               -DCONNECTION_MACHINE_BUILD_APP=ON
+               -B ${{github.workspace}}/build
+
+    - uses: vapier/coverity-scan-action@v1
+      with:
+        email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        command: make -C ${{github.workspace}}/build
+
+    - name: Offer analysis tarball for inspection
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+      with:
+        path: cov-int.tgz
+        if-no-files-found: error

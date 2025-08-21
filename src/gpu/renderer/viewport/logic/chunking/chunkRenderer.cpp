@@ -5,7 +5,6 @@
 #endif
 
 #include "backend/evaluator/logicState.h"
-#include "gpu/vulkanInstance.h"
 #include "gpu/abstractions/vulkanShader.h"
 #include "computerAPI/fileLoader.h"
 #include "computerAPI/directoryManager.h"
@@ -69,7 +68,7 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
-	
+
 	// save chunk data to frame
 	for (auto& chunk : chunks) {
 		frame.lifetime.push(chunk);
@@ -89,30 +88,6 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 
 			std::vector<logic_state_t> states(chunk->getStateSimulatorIds().size());
 			if (evaluator != nullptr) {
-				// std::vector<Position> positions;
-				// positions.reserve(chunk->getBlockStateIndex().size());
-				// std::vector<size_t> indexes;
-				// indexes.reserve(chunk->getBlockStateIndex().size());
-				// for (const auto& pair : chunk->getBlockStateIndex()) {
-				// 	positions.push_back(pair.first);
-				// 	indexes.push_back(pair.second);
-				// }
-				// std::vector<logic_state_t> blockStates = evaluator->getBulkStates(positions, address);
-				// for (size_t i = 0; i < chunk->getBlockStateIndex().size(); i++) {
-				// 	states[indexes[i]] = blockStates[i];
-				// }
-				// positions.clear();
-				// positions.reserve(chunk->getPortStateIndex().size());
-				// indexes.clear();
-				// indexes.reserve(chunk->getPortStateIndex().size());
-				// for (const auto& pair : chunk->getPortStateIndex()) {
-				// 	positions.push_back(pair.first);
-				// 	indexes.push_back(pair.second);
-				// }
-				// std::vector<logic_state_t> pinStates = evaluator->getBulkPinStates(positions, address);
-				// for (size_t i = 0; i < chunk->getPortStateIndex().size(); i++) {
-				// 	states[indexes[i]] = pinStates[i];
-				// }
 				states = evaluator->getStatesFromSimulatorIds(chunk->getStateSimulatorIds());
 			}
 			
@@ -132,7 +107,9 @@ void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::share
 		blockPipeline.cmdPushConstants(frame.mainCommandBuffer, &pushConstants);
 		
 		// bind texture descriptor
-		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &device->getBlockTextureManager()->getTexture().descriptor, 0, nullptr);
+		std::shared_ptr<BlockTexture> blockTexture = device->getBlockTextureManager()->getTexture();
+		frame.lifetime.push(blockTexture);
+		vkCmdBindDescriptorSets(frame.mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, blockPipeline.getLayout(), 1, 1, &blockTexture->descriptor, 0, nullptr);
         
 		for (std::shared_ptr<VulkanChunkAllocation> chunk : chunks) {
 			if (chunk->getBlockBuffer().has_value()) {

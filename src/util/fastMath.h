@@ -10,26 +10,33 @@ constexpr T FastPower(T x) {
 	if constexpr ((P % 2) == 0) { return tmp * tmp; } else { return x * tmp * tmp; }
 }
 
+constexpr unsigned int Abs(unsigned int x) { assert(false || "WHY DO YOU DO THIS?????"); return x; }
+
 constexpr int Abs(int x) { return x < 0 ? -x : x; }
 
-constexpr double Fabs(double x) {
+constexpr double Abs(double x) {
 	union { double f; uint64_t i; } u = { x };
-	u.i &= -1ULL / 2;
+	u.i &= 0x7fffffff;
+	return u.f;
+}
+
+constexpr float Abs(float x) {
+	union { float f; uint32_t i; } u = { x };
+	u.i &= 0x7fffffff;
 	return u.f;
 }
 
 template <typename T>
-// (nerd emoji) I literally had to google what signum was to confirm it was sign. you can't even spell english words why are you trying to use latin? Also I love the capitalization conventions in this file.
 constexpr char signum(T x) {
 	if constexpr (std::is_signed<T>())
 		return (T(0) < x) - (x < T(0));
 	return T(0) < x;
 }
 
-inline float decPart(float x) { return (float)signum(x) * fmodf(Fabs(x), 1.f); }
+inline float decPart(float x) { return (float)signum(x) * fmodf(Abs(x), 1.f); }
 
 inline bool approx_equals(float a, float b) {
-	return Fabs(a - b) <= nexttowardf(std::max(a, b), HUGE_VALL) - std::max(a, b);
+	return Abs(a - b) <= nexttowardf(std::max(a, b), HUGE_VALL) - std::max(a, b);
 }
 
 #endif /* fastMath_h */

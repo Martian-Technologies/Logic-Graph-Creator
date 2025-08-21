@@ -1,7 +1,6 @@
 #ifndef vulkanDescriptor_h
 #define vulkanDescriptor_h
 
-#include <span>
 #include "gpu/vulkanDevice.h"
 
 class DescriptorLayoutBuilder {

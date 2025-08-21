@@ -18,11 +18,9 @@ bool ConnectionContainer::tryRemoveConnection(connection_end_id_t thisEndId, Con
 	}
 	connectionsSet.erase(iter2);
 	return true;
-
 }
 
 bool ConnectionContainer::hasConnection(connection_end_id_t thisEndId, ConnectionEnd otherConnectionEnd) const {
 	auto iter = connections.find(thisEndId);
 	return iter != connections.end() && iter->second.contains(otherConnectionEnd);
 }
-

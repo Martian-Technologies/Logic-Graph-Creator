@@ -12,6 +12,7 @@
 #include "computerAPI/fileListener/fileListener.h"
 #include "backend/backend.h"
 
+#include "tools/toolManagerManager.h"
 #include "sideBar/icEditor/blockCreationWindow.h"
 #include "circuitView/simControlsManager.h"
 #include "circuitView/circuitViewWidget.h"
@@ -20,7 +21,7 @@
 
 class MainWindow {
 public:
-	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, FileListener* fileListener, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
+	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
 	~MainWindow();
 
 	// no copy
@@ -33,7 +34,12 @@ public:
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 	inline float getSdlWindowScalingSize() const { return sdlWindow.getWindowScalingSize(); }
-	inline std::shared_ptr<CircuitViewWidget> getCircuitViewWidget() { return circuitViewWidget; };
+	inline std::vector<std::shared_ptr<CircuitViewWidget>> getCircuitViewWidgets() { return circuitViewWidgets; };
+	inline std::shared_ptr<CircuitViewWidget> getCircuitViewWidget(unsigned int i) { return circuitViewWidgets[i]; };
+	inline std::shared_ptr<CircuitViewWidget> getActiveCircuitViewWidget() { return activeCircuitViewWidget; };
+
+	// void addCircuitViewWidget() // once we can change element that it is attached to
+	void createCircuitViewWidget(Rml::Element* element);
 
 	void saveCircuit(circuit_id_t id, bool saveAs);
 	void loadCircuit();
@@ -47,16 +53,18 @@ private:
 	void createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
 
 	Backend* backend;
+	KeybindHandler keybindHandler;
 	CircuitFileManager* circuitFileManager;
-	FileListener* fileListener;
 	SdlWindow sdlWindow;
 	WindowRenderer renderer;
+	ToolManagerManager toolManagerManager;
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;
 	std::optional<BlockCreationWindow> blockCreationWindow;
 	std::optional<SimControlsManager> simControlsManager;
 
-	std::shared_ptr<CircuitViewWidget> circuitViewWidget;
+	std::shared_ptr<CircuitViewWidget> activeCircuitViewWidget;
+	std::vector<std::shared_ptr<CircuitViewWidget>> circuitViewWidgets;
 	
 	Rml::Context* rmlContext;
 	Rml::ElementDocument* rmlDocument;
@@ -64,4 +72,4 @@ private:
 	std::vector<std::pair<std::string,const std::vector<std::pair<std::string, std::function<void()>>>>> popUpsToAdd;
 };
 
-#endif
+#endif /* window_h */

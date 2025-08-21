@@ -84,7 +84,7 @@ bool GeneratedCircuitValidator::handleInvalidConnections() {
 
 bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 	for (auto& [id, block] : generatedCircuit.blocks) {
-		if (block.position.x == std::numeric_limits<cord_t>::max() || block.position.y == std::numeric_limits<cord_t>::max()) {
+		if (block.position.x == std::numeric_limits<coordinate_t>::max() || block.position.y == std::numeric_limits<coordinate_t>::max()) {
 			continue;
 		}
 
@@ -115,8 +115,8 @@ bool GeneratedCircuitValidator::setOverlapsUnpositioned() {
 				block.position.toString(),
 				intPos.toString()
 			);
-			block.position.x = std::numeric_limits<cord_t>::max();
-			block.position.y = std::numeric_limits<cord_t>::max();
+			block.position.x = std::numeric_limits<coordinate_t>::max();
+			block.position.y = std::numeric_limits<coordinate_t>::max();
 		} else {
 			// mark all positions as occupied
 			occupiedPositions.insert(takenPositions.begin(), takenPositions.end());
@@ -313,7 +313,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				auto iter = generatedCircuit.blocks.find(id);
 				if (iter == generatedCircuit.blocks.end()) continue;
 				GeneratedCircuit::GeneratedCircuitBlockData& block = iter->second;
-				if (block.position.x != std::numeric_limits<cord_t>::max() && block.position.y != std::numeric_limits<cord_t>::max()) {
+				if (block.position.x != std::numeric_limits<coordinate_t>::max() && block.position.y != std::numeric_limits<coordinate_t>::max()) {
 					continue;
 				}
 
@@ -360,7 +360,7 @@ bool GeneratedCircuitValidator::handleUnpositionedBlocks() {
 				block.position = Position(x, y);
 				layerYcounter[x] = y + blockSize.h;
 
-				cord_t blockMaxY = y + blockSize.h - 1;
+				coordinate_t blockMaxY = y + blockSize.h - 1;
 
 				maxYPlaced = std::max(maxYPlaced, blockMaxY);
 			}

@@ -1,4 +1,5 @@
 #include "connectionMachineParser.h"
+#include "backend/position/position.h"
 #include "util/uuid.h"
 
 BlockType stringToBlockType(const std::string& str) {
@@ -19,12 +20,16 @@ BlockType stringToBlockType(const std::string& str) {
 	return BlockType::CUSTOM;
 }
 
-Rotation stringToRotation(const std::string& str) {
-	if (str == "ZERO") return Rotation::ZERO;
-	if (str == "NINETY") return Rotation::NINETY;
-	if (str == "ONE_EIGHTY") return Rotation::ONE_EIGHTY;
-	if (str == "TWO_SEVENTY") return Rotation::TWO_SEVENTY;
-	return Rotation::ZERO;
+Orientation stringToOrientation(const std::string& str) {
+	if (str == "ZERO") return Orientation(Rotation::ZERO, false);
+	if (str == "NINETY") return Orientation(Rotation::NINETY, false);
+	if (str == "ONE_EIGHTY") return Orientation(Rotation::ONE_EIGHTY, false);
+	if (str == "TWO_SEVENTY") return Orientation(Rotation::TWO_SEVENTY, false);
+	if (str == "ZERO_FLIPPED") return Orientation(Rotation::ZERO, true);
+	if (str == "NINETY_FLIPPED") return Orientation(Rotation::NINETY, true);
+	if (str == "ONE_EIGHTY_FLIPPED") return Orientation(Rotation::ONE_EIGHTY, true);
+	if (str == "TWO_SEVENTY_FLIPPED") return Orientation(Rotation::TWO_SEVENTY, true);
+	return Orientation();
 }
 
 std::string blockTypeToString(BlockType type) {
@@ -48,14 +53,16 @@ std::string blockTypeToString(BlockType type) {
 	}
 }
 
-std::string rotationToString(Rotation rotation) {
-	switch (rotation) {
-	case Rotation::ZERO: return "ZERO";
-	case Rotation::NINETY: return "NINETY";
-	case Rotation::ONE_EIGHTY: return "ONE_EIGHTY";
-	case Rotation::TWO_SEVENTY: return "TWO_SEVENTY";
-	default: return "ZERO";
-	}
+std::string orientationToString(Orientation orientation) {
+	if (orientation == Orientation(Rotation::ZERO, false)) return "ZERO";
+	if (orientation == Orientation(Rotation::NINETY, false)) return "NINETY";
+	if (orientation == Orientation(Rotation::ONE_EIGHTY, false)) return "ONE_EIGHTY";
+	if (orientation == Orientation(Rotation::TWO_SEVENTY, false)) return "TWO_SEVENTY";
+	if (orientation == Orientation(Rotation::ZERO, true)) return "ZERO_FLIPPED";
+	if (orientation == Orientation(Rotation::NINETY, true)) return "NINETY_FLIPPED";
+	if (orientation == Orientation(Rotation::ONE_EIGHTY, true)) return "ONE_EIGHTY_FLIPPED";
+	if (orientation == Orientation(Rotation::TWO_SEVENTY, true)) return "TWO_SEVENTY_FLIPPED";
+	return "ZERO";
 }
 
 std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path) {
@@ -80,7 +87,9 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 	inputFile >> token;
 
 	unsigned int version;
-	if (token == "version_6") {
+	if (token == "version_7") {
+		version = 7;
+	} else if (token == "version_6") {
 		version = 6;
 	} else if (token == "version_5" || token == "version_4" || token == "version_3" || token == "version_2") {
 		version = 5;
@@ -114,7 +123,10 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 		} else if (token == "size:") {
 			currentParsedCircuit->markAsCustom();
 			unsigned int width, height;
-			inputFile >> cToken >> width >> cToken >> height >> cToken;
+			if (version < 7)
+				inputFile >> cToken >> width >> cToken >> height >> cToken;
+			else
+				inputFile >> width >> cToken >> height;
 			currentParsedCircuit->setSize(Size(width, height));
 		} else if (token == "ports" || token == "ports:") {
 			currentParsedCircuit->markAsCustom();
@@ -125,7 +137,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 				inputFile >> cToken;
 				connection_end_id_t endId;
 				int blockId;
-				cord_t vecX, vecY;
+				coordinate_t vecX, vecY;
 				std::string portName = "";
 				inputFile >> token >> endId >> cToken >> blockId >> cToken >> cToken >> vecX >> cToken >> vecY >> cToken >> cToken >> std::quoted(portName) >> cToken;
 				currentParsedCircuit->addConnectionPort(token == "IN,", endId, Vector(vecX, vecY), blockId, 0, portName);
@@ -158,9 +170,9 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 			}
 
 			inputFile >> posX >> posY >> token;
-			Rotation rotation = stringToRotation(token);
+			Orientation orientation = stringToOrientation(token);
 
-			currentParsedCircuit->addBlock(blockId, FPosition(posX, posY), rotation, blockType);
+			currentParsedCircuit->addBlock(blockId, FPosition(posX, posY), orientation, blockType);
 
 			if (version <= 5) getline(inputFile, token);
 			while (true) {
@@ -201,7 +213,7 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 		return false;
 	}
 
-	outputFile << "version_6\n";
+	outputFile << "version_7\n";
 
 	// find all required imports
 	// not ideal but if we loop through from maxBlockId down then we will find all dependencies across every circuit, not just this one
@@ -329,7 +341,7 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 
 			outputFile << "blockId " << itr->first << ' '
 				<< blockTypeStr << ' ' << pos.x << ' '
-				<< pos.y << ' ' << block.getOrientation().toString() << '\n';
+				<< pos.y << ' ' << orientationToString(block.getOrientation()) << '\n';
 			const ConnectionContainer& connectionContainer = block.getConnectionContainer();
 
 			for (auto& connectionIter : connectionContainer.getConnections()) {

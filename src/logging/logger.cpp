@@ -1,7 +1,7 @@
 #include "logger.h"
 
 #ifdef TRACY_PROFILER
-	#include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 #define ANSI_INFO "\033[1;37m"
@@ -23,16 +23,14 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 	}
 	
 	switch (type) {
-	//output logs to cout
+	// output to stderr
 	case LogType::Info:
 		categoryText = "Info" + categoryText;
-		std::cout << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
-		std::cout.flush();
+		std::cerr << "[" << ANSI_INFO << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Warning:
 		categoryText = "Warning" + categoryText;
-		std::cout << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
-		std::cout.flush();
+		std::cerr << "[" << ANSI_WARNING << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	case LogType::Error:
 		categoryText = "ERROR" + categoryText;
@@ -43,12 +41,15 @@ void Logger::log(LogType type, const std::string& message, const std::string& su
 		std::cerr << "[" << ANSI_FATAL << categoryText << ANSI_TAIL << "] " << message << "\n";
 		break;
 	}
+	std::cerr.flush();
 
-	// and output to the log file
-	#ifdef TRACY_PROFILER
-		std::string msg = "[" + categoryText + "] " + message;
-		TracyMessage(msg.c_str(), msg.size());
-	#endif
+#ifdef TRACY_PROFILER
+	// output to tracy
+	std::string msg = "[" + categoryText + "] " + message;
+	TracyMessage(msg.c_str(), msg.size());
+#endif
+
+	// output to file
 	outputFileStream << "[" << categoryText << "] " << message << "\n";
 	outputFileStream.flush();
 }

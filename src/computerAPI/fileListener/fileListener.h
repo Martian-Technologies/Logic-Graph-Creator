@@ -1,10 +1,6 @@
 #ifndef fileListener_h
 #define fileListener_h
 
-#include <condition_variable>
-#include <chrono>
-#include <thread>
-
 class FileListener {
 public:
 	using Callback = std::function<void(const std::string&)>;

@@ -85,3 +85,7 @@ build_error.txt
 
 # coverage results
 /coverage
+
+# third-party libs
+/external
+/lib-binary

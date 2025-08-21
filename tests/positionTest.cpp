@@ -17,7 +17,7 @@ TEST_F(PositionTest, VectorBasicOperations) {
 TEST_F(PositionTest, VectorFunctions) {
 	Vector a(5, 5);
 	ASSERT_TRUE(a.toString() == "<5, 5>");
-	ASSERT_TRUE(a.manhattenlength() == 10);
+	ASSERT_TRUE(a.manhattenLength() == 10);
 	ASSERT_TRUE(approx_equals(a.lengthSquared(), 50.f));
 	ASSERT_TRUE(approx_equals(a.length(), sqrt(50)));
 
@@ -60,7 +60,7 @@ TEST_F(PositionTest, FVectorFunctions) {
 	// Idk if we should test this. Maybe a better way is the read the string in as a new vector and then comapare.
 	ASSERT_TRUE(a.toString() == "<5.100000, 5.200000>");
 
-	ASSERT_TRUE(approx_equals(a.manhattenlength(), 10.3f));
+	ASSERT_TRUE(approx_equals(a.manhattenLength(), 10.3f));
 	ASSERT_TRUE(approx_equals(a.lengthSquared(), 53.05f));
 	ASSERT_TRUE(approx_equals(a.length(), sqrt(53.05f)));
 }

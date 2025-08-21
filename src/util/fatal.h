@@ -3,4 +3,4 @@
 
 void throwFatalError(const std::string& message);
 
-#endif
+#endif /* gatalityFatal_h */

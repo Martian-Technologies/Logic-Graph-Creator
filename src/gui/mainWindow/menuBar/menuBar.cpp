@@ -26,11 +26,11 @@ void MenuBar::triggerEvent(const std::string& name) {
 	if (name == "setting") {
 		settingsWindow->toggleVisibility();
 	} else if (name == "file-new") {
-		window->getCircuitViewWidget()->newCircuit();
+		window->getActiveCircuitViewWidget()->newCircuit();
 	} else if (name == "file-open") {
-		window->getCircuitViewWidget()->load();
+		window->getActiveCircuitViewWidget()->load();
 	} else if (name == "file-save") {
-		window->getCircuitViewWidget()->save();
+		window->getActiveCircuitViewWidget()->save();
 	} else {
 		logWarning("Event \"{}\" not reconized", "MenuBar", name);
 	}

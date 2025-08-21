@@ -5,7 +5,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-#include <greg7mdp/phmap.h>
+#include <parallel_hashmap/phmap.h>
 
 #include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
@@ -200,6 +200,7 @@ public:
 
 private:
 	std::vector<ChunkIntersection> getChunkIntersections(FPosition start, FPosition end);
+	std::vector<ChunkIntersection> getNeededChunkIntersections(FPosition start, FPosition end);
 	
 private:
 	phmap::flat_hash_map<Position, Chunk> chunks;

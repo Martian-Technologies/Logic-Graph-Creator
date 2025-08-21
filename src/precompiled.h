@@ -11,6 +11,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <chrono>
 
 #include <array>
 #include <condition_variable>
@@ -31,12 +32,16 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <format>
 
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <ostream>
 #include <sstream>
+#include <span>
+
+#include <fmt/core.h>
 
 #include "logging/logging.h"
 #include "util/fatal.h"

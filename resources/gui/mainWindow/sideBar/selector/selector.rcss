@@ -38,14 +38,46 @@
 	vertical-align: top;
 }
 
+#parameter-menu .parameter {
+	min-height: 18dp;
+	padding: 2dp 4dp;
+	border-left: 2dp transparent;
+	border-radius: 4dp;
+}
+#parameter-menu .parameter:hover {
+	background-color: #3b3b3b;
+}
+#parameter-menu .parameter:active {
+	background-color: #1d1d1d;
+}
+#parameter-menu .parameter.selected {
+	background-color: #2e2e2e;
+	border-left-color: #d1963a;
+}
+
+#parameter-menu.alt-rows .parameter:nth-child(even) {
+	background-color: #242424;
+}
+
+#parameter-menu.alt-rows .parameter:nth-child(even):hover {
+	background-color: #3b3b3b;
+}
+
 #parameter-menu .parameter input {
 	display: inline-block;
-	background-color: #151515;
-	border-radius: 0.1em;
+	background-color: #1d1d1d;
+	border: 1dp #3b3b3b;
+	border-radius: 4dp;
+	color: #f5f5f5;
 	vertical-align: middle;
-	margin: 0 0.1em;
-	padding: 0.1em 0.1em;
-	width: 4em;
+	margin: 0 4dp;
+	padding: 2dp 6dp;
+	min-width: 40dp;
+}
+
+#parameter-menu .parameter input:focus {
+	border-color: #d1963a;
+	background-color: #232323;
 }
 
 #reset-parameters, #create-block {

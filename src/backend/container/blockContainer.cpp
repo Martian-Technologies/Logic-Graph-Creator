@@ -1,11 +1,14 @@
 #include "blockContainer.h"
+
+#include "backend/circuit/circuit.h"
+#include "backend/circuit/circuitManager.h"
 #include "block/block.h"
 #include "backend/blockData/blockDataManager.h"
 
 void BlockContainer::clear(Difference* difference) {
 	difference->setIsClear();
-	for (auto iter : blocks) {
-		difference->addRemovedBlock(iter.second.getPosition(), iter.second.getOrientation(), iter.second.type());
+	for (const std::pair<const unsigned int, Block>& block : blocks) {
+		difference->addRemovedBlock(block.second.getPosition(), block.second.getOrientation(), block.second.type());
 	}
 
 	lastId = 0;
@@ -37,8 +40,25 @@ bool BlockContainer::checkCollision(Position position, Orientation orientation, 
 	return checkCollision(position, position + blockDataManager->getBlockSize(blockType, orientation).getLargestVectorInArea(), idToIgnore);
 }
 
+unsigned int BlockContainer::getBlockTypeCountRecursive(BlockType blockType) const {
+	if (selfBlockType == blockType) return 0;
+	unsigned int count = 0;
+	if (blockTypeCounts.size() > blockType) count += blockTypeCounts[blockType];
+	for (unsigned int i = 0; i < blockTypeCounts.size(); i++) {
+		if ((BlockType)i == blockType) continue;
+		circuit_id_t circuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId((BlockType)i);
+		if (circuitId == 0) continue;
+		SharedCircuit circuit = circuitManager->getCircuit(circuitId);
+		count += circuit->getBlockContainer()->getBlockTypeCountRecursive(blockType) * blockTypeCounts[i];
+	}
+	return count;
+}
+
 bool BlockContainer::tryInsertBlock(Position position, Orientation orientation, BlockType blockType, Difference* difference) {
 	if (selfBlockType == blockType || !blockDataManager->blockExists(blockType) || checkCollision(position, orientation, blockType))
+		return false;
+	circuit_id_t circuitId = circuitManager->getCircuitBlockDataManager()->getCircuitId(blockType);
+	if (circuitId != 0 && circuitManager->getCircuit(circuitId)->getBlockContainer()->getBlockTypeCountRecursive(selfBlockType) != 0)
 		return false;
 	block_id_t id = getNewId();
 	auto iter = blocks.insert(std::make_pair(id, getBlockClass(blockDataManager, blockType))).first;
@@ -109,12 +129,12 @@ bool BlockContainer::trySetType(Position positionOfBlock, BlockType type, Differ
 	tryInsertBlock(pos, rot, type, difference);
 	Block* newBlock = getBlock_(pos);
 	if (!newBlock) return false;
-	for (auto iter : connections) {
-		ConnectionEnd end1(newBlock->id(), iter.first);
-		bool isInput = blockDataManager->isConnectionInput(type, iter.first);
-		for (auto iter2 : iter.second) {
-			if (isInput) tryCreateConnection(iter2, end1, difference);
-			else tryCreateConnection(end1, iter2, difference);
+	for (const auto& connectionData : connections) {
+		ConnectionEnd end(newBlock->id(), connectionData.first);
+		bool isInput = blockDataManager->isConnectionInput(type, connectionData.first);
+		for (ConnectionEnd otherEnd : connectionData.second) {
+			if (isInput) tryCreateConnection(otherEnd, end, difference);
+			else tryCreateConnection(end, otherEnd, difference);
 		}
 	}
 	return true;
@@ -151,7 +171,6 @@ void BlockContainer::resizeBlockType(BlockType blockType, Size newSize, Differen
 }
 
 bool BlockContainer::connectionExists(Position outputPosition, Position inputPosition) const {
-	
 	const Block* input = getBlock(inputPosition);
 	if (!input) return false;
 	std::optional<connection_end_id_t> inputConnectionId = input->getInputConnectionId(inputPosition);
@@ -201,7 +220,8 @@ bool BlockContainer::tryCreateConnection(ConnectionEnd outputConnectionEnd, Conn
 		)
 	) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionEnd.getConnectionId(), outputConnectionEnd)) {
-		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd));
+		bool secondSuc = output->getConnectionContainer().tryMakeConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd);
+		assert(secondSuc);
 		difference->addCreatedConnection(
 			output->getPosition(), output->getConnectionPosition(outputConnectionEnd.getConnectionId()).value(),
 			input->getPosition(), input->getConnectionPosition(inputConnectionEnd.getConnectionId()).value()
@@ -227,7 +247,8 @@ bool BlockContainer::tryCreateConnection(Position outputPosition, Position input
 		))
 	) return false;
 	if (input->getConnectionContainer().tryMakeConnection(inputConnectionId.value(), ConnectionEnd(output->id(), outputConnectionId.value()))) {
-		assert(output->getConnectionContainer().tryMakeConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value())));
+		bool secondSuc = output->getConnectionContainer().tryMakeConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value()));
+		assert(secondSuc);
 		difference->addCreatedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}
@@ -240,7 +261,8 @@ bool BlockContainer::tryRemoveConnection(ConnectionEnd outputConnectionEnd, Conn
 	Block* output = getBlock_(outputConnectionEnd.getBlockId());
 	if (!output) return false;
 	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionEnd.getConnectionId(), outputConnectionEnd)) {
-		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd));
+		bool secondSuc = output->getConnectionContainer().tryRemoveConnection(outputConnectionEnd.getConnectionId(), inputConnectionEnd);
+		assert(secondSuc);
 		difference->addRemovedConnection(
 			output->getPosition(), output->getConnectionPosition(outputConnectionEnd.getConnectionId()).value(),
 			input->getPosition(), input->getConnectionPosition(inputConnectionEnd.getConnectionId()).value()
@@ -252,10 +274,11 @@ bool BlockContainer::tryRemoveConnection(ConnectionEnd outputConnectionEnd, Conn
 			outputConnectionEnd.getConnectionId(),
 			ConnectionEnd(outputConnectionEnd.getBlockId(), inputConnectionEnd.getConnectionId())
 		)) {
-			assert(output->getConnectionContainer().tryRemoveConnection(
+			bool secondSuc = output->getConnectionContainer().tryRemoveConnection(
 				inputConnectionEnd.getConnectionId(),
 				ConnectionEnd(inputConnectionEnd.getBlockId(), outputConnectionEnd.getConnectionId())
-			));
+			);
+			assert(secondSuc);
 			difference->addRemovedConnection(
 				output->getPosition(), output->getConnectionPosition(inputConnectionEnd.getConnectionId()).value(),
 				input->getPosition(), input->getConnectionPosition(outputConnectionEnd.getConnectionId()).value()
@@ -276,14 +299,15 @@ bool BlockContainer::tryRemoveConnection(Position outputPosition, Position input
 	std::optional<connection_end_id_t> outputConnectionId = output->getOutputConnectionId(outputPosition);
 	if (!outputConnectionId) return false;
 	if (input->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(output->id(), outputConnectionId.value()))) {
-		assert(output->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value())));
+		output->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(input->id(), inputConnectionId.value()));
 		difference->addRemovedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
 		return true;
 	}
 	if (input->type() == BlockType::JUNCTION && output->type() == BlockType::JUNCTION) {
 		if (input->getConnectionContainer().tryRemoveConnection(outputConnectionId.value(), ConnectionEnd(output->id(), inputConnectionId.value()))) {
-			assert(output->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(input->id(), outputConnectionId.value())));
-			difference->addRemovedConnection(output->getPosition(), outputPosition, input->getPosition(), inputPosition);
+			bool secondSuc = output->getConnectionContainer().tryRemoveConnection(inputConnectionId.value(), ConnectionEnd(input->id(), outputConnectionId.value()));
+			assert(secondSuc);
+			difference->addRemovedConnection(input->getPosition(), inputPosition, output->getPosition(), outputPosition);
 			return true;
 		}
 	}
@@ -307,7 +331,8 @@ void BlockContainer::removeConnectionPort(BlockType blockType, connection_end_id
 		for (auto& connectionEnd : connectionsCopy) {
 			Block* otherBlock = getBlock_(connectionEnd.getBlockId());
 			if (otherBlock && otherBlock->getConnectionContainer().tryRemoveConnection(connectionEnd.getConnectionId(), ConnectionEnd(block.id(), endId))) {
-				assert(block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd));
+				bool secondSuc = block.getConnectionContainer().tryRemoveConnection(endId, connectionEnd);
+				assert(secondSuc);
 				std::optional otherPosition = otherBlock->getConnectionPosition(connectionEnd.getConnectionId());
 				if (!otherPosition) continue;
 				if (isInput) difference->addRemovedConnection(otherBlock->getPosition(), otherPosition.value(), block.getPosition(), connectionPosition.value());
@@ -343,17 +368,21 @@ void BlockContainer::removeBlockCells(const Block* block) {
 
 Difference BlockContainer::getCreationDifference() const {
 	Difference difference;
-	for (auto iter : blocks) {
-		difference.addPlacedBlock(iter.second.getPosition(), iter.second.getOrientation(), iter.second.type());
+	for (const std::pair<const unsigned int, Block>& block : blocks) {
+		difference.addPlacedBlock(block.second.getPosition(), block.second.getOrientation(), block.second.type());
 	}
-	for (auto iter : blocks) {
-		for (auto& connectionIter : iter.second.getConnectionContainer().getConnections()) {
-			if (iter.second.isConnectionInput(connectionIter.first)) continue;
-			const auto connections = iter.second.getConnectionContainer().getConnections(connectionIter.first);
+	for (const std::pair<const unsigned int, Block>& block : blocks) {
+		for (auto& connectionIter : block.second.getConnectionContainer().getConnections()) {
+			if (block.second.isConnectionInput(connectionIter.first)) continue;
+			const auto connections = block.second.getConnectionContainer().getConnections(connectionIter.first);
 			if (!connections) continue;
 			for (auto otherConnectionIter : *connections) {
 				const Block* otherBlock = getBlock(otherConnectionIter.getBlockId());
-				difference.addCreatedConnection(iter.second.getPosition(), iter.second.getConnectionPosition(connectionIter.first).value(), otherBlock->getPosition(), otherBlock->getConnectionPosition(otherConnectionIter.getConnectionId()).value());
+				difference.addCreatedConnection(
+					block.second.getPosition(),
+					block.second.getConnectionPosition(connectionIter.first).value(),
+					otherBlock->getPosition(),
+					otherBlock->getConnectionPosition(otherConnectionIter.getConnectionId()).value());
 			}
 		}
 	}

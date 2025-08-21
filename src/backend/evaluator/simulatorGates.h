@@ -467,6 +467,10 @@ struct CopySelfOutputGate : public LogicGate {
 	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
 		return id;
 	}
+
+	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
+		states[id] = logic_state_t::LOW;
+	}
 };
 
 #endif /* simulatorGates_h */

@@ -1,7 +1,6 @@
 #include "BLIFParser.h"
 
 #include "util/algorithm.h"
-#include "util/uuid.h"
 
 std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 	// Check for cyclic import

@@ -1,7 +1,7 @@
 #ifndef connectionContainer_h
 #define connectionContainer_h
 
-#include <greg7mdp/phmap.h>
+#include <parallel_hashmap/phmap.h>
 
 #include "connectionEnd.h"
 class BlockContainer;

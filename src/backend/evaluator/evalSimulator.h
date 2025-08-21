@@ -54,7 +54,7 @@ public:
 	inline void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		gateSubstituter.removeConnection(pauseGuard, connection);
 	}
-	inline float getAverageTickrate() const {
+	inline double getAverageTickrate() const {
 		return gateSubstituter.getAverageTickrate();
 	}
 private:

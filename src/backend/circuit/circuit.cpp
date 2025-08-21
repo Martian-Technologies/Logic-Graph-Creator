@@ -8,8 +8,8 @@
 #include "logging/logging.h"
 #include "parsedCircuit.h"
 
-Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
-	circuitId(circuitId), blockContainer(blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
+Circuit::Circuit(circuit_id_t circuitId, CircuitManager* circuitManager, BlockDataManager* blockDataManager, DataUpdateEventManager* dataUpdateEventManager, const std::string& name, const std::string& uuid) :
+	circuitId(circuitId), blockContainer(circuitManager, blockDataManager), circuitUUID(uuid), circuitName(name), dataUpdateEventManager(dataUpdateEventManager), dataUpdateEventReceiver(dataUpdateEventManager) {
 	dataUpdateEventReceiver.linkFunction("preBlockSizeChange", std::bind(&Circuit::blockSizeChange, this, std::placeholders::_1));
 	dataUpdateEventReceiver.linkFunction("preBlockDataSetConnection", std::bind(&Circuit::addConnectionPort, this, std::placeholders::_1));
 	dataUpdateEventReceiver.linkFunction("preBlockDataRemoveConnection", std::bind(&Circuit::removeConnectionPort, this, std::placeholders::_1));
@@ -18,7 +18,7 @@ Circuit::Circuit(circuit_id_t circuitId, BlockDataManager* blockDataManager, Dat
 void Circuit::clear(bool clearUndoTree) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.clear(difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	if (clearUndoTree) {
 		undoSystem.clear();
 	}
@@ -41,7 +41,7 @@ bool Circuit::tryInsertBlock(Position position, Orientation orientation, BlockTy
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryInsertBlock(position, orientation, blockType, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
@@ -51,7 +51,7 @@ bool Circuit::tryRemoveBlock(Position position) {
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveBlock(position, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
@@ -62,11 +62,11 @@ bool Circuit::tryMoveBlock(Position positionOfBlock, Position position) {
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryMoveBlock(positionOfBlock, position, Orientation(), difference.get());
 	assert(out != difference->empty());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
-bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Orientation transformAmount) {
+bool Circuit::tryMoveBlocks(const SharedSelection& selection, Vector movement, Orientation transformAmount) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
@@ -112,20 +112,20 @@ bool Circuit::tryMoveBlocks(SharedSelection selection, Vector movement, Orientat
 	// // finding tmp pos to move everything to
 	// if (checkMoveCollision(selection, movement)) return false;
 	// moveBlocks(selection, movement, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return true;
 }
 
-void Circuit::setType(SharedSelection selection, BlockType type) {
+void Circuit::setType(const SharedSelection& selection, BlockType type) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	setType(selection, type, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 }
 
-void Circuit::setType(SharedSelection selection, BlockType type, Difference* difference) {
+void Circuit::setType(const SharedSelection& selection, BlockType type, Difference* difference) {
 
 	// Cell Selection
 	SharedCellSelection cellSelection = selectionCast<CellSelection>(selection);
@@ -150,12 +150,12 @@ void Circuit::tryInsertOverArea(Position cellA, Position cellB, Orientation tran
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	for (cord_t x = cellA.x; x <= cellB.x; x++) {
-		for (cord_t y = cellA.y; y <= cellB.y; y++) {
+	for (coordinate_t x = cellA.x; x <= cellB.x; x++) {
+		for (coordinate_t y = cellA.y; y <= cellB.y; y++) {
 			blockContainer.tryInsertBlock(Position(x, y), transformAmount, blockType, difference.get());
 		}
 	}
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 }
 
 void Circuit::tryRemoveOverArea(Position cellA, Position cellB) {
@@ -166,12 +166,12 @@ void Circuit::tryRemoveOverArea(Position cellA, Position cellB) {
 	if (cellA.y > cellB.y) std::swap(cellA.y, cellB.y);
 
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	for (cord_t x = cellA.x; x <= cellB.x; x++) {
-		for (cord_t y = cellA.y; y <= cellB.y; y++) {
+	for (coordinate_t x = cellA.x; x <= cellB.x; x++) {
+		for (coordinate_t y = cellA.y; y <= cellB.y; y++) {
 			blockContainer.tryRemoveBlock(Position(x, y), difference.get());
 		}
 	}
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 }
 
 bool Circuit::checkCollision(const SharedSelection& selection) {
@@ -234,7 +234,7 @@ bool Circuit::tryInsertParsedCircuit(const ParsedCircuit& parsedCircuit, Positio
 			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputEndId, conn.outputBlockId, conn.outputEndId);
 		}
 	}
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return true;
 }
 
@@ -281,7 +281,7 @@ bool Circuit::tryInsertGeneratedCircuit(const GeneratedCircuit& generatedCircuit
 			logError("Failed to create connection while inserting block (could be a duplicate connection in parsing):[{},{}] -> [{},{}]", "", conn.inputBlockId, conn.inputId, conn.outputBlockId, conn.outputId);
 		}
 	}
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return true;
 }
 
@@ -318,7 +318,7 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 			logError("Failed to create connection while inserting block.");
 		}
 	}
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return true;
 }
 
@@ -328,7 +328,7 @@ bool Circuit::tryCreateConnection(Position outputPosition, Position inputPositio
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputPosition, inputPosition, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
@@ -338,7 +338,7 @@ bool Circuit::tryRemoveConnection(Position outputPosition, Position inputPositio
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputPosition, inputPosition, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
@@ -348,7 +348,7 @@ bool Circuit::tryCreateConnection(ConnectionEnd outputConnectionEnd, ConnectionE
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryCreateConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
@@ -358,37 +358,38 @@ bool Circuit::tryRemoveConnection(ConnectionEnd outputConnectionEnd, ConnectionE
 #endif
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	bool out = blockContainer.tryRemoveConnection(outputConnectionEnd, inputConnectionEnd, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	return out;
 }
 
-bool Circuit::tryCreateConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+bool Circuit::tryCreateConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	if (!sameSelectionShape(outputSelection, inputSelection)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	createConnection(outputSelection, inputSelection, difference.get());
-	sendDifference(difference);
+	createConnection(std::move(outputSelection), std::move(inputSelection), difference.get());
+	sendDifference(std::move(difference));
 	return true;
 }
 
-bool Circuit::tryRemoveConnection(SharedSelection outputSelection, SharedSelection inputSelection) {
+bool Circuit::tryRemoveConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	if (!sameSelectionShape(outputSelection, inputSelection)) return false;
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
-	removeConnection(outputSelection, inputSelection, difference.get());
-	sendDifference(difference);
+	removeConnection(std::move(outputSelection), std::move(inputSelection), difference.get());
+	sendDifference(std::move(difference));
 	return true;
 }
 
-void Circuit::createConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference) {
+void Circuit::createConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection, Difference* difference) {
 	// Cell Selection
 	SharedCellSelection outputCellSelection = selectionCast<CellSelection>(outputSelection);
-	if (outputCellSelection) {
-		blockContainer.tryCreateConnection(outputCellSelection->getPosition(), selectionCast<CellSelection>(inputSelection)->getPosition(), difference);
+	SharedCellSelection inputCellSelection = selectionCast<CellSelection>(inputSelection);
+	if (outputCellSelection && inputCellSelection) {
+		blockContainer.tryCreateConnection(outputCellSelection->getPosition(), inputCellSelection->getPosition(), difference);
 		return;
 	}
 
@@ -412,11 +413,12 @@ void Circuit::createConnection(SharedSelection outputSelection, SharedSelection 
 	}
 }
 
-void Circuit::removeConnection(SharedSelection outputSelection, SharedSelection inputSelection, Difference* difference) {
+void Circuit::removeConnection(const SharedSelection& outputSelection, const SharedSelection& inputSelection, Difference* difference) {
 	// Cell Selection
-	SharedCellSelection outputCellSelection = selectionCast<CellSelection>(outputSelection);
-	if (outputCellSelection) {
-		blockContainer.tryRemoveConnection(outputCellSelection->getPosition(), selectionCast<CellSelection>(inputSelection)->getPosition(), difference);
+	const SharedCellSelection& outputCellSelection = selectionCast<CellSelection>(outputSelection);
+	const SharedCellSelection& inputCellSelection = selectionCast<CellSelection>(inputSelection);
+	if (outputCellSelection && inputCellSelection) {
+		blockContainer.tryRemoveConnection(outputCellSelection->getPosition(), inputCellSelection->getPosition(), difference);
 		return;
 	}
 
@@ -532,7 +534,7 @@ void Circuit::blockSizeChange(const DataUpdateEventManager::EventData* eventData
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.resizeBlockType(data->get().first, data->get().second, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 	undoSystem.addBlocker(); // cant undo after changing block size!
 }
 
@@ -553,7 +555,7 @@ void Circuit::addConnectionPort(const DataUpdateEventManager::EventData* eventDa
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.addConnectionPort(data->get().first, data->get().second, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 }
 
 void Circuit::removeConnectionPort(const DataUpdateEventManager::EventData* eventData) {
@@ -568,7 +570,7 @@ void Circuit::removeConnectionPort(const DataUpdateEventManager::EventData* even
 	}
 	DifferenceSharedPtr difference = std::make_shared<Difference>();
 	blockContainer.removeConnectionPort(data->get().first, data->get().second, difference.get());
-	sendDifference(difference);
+	sendDifference(std::move(difference));
 }
 
 void Circuit::setCircuitName(const std::string& name) {
