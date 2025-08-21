@@ -1,5 +1,3 @@
-add_main_dependencies()
-
 if(CONNECTION_MACHINE_CODE_COVERAGE)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 		message(STATUS "Code coverage enabled")
@@ -45,6 +43,9 @@ if(APPLE)
 endif()
 
 add_executable(${PROJECT_NAME}_tests ${TEST_FILES})
+
+add_main_dependencies()
+
 target_include_directories(${PROJECT_NAME}_tests PRIVATE ${SOURCE_DIR} ${TEST_DIR} "${EXTERNAL_DIR}/wasmtime")
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${EXTERNAL_LINKS})
 
