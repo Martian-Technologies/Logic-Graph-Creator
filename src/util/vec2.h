@@ -47,4 +47,4 @@ struct Vec2Int {
 	vec_int_coordinate_t x, y;
 };
 
-#endif
+#endif /* vec2_h */

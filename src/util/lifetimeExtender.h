@@ -15,4 +15,4 @@ private:
 	std::vector<std::shared_ptr<void>> lifetimes;
 };
 
-#endif
+#endif /* lifetimeExtender_h */

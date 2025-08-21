@@ -1,4 +1,5 @@
 include(cmake/CPM.cmake)
+include(ExternalProject)
 
 function(add_main_dependencies)
 	# JSON
@@ -7,12 +8,13 @@ function(add_main_dependencies)
 		GITHUB_REPOSITORY nlohmann/json
 		GIT_TAG v3.12.0
 		OPTIONS
-			"OPTION_BUILD_TESTS OFF"
+			"JSON_BuildTests OFF"
 			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/json"
 	)
 	list(APPEND EXTERNAL_LINKS nlohmann_json)
 
+	# fmt
 	CPMAddPackage(
 		NAME fmt
 		GITHUB_REPOSITORY fmtlib/fmt
@@ -20,6 +22,19 @@ function(add_main_dependencies)
 		SOURCE_DIR "${EXTERNAL_DIR}/fmt"
 	)
 	list(APPEND EXTERNAL_LINKS fmt)
+
+	# yosys
+	CPMAddPackage(
+		NAME yosys_shared
+		GITHUB_REPOSITORY nickrallison/yosys
+		GIT_TAG e1838da042ea471c8bcc1f468b80fefdd6738dea
+		OPTIONS
+			"ENABLE_LIBYOSYS ON"
+			"ENABLE_READLINE OFF"
+		SOURCE_DIR "${EXTERNAL_DIR}/yosys"
+	)
+	target_compile_options(yosys_shared PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>)
+	list(APPEND EXTERNAL_LINKS yosys_shared)
 
 	# CPPLocate (they have extreme cmake goofyness)
 	CPMAddPackage(
@@ -180,6 +195,13 @@ function(add_app_dependencies)
 			"EXCLUDE_FROM_ALL YES"
 		SOURCE_DIR "${EXTERNAL_DIR}/VulkanMemoryAllocator"
 	)
+	get_target_property(compile_opts VulkanMemoryAllocator INTERFACE_COMPILE_OPTIONS)
+	if (compile_opts)
+		list(APPEND compile_opts "$<$<CXX_COMPILER_ID:GNU>:-Wno-nullability-completeness>")
+	else()
+		set(compile_opts "$<$<CXX_COMPILER_ID:GNU>:-Wno-nullability-completeness>")
+	endif()
+	set_target_properties(VulkanMemoryAllocator PROPERTIES INTERFACE_COMPILE_OPTIONS "${compile_opts}")
 	list(APPEND EXTERNAL_LINKS VulkanMemoryAllocator)
 
 	# Vk Bootstrap

@@ -45,8 +45,6 @@ if(MSVC)
 	add_compile_options(/W1)
 endif()
 
-set(EXTERNAL_LINKS)
-
 if (CONNECTION_MACHINE_BUILD_APP)
 	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/makeApp.cmake)
 endif()
