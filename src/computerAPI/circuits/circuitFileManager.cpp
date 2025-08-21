@@ -2,6 +2,7 @@
 
 #include "openCircuitsParser.h"
 #include "BLIFParser.h"
+#include "verilogYosysParser.h"
 #include "connectionMachineParser.h"
 #include "util/uuid.h"
 
@@ -30,6 +31,15 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		BLIFParser parser(this, circuitManager);
+		std::vector<circuit_id_t> circuits = parser.load(path);
+		if (circuits.empty()) {
+			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
+		}
+		return circuits;
+	} else if (path.size() >= 2 && path.substr(path.size() - 2) == ".v") {
+		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
+		// open circuit file parser function
+		VerilogYosysParser parser(this, circuitManager);
 		std::vector<circuit_id_t> circuits = parser.load(path);
 		if (circuits.empty()) {
 			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);

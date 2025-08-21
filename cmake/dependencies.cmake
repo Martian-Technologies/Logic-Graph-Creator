@@ -23,17 +23,43 @@ function(add_main_dependencies)
 	)
 	list(APPEND EXTERNAL_LINKS fmt)
 
+	CPMAddPackage(
+		NAME yosys-slang
+		GITHUB_REPOSITORY ItchyTrack/yosys-slang
+		GIT_TAG f99230e2c015eb48bb397cd14115f515372a99fd
+		OPTIONS
+			"BUILD_AS_PLUGIN OFF"
+		SOURCE_DIR "${EXTERNAL_DIR}/yosys-slang"
+	)
+	list(APPEND EXTERNAL_LINKS yosys-slang)
+	
 	# yosys
 	CPMAddPackage(
 		NAME yosys_shared
-		GITHUB_REPOSITORY nickrallison/yosys
-		GIT_TAG e1838da042ea471c8bcc1f468b80fefdd6738dea
+		GITHUB_REPOSITORY ItchyTrack/yosys
+		GIT_TAG 6ccd62334f03c84f80e3a32373b83a9d7e8707f6
 		OPTIONS
 			"ENABLE_LIBYOSYS ON"
 			"ENABLE_READLINE OFF"
+			"DISABLE_SPAWN ON"
+			"ENABLE_ABC OFF"
+			"LINK_ABC OFF"
 		SOURCE_DIR "${EXTERNAL_DIR}/yosys"
 	)
 	target_compile_options(yosys_shared PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>)
+	get_target_property(yosys_link_flags yosys_shared LINK_FLAGS)
+	if(APPLE)
+		set(yosys_link_flags_to_add "-Wl,-force_load,${MYLIB}")
+	else()
+		set(yosys_link_flags_to_add "-Wl,--whole-archive ${MYLIB} -Wl,--no-whole-archive")
+	endif()
+	if (yosys_link_flags)
+		message("yosys_link_flags:${yosys_link_flags}")
+		set_target_properties(yosys_shared PROPERTIES LINK_FLAGS "${yosys_link_flags} ${yosys_link_flags_to_add}")
+	else()
+		set_target_properties(yosys_shared PROPERTIES LINK_FLAGS ${yosys_link_flags_to_add})
+	endif()
+	add_dependencies(yosys_shared yosys-slang) # forces compile order
 	list(APPEND EXTERNAL_LINKS yosys_shared)
 
 	# CPPLocate (they have extreme cmake goofyness)
