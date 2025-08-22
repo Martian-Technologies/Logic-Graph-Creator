@@ -1,11 +1,17 @@
 #include "verilogYosysParser.h"
 
 #include <kernel/yosys.h>
+// #include <slang_frontend.h>
 
 std::vector<circuit_id_t> VerilogYosysParser::load(const std::string& path) {
 	Yosys::yosys_setup(); // ok to run again
 	// Yosys::load_plugin("/Users/ben/Documents/GitHub/Logic-Graph-Creator/build/_deps/yosys-slang-build/slang.so", {});
 	// Yosys::loaded_plugins.begin()->second->
+
+	logInfo("Yosys passes:", "VerilogYosysParser");
+	for (auto& pair : Yosys::pass_register) {
+		logInfo("{}", "VerilogYosysParser", pair.first);
+	}
 
 	logInfo("Yosys plugins:", "VerilogYosysParser");
 	for (auto& pair : Yosys::loaded_plugins) {
