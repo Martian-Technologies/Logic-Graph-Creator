@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 import argparse
 
-ICO_SIZES = [16, 24, 32, 48, 64, 128, 256]
+ICO_SIZES = [16, 24, 32, 48, 64, 128, 256, 512, 1024]
 ICNS_SIZES = [16, 32, 64, 128, 256, 512, 1024]
 
 def make_square_rgba(im: Image.Image) -> Image.Image:
