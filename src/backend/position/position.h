@@ -656,7 +656,7 @@ struct Orientation {
 	inline Size operator*(Size size) const noexcept { return rotateSize(rotation, size); }
 	inline FSize operator*(FSize size) const noexcept { return rotateSize(rotation, size); }
 	inline bool operator==(Orientation other) const noexcept { return this->rotation == other.rotation && this->flipped == other.flipped; }
-	inline bool operator!=(Orientation other) { return !(*this == other); }
+	inline bool operator!=(Orientation other) const noexcept { return !(*this == other); }
 	inline void rotate(bool clockWise) { rotation = ::rotate(rotation, clockWise); }
 	inline void flip() { flipped = !flipped; }
 	inline Orientation operator*(Orientation other) const noexcept {
