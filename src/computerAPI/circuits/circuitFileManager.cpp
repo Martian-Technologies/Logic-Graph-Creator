@@ -4,11 +4,23 @@
 #include "BLIFParser.h"
 #include "verilogYosysParser.h"
 #include "connectionMachineParser.h"
-#include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) { }
 
 std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& path) {
+	auto iter = filePathToFile.find(path);
+	if (iter != filePathToFile.end()) {
+		logInfo("Duplicate import detected. skipping file: " + path, "CircuitFileManager");
+		std::vector<circuit_id_t> circuitIds;
+		for (const std::string& uuid : iter->second.UUIDs) {
+			SharedCircuit circuit = circuitManager->getCircuit(uuid);
+			if (circuit) {
+				circuitIds.push_back(circuit->getCircuitId());
+			}
+		}
+		return circuitIds;
+	}
+
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
 		// our Connection Machine file parser function
 		ConnectionMachineParser parser(this, circuitManager);

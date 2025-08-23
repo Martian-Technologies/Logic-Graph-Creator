@@ -66,12 +66,6 @@ std::string orientationToString(Orientation orientation) {
 }
 
 std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path) {
-	// Check for cyclic import
-	if (importedFiles.find(path) != importedFiles.end()) {
-		logError("Cyclic import detected: " + path, "ConnectionMachineParser");
-		return {};
-	}
-	importedFiles.insert(path);
 	logInfo("Parsing Connection Machine Circuit File (.cir)", "ConnectionMachineParser");
 
 	std::ifstream inputFile(path, std::ios::in | std::ios::binary);
@@ -105,8 +99,9 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 		if (token == "import") {
 			std::string importFileName;
 			inputFile >> std::quoted(importFileName);
+			// std::filesystem::path(importFileName).
 			std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
-			const std::string& fPath = fullPath.string();
+			const std::string& fPath = std::filesystem::weakly_canonical(fullPath).string();
 			circuitFileManager->loadFromFile(fPath);
 		} else if (token == "Circuit:") {
 			if (currentParsedCircuit) {

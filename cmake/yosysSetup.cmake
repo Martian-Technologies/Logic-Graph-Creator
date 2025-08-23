@@ -36,6 +36,8 @@ CPMAddPackage(
 		"BUILD_AS_PLUGIN OFF"
 	SOURCE_DIR "${EXTERNAL_DIR}/yosys-slang"
 )
+
+list(APPEND EXTERNAL_LINKS yosys-slang)
 set(YOSYS_SLANG_BIN_LOCATION "${CMAKE_BINARY_DIR}/libyosys-slang.a")
 # list(APPEND EXTERNAL_LINKS yosys-slang)
 
@@ -96,6 +98,7 @@ execute_process(
 if (APPLE)
 	add_custom_target(build_yosys ALL
 		BYPRODUCTS ${YOSYS_BIN_LOCATION}
+		COMMAND ${CMAKE_COMMAND} -E rm -f ${YOSYS_BIN_LOCATION}
 		COMMAND ${MAKE_EXE} -f ${EXTERNAL_DIR}/yosys/Makefile -j8 libyosys${YOSYS_LIB_SUFFIX}
 		COMMAND ${CMAKE_INSTALL_NAME_TOOL} -id ${YOSYS_BIN_LOCATION} ${YOSYS_BIN_LOCATION}
 		WORKING_DIRECTORY ${yosys_BINARY_DIR}
@@ -123,3 +126,7 @@ set_target_properties(Yosys PROPERTIES
 	INTERFACE_INCLUDE_DIRECTORIES ${EXTERNAL_DIR}/yosys/share/include
 )
 list(APPEND EXTERNAL_LINKS Yosys)
+
+# we also want slang
+# set(SLANG_USE_MIMALLOC OFF)
+# add_subdirectory(${yosys-slang_SOURCE_DIR}/third_party/slang)
