@@ -27,7 +27,7 @@ private:
 	ElementID elementID = 0;
 	unsigned long long lastCircuitEdit = 0;
 	std::string mode = "None";
-	Orientation transformAmount = Rotation::ZERO;
+	Orientation transformAmount = Orientation();
 	SharedSelectionHelperTool activeSelectionHelper = nullptr;
 };
 

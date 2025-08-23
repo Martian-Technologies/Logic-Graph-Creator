@@ -55,7 +55,7 @@ void PasteTool::updateElements() {
 			blocks.emplace_back(
 				block.blockType,
 				lastPointerPosition + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
-				block.orientation * transformAmount
+				transformAmount * block.orientation
 			);
 		}
 		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));

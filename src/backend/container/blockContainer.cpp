@@ -105,7 +105,7 @@ bool BlockContainer::tryRemoveBlock(Position position, Difference* difference) {
 bool BlockContainer::tryMoveBlock(Position positionOfBlock, Position position, Orientation transformAmount, Difference* difference) {
 	Block* block = getBlock_(positionOfBlock);
 	if (!block) return false;
-	Orientation newOrientation = block->getOrientation() * transformAmount;
+	Orientation newOrientation = transformAmount * block->getOrientation();
 	Position newPosition = position + (block->getPosition() - positionOfBlock);
 	if (checkCollision(newPosition, newOrientation, block->type(), block->id())) return false;
 	// do move
