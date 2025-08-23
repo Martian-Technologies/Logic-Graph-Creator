@@ -46,9 +46,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    steps:
-    - uses: actions/checkout@v2
-
     - name: Cache CMake dependency source code
       uses: actions/cache@v2
       env:
