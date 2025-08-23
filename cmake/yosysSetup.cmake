@@ -36,6 +36,11 @@ CPMAddPackage(
 		"BUILD_AS_PLUGIN OFF"
 	SOURCE_DIR "${EXTERNAL_DIR}/yosys-slang"
 )
+# removes $<TARGET_OBJECTS:fmt::fmt> from STATIC_LIBRARY_OPTIONS
+set_target_properties(yosys-slang PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+	STATIC_LIBRARY_OPTIONS "$<TARGET_OBJECTS:slang::slang>"
+)
 
 list(APPEND EXTERNAL_LINKS yosys-slang)
 set(YOSYS_SLANG_BIN_LOCATION "${CMAKE_BINARY_DIR}/libyosys-slang.a")
