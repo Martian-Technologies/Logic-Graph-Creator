@@ -52,17 +52,16 @@ jobs:
          version: 1.4.309.0
          cache: true
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
+    - name: Install Dependencies
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        sudo apt-get update
+        sudo apt-get install gperf build-essential bison flex libfl-dev libreadline-dev gawk tcl-dev libffi-dev git graphviz xdot pkg-config python3 libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev libbz2-dev
 
     - name: Build with CMake
       uses: ashutoshvarma/action-cmake-build@master
       with:
-        build-dir: ${{ steps.strings.outputs.build-output-dir }}
+        build-dir: ${{ github.workspace }}/build
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
         configure-options: "-DCONNECTION_MACHINE_BUILD_TESTS=ON -DCONNECTION_MACHINE_BUILD_APP=OFF"
@@ -70,10 +69,10 @@ jobs:
         build-type: ${{ matrix.build_type }}
 
     - name: List files
-      run: ls ${{ steps.strings.outputs.build-output-dir }}
+      run: ls ${{ github.workspace }}/build
 
     - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      working-directory: ${{ github.workspace }}/build
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ${{ matrix.runExecutable }}
