@@ -48,6 +48,8 @@ void CircuitView::setEvaluator(Backend* backend, evaluator_id_t evaluatorId, con
 				this->backend = backend;
 			}
 			this->evaluator = evaluator;
+			this->address = address;
+			
 			circuit_id_t circuitId = evaluator->getCircuitId(address);
 			SharedCircuit circuit = backend->getCircuit(circuitId); // ok if null
 			this->circuit = circuit;
@@ -80,6 +82,7 @@ void CircuitView::setEvaluator(Backend* backend, std::shared_ptr<Evaluator> eval
 			this->backend = backend;
 		}
 		this->evaluator = evaluator;
+		this->address = address;
 
 		circuit_id_t circuitId = evaluator->getCircuitId(address);
 		SharedCircuit circuit = backend->getCircuit(circuitId); // ok if null
