@@ -3,7 +3,7 @@ from PIL import Image
 import argparse
 
 ICO_SIZES = [16, 24, 32, 48, 64, 128, 256]
-ICNS_SIZES = [16, 32, 64, 128, 256, 512, 1024]
+ICNS_SIZES = [16, 32, 64, 128, 256]
 
 def make_square_rgba(im: Image.Image) -> Image.Image:
     im = im.convert("RGBA")
@@ -41,17 +41,17 @@ def main():
         im.save(base.with_suffix(".ico"), sizes=ico_sizes)  # Pillow handles downscaling
         print(f"Wrote {base.with_suffix('.ico')} with sizes {ico_sizes}")
 
-    # ICNS
-    if not args.no_icns:
-        # Prepare largest base + append_images for other sizes
-        available = [s for s in ICNS_SIZES if s <= im.size[0]]
-        if not available:
-            available = [min(1024, im.size[0])]
-        base_size = max(available)
-        base_img = resized(im, base_size)
-        others = [resized(im, s) for s in available if s != base_size]
-        base_img.save(base.with_suffix(".icns"), append_images=others)
-        print(f"Wrote {base.with_suffix('.icns')} with sizes {available}")
+    # # ICNS
+    # if not args.no_icns:
+    #     # Prepare largest base + append_images for other sizes
+    #     available = [s for s in ICNS_SIZES if s <= im.size[0]]
+    #     if not available:
+    #         available = [min(1024, im.size[0])]
+    #     base_size = max(available)
+    #     base_img = resized(im, base_size)
+    #     others = [resized(im, s) for s in available if s != base_size]
+    #     base_img.save(base.with_suffix(".icns"), append_images=others)
+    #     print(f"Wrote {base.with_suffix('.icns')} with sizes {available}")
 
 if __name__ == "__main__":
     main()
