@@ -23,9 +23,6 @@ function(add_main_dependencies)
 	)
 	list(APPEND EXTERNAL_LINKS fmt)
 
-	# yosys
-	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/yosysSetup.cmake)
-
 	# CPPLocate (they have extreme cmake goofyness)
 	CPMAddPackage(
 		NAME cpplocate
