@@ -99,7 +99,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 	if (version == 1) {
 		currentParsedCircuit = std::make_shared<ParsedCircuit>();
 		currentParsedCircuit->setAbsoluteFilePath(path);
-		currentParsedCircuit->setName(std::filesystem::path(path).stem());
+		currentParsedCircuit->setName(std::filesystem::path(path).stem().string());
 	}
 
 	while (inputFile >> token) {
