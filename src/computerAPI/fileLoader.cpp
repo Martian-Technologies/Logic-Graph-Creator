@@ -5,7 +5,7 @@ std::vector<char> readFileAsBytes(const std::filesystem::path& path) {
 	std::ifstream file(path, std::ios::binary | std::ios::ate);
 
 	if (!file.is_open()) {
-		logError("Could not open file (" + path.string() + ")");
+		logError("Could not open file (" + path.generic_string() + ")");
 		return {};
 	}
 
@@ -16,7 +16,7 @@ std::vector<char> readFileAsBytes(const std::filesystem::path& path) {
 	// read file as bytes
 	std::vector<char> buffer(size);
 	if (!file.read(buffer.data(), size)) {
-		logError("Could not read file (" + path.string() + ")");
+		logError("Could not read file (" + path.generic_string() + ")");
 		return {};
 	}
 

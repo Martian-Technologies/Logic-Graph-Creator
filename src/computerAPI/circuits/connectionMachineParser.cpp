@@ -87,6 +87,8 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 		version = 6;
 	} else if (token == "version_5" || token == "version_4" || token == "version_3" || token == "version_2") {
 		version = 5;
+	} else if (token == "version_1") {
+		version = 1;
 	} else {
 		logError("Invalid circuit file version: " + token, "ConnectionMachineParser");
 		return {};
@@ -94,6 +96,11 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 
 	std::vector<circuit_id_t> circuitIds;
 	SharedParsedCircuit currentParsedCircuit = nullptr;
+	if (version == 1) {
+		currentParsedCircuit = std::make_shared<ParsedCircuit>();
+		currentParsedCircuit->setAbsoluteFilePath(path);
+		currentParsedCircuit->setName(std::filesystem::path(path).stem());
+	}
 
 	while (inputFile >> token) {
 		if (token == "import") {
@@ -101,7 +108,7 @@ std::vector<circuit_id_t> ConnectionMachineParser::load(const std::string& path)
 			inputFile >> std::quoted(importFileName);
 			// std::filesystem::path(importFileName).
 			std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
-			const std::string& fPath = std::filesystem::weakly_canonical(fullPath).string();
+			const std::string& fPath = std::filesystem::weakly_canonical(fullPath).generic_string();
 			circuitFileManager->loadFromFile(fPath);
 		} else if (token == "Circuit:") {
 			if (currentParsedCircuit) {
@@ -252,7 +259,7 @@ bool ConnectionMachineParser::save(const CircuitFileManager::FileData& fileData,
 			} else {
 				if (!pathImports.insert(*subSavePath).second) continue;
 				try {
-					std::string relPath = std::filesystem::relative(std::filesystem::path(*subSavePath), std::filesystem::path(path) / "..").string();
+					std::string relPath = std::filesystem::relative(std::filesystem::path(*subSavePath), std::filesystem::path(path) / "..").generic_string();
 					outputFile << "import \"" << relPath << "\"\n";
 				} catch (...) {
 					logError("Could not find relPath between, \"{}\" and \"{}\".", "ConnectionMachineParser", *subSavePath, path);

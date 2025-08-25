@@ -16,7 +16,7 @@ RmlInstance::RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface
 		throwFatalError("Could not initialize RmlUI.");
 	}
 
-	Rml::LoadFontFace((DirectoryManager::getResourceDirectory() / "gui/fonts/monaspace.otf").string());
+	Rml::LoadFontFace((DirectoryManager::getResourceDirectory() / "gui/fonts/monaspace.otf").generic_string());
 }
 
 RmlInstance::~RmlInstance() {

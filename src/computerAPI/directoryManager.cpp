@@ -13,7 +13,7 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToExecutable = getExecutablePath().parent_path() / "resources";
 	if (std::filesystem::exists(relativeToExecutable)) {
 		resourceDirectory = relativeToExecutable;
-		logInfo("Found resource directory relative to executable at ({})", "", resourceDirectory.string());
+		logInfo("Found resource directory relative to executable at ({})", "", resourceDirectory.generic_string());
 		return;
 	}
 
@@ -21,7 +21,7 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToBundle = getBundlePath().parent_path() / "resources";
 	if (std::filesystem::exists(relativeToBundle)) {
 		resourceDirectory = relativeToBundle;
-		logInfo("Found resource directory relative to MacOS bundle at ({})", "", resourceDirectory.string());
+		logInfo("Found resource directory relative to MacOS bundle at ({})", "", resourceDirectory.generic_string());
 		return;
 	}
 
@@ -29,7 +29,7 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToExecutableParent = getExecutablePath().parent_path().parent_path() / "resources";
 	if (std::filesystem::exists(relativeToExecutableParent)) {
 		resourceDirectory = relativeToExecutableParent;
-		logInfo("Found resource directory relative to executable's parent at ({})", "", resourceDirectory.string());
+		logInfo("Found resource directory relative to executable's parent at ({})", "", resourceDirectory.generic_string());
 		return;
 	}
 
@@ -37,7 +37,7 @@ void DirectoryManager::findDirectories() {
 	std::filesystem::path relativeToWorkingDirectory = "resources";
 	if (std::filesystem::exists(relativeToWorkingDirectory)) {
 		resourceDirectory = relativeToWorkingDirectory;
-		logWarning("Found resource directory strictly relative to working directory, this is probably not intended.", "", resourceDirectory.string());
+		logWarning("Found resource directory strictly relative to working directory, this is probably not intended.", "", resourceDirectory.generic_string());
 		return;
 	}
 

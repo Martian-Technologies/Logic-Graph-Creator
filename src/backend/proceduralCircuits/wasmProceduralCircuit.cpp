@@ -12,7 +12,7 @@ WasmProceduralCircuit::WasmInstance::WasmInstance(wasmtime::Module module, Circu
 			std::string path = (*thisPtrPtr)->wasmToString(fileStrOffset);
 			if (std::filesystem::path(path).is_relative()) {
 				const std::string* thisPath = (*thisPtrPtr)->fileManager->getSavePath((*thisPtrPtr)->UUID);
-				path = std::filesystem::path(*thisPath).replace_filename(std::filesystem::path(path)).string();
+				path = std::filesystem::path(*thisPath).replace_filename(std::filesystem::path(path)).generic_string();
 			}
 			return (*thisPtrPtr)->fileManager->loadFromFile(path).size();
 		});

@@ -17,7 +17,7 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager,
 
 	// create rmlUI document
 	renderer.activateRml(renderInterface);
-	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().string() + "/gui/mainWindow/mainWindow.rml");
+	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().generic_string() + "/gui/mainWindow/mainWindow.rml");
 
 	// Rml::Debugger::Initialise(rmlContext);
 	// Rml::Debugger::SetVisible(true);
