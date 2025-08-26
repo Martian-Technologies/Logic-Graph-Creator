@@ -9,12 +9,6 @@ Things will generally run smoothly on MacOS and Linux, there are a few more step
 ## Getting the source
 You can start by git cloning the repository. A git client or the command line should work.
 
-We use git submodules so that we can keep the code of some of our smaller dependencies in the project, and so that they can be compiled by our build system.
-After cloning the main project, clone the submodules with these commands:
-- `git submodule init`
-- `git submodule update --init --recursive`
-> If you have a client that can do this, or clone the repo with the submodules to begin with, that's fine too.
-
 ## System dependencies
 This project requires [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) and [Wasmtime](https://github.com/bytecodealliance/wasmtime) to build.
 - On MacOS, it is recommended to install `vulkan-tools`, `vulkan-validationlayers`, and `shaderc` using [brew](https://brew.sh/).
