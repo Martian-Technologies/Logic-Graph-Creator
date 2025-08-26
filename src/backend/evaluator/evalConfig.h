@@ -5,11 +5,11 @@ class EvalConfig {
 public:
 	EvalConfig() = default;
 
-	inline long long int getTargetTickrate() const {
+	inline double getTargetTickrate() const {
 		return targetTickrate.load();
 	}
 
-	inline void setTargetTickrate(long long int tickrate) {
+	inline void setTargetTickrate(double tickrate) {
 		targetTickrate.store(tickrate);
 		notifySubscribers();
 	}
@@ -76,7 +76,7 @@ public:
 	}
 
 private:
-	std::atomic<long long int> targetTickrate = 0; // in ticks per minute
+	std::atomic<double> targetTickrate = 0.0;
 	std::atomic<bool> tickrateLimiter = true;
 	std::atomic<bool> running = false;
 	std::atomic<bool> realistic = false;

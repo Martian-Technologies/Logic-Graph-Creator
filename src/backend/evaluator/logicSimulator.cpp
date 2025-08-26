@@ -36,7 +36,14 @@ double LogicSimulator::getAverageTickrate() const {
 	if (!evalConfig.isRunning()) {
 		return false;
 	}
-	return averageTickrate.load(std::memory_order_acquire);
+	double tickspeed = averageTickrate.load(std::memory_order_acquire);
+	// if tickspeed close enough to target tickspeed, return target tickspeed
+	double targetTickrate = evalConfig.getTargetTickrate();
+	double percentageError = (tickspeed - targetTickrate) / targetTickrate;
+	if (std::abs(percentageError) < 0.01) {
+		return targetTickrate;
+	}
+	return tickspeed;
 }
 
 void LogicSimulator::simulationLoop() {
@@ -92,9 +99,9 @@ void LogicSimulator::simulationLoop() {
 
 			// handle timing after ticking
 			if (evalConfig.isTickrateLimiterEnabled()) {
-				long long targetTickrate = evalConfig.getTargetTickrate();
+				double targetTickrate = evalConfig.getTargetTickrate();
 				if (targetTickrate > 0) {
-					auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes { 1 }) / targetTickrate;
+					auto period = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / targetTickrate));
 					nextTick += period;
 					std::unique_lock lk(cvMutex);
 					cv.wait_until(lk, nextTick, [&] { return pauseRequest || !running || !evalConfig.isRunning(); });

@@ -98,8 +98,8 @@ public:
 	void tickStep() { tickStep (1); }
 	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
 	bool isRealistic() const { return evalConfig.isRealistic(); }
-	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
-	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
+	void setTickrate(double tickrate) { evalConfig.setTargetTickrate(tickrate); }
+	double getTickrate() const { return evalConfig.getTargetTickrate(); }
 	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
 	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
 	double getRealTickrate() const { return evalSimulator.getAverageTickrate(); }

@@ -33,7 +33,7 @@ TEST_F(EvaluatorTest, PauseUnpauseTest) {
 }
 
 TEST_F(EvaluatorTest, TickrateTest) {
-	int new_tickrate = 1000;
+	double new_tickrate = 10.0;
 	evaluator->setTickrate(new_tickrate);
 	evaluator->setUseTickrate(true);
 	evaluator->setPause(false);

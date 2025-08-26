@@ -248,7 +248,7 @@ void CircuitViewWidget::simUseSpeed(bool state) {
 
 void CircuitViewWidget::setSimSpeed(double speed) {
 	if (circuitView->getEvaluator())
-		circuitView->getEvaluator()->setTickrate(std::round(speed * 60));
+		circuitView->getEvaluator()->setTickrate(speed);
 }
 
 void CircuitViewWidget::newCircuit() {

@@ -20,7 +20,7 @@ circuit_id_t CircuitManager::createNewCircuit(const std::string& name, const std
 		SharedEvaluator eval = evaluatorManager->getEvaluator(evaluatorId);
 		eval->setPause(false);
 		eval->setUseTickrate(true);
-		eval->setTickrate(2400);
+		eval->setTickrate(40);
 	}
 
 	return id;
