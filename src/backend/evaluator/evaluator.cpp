@@ -245,12 +245,10 @@ void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 
 	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, blockContainer, outputPosition, Direction::OUT, circuitPortDependencies, circuitNodeDependencies);
 	if (!outputPoint.has_value()) {
-		logError("Output connection point not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
 		return;
 	}
 	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, blockContainer, inputPosition, Direction::IN, circuitPortDependencies, circuitNodeDependencies);
 	if (!inputPoint.has_value()) {
-		logError("Input connection point not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
 		return;
 	}
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
