@@ -96,29 +96,10 @@ public:
 	double getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
-	bool getBoolState(const Address& address) {
-		return toBool(getState(address));
-	};
+	bool getBoolState(const Address& address) { return toBool(getState(address)); };
 	void setState(const Address& address, logic_state_t state);
-	void setState(const Address& address, bool state) {
-		setState(address, fromBool(state));
-	}
-	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) {
-		logWarning("not implemented yet", "Evaluator::getBulkStates");
-		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
-	};
-	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
-	std::vector<logic_state_t> getBulkStates(const std::vector<Position>& positions, const Address& addressOrigin);
-	std::vector<logic_state_t> getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin);
-	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
-		logWarning("not implemented yet", "Evaluator::setBulkStates");
-	};
-	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin) {
-		logWarning("not implemented yet", "Evaluator::setBulkStates");
-	};
-	circuit_id_t getCircuitId() const {
-		return evalCircuitContainer.getCircuitId(0).value_or(0);
-	}
+	void setState(const Address& address, bool state) { setState(address, fromBool(state)); }
+	circuit_id_t getCircuitId() const { return evalCircuitContainer.getCircuitId(0).value_or(0); }
 	circuit_id_t getCircuitId(const Address& address) const {
 		std::shared_lock lk(simMutex);
 		eval_circuit_id_t evalCircuitId = 0;
