@@ -4,6 +4,7 @@
 #include "evalTypedef.h"
 #include "logicState.h"
 #include "idProvider.h"
+#include "EvaluatorLocalityVectorGenerator.h"
 
 class SimulatorGate {
 public:
@@ -58,7 +59,7 @@ public:
 
 class MultiInputGate : public LogicGate {
 public:
-	MultiInputGate(simulator_id_t id) : LogicGate(id) {}
+	MultiInputGate(simulator_id_t id, EvaluatorLocalityVectorGenerator::LocalityVector&& vector) : LogicGate(id), inputs(std::move(vector)) {}
 
 	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
 		inputs.push_back(inputId);
@@ -76,7 +77,7 @@ public:
 	}
 
 protected:
-	std::vector<simulator_id_t> inputs;
+	EvaluatorLocalityVectorGenerator::LocalityVector inputs;
 };
 
 class SingleInputGate : public LogicGate {
@@ -115,8 +116,8 @@ struct ANDLikeGate : public MultiInputGate {
 	bool inputsInverted;
 	bool outputInverted;
 
-	ANDLikeGate(simulator_id_t id, bool inputsInverted = false, bool outputInverted = false)
-		: MultiInputGate(id), inputsInverted(inputsInverted), outputInverted(outputInverted) {}
+	ANDLikeGate(simulator_id_t id, EvaluatorLocalityVectorGenerator::LocalityVector&& vector, bool inputsInverted = false, bool outputInverted = false)
+		: MultiInputGate(id, std::move(vector)), inputsInverted(inputsInverted), outputInverted(outputInverted) {}
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
 		if (inputs.empty()) {
@@ -156,8 +157,8 @@ struct XORLikeGate : public MultiInputGate {
 	// Can be used for XOR and XNOR
 	bool outputInverted;
 
-	XORLikeGate(simulator_id_t id, bool outputInverted = false)
-		: MultiInputGate(id), outputInverted(outputInverted) {}
+	XORLikeGate(simulator_id_t id, EvaluatorLocalityVectorGenerator::LocalityVector&& vector, bool outputInverted = false)
+		: MultiInputGate(id, std::move(vector)), outputInverted(outputInverted) {}
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
 		if (inputs.empty()) {

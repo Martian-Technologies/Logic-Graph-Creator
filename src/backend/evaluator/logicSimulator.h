@@ -4,8 +4,9 @@
 #include "simulatorGates.h"
 #include "gateType.h"
 #include "idProvider.h"
-#include "evalConnection.h"
 #include "evalConfig.h"
+
+#include "EvaluatorLocalityVectorGenerator.h"
 
 // Gate type indices for performance optimization
 enum class SimGateType : int {
@@ -69,6 +70,7 @@ private:
 	std::queue<StateChange> pendingStateChanges;
 	std::mutex stateChangeQueueMutex;
 
+	EvaluatorLocalityVectorGenerator evaluatorLocalityVectorGenerator;
 	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
 	std::vector<JunctionGate> junctions;

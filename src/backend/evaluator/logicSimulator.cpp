@@ -279,37 +279,37 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 
 	switch (gateType) {
 	case GateType::AND:
-		andGates.push_back({ simulatorId, false, false });
+		andGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), false, false );
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
 		andGates.back().resetState(evalConfig.isRealistic(), statesA);
 		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::OR:
-		andGates.push_back({ simulatorId, true, true });
+		andGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), true, true );
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
 		andGates.back().resetState(evalConfig.isRealistic(), statesA);
 		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::NAND:
-		andGates.push_back({ simulatorId, false, true });
+		andGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), false, true );
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
 		andGates.back().resetState(evalConfig.isRealistic(), statesA);
 		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::NOR:
-		andGates.push_back({ simulatorId, true, false });
+		andGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), true, false );
 		updateGateLocation(simulatorId, SimGateType::AND, andGates.size() - 1);
 		andGates.back().resetState(evalConfig.isRealistic(), statesA);
 		andGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::XOR:
-		xorGates.push_back({ simulatorId, false });
+		xorGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), false );
 		updateGateLocation(simulatorId, SimGateType::XOR, xorGates.size() - 1);
 		xorGates.back().resetState(evalConfig.isRealistic(), statesA);
 		xorGates.back().resetState(evalConfig.isRealistic(), statesB);
 		break;
 	case GateType::XNOR:
-		xorGates.push_back({ simulatorId, true });
+		xorGates.emplace_back( simulatorId, evaluatorLocalityVectorGenerator.getVector(andGates.size()), true );
 		updateGateLocation(simulatorId, SimGateType::XOR, xorGates.size() - 1);
 		xorGates.back().resetState(evalConfig.isRealistic(), statesA);
 		xorGates.back().resetState(evalConfig.isRealistic(), statesB);
