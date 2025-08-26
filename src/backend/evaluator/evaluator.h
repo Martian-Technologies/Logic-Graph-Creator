@@ -87,9 +87,15 @@ public:
 	void reset();
 	void setPause(bool pause) { evalConfig.setRunning(!pause); }
 	bool isPause() const { return !evalConfig.isRunning(); }
-	void addSprint(int nTicks) { evalConfig.addSprint(nTicks); }
+	void addSprint(unsigned int nTicks) { evalConfig.addSprint(nTicks); }
 	bool isSprinting() const { return evalConfig.getSprintCount() > 0; }
 	void waitForSprintComplete();
+	void tickStep(unsigned int nTicks) {
+		setPause(true);
+		evalConfig.addSprint(nTicks);
+		waitForSprintComplete();
+	}
+	void tickStep() { tickStep (1); }
 	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
 	bool isRealistic() const { return evalConfig.isRealistic(); }
 	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
