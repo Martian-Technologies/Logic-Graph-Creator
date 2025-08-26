@@ -106,15 +106,16 @@ TEST_F(EvaluatorTest, LogicGateEvaluation) {
 	evaluator->setState(Address(in2), logic_state_t::HIGH);
 
 	// run simulation
-	evaluator->setPause(false);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	evaluator->addSprint(1);
+	evaluator->waitForSprintComplete();
 
 	// check AND gate output
 	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::HIGH);
 
 	// change one input
 	evaluator->setState(Address(in1), logic_state_t::LOW);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	evaluator->addSprint(1);
+	evaluator->waitForSprintComplete();
 	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::LOW);
 
 	evaluator->setPause(true);

@@ -87,6 +87,9 @@ public:
 	void reset();
 	void setPause(bool pause) { evalConfig.setRunning(!pause); }
 	bool isPause() const { return !evalConfig.isRunning(); }
+	void addSprint(int nTicks) { evalConfig.addSprint(nTicks); }
+	bool isSprinting() const { return evalConfig.getSprintCount() > 0; }
+	void waitForSprintComplete();
 	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
 	bool isRealistic() const { return evalConfig.isRealistic(); }
 	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
