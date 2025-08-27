@@ -95,9 +95,9 @@ function(add_main_dependencies)
 			SOURCE_DIR "${EXTERNAL_DIR}/tracy"
 		)
 		list(APPEND EXTERNAL_LINKS TracyClient EXCLUDE_FROM_ALL)
-	endif()
 
-	add_subdirectory("${EXTERNAL_DIR}/tracy/profiler/")
+		add_subdirectory("${EXTERNAL_DIR}/tracy/profiler/")
+	endif()
 
 	set(EXTERNAL_LINKS "${EXTERNAL_LINKS}" PARENT_SCOPE)
 endfunction()
