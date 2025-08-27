@@ -13,9 +13,7 @@ typedef uint32_t ViewportID;
 
 class MainRenderer {
 public:
-	void singleton();
-	MainRenderer();
-	~MainRenderer();
+	static MainRenderer& get();
 
 	// Windows ==================================================================================================================================
 	WindowID registerWindow(SdlWindow window);
@@ -47,7 +45,6 @@ public:
 	// Block Data ===============================================================================================================================
 
 private:
-
 };
 
 #endif
