@@ -188,15 +188,8 @@ private:
 		const Position portPosition,
 		Direction direction,
 		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
-	) const;
-	std::optional<EvalConnectionPoint> getConnectionPoint(
-		const eval_circuit_id_t evalCircuitId,
-		const BlockContainer* blockContainer,
-		const Position portPosition,
-		Direction direction,
-		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
+		std::set<CircuitNode>& circuitNodeDependencies,
+		bool isInterCircuit
 	) const;
 
 	std::vector<InterCircuitConnection> interCircuitConnections;
