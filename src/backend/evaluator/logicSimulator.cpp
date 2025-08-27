@@ -33,7 +33,17 @@ LogicSimulator::~LogicSimulator() {
 void LogicSimulator::clearState() { }
 
 double LogicSimulator::getAverageTickrate() const {
-	return averageTickrate.load(std::memory_order_acquire);
+	if (!evalConfig.isRunning()) {
+		return false;
+	}
+	double tickspeed = averageTickrate.load(std::memory_order_acquire);
+	// if tickspeed close enough to target tickspeed, return target tickspeed
+	double targetTickrate = evalConfig.getTargetTickrate();
+	double percentageError = (tickspeed - targetTickrate) / targetTickrate;
+	if (std::abs(percentageError) < 0.01) {
+		return targetTickrate;
+	}
+	return tickspeed;
 }
 
 void LogicSimulator::simulationLoop() {
@@ -58,7 +68,24 @@ void LogicSimulator::simulationLoop() {
 		}
 
 		processPendingStateChanges();
-		if (evalConfig.isRunning()) {
+
+		// Sprint handling: if sprintCount > 0, execute ticks immediately, regardless of run/pause state.
+		// Sprint ticks update the EMA tickrate just like normal ticks, but bypass the limiter wait.
+		bool didSprint = false;
+		while (running && !pauseRequest.load(std::memory_order_acquire) && evalConfig.consumeSprintTick()) {
+			didSprint = true;
+			auto currentTime = clock::now();
+			if (evalConfig.isRealistic()) {
+				realisticTickOnce();
+			} else {
+				tickOnce();
+			}
+			updateEmaTickrate(currentTime, lastTickTime, isFirstTick);
+			// Allow a pause to break a long sprint
+			if (pauseRequest.load(std::memory_order_acquire)) break;
+		}
+
+		if (!didSprint && evalConfig.isRunning()) {
 			auto currentTime = clock::now();
 
 			if (evalConfig.isRealistic()) {
@@ -68,42 +95,26 @@ void LogicSimulator::simulationLoop() {
 			}
 
 			// Calculate EMA for tickrate after each tick
-			if (!isFirstTick) {
-				auto deltaTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - lastTickTime);
-				if (deltaTime.count() > 0) {
-					// Calculate current tickrate in Hz (ticks per second)
-					double currentTickrate = 1.0e9 / static_cast<double>(deltaTime.count());
-					double dtSeconds = std::chrono::duration<double>(deltaTime).count();
-					double alpha = 1.0 - std::exp(-dtSeconds * std::log(2.0) / tickrateHalflife);
-
-					// Apply EMA: EMA_new = alpha * current + (1 - alpha) * EMA_old
-					double currentEMA = averageTickrate.load(std::memory_order_acquire);
-					double newEMA = alpha * currentTickrate + (1.0 - alpha) * currentEMA;
-					averageTickrate.store(newEMA, std::memory_order_release);
-				}
-			} else {
-				isFirstTick = false;
-			}
-			lastTickTime = currentTime;
+			updateEmaTickrate(currentTime, lastTickTime, isFirstTick);
 
 			// handle timing after ticking
 			if (evalConfig.isTickrateLimiterEnabled()) {
-				long long targetTickrate = evalConfig.getTargetTickrate();
+				double targetTickrate = evalConfig.getTargetTickrate();
 				if (targetTickrate > 0) {
-					auto period = std::chrono::round<std::chrono::nanoseconds>(std::chrono::minutes { 1 }) / targetTickrate;
+					auto period = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / targetTickrate));
 					nextTick += period;
 					std::unique_lock lk(cvMutex);
 					cv.wait_until(lk, nextTick, [&] { return pauseRequest || !running || !evalConfig.isRunning(); });
 				}
 			}
-		} else {
+		} else if (!didSprint) {
 			// wait for state change or resume signal
 			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock lk(cvMutex);
 			cv.wait(lk, [&] {
 				// Check for pending state changes under lock to avoid race conditions
 				std::lock_guard<std::mutex> stateLock(stateChangeQueueMutex);
-				return pauseRequest || !running || evalConfig.isRunning() || !pendingStateChanges.empty();
+				return pauseRequest || !running || evalConfig.isRunning() || evalConfig.getSprintCount() > 0 || !pendingStateChanges.empty();
 			});
 			// reset nextTick when resuming simulation
 			nextTick = clock::now();
@@ -111,6 +122,29 @@ void LogicSimulator::simulationLoop() {
 			isFirstTick = true;
 		}
 	}
+}
+
+inline void LogicSimulator::updateEmaTickrate(
+	const std::chrono::steady_clock::time_point& currentTime,
+	std::chrono::steady_clock::time_point& lastTickTime,
+	bool& isFirstTick) {
+	if (!isFirstTick) {
+		auto deltaTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - lastTickTime);
+		if (deltaTime.count() > 0) {
+			// Calculate current tickrate in Hz (ticks per second)
+			double currentTickrate = 1.0e9 / static_cast<double>(deltaTime.count());
+			double dtSeconds = std::chrono::duration<double>(deltaTime).count();
+			double alpha = 1.0 - std::exp(-dtSeconds * std::log(2.0) / tickrateHalflife);
+
+			// Apply EMA: EMA_new = alpha * current + (1 - alpha) * EMA_old
+			double currentEMA = averageTickrate.load(std::memory_order_acquire);
+			double newEMA = alpha * currentTickrate + (1.0 - alpha) * currentEMA;
+			averageTickrate.store(newEMA, std::memory_order_release);
+		}
+	} else {
+		isFirstTick = false;
+	}
+	lastTickTime = currentTime;
 }
 
 inline void LogicSimulator::tickOnce() {

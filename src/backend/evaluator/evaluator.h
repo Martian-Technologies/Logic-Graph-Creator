@@ -87,10 +87,19 @@ public:
 	void reset();
 	void setPause(bool pause) { evalConfig.setRunning(!pause); }
 	bool isPause() const { return !evalConfig.isRunning(); }
+	void addSprint(unsigned int nTicks) { evalConfig.addSprint(nTicks); }
+	bool isSprinting() const { return evalConfig.getSprintCount() > 0; }
+	void waitForSprintComplete();
+	void tickStep(unsigned int nTicks) {
+		setPause(true);
+		evalConfig.addSprint(nTicks);
+		waitForSprintComplete();
+	}
+	void tickStep() { tickStep (1); }
 	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
 	bool isRealistic() const { return evalConfig.isRealistic(); }
-	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
-	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
+	void setTickrate(double tickrate) { evalConfig.setTargetTickrate(tickrate); }
+	double getTickrate() const { return evalConfig.getTargetTickrate(); }
 	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
 	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
 	double getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
@@ -179,15 +188,8 @@ private:
 		const Position portPosition,
 		Direction direction,
 		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
-	) const;
-	std::optional<EvalConnectionPoint> getConnectionPoint(
-		const eval_circuit_id_t evalCircuitId,
-		const BlockContainer* blockContainer,
-		const Position portPosition,
-		Direction direction,
-		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
+		std::set<CircuitNode>& circuitNodeDependencies,
+		bool isInterCircuit
 	) const;
 
 	std::vector<InterCircuitConnection> interCircuitConnections;

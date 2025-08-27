@@ -43,7 +43,7 @@ void SimControlsManager::update() {
 		} else {
 			limitSpeedElement->RemoveAttribute("checked");
 		}
-		std::string tpsStr = fmt::format("{:.1f}", (double)(evaluator->getTickrate())/60.);
+		std::string tpsStr = fmt::format("{:.1f}", evaluator->getTickrate());
 		if (tpsStr.back() == '0') tpsStr.pop_back();
 		if (tpsStr.back() == '.') tpsStr.pop_back();
 		tpsInputElement->SetInnerRML(std::string(tpsStr.size(), ' ') + "tps");
@@ -118,7 +118,7 @@ void SimControlsManager::setTPS() {
 				return;
 			}
 		}
-		evaluator->setTickrate((unsigned long long)(tps*60.));
+		evaluator->setTickrate(tps);
 	}
 	update();
 }
