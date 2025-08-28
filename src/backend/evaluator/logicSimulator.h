@@ -1,7 +1,7 @@
 #ifndef logicSimulator_h
 #define logicSimulator_h
 
-#include "simulatorGates.h"
+#include "simCounts.h"
 #include "gateType.h"
 #include "idProvider.h"
 #include "evalConnection.h"
@@ -49,6 +49,8 @@ public:
 
 	std::unordered_map<simulator_id_t, GateLocation> gateLocations;
 
+	using Counts = SimCounts;
+
 private:
 	EvalConfig& evalConfig;
 	std::thread simulationThread;
@@ -61,10 +63,8 @@ private:
 
 	std::vector<logic_state_t> statesReading;
 	std::vector<logic_state_t> statesWriting;
-	std::vector<unsigned int> countL;
-	std::vector<unsigned int> countH;
-	std::vector<unsigned int> countZ;
-	std::vector<unsigned int> countX;
+
+	Counts counts;
 
 	mutable std::shared_mutex statesReadingMutex;
 	std::mutex statesWritingMutex;
@@ -76,12 +76,12 @@ private:
 	std::queue<StateChange> pendingStateChanges;
 	std::mutex stateChangeQueueMutex;
 
-	std::vector<ANDLikeGate> andGates;
-	std::vector<XORLikeGate> xorGates;
-	std::vector<TristateBuffer> tristateBuffers;
-	std::vector<ConstantGate> constantGates;
-	std::vector<CopySelfOutputGate> copySelfOutputGates;
-	std::vector<Junction> junctions;
+	std::vector<class ANDLikeGate> andGates;
+	std::vector<class XORLikeGate> xorGates;
+	std::vector<class TristateBuffer> tristateBuffers;
+	std::vector<class ConstantGate> constantGates;
+	std::vector<class CopySelfOutputGate> copySelfOutputGates;
+	std::vector<class Junction> junctions;
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 

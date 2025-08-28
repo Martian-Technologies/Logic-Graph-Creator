@@ -4,6 +4,7 @@
 #include "evalTypedef.h"
 #include "logicState.h"
 #include "idProvider.h"
+#include "simCounts.h"
 
 class SimulatorGate {
 public:
@@ -29,44 +30,29 @@ public:
 	virtual inline void setState(
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX,
+		SimCounts& counts,
 		logic_state_t state
 	) = 0;
 	virtual inline void resetState(
 		bool isRealistic,
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		SimCounts& counts
 	) = 0;
 	virtual inline void setNewStateSimple(
 		std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) = 0;
 	virtual inline void setNewStateRealistic(
 		std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) = 0;
 	virtual inline void propagateNewState(
 		const std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		SimCounts& counts
 	) = 0;
 protected:
 	simulator_id_t id;
@@ -108,10 +94,7 @@ public:
 	inline void setState(
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX,
+		SimCounts& counts,
 		logic_state_t state
 	) override {
 		logic_state_t oldState = statesReading[id];
@@ -122,36 +105,36 @@ public:
 		statesWriting[id] = state;
 		if (oldState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]--;
+				counts.L[outputId]--;
 			}
 		} else if (oldState == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]--;
+				counts.H[outputId]--;
 			}
 		} else if (oldState == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]--;
+				counts.Z[outputId]--;
 			}
 		} else if (oldState == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]--;
+				counts.X[outputId]--;
 			}
 		}
 		if (state == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]++;
+				counts.L[outputId]++;
 			}
 		} else if (state == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]++;
+				counts.H[outputId]++;
 			}
 		} else if (state == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]++;
+				counts.Z[outputId]++;
 			}
 		} else if (state == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]++;
+				counts.X[outputId]++;
 			}
 		}
 	}
@@ -159,49 +142,34 @@ public:
 		bool isRealistic,
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		SimCounts& counts
 	) override {
 		setState(
 			statesWriting,
 			statesReading,
-			countL,
-			countH,
-			countZ,
-			countX,
+			counts,
 			getResetState(isRealistic)
 		);
 	};
 	virtual inline logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) = 0;
 
 	inline void setNewStateSimple(
 		std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) override {
-		statesWriting[id] = calculateNewState(statesReading, countL, countH, countZ, countX);
+		statesWriting[id] = calculateNewState(statesReading, counts);
 	};
 
 	inline void setNewStateRealistic(
 		std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) override {
-		logic_state_t newState = calculateNewState(statesReading, countL, countH, countZ, countX);
+		logic_state_t newState = calculateNewState(statesReading, counts);
 		if (newState == logic_state_t::UNDEFINED) {
 			statesWriting[id] = logic_state_t::UNDEFINED;
 			return;
@@ -221,10 +189,7 @@ public:
 	inline void propagateNewState(
 		const std::vector<logic_state_t>& statesWriting,
 		const std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		SimCounts& counts
 	) override {
 		logic_state_t newState = statesWriting[id];
 		logic_state_t oldState = statesReading[id];
@@ -233,36 +198,36 @@ public:
 		}
 		if (oldState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]--;
+				counts.L[outputId]--;
 			}
 		} else if (oldState == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]--;
+				counts.H[outputId]--;
 			}
 		} else if (oldState == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]--;
+				counts.Z[outputId]--;
 			}
 		} else if (oldState == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]--;
+				counts.X[outputId]--;
 			}
 		}
 		if (newState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]++;
+				counts.L[outputId]++;
 			}
 		} else if (newState == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]++;
+				counts.H[outputId]++;
 			}
 		} else if (newState == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]++;
+				counts.Z[outputId]++;
 			}
 		} else if (newState == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]++;
+				counts.X[outputId]++;
 			}
 		}
 	}
@@ -300,21 +265,18 @@ public:
 	}
 	logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) override {
-		if ((inputsInverted ? countH[id] : countL[id]) > 0) {
+		if ((inputsInverted ? counts.H[id] : counts.L[id]) > 0) {
 			return conditionOutput;
 		}
-		if (countX[id] > 0) {
+		if (counts.X[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countZ[id] > 0) {
+		if (counts.Z[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countL[id] == 0 && countH[id] == 0) {
+		if (counts.L[id] == 0 && counts.H[id] == 0) {
 			return logic_state_t::LOW;
 		}
 		return defaultOutput;
@@ -343,21 +305,18 @@ public:
 	}
 	logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) override {
-		if (countX[id] > 0) {
+		if (counts.X[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countZ[id] > 0) {
+		if (counts.Z[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countL[id] == 0 && countH[id] == 0) { // no inputs = LOW, regardless of gate type
+		if (counts.L[id] == 0 && counts.H[id] == 0) { // no inputs = LOW, regardless of gate type
 			return logic_state_t::LOW;
 		}
-		if (countH[id] % 2 == outputsInverted) { // if outputsInverted is true, our gate is XNOR, so if parity is odd, output LOW
+		if (counts.H[id] % 2 == outputsInverted) { // if outputsInverted is true, our gate is XNOR, so if parity is odd, output LOW
 			return logic_state_t::LOW;
 		}
 		return logic_state_t::HIGH;
@@ -380,10 +339,7 @@ public:
 	}
 	logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const SimCounts& counts
 	) override {
 		return constantState;
 	};
@@ -405,10 +361,7 @@ public:
 	}
 	logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const LogicSimulator::Counts& counts
 	) override {
 		return statesReading[id];
 	};
@@ -432,30 +385,27 @@ public:
 	}
 	logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
-		const std::vector<unsigned int>& countL,
-		const std::vector<unsigned int>& countH,
-		const std::vector<unsigned int>& countZ,
-		const std::vector<unsigned int>& countX
+		const LogicSimulator::Counts& counts
 	) override {
-		if (countX[enablePortId] > 0) {
+		if (counts.X[enablePortId] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countZ[enablePortId] > 0) {
+		if (counts.Z[enablePortId] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		bool enableHigh = (countH[enablePortId] > 0);
-		bool enableLow = (countL[enablePortId] > 0);
+		bool enableHigh = (counts.H[enablePortId] > 0);
+		bool enableLow = (counts.L[enablePortId] > 0);
 		if (enableHigh == enableLow) {
 			return logic_state_t::UNDEFINED;
 		}
 		if (enableHigh == enableInverted) {
 			return logic_state_t::FLOATING;
 		}
-		if (countX[id] > 0) {
+		if (counts.X[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		bool mainInputHigh = (countH[id] > 0);
-		bool mainInputLow = (countL[id] > 0);
+		bool mainInputHigh = (counts.H[id] > 0);
+		bool mainInputLow = (counts.L[id] > 0);
 		if (mainInputHigh && mainInputLow) {
 			return logic_state_t::UNDEFINED;
 		}
@@ -506,18 +456,15 @@ public:
 	inline void process(
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		SimCounts& counts
 	) {
 		logic_state_t oldState = statesReading[id];
 		logic_state_t newState;
-		if (countX[id] > 0) {
+		if (counts.X[id] > 0) {
 			newState = logic_state_t::UNDEFINED;
 		} else {
-			bool highPresent = (countH[id] > 0);
-			bool lowPresent = (countL[id] > 0);
+			bool highPresent = (counts.H[id] > 0);
+			bool lowPresent = (counts.L[id] > 0);
 			if (highPresent && lowPresent) {
 				newState = logic_state_t::UNDEFINED;
 			} else if (highPresent) {
@@ -535,36 +482,36 @@ public:
 		}
 		if (oldState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]--;
+				counts.L[outputId]--;
 			}
 		} else if (oldState == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]--;
+				counts.H[outputId]--;
 			}
 		} else if (oldState == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]--;
+				counts.Z[outputId]--;
 			}
 		} else if (oldState == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]--;
+				counts.X[outputId]--;
 			}
 		}
 		if (newState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
-				countL[outputId]++;
+				counts.L[outputId]++;
 			}
 		} else if (newState == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
-				countH[outputId]++;
+				counts.H[outputId]++;
 			}
 		} else if (newState == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
-				countZ[outputId]++;
+				counts.Z[outputId]++;
 			}
 		} else if (newState == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
-				countX[outputId]++;
+				counts.X[outputId]++;
 			}
 		}
 	}

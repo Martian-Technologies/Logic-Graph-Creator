@@ -1,5 +1,9 @@
 #include "logicSimulator.h"
+#include "simulatorGates.h"
 #include "gateType.h"
+#ifdef TRACY_PROFILER
+#include <tracy/Tracy.hpp>
+#endif
 
 LogicSimulator::LogicSimulator(
 	EvalConfig& evalConfig,
@@ -52,7 +56,7 @@ void LogicSimulator::simulationLoop() {
 
 	while (running) {
 #ifdef TRACY_PROFILER
-	ZoneScoped;
+		ZoneScoped;
 #endif
 		if (pauseRequest.load(std::memory_order_acquire)) {
 			averageTickrate.store(0.0, std::memory_order_release);
@@ -177,19 +181,19 @@ inline void LogicSimulator::calculateNewStatesSimple() {
 	ZoneScoped;
 #endif
 	for (auto& gate : andGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : xorGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : tristateBuffers) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : constantGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : copySelfOutputGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 }
 
@@ -198,19 +202,19 @@ inline void LogicSimulator::calculateNewStatesRealistic() {
 	ZoneScoped;
 #endif
 	for (auto& gate : andGates) {
-		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateRealistic(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : xorGates) {
-		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateRealistic(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : tristateBuffers) {
-		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateRealistic(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : constantGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : copySelfOutputGates) {
-		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.setNewStateSimple(statesWriting, statesReading, counts);
 	}
 }
 
@@ -219,19 +223,19 @@ inline void LogicSimulator::propagateNewStates() {
 	ZoneScoped;
 #endif
 	for (auto& gate : andGates) {
-		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.propagateNewState(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : xorGates) {
-		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.propagateNewState(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : tristateBuffers) {
-		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.propagateNewState(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : constantGates) {
-		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.propagateNewState(statesWriting, statesReading, counts);
 	}
 	for (auto& gate : copySelfOutputGates) {
-		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+		gate.propagateNewState(statesWriting, statesReading, counts);
 	}
 }
 
@@ -240,7 +244,7 @@ inline void LogicSimulator::processJunctions() {
 	ZoneScoped;
 #endif
 	for (auto& junction : junctions) {
-		junction.process(statesWriting, statesReading, countL, countH, countZ, countX);
+		junction.process(statesWriting, statesReading, counts);
 	}
 }
 
@@ -403,16 +407,16 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 		logic_state_t sourceState = statesReading[sourcePortId.value()];
 		switch (sourceState) {
 		case logic_state_t::LOW:
-			countL[destinationInputPortId]++;
+			counts.L[destinationInputPortId]++;
 			break;
 		case logic_state_t::HIGH:
-			countH[destinationInputPortId]++;
+			counts.H[destinationInputPortId]++;
 			break;
 		case logic_state_t::FLOATING:
-			countZ[destinationInputPortId]++;
+			counts.Z[destinationInputPortId]++;
 			break;
 		case logic_state_t::UNDEFINED:
-			countX[destinationInputPortId]++;
+			counts.X[destinationInputPortId]++;
 			break;
 		}
 		addGateDependency(sourceId, sourcePort, destinationId, destinationPort);
@@ -470,16 +474,16 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 		logic_state_t sourceState = statesReading[sourcePortId.value()];
 		switch (sourceState) {
 		case logic_state_t::LOW:
-			countL[destinationInputPortId]--;
+			counts.L[destinationInputPortId]--;
 			break;
 		case logic_state_t::HIGH:
-			countH[destinationInputPortId]--;
+			counts.H[destinationInputPortId]--;
 			break;
 		case logic_state_t::FLOATING:
-			countZ[destinationInputPortId]--;
+			counts.Z[destinationInputPortId]--;
 			break;
 		case logic_state_t::UNDEFINED:
-			countX[destinationInputPortId]--;
+			counts.X[destinationInputPortId]--;
 			break;
 		}
 		removeGateDependency(sourceId, sourcePort, destinationId, destinationPort);
@@ -500,19 +504,19 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t state) {
 			size_t gateIndex = it->second.gateIndex;
 			switch (gateType) {
 			case SimGateType::AND:
-				andGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				andGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 				break;
 			case SimGateType::XOR:
-				xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				xorGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 				break;
 			case SimGateType::TRISTATE_BUFFER:
-				tristateBuffers[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				tristateBuffers[gateIndex].setState(statesWriting, statesReading, counts, state);
 				break;
 			case SimGateType::CONSTANT:
-				constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				constantGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 				break;
 			case SimGateType::COPY_SELF_OUTPUT:
-				copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 				break;
 			}
 		}
@@ -545,19 +549,19 @@ void LogicSimulator::processPendingStateChanges() {
 				size_t gateIndex = it->second.gateIndex;
 				switch (gateType) {
 				case SimGateType::AND:
-					andGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					andGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 					break;
 				case SimGateType::XOR:
-					xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					xorGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 					break;
 				case SimGateType::TRISTATE_BUFFER:
-					tristateBuffers[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					tristateBuffers[gateIndex].setState(statesWriting, statesReading, counts, state);
 					break;
 				case SimGateType::CONSTANT:
-					constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					constantGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 					break;
 				case SimGateType::COPY_SELF_OUTPUT:
-					copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, counts, state);
 					break;
 				}
 			}
@@ -620,7 +624,7 @@ simulator_id_t LogicSimulator::addAndGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, false, false));
-	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -629,7 +633,7 @@ simulator_id_t LogicSimulator::addOrGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, true, true));
-	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -638,7 +642,7 @@ simulator_id_t LogicSimulator::addNandGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, false, true));
-	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -647,7 +651,7 @@ simulator_id_t LogicSimulator::addNorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, true, false));
-	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -656,7 +660,7 @@ simulator_id_t LogicSimulator::addXorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	xorGates.push_back(XORLikeGate(id, false));
-	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
@@ -665,7 +669,7 @@ simulator_id_t LogicSimulator::addXnorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	xorGates.push_back(XORLikeGate(id, true));
-	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
@@ -674,7 +678,7 @@ simulator_id_t LogicSimulator::addConstantOnGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	constantGates.push_back(ConstantGate(id, logic_state_t::HIGH));
-	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::CONSTANT, constantGates.size() - 1);
 	return id;
 }
@@ -683,7 +687,7 @@ simulator_id_t LogicSimulator::addConstantOffGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	constantGates.push_back(ConstantGate(id, logic_state_t::LOW));
-	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::CONSTANT, constantGates.size() - 1);
 	return id;
 }
@@ -692,7 +696,7 @@ simulator_id_t LogicSimulator::addCopySelfOutputGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	copySelfOutputGates.push_back(CopySelfOutputGate(id));
-	copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::COPY_SELF_OUTPUT, copySelfOutputGates.size() - 1);
 	return id;
 }
@@ -703,7 +707,7 @@ simulator_id_t LogicSimulator::addTristateBufferGate() {
 	expandDataVectors(id);
 	expandDataVectors(enableId);
 	tristateBuffers.push_back(TristateBuffer(id, enableId, false));
-	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
 	return id;
 }
@@ -714,7 +718,7 @@ simulator_id_t LogicSimulator::addTristateBufferInvertedGate() {
 	expandDataVectors(id);
 	expandDataVectors(enableId);
 	tristateBuffers.push_back(TristateBuffer(id, enableId, true));
-	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, counts);
 	gateLocations[id] = GateLocation(SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
 	return id;
 }
@@ -734,17 +738,17 @@ void LogicSimulator::expandDataVectors(simulator_id_t maxId) {
 	if (statesWriting.size() <= maxId) {
 		statesWriting.resize(maxId + 1, logic_state_t::UNDEFINED);
 	}
-	if (countL.size() <= maxId) {
-		countL.resize(maxId + 1, 0);
+	if (counts.L.size() <= maxId) {
+		counts.L.resize(maxId + 1, 0);
 	}
-	if (countH.size() <= maxId) {
-		countH.resize(maxId + 1, 0);
+	if (counts.H.size() <= maxId) {
+		counts.H.resize(maxId + 1, 0);
 	}
-	if (countZ.size() <= maxId) {
-		countZ.resize(maxId + 1, 0);
+	if (counts.Z.size() <= maxId) {
+		counts.Z.resize(maxId + 1, 0);
 	}
-	if (countX.size() <= maxId) {
-		countX.resize(maxId + 1, 0);
+	if (counts.X.size() <= maxId) {
+		counts.X.resize(maxId + 1, 0);
 	}
 }
 
