@@ -95,6 +95,15 @@ private:
 	double tickrateHalflife { 0.25 };
 
 	std::vector<simulator_id_t>& dirtySimulatorIds;
+
+	simulator_id_t addAndGate();
+	simulator_id_t addOrGate();
+	simulator_id_t addNandGate();
+	simulator_id_t addNorGate();
+	simulator_id_t addXorGate();
+	simulator_id_t addXnorGate();
+
+	void expandDataVectors(simulator_id_t maxId);
 };
 
 class SimPauseGuard {

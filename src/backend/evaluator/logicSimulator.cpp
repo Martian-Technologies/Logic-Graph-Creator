@@ -14,9 +14,7 @@ LogicSimulator::LogicSimulator(
 	});
 
 	simulationThread = std::thread(&LogicSimulator::simulationLoop, this);
-	statesReading.resize(1, logic_state_t::UNDEFINED);
-	statesWriting.resize(1, logic_state_t::UNDEFINED);
-	simulatorIdProvider.getNewId(); // reserve the 0th id to be used as an invalid id
+	expandDataVectors(simulatorIdProvider.getNewId()); // reserve the 0th id to be used as an invalid id
 }
 
 LogicSimulator::~LogicSimulator() {
@@ -216,7 +214,23 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 }
 
 simulator_id_t LogicSimulator::addGate(const GateType gateType) {
-	return 0;
+	switch (gateType) {
+	case GateType::AND:
+		return addAndGate();
+	case GateType::OR:
+		return addOrGate();
+	case GateType::NAND:
+		return addNandGate();
+	case GateType::NOR:
+		return addNorGate();
+	case GateType::XOR:
+		return addXorGate();
+	case GateType::XNOR:
+		return addXnorGate();
+	default:
+		logError("Unknown gate type: {}", "LogicSimulator::addGate", static_cast<int>(gateType));
+		return 0;
+	}
 }
 
 void LogicSimulator::removeGate(simulator_id_t gateId) {
@@ -244,5 +258,68 @@ void LogicSimulator::processPendingStateChanges() {
 }
 
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
-	return std::nullopt;
+	return simId; // update this later to support multi-output blocks
+}
+
+simulator_id_t LogicSimulator::addAndGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	andGates.push_back(ANDLikeGate(id, false, false));
+	expandDataVectors(id);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addOrGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	andGates.push_back(ANDLikeGate(id, true, true));
+	expandDataVectors(id);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addNandGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	andGates.push_back(ANDLikeGate(id, false, true));
+	expandDataVectors(id);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addNorGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	andGates.push_back(ANDLikeGate(id, true, false));
+	expandDataVectors(id);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addXorGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	xorGates.push_back(XORLikeGate(id, false));
+	expandDataVectors(id);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addXnorGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	xorGates.push_back(XORLikeGate(id, true));
+	expandDataVectors(id);
+	return id;
+}
+
+void LogicSimulator::expandDataVectors(simulator_id_t maxId) {
+	if (statesReading.size() <= maxId) {
+		statesReading.resize(maxId + 1, logic_state_t::UNDEFINED);
+	}
+	if (statesWriting.size() <= maxId) {
+		statesWriting.resize(maxId + 1, logic_state_t::UNDEFINED);
+	}
+	if (countL.size() <= maxId) {
+		countL.resize(maxId + 1, 0);
+	}
+	if (countH.size() <= maxId) {
+		countH.resize(maxId + 1, 0);
+	}
+	if (countZ.size() <= maxId) {
+		countZ.resize(maxId + 1, 0);
+	}
+	if (countX.size() <= maxId) {
+		countX.resize(maxId + 1, 0);
+	}
 }
