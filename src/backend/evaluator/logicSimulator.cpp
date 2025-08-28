@@ -51,6 +51,9 @@ void LogicSimulator::simulationLoop() {
 	bool isFirstTick = true;
 
 	while (running) {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 		if (pauseRequest.load(std::memory_order_acquire)) {
 			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock<std::mutex> lk(cvMutex);
@@ -146,6 +149,9 @@ inline void LogicSimulator::updateEmaTickrate(
 }
 
 inline void LogicSimulator::tickOnceSimple() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	std::unique_lock lkNext(statesWritingMutex);
 	calculateNewStatesSimple();
 	propagateNewStates();
@@ -155,6 +161,9 @@ inline void LogicSimulator::tickOnceSimple() {
 }
 
 inline void LogicSimulator::realisticTickOnce() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	std::unique_lock lkNext(statesWritingMutex);
 	calculateNewStatesRealistic();
 	propagateNewStates();
@@ -164,6 +173,9 @@ inline void LogicSimulator::realisticTickOnce() {
 }
 
 inline void LogicSimulator::calculateNewStatesSimple() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	for (auto& gate : andGates) {
 		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
@@ -182,6 +194,9 @@ inline void LogicSimulator::calculateNewStatesSimple() {
 }
 
 inline void LogicSimulator::calculateNewStatesRealistic() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	for (auto& gate : andGates) {
 		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
@@ -200,6 +215,9 @@ inline void LogicSimulator::calculateNewStatesRealistic() {
 }
 
 inline void LogicSimulator::propagateNewStates() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	for (auto& gate : andGates) {
 		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
@@ -218,6 +236,9 @@ inline void LogicSimulator::propagateNewStates() {
 }
 
 inline void LogicSimulator::processJunctions() {
+#ifdef TRACY_PROFILER
+	ZoneScoped;
+#endif
 	for (auto& junction : junctions) {
 		junction.process(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
