@@ -7,17 +7,14 @@
 #include "evalConnection.h"
 #include "evalConfig.h"
 
-// Gate type indices for performance optimization
 enum class SimGateType : int {
 	AND = 0,
 	XOR = 1,
 	JUNCTION = 2,
-	BUFFER = 3,
-	SINGLE_BUFFER = 4,
-	TRISTATE_BUFFER = 5,
-	CONSTANT = 6,
-	CONSTANT_RESET = 7,
-	COPY_SELF_OUTPUT = 8
+	TRISTATE_BUFFER = 3,
+	CONSTANT = 4,
+	CONSTANT_RESET = 5,
+	COPY_SELF_OUTPUT = 6
 };
 
 class LogicSimulator {
@@ -31,10 +28,6 @@ public:
 	void clearState();
 	double getAverageTickrate() const;
 	void setState(simulator_id_t id, logic_state_t state);
-	void setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
-
-	void setStateImmediate(simulator_id_t id, logic_state_t state);
-	void setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states);
 
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
@@ -56,11 +49,15 @@ private:
 	std::mutex cvMutex;
 	std::condition_variable cv;
 
-	std::vector<logic_state_t> statesA;
-	std::vector<logic_state_t> statesB;
+	std::vector<logic_state_t> statesReading;
+	std::vector<logic_state_t> statesWriting;
+	std::vector<unsigned int> countL;
+	std::vector<unsigned int> countH;
+	std::vector<unsigned int> countZ;
+	std::vector<unsigned int> countX;
 
-	mutable std::shared_mutex statesAMutex;
-	std::mutex statesBMutex;
+	mutable std::shared_mutex statesReadingMutex;
+	std::mutex statesWritingMutex;
 
 	struct StateChange {
 		simulator_id_t id;
@@ -71,41 +68,22 @@ private:
 
 	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
-	std::vector<JunctionGate> junctions;
-	std::vector<BufferGate> buffers;
-	std::vector<SingleBufferGate> singleBuffers;
-	std::vector<TristateBufferGate> tristateBuffers;
-	std::vector<ConstantGate> constantGates;
-	std::vector<ConstantResetGate> constantResetGates;
-	std::vector<CopySelfOutputGate> copySelfOutputGates;
+	// std::vector<JunctionGate> junctions;
+	// std::vector<TristateBufferGate> tristateBuffers;
+	// std::vector<ConstantGate> constantGates;
+	// std::vector<ConstantResetGate> constantResetGates;
+	// std::vector<CopySelfOutputGate> copySelfOutputGates;
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
-	struct GateDependency {
-		simulator_id_t gateId;
-
-		GateDependency() : gateId(0) {}
-		explicit GateDependency(simulator_id_t id) : gateId(id) {}
-
-		bool operator==(const GateDependency& other) const {
-			return gateId == other.gateId;
-		}
-	};
-
-	struct GateLocation {
-		SimGateType gateType;
-		size_t gateIndex;
-
-		GateLocation() : gateType(SimGateType::AND), gateIndex(0) {}
-		GateLocation(SimGateType type, size_t index) : gateType(type), gateIndex(index) {}
-	};
-
-	std::unordered_map<simulator_id_t, std::vector<GateDependency>> outputDependencies;
-	std::unordered_map<simulator_id_t, GateLocation> gateLocations;
-
 	void simulationLoop();
-	inline void tickOnce();
+	inline void tickOnceSimple();
 	inline void realisticTickOnce();
+	inline void calculateNewStatesSimple();
+	inline void calculateNewStatesRealistic();
+	inline void propagateNewStates();
+	inline void processJunctions();
+
 	void processPendingStateChanges();
 
 	inline void updateEmaTickrate(
@@ -113,16 +91,6 @@ private:
 		std::chrono::steady_clock::time_point& lastTickTime,
 		bool& isFirstTick);
 
-	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
-	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
-	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;
-
-	void updateGateLocation(simulator_id_t gateId, SimGateType gateType, size_t gateIndex);
-	void removeGateLocation(simulator_id_t gateId);
-	void addOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
-	void removeOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
-
-	// Use double precision internally to avoid float rounding sticking near 2^23 (~8,388,608)
 	std::atomic<double> averageTickrate { 0.0 };
 	double tickrateHalflife { 0.25 };
 

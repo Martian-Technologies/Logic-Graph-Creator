@@ -131,9 +131,6 @@ public:
 	inline void setState(EvalConnectionPoint point, logic_state_t state) {
 		replacer.setState(point, state);
 	}
-	inline void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
-		replacer.setStates(points, states);
-	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		middle_id_t sourceGateId = connection.source.gateId;
 		middle_id_t destinationGateId = connection.destination.gateId;

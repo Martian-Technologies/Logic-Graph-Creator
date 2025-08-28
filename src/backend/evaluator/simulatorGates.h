@@ -8,469 +8,220 @@
 class SimulatorGate {
 public:
 	virtual ~SimulatorGate() = default;
-
 	SimulatorGate(simulator_id_t id) : id(id) {}
-
-	virtual void addInput(simulator_id_t inputId, connection_port_id_t portId) = 0;
-	virtual void removeInput(simulator_id_t inputId, connection_port_id_t portId) = 0;
-	virtual void removeIdRefs(simulator_id_t otherId) = 0;
-	virtual simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const = 0;
-	virtual void resetState(bool realistic, std::vector<logic_state_t>& states) = 0;
-	virtual std::vector<simulator_id_t> getOutputSimIds() const = 0;
-
 	simulator_id_t getId() const { return id; }
-
+	virtual void remapIds(std::unordered_map<simulator_id_t, simulator_id_t>& idMap) {
+		if (idMap.contains(id)) {
+			id = idMap.at(id);
+		}
+	}
+	virtual inline void setNewStateSimple(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) = 0;
+	virtual inline void setNewStateRealistic(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) = 0;
+	virtual inline void propagateNewState(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) = 0;
 protected:
 	simulator_id_t id;
-
-	inline void applyRealisticTick(logic_state_t targetState, const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t currentState = statesA[id];
-		if (currentState == logic_state_t::UNDEFINED) {
-			statesB[id] = targetState;
-		} else if (targetState != currentState) {
-			statesB[id] = logic_state_t::UNDEFINED;
-		} else {
-			statesB[id] = currentState;
-		}
-	}
 };
 
-class LogicGate : public SimulatorGate {
+class SingleOutputGate : public SimulatorGate {
 public:
-	LogicGate(simulator_id_t id) : SimulatorGate(id) {}
-
-	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
-		if (realistic) {
-			states[id] = logic_state_t::UNDEFINED;
-		} else {
-			states[id] = logic_state_t::LOW;
+	SingleOutputGate(simulator_id_t id) : SimulatorGate(id) {}
+	void addOutput(simulator_id_t outputId) { outputIds.push_back(outputId); }
+	void removeOutput(simulator_id_t outputId) {
+		auto it = std::find(outputIds.begin(), outputIds.end(), outputId);
+		if (it != outputIds.end()) {
+			outputIds.erase(it);
 		}
 	}
-
-	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
-		return id;
-	}
-
-	std::vector<simulator_id_t> getOutputSimIds() const override {
-		return {id};
-	}
-};
-
-class MultiInputGate : public LogicGate {
-public:
-	MultiInputGate(simulator_id_t id) : LogicGate(id) {}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		inputs.push_back(inputId);
-	}
-
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		auto it = std::find(inputs.begin(), inputs.end(), inputId);
-		if (it != inputs.end()) {
-			inputs.erase(it);
+	void remapIds(std::unordered_map<simulator_id_t, simulator_id_t>& idMap) override {
+		if (idMap.contains(id)) {
+			id = idMap.at(id);
+		}
+		for (simulator_id_t& outputId : outputIds) {
+			if (idMap.contains(outputId)) {
+				outputId = idMap.at(outputId);
+			}
 		}
 	}
+	virtual inline logic_state_t calculateNewState(
+		unsigned int countL,
+		unsigned int countH,
+		unsigned int countZ,
+		unsigned int countX
+	) = 0;
 
-	void removeIdRefs(simulator_id_t otherId) override {
-		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
-	}
+	inline void setNewStateSimple(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) override {
+		statesWriting[id] = calculateNewState(countL[id], countH[id], countZ[id], countX[id]);
+	};
 
-protected:
-	std::vector<simulator_id_t> inputs;
-};
-
-class SingleInputGate : public LogicGate {
-public:
-	SingleInputGate(simulator_id_t id) : LogicGate(id) {}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		if (input.has_value()) {
-			logError("SingleInputGate already has an input", "SingleInputGate::addInput");
+	inline void setNewStateRealistic(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) override {
+		logic_state_t newState = calculateNewState(countL[id], countH[id], countZ[id], countX[id]);
+		if (newState == logic_state_t::UNDEFINED) {
+			statesWriting[id] = logic_state_t::UNDEFINED;
 			return;
 		}
-		input = inputId;
-	}
+		logic_state_t currentState = statesReading[id];
+		if (currentState == logic_state_t::UNDEFINED) {
+			statesWriting[id] = newState;
+			return;
+		}
+		if (currentState == newState) {
+			statesWriting[id] = newState;
+			return;
+		}
+		statesWriting[id] = logic_state_t::UNDEFINED;
+	};
 
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		if (input == inputId) {
-			input.reset();
-		} else {
-			logError("SingleInputGate does not have the specified input", "SingleInputGate::removeInput");
+	inline void propagateNewState(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) override {
+		logic_state_t newState = statesWriting[id];
+		logic_state_t oldState = statesReading[id];
+		if (newState == oldState) {
+			return;
+		}
+		if (oldState == logic_state_t::LOW) {
+			for (simulator_id_t outputId : outputIds) {
+				countL[outputId]--;
+			}
+		} else if (oldState == logic_state_t::HIGH) {
+			for (simulator_id_t outputId : outputIds) {
+				countH[outputId]--;
+			}
+		} else if (oldState == logic_state_t::FLOATING) {
+			for (simulator_id_t outputId : outputIds) {
+				countZ[outputId]--;
+			}
+		} else if (oldState == logic_state_t::UNDEFINED) {
+			for (simulator_id_t outputId : outputIds) {
+				countX[outputId]--;
+			}
+		}
+		if (newState == logic_state_t::LOW) {
+			for (simulator_id_t outputId : outputIds) {
+				countL[outputId]++;
+			}
+		} else if (newState == logic_state_t::HIGH) {
+			for (simulator_id_t outputId : outputIds) {
+				countH[outputId]++;
+			}
+		} else if (newState == logic_state_t::FLOATING) {
+			for (simulator_id_t outputId : outputIds) {
+				countZ[outputId]++;
+			}
+		} else if (newState == logic_state_t::UNDEFINED) {
+			for (simulator_id_t outputId : outputIds) {
+				countX[outputId]++;
+			}
 		}
 	}
-
-	void removeIdRefs(simulator_id_t otherId) override {
-		if (input.has_value() && input.value() == otherId) {
-			input.reset();
-		}
-	}
-
 protected:
-	std::optional<simulator_id_t> input;
+	std::vector<simulator_id_t> outputIds;
 };
 
-struct ANDLikeGate : public MultiInputGate {
-	// By default, behaves like an AND gate
-	// Can be used for AND, OR, NAND, and NOR
+class ANDLikeGate : public SingleOutputGate {
+	// AND - inputsInverted = false, outputsInverted = false
+	// OR - inputsInverted = true, outputsInverted = true
+	// NAND - inputsInverted = false, outputsInverted = true
+	// NOR - inputsInverted = true, outputsInverted = false
+public:
+	ANDLikeGate(simulator_id_t id, bool inputsInverted, bool outputsInverted) : SingleOutputGate(id), inputsInverted(inputsInverted) {
+		if (outputsInverted) {
+			conditionOutput = logic_state_t::HIGH; // OR/NOR
+			defaultOutput = logic_state_t::LOW;
+		} else {
+			conditionOutput = logic_state_t::LOW; // AND/NAND
+			defaultOutput = logic_state_t::HIGH;
+		}
+	}
+	logic_state_t calculateNewState(
+		unsigned int countL,
+		unsigned int countH,
+		unsigned int countZ,
+		unsigned int countX
+	) override {
+		if ((inputsInverted ? countH : countL) > 0) {
+			return conditionOutput;
+		}
+		if (countX > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (countZ > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (countL == 0 && countH == 0) {
+			return logic_state_t::LOW;
+		}
+		return defaultOutput;
+	};
+private:
 	bool inputsInverted;
-	bool outputInverted;
-
-	ANDLikeGate(simulator_id_t id, bool inputsInverted = false, bool outputInverted = false)
-		: MultiInputGate(id), inputsInverted(inputsInverted), outputInverted(outputInverted) {}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		if (inputs.empty()) {
-			return logic_state_t::LOW;
-		}
-		bool foundGoofyState = false;
-		const logic_state_t desiredState = inputsInverted ? logic_state_t::HIGH : logic_state_t::LOW;
-		for (const auto inputId : inputs) {
-			const logic_state_t state = statesA[inputId];
-			// Early-out if the decisive (desired) state is present
-			if (state == desiredState) {
-				return outputInverted ? logic_state_t::HIGH : logic_state_t::LOW;
-			}
-			// Track any unknown/floating driver; only matters if no decisive state was found
-			if (state == logic_state_t::UNDEFINED || state == logic_state_t::FLOATING) {
-				foundGoofyState = true;
-			}
-		}
-		if (foundGoofyState) {
-			return logic_state_t::UNDEFINED;
-		}
-		return outputInverted ? logic_state_t::LOW : logic_state_t::HIGH;
-	}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate(statesA);
-	}
-
-	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesA, statesB);
-	}
+	logic_state_t conditionOutput;
+	logic_state_t defaultOutput;
 };
 
-struct XORLikeGate : public MultiInputGate {
-	// Behaves like an XOR gate
-	// Can be used for XOR and XNOR
-	bool outputInverted;
-
-	XORLikeGate(simulator_id_t id, bool outputInverted = false)
-		: MultiInputGate(id), outputInverted(outputInverted) {}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		if (inputs.empty()) {
-			return logic_state_t::LOW;
-		}
-		// parity == true means current result would be HIGH
-		bool parity = outputInverted;
-		for (const auto inputId : inputs) {
-			const logic_state_t state = statesA[inputId];
-			if (state == logic_state_t::HIGH) {
-				parity = !parity;
-			} else if (state != logic_state_t::LOW) { // FLOATING or UNDEFINED
-				return logic_state_t::UNDEFINED;
-			}
-		}
-		return parity ? logic_state_t::HIGH : logic_state_t::LOW;
-	}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate(statesA);
-	}
-
-	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesA, statesB);
-	}
-};
-
-struct JunctionGate : public SimulatorGate {
-	std::vector<simulator_id_t> inputs;
-
-	JunctionGate(simulator_id_t id) : SimulatorGate(id) {}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& states) const noexcept {
-		logic_state_t outputState = logic_state_t::FLOATING;
-		for (const auto inputId : inputs) {
-			const logic_state_t state = states[inputId];
-			if (state == logic_state_t::FLOATING) {
-				continue;
-			}
-			if (state == logic_state_t::UNDEFINED) {
-				return logic_state_t::UNDEFINED;
-			}
-			if (outputState == logic_state_t::FLOATING) {
-				outputState = state;
-			} else if (outputState != state) {
-				return logic_state_t::UNDEFINED;
-			}
-		}
-		return outputState;
-	}
-
-	inline void tick(std::vector<logic_state_t>& states) noexcept {
-		states[id] = calculate(states);
-	}
-
-	inline void doubleTick(std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t state = calculate(statesB);
-		statesA[id] = state;
-		statesB[id] = state;
-	}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		inputs.push_back(inputId);
-	}
-
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		auto it = std::find(inputs.begin(), inputs.end(), inputId);
-		if (it != inputs.end()) {
-			inputs.erase(it);
-		}
-	}
-
-	void removeIdRefs(simulator_id_t otherId) override {
-		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
-	}
-
-	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
-		states[id] = logic_state_t::FLOATING;
-	}
-
-	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
-		return id;
-	}
-
-	std::vector<simulator_id_t> getOutputSimIds() const override {
-		return {id};
-	}
-};
-
-
-class BufferGateBase : public SingleInputGate {
+class XORLikeGate : public SingleOutputGate {
 public:
-	bool outputInverted;
-
-	BufferGateBase(simulator_id_t id, bool outputInverted = false)
-		: SingleInputGate(id), outputInverted(outputInverted) {}
-};
-
-struct BufferGate : public BufferGateBase {
-	unsigned int extraDelayTicks;
-
-	BufferGate(simulator_id_t id, bool outputInverted = false, unsigned int extraDelayTicks = 0)
-		: BufferGateBase(id, outputInverted), extraDelayTicks(extraDelayTicks) {}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {}
-};
-
-struct SingleBufferGate : public BufferGateBase {
-	SingleBufferGate(simulator_id_t id, bool outputInverted = false)
-		: BufferGateBase(id, outputInverted) {}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		if (!input.has_value()) {
+	XORLikeGate(simulator_id_t id, bool outputsInverted) : SingleOutputGate(id), outputsInverted(outputsInverted) {}
+	logic_state_t calculateNewState(
+		unsigned int countL,
+		unsigned int countH,
+		unsigned int countZ,
+		unsigned int countX
+	) override {
+		if (countX > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (countZ > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (countL == 0 && countH == 0) { // no inputs = LOW, regardless of gate type
 			return logic_state_t::LOW;
 		}
-		return statesA[input.value()];
-	}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate(statesA);
-	}
-
-	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesA, statesB);
-	}
-};
-
-struct TristateBufferGate : public SimulatorGate {
-	bool enableInverted;
-	std::vector<simulator_id_t> inputs;
-	std::vector<simulator_id_t> enableInputs;
-
-	TristateBufferGate(simulator_id_t id, bool enableInverted = false)
-		: SimulatorGate(id), enableInverted(enableInverted) {}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		if (portId == 0) {
-			inputs.push_back(inputId);
-		} else {
-			enableInputs.push_back(inputId);
+		if (countH % 2 == outputsInverted) { // if outputsInverted is true, our gate is XNOR, so if parity is odd, output LOW
+			return logic_state_t::LOW;
 		}
-	}
-
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {
-		if (portId == 0) {
-			auto it = std::find(inputs.begin(), inputs.end(), inputId);
-			if (it != inputs.end()) {
-				inputs.erase(it);
-			}
-		} else {
-			auto it = std::find(enableInputs.begin(), enableInputs.end(), inputId);
-			if (it != enableInputs.end()) {
-				enableInputs.erase(it);
-			}
-		}
-	}
-
-	void removeIdRefs(simulator_id_t otherId) override {
-		inputs.erase(std::remove(inputs.begin(), inputs.end(), otherId), inputs.end());
-		enableInputs.erase(std::remove(enableInputs.begin(), enableInputs.end(), otherId), enableInputs.end());
-	}
-
-	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
-		if (realistic) {
-			states[id] = logic_state_t::UNDEFINED;
-		} else {
-			states[id] = logic_state_t::FLOATING;
-		}
-	}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		bool foundGoofyState = false;
-		bool foundEnabled = false;
-		bool foundDisabled = false;
-		for (const auto& enableId : enableInputs) {
-			logic_state_t enableState = statesA[enableId];
-			if (enableState == logic_state_t::UNDEFINED) {
-				foundGoofyState = true;
-				break;
-			}
-			if (enableState == logic_state_t::HIGH) {
-				foundEnabled = true;
-			} else if (enableState == logic_state_t::LOW) {
-				foundDisabled = true;
-			}
-			if (foundEnabled && foundDisabled) {
-				break;
-			}
-		}
-		if (foundEnabled == foundDisabled) {
-			foundGoofyState = true;
-		}
-		if (foundGoofyState) {
-			return logic_state_t::UNDEFINED;
-		}
-		if (foundEnabled == enableInverted) {
-			return logic_state_t::FLOATING;
-		}
-		if (inputs.empty()) {
-			return logic_state_t::UNDEFINED;
-		}
-		logic_state_t outputState = logic_state_t::FLOATING;
-		for (const auto& inputId : inputs) {
-			logic_state_t state = statesA[inputId];
-			if (state == logic_state_t::UNDEFINED) {
-				foundGoofyState = true;
-				break;
-			}
-			if (state == logic_state_t::FLOATING) {
-				continue;
-			}
-			if (outputState == logic_state_t::FLOATING) {
-				outputState = state;
-			} else if (outputState != state) {
-				outputState = logic_state_t::UNDEFINED;
-				break;
-			}
-		}
-		if (foundGoofyState) {
-			return logic_state_t::UNDEFINED;
-		} else {
-			return outputState;
-		}
-	}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate(statesA);
-	}
-
-	inline void realisticTick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		logic_state_t targetState = calculate(statesA);
-		applyRealisticTick(targetState, statesA, statesB);
-	}
-
-	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
-		return id;
-	}
-
-	std::vector<simulator_id_t> getOutputSimIds() const override {
-		return {id};
-	}
-};
-
-class ConstantGateBase : public SimulatorGate {
-public:
-	logic_state_t outputState;
-
-	ConstantGateBase(simulator_id_t id, logic_state_t outputState)
-		: SimulatorGate(id), outputState(outputState) {}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {}
-
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {}
-
-	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
-		states[id] = outputState;
-	}
-
-	void removeIdRefs(simulator_id_t otherId) override {}
-
-	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
-		return id;
-	}
-
-	std::vector<simulator_id_t> getOutputSimIds() const override {
-		return {id};
-	}
-};
-
-struct ConstantGate : public ConstantGateBase {
-	ConstantGate(simulator_id_t id, logic_state_t outputState = logic_state_t::LOW)
-		: ConstantGateBase(id, outputState) {}
-};
-
-struct ConstantResetGate : public ConstantGateBase {
-	ConstantResetGate(simulator_id_t id, logic_state_t outputState = logic_state_t::LOW)
-		: ConstantGateBase(id, outputState) {}
-
-	inline logic_state_t calculate() const noexcept {
-		return outputState;
-	}
-
-	inline void tick(std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate();
-	}
-};
-
-struct CopySelfOutputGate : public LogicGate {
-	CopySelfOutputGate(simulator_id_t id) : LogicGate(id) {}
-
-	void addInput(simulator_id_t inputId, connection_port_id_t portId) override {}
-
-	void removeInput(simulator_id_t inputId, connection_port_id_t portId) override {}
-
-	void removeIdRefs(simulator_id_t otherId) override {}
-
-	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		return statesA[id];
-	}
-
-	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
-		statesB[id] = calculate(statesA);
-	}
-
-	simulator_id_t getIdOfOutputPort(connection_port_id_t portId) const override {
-		return id;
-	}
-
-	void resetState(bool realistic, std::vector<logic_state_t>& states) override {
-		states[id] = logic_state_t::LOW;
-	}
+		return logic_state_t::HIGH;
+	};
+private:
+	bool outputsInverted;
 };
 
 #endif /* simulatorGates_h */
