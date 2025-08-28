@@ -7,8 +7,8 @@ class CircuitView;
 
 class ToolManager {
 public:
-	inline ToolManager(EventRegister* eventRegister, CircuitViewRenderer* renderer, CircuitView* circuitView) :
-		toolStacks { ToolStack(eventRegister, renderer, circuitView, this), ToolStack(eventRegister, renderer, circuitView, this), ToolStack(eventRegister, renderer, circuitView, this) } {
+	inline ToolManager(EventRegister* eventRegister, ViewportID viewportID, CircuitView* circuitView) :
+		toolStacks { ToolStack(eventRegister, viewportID, circuitView, this), ToolStack(eventRegister, viewportID, circuitView, this), ToolStack(eventRegister, viewportID, circuitView, this) } {
 		toolStacks[activeToolStack].activate();
 	}
 

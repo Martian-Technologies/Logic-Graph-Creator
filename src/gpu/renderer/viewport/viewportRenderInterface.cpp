@@ -9,8 +9,8 @@
 #include "gpu/renderer/windowRenderer.h"
 #include "logic/sharedLogic/logicRenderingUtils.h"
 
-ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
-	: element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
+ViewportRenderInterface::ViewportRenderInterface(ViewportID ViewportID, Rml::Element* element)
+	: element(element), chunker(MainRenderer::get().getDevice()), linkedWindowRenderer(MainRenderer::get().getWindowRenderer(ViewportID)) {
 	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 

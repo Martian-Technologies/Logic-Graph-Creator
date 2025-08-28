@@ -6,6 +6,7 @@
 #include "gui/viewPortManager/circuitView/renderer/renderer.h"
 #include "elements/elementRenderer.h"
 #include "logic/chunking/vulkanChunker.h"
+#include "gpu/mainRenderer.h"
 
 namespace Rml { class Element; }
 
@@ -20,7 +21,7 @@ struct ViewportViewData {
 
 class ViewportRenderInterface : public CircuitViewRenderer {
 public:
-	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
+	ViewportRenderInterface(ViewportID ViewportID, Rml::Element* element);
 	~ViewportRenderInterface();
 
 	ViewportViewData getViewData();

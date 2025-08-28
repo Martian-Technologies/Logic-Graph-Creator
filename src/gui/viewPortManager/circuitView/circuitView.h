@@ -5,6 +5,8 @@
 #include "tools/toolManager.h"
 #include "viewManager/viewManager.h"
 
+#include "gpu/mainRendererDefs.h"
+
 class Evaluator;
 class Circuit;
 class Backend;
@@ -12,7 +14,7 @@ class Backend;
 class CircuitView {
 	friend class Backend;
 public:
-	CircuitView(CircuitViewRenderer* renderer);
+	CircuitView(ViewportID viewportID);
 
 	// --------------- Gettters ---------------
 
@@ -30,9 +32,6 @@ public:
 
 	inline ViewManager& getViewManager() { return viewManager; }
 	inline const ViewManager& getViewManager() const { return viewManager; }
-
-	inline CircuitViewRenderer* getRenderer() { return renderer; }
-	inline const CircuitViewRenderer* getRenderer() const { return renderer; }
 
 	inline Backend* getBackend() { return backend; }
 	inline const Backend* getBackend() const { return backend; }
@@ -52,7 +51,7 @@ private:
 
 	Address address;
 	std::shared_ptr<Circuit> circuit;
-	CircuitViewRenderer* renderer;
+	ViewportID viewportID;
 	std::shared_ptr<Evaluator> evaluator;
 
 	DataUpdateEventManager* dataUpdateEventManager = nullptr;

@@ -2,6 +2,7 @@
 
 #include "../events/eventRegister.h"
 #include "../events/customEvents.h"
+#include "gpu/mainRendererDefs.h"
 
 bool CircuitTool::sendEvent(const Event* event) {
 	auto events = registeredEvents;
@@ -49,9 +50,9 @@ void CircuitTool::activate() {
 	updateElements();
 }
 
-void CircuitTool::setup(CircuitViewRenderer* renderer, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit) {
+void CircuitTool::setup(ViewportID viewportID, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit) {
 	this->toolStackInterface = toolStackInterface;
-	this->elementCreator.setup(renderer);
+	this->elementCreator.setup(viewportID);
 	this->eventRegister = eventRegister;
 	this->circuit = circuit;
 	this->circuitView = circuitView;

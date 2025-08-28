@@ -49,10 +49,14 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowRenderer* windowRenderer, Rml::Element* element) : fileManager(fileManager), document(document), window(window), element(element) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowID windowID, Rml::Element* element) : fileManager(fileManager), document(document), window(window), element(element) {
 	// create circuitView
-	rendererInterface = std::make_unique<ViewportRenderInterface>(windowRenderer->getDevice(), element, windowRenderer);
-	circuitView = std::make_unique<CircuitView>(rendererInterface.get());
+	int w = this->element->GetClientWidth();
+	int h = this->element->GetClientHeight();
+	int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
+	int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
+	ViewportID viewportID = MainRenderer::get().registerViewport(windowID, {x, y}, {w, h});
+	circuitView = std::make_unique<CircuitView>(viewportID);
 	
 	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
 		auto eventData = event->cast2<std::string>();

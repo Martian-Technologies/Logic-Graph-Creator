@@ -3,20 +3,23 @@
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
 
+#include "gpu/mainRenderer.h"
+
 #include "settingsWindow/settingsWindow.h"
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
 #include "../helper/eventPasser.h"
 #include "menuBar/menuBar.h"
 
-MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& renderInterface, VulkanInstance* vulkanInstance) :
-	sdlWindow("Connection Machine"), renderer(&sdlWindow, vulkanInstance), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager) {
+MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager) :
+	sdlWindow("Connection Machine"), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager) {
+
+	windowID = MainRenderer::get().registerWindow(sdlWindow);
 
 	// create rmlUI context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
 
 	// create rmlUI document
-	renderer.activateRml(renderInterface);
 	rmlDocument = rmlContext->LoadDocument(DirectoryManager::getResourceDirectory().generic_string() + "/gui/mainWindow/mainWindow.rml");
 
 	// Rml::Debugger::Initialise(rmlContext);
@@ -126,7 +129,7 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 
 		// let renderer know we if resized the window
 		if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
-			renderer.resize({ event.window.data1, event.window.data2 });
+			MainRenderer::get().resizeWindow(windowID, { event.window.data1, event.window.data2 });
 			rmlContext->Update();
 			for (auto circuitViewWidget : circuitViewWidgets) {
 				circuitViewWidget->handleResize();
@@ -139,16 +142,15 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 	return false;
 }
 
-void MainWindow::updateRml(RmlRenderInterface& renderInterface) {
+void MainWindow::updateRml() {
 	rmlContext->Update();
-
-	renderer.prepareForRml(renderInterface);
+	MainRenderer::get().prepareForRml(windowID);
 	rmlContext->Render();
-	renderer.endRml();
+	MainRenderer::get().endRml(windowID);
 }
 
 void MainWindow::createCircuitViewWidget(Rml::Element* element) {
-	circuitViewWidgets.push_back(std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), &renderer, element));
+	circuitViewWidgets.push_back(std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), windowID, element));
 	circuitViewWidgets.back()->getCircuitView()->setBackend(backend);
 	toolManagerManager.addCircuitView(circuitViewWidgets.back()->getCircuitView());
 	activeCircuitViewWidget = circuitViewWidgets.back(); // if it is created, it should be used

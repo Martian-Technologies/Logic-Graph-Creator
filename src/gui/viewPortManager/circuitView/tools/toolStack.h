@@ -3,16 +3,17 @@
 
 #include "../events/eventRegister.h"
 #include "toolStackInterface.h"
-#include "../renderer/renderer.h"
 #include "circuitTool.h"
+
+#include "gpu/mainRendererDefs.h"
 
 class CircuitView;
 class ToolManager;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, CircuitViewRenderer* renderer, CircuitView* circuitView, ToolManager* toolManager) :
-		eventRegister(eventRegister), renderer(renderer), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
+	inline ToolStack(EventRegister* eventRegister, ViewportID viewportID, CircuitView* circuitView, ToolManager* toolManager) :
+		eventRegister(eventRegister), viewportID(viewportID), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("Pointer Move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
@@ -61,7 +62,7 @@ private:
 	ToolStackInterface toolStackInterface;
 	EventRegister* eventRegister;
 
-	CircuitViewRenderer* renderer;
+	ViewportID viewportID;
 
 	bool isActive = false;
 	std::vector<SharedCircuitTool> toolStack;

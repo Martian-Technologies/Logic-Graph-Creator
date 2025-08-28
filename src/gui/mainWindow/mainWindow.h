@@ -5,11 +5,8 @@
 #include <SDL3/SDL_events.h>
 
 #include "gui/sdl/sdlWindow.h"
-#include "gpu/renderer/windowRenderer.h"
-#include "gui/rml/rmlRenderInterface.h"
 
 #include "computerAPI/circuits/circuitFileManager.h"
-#include "computerAPI/fileListener/fileListener.h"
 #include "backend/backend.h"
 
 #include "tools/toolManagerManager.h"
@@ -19,9 +16,10 @@
 #include "sideBar/selector/selectorWindow.h"
 #include "sideBar/simulation/evalWindow.h"
 
+
 class MainWindow {
 public:
-	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager, RmlRenderInterface& rmlRenderInterface, VulkanInstance* vulkanInstance);
+	MainWindow(Backend* backend, CircuitFileManager* circuitFileManager);
 	~MainWindow();
 
 	// no copy
@@ -30,7 +28,7 @@ public:
 	
 public:
 	bool recieveEvent(SDL_Event& event);
-	void updateRml(RmlRenderInterface& renderInterface);
+	void updateRml();
 
 	inline SDL_Window* getSdlWindow() { return sdlWindow.getHandle(); };
 	inline float getSdlWindowScalingSize() const { return sdlWindow.getWindowScalingSize(); }
@@ -52,11 +50,11 @@ public:
 private:
 	void createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
 
+	WindowID windowID;
 	Backend* backend;
 	KeybindHandler keybindHandler;
 	CircuitFileManager* circuitFileManager;
 	SdlWindow sdlWindow;
-	WindowRenderer renderer;
 	ToolManagerManager toolManagerManager;
 	std::optional<SelectorWindow> selectorWindow;
 	std::optional<EvalWindow> evalWindow;

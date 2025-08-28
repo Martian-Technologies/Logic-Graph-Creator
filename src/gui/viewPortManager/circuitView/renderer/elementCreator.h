@@ -1,58 +1,58 @@
 #ifndef elementCreator_h
 #define elementCreator_h
 
-#include "renderer.h"
+#include "gpu/mainRenderer.h"
 
 class ElementCreator {
 public:
-	ElementCreator() : renderer(nullptr) { }
-	ElementCreator(CircuitViewRenderer* renderer) : renderer(renderer), ids() { assert(renderer); }
+	ElementCreator() : viewportID(0) { }
+	ElementCreator(ViewportID viewportID) : viewportID(viewportID) { assert(viewportID); }
 	ElementCreator(const ElementCreator& elementCreator) = delete;
 	ElementCreator& operator=(const ElementCreator& elementCreator) = delete;
 
 	~ElementCreator() { clear(); }
 
-	void setup(CircuitViewRenderer* renderer) { if (this->renderer) clear(); this->renderer = renderer; }
-	bool isSetup() { return (bool)renderer; }
+	void setup(ViewportID viewportID) { clear(); this->viewportID = viewportID; }
+	bool isSetup() { return (bool)viewportID; }
 
 	void removeElement(ElementID id) {
-		assert(renderer);
+		assert(viewportID);
 		auto iter = ids.find(id);
 		if (iter == ids.end()) return;
 		switch (iter->second) {
 		case SelectionElement:
-			renderer->removeSelectionElement(iter->first);
+			MainRenderer::get().removeSelectionElement(viewportID, iter->first);
 			break;
 		case BlockPreview:
-			renderer->removeBlockPreview(iter->first);
+			MainRenderer::get().removeBlockPreview(viewportID, iter->first);
 			break;
 		case ConnectionPreview:
-			renderer->removeConnectionPreview(iter->first);
+			MainRenderer::get().removeConnectionPreview(viewportID, iter->first);
 			break;
 		case HalfConnectionPreview:
-			renderer->removeHalfConnectionPreview(iter->first);
+			MainRenderer::get().removeHalfConnectionPreview(viewportID, iter->first);
 			break;
 		}
 		ids.erase(iter);
 	}
 
 	inline void clear() {
-		if (!renderer) return;
+		if (!viewportID) return;
 		for (auto pair : ids) {
 			switch (pair.second) {
 			case SelectionElement:
-				renderer->removeSelectionElement(pair.first);
+				MainRenderer::get().removeSelectionElement(viewportID, pair.first);
 				break;
 			case BlockPreview:
-				renderer->removeBlockPreview(pair.first);
+				MainRenderer::get().removeBlockPreview(viewportID, pair.first);
 				break;
 			case ConnectionPreview:
-				renderer->removeConnectionPreview(pair.first);
+				MainRenderer::get().removeConnectionPreview(viewportID, pair.first);
 				break;
 			case HalfConnectionPreview:
-				renderer->removeHalfConnectionPreview(pair.first);
+				MainRenderer::get().removeHalfConnectionPreview(viewportID, pair.first);
 				break;
-			}
+		}
 		}
 		ids.clear();
 	}
@@ -60,48 +60,43 @@ public:
 	inline bool hasElement(ElementID id) { return ids.find(id) != ids.end(); }
 
 	inline ElementID addSelectionElement(const SelectionObjectElement& selection) {
-		assert(renderer);
-		ElementID id = renderer->addSelectionObjectElement(selection);
+		assert(viewportID);
+		ElementID id = MainRenderer::get().addSelectionObjectElement(viewportID, selection);
 		ids[id] = ElementType::SelectionElement;
 		return id;
 	}
 
 	inline ElementID addSelectionElement(const SelectionElement& selection) {
-		assert(renderer);
-		ElementID id = renderer->addSelectionElement(selection);
+		assert(viewportID);
+		ElementID id = MainRenderer::get().addSelectionElement(viewportID, selection);
 		ids[id] = ElementType::SelectionElement;
 		return id;
 	}
 
 	ElementID addBlockPreview(BlockPreview&& blockPreview) {
-		assert(renderer);
-		ElementID id = renderer->addBlockPreview(std::move(blockPreview));
-		ids[id] = ElementType::BlockPreview;
+		assert(viewportID);
+		ElementID id = MainRenderer::get().addBlockPreview(viewportID, std::move(blockPreview));
+		ids[id] = ElementType::SelectionElement;
 		return id;
 	}
 
 	void shiftBlockPreview(ElementID id, Vector shift) {
-		assert(renderer);
-		if (ids.contains(id)) renderer->shiftBlockPreview(id, shift);
+		assert(viewportID);
+		if (ids.contains(id)) MainRenderer::get().shiftBlockPreview(viewportID, id, shift);
 	}
 
 	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) {
-		assert(renderer);
-		ElementID id = renderer->addConnectionPreview(connectionPreview);
+		assert(viewportID);
+		ElementID id = MainRenderer::get().addConnectionPreview(viewportID, connectionPreview);
 		ids[id] = ElementType::ConnectionPreview;
 		return id;
 	}
 
 	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
-		assert(renderer);
-		ElementID id = renderer->addHalfConnectionPreview(halfConnectionPreview);
+		assert(viewportID);
+		ElementID id = MainRenderer::get().addHalfConnectionPreview(viewportID, halfConnectionPreview);
 		ids[id] = ElementType::HalfConnectionPreview;
 		return id;
-	}
-
-	void addConfetti(FPosition start) {
-		assert(renderer);
-		renderer->spawnConfetti(start);
 	}
 
 private:
@@ -112,7 +107,7 @@ private:
 		BlockPreview,
 	};
 
-	CircuitViewRenderer* renderer;
+	ViewportID viewportID;
 	std::map<ElementID, ElementType> ids;
 };
 
