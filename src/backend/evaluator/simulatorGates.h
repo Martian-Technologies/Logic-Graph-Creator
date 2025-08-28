@@ -414,6 +414,65 @@ public:
 	};
 };
 
+class TristateBuffer : public SingleOutputGate {
+public:
+	TristateBuffer(simulator_id_t id, simulator_id_t enablePortId, bool enableInverted) : SingleOutputGate(id), enablePortId(enablePortId), enableInverted(enableInverted) {}
+	std::vector<simulator_id_t> getOccupiedIds() const override {
+		return { id, enablePortId };
+	}
+	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
+		if (portId == 0) {
+			return id;
+		} else {
+			return enablePortId;
+		}
+	}
+	logic_state_t getResetState(bool isRealistic) override {
+		return logic_state_t::FLOATING;
+	}
+	logic_state_t calculateNewState(
+		const std::vector<logic_state_t>& statesReading,
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
+	) override {
+		if (countX[enablePortId] > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (countZ[enablePortId] > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		bool enableHigh = (countH[enablePortId] > 0);
+		bool enableLow = (countL[enablePortId] > 0);
+		if (enableHigh == enableLow) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (enableHigh == enableInverted) {
+			return logic_state_t::FLOATING;
+		}
+		if (countX[id] > 0) {
+			return logic_state_t::UNDEFINED;
+		}
+		bool mainInputHigh = (countH[id] > 0);
+		bool mainInputLow = (countL[id] > 0);
+		if (mainInputHigh && mainInputLow) {
+			return logic_state_t::UNDEFINED;
+		}
+		if (mainInputHigh) {
+			return logic_state_t::HIGH;
+		}
+		if (mainInputLow) {
+			return logic_state_t::LOW;
+		}
+		return logic_state_t::FLOATING;
+	};
+
+private:
+	simulator_id_t enablePortId;
+	bool enableInverted;
+};
+
 class Junction {
 public:
 	Junction(simulator_id_t id) : id(id) {}

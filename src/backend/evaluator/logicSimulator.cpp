@@ -170,6 +170,9 @@ inline void LogicSimulator::calculateNewStatesSimple() {
 	for (auto& gate : xorGates) {
 		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
+	for (auto& gate : tristateBuffers) {
+		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
+	}
 	for (auto& gate : constantGates) {
 		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
@@ -185,6 +188,9 @@ inline void LogicSimulator::calculateNewStatesRealistic() {
 	for (auto& gate : xorGates) {
 		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
+	for (auto& gate : tristateBuffers) {
+		gate.setNewStateRealistic(statesWriting, statesReading, countL, countH, countZ, countX);
+	}
 	for (auto& gate : constantGates) {
 		gate.setNewStateSimple(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
@@ -198,6 +204,9 @@ inline void LogicSimulator::propagateNewStates() {
 		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
 	for (auto& gate : xorGates) {
+		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
+	}
+	for (auto& gate : tristateBuffers) {
 		gate.propagateNewState(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
 	for (auto& gate : constantGates) {
@@ -255,6 +264,10 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 		return addConstantOffGate();
 	case GateType::CONSTANT_ON:
 		return addConstantOnGate();
+	case GateType::TRISTATE_BUFFER:
+		return addTristateBufferGate();
+	case GateType::TRISTATE_BUFFER_INVERTED:
+		return addTristateBufferInvertedGate();
 	case GateType::JUNCTION:
 		return addJunction();
 	default:
@@ -307,6 +320,7 @@ void LogicSimulator::removeGate(simulator_id_t gateId) {
 	switch (gateType) {
 	case SimGateType::AND: if (!andGates.empty()) fixMovedIndex(andGates); break;
 	case SimGateType::XOR: if (!xorGates.empty()) fixMovedIndex(xorGates); break;
+	case SimGateType::TRISTATE_BUFFER: if (!tristateBuffers.empty()) fixMovedIndex(tristateBuffers); break;
 	case SimGateType::CONSTANT: if (!constantGates.empty()) fixMovedIndex(constantGates); break;
 	case SimGateType::COPY_SELF_OUTPUT: if (!copySelfOutputGates.empty()) fixMovedIndex(copySelfOutputGates); break;
 	case SimGateType::JUNCTION: if (!junctions.empty()) fixMovedIndex(junctions); break;
@@ -345,6 +359,10 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 		break;
 	case SimGateType::XOR:
 		xorGates[gateIndex].addOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
+	case SimGateType::TRISTATE_BUFFER:
+		tristateBuffers[gateIndex].addOutput(sourcePort, destinationInputPortId);
 		success = true;
 		break;
 	case SimGateType::CONSTANT:
@@ -410,6 +428,10 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 		xorGates[gateIndex].removeOutput(sourcePort, destinationInputPortId);
 		success = true;
 		break;
+	case SimGateType::TRISTATE_BUFFER:
+		tristateBuffers[gateIndex].removeOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
 	case SimGateType::CONSTANT:
 		constantGates[gateIndex].removeOutput(sourcePort, destinationInputPortId);
 		success = true;
@@ -462,6 +484,9 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t state) {
 			case SimGateType::XOR:
 				xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
 				break;
+			case SimGateType::TRISTATE_BUFFER:
+				tristateBuffers[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				break;
 			case SimGateType::CONSTANT:
 				constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
 				break;
@@ -504,6 +529,9 @@ void LogicSimulator::processPendingStateChanges() {
 				case SimGateType::XOR:
 					xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
 					break;
+				case SimGateType::TRISTATE_BUFFER:
+					tristateBuffers[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					break;
 				case SimGateType::CONSTANT:
 					constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
 					break;
@@ -531,6 +559,8 @@ std::optional<simulator_id_t> LogicSimulator::getInputPortId(simulator_id_t simI
 		return andGates[gateIndex].getInputPortId(portId);
 	case SimGateType::XOR:
 		return xorGates[gateIndex].getInputPortId(portId);
+	case SimGateType::TRISTATE_BUFFER:
+		return tristateBuffers[gateIndex].getInputPortId(portId);
 	case SimGateType::CONSTANT:
 		return constantGates[gateIndex].getInputPortId(portId);
 	case SimGateType::COPY_SELF_OUTPUT:
@@ -553,6 +583,8 @@ std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t sim
 		return andGates[gateIndex].getOutputPortId(portId);
 	case SimGateType::XOR:
 		return xorGates[gateIndex].getOutputPortId(portId);
+	case SimGateType::TRISTATE_BUFFER:
+		return tristateBuffers[gateIndex].getOutputPortId(portId);
 	case SimGateType::CONSTANT:
 		return constantGates[gateIndex].getOutputPortId(portId);
 	case SimGateType::COPY_SELF_OUTPUT:
@@ -644,6 +676,28 @@ simulator_id_t LogicSimulator::addCopySelfOutputGate() {
 	return id;
 }
 
+simulator_id_t LogicSimulator::addTristateBufferGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	simulator_id_t enableId = simulatorIdProvider.getNewId();
+	expandDataVectors(id);
+	expandDataVectors(enableId);
+	tristateBuffers.push_back(TristateBuffer(id, enableId, false));
+	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	gateLocations[id] = GateLocation(SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
+	return id;
+}
+
+simulator_id_t LogicSimulator::addTristateBufferInvertedGate() {
+	simulator_id_t id = simulatorIdProvider.getNewId();
+	simulator_id_t enableId = simulatorIdProvider.getNewId();
+	expandDataVectors(id);
+	expandDataVectors(enableId);
+	tristateBuffers.push_back(TristateBuffer(id, enableId, true));
+	tristateBuffers.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
+	gateLocations[id] = GateLocation(SimGateType::TRISTATE_BUFFER, tristateBuffers.size() - 1);
+	return id;
+}
+
 simulator_id_t LogicSimulator::addJunction() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
@@ -719,6 +773,8 @@ std::optional<std::vector<simulator_id_t>> LogicSimulator::getOccupiedIds(simula
 		return andGates[gateIndex].getOccupiedIds();
 	case SimGateType::XOR:
 		return xorGates[gateIndex].getOccupiedIds();
+	case SimGateType::TRISTATE_BUFFER:
+		return tristateBuffers[gateIndex].getOccupiedIds();
 	case SimGateType::CONSTANT:
 		return constantGates[gateIndex].getOccupiedIds();
 	case SimGateType::COPY_SELF_OUTPUT:

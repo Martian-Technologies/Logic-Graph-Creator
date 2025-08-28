@@ -78,7 +78,7 @@ private:
 
 	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
-	// std::vector<TristateBufferGate> tristateBuffers;
+	std::vector<TristateBuffer> tristateBuffers;
 	std::vector<ConstantGate> constantGates;
 	std::vector<CopySelfOutputGate> copySelfOutputGates;
 	std::vector<Junction> junctions;
@@ -131,6 +131,8 @@ private:
 	simulator_id_t addConstantOnGate();
 	simulator_id_t addConstantOffGate();
 	simulator_id_t addCopySelfOutputGate();
+	simulator_id_t addTristateBufferGate();
+	simulator_id_t addTristateBufferInvertedGate();
 	simulator_id_t addJunction();
 
 	void expandDataVectors(simulator_id_t maxId);
