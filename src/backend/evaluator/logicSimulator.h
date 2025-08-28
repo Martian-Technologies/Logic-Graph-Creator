@@ -13,8 +13,7 @@ enum class SimGateType : int {
 	JUNCTION = 2,
 	TRISTATE_BUFFER = 3,
 	CONSTANT = 4,
-	CONSTANT_RESET = 5,
-	COPY_SELF_OUTPUT = 6
+	COPY_SELF_OUTPUT = 5
 };
 
 class LogicSimulator {
@@ -79,11 +78,10 @@ private:
 
 	std::vector<ANDLikeGate> andGates;
 	std::vector<XORLikeGate> xorGates;
-	// std::vector<JunctionGate> junctions;
 	// std::vector<TristateBufferGate> tristateBuffers;
-	// std::vector<ConstantGate> constantGates;
-	// std::vector<ConstantResetGate> constantResetGates;
-	// std::vector<CopySelfOutputGate> copySelfOutputGates;
+	std::vector<ConstantGate> constantGates;
+	std::vector<CopySelfOutputGate> copySelfOutputGates;
+	std::vector<Junction> junctions;
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
@@ -130,6 +128,10 @@ private:
 	simulator_id_t addNorGate();
 	simulator_id_t addXorGate();
 	simulator_id_t addXnorGate();
+	simulator_id_t addConstantOnGate();
+	simulator_id_t addConstantOffGate();
+	simulator_id_t addCopySelfOutputGate();
+	simulator_id_t addJunction();
 
 	void expandDataVectors(simulator_id_t maxId);
 
