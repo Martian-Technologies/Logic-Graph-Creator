@@ -10,6 +10,8 @@
 
 #include "mainRendererDefs.h"
 
+#include "gpu/renderer/windowRenderer.h"
+
 // Element Types ------------------------------
 struct SelectionElement {
 	SelectionElement() = default;
@@ -128,6 +130,10 @@ public:
 		
 
 private:
+	std::map<WindowID, WindowRenderer> windowRenderers;
+	std::map<ViewportID, ViewportRenderInterface> viewportRenderers;
+
+
 };
 
 #endif
