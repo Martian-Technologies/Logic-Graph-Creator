@@ -238,18 +238,23 @@ void LogicSimulator::removeGate(simulator_id_t gateId) {
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-	dirtySimulatorIds.push_back(sourceId); // update this to support multi-output gates
-	auto locationIt = gateLocations.find(sourceId);
-	if (locationIt == gateLocations.end()) {
-		logError("Source gate not found: {}", "LogicSimulator::makeConnection", sourceId);
+	std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
+	if (!sourcePortId) {
+		logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
 		return;
 	}
+	dirtySimulatorIds.push_back(sourcePortId.value());
 	std::optional<simulator_id_t> destinationInputPortIdOpt = getInputPortId(destinationId, destinationPort);
 	if (!destinationInputPortIdOpt) {
 		logError("Destination input port not found: {}", "LogicSimulator::makeConnection", destinationId);
 		return;
 	}
 	simulator_id_t destinationInputPortId = destinationInputPortIdOpt.value();
+	auto locationIt = gateLocations.find(sourceId);
+	if (locationIt == gateLocations.end()) {
+		logError("Source gate not found: {}", "LogicSimulator::makeConnection", sourceId);
+		return;
+	}
 	SimGateType gateType = locationIt->second.gateType;
 	size_t gateIndex = locationIt->second.gateIndex;
 	bool success = false;
@@ -264,11 +269,6 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 		break;
 	}
 	if (success) {
-		std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
-		if (!sourcePortId) {
-			logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
-			return;
-		}
 		logic_state_t sourceState = statesReading[sourcePortId.value()];
 		switch (sourceState) {
 		case logic_state_t::LOW:
@@ -289,8 +289,54 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 }
 
 void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-	dirtySimulatorIds.push_back(sourceId); // update this to support multi-output gates
-
+	std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
+	if (!sourcePortId) {
+		logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
+		return;
+	}
+	dirtySimulatorIds.push_back(sourcePortId.value());
+	std::optional<simulator_id_t> destinationInputPortIdOpt = getInputPortId(destinationId, destinationPort);
+	if (!destinationInputPortIdOpt) {
+		logError("Destination input port not found: {}", "LogicSimulator::makeConnection", destinationId);
+		return;
+	}
+	simulator_id_t destinationInputPortId = destinationInputPortIdOpt.value();
+	auto locationIt = gateLocations.find(sourceId);
+	if (locationIt == gateLocations.end()) {
+		logError("Source gate not found: {}", "LogicSimulator::makeConnection", sourceId);
+		return;
+	}
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+	bool success = false;
+	switch (gateType) {
+	case SimGateType::AND:
+		andGates[gateIndex].removeOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
+	case SimGateType::XOR:
+		xorGates[gateIndex].removeOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
+	}
+	if (success) {
+		logic_state_t sourceState = statesReading[sourcePortId.value()];
+		switch (sourceState) {
+		case logic_state_t::LOW:
+			countL[destinationInputPortId]--;
+			break;
+		case logic_state_t::HIGH:
+			countH[destinationInputPortId]--;
+			break;
+		case logic_state_t::FLOATING:
+			countZ[destinationInputPortId]--;
+			break;
+		case logic_state_t::UNDEFINED:
+			countX[destinationInputPortId]--;
+			break;
+		}
+	}
+	logInfo("Made removed: {}:{} -> {}:{}", "LogicSimulator::makeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
 
 void LogicSimulator::endEdit() {
