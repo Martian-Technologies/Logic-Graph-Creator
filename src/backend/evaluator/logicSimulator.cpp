@@ -314,6 +314,7 @@ void LogicSimulator::removeGate(simulator_id_t gateId) {
 
 	gateLocations.erase(gateId);
 	inputDependencies.erase(gateId);
+	outputDependencies.erase(gateId);
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
