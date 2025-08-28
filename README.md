@@ -13,7 +13,7 @@ Download builds of the app in the [releases tab](https://github.com/Martian-Tech
 - Alt+Click move
 - Q/E rotate
 - Ctrl+Z undo, Ctrl+Shift+Z redo
-- Ctrl+S Save. Ctrl+I or Drop file load
+- Ctrl+S Save. Ctrl+O or Drop file load
 - Ctrl+N new file
 - L/R click to use tools. E confirm (for tensor)
 - Check setting for more!

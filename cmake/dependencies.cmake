@@ -85,16 +85,18 @@ function(add_main_dependencies)
 	if (RUN_TRACY_PROFILER)
 		message("tracy is ON")
 		CPMAddPackage(
-			NAME tracy
+			NAME TracyClient
 			GITHUB_REPOSITORY wolfpld/tracy
-			GIT_TAG v2.0.0
+			GIT_TAG v0.12.2
 			OPTIONS
 				"TRACY_ENABLE ON"
 				"TRACY_ON_DEMAND ON"
 				"EXCLUDE_FROM_ALL YES"
 			SOURCE_DIR "${EXTERNAL_DIR}/tracy"
 		)
-		list(APPEND EXTERNAL_LINKS tracy)
+		list(APPEND EXTERNAL_LINKS TracyClient EXCLUDE_FROM_ALL)
+
+		add_subdirectory("${EXTERNAL_DIR}/tracy/profiler/")
 	endif()
 
 	set(EXTERNAL_LINKS "${EXTERNAL_LINKS}" PARENT_SCOPE)
