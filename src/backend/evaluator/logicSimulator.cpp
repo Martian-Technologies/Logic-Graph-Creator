@@ -214,3 +214,35 @@ std::vector<logic_state_t> LogicSimulator::getStates(const std::vector<simulator
 	}
 	return result;
 }
+
+simulator_id_t LogicSimulator::addGate(const GateType gateType) {
+	return 0;
+}
+
+void LogicSimulator::removeGate(simulator_id_t gateId) {
+
+}
+
+void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
+
+}
+
+void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
+
+}
+
+void LogicSimulator::endEdit() {
+
+}
+
+void LogicSimulator::setState(simulator_id_t id, logic_state_t state) {
+
+}
+
+void LogicSimulator::processPendingStateChanges() {
+
+}
+
+std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
+	return std::nullopt;
+}
