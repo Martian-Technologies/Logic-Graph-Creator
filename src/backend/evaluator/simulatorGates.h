@@ -15,6 +15,16 @@ public:
 			id = idMap.at(id);
 		}
 	}
+	virtual inline void addOutput(
+		connection_port_id_t portId,
+		simulator_id_t outputId
+	) = 0;
+	virtual inline void removeOutput(
+		connection_port_id_t portId,
+		simulator_id_t outputId
+	) = 0;
+	virtual inline std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const = 0;
+	virtual inline std::optional<simulator_id_t> getOutputPortId(connection_port_id_t portId) const = 0;
 	virtual inline void setNewStateSimple(
 		std::vector<logic_state_t>& statesWriting,
 		std::vector<unsigned int>& countL,
@@ -62,11 +72,23 @@ public:
 			}
 		}
 	}
+	inline void addOutput(connection_port_id_t portId, simulator_id_t outputId) override {
+		outputIds.push_back(outputId);
+	}
+	inline void removeOutput(connection_port_id_t portId, simulator_id_t outputId) override {
+		auto it = std::find(outputIds.begin(), outputIds.end(), outputId);
+		if (it != outputIds.end()) {
+			outputIds.erase(it);
+		}
+	}
+	std::optional<simulator_id_t> getOutputPortId(connection_port_id_t portId) const override {
+		return id;
+	}
 	virtual inline logic_state_t calculateNewState(
-		unsigned int countL,
-		unsigned int countH,
-		unsigned int countZ,
-		unsigned int countX
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
 	) = 0;
 
 	inline void setNewStateSimple(
@@ -76,7 +98,7 @@ public:
 		std::vector<unsigned int>& countZ,
 		std::vector<unsigned int>& countX
 	) override {
-		statesWriting[id] = calculateNewState(countL[id], countH[id], countZ[id], countX[id]);
+		statesWriting[id] = calculateNewState(countL, countH, countZ, countX);
 	};
 
 	inline void setNewStateRealistic(
@@ -87,7 +109,7 @@ public:
 		std::vector<unsigned int>& countZ,
 		std::vector<unsigned int>& countX
 	) override {
-		logic_state_t newState = calculateNewState(countL[id], countH[id], countZ[id], countX[id]);
+		logic_state_t newState = calculateNewState(countL, countH, countZ, countX);
 		if (newState == logic_state_t::UNDEFINED) {
 			statesWriting[id] = logic_state_t::UNDEFINED;
 			return;
@@ -171,22 +193,25 @@ public:
 			defaultOutput = logic_state_t::HIGH;
 		}
 	}
+	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
+		return id;
+	}
 	logic_state_t calculateNewState(
-		unsigned int countL,
-		unsigned int countH,
-		unsigned int countZ,
-		unsigned int countX
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
 	) override {
-		if ((inputsInverted ? countH : countL) > 0) {
+		if ((inputsInverted ? countH[id] : countL[id]) > 0) {
 			return conditionOutput;
 		}
-		if (countX > 0) {
+		if (countX[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countZ > 0) {
+		if (countZ[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countL == 0 && countH == 0) {
+		if (countL[id] == 0 && countH[id] == 0) {
 			return logic_state_t::LOW;
 		}
 		return defaultOutput;
@@ -200,22 +225,25 @@ private:
 class XORLikeGate : public SingleOutputGate {
 public:
 	XORLikeGate(simulator_id_t id, bool outputsInverted) : SingleOutputGate(id), outputsInverted(outputsInverted) {}
+	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
+		return id;
+	}
 	logic_state_t calculateNewState(
-		unsigned int countL,
-		unsigned int countH,
-		unsigned int countZ,
-		unsigned int countX
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
 	) override {
-		if (countX > 0) {
+		if (countX[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countZ > 0) {
+		if (countZ[id] > 0) {
 			return logic_state_t::UNDEFINED;
 		}
-		if (countL == 0 && countH == 0) { // no inputs = LOW, regardless of gate type
+		if (countL[id] == 0 && countH[id] == 0) { // no inputs = LOW, regardless of gate type
 			return logic_state_t::LOW;
 		}
-		if (countH % 2 == outputsInverted) { // if outputsInverted is true, our gate is XNOR, so if parity is odd, output LOW
+		if (countH[id] % 2 == outputsInverted) { // if outputsInverted is true, our gate is XNOR, so if parity is odd, output LOW
 			return logic_state_t::LOW;
 		}
 		return logic_state_t::HIGH;

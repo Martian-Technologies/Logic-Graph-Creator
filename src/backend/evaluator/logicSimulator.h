@@ -31,6 +31,7 @@ public:
 
 	logic_state_t getState(simulator_id_t id) const;
 	std::vector<logic_state_t> getStates(const std::vector<simulator_id_t>& ids) const;
+	std::optional<simulator_id_t> getInputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 	std::optional<simulator_id_t> getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const;
 
 	simulator_id_t addGate(const GateType gateType);
@@ -38,6 +39,16 @@ public:
 	void makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	void removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
 	void endEdit();
+
+	struct GateLocation {
+		SimGateType gateType;
+		size_t gateIndex;
+
+		GateLocation() : gateType(SimGateType::AND), gateIndex(0) {}
+		GateLocation(SimGateType type, size_t index) : gateType(type), gateIndex(index) {}
+	};
+
+	std::unordered_map<simulator_id_t, GateLocation> gateLocations;
 
 private:
 	EvalConfig& evalConfig;

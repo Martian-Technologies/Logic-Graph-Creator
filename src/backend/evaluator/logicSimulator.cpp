@@ -238,10 +238,58 @@ void LogicSimulator::removeGate(simulator_id_t gateId) {
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-
+	dirtySimulatorIds.push_back(sourceId); // update this to support multi-output gates
+	auto locationIt = gateLocations.find(sourceId);
+	if (locationIt == gateLocations.end()) {
+		logError("Source gate not found: {}", "LogicSimulator::makeConnection", sourceId);
+		return;
+	}
+	std::optional<simulator_id_t> destinationInputPortIdOpt = getInputPortId(destinationId, destinationPort);
+	if (!destinationInputPortIdOpt) {
+		logError("Destination input port not found: {}", "LogicSimulator::makeConnection", destinationId);
+		return;
+	}
+	simulator_id_t destinationInputPortId = destinationInputPortIdOpt.value();
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+	bool success = false;
+	switch (gateType) {
+	case SimGateType::AND:
+		andGates[gateIndex].addOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
+	case SimGateType::XOR:
+		xorGates[gateIndex].addOutput(sourcePort, destinationInputPortId);
+		success = true;
+		break;
+	}
+	if (success) {
+		std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
+		if (!sourcePortId) {
+			logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
+			return;
+		}
+		logic_state_t sourceState = statesReading[sourcePortId.value()];
+		switch (sourceState) {
+		case logic_state_t::LOW:
+			countL[destinationInputPortId]++;
+			break;
+		case logic_state_t::HIGH:
+			countH[destinationInputPortId]++;
+			break;
+		case logic_state_t::FLOATING:
+			countZ[destinationInputPortId]++;
+			break;
+		case logic_state_t::UNDEFINED:
+			countX[destinationInputPortId]++;
+			break;
+		}
+	}
+	logInfo("Made connection: {}:{} -> {}:{}", "LogicSimulator::makeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
 
 void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
+	dirtySimulatorIds.push_back(sourceId); // update this to support multi-output gates
 
 }
 
@@ -257,14 +305,43 @@ void LogicSimulator::processPendingStateChanges() {
 
 }
 
+std::optional<simulator_id_t> LogicSimulator::getInputPortId(simulator_id_t simId, connection_port_id_t portId) const {
+	auto locationIt = gateLocations.find(simId);
+	if (locationIt == gateLocations.end()) {
+		return std::nullopt;
+	}
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+	switch (gateType) {
+	case SimGateType::AND:
+		return andGates[gateIndex].getInputPortId(portId);
+	case SimGateType::XOR:
+		return xorGates[gateIndex].getInputPortId(portId);
+	}
+	return std::nullopt;
+}
+
 std::optional<simulator_id_t> LogicSimulator::getOutputPortId(simulator_id_t simId, connection_port_id_t portId) const {
-	return simId; // update this later to support multi-output blocks
+	auto locationIt = gateLocations.find(simId);
+	if (locationIt == gateLocations.end()) {
+		return std::nullopt;
+	}
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+	switch (gateType) {
+	case SimGateType::AND:
+		return andGates[gateIndex].getOutputPortId(portId);
+	case SimGateType::XOR:
+		return xorGates[gateIndex].getOutputPortId(portId);
+	}
+	return std::nullopt;
 }
 
 simulator_id_t LogicSimulator::addAndGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	andGates.push_back(ANDLikeGate(id, false, false));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
 
@@ -272,6 +349,7 @@ simulator_id_t LogicSimulator::addOrGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	andGates.push_back(ANDLikeGate(id, true, true));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
 
@@ -279,6 +357,7 @@ simulator_id_t LogicSimulator::addNandGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	andGates.push_back(ANDLikeGate(id, false, true));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
 
@@ -286,6 +365,7 @@ simulator_id_t LogicSimulator::addNorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	andGates.push_back(ANDLikeGate(id, true, false));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
 
@@ -293,6 +373,7 @@ simulator_id_t LogicSimulator::addXorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	xorGates.push_back(XORLikeGate(id, false));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
 
@@ -300,6 +381,7 @@ simulator_id_t LogicSimulator::addXnorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	xorGates.push_back(XORLikeGate(id, true));
 	expandDataVectors(id);
+	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
 
