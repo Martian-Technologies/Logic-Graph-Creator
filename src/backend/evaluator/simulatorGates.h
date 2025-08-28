@@ -10,6 +10,7 @@ public:
 	virtual ~SimulatorGate() = default;
 	SimulatorGate(simulator_id_t id) : id(id) {}
 	simulator_id_t getId() const { return id; }
+	virtual std::vector<simulator_id_t> getOccupiedIds() const = 0;
 	virtual void remapIds(std::unordered_map<simulator_id_t, simulator_id_t>& idMap) {
 		if (idMap.contains(id)) {
 			id = idMap.at(id);
@@ -27,22 +28,22 @@ public:
 	virtual inline std::optional<simulator_id_t> getOutputPortId(connection_port_id_t portId) const = 0;
 	virtual inline void setNewStateSimple(
 		std::vector<logic_state_t>& statesWriting,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) = 0;
 	virtual inline void setNewStateRealistic(
 		std::vector<logic_state_t>& statesWriting,
-		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<logic_state_t>& statesReading,
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) = 0;
 	virtual inline void propagateNewState(
-		std::vector<logic_state_t>& statesWriting,
-		std::vector<logic_state_t>& statesReading,
+		const std::vector<logic_state_t>& statesWriting,
+		const std::vector<logic_state_t>& statesReading,
 		std::vector<unsigned int>& countL,
 		std::vector<unsigned int>& countH,
 		std::vector<unsigned int>& countZ,
@@ -85,29 +86,29 @@ public:
 		return id;
 	}
 	virtual inline logic_state_t calculateNewState(
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) = 0;
 
 	inline void setNewStateSimple(
 		std::vector<logic_state_t>& statesWriting,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) override {
 		statesWriting[id] = calculateNewState(countL, countH, countZ, countX);
 	};
 
 	inline void setNewStateRealistic(
 		std::vector<logic_state_t>& statesWriting,
-		std::vector<logic_state_t>& statesReading,
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<logic_state_t>& statesReading,
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) override {
 		logic_state_t newState = calculateNewState(countL, countH, countZ, countX);
 		if (newState == logic_state_t::UNDEFINED) {
@@ -127,8 +128,8 @@ public:
 	};
 
 	inline void propagateNewState(
-		std::vector<logic_state_t>& statesWriting,
-		std::vector<logic_state_t>& statesReading,
+		const std::vector<logic_state_t>& statesWriting,
+		const std::vector<logic_state_t>& statesReading,
 		std::vector<unsigned int>& countL,
 		std::vector<unsigned int>& countH,
 		std::vector<unsigned int>& countZ,
@@ -193,14 +194,17 @@ public:
 			defaultOutput = logic_state_t::HIGH;
 		}
 	}
+	std::vector<simulator_id_t> getOccupiedIds() const override {
+		return { id };
+	}
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return id;
 	}
 	logic_state_t calculateNewState(
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) override {
 		if ((inputsInverted ? countH[id] : countL[id]) > 0) {
 			return conditionOutput;
@@ -228,11 +232,14 @@ public:
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return id;
 	}
+	std::vector<simulator_id_t> getOccupiedIds() const override {
+		return { id };
+	}
 	logic_state_t calculateNewState(
-		std::vector<unsigned int>& countL,
-		std::vector<unsigned int>& countH,
-		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		const std::vector<unsigned int>& countL,
+		const std::vector<unsigned int>& countH,
+		const std::vector<unsigned int>& countZ,
+		const std::vector<unsigned int>& countX
 	) override {
 		if (countX[id] > 0) {
 			return logic_state_t::UNDEFINED;

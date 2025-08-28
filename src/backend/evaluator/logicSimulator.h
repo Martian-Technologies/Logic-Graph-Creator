@@ -87,6 +87,23 @@ private:
 
 	IdProvider<simulator_id_t> simulatorIdProvider;
 
+	struct GateDependency {
+		simulator_id_t dependentId;
+		connection_port_id_t sourcePort;
+		connection_port_id_t destinationPort;
+
+		GateDependency() : dependentId(0), sourcePort(0), destinationPort(0) {}
+		explicit GateDependency(simulator_id_t id, connection_port_id_t srcPort, connection_port_id_t destPort)
+			: dependentId(id), sourcePort(srcPort), destinationPort(destPort) {}
+
+		bool operator==(const GateDependency& other) const {
+			return dependentId == other.dependentId && sourcePort == other.sourcePort && destinationPort == other.destinationPort;
+		}
+	};
+
+	std::unordered_map<simulator_id_t, std::vector<GateDependency>> inputDependencies;
+	std::unordered_map<simulator_id_t, std::vector<GateDependency>> outputDependencies;
+
 	void simulationLoop();
 	inline void tickOnceSimple();
 	inline void realisticTickOnce();
@@ -115,6 +132,11 @@ private:
 	simulator_id_t addXnorGate();
 
 	void expandDataVectors(simulator_id_t maxId);
+
+	void addGateDependency(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
+	void removeGateDependency(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort);
+
+	std::optional<std::vector<simulator_id_t>> getOccupiedIds(simulator_id_t gateId) const;
 };
 
 class SimPauseGuard {

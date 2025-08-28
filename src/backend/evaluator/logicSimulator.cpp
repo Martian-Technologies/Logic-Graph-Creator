@@ -234,7 +234,53 @@ simulator_id_t LogicSimulator::addGate(const GateType gateType) {
 }
 
 void LogicSimulator::removeGate(simulator_id_t gateId) {
+	if (outputDependencies.contains(gateId)) {
+		std::vector<GateDependency> dependencies = outputDependencies[gateId];
+		for (const auto& dep : dependencies) {
+			removeConnection(gateId, dep.sourcePort, dep.dependentId, dep.destinationPort);
+		}
+		outputDependencies.erase(gateId);
+	}
+	if (inputDependencies.contains(gateId)) {
+		std::vector<GateDependency> dependencies = inputDependencies[gateId];
+		for (const auto& dep : dependencies) {
+			removeConnection(dep.dependentId, dep.sourcePort, gateId, dep.destinationPort);
+		}
+		inputDependencies.erase(gateId);
+	}
+	std::optional<std::vector<simulator_id_t>> occupiedIdsOpt = getOccupiedIds(gateId);
+	if (occupiedIdsOpt) {
+		for (const simulator_id_t& id : occupiedIdsOpt.value()) {
+			simulatorIdProvider.releaseId(id);
+			dirtySimulatorIds.push_back(id);
+		}
+	}
 
+	auto locationIt = gateLocations.find(gateId);
+	if (locationIt == gateLocations.end()) {
+		logError("Gate not found: {}", "LogicSimulator::removeGate", gateId);
+		return;
+	}
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+
+	auto fixMovedIndex = [&](auto& vec) {
+		const size_t last = vec.size() - 1;
+		if (gateIndex != last) {
+			std::swap(vec[gateIndex], vec[last]);
+			simulator_id_t movedId = vec[gateIndex].getId();
+			gateLocations[movedId].gateIndex = gateIndex;
+		}
+		vec.pop_back();
+	};
+
+	switch (gateType) {
+	case SimGateType::AND: if (!andGates.empty()) fixMovedIndex(andGates); break;
+	case SimGateType::XOR: if (!xorGates.empty()) fixMovedIndex(xorGates); break;
+	}
+
+	gateLocations.erase(gateId);
+	inputDependencies.erase(gateId);
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
@@ -284,6 +330,7 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 			countX[destinationInputPortId]++;
 			break;
 		}
+		addGateDependency(sourceId, sourcePort, destinationId, destinationPort);
 	}
 	logInfo("Made connection: {}:{} -> {}:{}", "LogicSimulator::makeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
@@ -335,8 +382,9 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 			countX[destinationInputPortId]--;
 			break;
 		}
+		removeGateDependency(sourceId, sourcePort, destinationId, destinationPort);
 	}
-	logInfo("Made removed: {}:{} -> {}:{}", "LogicSimulator::makeConnection", sourceId, sourcePort, destinationId, destinationPort);
+	logInfo("Removed connection: {}:{} -> {}:{}", "LogicSimulator::removeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
 
 void LogicSimulator::endEdit() {
@@ -450,4 +498,54 @@ void LogicSimulator::expandDataVectors(simulator_id_t maxId) {
 	if (countX.size() <= maxId) {
 		countX.resize(maxId + 1, 0);
 	}
+}
+
+void LogicSimulator::addGateDependency(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
+	inputDependencies[destinationId].emplace_back(sourceId, sourcePort, destinationPort);
+	outputDependencies[sourceId].emplace_back(destinationId, sourcePort, destinationPort);
+}
+
+void LogicSimulator::removeGateDependency(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
+	{
+		auto it = inputDependencies.find(destinationId);
+		if (it != inputDependencies.end()) {
+			auto& vec = it->second;
+			auto it2 = std::find(vec.begin(), vec.end(), GateDependency(sourceId, sourcePort, destinationPort));
+			if (it2 != vec.end()) {
+				vec.erase(it2);
+				if (vec.empty()) {
+					inputDependencies.erase(it);
+				}
+			}
+		}
+	}
+	{
+		auto it = outputDependencies.find(sourceId);
+		if (it != outputDependencies.end()) {
+			auto& vec = it->second;
+			auto it2 = std::find(vec.begin(), vec.end(), GateDependency(destinationId, sourcePort, destinationPort));
+			if (it2 != vec.end()) {
+				vec.erase(it2);
+				if (vec.empty()) {
+					outputDependencies.erase(it);
+				}
+			}
+		}
+	}
+}
+
+std::optional<std::vector<simulator_id_t>> LogicSimulator::getOccupiedIds(simulator_id_t gateId) const {
+	auto locationIt = gateLocations.find(gateId);
+	if (locationIt == gateLocations.end()) {
+		return std::nullopt;
+	}
+	SimGateType gateType = locationIt->second.gateType;
+	size_t gateIndex = locationIt->second.gateIndex;
+	switch (gateType) {
+	case SimGateType::AND:
+		return andGates[gateIndex].getOccupiedIds();
+	case SimGateType::XOR:
+		return xorGates[gateIndex].getOccupiedIds();
+	}
+	return std::nullopt;
 }
