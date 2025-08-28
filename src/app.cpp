@@ -7,7 +7,7 @@
 App::App() :
 	rml(&rmlSystemInterface, &rmlRenderInterface), backend(&circuitFileManager), circuitFileManager(&(backend.getCircuitManager())),
 	fileListener(std::chrono::milliseconds(200)) {
-	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager, rmlRenderInterface, &vulkan));
+	windows.push_back(std::make_unique<MainWindow>(&backend, &circuitFileManager));
 }
 
 #ifdef TRACY_PROFILER
@@ -68,7 +68,7 @@ void App::runLoop() {
 
 		// tell all windows to update rml
 		for (auto& window : windows) {
-			window->updateRml(rmlRenderInterface);
+			window->updateRml();
 			// update circuit view widget UI components like TPS display
 			for (auto circuitViewWidget : window->getCircuitViewWidgets()) {
 				circuitViewWidget->render();

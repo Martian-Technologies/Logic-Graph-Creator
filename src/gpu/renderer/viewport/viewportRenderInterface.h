@@ -3,7 +3,6 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 
-#include "gui/viewPortManager/circuitView/renderer/renderer.h"
 #include "elements/elementRenderer.h"
 #include "logic/chunking/vulkanChunker.h"
 #include "gpu/mainRenderer.h"
@@ -19,9 +18,9 @@ struct ViewportViewData {
 	VkViewport viewport;
 };
 
-class ViewportRenderInterface : public CircuitViewRenderer {
+class ViewportRenderInterface {
 public:
-	ViewportRenderInterface(ViewportID ViewportID, Rml::Element* element);
+	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
 	~ViewportRenderInterface();
 
 	ViewportViewData getViewData();
@@ -46,31 +45,31 @@ public:
 
 public:
 	// main flow
-	void setCircuit(Circuit* circuit) override final;
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator) override final;
-	void setAddress(const Address& address) override final;
+	void setCircuit(Circuit* circuit) ;
+	void setEvaluator(std::shared_ptr<Evaluator> evaluator) ;
+	void setAddress(const Address& address) ;
 
-	void updateView(ViewManager* viewManager) override final;
+	// void updateView(ViewManager* viewManager) ;
 
-	float getLastFrameTimeMs() const override final;
+	float getLastFrameTimeMs() const ;
 
 private:
 	// elements
-	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) override final;
-	ElementID addSelectionElement(const SelectionElement& selection) override final;
-	void removeSelectionElement(ElementID selection) override final;
+	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) ;
+	ElementID addSelectionElement(const SelectionElement& selection) ;
+	void removeSelectionElement(ElementID selection) ;
 
-	ElementID addBlockPreview(BlockPreview&& blockPreview) override final;
-	void shiftBlockPreview(ElementID id, Vector shift) override final;
-	void removeBlockPreview(ElementID blockPreview) override final;
+	ElementID addBlockPreview(BlockPreview&& blockPreview) ;
+	void shiftBlockPreview(ElementID id, Vector shift) ;
+	void removeBlockPreview(ElementID blockPreview) ;
 
-	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) override final;
-	void removeConnectionPreview(ElementID connectionPreview) override final;
+	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) ;
+	void removeConnectionPreview(ElementID connectionPreview) ;
 
-	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) override final;
-	void removeHalfConnectionPreview(ElementID halfConnectionPreview) override final;
+	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) ;
+	void removeHalfConnectionPreview(ElementID halfConnectionPreview) ;
 
-	void spawnConfetti(FPosition start) override final;
+	void spawnConfetti(FPosition start) ;
 
 private:
 	// From the UI Side

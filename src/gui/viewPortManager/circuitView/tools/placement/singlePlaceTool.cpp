@@ -1,5 +1,5 @@
 #include "singlePlaceTool.h"
-#include "../../renderer/renderer.h"
+#include "gpu/mainRenderer.h"
 
 void SinglePlaceTool::activate() {
 	BaseBlockPlacementTool::activate();

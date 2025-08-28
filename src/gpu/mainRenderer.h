@@ -110,19 +110,19 @@ public:
 	// void sendDiff(ViewportID viewport, ...)
 
 	// elements
-	virtual ElementID addSelectionObjectElement(ViewportID viewport, const SelectionObjectElement& selection) = 0;
-	virtual ElementID addSelectionElement(ViewportID viewport, const SelectionElement& selection) = 0;
-	virtual void removeSelectionElement(ViewportID viewport, ElementID id) = 0;
+	ElementID addSelectionObjectElement(ViewportID viewport, const SelectionObjectElement& selection);
+	ElementID addSelectionElement(ViewportID viewport, const SelectionElement& selection);
+	void removeSelectionElement(ViewportID viewport, ElementID id);
 
-	virtual ElementID addBlockPreview(ViewportID viewport, BlockPreview&& blockPreview) = 0;
-	virtual void shiftBlockPreview(ViewportID viewport, ElementID id, Vector shift) = 0;
-	virtual void removeBlockPreview(ViewportID viewport, ElementID id) = 0;
+	ElementID addBlockPreview(ViewportID viewport, BlockPreview&& blockPreview);
+	void shiftBlockPreview(ViewportID viewport, ElementID id, Vector shift);
+	void removeBlockPreview(ViewportID viewport, ElementID id);
 
-	virtual ElementID addConnectionPreview(ViewportID viewport, const ConnectionPreview& connectionPreview) = 0;
-	virtual void removeConnectionPreview(ViewportID viewport, ElementID id) = 0;
+	ElementID addConnectionPreview(ViewportID viewport, const ConnectionPreview& connectionPreview);
+	void removeConnectionPreview(ViewportID viewport, ElementID id);
 
-	virtual ElementID addHalfConnectionPreview(ViewportID viewport, const HalfConnectionPreview& halfConnectionPreview) = 0;
-	virtual void removeHalfConnectionPreview(ViewportID viewport, ElementID id) = 0;
+	ElementID addHalfConnectionPreview(ViewportID viewport, const HalfConnectionPreview& halfConnectionPreview);
+	void removeHalfConnectionPreview(ViewportID viewport, ElementID id);
 	
 	// Block Data ===============================================================================================================================
 		

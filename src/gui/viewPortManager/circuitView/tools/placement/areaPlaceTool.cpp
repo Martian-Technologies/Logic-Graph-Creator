@@ -1,5 +1,5 @@
 #include "areaPlaceTool.h"
-#include "../../renderer/renderer.h"
+#include "gpu/mainRenderer.h"
 
 void AreaPlaceTool::activate() {
 	BaseBlockPlacementTool::activate();
