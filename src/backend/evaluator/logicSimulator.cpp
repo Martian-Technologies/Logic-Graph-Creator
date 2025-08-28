@@ -32,7 +32,7 @@ void LogicSimulator::clearState() { }
 
 double LogicSimulator::getAverageTickrate() const {
 	if (!evalConfig.isRunning()) {
-		return false;
+		return 0.0;
 	}
 	double tickspeed = averageTickrate.load(std::memory_order_acquire);
 	// if tickspeed close enough to target tickspeed, return target tickspeed (nicer for ui)
@@ -210,7 +210,7 @@ inline void LogicSimulator::propagateNewStates() {
 
 inline void LogicSimulator::processJunctions() {
 	for (auto& junction : junctions) {
-		junction.process(statesReading, countL, countH, countZ, countX);
+		junction.process(statesWriting, statesReading, countL, countH, countZ, countX);
 	}
 }
 
@@ -317,7 +317,7 @@ void LogicSimulator::removeGate(simulator_id_t gateId) {
 }
 
 void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-	std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
+	std::optional<simulator_id_t> sourcePortId = getOutputPortId(sourceId, sourcePort);
 	if (!sourcePortId) {
 		logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
 		return;
@@ -377,11 +377,10 @@ void LogicSimulator::makeConnection(simulator_id_t sourceId, connection_port_id_
 		}
 		addGateDependency(sourceId, sourcePort, destinationId, destinationPort);
 	}
-	logInfo("Made connection: {}:{} -> {}:{}", "LogicSimulator::makeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
 
 void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_id_t sourcePort, simulator_id_t destinationId, connection_port_id_t destinationPort) {
-	std::optional<simulator_id_t> sourcePortId = getInputPortId(sourceId, sourcePort);
+	std::optional<simulator_id_t> sourcePortId = getOutputPortId(sourceId, sourcePort);
 	if (!sourcePortId) {
 		logError("Source output port not found: {}", "LogicSimulator::makeConnection", sourceId);
 		return;
@@ -441,7 +440,6 @@ void LogicSimulator::removeConnection(simulator_id_t sourceId, connection_port_i
 		}
 		removeGateDependency(sourceId, sourcePort, destinationId, destinationPort);
 	}
-	logInfo("Removed connection: {}:{} -> {}:{}", "LogicSimulator::removeConnection", sourceId, sourcePort, destinationId, destinationPort);
 }
 
 void LogicSimulator::endEdit() {
@@ -449,11 +447,75 @@ void LogicSimulator::endEdit() {
 }
 
 void LogicSimulator::setState(simulator_id_t id, logic_state_t state) {
-
+	std::unique_lock lockWriting(statesWritingMutex, std::try_to_lock);
+	std::unique_lock lockReading(statesReadingMutex, std::try_to_lock);
+	if (lockWriting.owns_lock() && lockReading.owns_lock()) {
+		auto it = gateLocations.find(id);
+		if (it != gateLocations.end()) {
+			SimGateType gateType = it->second.gateType;
+			size_t gateIndex = it->second.gateIndex;
+			switch (gateType) {
+			case SimGateType::AND:
+				andGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				break;
+			case SimGateType::XOR:
+				xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				break;
+			case SimGateType::CONSTANT:
+				constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				break;
+			case SimGateType::COPY_SELF_OUTPUT:
+				copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+				break;
+			}
+		}
+		processJunctions();
+	} else {
+		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
+		pendingStateChanges.push({ id, state });
+		cv.notify_one();
+	}
 }
 
 void LogicSimulator::processPendingStateChanges() {
+	std::queue<StateChange> localQueue;
+	{
+		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
+		std::swap(localQueue, pendingStateChanges);
+	}
 
+	if (!localQueue.empty()) {
+		std::scoped_lock lk(statesWritingMutex, statesReadingMutex);
+		while (!localQueue.empty()) {
+			const StateChange& change = localQueue.front();
+
+			simulator_id_t id = change.id;
+			logic_state_t state = change.state;
+
+			auto it = gateLocations.find(id);
+			if (it != gateLocations.end()) {
+				SimGateType gateType = it->second.gateType;
+				size_t gateIndex = it->second.gateIndex;
+				switch (gateType) {
+				case SimGateType::AND:
+					andGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					break;
+				case SimGateType::XOR:
+					xorGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					break;
+				case SimGateType::CONSTANT:
+					constantGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					break;
+				case SimGateType::COPY_SELF_OUTPUT:
+					copySelfOutputGates[gateIndex].setState(statesWriting, statesReading, countL, countH, countZ, countX, state);
+					break;
+				}
+			}
+
+			localQueue.pop();
+		}
+		processJunctions();
+	}
 }
 
 std::optional<simulator_id_t> LogicSimulator::getInputPortId(simulator_id_t simId, connection_port_id_t portId) const {
@@ -504,7 +566,7 @@ simulator_id_t LogicSimulator::addAndGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, false, false));
-	andGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -513,7 +575,7 @@ simulator_id_t LogicSimulator::addOrGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, true, true));
-	andGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -522,7 +584,7 @@ simulator_id_t LogicSimulator::addNandGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, false, true));
-	andGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -531,7 +593,7 @@ simulator_id_t LogicSimulator::addNorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	andGates.push_back(ANDLikeGate(id, true, false));
-	andGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	andGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::AND, andGates.size() - 1);
 	return id;
 }
@@ -540,7 +602,7 @@ simulator_id_t LogicSimulator::addXorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	xorGates.push_back(XORLikeGate(id, false));
-	xorGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
@@ -549,7 +611,7 @@ simulator_id_t LogicSimulator::addXnorGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	xorGates.push_back(XORLikeGate(id, true));
-	xorGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	xorGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::XOR, xorGates.size() - 1);
 	return id;
 }
@@ -558,7 +620,7 @@ simulator_id_t LogicSimulator::addConstantOnGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	constantGates.push_back(ConstantGate(id, logic_state_t::HIGH));
-	constantGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::CONSTANT, constantGates.size() - 1);
 	return id;
 }
@@ -567,7 +629,7 @@ simulator_id_t LogicSimulator::addConstantOffGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	constantGates.push_back(ConstantGate(id, logic_state_t::LOW));
-	constantGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	constantGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::CONSTANT, constantGates.size() - 1);
 	return id;
 }
@@ -576,7 +638,7 @@ simulator_id_t LogicSimulator::addCopySelfOutputGate() {
 	simulator_id_t id = simulatorIdProvider.getNewId();
 	expandDataVectors(id);
 	copySelfOutputGates.push_back(CopySelfOutputGate(id));
-	copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesReading, countL, countH, countZ, countX);
+	copySelfOutputGates.back().resetState(evalConfig.isRealistic(), statesWriting, statesReading, countL, countH, countZ, countX);
 	gateLocations[id] = GateLocation(SimGateType::COPY_SELF_OUTPUT, copySelfOutputGates.size() - 1);
 	return id;
 }

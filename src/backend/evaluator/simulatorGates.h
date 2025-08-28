@@ -26,8 +26,18 @@ public:
 	) = 0;
 	virtual inline std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const = 0;
 	virtual inline std::optional<simulator_id_t> getOutputPortId(connection_port_id_t portId) const = 0;
+	virtual inline void setState(
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX,
+		logic_state_t state
+	) = 0;
 	virtual inline void resetState(
 		bool isRealistic,
+		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
 		std::vector<unsigned int>& countL,
 		std::vector<unsigned int>& countH,
@@ -94,21 +104,22 @@ public:
 	std::optional<simulator_id_t> getOutputPortId(connection_port_id_t portId) const override {
 		return id;
 	}
-	virtual inline logic_state_t getDefaultState(bool isRealistic) = 0;
-	inline void resetState(
-		bool isRealistic,
+	virtual inline logic_state_t getResetState(bool isRealistic) = 0;
+	inline void setState(
+		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
 		std::vector<unsigned int>& countL,
 		std::vector<unsigned int>& countH,
 		std::vector<unsigned int>& countZ,
-		std::vector<unsigned int>& countX
+		std::vector<unsigned int>& countX,
+		logic_state_t state
 	) override {
 		logic_state_t oldState = statesReading[id];
-		logic_state_t newState = getDefaultState(isRealistic);
-		if (newState == oldState) {
+		if (state == oldState) {
 			return;
 		}
-		statesReading[id] = newState;
+		statesReading[id] = state;
+		statesWriting[id] = state;
 		if (oldState == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
 				countL[outputId]--;
@@ -126,23 +137,42 @@ public:
 				countX[outputId]--;
 			}
 		}
-		if (newState == logic_state_t::LOW) {
+		if (state == logic_state_t::LOW) {
 			for (simulator_id_t outputId : outputIds) {
 				countL[outputId]++;
 			}
-		} else if (newState == logic_state_t::HIGH) {
+		} else if (state == logic_state_t::HIGH) {
 			for (simulator_id_t outputId : outputIds) {
 				countH[outputId]++;
 			}
-		} else if (newState == logic_state_t::FLOATING) {
+		} else if (state == logic_state_t::FLOATING) {
 			for (simulator_id_t outputId : outputIds) {
 				countZ[outputId]++;
 			}
-		} else if (newState == logic_state_t::UNDEFINED) {
+		} else if (state == logic_state_t::UNDEFINED) {
 			for (simulator_id_t outputId : outputIds) {
 				countX[outputId]++;
 			}
 		}
+	}
+	inline void resetState(
+		bool isRealistic,
+		std::vector<logic_state_t>& statesWriting,
+		std::vector<logic_state_t>& statesReading,
+		std::vector<unsigned int>& countL,
+		std::vector<unsigned int>& countH,
+		std::vector<unsigned int>& countZ,
+		std::vector<unsigned int>& countX
+	) override {
+		setState(
+			statesWriting,
+			statesReading,
+			countL,
+			countH,
+			countZ,
+			countX,
+			getResetState(isRealistic)
+		);
 	};
 	virtual inline logic_state_t calculateNewState(
 		const std::vector<logic_state_t>& statesReading,
@@ -261,7 +291,7 @@ public:
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return id;
 	}
-	logic_state_t getDefaultState(bool isRealistic) override {
+	logic_state_t getResetState(bool isRealistic) override {
 		if (isRealistic) {
 			return logic_state_t::UNDEFINED;
 		} else {
@@ -304,7 +334,7 @@ public:
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return id;
 	}
-	logic_state_t getDefaultState(bool isRealistic) override {
+	logic_state_t getResetState(bool isRealistic) override {
 		if (isRealistic) {
 			return logic_state_t::UNDEFINED;
 		} else {
@@ -345,7 +375,7 @@ public:
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return std::nullopt;
 	}
-	logic_state_t getDefaultState(bool isRealistic) override {
+	logic_state_t getResetState(bool isRealistic) override {
 		return constantState;
 	}
 	logic_state_t calculateNewState(
@@ -370,7 +400,7 @@ public:
 	std::optional<simulator_id_t> getInputPortId(connection_port_id_t portId) const override {
 		return std::nullopt;
 	}
-	logic_state_t getDefaultState(bool isRealistic) override {
+	logic_state_t getResetState(bool isRealistic) override {
 		return logic_state_t::LOW;
 	}
 	logic_state_t calculateNewState(
@@ -415,6 +445,7 @@ public:
 	}
 
 	inline void process(
+		std::vector<logic_state_t>& statesWriting,
 		std::vector<logic_state_t>& statesReading,
 		std::vector<unsigned int>& countL,
 		std::vector<unsigned int>& countH,
@@ -439,6 +470,7 @@ public:
 			}
 		}
 		statesReading[id] = newState;
+		statesWriting[id] = newState;
 		if (newState == oldState) {
 			return;
 		}
