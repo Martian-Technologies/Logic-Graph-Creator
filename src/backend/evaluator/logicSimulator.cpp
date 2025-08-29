@@ -6,7 +6,6 @@ LogicSimulator::LogicSimulator(
 	std::vector<simulator_id_t>& dirtySimulatorIds) :
 	evalConfig(evalConfig),
 	dirtySimulatorIds(dirtySimulatorIds) {
-	// Subscribe to EvalConfig changes to update the simulator accordingly
 	evalConfig.subscribe([this]() {
 		{
 			SimPauseGuard pauseGuard(*this);
@@ -64,7 +63,6 @@ void LogicSimulator::simulationLoop() {
 			cv.wait(lk, [&] { return !pauseRequest || !running; });
 			isPaused.store(false, std::memory_order_release);
 			if (!running) break;
-			// reset nextTick after resuming from pause
 			nextTick = clock::now();
 			lastTickTime = clock::now();
 			isFirstTick = true;
@@ -72,19 +70,12 @@ void LogicSimulator::simulationLoop() {
 
 		processPendingStateChanges();
 
-		// Sprint handling: if sprintCount > 0, execute ticks immediately, regardless of run/pause state.
-		// Sprint ticks update the EMA tickrate just like normal ticks, but bypass the limiter wait.
 		bool didSprint = false;
 		while (running && !pauseRequest.load(std::memory_order_acquire) && evalConfig.consumeSprintTick()) {
 			didSprint = true;
 			auto currentTime = clock::now();
-			if (evalConfig.isRealistic()) {
-				realisticTickOnce();
-			} else {
-				tickOnce();
-			}
+			tickOnce();
 			updateEmaTickrate(currentTime, lastTickTime, isFirstTick);
-			// Allow a pause to break a long sprint
 			if (pauseRequest.load(std::memory_order_acquire)) break;
 		}
 
@@ -93,10 +84,8 @@ void LogicSimulator::simulationLoop() {
 
 			tickOnce();
 
-			// Calculate EMA for tickrate after each tick
 			updateEmaTickrate(currentTime, lastTickTime, isFirstTick);
 
-			// handle timing after ticking
 			if (evalConfig.isTickrateLimiterEnabled()) {
 				double targetTickrate = evalConfig.getTargetTickrate();
 				if (targetTickrate > 0) {
@@ -107,15 +96,12 @@ void LogicSimulator::simulationLoop() {
 				}
 			}
 		} else if (!didSprint) {
-			// wait for state change or resume signal
 			averageTickrate.store(0.0, std::memory_order_release);
 			std::unique_lock lk(cvMutex);
 			cv.wait(lk, [&] {
-				// Check for pending state changes under lock to avoid race conditions
 				std::lock_guard<std::mutex> stateLock(stateChangeQueueMutex);
 				return pauseRequest || !running || evalConfig.isRunning() || evalConfig.getSprintCount() > 0 || !pendingStateChanges.empty();
 			});
-			// reset nextTick when resuming simulation
 			nextTick = clock::now();
 			lastTickTime = clock::now();
 			isFirstTick = true;
@@ -130,12 +116,10 @@ inline void LogicSimulator::updateEmaTickrate(
 	if (!isFirstTick) {
 		auto deltaTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - lastTickTime);
 		if (deltaTime.count() > 0) {
-			// Calculate current tickrate in Hz (ticks per second)
 			double currentTickrate = 1.0e9 / static_cast<double>(deltaTime.count());
 			double dtSeconds = std::chrono::duration<double>(deltaTime).count();
 			double alpha = 1.0 - std::exp(-dtSeconds * std::log(2.0) / tickrateHalflife);
 
-			// Apply EMA: EMA_new = alpha * current + (1 - alpha) * EMA_old
 			double currentEMA = averageTickrate.load(std::memory_order_acquire);
 			double newEMA = alpha * currentTickrate + (1.0 - alpha) * currentEMA;
 			averageTickrate.store(newEMA, std::memory_order_release);
@@ -149,8 +133,8 @@ inline void LogicSimulator::updateEmaTickrate(
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
 
-	aiScheduler.reset_and_load(jobs);
-	aiScheduler.wait_for_completion();
+	aiScheduler.resetAndLoad(jobs);
+	aiScheduler.waitForCompletion();
 
 	for (auto& gate : junctions) gate.tick(statesB);
 	std::unique_lock lkCurEx(statesAMutex);
@@ -158,20 +142,17 @@ inline void LogicSimulator::tickOnce() {
 }
 
 void LogicSimulator::processPendingStateChanges() {
-	// Process pending state changes without blocking the calling thread
 	std::queue<StateChange> localQueue;
 	{
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		std::swap(localQueue, pendingStateChanges);
 	}
 
-	// Apply all pending state changes
 	if (!localQueue.empty()) {
 		std::scoped_lock lk(statesBMutex, statesAMutex);
 		while (!localQueue.empty()) {
 			const StateChange& change = localQueue.front();
 
-			// Ensure the states vectors are large enough
 			if (statesA.size() <= change.id) {
 				statesA.resize(change.id + 1, logic_state_t::UNDEFINED);
 				statesB.resize(change.id + 1, logic_state_t::UNDEFINED);
@@ -186,12 +167,11 @@ void LogicSimulator::processPendingStateChanges() {
 }
 
 void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
-	// Try to acquire locks non-blockingly first
+	// we don't want to freeze up if the mutexes are locked, so we'll only set the state if we can successfully lock. otherwise, we'll wait until the next tick to set the states.
 	std::unique_lock lkB(statesBMutex, std::try_to_lock);
 	std::unique_lock lkA(statesAMutex, std::try_to_lock);
 
 	if (lkB.owns_lock() && lkA.owns_lock()) {
-		// Successfully acquired both locks, apply immediately
 		if (statesA.size() <= id) {
 			statesA.resize(id + 1, logic_state_t::UNDEFINED);
 			statesB.resize(id + 1, logic_state_t::UNDEFINED);
@@ -200,70 +180,9 @@ void LogicSimulator::setState(simulator_id_t id, logic_state_t st) {
 		statesB[id] = st;
 		for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
 	} else {
-		// Couldn't acquire locks, fall back to queuing
 		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
 		pendingStateChanges.push({ id, st });
-		// Wake up the simulation thread to process state changes
 		cv.notify_one();
-	}
-}
-
-void LogicSimulator::setStates(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
-	if (ids.size() != states.size()) {
-		throw std::invalid_argument("ids and states must have the same size");
-	}
-
-	// Try to acquire locks non-blockingly first
-	std::unique_lock lkB(statesBMutex, std::try_to_lock);
-	std::unique_lock lkA(statesAMutex, std::try_to_lock);
-
-	if (lkB.owns_lock() && lkA.owns_lock()) {
-		// Successfully acquired both locks, apply immediately
-		for (size_t i = 0; i < ids.size(); ++i) {
-			// Ensure the states vectors are large enough
-			if (statesA.size() <= ids[i]) {
-				statesA.resize(ids[i] + 1, logic_state_t::UNDEFINED);
-				statesB.resize(ids[i] + 1, logic_state_t::UNDEFINED);
-			}
-			statesA[ids[i]] = states[i];
-			statesB[ids[i]] = states[i];
-		}
-		for (auto& gate : junctions) gate.doubleTick(statesA, statesB);
-	} else {
-		// Couldn't acquire locks, fall back to queuing
-		std::lock_guard<std::mutex> lock(stateChangeQueueMutex);
-		for (size_t i = 0; i < ids.size(); ++i) {
-			pendingStateChanges.push({ ids[i], states[i] });
-		}
-		// Wake up the simulation thread to process state changes
-		cv.notify_one();
-	}
-}
-
-void LogicSimulator::setStateImmediate(simulator_id_t id, logic_state_t st) {
-	std::scoped_lock lk(statesBMutex, statesAMutex);
-	// Ensure the states vectors are large enough
-	if (statesA.size() <= id) {
-		statesA.resize(id + 1, logic_state_t::UNDEFINED);
-		statesB.resize(id + 1, logic_state_t::UNDEFINED);
-	}
-	statesA[id] = st;
-	statesB[id] = st;
-}
-
-void LogicSimulator::setStatesImmediate(const std::vector<simulator_id_t>& ids, const std::vector<logic_state_t>& states) {
-	if (ids.size() != states.size()) {
-		throw std::invalid_argument("ids and states must have the same size");
-	}
-	std::scoped_lock lk(statesBMutex, statesAMutex);
-	for (size_t i = 0; i < ids.size(); ++i) {
-		// Ensure the states vectors are large enough
-		if (statesA.size() <= ids[i]) {
-			statesA.resize(ids[i] + 1, logic_state_t::UNDEFINED);
-			statesB.resize(ids[i] + 1, logic_state_t::UNDEFINED);
-		}
-		statesA[ids[i]] = states[i];
-		statesB[ids[i]] = states[i];
 	}
 }
 
@@ -394,7 +313,6 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		return;
 	}
 
-	// Fetch outputs directly via location mapping (O(1))
 	std::optional<std::vector<simulator_id_t>> outputIdsOpt = getOutputSimIdsFromGate(simulatorId);
 	if (!outputIdsOpt.has_value()) {
 		logError("Cannot remove gate: no output IDs found for simulator_id_t " + std::to_string(simulatorId), "LogicSimulator::removeGate");
@@ -402,7 +320,6 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 	}
 	const auto& outputIds = outputIdsOpt.value();
 
-	// Remove references to this gate's outputs from dependent gates and purge dependency entries
 	for (const auto& outId : outputIds) {
 		auto depIt = outputDependencies.find(outId);
 		if (depIt != outputDependencies.end()) {
@@ -430,7 +347,6 @@ void LogicSimulator::removeGate(simulator_id_t simulatorId) {
 		dirtySimulatorIds.push_back(outId);
 	}
 
-	// Now erase the gate itself using swap-and-pop; update only the moved gate's index
 	SimGateType gateType = locationIt->second.gateType;
 	size_t gateIndex = locationIt->second.gateIndex;
 
@@ -743,9 +659,7 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, simulator_i
 }
 
 void LogicSimulator::regenerateJobs() {
-	// Ensure previous round fully consumed before we invalidate its JobInstruction memory.
-	aiScheduler.wait_for_empty();
-	// Rebuild the job list without leaking JobInstruction allocations.
+	aiScheduler.waitForEmpty();
 	jobs.clear();
 	jobInstructionStorage.clear();
 	bool isRealistic = evalConfig.isRealistic();
@@ -755,10 +669,8 @@ void LogicSimulator::regenerateJobs() {
 		return jobInstructionStorage.back().get();
 	};
 
-	constexpr size_t batch = 256; // batch size
+	constexpr size_t batch = 512;
 
-	// Order: logic gates that read from statesA and write into statesB.
-	// Combine homogeneous gate vectors into batches for better cache use.
 	for (size_t i = 0; i < andGates.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, andGates.size()));
 		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execANDRealistic : &LogicSimulator::execAND, ji });
@@ -779,10 +691,14 @@ void LogicSimulator::regenerateJobs() {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, copySelfOutputGates.size()));
 		jobs.push_back(AtomicIndexScheduler::Job{ &LogicSimulator::execCopySelfOutput, ji });
 	}
+	if (jobs.size() < std::thread::hardware_concurrency() / 2) {
+		aiScheduler.resizeThreads(jobs.size());
+	} else {
+		aiScheduler.resizeThreads(std::thread::hardware_concurrency() / 2);
+	}
 	logInfo("{} jobs created for the current round", "LogicSimulator::regenerateJobs", jobs.size());
 }
 
-// Static executor definitions ---------------------------------------------------------
 void LogicSimulator::execAND(void* jobInstruction) {
 	auto* ji = static_cast<JobInstruction*>(jobInstruction);
 	for (size_t i = ji->start; i < ji->end; ++i) ji->self->andGates[i].tick(ji->self->statesA, ji->self->statesB);

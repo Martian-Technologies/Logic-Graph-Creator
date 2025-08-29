@@ -9,12 +9,12 @@ public:
 	{
 		if (nthreads == 0) nthreads = 1;
 		workers.reserve(nthreads);
-		for (size_t i = 0; i < nthreads; ++i) spawn_one();
+		for (size_t i = 0; i < nthreads; ++i) spawnOne();
 	}
 
 	~AtomicIndexScheduler() {
 		// Ensure all jobs have fully finished (not just claimed)
-		wait_for_completion();
+		waitForCompletion();
 		stop.store(true, std::memory_order_relaxed);
 		for (auto& w : workers) w->retire.store(true, std::memory_order_relaxed);
 		cv.notify_all(); // wake any sleepers
@@ -26,10 +26,8 @@ public:
 		void* arg;
 	};
 
-	// Submit a *batch* for the next round. Call after wait_for_empty().
-	void reset_and_load(std::vector<Job> new_jobs) {
+	void resetAndLoad(std::vector<Job> new_jobs) {
 		{
-			// Publish new round atomically with an epoch bump.
 			std::lock_guard lk(mtx);
 			jobs = std::move(new_jobs);
 			next.store(0, std::memory_order_relaxed);
@@ -37,11 +35,11 @@ public:
 			end.store(static_cast<uint32_t>(jobs.size()), std::memory_order_release);
 			round.fetch_add(1, std::memory_order_release);
 		}
-		cv.notify_all(); // wake parked workers to start this round
+		cv.notify_all();
 	}
 
 	// Block until the current round is consumed.
-	void wait_for_empty() {
+	void waitForEmpty() {
 		while (true) {
 			uint32_t n = next.load(std::memory_order_acquire);
 			uint32_t e = end.load(std::memory_order_acquire);
@@ -52,7 +50,7 @@ public:
 	}
 
 	// Block until all jobs in the current round have finished executing (not just claimed).
-	void wait_for_completion() {
+	void waitForCompletion() {
 		while (true) {
 			uint32_t c = completed.load(std::memory_order_acquire);
 			uint32_t e = end.load(std::memory_order_acquire);
@@ -62,18 +60,18 @@ public:
 	}
 
 	// Change worker count. Shrink only between rounds.
-	void resize_threads(size_t new_count) {
+	void resizeThreads(size_t new_count) {
 		size_t cur = workers.size();
 		new_count = std::max(new_count, size_t(1));
 		if (new_count > cur) {
 			size_t add = new_count - cur;
 			workers.reserve(workers.size() + add);
-			for (size_t i = 0; i < add; ++i) spawn_one();
+			for (size_t i = 0; i < add; ++i) spawnOne();
 			return;
 		}
 		if (new_count < cur) {
 			size_t kill = cur - new_count;
-			wait_for_completion();
+			waitForCompletion();
 			for (size_t i = 0; i < kill; ++i)
 				workers[workers.size() - 1 - i]->retire.store(true, std::memory_order_relaxed);
 			cv.notify_all(); // wake sleepers so they can retire
@@ -86,7 +84,7 @@ public:
 		}
 	}
 
-	size_t thread_count() const { return workers.size(); }
+	size_t threadCount() const { return workers.size(); }
 
 private:
 	struct Worker {
@@ -94,7 +92,7 @@ private:
 		std::atomic<bool> retire{false};
 	};
 
-	void spawn_one() {
+	void spawnOne() {
 		auto w = std::make_unique<Worker>();
 		Worker* self = w.get();
 		w->th = std::thread([this, self]{ workerLoop(self); });
