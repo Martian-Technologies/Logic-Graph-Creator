@@ -38,6 +38,7 @@ public:
 
 	inline void clear() {
 		if (!viewportID) return;
+		logInfo("Clearing: {}", "", ids.size());
 		for (auto pair : ids) {
 			switch (pair.second) {
 			case SelectionElement:
@@ -76,7 +77,7 @@ public:
 	ElementID addBlockPreview(BlockPreview&& blockPreview) {
 		assert(viewportID);
 		ElementID id = MainRenderer::get().addBlockPreview(viewportID, std::move(blockPreview));
-		ids[id] = ElementType::SelectionElement;
+		ids[id] = ElementType::BlockPreview;
 		return id;
 	}
 

@@ -9,8 +9,8 @@
 #include "gpu/renderer/windowRenderer.h"
 #include "logic/sharedLogic/logicRenderingUtils.h"
 
-ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
-	: element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
+ViewportRenderInterface::ViewportRenderInterface(WindowID windowID, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
+	: windowID(windowID), element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
 	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
@@ -43,7 +43,7 @@ void ViewportRenderInterface::setCircuit(Circuit* circuit) {
 	}
 }
 
-void ViewportRenderInterface::setEvaluator(SharedEvaluator evaluator) {
+void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
 	std::lock_guard<std::mutex> lock(evaluatorMux);
 	this->evaluator = evaluator;
 	chunker.setEvaluator(evaluator);
@@ -55,25 +55,22 @@ void ViewportRenderInterface::setAddress(const Address& address) {
 	chunker.setAddress(address);
 }
 
-// void ViewportRenderInterface::updateView(ViewManager* viewManager) {
-// 	std::lock_guard<std::mutex> lock(viewMux);
+void ViewportRenderInterface::updateViewFrame(glm::vec2 origin, glm::vec2 size) {
+	std::lock_guard<std::mutex> lock(viewMux);
+	viewData.viewport.x = origin.x;
+	viewData.viewport.y = origin.y;
+	viewData.viewport.width = size.x;
+	viewData.viewport.height = size.y;
+	viewData.viewport.minDepth = 0.0f;
+	viewData.viewport.maxDepth = 1.0f;
 
-// 	// Update vulkan viewport
-// 	viewData.viewport.x = element->GetAbsoluteOffset().x;
-// 	viewData.viewport.y = element->GetAbsoluteOffset().y;
-// 	viewData.viewport.width = element->GetBox().GetSize().x;
-// 	viewData.viewport.height = element->GetBox().GetSize().y;
-// 	viewData.viewport.minDepth = 0.0f;
-// 	viewData.viewport.maxDepth = 1.0f;
+}
 
-// 	// Create view mat
-// 	FPosition topLeft = viewManager->getTopLeft();
-// 	FPosition bottomRight = viewManager->getBottomRight();
-// 	viewData.viewportViewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
-// 	viewData.viewBounds = { topLeft, bottomRight };
-
-// 	viewData.viewScale = viewManager->getViewScale();
-// }
+void ViewportRenderInterface::updateView(FPosition topLeft, FPosition bottomRight) {
+	std::lock_guard<std::mutex> lock(viewMux);
+	viewData.viewportViewMat = glm::ortho(topLeft.x, bottomRight.x, topLeft.y, bottomRight.y);
+	viewData.viewBounds = { topLeft, bottomRight };
+}
 
 float ViewportRenderInterface::getLastFrameTimeMs() const {
 	return 0.0f;

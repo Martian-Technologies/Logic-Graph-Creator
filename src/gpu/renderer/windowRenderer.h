@@ -3,13 +3,13 @@
 
 #include <RmlUi/Core/RenderInterface.h>
 
-#include "gui/rml/rmlRenderInterface.h"
 #include "gui/sdl/sdlWindow.h"
 
 #include "gpu/abstractions/vulkanSwapchain.h"
 #include "gpu/renderer/frameManager.h"
 #include "gpu/renderer/viewport/viewportRenderInterface.h"
 #include "gpu/renderer/viewport/viewportRenderer.h"
+#include "gpu/renderer/rml/rmlRenderer.h"
 
 class WindowRenderer {
 public:
@@ -23,9 +23,8 @@ public:
 public:
 	void resize(std::pair<uint32_t, uint32_t> windowSize);
 
-	void activateRml(RmlRenderInterface& renderInterface);
-	void prepareForRml(RmlRenderInterface& renderInterface);
-	void endRml();
+	RmlRenderer& getRmlRenderer() { return rmlRenderer; }
+	const RmlRenderer& getRmlRenderer() const { return rmlRenderer; }
 
 	void registerViewportRenderInterface(ViewportRenderInterface* renderInterface);
 	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);

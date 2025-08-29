@@ -21,6 +21,6 @@ RmlInstance::RmlInstance(RmlSystemInterface* systemInterface, RmlRenderInterface
 
 RmlInstance::~RmlInstance() {
 	logInfo("Shutting down RmlUI...");
-	renderInterface->pointToRenderer(nullptr);
+	renderInterface->setWindowToRenderOn(0);
 	Rml::Shutdown();
 }

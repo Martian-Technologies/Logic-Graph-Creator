@@ -193,7 +193,7 @@ public:
 	void reset() override final;
 	
 	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator);
+	void setEvaluator(Evaluator* evaluator);
 	void setAddress(const Address& address);
 
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
@@ -211,7 +211,7 @@ private:
 	std::unordered_set<Position> chunksToUpdate;
 
 	VulkanDevice* device = nullptr;
-	std::shared_ptr<Evaluator> evaluator = nullptr;
+	Evaluator* evaluator = nullptr;
 	Address address;
 };
 

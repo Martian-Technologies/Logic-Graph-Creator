@@ -201,7 +201,7 @@ void VulkanChunker::startMakingEdits() {
 void VulkanChunker::stopMakingEdits() {
 	for (const Position& chunkPos : chunksToUpdate) {
 		auto iter = chunks.find(chunkPos);
-		if (iter != chunks.end()) iter->second.rebuildAllocation(device, evaluator.get(), address);
+		if (iter != chunks.end()) iter->second.rebuildAllocation(device, evaluator, address);
 	}
 	chunksToUpdate.clear();
 
@@ -313,7 +313,7 @@ void VulkanChunker::updateSimulatorIds(const std::vector<SimulatorMappingUpdate>
 	}
 }
 
-void VulkanChunker::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
+void VulkanChunker::setEvaluator(Evaluator* evaluator) {
 	if (this->evaluator) {
 		this->evaluator->disconnectListener(this);
 	}
@@ -323,7 +323,7 @@ void VulkanChunker::setEvaluator(std::shared_ptr<Evaluator> evaluator) {
 		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
 	}
 	for (auto& pair : chunks) {
-		pair.second.rebuildAllocation(device, evaluator.get(), address);
+		pair.second.rebuildAllocation(device, evaluator, address);
 	}
 }
 
@@ -335,7 +335,7 @@ void VulkanChunker::setAddress(const Address& address) {
 		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
 	}
 	for (auto& pair : chunks) {
-		pair.second.rebuildAllocation(device, evaluator.get(), address);
+		pair.second.rebuildAllocation(device, evaluator, address);
 	}
 }
 

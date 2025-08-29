@@ -6,8 +6,7 @@
 
 #include "gpu/vulkanInstance.h"
 
-WindowRenderer::WindowRenderer(SdlWindow* sdlWindow, VulkanInstance* instance)
-	: sdlWindow(sdlWindow) {
+WindowRenderer::WindowRenderer(SdlWindow* sdlWindow, VulkanInstance* instance) : sdlWindow(sdlWindow) {
 	logInfo("Initializing window renderer...");
 
 	// create surface and use it to make sure a vulkan device has been created
@@ -22,7 +21,7 @@ WindowRenderer::WindowRenderer(SdlWindow* sdlWindow, VulkanInstance* instance)
 	swapchain.init(device, surface, windowSize);
 	createRenderPass();
 	swapchain.createFramebuffers(renderPass);
-
+	
 	// subrenderers
 	rmlRenderer.init(device, renderPass);
 	viewportRenderer.init(device, renderPass);
@@ -242,18 +241,6 @@ void WindowRenderer::recreateSwapchain() {
 	swapchain.createFramebuffers(renderPass);
 	
 	swapchainRecreationNeeded = false;
-}
-
-void WindowRenderer::activateRml(RmlRenderInterface& renderInterface) {
-	renderInterface.pointToRenderer(&rmlRenderer);
-}
-
-void WindowRenderer::prepareForRml(RmlRenderInterface& renderInterface) {
-	activateRml(renderInterface);
-	rmlRenderer.prepareForRmlRender();
-}
-void WindowRenderer::endRml() {
-	rmlRenderer.endRmlRender();
 }
 
 void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {

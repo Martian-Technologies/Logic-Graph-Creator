@@ -5,7 +5,7 @@
 
 #include "elements/elementRenderer.h"
 #include "logic/chunking/vulkanChunker.h"
-#include "gpu/mainRenderer.h"
+#include "gpu/mainRendererDefs.h"
 
 namespace Rml { class Element; }
 
@@ -20,7 +20,7 @@ struct ViewportViewData {
 
 class ViewportRenderInterface {
 public:
-	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
+	ViewportRenderInterface(WindowID windowID, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
 	~ViewportRenderInterface();
 
 	ViewportViewData getViewData();
@@ -29,7 +29,7 @@ public:
 		return circuit != nullptr;
 	}
 	inline VulkanChunker& getChunker() { return chunker; }
-	inline std::shared_ptr<Evaluator> getEvaluator() {
+	inline Evaluator* getEvaluator() {
 		std::lock_guard<std::mutex> lock(evaluatorMux);
 		return evaluator;
 	}
@@ -37,23 +37,23 @@ public:
 		std::lock_guard<std::mutex> lock(addressMux);
 		return address;
 	}
+	inline WindowID getWindowID() const { return windowID; }
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	std::vector<BoxSelectionRenderData> getBoxSelections();
 	std::vector<ConnectionPreviewRenderData> getConnectionPreviews();
 	std::vector<ArrowRenderData> getArrows();
 
-public:
 	// main flow
 	void setCircuit(Circuit* circuit) ;
-	void setEvaluator(std::shared_ptr<Evaluator> evaluator) ;
+	void setEvaluator(Evaluator* evaluator) ;
 	void setAddress(const Address& address) ;
 
-	// void updateView(ViewManager* viewManager) ;
+	void updateViewFrame(glm::vec2 origin, glm::vec2 size);
+	void updateView(FPosition topLeft, FPosition bottomRight);
 
 	float getLastFrameTimeMs() const ;
 
-private:
 	// elements
 	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) ;
 	ElementID addSelectionElement(const SelectionElement& selection) ;
@@ -76,14 +76,16 @@ private:
 	Rml::Element* element;
 	WindowRenderer* linkedWindowRenderer = nullptr;
 
-	std::shared_ptr<Evaluator> evaluator = nullptr;
+	Evaluator* evaluator = nullptr;
 	std::mutex evaluatorMux;
 	Circuit* circuit = nullptr;
 	std::mutex circuitMux;
 	Address address;
 	std::mutex addressMux;
 
+	
 	// Vulkan
+	WindowID windowID;
 	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view
 	std::optional<CircuitRenderManager> renderManager;
 

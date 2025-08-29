@@ -40,6 +40,7 @@ private:
 	inline float getPixelsYPos() const;
 
 	WindowID windowID;
+	ViewportID viewportID;
 	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;

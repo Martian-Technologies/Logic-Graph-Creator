@@ -64,7 +64,7 @@ void ChunkRenderer::cleanup() {
 	wirePipeline.cleanup();
 }
 
-void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, std::shared_ptr<Evaluator> evaluator, const Address& address, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
+void ChunkRenderer::render(Frame& frame, const glm::mat4& viewMatrix, Evaluator* evaluator, const Address& address, const std::vector<std::shared_ptr<VulkanChunkAllocation>>& chunks) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif

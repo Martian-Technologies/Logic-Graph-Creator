@@ -6,7 +6,7 @@
 #include "gpu/mainRenderer.h"
 
 CircuitView::CircuitView(ViewportID viewportID) : viewportID(viewportID), toolManager(&eventRegister, viewportID, this) {
-	MainRenderer::get().moveViewportView(viewportID, viewManager.getViewCenter(), viewManager.getViewScale());
+	MainRenderer::get().moveViewportView(viewportID, viewManager.getTopLeft(), viewManager.getBottomRight());
 	viewManager.setUpEvents(eventRegister);
 	viewManager.connectViewChanged(std::bind(&CircuitView::viewChanged, this));
 }
@@ -194,5 +194,5 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 
 void CircuitView::viewChanged() {
 	eventRegister.doEvent(PositionEvent("Pointer Move", viewManager.getPointerPosition()));
-	MainRenderer::get().moveViewportView(viewportID, viewManager.getViewCenter(), viewManager.getViewScale());
+	MainRenderer::get().moveViewportView(viewportID, viewManager.getTopLeft(), viewManager.getBottomRight());
 }

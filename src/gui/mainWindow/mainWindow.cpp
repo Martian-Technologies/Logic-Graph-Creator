@@ -5,6 +5,7 @@
 
 #include "gpu/mainRenderer.h"
 
+#include "gui/rml/rmlRenderInterface.h"
 #include "settingsWindow/settingsWindow.h"
 #include "computerAPI/directoryManager.h"
 #include "gui/rml/rmlSystemInterface.h"
@@ -14,7 +15,7 @@
 MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager) :
 	sdlWindow("Connection Machine"), backend(backend), toolManagerManager(backend->getDataUpdateEventManager()), circuitFileManager(circuitFileManager) {
 
-	windowID = MainRenderer::get().registerWindow(sdlWindow);
+	windowID = MainRenderer::get().registerWindow(&sdlWindow);
 
 	// create rmlUI context
 	rmlContext = Rml::CreateContext("main", Rml::Vector2i(sdlWindow.getSize().first, sdlWindow.getSize().second)); // ptr managed by rmlUi (I think)
@@ -143,10 +144,14 @@ bool MainWindow::recieveEvent(SDL_Event& event) {
 }
 
 void MainWindow::updateRml() {
-	rmlContext->Update();
-	MainRenderer::get().prepareForRml(windowID);
-	rmlContext->Render();
-	MainRenderer::get().endRml(windowID);
+	RmlRenderInterface* rmlRenderInterface = dynamic_cast<RmlRenderInterface*>(Rml::GetRenderInterface());
+	if (rmlRenderInterface) {
+		rmlContext->Update();
+		rmlRenderInterface->setWindowToRenderOn(windowID);
+		MainRenderer::get().prepareForRmlRender(windowID);
+		rmlContext->Render();
+		MainRenderer::get().endRmlRender(windowID);
+	}
 }
 
 void MainWindow::createCircuitViewWidget(Rml::Element* element) {
