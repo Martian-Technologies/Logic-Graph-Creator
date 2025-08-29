@@ -1,7 +1,6 @@
 #ifndef app_h
 #define app_h
 
-#include "gpu/vulkanInstance.h"
 #include "gui/mainWindow/mainWindow.h"
 #include "gui/rml/rmlInstance.h"
 #include "gui/rml/rmlRenderInterface.h"
