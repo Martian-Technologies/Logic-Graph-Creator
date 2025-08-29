@@ -15,6 +15,19 @@ public:
 			return id;
 		}
 	}
+	inline T getNewId(T preferredId) {
+		if (unusedIds.size() * 2 < lastId && unusedIds.contains(preferredId)) {
+			unusedIds.erase(preferredId);
+			return preferredId;
+		}
+		if (preferredId == lastId || unusedIds.empty()) {
+			return lastId++;
+		} else {
+			T id = *unusedIds.begin();
+			unusedIds.erase(unusedIds.begin());
+			return id;
+		}
+	}
 	inline void releaseId(T id) {
 		if (id > lastId || unusedIds.contains(id)) {
 			return;
