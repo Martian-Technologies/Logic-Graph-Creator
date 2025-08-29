@@ -1,5 +1,5 @@
 #include "singleConnectTool.h"
-#include "gui/viewPortManager/logicRenderingUtils.h"
+#include "gui/viewportManager/circuitView/renderer/logicRenderingUtils.h"
 
 bool SingleConnectTool::makeConnection(const Event* event) {
 	if (!circuit) return false;
@@ -47,15 +47,19 @@ void SingleConnectTool::updateElements() {
 	if (clicked) {
 		bool valid = circuit->getBlockContainer()->getInputConnectionEnd(lastPointerPosition).has_value();
 
-		const Block* block = circuit->getBlockContainer()->getBlock(clickPosition);
-		if (valid) elementCreator.addConnectionPreview(ConnectionPreview(
-			clickPosition.free() + getOutputOffset(block->type(), block->getOrientation()),
-			lastPointerPosition.free() + getOutputOffset(block->type(), block->getOrientation())
-		));
-		else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(
-			clickPosition.free() + getOutputOffset(block->type(), block->getOrientation()),
-			lastPointerFPosition
-		));
+		const Block* outputBlock = circuit->getBlockContainer()->getBlock(clickPosition);
+		if (valid) {
+			const Block* inputBlock = circuit->getBlockContainer()->getBlock(lastPointerPosition);
+			elementCreator.addConnectionPreview(ConnectionPreview(
+				clickPosition.free() + getOutputOffset(outputBlock->type(), outputBlock->getOrientation()),
+				lastPointerPosition.free() + getInputOffset(inputBlock->type(), inputBlock->getOrientation())
+			));
+		} else {
+			elementCreator.addHalfConnectionPreview(HalfConnectionPreview(
+				clickPosition.free() + getOutputOffset(outputBlock->type(), outputBlock->getOrientation()),
+				lastPointerFPosition
+			));
+		}
 
 		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, !valid));
 	} else {

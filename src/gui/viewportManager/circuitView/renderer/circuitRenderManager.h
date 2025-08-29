@@ -20,7 +20,7 @@ private:
 		Orientation orientation;
 	};
 
-	std::shared_ptr<Circuit> circuit;
+	Circuit* circuit;
 	ViewportId viewportId;
 
 	std::unordered_map<Position, RenderedBlock> renderedBlocks;

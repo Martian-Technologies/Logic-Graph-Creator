@@ -6,6 +6,7 @@
 
 #include "gpu/mainRenderer.h"
 #include "backend/circuit/circuit.h"
+#include "logicRenderingUtils.h"
 
 CircuitRenderManager::CircuitRenderManager(Circuit* circuit, ViewportId viewportId) : circuit(circuit), viewportId(viewportId) {
 	circuit->connectListener(this, [this](DifferenceSharedPtr diff, circuit_id_t circuitId) {if (circuitId == this->circuit->getCircuitId()) addDifference(diff); });
@@ -81,10 +82,15 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff) {
 					logError("Could not find block at {} to add input connection to.", "CircuitRenderManager", inputBlockPosition);
 				}
 				inputIter->second.connectionsToOtherBlock.emplace(newConnection, outputBlockPosition);
-				MainRenderer::get().addWire(viewportId, newConnection, { FVector(), FVector() });
+				MainRenderer::get().addWire(viewportId, newConnection, {
+					getOutputOffset(outputIter->second.type, outputIter->second.orientation),
+					getInputOffset(inputIter->second.type, inputIter->second.orientation)
+				});
 			} else {
-				MainRenderer::get().addWire(viewportId, newConnection, { FVector(), FVector() });
-				// renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(outputIter->second.type, outputIter->second.orientation) });
+				MainRenderer::get().addWire(viewportId, newConnection, {
+					getOutputOffset(outputIter->second.type, outputIter->second.orientation),
+					getInputOffset(outputIter->second.type, outputIter->second.orientation)
+				});
 			}
 			break;
 		}
@@ -157,12 +163,18 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff) {
 					bool isInput = posPair.second.withinArea(curPosition, curPosition + blockSize.getLargestVectorInArea());
 					if (isInput) {
 						Position inputPos = newPosition + transformAmount.transformVectorWithArea(posPair.second - curPosition, blockSize);
-						MainRenderer::get().addWire(viewportId, { posPair.first, inputPos }, { FVector(), FVector() });
+						MainRenderer::get().addWire(viewportId, { posPair.first, inputPos }, {
+							getOutputOffset(otherIter->second.type, otherIter->second.orientation),
+							getInputOffset(iter->second.type, newOrientation)
+						});
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), newPosition);
 					} else {
 						Position outputPos = newPosition + transformAmount.transformVectorWithArea(posPair.first - curPosition, blockSize);
-						MainRenderer::get().addWire(viewportId,{ outputPos, posPair.second }, { FVector(), FVector() });
+						MainRenderer::get().addWire(viewportId,{ outputPos, posPair.second }, {
+							getOutputOffset(iter->second.type, newOrientation),
+							getInputOffset(otherIter->second.type, otherIter->second.orientation)
+						});
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), newPosition);
 					}

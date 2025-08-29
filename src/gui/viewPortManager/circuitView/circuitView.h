@@ -1,9 +1,10 @@
 #ifndef circuitView_h
 #define circuitView_h
 
+#include "renderer/circuitRenderManager.h"
+#include "viewManager/viewManager.h"
 #include "events/eventRegister.h"
 #include "tools/toolManager.h"
-#include "viewManager/viewManager.h"
 
 #include "gpu/mainRendererDefs.h"
 
@@ -56,6 +57,7 @@ private:
 
 	DataUpdateEventManager* dataUpdateEventManager = nullptr;
 
+	std::optional<CircuitRenderManager> circuitRenderManager;
 	EventRegister eventRegister;
 	ViewManager viewManager;
 	ToolManager toolManager;

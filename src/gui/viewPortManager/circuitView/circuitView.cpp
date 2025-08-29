@@ -127,6 +127,7 @@ void CircuitView::setCircuit(Backend* backend, circuit_id_t circuitId) {
 			dataUpdateEventManager = backend->getDataUpdateEventManager();
 			this->evaluator = nullptr;
 			this->circuit = nullptr;
+			circuitRenderManager.reset();
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(nullptr);
 			if (dataUpdateEventManager) {
@@ -145,6 +146,7 @@ void CircuitView::setCircuit(Backend* backend, circuit_id_t circuitId) {
 			}
 			this->evaluator = nullptr;
 			this->circuit = circuit;
+			circuitRenderManager.emplace(circuit.get(), viewportId);
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(circuit.get());
 
@@ -165,6 +167,7 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 			dataUpdateEventManager = backend->getDataUpdateEventManager();
 			this->evaluator = nullptr;
 			this->circuit = nullptr;
+			circuitRenderManager.reset();
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(nullptr);
 
@@ -182,6 +185,7 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 		}
 		this->evaluator = nullptr;
 		this->circuit = circuit;
+		circuitRenderManager.emplace(circuit.get(), viewportId);
 		MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 		toolManager.setCircuit(circuit.get());
 

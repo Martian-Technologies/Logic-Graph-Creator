@@ -5,7 +5,7 @@
 
 #include "computerAPI/circuits/circuitFileManager.h"
 
-#include "gui/viewPortManager/circuitView/circuitView.h"
+#include "gui/viewportManager/circuitView/circuitView.h"
 #include "gui/helper/keybindHandler.h"
 
 #include "util/vec2.h"
