@@ -2,16 +2,19 @@
 #define circuitViewWidget_h
 
 #include <RmlUi/Core.h>
-#include <SDL3/SDL.h>
 
 #include "computerAPI/circuits/circuitFileManager.h"
+
 #include "gui/viewPortManager/circuitView/circuitView.h"
 #include "gui/helper/keybindHandler.h"
+
 #include "util/vec2.h"
+
+class MainWindow;
 
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, SDL_Window* window, WindowID windowID, Rml::Element* element);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, MainWindow* mainWindow, WindowID windowID, Rml::Element* element);
 	~CircuitViewWidget() { element->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
@@ -45,7 +48,7 @@ private:
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;
 	Rml::Element* element;
-	SDL_Window* window;
+	MainWindow* mainWindow;
 	KeybindHandler keybindHandler;
 
 	// settings (temp)

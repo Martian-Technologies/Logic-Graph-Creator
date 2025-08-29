@@ -46,6 +46,8 @@ public:
 	void setTool(std::string tool);
 	void setMode(std::string tool);
 	void addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
+	void savePopUp(const std::string& circuitUUID);
+	void saveAsPopUp(const std::string& circuitUUID);
 
 private:
 	void createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);

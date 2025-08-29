@@ -155,7 +155,7 @@ void MainWindow::updateRml() {
 }
 
 void MainWindow::createCircuitViewWidget(Rml::Element* element) {
-	circuitViewWidgets.push_back(std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, sdlWindow.getHandle(), windowID, element));
+	circuitViewWidgets.push_back(std::make_shared<CircuitViewWidget>(circuitFileManager, rmlDocument, this, windowID, element));
 	circuitViewWidgets.back()->getCircuitView()->setBackend(backend);
 	toolManagerManager.addCircuitView(circuitViewWidgets.back()->getCircuitView());
 	activeCircuitViewWidget = circuitViewWidgets.back(); // if it is created, it should be used
@@ -201,3 +201,36 @@ void MainWindow::createPopUp(const std::string& message, const std::vector<std::
 	}
 }
 
+void SaveCallback(void* userData, const char* const* filePaths, int filter) {
+	std::pair<CircuitFileManager*, std::string>* data = (std::pair<CircuitFileManager*, std::string>*)userData;
+	if (filePaths && filePaths[0]) {
+		std::string filePath = filePaths[0];
+		if (data->first->getSavePath(data->second) != nullptr)
+			logWarning("This circuit " + data->second + " will be saved with a new UUID");
+		data->first->saveToFile(filePath, data->second);
+	} else {
+		std::cout << "File dialog canceled." << std::endl;
+	}
+	delete data;
+}
+
+void MainWindow::savePopUp(const std::string& circuitUUID) {
+	if (circuitFileManager && !circuitFileManager->save(circuitUUID)) {
+		// if failed to save the circuit with out a path
+		static const SDL_DialogFileFilter filters[] = {
+			{ "Circuit Files",  ".cir" }
+		};
+		std::pair<CircuitFileManager*, std::string>* data = new std::pair<CircuitFileManager*, std::string>(circuitFileManager, circuitUUID);
+		SDL_ShowSaveFileDialog(SaveCallback, data, sdlWindow.getHandle(), filters, 1, nullptr);
+	}
+}
+
+void MainWindow::saveAsPopUp(const std::string& circuitUUID) {
+	if (circuitFileManager) {
+		static const SDL_DialogFileFilter filters[] = {
+			{ "Circuit Files",  ".cir" }
+		};
+		std::pair<CircuitFileManager*, std::string>* data = new std::pair<CircuitFileManager*, std::string>(circuitFileManager, circuitUUID);
+		SDL_ShowSaveFileDialog(SaveCallback, data, sdlWindow.getHandle(), filters, 1, nullptr);
+	}
+}
