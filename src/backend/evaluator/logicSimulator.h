@@ -193,6 +193,13 @@ private:
 	std::vector<std::unique_ptr<JobInstruction>> jobInstructionStorage;
 
 	void regenerateJobs();
+
+	void extendDataVectors(simulator_id_t id) {
+		if (statesA.size() <= id) {
+			statesA.resize(id + 1, logic_state_t::UNDEFINED);
+			statesB.resize(id + 1, logic_state_t::UNDEFINED);
+		}
+	}
 };
 
 class SimPauseGuard {
