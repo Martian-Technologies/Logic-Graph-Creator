@@ -38,7 +38,6 @@ public:
 
 	inline void clear() {
 		if (!viewportID) return;
-		logInfo("Clearing: {}", "", ids.size());
 		for (auto pair : ids) {
 			switch (pair.second) {
 			case SelectionElement:
