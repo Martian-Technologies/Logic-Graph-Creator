@@ -16,7 +16,7 @@ void BlockTextureManager::init(VulkanDevice* device) {
 
 	// upload texture
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load((DirectoryManager::getResourceDirectory() / "logicTiles.png").generic_string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkExtent3D size{ (uint32_t)texWidth, (uint32_t)texHeight, 1 };
 	mainTexture = std::make_shared<BlockTexture>();
 	mainTexture->device = device;

@@ -31,7 +31,7 @@ std::vector<circuit_id_t> BLIFParser::load(const std::string& path) {
 			std::string importFileName;
 			inputFile >> std::quoted(importFileName);
 			std::filesystem::path fullPath = std::filesystem::absolute(std::filesystem::path(path)).parent_path() / importFileName;
-			const std::string& fPath = fullPath.string();
+			const std::string& fPath = fullPath.generic_string();
 			load(fPath);
 		} else if (token == ".end") {
 			if (current.parsedCircuit) {

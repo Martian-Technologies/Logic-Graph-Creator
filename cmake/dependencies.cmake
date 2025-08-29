@@ -23,9 +23,6 @@ function(add_main_dependencies)
 	)
 	list(APPEND EXTERNAL_LINKS fmt)
 
-	# yosys
-	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/yosysSetup.cmake)
-
 	# CPPLocate (they have extreme cmake goofyness)
 	CPMAddPackage(
 		NAME cpplocate
@@ -88,16 +85,18 @@ function(add_main_dependencies)
 	if (RUN_TRACY_PROFILER)
 		message("tracy is ON")
 		CPMAddPackage(
-			NAME tracy
+			NAME TracyClient
 			GITHUB_REPOSITORY wolfpld/tracy
-			GIT_TAG v2.0.0
+			GIT_TAG v0.12.2
 			OPTIONS
 				"TRACY_ENABLE ON"
 				"TRACY_ON_DEMAND ON"
 				"EXCLUDE_FROM_ALL YES"
 			SOURCE_DIR "${EXTERNAL_DIR}/tracy"
 		)
-		list(APPEND EXTERNAL_LINKS tracy)
+		list(APPEND EXTERNAL_LINKS TracyClient EXCLUDE_FROM_ALL)
+
+		add_subdirectory("${EXTERNAL_DIR}/tracy/profiler/")
 	endif()
 
 	set(EXTERNAL_LINKS "${EXTERNAL_LINKS}" PARENT_SCOPE)
@@ -187,9 +186,9 @@ function(add_app_dependencies)
 	)
 	get_target_property(compile_opts VulkanMemoryAllocator INTERFACE_COMPILE_OPTIONS)
 	if (compile_opts)
-		list(APPEND compile_opts "$<$<CXX_COMPILER_ID:GNU>:-Wno-nullability-completeness>")
+		list(APPEND compile_opts "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-nullability-completeness>")
 	else()
-		set(compile_opts "$<$<CXX_COMPILER_ID:GNU>:-Wno-nullability-completeness>")
+		set(compile_opts "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-nullability-completeness>")
 	endif()
 	set_target_properties(VulkanMemoryAllocator PROPERTIES INTERFACE_COMPILE_OPTIONS "${compile_opts}")
 	list(APPEND EXTERNAL_LINKS VulkanMemoryAllocator)

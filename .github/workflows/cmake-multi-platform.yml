@@ -46,23 +46,46 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Cache CMake dependency source code
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake-dependency-sources
+      with:
+        # CMake cache is at ${{github.workspace}}/build/_deps but we only will cache folders ending in '-src' to cache source code
+        path: ${{github.workspace}}/build/_deps/*-src
+        # Cache hash is dependent on CMakeLists files anywhere as these can change what's in the cache, as well as cmake modules files
+        key: ${{ env.cache-name }}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
+        # it's acceptable to reuse caches for different CMakeLists content if exact match is not available and unlike build caches, we
+        # don't need to restrict these by OS or compiler as it's only source code that's being cached
+        restore-keys: |
+          ${{ env.cache-name }}-
+
+    - name: Cache CMake dependency build objects
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake-dependency-builds
+      with:
+        # CMake cache is at ${{github.workspace}}/build/_deps but we only care about the folders ending in -build or -subbuild
+        path: |
+          ${{github.workspace}}/build/_deps/*-build
+          ${{github.workspace}}/build/_deps/*-subbuild
+        # Cache hash is dependent on CMakeLists files anywhere as these can change what's in the cache, as well as cmake modules files
+        key: ${{ env.cache-name }}-${{ matrix.os }}-${{ matrix.cxx }}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
+        # it's acceptable to reuse caches for different CMakeLists content if exact match is not available
+        # as long as the OS and Compiler match exactly
+        restore-keys: |
+          ${{ env.cache-name }}-${{ matrix.os }}-${{ matrix.cxx }}-
+
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
       with:
          version: 1.4.309.0
          cache: true
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
     - name: Build with CMake
       uses: ashutoshvarma/action-cmake-build@master
       with:
-        build-dir: ${{ steps.strings.outputs.build-output-dir }}
+        build-dir: ${{ github.workspace }}/build
         cc: ${{ matrix.c_compiler }}
         cxx: ${{ matrix.cpp_compiler }}
         configure-options: "-DCONNECTION_MACHINE_BUILD_TESTS=ON -DCONNECTION_MACHINE_BUILD_APP=OFF"
@@ -70,10 +93,10 @@ jobs:
         build-type: ${{ matrix.build_type }}
 
     - name: List files
-      run: ls ${{ steps.strings.outputs.build-output-dir }}
+      run: ls ${{ github.workspace }}/build
 
     - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      working-directory: ${{ github.workspace }}/build
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ${{ matrix.runExecutable }}

@@ -87,38 +87,28 @@ public:
 	void reset();
 	void setPause(bool pause) { evalConfig.setRunning(!pause); }
 	bool isPause() const { return !evalConfig.isRunning(); }
+	void addSprint(unsigned int nTicks) { evalConfig.addSprint(nTicks); }
+	bool isSprinting() const { return evalConfig.getSprintCount() > 0; }
+	void waitForSprintComplete();
+	void tickStep(unsigned int nTicks) {
+		setPause(true);
+		evalConfig.addSprint(nTicks);
+		waitForSprintComplete();
+	}
+	void tickStep() { tickStep (1); }
 	void setRealistic(bool realistic) { evalConfig.setRealistic(realistic); }
 	bool isRealistic() const { return evalConfig.isRealistic(); }
-	void setTickrate(unsigned long long tickrate) { evalConfig.setTargetTickrate(tickrate); }
-	unsigned long long getTickrate() const { return evalConfig.getTargetTickrate(); }
+	void setTickrate(double tickrate) { evalConfig.setTargetTickrate(tickrate); }
+	double getTickrate() const { return evalConfig.getTargetTickrate(); }
 	void setUseTickrate(bool useTickrate) { evalConfig.setTickrateLimiter(useTickrate); }
 	bool getUseTickrate() const { return evalConfig.isTickrateLimiterEnabled(); }
 	double getRealTickrate() const { return evalSimulator.getAverageTickrate(); }
 	void makeEdit(DifferenceSharedPtr difference, circuit_id_t circuitId);
 	logic_state_t getState(const Address& address);
-	bool getBoolState(const Address& address) {
-		return toBool(getState(address));
-	};
+	bool getBoolState(const Address& address) { return toBool(getState(address)); };
 	void setState(const Address& address, logic_state_t state);
-	void setState(const Address& address, bool state) {
-		setState(address, fromBool(state));
-	}
-	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses) {
-		logWarning("not implemented yet", "Evaluator::getBulkStates");
-		return std::vector<logic_state_t>(addresses.size(), logic_state_t::UNDEFINED);
-	};
-	std::vector<logic_state_t> getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin);
-	std::vector<logic_state_t> getBulkStates(const std::vector<Position>& positions, const Address& addressOrigin);
-	std::vector<logic_state_t> getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin);
-	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states) {
-		logWarning("not implemented yet", "Evaluator::setBulkStates");
-	};
-	void setBulkStates(const std::vector<Address>& addresses, const std::vector<logic_state_t>& states, const Address& addressOrigin) {
-		logWarning("not implemented yet", "Evaluator::setBulkStates");
-	};
-	circuit_id_t getCircuitId() const {
-		return evalCircuitContainer.getCircuitId(0).value_or(0);
-	}
+	void setState(const Address& address, bool state) { setState(address, fromBool(state)); }
+	circuit_id_t getCircuitId() const { return evalCircuitContainer.getCircuitId(0).value_or(0); }
 	circuit_id_t getCircuitId(const Address& address) const {
 		std::shared_lock lk(simMutex);
 		eval_circuit_id_t evalCircuitId = 0;
@@ -198,15 +188,8 @@ private:
 		const Position portPosition,
 		Direction direction,
 		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
-	) const;
-	std::optional<EvalConnectionPoint> getConnectionPoint(
-		const eval_circuit_id_t evalCircuitId,
-		const BlockContainer* blockContainer,
-		const Position portPosition,
-		Direction direction,
-		std::set<CircuitPortDependency>& circuitPortDependencies,
-		std::set<CircuitNode>& circuitNodeDependencies
+		std::set<CircuitNode>& circuitNodeDependencies,
+		bool isInterCircuit
 	) const;
 
 	std::vector<InterCircuitConnection> interCircuitConnections;

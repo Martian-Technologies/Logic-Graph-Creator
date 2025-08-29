@@ -243,18 +243,16 @@ void Evaluator::edit_createConnection(SimPauseGuard& pauseGuard, eval_circuit_id
 	std::set<CircuitPortDependency> circuitPortDependencies;
 	std::set<CircuitNode> circuitNodeDependencies;
 
-	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, blockContainer, outputPosition, Direction::OUT, circuitPortDependencies, circuitNodeDependencies);
+	std::optional<EvalConnectionPoint> outputPoint = getConnectionPoint(evalCircuitId, outputPosition, Direction::OUT, circuitPortDependencies, circuitNodeDependencies, false);
 	if (!outputPoint.has_value()) {
-		logError("Output connection point not found for position {}", "Evaluator::edit_createConnection", outputPosition.toString());
 		return;
 	}
-	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, blockContainer, inputPosition, Direction::IN, circuitPortDependencies, circuitNodeDependencies);
+	std::optional<EvalConnectionPoint> inputPoint = getConnectionPoint(evalCircuitId, inputPosition, Direction::IN, circuitPortDependencies, circuitNodeDependencies, false);
 	if (!inputPoint.has_value()) {
-		logError("Input connection point not found for position {}", "Evaluator::edit_createConnection", inputPosition.toString());
 		return;
 	}
 	EvalConnection connection(outputPoint.value(), inputPoint.value());
-	if (!circuitPortDependencies.empty()) {
+	if (!circuitPortDependencies.empty() || !circuitNodeDependencies.empty()) {
 		interCircuitConnections.push_back({ connection, circuitPortDependencies, circuitNodeDependencies });
 	}
 	evalSimulator.makeConnection(pauseGuard, connection);
@@ -467,29 +465,19 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 	const Position portPosition,
 	Direction direction,
 	std::set<CircuitPortDependency>& circuitPortDependencies,
-	std::set<CircuitNode>& circuitNodeDependencies
+	std::set<CircuitNode>& circuitNodeDependencies,
+	bool isInterCircuit
 ) const {
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
 	if (!evalCircuit) [[unlikely]] {
 		return std::nullopt;
 	}
-	circuit_id_t circuitId = evalCircuit->getCircuitId();
-	SharedCircuit circuit = circuitManager.getCircuit(circuitId);
+
+	SharedCircuit circuit = circuitManager.getCircuit(evalCircuit->getCircuitId());
 	if (!circuit) [[unlikely]] {
 		return std::nullopt;
 	}
 	const BlockContainer* blockContainer = circuit->getBlockContainer();
-	return getConnectionPoint(evalCircuitId, blockContainer, portPosition, direction, circuitPortDependencies, circuitNodeDependencies);
-}
-
-std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
-	const eval_circuit_id_t evalCircuitId,
-	const BlockContainer* blockContainer,
-	const Position portPosition,
-	Direction direction,
-	std::set<CircuitPortDependency>& circuitPortDependencies,
-	std::set<CircuitNode>& circuitNodeDependencies
-) const {
 	const Block* block = blockContainer->getBlock(portPosition);
 	if (!block) [[unlikely]] {
 		return std::nullopt;
@@ -498,16 +486,13 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 	const BlockType blockType = block->type();
 	const Position blockPosition = block->getPosition();
 
-	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
-	if (!evalCircuit) [[unlikely]] {
-		return std::nullopt;
-	}
-
 	std::optional<CircuitNode> node = evalCircuit->getNode(blockPosition);
 	if (!node.has_value()) [[unlikely]] {
 		return std::nullopt;
 	}
-	circuitNodeDependencies.insert(node.value());
+	if (isInterCircuit) {
+		circuitNodeDependencies.insert(node.value());
+	}
 	switch (blockType) {
 	case BlockType::SWITCH:
 	case BlockType::BUTTON:
@@ -559,8 +544,10 @@ std::optional<EvalConnectionPoint> Evaluator::getConnectionPoint(
 		return std::nullopt;
 	}
 
-	circuitPortDependencies.insert({ circuitId, portId.value() });
-	return getConnectionPoint(node->getId(), *internalPosition, direction, circuitPortDependencies, circuitNodeDependencies);
+	if (isInterCircuit) {
+		circuitPortDependencies.insert({ circuitId, portId.value() });
+	}
+	return getConnectionPoint(node->getId(), *internalPosition, direction, circuitPortDependencies, circuitNodeDependencies, true);
 }
 
 void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, DiffCache& diffCache, Position curPosition, Orientation curOrientation, Position newPosition, Orientation newOrientation) {
@@ -574,6 +561,9 @@ void Evaluator::edit_moveBlock(SimPauseGuard& pauseGuard, eval_circuit_id_t eval
 	if (!node.has_value()) {
 		logError("Node at position {} not found", "Evaluator::edit_moveBlock", curPosition.toString());
 		return;
+	}
+	if (node->isIC()) {
+		changedICs = true;
 	}
 	removeDependentInterCircuitConnections(pauseGuard, node.value());
 	evalCircuit->moveNode(curPosition, newPosition);
@@ -729,141 +719,6 @@ void Evaluator::setState(const Address& address, logic_state_t state) {
 	logError("Failed to get connection point for address {}", "Evaluator::setState", address.toString());
 }
 
-std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Address>& addresses, const Address& addressOrigin) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
-	if (addresses.empty()) {
-		return {};
-	}
-	std::shared_lock lk(simMutex);
-	eval_circuit_id_t startingPoint = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
-
-	std::vector<eval_circuit_id_t> evalCircuitIds;
-	evalCircuitIds.reserve(addresses.size());
-	for (const Address& addr : addresses) {
-		evalCircuitIds.push_back(evalCircuitContainer.traverseToTopLevelIC(startingPoint, addr));
-	}
-
-	struct CircuitCacheEntry {
-		EvalCircuit* evalCircuit = nullptr;
-		const BlockContainer* blockContainer = nullptr;
-		circuit_id_t circuitId = 0;
-	};
-	std::unordered_map<eval_circuit_id_t, CircuitCacheEntry> circuitCache;
-
-	for (eval_circuit_id_t evalCircuitId : evalCircuitIds) {
-		if (circuitCache.find(evalCircuitId) == circuitCache.end()) {
-			CircuitCacheEntry entry;
-			entry.evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
-			if (entry.evalCircuit) {
-				entry.circuitId = evalCircuitContainer.getCircuitId(evalCircuitId).value_or(0);
-				SharedCircuit circuit = circuitManager.getCircuit(entry.circuitId);
-				if (circuit) {
-					entry.blockContainer = circuit->getBlockContainer();
-				}
-			}
-			circuitCache[evalCircuitId] = entry;
-		}
-	}
-
-	std::vector<EvalConnectionPoint> connectionPoints;
-	connectionPoints.reserve(addresses.size());
-
-	for (size_t i = 0; i < addresses.size(); ++i) {
-		const Address& addr = addresses[i];
-		eval_circuit_id_t evalCircuitId = evalCircuitIds[i];
-
-		const CircuitCacheEntry& cacheEntry = circuitCache[evalCircuitId];
-		if (!cacheEntry.blockContainer || !cacheEntry.evalCircuit) {
-			logError("Failed to get cached resources for evalCircuitId {}", "Evaluator::getBulkStates", evalCircuitId);
-			connectionPoints.emplace_back(0, 0);
-			continue;
-		}
-
-		Position portPosition = addr.getPosition(addr.size() - 1);
-
-		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(evalCircuitId, cacheEntry.blockContainer, portPosition, Direction::OUT);
-		if (connectionPoint.has_value()) {
-			connectionPoints.push_back(connectionPoint.value());
-			continue;
-		}
-
-		const Block* block = cacheEntry.blockContainer->getBlock(portPosition);
-		if (!block) {
-			connectionPoints.emplace_back(0, 0);
-			continue;
-		}
-
-		Position blockPosition = block->getPosition();
-		std::optional<CircuitNode> node = cacheEntry.evalCircuit->getNode(blockPosition);
-		if (!node.has_value()) {
-			connectionPoints.emplace_back(0, 0);
-			continue;
-		}
-
-		if (node->isIC()) {
-			connectionPoints.emplace_back(0, 0);
-			continue;
-		}
-
-		connectionPoints.emplace_back(node->getId(), 0);
-	}
-
-	return evalSimulator.getStates(connectionPoints);
-}
-
-std::vector<logic_state_t> Evaluator::getBulkStates(const std::vector<Position>& positions, const Address& addressOrigin) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
-	if (positions.empty()) {
-		return {};
-	}
-	std::shared_lock lk(simMutex);
-	eval_circuit_id_t startingPoint = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
-
-	std::vector<EvalConnectionPoint> connectionPoints;
-	connectionPoints.reserve(positions.size());
-
-	for (const Position& portPosition : positions) {
-		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(startingPoint, portPosition, Direction::OUT);
-		if (connectionPoint.has_value()) {
-			connectionPoints.push_back(connectionPoint.value());
-		} else {
-			connectionPoints.emplace_back(0, 0);
-		}
-	}
-
-	return evalSimulator.getStates(connectionPoints);
-}
-
-std::vector<logic_state_t> Evaluator::getBulkPinStates(const std::vector<Position>& positions, const Address& addressOrigin) {
-#ifdef TRACY_PROFILER
-	ZoneScoped;
-#endif
-	if (positions.empty()) {
-		return {};
-	}
-	std::shared_lock lk(simMutex);
-	eval_circuit_id_t startingPoint = evalCircuitContainer.traverseToTopLevelIC(addressOrigin);
-
-	std::vector<EvalConnectionPoint> connectionPoints;
-	connectionPoints.reserve(positions.size());
-
-	for (size_t i = 0; i < positions.size(); ++i) {
-		Position portPosition = positions[i];
-		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(startingPoint, portPosition, Direction::OUT);
-		if (connectionPoint.has_value()) {
-			connectionPoints.push_back(connectionPoint.value());
-		} else {
-			connectionPoints.emplace_back(0, 0);
-		}
-	}
-
-	return evalSimulator.getPinStates(connectionPoints);
-}
-
 void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval_circuit_id_t evalCircuitId, Position position) {
 	// logInfo("Checking to create external connections for evalCircuitId {} at position {}", "Evaluator::checkToCreateExternalConnections", evalCircuitId, position.toString());
 	EvalCircuit* evalCircuit = evalCircuitContainer.getCircuit(evalCircuitId);
@@ -942,7 +797,7 @@ void Evaluator::checkToCreateExternalConnections(SimPauseGuard& pauseGuard, eval
 		std::set<CircuitNode> circuitNodeDependencies;
 		circuitNodeDependencies.insert(node.value());
 		std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(
-			evalCircuitId, blockContainer, portPosition, direction, circuitPortDependencies, circuitNodeDependencies);
+			evalCircuitId, portPosition, direction, circuitPortDependencies, circuitNodeDependencies, false);
 
 		if (connectionPoint.has_value()) {
 			traceOutwardsIC(
@@ -983,6 +838,26 @@ void Evaluator::traceOutwardsIC(
 		logError("CircuitBlockData for circuit ID {} not found", "Evaluator::traceOutwardsIC", circuitId);
 		return;
 	}
+	SharedCircuit innerCircuit = circuitManager.getCircuit(evalCircuit->getCircuitId());
+	if (!innerCircuit) {
+		logError("Inner circuit for evalCircuitId {} not found", "Evaluator::traceOutwardsIC", evalCircuitId);
+		return;
+	}
+	const BlockContainer* innerBlockContainer = innerCircuit->getBlockContainer();
+	if (!innerBlockContainer) {
+		logError("BlockContainer for inner circuit ID {} not found", "Evaluator::traceOutwardsIC", evalCircuit->getCircuitId());
+		return;
+	}
+	const Block* block = innerBlockContainer->getBlock(position);
+	if (!block) {
+		logError("Block not found at position {}", "Evaluator::traceOutwardsIC", position.toString());
+		return;
+	}
+	std::optional<CircuitNode> node = evalCircuit->getNode(block->getPosition());
+	if (!node.has_value()) {
+		logError("CircuitNode not found for block at position {}", "Evaluator::traceOutwardsIC", block->getPosition().toString());
+		return;
+	}
 	// go through all the connection_end_ids
 	eval_circuit_id_t parentEvalCircuitId = evalCircuit->getParentEvalId();
 	EvalCircuit* parentEvalCircuit = evalCircuitContainer.getCircuit(parentEvalCircuitId);
@@ -1012,7 +887,7 @@ void Evaluator::traceOutwardsIC(
 		return;
 	}
 
-	circuitNodeDependencies.insert(CircuitNode::fromIC(evalCircuitId));
+	circuitNodeDependencies.insert(node.value());
 
 	BidirectionalMultiSecondKeyMap<connection_end_id_t, Position>::constIteratorPairT2 connectionIds = circuitBlockData->getConnectionPositionToId(position);
 
@@ -1052,7 +927,7 @@ void Evaluator::traceOutwardsIC(
 			std::set<CircuitNode> circuitNodeDependenciesCopy = circuitNodeDependencies;
 			// get connection point
 			std::optional<EvalConnectionPoint> connectionPoint = getConnectionPoint(
-				parentEvalCircuitId, parentCircuitBlockContainer, targetConnectionPointPosition, !direction, circuitPortDependenciesCopy, circuitNodeDependenciesCopy);
+				parentEvalCircuitId, targetConnectionPointPosition, !direction, circuitPortDependenciesCopy, circuitNodeDependenciesCopy, false);
 			if (!connectionPoint.has_value()) {
 				continue;
 			}
@@ -1089,7 +964,7 @@ void Evaluator::traceOutwardsIC(
 		circuitPortDependencies.erase({ circuitId, connectionEndId });
 	}
 
-	circuitNodeDependencies.erase(CircuitNode::fromIC(evalCircuitId));
+	circuitNodeDependencies.erase(node.value());
 }
 
 void Evaluator::processDirtyNodes() {
@@ -1241,4 +1116,10 @@ void Evaluator::connectListener(
 		this->dirtyBlockAt(pos, evalCircuitId.value());
 	});
 	processDirtyNodes();
+}
+
+void Evaluator::waitForSprintComplete() {
+	while (evalConfig.getSprintCount() > 0) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 }

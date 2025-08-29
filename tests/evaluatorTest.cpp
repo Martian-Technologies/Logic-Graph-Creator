@@ -25,30 +25,25 @@ TEST_F(EvaluatorTest, PauseUnpauseTest) {
 	evaluator->setUseTickrate(false);
 	// set to 1000000000 tick/min
 	// tickrate should be ~16666666.7 ?
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	ASSERT_GT(evaluator->getRealTickrate(), 0);
 
 	evaluator->setPause(true);
-	std::this_thread::sleep_for(std::chrono::seconds(2));
 	ASSERT_EQ(evaluator->getRealTickrate(), 0);
 }
 
 TEST_F(EvaluatorTest, TickrateTest) {
-	int new_tickrate = 1000;
+	double new_tickrate = 10.0;
 	evaluator->setTickrate(new_tickrate);
 	evaluator->setUseTickrate(true);
 	evaluator->setPause(false);
 
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	ASSERT_GT(evaluator->getRealTickrate(), 0);
-	//ASSERT_EQ(evaluator->getRealTickrate(), new_tickrate/60); // have to sleep for a couple seconds
+	ASSERT_LT(evaluator->getRealTickrate(), new_tickrate*2);
 
 	evaluator->setUseTickrate(false);
-	//std::this_thread::sleep_for(std::chrono::seconds(2));
-	// tickrate should grow
-	//ASSERT_GT(evaluator->getRealTickrate(), new_tickrate);
-
 	evaluator->setPause(true);
 }
 
@@ -111,15 +106,14 @@ TEST_F(EvaluatorTest, LogicGateEvaluation) {
 	evaluator->setState(Address(in2), logic_state_t::HIGH);
 
 	// run simulation
-	evaluator->setPause(false);
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+	evaluator->tickStep();
 
 	// check AND gate output
 	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::HIGH);
 
 	// change one input
 	evaluator->setState(Address(in1), logic_state_t::LOW);
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+	evaluator->tickStep();
 	ASSERT_EQ(evaluator->getState(Address(andPos)), logic_state_t::LOW);
 
 	evaluator->setPause(true);
@@ -205,5 +199,35 @@ TEST_F(EvaluatorTest, FastCircuitModifications) {
 	for (int j = 1; j < (int)positions.size(); j += 2) {
 		Address addr(positions[j]);
 		ASSERT_NO_THROW(evaluator->getState(addr));
+	}
+}
+
+TEST_F(EvaluatorTest, EqualityCircuit) {
+	circuit->tryInsertBlock({ 0, 3 }, Rotation::ZERO, BlockType::AND); // output
+	for (int i = 0; i < 4; ++i) {
+		circuit->tryInsertBlock({i, 0}, Rotation::ZERO, BlockType::SWITCH);
+		circuit->tryInsertBlock({i, 1}, Rotation::ZERO, BlockType::SWITCH);
+		circuit->tryInsertBlock({ i, 2 }, Rotation::ZERO, BlockType::XNOR); // compare two inputs are equal
+		circuit->tryCreateConnection(Position { i, 0 }, Position { i, 2 });
+		circuit->tryCreateConnection(Position { i, 1 }, Position { i, 2 });
+		circuit->tryCreateConnection(Position { i, 2 }, Position { 0, 3 });
+	}
+	for (int i = 0; i < 4; ++i) {
+		evaluator->setState(Address({ 0, 0 }), (i & 1) == 1);
+		evaluator->setState(Address({ 1, 0 }), (i & 2) == 2);
+		evaluator->setState(Address({ 2, 0 }), (i & 4) == 4);
+		evaluator->setState(Address({ 3, 0 }), (i & 8) == 8);
+		for (int j = 0; j < 4; ++j) {
+			evaluator->setState(Address({ 0, 1 }), (j & 1) == 1);
+			evaluator->setState(Address({ 1, 1 }), (j & 2) == 2);
+			evaluator->setState(Address({ 2, 1 }), (j & 4) == 4);
+			evaluator->setState(Address({ 3, 1 }), (j & 8) == 8);
+			evaluator->tickStep(2);
+			ASSERT_EQ(evaluator->getBoolState(Address({ 0, 2 })), (i & 1) == (j & 1));
+			ASSERT_EQ(evaluator->getBoolState(Address({ 1, 2 })), (i & 2) == (j & 2));
+			ASSERT_EQ(evaluator->getBoolState(Address({ 2, 2 })), (i & 4) == (j & 4));
+			ASSERT_EQ(evaluator->getBoolState(Address({ 3, 2 })), (i & 8) == (j & 8));
+			ASSERT_EQ(evaluator->getBoolState(Address({ 0, 3 })), i == j);
+		}
 	}
 }

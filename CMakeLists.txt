@@ -7,6 +7,8 @@ if(APPLE)
 	PreProjectAppleSetup()
 endif()
 
+set(VERBOSE)
+
 set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
 # generate compile commands json

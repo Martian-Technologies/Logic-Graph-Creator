@@ -84,7 +84,7 @@ bool Circuit::tryMoveBlocks(const SharedSelection& selection, Vector movement, O
 				// !positions.contains(newSelectionOrigin + rotateVector(*iter - selectionOrigin, transformAmount)) &&
 				blockContainer.checkCollision(
 					newSelectionOrigin + transformAmount * (block->getPosition() - selectionOrigin) - transformAmount.transformVectorWithArea(Vector(0), block->size()),
-					block->getOrientation() * transformAmount,
+					transformAmount * block->getOrientation(),
 					block->type(),
 					block->id()
 				)
@@ -293,7 +293,7 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (blockContainer.checkCollision(
 			position + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
-			block.orientation * transformAmount,
+			transformAmount * block.orientation,
 			block.blockType
 		)) {
 			return false;
@@ -303,7 +303,7 @@ bool Circuit::tryInsertCopiedBlocks(const SharedCopiedBlocks& copiedBlocks, Posi
 	for (const CopiedBlocks::CopiedBlockData& block : copiedBlocks->getCopiedBlocks()) {
 		if (!blockContainer.tryInsertBlock(
 			position + transformAmount * (block.position - copiedBlocks->getMinPosition()) - transformAmount.transformVectorWithArea(Vector(0), blockContainer.getBlockDataManager()->getBlockSize(block.blockType, block.orientation)),
-			block.orientation * transformAmount,
+			transformAmount * block.orientation,
 			block.blockType, difference.get()
 		)) {
 			logError("Failed to insert block while inserting block.");

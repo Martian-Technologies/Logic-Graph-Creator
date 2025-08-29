@@ -117,24 +117,30 @@ void SimulatorOptimizer::removeConnection(SimPauseGuard& pauseGuard, EvalConnect
 	// Remove from connection tracking
 	if (inputConnections.size() > destinationGateId) {
 		auto& connections = inputConnections.at(destinationGateId);
-		connections.erase(std::remove_if(connections.begin(), connections.end(),
+		auto it = std::find_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
 				return conn.source.gateId == connection.source.gateId &&
 					conn.source.portId == connection.source.portId &&
 					conn.destination.gateId == connection.destination.gateId &&
 					conn.destination.portId == connection.destination.portId;
-			}), connections.end());
+			});
+		if (it != connections.end()) {
+			connections.erase(it);
+		}
 	}
 
 	if (outputConnections.size() > sourceGateId) {
 		auto& connections = outputConnections.at(sourceGateId);
-		connections.erase(std::remove_if(connections.begin(), connections.end(),
+		auto it = std::find_if(connections.begin(), connections.end(),
 			[&connection](const EvalConnection& conn) {
 				return conn.source.gateId == connection.source.gateId &&
 					conn.source.portId == connection.source.portId &&
 					conn.destination.gateId == connection.destination.gateId &&
 					conn.destination.portId == connection.destination.portId;
-			}), connections.end());
+			});
+		if (it != connections.end()) {
+			connections.erase(it);
+		}
 	}
 }
 

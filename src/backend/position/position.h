@@ -587,7 +587,7 @@ inline constexpr Rotation addRotations(Rotation rotationA, Rotation rotationB) {
 		output -= 4;
 	return (Rotation)output;
 }
-inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)(4 - (char)rotation); }
+inline constexpr Rotation rotationNeg(Rotation rotation) { return (Rotation)((4 - (char)rotation) & 0b11); }
 inline constexpr Rotation subRotations(Rotation rotationA, Rotation rotationB) {
 	return addRotations(rotationA, rotationNeg(rotationB));
 }
@@ -656,15 +656,15 @@ struct Orientation {
 	inline Size operator*(Size size) const noexcept { return rotateSize(rotation, size); }
 	inline FSize operator*(FSize size) const noexcept { return rotateSize(rotation, size); }
 	inline bool operator==(Orientation other) const noexcept { return this->rotation == other.rotation && this->flipped == other.flipped; }
-	inline bool operator!=(Orientation other) { return !(*this == other); }
+	inline bool operator!=(Orientation other) const noexcept { return !(*this == other); }
 	inline void rotate(bool clockWise) { rotation = ::rotate(rotation, clockWise); }
 	inline void flip() { flipped = !flipped; }
 	inline Orientation operator*(Orientation other) const noexcept {
 		return Orientation(addRotations(rotation, flipped ? rotationNeg(other.rotation) : other.rotation), other.flipped ^ flipped);
 	}
 	inline const Orientation& operator*=(Orientation other) noexcept {
-		flipped ^= other.flipped;
 		rotation = addRotations(rotation, flipped ? rotationNeg(other.rotation) : other.rotation);
+		flipped ^= other.flipped;
 		return *this;
 	}
 	inline Orientation inverse() const noexcept {
@@ -688,8 +688,8 @@ struct Orientation {
 	}
 	inline FVector inverseTransformVectorWithArea(FVector vector, FSize size) const noexcept {
 		return inverse().transformVectorWithArea(vector, size);
-		FVector vec = reverseRotateVectorWithArea(vector, size, rotation);
-		return FVector(vec.dx, flipped ? (rotateSize(rotation, size).h - vec.dy - 1) : vec.dy);
+		// FVector vec = reverseRotateVectorWithArea(vector, size, rotation);
+		// return FVector(vec.dx, flipped ? (rotateSize(rotation, size).h - vec.dy - 1) : vec.dy);
 	}
 };
 

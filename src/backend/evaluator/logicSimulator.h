@@ -175,6 +175,11 @@ private:
 	inline void tickOnce();
 	void processPendingStateChanges();
 
+	inline void updateEmaTickrate(
+		const std::chrono::steady_clock::time_point& currentTime,
+		std::chrono::steady_clock::time_point& lastTickTime,
+		bool& isFirstTick);
+
 	void addInputToGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	void removeInputFromGate(simulator_id_t simId, simulator_id_t inputId, connection_port_id_t portId);
 	std::optional<std::vector<simulator_id_t>> getOutputSimIdsFromGate(simulator_id_t simId) const;

@@ -2,13 +2,24 @@
 
 #include "openCircuitsParser.h"
 #include "BLIFParser.h"
-#include "verilogYosysParser.h"
 #include "connectionMachineParser.h"
-#include "util/uuid.h"
 
 CircuitFileManager::CircuitFileManager(CircuitManager* circuitManager) : circuitManager(circuitManager) { }
 
 std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& path) {
+	auto iter = filePathToFile.find(path);
+	if (iter != filePathToFile.end()) {
+		logInfo("Duplicate import detected. skipping file: " + path, "CircuitFileManager");
+		std::vector<circuit_id_t> circuitIds;
+		for (const std::string& uuid : iter->second.UUIDs) {
+			SharedCircuit circuit = circuitManager->getCircuit(uuid);
+			if (circuit) {
+				circuitIds.push_back(circuit->getCircuitId());
+			}
+		}
+		return circuitIds;
+	}
+
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".cir") {
 		// our Connection Machine file parser function
 		ConnectionMachineParser parser(this, circuitManager);
@@ -18,28 +29,19 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
 		}
 		return circuits;
-	} else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") {
-		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
-		// open circuit file parser function
-		OpenCircuitsParser parser(this, circuitManager);
-		std::vector<circuit_id_t> circuits = parser.load(path);
-		if (circuits.empty()) {
-			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
-		}
-		return circuits;
+	// } else if (path.size() >= 8 && path.substr(path.size() - 8) == ".circuit") { // does not work and will not be used
+	// 	SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
+	// 	// open circuit file parser function
+	// 	OpenCircuitsParser parser(this, circuitManager);
+	// 	std::vector<circuit_id_t> circuits = parser.load(path);
+	// 	if (circuits.empty()) {
+	// 		logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
+	// 	}
+	// 	return circuits;
 	} else if (path.size() >= 5 && path.substr(path.size() - 5) == ".blif") {
 		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
 		// open circuit file parser function
 		BLIFParser parser(this, circuitManager);
-		std::vector<circuit_id_t> circuits = parser.load(path);
-		if (circuits.empty()) {
-			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
-		}
-		return circuits;
-	} else if (path.size() >= 2 && path.substr(path.size() - 2) == ".v") {
-		SharedParsedCircuit parsedCircuit = std::make_shared<ParsedCircuit>();
-		// open circuit file parser function
-		VerilogYosysParser parser(this, circuitManager);
 		std::vector<circuit_id_t> circuits = parser.load(path);
 		if (circuits.empty()) {
 			logWarning("No circuits loaded from {}. This may be a error", "CircuitFileManager", path);
@@ -50,13 +52,13 @@ std::vector<circuit_id_t> CircuitFileManager::loadFromFile(const std::string& pa
 		if (module) {
 			const std::string* UUID = circuitManager->getProceduralCircuitManager()->createWasmProceduralCircuit(module.value());
 			if (UUID) {
-				setSaveFilePath(*UUID, std::filesystem::absolute(std::filesystem::path(path)).string());
+				setSaveFilePath(*UUID, std::filesystem::absolute(std::filesystem::path(path)).generic_string());
 			}
 		} else {
 			logError("Failed to load wasm module", "CircuitFileManager");
 		}
 	} else {
-		logError("Unsupported file extension. Expected .circuit or .cir", "FileManager");
+		logError("Unsupported file extension \"{}\". Expected .cir, .blif, .wat, or .wasm", "CircuitFileManager", std::filesystem::path(path).extension().generic_string());
 	}
 	return {};
 }
@@ -152,10 +154,10 @@ bool CircuitFileManager::save(const std::string& UUID) {
 // 		std::map<circuit_id_t, std::string>::iterator itr = circuitIdToFilePath.find(id);
 // 		if (itr == circuitIdToFilePath.end()) {
 // 			// give default name
-// 			fileData.fileLocation = (prefixPath / ("Untitled_" + std::to_string(untitled++))).string();
+// 			fileData.fileLocation = (prefixPath / ("Untitled_" + std::to_string(untitled++))).generic_string();
 // 		} else {
 // 			// get the name that we loaded the circuit in as
-// 			fileData.fileLocation = (prefixPath / std::filesystem::path(itr->second).filename()).string();
+// 			fileData.fileLocation = (prefixPath / std::filesystem::path(itr->second).filename()).generic_string();
 // 		}
 // 		if (saver.save(fileData, true)) {
 // 			logInfo("Successfully saved Circuit to: {}", "CircuitFileManager", fileLocationPrefix);
