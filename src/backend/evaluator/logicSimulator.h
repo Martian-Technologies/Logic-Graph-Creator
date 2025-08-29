@@ -7,7 +7,6 @@
 #include "evalConnection.h"
 #include "evalConfig.h"
 #include "threadPool.h"
-#include <memory>
 
 enum class SimGateType : int {
 	AND = 0,
