@@ -1,10 +1,9 @@
 #ifndef threadPool_h
 #define threadPool_h
 
-
-class AtomicIndexScheduler {
+class ThreadPool {
 public:
-	explicit AtomicIndexScheduler(size_t nthreads = (std::thread::hardware_concurrency() / 2))
+	explicit ThreadPool(size_t nthreads = (std::thread::hardware_concurrency() / 2))
 		: stop(false)
 	{
 		if (nthreads == 0) nthreads = 1;
@@ -12,7 +11,7 @@ public:
 		for (size_t i = 0; i < nthreads; ++i) spawnOne();
 	}
 
-	~AtomicIndexScheduler() {
+	~ThreadPool() {
 		// Ensure all jobs have fully finished (not just claimed)
 		waitForCompletion();
 		stop.store(true, std::memory_order_relaxed);
@@ -38,18 +37,15 @@ public:
 		cv.notify_all();
 	}
 
-	// Block until the current round is consumed.
 	void waitForEmpty() {
 		while (true) {
 			uint32_t n = next.load(std::memory_order_acquire);
 			uint32_t e = end.load(std::memory_order_acquire);
 			if (n >= e) break;
-			// short passive wait: yielding here is fine because rounds complete quickly
 			std::this_thread::yield();
 		}
 	}
 
-	// Block until all jobs in the current round have finished executing (not just claimed).
 	void waitForCompletion() {
 		while (true) {
 			uint32_t c = completed.load(std::memory_order_acquire);
@@ -59,7 +55,6 @@ public:
 		}
 	}
 
-	// Change worker count. Shrink only between rounds.
 	void resizeThreads(size_t new_count) {
 		size_t cur = workers.size();
 		new_count = std::max(new_count, size_t(1));
@@ -113,7 +108,6 @@ private:
 				continue;
 			}
 
-			// No work: park until a new round or retirement.
 			std::unique_lock lk(mtx);
 			cv.wait(lk, [this, self, &local_round]{
 				return self->retire.load(std::memory_order_relaxed)
@@ -125,7 +119,6 @@ private:
 				return;
 			}
 			local_round = round.load(std::memory_order_acquire);
-			// loop will try to claim indices from the fresh round
 		}
 	}
 

@@ -6,10 +6,9 @@
 #include "idProvider.h"
 #include "evalConnection.h"
 #include "evalConfig.h"
-#include "atomicIndexScheduler.h"
+#include "threadPool.h"
 #include <memory>
 
-// Gate type indices for performance optimization
 enum class SimGateType : int {
 	AND = 0,
 	XOR = 1,
@@ -185,16 +184,13 @@ private:
 	void addOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
 	void removeOutputDependency(simulator_id_t outputId, simulator_id_t dependentGateId);
 
-	// Use double precision internally to avoid float rounding sticking near 2^23 (~8,388,608)
 	std::atomic<double> averageTickrate { 0.0 };
 	double tickrateHalflife { 0.25 };
 
 	std::vector<simulator_id_t>& dirtySimulatorIds;
 
-	AtomicIndexScheduler aiScheduler; // guys it's ai trust
-	std::vector<AtomicIndexScheduler::Job> jobs;
-	// Owns the JobInstruction objects whose raw pointers are passed to the
-	// AtomicIndexScheduler::Job entries. Cleared & rebuilt in regenerateJobs().
+	ThreadPool threadPool;
+	std::vector<ThreadPool::Job> jobs;
 	std::vector<std::unique_ptr<JobInstruction>> jobInstructionStorage;
 
 	void regenerateJobs();

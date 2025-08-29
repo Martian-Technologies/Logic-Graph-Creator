@@ -133,8 +133,8 @@ inline void LogicSimulator::updateEmaTickrate(
 inline void LogicSimulator::tickOnce() {
 	std::unique_lock lkNext(statesBMutex);
 
-	aiScheduler.resetAndLoad(jobs);
-	aiScheduler.waitForCompletion();
+	threadPool.resetAndLoad(jobs);
+	threadPool.waitForCompletion();
 
 	for (auto& gate : junctions) gate.tick(statesB);
 	std::unique_lock lkCurEx(statesAMutex);
@@ -659,7 +659,7 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, simulator_i
 }
 
 void LogicSimulator::regenerateJobs() {
-	aiScheduler.waitForEmpty();
+	threadPool.waitForEmpty();
 	jobs.clear();
 	jobInstructionStorage.clear();
 	bool isRealistic = evalConfig.isRealistic();
@@ -673,28 +673,28 @@ void LogicSimulator::regenerateJobs() {
 
 	for (size_t i = 0; i < andGates.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, andGates.size()));
-		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execANDRealistic : &LogicSimulator::execAND, ji });
+		jobs.push_back(ThreadPool::Job{ isRealistic ? &LogicSimulator::execANDRealistic : &LogicSimulator::execAND, ji });
 	}
 	for (size_t i = 0; i < xorGates.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, xorGates.size()));
-		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execXORRealistic : &LogicSimulator::execXOR, ji });
+		jobs.push_back(ThreadPool::Job{ isRealistic ? &LogicSimulator::execXORRealistic : &LogicSimulator::execXOR, ji });
 	}
 	for (size_t i = 0; i < tristateBuffers.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, tristateBuffers.size()));
-		jobs.push_back(AtomicIndexScheduler::Job{ isRealistic ? &LogicSimulator::execTristateRealistic : &LogicSimulator::execTristate, ji });
+		jobs.push_back(ThreadPool::Job{ isRealistic ? &LogicSimulator::execTristateRealistic : &LogicSimulator::execTristate, ji });
 	}
 	for (size_t i = 0; i < constantResetGates.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, constantResetGates.size()));
-		jobs.push_back(AtomicIndexScheduler::Job{ &LogicSimulator::execConstantReset, ji });
+		jobs.push_back(ThreadPool::Job{ &LogicSimulator::execConstantReset, ji });
 	}
 	for (size_t i = 0; i < copySelfOutputGates.size(); i += batch) {
 		JobInstruction* ji = makeJI(i, std::min(i + batch, copySelfOutputGates.size()));
-		jobs.push_back(AtomicIndexScheduler::Job{ &LogicSimulator::execCopySelfOutput, ji });
+		jobs.push_back(ThreadPool::Job{ &LogicSimulator::execCopySelfOutput, ji });
 	}
 	if (jobs.size() < std::thread::hardware_concurrency() / 2) {
-		aiScheduler.resizeThreads(jobs.size());
+		threadPool.resizeThreads(jobs.size());
 	} else {
-		aiScheduler.resizeThreads(std::thread::hardware_concurrency() / 2);
+		threadPool.resizeThreads(std::thread::hardware_concurrency() / 2);
 	}
 	logInfo("{} jobs created for the current round", "LogicSimulator::regenerateJobs", jobs.size());
 }
