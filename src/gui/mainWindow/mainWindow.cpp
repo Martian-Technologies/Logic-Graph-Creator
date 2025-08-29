@@ -96,6 +96,7 @@ MainWindow::MainWindow(Backend* backend, CircuitFileManager* circuitFileManager)
 
 MainWindow::~MainWindow() {
 	Rml::RemoveContext(rmlContext->GetName());
+	MainRenderer::get().deregisterWindow(windowID);
 	rmlContext = nullptr;
 }
 

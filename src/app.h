@@ -26,7 +26,6 @@ private:
 	RmlRenderInterface rmlRenderInterface;
 	RmlSystemInterface rmlSystemInterface;
 
-	VulkanInstance vulkan;
 	SdlInstance sdl;
 	RmlInstance rml;
 
