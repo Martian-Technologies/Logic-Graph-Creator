@@ -659,7 +659,7 @@ void LogicSimulator::removeOutputDependency(simulator_id_t outputId, simulator_i
 }
 
 void LogicSimulator::regenerateJobs() {
-	threadPool.waitForEmpty();
+	threadPool.waitForCompletion();
 	jobs.clear();
 	jobInstructionStorage.clear();
 	bool isRealistic = evalConfig.isRealistic();

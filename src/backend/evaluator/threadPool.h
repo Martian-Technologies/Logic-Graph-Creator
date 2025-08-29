@@ -25,13 +25,14 @@ public:
 		void* arg;
 	};
 
-	void resetAndLoad(std::vector<Job> new_jobs) {
+	// Load a new round that references the caller-owned jobs (no copy/move).
+	void resetAndLoad(const std::vector<Job>& new_jobs) {
 		{
 			std::lock_guard lk(mtx);
-			jobs = std::move(new_jobs);
+			jobsRef = &new_jobs;
 			next.store(0, std::memory_order_relaxed);
 			completed.store(0, std::memory_order_relaxed);
-			end.store(static_cast<uint32_t>(jobs.size()), std::memory_order_release);
+			end.store(static_cast<uint32_t>(new_jobs.size()), std::memory_order_release);
 			round.fetch_add(1, std::memory_order_release);
 		}
 		cv.notify_all();
@@ -102,7 +103,8 @@ private:
 			uint32_t e = end.load(std::memory_order_acquire);
 
 			if (i < e) {
-				Job j = jobs[i];
+				// Safe because resetAndLoad keeps jobsRef stable for the round.
+				const Job j = (*jobsRef)[i];
 				j.fn(j.arg);
 				completed.fetch_add(1, std::memory_order_acq_rel);
 				continue;
@@ -123,9 +125,9 @@ private:
 	}
 
 	std::vector<std::unique_ptr<Worker>> workers;
-	std::vector<Job> jobs;                   // current round’s jobs
+	const std::vector<Job>* jobsRef{nullptr}; // reference to current round’s jobs
 	std::atomic<uint32_t> next{0};          // next index to claim
-	std::atomic<uint32_t> end{0};           // jobs.size()
+	std::atomic<uint32_t> end{0};           // jobsRef->size()
 	std::atomic<uint32_t> completed{0};      // number of jobs fully executed
 	std::atomic<bool> stop{false};          // global shutdown (idle-only)
 	std::atomic<uint64_t> round{0};         // generation/epoch for cv wakeups

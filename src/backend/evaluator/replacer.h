@@ -233,10 +233,6 @@ public:
 		simulatorOptimizer.setState(getReplacementConnectionPoint(id), state);
 	}
 
-	inline void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
-		simulatorOptimizer.setStates(getReplacementConnectionPoints(points), states);
-	}
-
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection) {
 		pingOutputs(pauseGuard, connection.source.gateId);
 		pingInputs(pauseGuard, connection.destination.gateId);

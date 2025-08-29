@@ -174,15 +174,6 @@ public:
 		}
 		simulator.setState(simIdOpt.value(), state);
 	}
-	void setStates(const std::vector<EvalConnectionPoint>& points, const std::vector<logic_state_t>& states) {
-		std::vector<simulator_id_t> simIds;
-		simIds.reserve(points.size());
-		for (const auto& point : points) {
-			std::optional<simulator_id_t> simIdOpt = getSimIdFromConnectionPoint(point);
-			simIds.push_back(simIdOpt.value_or(0));
-		}
-		simulator.setStates(simIds, states);
-	}
 	void makeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
 	void removeConnection(SimPauseGuard& pauseGuard, EvalConnection connection);
 
