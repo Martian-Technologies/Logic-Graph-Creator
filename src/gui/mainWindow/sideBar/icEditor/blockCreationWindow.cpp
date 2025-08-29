@@ -5,7 +5,7 @@
 #include "util/algorithm.h"
 #include "gui/helper/eventPasser.h"
 #include "../../mainWindow.h"
-#include "gui/viewPortManager/circuitView/tools/other/portSelector.h"
+#include "gui/viewportManager/circuitView/tools/other/portSelector.h"
 
 BlockCreationWindow::BlockCreationWindow(
 	CircuitManager* circuitManager,

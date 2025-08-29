@@ -5,8 +5,8 @@
 #include "backend/settings/settings.h"
 #include "backend/backend.h"
 
-#include "gui/viewPortManager/circuitView/events/customEvents.h"
-#include "gui/viewPortManager/circuitView/circuitView.h"
+#include "gui/viewportManager/circuitView/events/customEvents.h"
+#include "gui/viewportManager/circuitView/circuitView.h"
 #include "gui/helper/eventPasser.h"
 
 #include "gui/mainWindow/mainWindow.h"
