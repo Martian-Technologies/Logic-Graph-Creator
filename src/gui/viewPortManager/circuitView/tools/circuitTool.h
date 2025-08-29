@@ -51,7 +51,7 @@ protected:
 
 private:
 	// This will also tell the tool to reset.
-	void setup(ViewportID viewportID, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit);
+	void setup(ViewportId viewportId, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit);
 	void unsetup();
 	inline void setCircuit(Circuit* circuit) { this->circuit = circuit; reset(); }
 

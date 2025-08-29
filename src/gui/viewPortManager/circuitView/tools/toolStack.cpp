@@ -75,7 +75,7 @@ void ToolStack::pushTool(SharedCircuitTool newTool, bool resetTool) {
 	if (!toolStack.empty())
 		toolStack.back()->deactivate();
 	toolStack.push_back(newTool);
-	toolStack.back()->setup(viewportID, eventRegister, &toolStackInterface, circuitView, circuit);
+	toolStack.back()->setup(viewportId, eventRegister, &toolStackInterface, circuitView, circuit);
 	if (resetTool) toolStack.back()->reset();
 	if (pointerInView) {
 		PositionEvent event("Stack Updating Position", lastPointerFPosition);

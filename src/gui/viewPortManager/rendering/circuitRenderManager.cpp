@@ -1,48 +1,32 @@
-#include "renderManager.h"
+#include "circuitRenderManager.h"
 
 #ifdef TRACY_PROFILER
 #include <tracy/Tracy.hpp>
 #endif
 
-#include "sharedLogic/logicRenderingUtils.h"
+#include "gpu/mainRenderer.h"
 #include "backend/circuit/circuit.h"
 
-CircuitRenderManager::CircuitRenderManager(Circuit* circuit) : circuit(circuit) {
+CircuitRenderManager::CircuitRenderManager(Circuit* circuit, ViewportId viewportId) : circuit(circuit), viewportId(viewportId) {
 	circuit->connectListener(this, [this](DifferenceSharedPtr diff, circuit_id_t circuitId) {if (circuitId == this->circuit->getCircuitId()) addDifference(diff); });
+	addDifference(circuit->getBlockContainer()->getCreationDifferenceShared());
 }
 
 CircuitRenderManager::~CircuitRenderManager() {
 	circuit->disconnectListener(this);
 }
 
-void CircuitRenderManager::connect(CircuitRenderer* circuitRenderer) {
-	addDifference(circuit->getBlockContainer()->getCreationDifferenceShared(), std::set<CircuitRenderer*>{ circuitRenderer });
-	connectedRenderers.insert(circuitRenderer);
-}
-
-void CircuitRenderManager::disconnect(CircuitRenderer* circuitRenderer) {
-	connectedRenderers.erase(circuitRenderer);
-}
-
 void CircuitRenderManager::addDifference(DifferenceSharedPtr diff) {
-	addDifference(diff, connectedRenderers);
-}
-
-void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::set<CircuitRenderer*>& renderers) {
 #ifdef TRACY_PROFILER
 	ZoneScoped;
 #endif
 	if (diff->clearsAll()) {
 		renderedBlocks.clear();
-		for (CircuitRenderer* renderer : renderers) {
-			renderer->reset();
-		}
+		MainRenderer::get().reset(viewportId);
 		return;
 	}
 
-	for (CircuitRenderer* renderer : renderers) {
-		renderer->startMakingEdits();
-	}
+	MainRenderer::get().startMakingEdits(viewportId);
 
 	const BlockDataManager* blockDataManager = circuit->getBlockContainer()->getBlockDataManager();
 	for (const auto& modification : diff->getModifications()) {
@@ -51,15 +35,12 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 		case Difference::ModificationType::PLACE_BLOCK:
 		{
 			const auto& [position, orientation, blockType] = std::get<Difference::block_modification_t>(modificationData);
-
-			for (CircuitRenderer* renderer : renderers) {
-				Position statePosition = Position(1000000, 1000000);
-				if (blockType < BlockType::CUSTOM) {
-					if (blockType == BlockType::TRISTATE_BUFFER) statePosition = position + orientation.transformVectorWithArea(Vector(0, 1), Size(1, 2));
-					else statePosition = position;
-				}
-				renderer->addBlock(blockType, position, blockDataManager->getBlockSize(blockType, orientation), orientation, statePosition);
+			Position statePosition = Position(1000000, 1000000);
+			if (blockType < BlockType::CUSTOM) {
+				if (blockType == BlockType::TRISTATE_BUFFER) statePosition = position + orientation.transformVectorWithArea(Vector(0, 1), Size(1, 2));
+				else statePosition = position;
 			}
+			MainRenderer::get().addBlock(viewportId, blockType, position, blockDataManager->getBlockSize(blockType, orientation), orientation, statePosition);
 			renderedBlocks.emplace(position, RenderedBlock(blockType, orientation));
 			break;
 		}
@@ -67,9 +48,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 		{
 			const auto& [position, orientation, blockType] = std::get<Difference::block_modification_t>(modificationData);
 
-			for (CircuitRenderer* renderer : renderers) {
-				renderer->removeBlock(position);
-			}
+			MainRenderer::get().removeBlock(viewportId, position);
 			auto iter = renderedBlocks.find(position);
 			if (iter == renderedBlocks.end()) {
 				logError("Could not find block at {} to remove.", "CircuitRenderManager", position);
@@ -102,22 +81,17 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					logError("Could not find block at {} to add input connection to.", "CircuitRenderManager", inputBlockPosition);
 				}
 				inputIter->second.connectionsToOtherBlock.emplace(newConnection, outputBlockPosition);
-				for (CircuitRenderer* renderer : renderers) {
-					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(inputIter->second.type, inputIter->second.orientation) });
-				}
+				MainRenderer::get().addWire(viewportId, newConnection, { FVector(), FVector() });
 			} else {
-				for (CircuitRenderer* renderer : renderers) {
-					renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(outputIter->second.type, outputIter->second.orientation) });
-				}
+				MainRenderer::get().addWire(viewportId, newConnection, { FVector(), FVector() });
+				// renderer->addWire(newConnection, { getOutputOffset(outputIter->second.type, outputIter->second.orientation), getInputOffset(outputIter->second.type, outputIter->second.orientation) });
 			}
 			break;
 		}
 		case Difference::ModificationType::REMOVED_CONNECTION:
 		{
 			const auto& [outputBlockPosition, outputPosition, inputBlockPosition, inputPosition] = std::get<Difference::connection_modification_t>(modificationData);
-			for (CircuitRenderer* renderer : renderers) {
-				renderer->removeWire({ outputPosition, inputPosition });
-			}
+			MainRenderer::get().removeWire(viewportId, { outputPosition, inputPosition });
 
 			auto outputIter = renderedBlocks.find(outputBlockPosition);
 			if (outputIter == renderedBlocks.end()) {
@@ -156,9 +130,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 			iter->second.orientation = newOrientation;
 
 			// MOVE BLOCK
-			for (CircuitRenderer* renderer : renderers) {
-				renderer->moveBlock(curPosition, newPosition, newOrientation, blockDataManager->getBlockSize(iter->second.type, newOrientation));
-			}
+			MainRenderer::get().moveBlock(viewportId, curPosition, newPosition, newOrientation, blockDataManager->getBlockSize(iter->second.type, newOrientation));
 
 			Size blockSize = blockDataManager->getBlockSize(iter->second.type, curOrientation);
 			Orientation transformAmount = newOrientation.relativeTo(curOrientation);
@@ -168,15 +140,12 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 			iter->second.connectionsToOtherBlock.clear();
 
 			for (auto& [posPair, otherBlockPos] : oldConnectionsToOtherBlock) {
-				for (CircuitRenderer* renderer : renderers) {
-					renderer->removeWire(posPair);
-				}
+				MainRenderer::get().removeWire(viewportId, posPair);
+
 				if (otherBlockPos == curPosition) {
 					Position outputPos = newPosition + transformAmount.transformVectorWithArea(posPair.first - curPosition, blockSize);
 					Position inputPos = newPosition + transformAmount.transformVectorWithArea(posPair.second - curPosition, blockSize);
-					for (CircuitRenderer* renderer : renderers) {
-						renderer->addWire({ outputPos, inputPos }, { getOutputOffset(iter->second.type, newOrientation), getInputOffset(iter->second.type, newOrientation) });
-					}
+					MainRenderer::get().addWire(viewportId, { outputPos, inputPos }, { FVector(), FVector() });
 					iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, inputPos), newPosition);
 				} else {
 					auto otherIter = renderedBlocks.find(otherBlockPos);
@@ -188,16 +157,12 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 					bool isInput = posPair.second.withinArea(curPosition, curPosition + blockSize.getLargestVectorInArea());
 					if (isInput) {
 						Position inputPos = newPosition + transformAmount.transformVectorWithArea(posPair.second - curPosition, blockSize);
-						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ posPair.first, inputPos }, { getOutputOffset(otherIter->second.type, otherIter->second.orientation), getInputOffset(iter->second.type, newOrientation) });
-						}
+						MainRenderer::get().addWire(viewportId, { posPair.first, inputPos }, { FVector(), FVector() });
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(posPair.first, inputPos), newPosition);
 					} else {
 						Position outputPos = newPosition + transformAmount.transformVectorWithArea(posPair.first - curPosition, blockSize);
-						for (CircuitRenderer* renderer : renderers) {
-							renderer->addWire({ outputPos, posPair.second }, { getOutputOffset(iter->second.type, newOrientation), getInputOffset(otherIter->second.type, otherIter->second.orientation) });
-						}
+						MainRenderer::get().addWire(viewportId,{ outputPos, posPair.second }, { FVector(), FVector() });
 						iter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), otherBlockPos);
 						otherIter->second.connectionsToOtherBlock.emplace(std::make_pair(outputPos, posPair.second), newPosition);
 					}
@@ -207,8 +172,5 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff, const std::se
 		}
 	}
 
-
-	for (CircuitRenderer* renderer : renderers) {
-		renderer->stopMakingEdits();
-	}
+	MainRenderer::get().stopMakingEdits(viewportId);
 }

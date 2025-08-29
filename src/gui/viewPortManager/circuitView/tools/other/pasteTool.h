@@ -23,7 +23,7 @@ public:
 
 private:
 	Position lastElementPosition;
-	ElementID elementID = 0;
+	ElementId elementId = 0;
 	unsigned long long lastClipboardEditCounter = 0;
 	Orientation transformAmount = Orientation();
 	bool validatePlacement() const;

@@ -14,7 +14,7 @@ class MainWindow;
 
 class CircuitViewWidget {
 public:
-	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, MainWindow* mainWindow, WindowID windowID, Rml::Element* element);
+	CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, MainWindow* mainWindow, WindowId windowId, Rml::Element* element);
 	~CircuitViewWidget() { element->RemoveEventListener("keydown", &keybindHandler); }
 
 	// setup
@@ -42,8 +42,8 @@ private:
 	inline float getPixelsXPos() const;
 	inline float getPixelsYPos() const;
 
-	WindowID windowID;
-	ViewportID viewportID;
+	WindowId windowId;
+	ViewportId viewportId;
 	std::unique_ptr<CircuitView> circuitView;
 	CircuitFileManager* fileManager;
 	Rml::ElementDocument* document;

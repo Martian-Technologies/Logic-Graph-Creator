@@ -44,14 +44,14 @@ void MoveTool::setMode(std::string toolMode) {
 
 bool MoveTool::rotateCW(const Event* event) {
 	transformAmount.nextOrientation();
-	elementID = 0; // remake elements
+	elementId = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool MoveTool::rotateCCW(const Event* event) {
 	transformAmount.lastOrientation();
-	elementID = 0; // remake elements
+	elementId = 0; // remake elements
 	updateElements();
 	return true;
 }
@@ -89,7 +89,7 @@ void MoveTool::updateElements() {
 		elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
 		return;
 	}
-	if (lastCircuitEdit != circuit->getEditCount() || !elementCreator.hasElement(elementID)) {
+	if (lastCircuitEdit != circuit->getEditCount() || !elementCreator.hasElement(elementId)) {
 		lastCircuitEdit = circuit->getEditCount();
 		elementCreator.clear();
 		elementCreator.addSelectionElement(SelectionObjectElement(activeSelectionHelper->getSelection(), SelectionObjectElement::RenderMode::SELECTION));
@@ -111,10 +111,10 @@ void MoveTool::updateElements() {
 				transformAmount * block->getOrientation()
 			);
 		}
-		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
+		elementId = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
 		lastElementPosition = lastPointerPosition;
 	} else {
-		elementCreator.shiftBlockPreview(elementID, lastPointerPosition - lastElementPosition);
+		elementCreator.shiftBlockPreview(elementId, lastPointerPosition - lastElementPosition);
 		lastElementPosition = lastPointerPosition;
 	}
 }

@@ -10,72 +10,88 @@
 
 #include "mainRendererDefs.h"
 
-#include "renderer/windowRenderer.h"
 #include "vulkanInstance.h"
+#include "renderer/windowRenderer.h"
 
 class MainRenderer {
 public:
 	static MainRenderer& get();
 
 	// Windows ==================================================================================================================================
-	WindowID registerWindow(SdlWindow* window);
-	void resizeWindow(WindowID windowID, glm::vec2 size);
-	void deregisterWindow(WindowID windowID);
+	WindowId registerWindow(SdlWindow* window);
+	void resizeWindow(WindowId windowId, glm::vec2 size);
+	void deregisterWindow(WindowId windowId);
 
 	// RmlUI ====================================================================================================================================
 	// Prepare for Rml
-	void prepareForRmlRender(WindowID windowID);
-	void endRmlRender(WindowID windowID);
+	void prepareForRmlRender(WindowId windowId);
+	void endRmlRender(WindowId windowId);
 
 	// Geometry resources
-	Rml::CompiledGeometryHandle compileGeometry(WindowID windowID, Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
-	void releaseGeometry(WindowID windowID, Rml::CompiledGeometryHandle geometry);
+	Rml::CompiledGeometryHandle compileGeometry(WindowId windowId, Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices);
+	void releaseGeometry(WindowId windowId, Rml::CompiledGeometryHandle geometry);
 
 	// Texture resources
-	Rml::TextureHandle loadTexture(WindowID windowID, Rml::Vector2i& texture_dimensions, const Rml::String& source);
-	Rml::TextureHandle generateTexture(WindowID windowID, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions);
-	void releaseTexture(WindowID windowID, Rml::TextureHandle texture_handle);
+	Rml::TextureHandle loadTexture(WindowId windowId, Rml::Vector2i& texture_dimensions, const Rml::String& source);
+	Rml::TextureHandle generateTexture(WindowId windowId, Rml::Span<const Rml::byte> source, Rml::Vector2i source_dimensions);
+	void releaseTexture(WindowId windowId, Rml::TextureHandle texture_handle);
 
 	// Rendering (per window)
-	void renderGeometry(WindowID windowID, Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture);
-	void enableScissorRegion(WindowID windowID, bool enable);
-	void setScissorRegion(WindowID windowID, Rml::Rectanglei region);
+	void renderGeometry(WindowId windowId, Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture);
+	void enableScissorRegion(WindowId windowId, bool enable);
+	void setScissorRegion(WindowId windowId, Rml::Rectanglei region);
 	
+	// Block Render Data ===============================================================================================================================
+	BlockRenderDataId registrBlockRenderData();
+	void deregisterBlockRenderData(BlockRenderDataId blockRenderDataId);
+	void setBlockName(BlockRenderDataId blockRenderDataId, const std::string& blockName);
+	void setBlockSize(BlockRenderDataId blockRenderDataId, Size size);
+	BlockRenderDataPortId addBlockPort(BlockRenderDataId blockRenderDataId, bool isInput, FPosition positionOnBlock, const std::string name);
+	void removeBlockPort(BlockRenderDataId blockRenderDataId, BlockRenderDataPortId blockRenderDataPortId);
+	void moveBlockPort(BlockRenderDataId blockRenderDataId, BlockRenderDataPortId blockRenderDataPortId, FPosition newPositionOnBlock);
+	void setBlockPortName(BlockRenderDataId blockRenderDataId, BlockRenderDataPortId blockRenderDataPortId, const std::string newName);
+
 	// Viewports ================================================================================================================================
-	ViewportID registerViewport(WindowID windowID, glm::vec2 origin, glm::vec2 size, Rml::Element* element); // tmp element
-	void moveViewport(ViewportID viewportID, WindowID windowID, glm::vec2 origin, glm::vec2 size);
-	void moveViewportView(ViewportID viewportIDID, FPosition topLeft, FPosition bottomRight);
-	void setViewportCircuit(ViewportID viewportID, Circuit* circuit); // tmp circuit
-	void setViewportEvaluator(ViewportID viewportID, Circuit* circuit, Evaluator* evaluator, Address address); // tmp circuit
-	void deregisterViewport(ViewportID viewportID);
-	// void sendDiff(ViewportID viewportID, ...)
+	ViewportId registerViewport(WindowId windowId, glm::vec2 origin, glm::vec2 size, Rml::Element* element); // tmp element
+	void moveViewport(ViewportId viewportId, WindowId windowId, glm::vec2 origin, glm::vec2 size);
+	void moveViewportView(ViewportId viewportId, FPosition topLeft, FPosition bottomRight);
+	void setViewportEvaluator(ViewportId viewportId, Evaluator* evaluator, Address address); // tmp circuit
+	void deregisterViewport(ViewportId viewportId);
+
+	// block and wires
+	void startMakingEdits(ViewportId viewportId);
+	void stopMakingEdits(ViewportId viewportId);
+	void addBlock(ViewportId viewportId, BlockType type, Position position, Size size, Orientation orientation, Position statePosition);
+	void removeBlock(ViewportId viewportId, Position position);
+	void moveBlock(ViewportId viewportId, Position curPos, Position newPos, Orientation newOrientation, Size newSize);
+	void addWire(ViewportId viewportId, std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets);
+	void removeWire(ViewportId viewportId, std::pair<Position, Position> points);
+	void reset(ViewportId viewportId);
+	void updateSimulatorIds(ViewportId viewportId, const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
 
 	// elements
-	ElementID addSelectionObjectElement(ViewportID viewportID, const SelectionObjectElement& selection);
-	ElementID addSelectionElement(ViewportID viewportID, const SelectionElement& selection);
-	void removeSelectionElement(ViewportID viewportID, ElementID id);
+	ElementId addSelectionObjectElement(ViewportId viewportId, const SelectionObjectElement& selection);
+	ElementId addSelectionElement(ViewportId viewportId, const SelectionElement& selection);
+	void removeSelectionElement(ViewportId viewportId, ElementId id);
 
-	ElementID addBlockPreview(ViewportID viewportID, BlockPreview&& blockPreview);
-	void shiftBlockPreview(ViewportID viewportID, ElementID id, Vector shift);
-	void removeBlockPreview(ViewportID viewportID, ElementID id);
+	ElementId addBlockPreview(ViewportId viewportId, BlockPreview&& blockPreview);
+	void shiftBlockPreview(ViewportId viewportId, ElementId id, Vector shift);
+	void removeBlockPreview(ViewportId viewportId, ElementId id);
 
-	ElementID addConnectionPreview(ViewportID viewportID, const ConnectionPreview& connectionPreview);
-	void removeConnectionPreview(ViewportID viewportID, ElementID id);
+	ElementId addConnectionPreview(ViewportId viewportId, const ConnectionPreview& connectionPreview);
+	void removeConnectionPreview(ViewportId viewportId, ElementId id);
 
-	ElementID addHalfConnectionPreview(ViewportID viewportID, const HalfConnectionPreview& halfConnectionPreview);
-	void removeHalfConnectionPreview(ViewportID viewportID, ElementID id);
-	
-	// Block Data ===============================================================================================================================
-		
+	ElementId addHalfConnectionPreview(ViewportId viewportId, const HalfConnectionPreview& halfConnectionPreview);
+	void removeHalfConnectionPreview(ViewportId viewportId, ElementId id);
 
 private:
-	inline WindowID getNewWindowID() { return ++lastWindowID; }
-	inline ViewportID getNewViewportID() { return ++lastViewportID; }
+	inline WindowId getNewWindowId() { return ++lastWindowId; }
+	inline ViewportId getNewViewportId() { return ++lastViewportId; }
 
-	WindowID lastWindowID = 0;
-	ViewportID lastViewportID = 0;
-	std::map<WindowID, WindowRenderer> windowRenderers;
-	std::map<ViewportID, ViewportRenderInterface> viewportRenderers;
+	WindowId lastWindowId = 0;
+	ViewportId lastViewportId = 0;
+	std::map<WindowId, WindowRenderer> windowRenderers;
+	std::map<ViewportId, ViewportRenderInterface> viewportRenderers;
 
 	VulkanInstance vulkanInstance;
 };

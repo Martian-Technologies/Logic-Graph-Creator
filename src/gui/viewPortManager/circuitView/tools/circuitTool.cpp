@@ -50,9 +50,9 @@ void CircuitTool::activate() {
 	updateElements();
 }
 
-void CircuitTool::setup(ViewportID viewportID, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit) {
+void CircuitTool::setup(ViewportId viewportId, EventRegister* eventRegister, ToolStackInterface* toolStackInterface, CircuitView* circuitView, Circuit* circuit) {
 	this->toolStackInterface = toolStackInterface;
-	this->elementCreator.setup(viewportID);
+	this->elementCreator.setup(viewportId);
 	this->eventRegister = eventRegister;
 	this->circuit = circuit;
 	this->circuitView = circuitView;

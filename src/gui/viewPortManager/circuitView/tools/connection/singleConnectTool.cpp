@@ -1,4 +1,5 @@
 #include "singleConnectTool.h"
+#include "gui/viewPortManager/logicRenderingUtils.h"
 
 bool SingleConnectTool::makeConnection(const Event* event) {
 	if (!circuit) return false;
@@ -46,8 +47,15 @@ void SingleConnectTool::updateElements() {
 	if (clicked) {
 		bool valid = circuit->getBlockContainer()->getInputConnectionEnd(lastPointerPosition).has_value();
 
-		if (valid) elementCreator.addConnectionPreview(ConnectionPreview(clickPosition, lastPointerPosition));
-		else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(clickPosition, lastPointerFPosition));
+		const Block* block = circuit->getBlockContainer()->getBlock(clickPosition);
+		if (valid) elementCreator.addConnectionPreview(ConnectionPreview(
+			clickPosition.free() + getOutputOffset(block->type(), block->getOrientation()),
+			lastPointerPosition.free() + getOutputOffset(block->type(), block->getOrientation())
+		));
+		else elementCreator.addHalfConnectionPreview(HalfConnectionPreview(
+			clickPosition.free() + getOutputOffset(block->type(), block->getOrientation()),
+			lastPointerFPosition
+		));
 
 		elementCreator.addSelectionElement(SelectionElement(lastPointerPosition, !valid));
 	} else {

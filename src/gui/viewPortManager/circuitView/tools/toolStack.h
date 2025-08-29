@@ -12,8 +12,8 @@ class ToolManager;
 
 class ToolStack {
 public:
-	inline ToolStack(EventRegister* eventRegister, ViewportID viewportID, CircuitView* circuitView, ToolManager* toolManager) :
-		eventRegister(eventRegister), viewportID(viewportID), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
+	inline ToolStack(EventRegister* eventRegister, ViewportId viewportId, CircuitView* circuitView, ToolManager* toolManager) :
+		eventRegister(eventRegister), viewportId(viewportId), circuitView(circuitView), toolManager(toolManager), toolStackInterface(this) {
 		eventRegister->registerFunction("pointer enter view", std::bind(&ToolStack::enterBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("pointer exit view", std::bind(&ToolStack::exitBlockView, this, std::placeholders::_1));
 		eventRegister->registerFunction("Pointer Move", std::bind(&ToolStack::pointerMove, this, std::placeholders::_1));
@@ -62,7 +62,7 @@ private:
 	ToolStackInterface toolStackInterface;
 	EventRegister* eventRegister;
 
-	ViewportID viewportID;
+	ViewportId viewportId;
 
 	bool isActive = false;
 	std::vector<SharedCircuitTool> toolStack;

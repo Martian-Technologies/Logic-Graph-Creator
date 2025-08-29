@@ -9,7 +9,6 @@
 
 #include "backend/evaluator/evaluator.h"
 #include "backend/address.h"
-#include "../renderManager.h"
 #include "backend/position/position.h"
 #include "gpu/abstractions/vulkanBuffer.h"
 #include "gpu/helper/nBuffer.h"
@@ -178,19 +177,19 @@ struct ChunkIntersection {
 	FPosition end;
 };
 
-class VulkanChunker : public CircuitRenderer {
+class VulkanChunker {
 public:
 	VulkanChunker(VulkanDevice* device);
 	~VulkanChunker();
 
-	void startMakingEdits() override final;
-	void stopMakingEdits() override final;
-	void addBlock(BlockType type, Position position, Size size, Orientation orientation, Position statePosition) override final;
-	void removeBlock(Position position) override final;
-	void moveBlock(Position curPos, Position newPos, Orientation newOrientation, Size newSize) override final;
-	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets) override final;
-	void removeWire(std::pair<Position, Position> points) override final;	
-	void reset() override final;
+	void startMakingEdits();
+	void stopMakingEdits();
+	void addBlock(BlockType type, Position position, Size size, Orientation orientation, Position statePosition);
+	void removeBlock(Position position);
+	void moveBlock(Position curPos, Position newPos, Orientation newOrientation, Size newSize);
+	void addWire(std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets);
+	void removeWire(std::pair<Position, Position> points);	
+	void reset();
 	
 	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
 	void setEvaluator(Evaluator* evaluator);

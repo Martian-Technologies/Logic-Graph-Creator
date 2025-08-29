@@ -35,14 +35,14 @@ void LoadCallback(void* userData, const char* const* filePaths, int filter) {
 	}
 }
 
-CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, MainWindow* mainWindow, WindowID windowID, Rml::Element* element) : fileManager(fileManager), document(document), mainWindow(mainWindow), windowID(windowID), element(element) {
+CircuitViewWidget::CircuitViewWidget(CircuitFileManager* fileManager, Rml::ElementDocument* document, MainWindow* mainWindow, WindowId windowId, Rml::Element* element) : fileManager(fileManager), document(document), mainWindow(mainWindow), windowId(windowId), element(element) {
 	// create circuitView
 	int w = this->element->GetClientWidth();
 	int h = this->element->GetClientHeight();
 	int x = this->element->GetAbsoluteLeft() + this->element->GetClientLeft();
 	int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
-	viewportID = MainRenderer::get().registerViewport(windowID, {x, y}, {w, h}, element);
-	circuitView = std::make_unique<CircuitView>(viewportID);
+	viewportId = MainRenderer::get().registerViewport(windowId, {x, y}, {w, h}, element);
+	circuitView = std::make_unique<CircuitView>(viewportId);
 	
 	circuitView->getEventRegister().registerFunction("status bar changed", [this](const Event* event) -> bool {
 		auto eventData = event->cast2<std::string>();
@@ -294,7 +294,7 @@ void CircuitViewWidget::handleResize() {
 	int y = this->element->GetAbsoluteTop() + this->element->GetClientTop();
 
 	circuitView->getViewManager().setAspectRatio((float)w / (float)h);
-	MainRenderer::get().moveViewport(viewportID, windowID, {x, y}, {w, h});
+	MainRenderer::get().moveViewport(viewportId, windowId, {x, y}, {w, h});
 }
 
 inline Vec2 CircuitViewWidget::pixelsToView(const SDL_FPoint& point) const {

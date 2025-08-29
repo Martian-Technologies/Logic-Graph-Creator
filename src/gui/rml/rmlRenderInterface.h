@@ -8,7 +8,7 @@
 // -- Inherited from Rml::RenderInterface --
 class RmlRenderInterface : public Rml::RenderInterface {
 public:
-	inline void setWindowToRenderOn(WindowID windowID) { currentWindowID = windowID; };
+	inline void setWindowToRenderOn(WindowId windowId) { currentWindowId = windowId; };
 
 	Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) override;
 	void ReleaseGeometry(Rml::CompiledGeometryHandle geometry) override;
@@ -22,7 +22,7 @@ public:
 	void SetScissorRegion(Rml::Rectanglei region) override;
 
 private:
-	WindowID currentWindowID = 0;
+	WindowId currentWindowId = 0;
 };
 
 #endif

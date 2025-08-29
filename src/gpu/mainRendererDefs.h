@@ -6,9 +6,11 @@
 #include "backend/selection.h"
 
 // Types
-typedef uint32_t WindowID;
-typedef uint32_t ViewportID;
-typedef unsigned int ElementID;
+typedef uint32_t WindowId;
+typedef uint32_t ViewportId;
+typedef uint32_t ElementId;
+typedef uint32_t BlockRenderDataId;
+typedef uint32_t BlockRenderDataPortId;
 
 // Element Types ------------------------------
 struct SelectionElement {
@@ -56,19 +58,19 @@ struct BlockPreview {
 
 struct ConnectionPreview {
 	ConnectionPreview() = default;
-	ConnectionPreview(Position output, Position input)
+	ConnectionPreview(FPosition output, FPosition input)
 		: output(output), input(input) { }
 
-	Position output;
-	Position input;
+	FPosition output;
+	FPosition input;
 };
 
 struct HalfConnectionPreview {
 	HalfConnectionPreview() = default;
-	HalfConnectionPreview(Position output, FPosition input)
+	HalfConnectionPreview(FPosition output, FPosition input)
 		: output(output), input(input) { }
 
-	Position output;
+	FPosition output;
 	FPosition input;
 };
 

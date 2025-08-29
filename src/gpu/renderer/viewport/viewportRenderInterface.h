@@ -20,14 +20,10 @@ struct ViewportViewData {
 
 class ViewportRenderInterface {
 public:
-	ViewportRenderInterface(WindowID windowID, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
+	ViewportRenderInterface(WindowId windowId, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
 	~ViewportRenderInterface();
 
 	ViewportViewData getViewData();
-	inline bool hasCircuit() {
-		std::lock_guard<std::mutex> lock(circuitMux);
-		return circuit != nullptr;
-	}
 	inline VulkanChunker& getChunker() { return chunker; }
 	inline Evaluator* getEvaluator() {
 		std::lock_guard<std::mutex> lock(evaluatorMux);
@@ -37,7 +33,7 @@ public:
 		std::lock_guard<std::mutex> lock(addressMux);
 		return address;
 	}
-	inline WindowID getWindowID() const { return windowID; }
+	inline WindowId getWindowId() const { return windowId; }
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	std::vector<BoxSelectionRenderData> getBoxSelections();
@@ -45,31 +41,30 @@ public:
 	std::vector<ArrowRenderData> getArrows();
 
 	// main flow
-	void setCircuit(Circuit* circuit) ;
-	void setEvaluator(Evaluator* evaluator) ;
-	void setAddress(const Address& address) ;
+	void setEvaluator(Evaluator* evaluator);
+	void setAddress(const Address& address);
 
 	void updateViewFrame(glm::vec2 origin, glm::vec2 size);
 	void updateView(FPosition topLeft, FPosition bottomRight);
 
-	float getLastFrameTimeMs() const ;
+	float getLastFrameTimeMs() const;
 
 	// elements
-	ElementID addSelectionObjectElement(const SelectionObjectElement& selection) ;
-	ElementID addSelectionElement(const SelectionElement& selection) ;
-	void removeSelectionElement(ElementID selection) ;
+	ElementId addSelectionObjectElement(const SelectionObjectElement& selection);
+	ElementId addSelectionElement(const SelectionElement& selection);
+	void removeSelectionElement(ElementId selection);
 
-	ElementID addBlockPreview(BlockPreview&& blockPreview) ;
-	void shiftBlockPreview(ElementID id, Vector shift) ;
-	void removeBlockPreview(ElementID blockPreview) ;
+	ElementId addBlockPreview(BlockPreview&& blockPreview);
+	void shiftBlockPreview(ElementId id, Vector shift);
+	void removeBlockPreview(ElementId blockPreview);
 
-	ElementID addConnectionPreview(const ConnectionPreview& connectionPreview) ;
-	void removeConnectionPreview(ElementID connectionPreview) ;
+	ElementId addConnectionPreview(const ConnectionPreview& connectionPreview);
+	void removeConnectionPreview(ElementId connectionPreview);
 
-	ElementID addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) ;
-	void removeHalfConnectionPreview(ElementID halfConnectionPreview) ;
+	ElementId addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview);
+	void removeHalfConnectionPreview(ElementId halfConnectionPreview);
 
-	void spawnConfetti(FPosition start) ;
+	void spawnConfetti(FPosition start);
 
 private:
 	// From the UI Side
@@ -78,23 +73,20 @@ private:
 
 	Evaluator* evaluator = nullptr;
 	std::mutex evaluatorMux;
-	Circuit* circuit = nullptr;
-	std::mutex circuitMux;
 	Address address;
 	std::mutex addressMux;
 
 	
 	// Vulkan
-	WindowID windowID;
-	VulkanChunker chunker; // this should eventually probably be per circuit instead of per view
-	std::optional<CircuitRenderManager> renderManager;
+	WindowId windowId;
+	VulkanChunker chunker;
 
 	// Elements
-	ElementID currentElementID = 0;
-	std::unordered_multimap<ElementID, BlockPreviewRenderData> blockPreviews;
-	std::unordered_map<ElementID, std::vector<BoxSelectionRenderData>> boxSelections;
-	std::unordered_map<ElementID, ConnectionPreviewRenderData> connectionPreviews;
-	std::unordered_map<ElementID, std::vector<ArrowRenderData>> arrows;
+	ElementId currentElementId = 0;
+	std::unordered_multimap<ElementId, BlockPreviewRenderData> blockPreviews;
+	std::unordered_map<ElementId, std::vector<BoxSelectionRenderData>> boxSelections;
+	std::unordered_map<ElementId, ConnectionPreviewRenderData> connectionPreviews;
+	std::unordered_map<ElementId, std::vector<ArrowRenderData>> arrows;
 	std::mutex elementsMux;
 
 	// View data

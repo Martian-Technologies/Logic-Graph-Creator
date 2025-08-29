@@ -52,7 +52,7 @@ public:
 private:
 	void createPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
 
-	WindowID windowID;
+	WindowId windowId;
 	Backend* backend;
 	KeybindHandler keybindHandler;
 	CircuitFileManager* circuitFileManager;

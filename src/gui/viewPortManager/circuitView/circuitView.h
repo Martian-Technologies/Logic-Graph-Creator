@@ -14,7 +14,7 @@ class Backend;
 class CircuitView {
 	friend class Backend;
 public:
-	CircuitView(ViewportID viewportID);
+	CircuitView(ViewportId viewportId);
 
 	// --------------- Gettters ---------------
 
@@ -51,7 +51,7 @@ private:
 
 	Address address;
 	std::shared_ptr<Circuit> circuit;
-	ViewportID viewportID;
+	ViewportId viewportId;
 	std::shared_ptr<Evaluator> evaluator;
 
 	DataUpdateEventManager* dataUpdateEventManager = nullptr;

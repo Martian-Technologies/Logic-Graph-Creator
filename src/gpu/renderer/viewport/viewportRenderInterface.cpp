@@ -7,15 +7,13 @@
 #include "backend/selection.h"
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
 #include "gpu/renderer/windowRenderer.h"
-#include "logic/sharedLogic/logicRenderingUtils.h"
 
-ViewportRenderInterface::ViewportRenderInterface(WindowID windowID, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
-	: windowID(windowID), element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
+ViewportRenderInterface::ViewportRenderInterface(WindowId windowId, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
+	: windowId(windowId), element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
 	linkedWindowRenderer->registerViewportRenderInterface(this);
 }
 
 ViewportRenderInterface::~ViewportRenderInterface() {
-	if (circuit != nullptr) renderManager->disconnect(&chunker);
 	if (linkedWindowRenderer != nullptr) linkedWindowRenderer->deregisterViewportRenderInterface(this);
 }
 
@@ -25,23 +23,6 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 }
 
 // ====================================== INTERFACE ==========================================
-
-void ViewportRenderInterface::setCircuit(Circuit* circuit) {
-	std::lock_guard<std::mutex> lock(circuitMux);
-
-	if (this->circuit) {
-		chunker.reset();
-		renderManager->disconnect(&chunker);
-		renderManager.reset();
-		this->circuit = nullptr;
-	}
-	this->circuit = circuit;
-
-	if (this->circuit) {
-		renderManager.emplace(circuit);
-		renderManager->connect(&chunker);
-	}
-}
 
 void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
 	std::lock_guard<std::mutex> lock(evaluatorMux);
@@ -76,10 +57,10 @@ float ViewportRenderInterface::getLastFrameTimeMs() const {
 	return 0.0f;
 }
 
-ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObjectElement& selection) {
+ElementId ViewportRenderInterface::addSelectionObjectElement(const SelectionObjectElement& selection) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	ElementID newElement = ++currentElementID;
+	ElementId newElement = ++currentElementId;
 
 	std::stack<SharedSelection> selectionsLeft;
 	selectionsLeft.push(selection.selection);
@@ -158,10 +139,10 @@ ElementID ViewportRenderInterface::addSelectionObjectElement(const SelectionObje
 	return newElement;
 }
 
-ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& selection) {
+ElementId ViewportRenderInterface::addSelectionElement(const SelectionElement& selection) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	ElementID newElement = ++currentElementID;
+	ElementId newElement = ++currentElementId;
 
 	// calculate ordered box
 	FPosition topLeft = selection.topLeft.free();
@@ -179,7 +160,7 @@ ElementID ViewportRenderInterface::addSelectionElement(const SelectionElement& s
 	return newElement;
 }
 
-void ViewportRenderInterface::removeSelectionElement(ElementID id) {
+void ViewportRenderInterface::removeSelectionElement(ElementId id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	boxSelections.erase(id);
@@ -212,12 +193,10 @@ std::vector<BoxSelectionRenderData> ViewportRenderInterface::getBoxSelections() 
 	return returnBoxSelections;
 }
 
-ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) {
+ElementId ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	ElementID newElement = ++currentElementID;
-
-	std::lock_guard<std::mutex> circuitLock(circuitMux);
+	ElementId newElement = ++currentElementId;
 
 	blockPreviews.reserve(blockPreviews.size() + blockPreview.blocks.size());
 		
@@ -226,7 +205,7 @@ ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) 
 		newPreview.position = glm::vec2(block.position.x, block.position.y);
 		newPreview.orientation = block.orientation;
 		Size size(1);
-		if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.orientation);
+		// if (circuit) size = circuit->getBlockContainer()->getBlockDataManager()->getBlockSize(block.type, block.orientation);
 		newPreview.size = glm::vec2(size.w, size.h);
 		newPreview.type = block.type;
 
@@ -237,7 +216,7 @@ ElementID ViewportRenderInterface::addBlockPreview(BlockPreview&& blockPreview) 
 	return newElement;
 }
 
-void ViewportRenderInterface::shiftBlockPreview(ElementID id, Vector shift) {
+void ViewportRenderInterface::shiftBlockPreview(ElementId id, Vector shift) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	auto iterPair = blockPreviews.equal_range(id);
@@ -246,7 +225,7 @@ void ViewportRenderInterface::shiftBlockPreview(ElementID id, Vector shift) {
 	}
 }
 
-void ViewportRenderInterface::removeBlockPreview(ElementID id) {
+void ViewportRenderInterface::removeBlockPreview(ElementId id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	blockPreviews.erase(id);
@@ -265,47 +244,42 @@ std::vector<BlockPreviewRenderData> ViewportRenderInterface::getBlockPreviews() 
 	return returnBlockPreviews;
 }
 
-ElementID ViewportRenderInterface::addConnectionPreview(const ConnectionPreview& connectionPreview) {
+ElementId ViewportRenderInterface::addConnectionPreview(const ConnectionPreview& connectionPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	ElementID newElement = ++currentElementID;
-	if (circuit) {
-		std::lock_guard<std::mutex> lock(circuitMux);
-		ConnectionPreviewRenderData newPreview;
-		FPosition pointA = connectionPreview.output.free() + getOutputOffset(connectionPreview.output, circuit);
-		FPosition pointB = connectionPreview.input.free() + getInputOffset(connectionPreview.input, circuit);
-		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
-		newPreview.pointB = glm::vec2(pointB.x, pointB.y);
-		connectionPreviews[newElement] = newPreview;
-	}
+	ElementId newElement = ++currentElementId;
+
+	ConnectionPreviewRenderData newPreview;
+	FPosition pointA = connectionPreview.output;
+	FPosition pointB = connectionPreview.input;
+	newPreview.pointA = glm::vec2(pointA.x, pointA.y);
+	newPreview.pointB = glm::vec2(pointB.x, pointB.y);
+	connectionPreviews[newElement] = newPreview;
 
 	return newElement;
 }
 
-void ViewportRenderInterface::removeConnectionPreview(ElementID id) {
+void ViewportRenderInterface::removeConnectionPreview(ElementId id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	connectionPreviews.erase(id);
 }
 
-ElementID ViewportRenderInterface::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
+ElementId ViewportRenderInterface::addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
-	ElementID newElement = ++currentElementID;
-	if (circuit) {
-		std::lock_guard<std::mutex> lock(circuitMux);
-		ConnectionPreviewRenderData newPreview;
+	ElementId newElement = ++currentElementId;
 
-		FPosition pointA = halfConnectionPreview.output.free() + getOutputOffset(halfConnectionPreview.output, circuit);
-		newPreview.pointA = glm::vec2(pointA.x, pointA.y);
-		newPreview.pointB = glm::vec2(halfConnectionPreview.input.x, halfConnectionPreview.input.y);
-		connectionPreviews[newElement] = newPreview;
-	}
+	ConnectionPreviewRenderData newPreview;
+	FPosition pointA = halfConnectionPreview.output;
+	newPreview.pointA = glm::vec2(pointA.x, pointA.y);
+	newPreview.pointB = glm::vec2(halfConnectionPreview.input.x, halfConnectionPreview.input.y);
+	connectionPreviews[newElement] = newPreview;
 
 	return newElement;
 }
 
-void ViewportRenderInterface::removeHalfConnectionPreview(ElementID id) {
+void ViewportRenderInterface::removeHalfConnectionPreview(ElementId id) {
 	std::lock_guard<std::mutex> lock(elementsMux);
 
 	connectionPreviews.erase(id);

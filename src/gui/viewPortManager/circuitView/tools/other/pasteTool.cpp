@@ -13,14 +13,14 @@ void PasteTool::activate() {
 
 bool PasteTool::rotateCW(const Event* event) {
 	transformAmount.nextOrientation();
-	elementID = 0; // remake elements
+	elementId = 0; // remake elements
 	updateElements();
 	return true;
 }
 
 bool PasteTool::rotateCCW(const Event* event) {
 	transformAmount.lastOrientation();
-	elementID = 0; // remake elements
+	elementId = 0; // remake elements
 	updateElements();
 	return true;
 }
@@ -41,7 +41,7 @@ void PasteTool::updateElements() {
 		return;
 	}
 
-	if (circuitView->getBackend()->getClipboardEditCounter() != lastClipboardEditCounter || !elementCreator.hasElement(elementID)) {
+	if (circuitView->getBackend()->getClipboardEditCounter() != lastClipboardEditCounter || !elementCreator.hasElement(elementId)) {
 		lastClipboardEditCounter = circuitView->getBackend()->getClipboardEditCounter();
 		// reset and remake blocks
 		elementCreator.clear();
@@ -58,11 +58,11 @@ void PasteTool::updateElements() {
 				transformAmount * block.orientation
 			);
 		}
-		elementID = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
+		elementId = elementCreator.addBlockPreview(BlockPreview(std::move(blocks)));
 		lastElementPosition = lastPointerPosition;
 	} else {
 		// update old element
-		elementCreator.shiftBlockPreview(elementID, lastPointerPosition - lastElementPosition);
+		elementCreator.shiftBlockPreview(elementId, lastPointerPosition - lastElementPosition);
 		lastElementPosition = lastPointerPosition;
 	}
 

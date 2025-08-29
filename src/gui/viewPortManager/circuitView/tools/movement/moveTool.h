@@ -24,7 +24,7 @@ public:
 
 private:
 	Position lastElementPosition;
-	ElementID elementID = 0;
+	ElementId elementId = 0;
 	unsigned long long lastCircuitEdit = 0;
 	std::string mode = "None";
 	Orientation transformAmount = Orientation();
