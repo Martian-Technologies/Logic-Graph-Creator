@@ -3,8 +3,8 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 
-#include "elements/elementRenderer.h"
 #include "logic/chunking/vulkanChunker.h"
+#include "elements/elementRenderer.h"
 #include "gpu/mainRendererDefs.h"
 
 namespace Rml { class Element; }

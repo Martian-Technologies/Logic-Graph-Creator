@@ -1,11 +1,11 @@
 #ifndef viewportRenderer_h
 #define viewportRenderer_h
 
-#include "elements/elementRenderer.h"
-#include "gpu/renderer/frameManager.h"
-#include "grid/gridRenderer.h"
 #include "logic/chunking/chunkRenderer.h"
+#include "gpu/renderer/frameManager.h"
+#include "elements/elementRenderer.h"
 #include "viewportRenderInterface.h"
+#include "grid/gridRenderer.h"
 
 class ViewportRenderer {
 public:
