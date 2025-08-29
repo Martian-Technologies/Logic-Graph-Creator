@@ -16,7 +16,7 @@ public:
 		}
 	}
 	inline T getNewId(T preferredId) {
-		if (unusedIds.contains(preferredId)) {
+		if (unusedIds.size() * 2 < lastId && unusedIds.contains(preferredId)) {
 			unusedIds.erase(preferredId);
 			return preferredId;
 		}
