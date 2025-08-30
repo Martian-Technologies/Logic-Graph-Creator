@@ -162,19 +162,6 @@ void MainWindow::createCircuitViewWidget(Rml::Element* element) {
 	activeCircuitViewWidget = circuitViewWidgets.back(); // if it is created, it should be used
 }
 
-void MainWindow::setBlock(std::string blockPath) {
-	BlockType blockType = backend->getBlockDataManager()->getBlockType(blockPath);
-	toolManagerManager.setBlock(blockType);
-}
-
-void MainWindow::setTool(std::string tool) {
-	toolManagerManager.setTool(tool);
-}
-
-void MainWindow::setMode(std::string mode) {
-	toolManagerManager.setMode(mode);
-}
-
 void MainWindow::addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options) {
 	if (popUpsToAdd.empty()) {
 		createPopUp(message, options);

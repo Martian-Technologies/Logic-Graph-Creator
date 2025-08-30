@@ -42,9 +42,6 @@ public:
 	void saveCircuit(circuit_id_t id, bool saveAs);
 	void loadCircuit();
 	void exportProject();
-	void setBlock(std::string blockPath);
-	void setTool(std::string tool);
-	void setMode(std::string tool);
 	void addPopUp(const std::string& message, const std::vector<std::pair<std::string, std::function<void()>>>& options);
 	void savePopUp(const std::string& circuitUUID);
 	void saveAsPopUp(const std::string& circuitUUID);
