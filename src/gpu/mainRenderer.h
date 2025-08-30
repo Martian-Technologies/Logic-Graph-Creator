@@ -16,6 +16,7 @@
 class MainRenderer {
 public:
 	static MainRenderer& get();
+	static void kill();
 
 	// Windows ==================================================================================================================================
 	WindowId registerWindow(SdlWindow* window);
@@ -88,12 +89,12 @@ private:
 	inline WindowId getNewWindowId() { return ++lastWindowId; }
 	inline ViewportId getNewViewportId() { return ++lastViewportId; }
 
+	VulkanInstance vulkanInstance;
+
 	WindowId lastWindowId = 0;
 	ViewportId lastViewportId = 0;
 	std::map<WindowId, WindowRenderer> windowRenderers;
 	std::map<ViewportId, ViewportRenderInterface> viewportRenderers;
-
-	VulkanInstance vulkanInstance;
 };
 
 #endif /* mainRenderer_h */

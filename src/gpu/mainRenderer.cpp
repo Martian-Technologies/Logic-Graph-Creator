@@ -1,8 +1,14 @@
 #include "mainRenderer.h"
 
+std::optional<MainRenderer> singleton;
+
 MainRenderer& MainRenderer::get() {
-	static MainRenderer singleton;
-	return singleton;
+	if (!singleton) singleton.emplace();
+	return *singleton;
+}
+
+void MainRenderer::kill() {
+	singleton.reset();
 }
 
 WindowId MainRenderer::registerWindow(SdlWindow* sdlWindow) {
