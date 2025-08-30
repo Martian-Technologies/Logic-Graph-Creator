@@ -119,26 +119,23 @@ struct ANDLikeGate : public MultiInputGate {
 		: MultiInputGate(id), inputsInverted(inputsInverted), outputInverted(outputInverted) {}
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		if (inputs.empty()) {
+		if (inputs.empty()) [[unlikely]] {
 			return logic_state_t::LOW;
 		}
 		bool foundGoofyState = false;
-		const logic_state_t desiredState = inputsInverted ? logic_state_t::HIGH : logic_state_t::LOW;
-		for (const auto inputId : inputs) {
+		const logic_state_t desiredState = (logic_state_t)inputsInverted;
+		for (const simulator_id_t inputId : inputs) {
 			const logic_state_t state = statesA[inputId];
 			// Early-out if the decisive (desired) state is present
 			if (state == desiredState) {
-				return outputInverted ? logic_state_t::HIGH : logic_state_t::LOW;
+				return (logic_state_t)outputInverted;
 			}
 			// Track any unknown/floating driver; only matters if no decisive state was found
-			if (state == logic_state_t::UNDEFINED || state == logic_state_t::FLOATING) {
+			if (state >= logic_state_t::UNDEFINED) {
 				foundGoofyState = true;
 			}
 		}
-		if (foundGoofyState) {
-			return logic_state_t::UNDEFINED;
-		}
-		return outputInverted ? logic_state_t::LOW : logic_state_t::HIGH;
+		return foundGoofyState ? logic_state_t::UNDEFINED : (logic_state_t)!outputInverted;
 	}
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
@@ -165,7 +162,7 @@ struct XORLikeGate : public MultiInputGate {
 		}
 		// parity == true means current result would be HIGH
 		bool parity = outputInverted;
-		for (const auto inputId : inputs) {
+		for (const simulator_id_t inputId : inputs) {
 			const logic_state_t state = statesA[inputId];
 			if (state == logic_state_t::HIGH) {
 				parity = !parity;
@@ -173,7 +170,7 @@ struct XORLikeGate : public MultiInputGate {
 				return logic_state_t::UNDEFINED;
 			}
 		}
-		return parity ? logic_state_t::HIGH : logic_state_t::LOW;
+		return (logic_state_t)parity;
 	}
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
@@ -193,7 +190,7 @@ struct JunctionGate : public SimulatorGate {
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& states) const noexcept {
 		logic_state_t outputState = logic_state_t::FLOATING;
-		for (const auto inputId : inputs) {
+		for (const simulator_id_t inputId : inputs) {
 			const logic_state_t state = states[inputId];
 			if (state == logic_state_t::FLOATING) {
 				continue;
@@ -271,10 +268,7 @@ struct SingleBufferGate : public BufferGateBase {
 		: BufferGateBase(id, outputInverted) {}
 
 	inline logic_state_t calculate(const std::vector<logic_state_t>& statesA) const noexcept {
-		if (!input.has_value()) {
-			return logic_state_t::LOW;
-		}
-		return statesA[input.value()];
+		return input.has_value() ? statesA[input.value()] : logic_state_t::LOW;
 	}
 
 	inline void tick(const std::vector<logic_state_t>& statesA, std::vector<logic_state_t>& statesB) noexcept {
@@ -334,7 +328,7 @@ struct TristateBufferGate : public SimulatorGate {
 		bool foundGoofyState = false;
 		bool foundEnabled = false;
 		bool foundDisabled = false;
-		for (const auto& enableId : enableInputs) {
+		for (const simulator_id_t enableId : enableInputs) {
 			logic_state_t enableState = statesA[enableId];
 			if (enableState == logic_state_t::UNDEFINED) {
 				foundGoofyState = true;
@@ -362,7 +356,7 @@ struct TristateBufferGate : public SimulatorGate {
 			return logic_state_t::UNDEFINED;
 		}
 		logic_state_t outputState = logic_state_t::FLOATING;
-		for (const auto& inputId : inputs) {
+		for (const simulator_id_t inputId : inputs) {
 			logic_state_t state = statesA[inputId];
 			if (state == logic_state_t::UNDEFINED) {
 				foundGoofyState = true;
