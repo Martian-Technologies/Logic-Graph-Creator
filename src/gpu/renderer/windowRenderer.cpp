@@ -243,12 +243,17 @@ void WindowRenderer::recreateSwapchain() {
 	swapchainRecreationNeeded = false;
 }
 
-void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *renderInterface) {
+void WindowRenderer::registerViewportRenderInterface(ViewportRenderInterface *viewportRenderInterface) {
 	std::lock_guard<std::mutex> lock(viewportRenderersMux);
-	viewportRenderInterfaces.insert(renderInterface);
+	viewportRenderInterfaces.insert(viewportRenderInterface);
 }
 
-void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface) {
+void WindowRenderer::deregisterViewportRenderInterface(ViewportRenderInterface* viewportRenderInterface) {
 	std::lock_guard<std::mutex> lock(viewportRenderersMux);
-	viewportRenderInterfaces.erase(renderInterface);
+	viewportRenderInterfaces.erase(viewportRenderInterface);
+}
+
+bool WindowRenderer::hasViewportRenderInterface(ViewportRenderInterface* viewportRenderInterface) {
+	std::lock_guard<std::mutex> lock(viewportRenderersMux);
+	return viewportRenderInterfaces.contains(viewportRenderInterface);
 }

@@ -124,7 +124,7 @@ ViewportId MainRenderer::registerViewport(WindowId windowId, glm::vec2 origin, g
 		logError("Failed to call registerViewport on non existent window {}", "MainRenderer", windowId);
 		return 0;
 	}
-	auto pair = viewportRenderers.try_emplace(windowId, getNewViewportId(), iter->second.getDevice(), element, &(iter->second));
+	auto pair = viewportRenderers.try_emplace(getNewViewportId(), iter->second.getDevice(), element);
 	iter->second.registerViewportRenderInterface(&(pair.first->second));
 	return lastViewportId;
 }
@@ -135,12 +135,12 @@ void MainRenderer::moveViewport(ViewportId viewportId, WindowId windowId, glm::v
 		logError("Failed to call moveViewport on non existent viewport {}", "MainRenderer", viewportId);
 		return;
 	}
-	if (viewportIter->second.getWindowId() != windowId) {
-		auto windowIter = windowRenderers.find(windowId);
-		if (windowIter == windowRenderers.end()) {
-			logError("Failed to call moveViewport on non existent window {}", "MainRenderer", windowId);
-			return;
-		}
+	auto windowIter = windowRenderers.find(windowId);
+	if (windowIter == windowRenderers.end()) {
+		logError("Failed to call moveViewport on non existent window {}", "MainRenderer", windowId);
+		return;
+	}
+	if (! windowIter->second.hasViewportRenderInterface(&(viewportIter->second))) {
 		logError("moving viewport to other window not supported yet");
 		return;
 	}

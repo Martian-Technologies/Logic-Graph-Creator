@@ -6,16 +6,8 @@
 
 #include "backend/selection.h"
 #include "gpu/renderer/viewport/elements/elementRenderer.h"
-#include "gpu/renderer/windowRenderer.h"
 
-ViewportRenderInterface::ViewportRenderInterface(WindowId windowId, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer)
-	: windowId(windowId), element(element), chunker(device), linkedWindowRenderer(windowRenderer) {
-	linkedWindowRenderer->registerViewportRenderInterface(this);
-}
-
-ViewportRenderInterface::~ViewportRenderInterface() {
-	if (linkedWindowRenderer != nullptr) linkedWindowRenderer->deregisterViewportRenderInterface(this);
-}
+ViewportRenderInterface::ViewportRenderInterface(VulkanDevice* device, Rml::Element* element) : element(element), chunker(device) {}
 
 ViewportViewData ViewportRenderInterface::getViewData() {
 	std::lock_guard<std::mutex> lock(viewMux);

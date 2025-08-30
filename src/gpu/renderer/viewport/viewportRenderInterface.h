@@ -9,8 +9,6 @@
 
 namespace Rml { class Element; }
 
-struct WindowRenderer;
-
 struct ViewportViewData {
 	glm::mat4 viewportViewMat;
 	std::pair<FPosition, FPosition> viewBounds;
@@ -20,8 +18,7 @@ struct ViewportViewData {
 
 class ViewportRenderInterface {
 public:
-	ViewportRenderInterface(WindowId windowId, VulkanDevice* device, Rml::Element* element, WindowRenderer* windowRenderer);
-	~ViewportRenderInterface();
+	ViewportRenderInterface(VulkanDevice* device, Rml::Element* element);
 
 	ViewportViewData getViewData();
 	inline VulkanChunker& getChunker() { return chunker; }
@@ -33,7 +30,6 @@ public:
 		std::lock_guard<std::mutex> lock(addressMux);
 		return address;
 	}
-	inline WindowId getWindowId() const { return windowId; }
 
 	std::vector<BlockPreviewRenderData> getBlockPreviews();
 	std::vector<BoxSelectionRenderData> getBoxSelections();
@@ -69,7 +65,6 @@ public:
 private:
 	// From the UI Side
 	Rml::Element* element;
-	WindowRenderer* linkedWindowRenderer = nullptr;
 
 	Evaluator* evaluator = nullptr;
 	std::mutex evaluatorMux;
@@ -78,7 +73,6 @@ private:
 
 	
 	// Vulkan
-	WindowId windowId;
 	VulkanChunker chunker;
 
 	// Elements

@@ -26,8 +26,9 @@ public:
 	RmlRenderer& getRmlRenderer() { return rmlRenderer; }
 	const RmlRenderer& getRmlRenderer() const { return rmlRenderer; }
 
-	void registerViewportRenderInterface(ViewportRenderInterface* renderInterface);
-	void deregisterViewportRenderInterface(ViewportRenderInterface* renderInterface);
+	void registerViewportRenderInterface(ViewportRenderInterface* viewportRenderInterface);
+	void deregisterViewportRenderInterface(ViewportRenderInterface* viewportRenderInterface);
+	bool hasViewportRenderInterface(ViewportRenderInterface* viewportRenderInterface);
 
 	inline VulkanDevice* getDevice() { return device; }
 
