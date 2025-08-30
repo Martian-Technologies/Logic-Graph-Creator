@@ -37,8 +37,7 @@ public:
 	std::vector<ArrowRenderData> getArrows();
 
 	// main flow
-	void setEvaluator(Evaluator* evaluator);
-	void setAddress(const Address& address);
+	void setEvaluator(Evaluator* evaluator, const Address& address);
 
 	void updateViewFrame(glm::vec2 origin, glm::vec2 size);
 	void updateView(FPosition topLeft, FPosition bottomRight);
@@ -59,8 +58,6 @@ public:
 
 	ElementId addHalfConnectionPreview(const HalfConnectionPreview& halfConnectionPreview);
 	void removeHalfConnectionPreview(ElementId halfConnectionPreview);
-
-	void spawnConfetti(FPosition start);
 
 private:
 	// From the UI Side

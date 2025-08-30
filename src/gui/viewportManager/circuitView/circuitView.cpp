@@ -17,6 +17,7 @@ void CircuitView::setBackend(Backend* backend) {
 		dataUpdateEventManager = nullptr;
 		this->evaluator = nullptr;
 		this->circuit = nullptr;
+		circuitRenderManager.reset();
 		MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 		toolManager.setCircuit(nullptr);
 	} else if (this->backend != backend) {
@@ -24,6 +25,7 @@ void CircuitView::setBackend(Backend* backend) {
 		dataUpdateEventManager = backend->getDataUpdateEventManager();
 		this->evaluator = nullptr;
 		this->circuit = nullptr;
+		circuitRenderManager.reset();
 		MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 		toolManager.setCircuit(nullptr);
 	}
@@ -42,6 +44,7 @@ void CircuitView::setEvaluator(Backend* backend, evaluator_id_t evaluatorId, con
 			dataUpdateEventManager = backend->getDataUpdateEventManager();
 			this->evaluator = nullptr;
 			this->circuit = nullptr;
+			circuitRenderManager.reset();
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(nullptr);
 			if (dataUpdateEventManager) {
@@ -60,15 +63,12 @@ void CircuitView::setEvaluator(Backend* backend, evaluator_id_t evaluatorId, con
 			}
 			this->evaluator = evaluator;
 			this->address = address;
-			
 			circuit_id_t circuitId = evaluator->getCircuitId(address);
 			SharedCircuit circuit = backend->getCircuit(circuitId); // ok if null
 			this->circuit = circuit;
-			
+			circuitRenderManager.emplace(circuit.get(), viewportId);
 			MainRenderer::get().setViewportEvaluator(viewportId, evaluator.get(), address);
-
 			toolManager.setCircuit(circuit.get());
-
 			if (dataUpdateEventManager) {
 				dataUpdateEventManager->sendEvent("circuitViewChangeEvaluator");
 				dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
@@ -86,6 +86,7 @@ void CircuitView::setEvaluator(Backend* backend, std::shared_ptr<Evaluator> eval
 			dataUpdateEventManager = backend->getDataUpdateEventManager();
 			this->evaluator = nullptr;
 			this->circuit = nullptr;
+			circuitRenderManager.reset();
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(nullptr);
 			if (dataUpdateEventManager) {
@@ -102,15 +103,12 @@ void CircuitView::setEvaluator(Backend* backend, std::shared_ptr<Evaluator> eval
 		}
 		this->evaluator = evaluator;
 		this->address = address;
-
 		circuit_id_t circuitId = evaluator->getCircuitId(address);
 		SharedCircuit circuit = backend->getCircuit(circuitId); // ok if null
 		this->circuit = circuit;
-
+		circuitRenderManager.emplace(circuit.get(), viewportId);
 		MainRenderer::get().setViewportEvaluator(viewportId, evaluator.get(), address);
-		
 		toolManager.setCircuit(circuit.get());
-
 		if (dataUpdateEventManager) {
 			dataUpdateEventManager->sendEvent("circuitViewChangeEvaluator");
 			dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
@@ -149,7 +147,6 @@ void CircuitView::setCircuit(Backend* backend, circuit_id_t circuitId) {
 			circuitRenderManager.emplace(circuit.get(), viewportId);
 			MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 			toolManager.setCircuit(circuit.get());
-
 			if (dataUpdateEventManager) {
 				dataUpdateEventManager->sendEvent("circuitViewChangeEvaluator");
 				dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");
@@ -188,7 +185,6 @@ void CircuitView::setCircuit(Backend* backend, SharedCircuit circuit) {
 		circuitRenderManager.emplace(circuit.get(), viewportId);
 		MainRenderer::get().setViewportEvaluator(viewportId, nullptr, Address());
 		toolManager.setCircuit(circuit.get());
-
 		if (dataUpdateEventManager) {
 			dataUpdateEventManager->sendEvent("circuitViewChangeEvaluator");
 			dataUpdateEventManager->sendEvent("circuitViewChangeCircuit");

@@ -67,7 +67,7 @@ public:
 	void moveBlock(ViewportId viewportId, Position curPos, Position newPos, Orientation newOrientation, Size newSize);
 	void addWire(ViewportId viewportId, std::pair<Position, Position> points, std::pair<FVector, FVector> socketOffsets);
 	void removeWire(ViewportId viewportId, std::pair<Position, Position> points);
-	void reset(ViewportId viewportId);
+	void resetCircuit(ViewportId viewportId);
 	void updateSimulatorIds(ViewportId viewportId, const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
 
 	// elements

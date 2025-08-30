@@ -16,16 +16,12 @@ ViewportViewData ViewportRenderInterface::getViewData() {
 
 // ====================================== INTERFACE ==========================================
 
-void ViewportRenderInterface::setEvaluator(Evaluator* evaluator) {
-	std::lock_guard<std::mutex> lock(evaluatorMux);
+void ViewportRenderInterface::setEvaluator(Evaluator* evaluator, const Address& address) {
+	std::lock_guard<std::mutex> lock1(evaluatorMux);
+	std::lock_guard<std::mutex> lock2(addressMux);
 	this->evaluator = evaluator;
-	chunker.setEvaluator(evaluator);
-}
-
-void ViewportRenderInterface::setAddress(const Address& address) {
-	std::lock_guard<std::mutex> lock(addressMux);
 	this->address = address;
-	chunker.setAddress(address);
+	chunker.setEvaluator(evaluator, address);
 }
 
 void ViewportRenderInterface::updateViewFrame(glm::vec2 origin, glm::vec2 size) {
@@ -288,7 +284,4 @@ std::vector<ConnectionPreviewRenderData> ViewportRenderInterface::getConnectionP
 	}
 
 	return returnConnectionPreviews;
-}
-
-void ViewportRenderInterface::spawnConfetti(FPosition start) {
 }

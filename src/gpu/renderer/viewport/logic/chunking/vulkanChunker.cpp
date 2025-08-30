@@ -313,25 +313,14 @@ void VulkanChunker::updateSimulatorIds(const std::vector<SimulatorMappingUpdate>
 	}
 }
 
-void VulkanChunker::setEvaluator(Evaluator* evaluator) {
+void VulkanChunker::setEvaluator(Evaluator* evaluator, const Address& address) {
 	if (this->evaluator) {
 		this->evaluator->disconnectListener(this);
 	}
+	this->address = address;
 	this->evaluator = evaluator;
 	if (evaluator) {
 		logInfo("setEvaluator > connectListener");
-		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
-	}
-	for (auto& pair : chunks) {
-		pair.second.rebuildAllocation(device, evaluator, address);
-	}
-}
-
-void VulkanChunker::setAddress(const Address& address) {
-	this->address = address;
-	if (evaluator) {
-		evaluator->disconnectListener(this);
-		logInfo("setAddress > connectListener");
 		evaluator->connectListener(this, address, std::bind(&VulkanChunker::updateSimulatorIds, this, std::placeholders::_1));
 	}
 	for (auto& pair : chunks) {

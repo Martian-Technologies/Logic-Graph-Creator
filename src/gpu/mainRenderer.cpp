@@ -168,8 +168,7 @@ void MainRenderer::setViewportEvaluator(ViewportId viewportId, Evaluator* evalua
 		logError("Failed to call setViewportEvaluator on non existent viewport {}", "MainRenderer", viewportId);
 		return;
 	}
-	iter->second.setEvaluator(evaluator);
-	iter->second.setAddress(address);
+	iter->second.setEvaluator(evaluator, address);
 }
 
 void MainRenderer::deregisterViewport(ViewportId viewport) { }
@@ -237,7 +236,7 @@ void MainRenderer::removeWire(ViewportId viewportId, std::pair<Position, Positio
 	iter->second.getChunker().removeWire(points);
 }
 
-void MainRenderer::reset(ViewportId viewportId) {
+void MainRenderer::resetCircuit(ViewportId viewportId) {
 	auto iter = viewportRenderers.find(viewportId);
 	if (iter == viewportRenderers.end()) {
 		logError("Failed to call reset on non existent viewport {}", "MainRenderer", viewportId);

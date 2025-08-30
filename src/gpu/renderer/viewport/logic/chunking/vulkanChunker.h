@@ -192,8 +192,7 @@ public:
 	void reset();
 	
 	void updateSimulatorIds(const std::vector<SimulatorMappingUpdate>& simulatorMappingUpdates);
-	void setEvaluator(Evaluator* evaluator);
-	void setAddress(const Address& address);
+	void setEvaluator(Evaluator* evaluator, const Address& address);
 
 	std::vector<std::shared_ptr<VulkanChunkAllocation>> getAllocations(Position min, Position max);
 

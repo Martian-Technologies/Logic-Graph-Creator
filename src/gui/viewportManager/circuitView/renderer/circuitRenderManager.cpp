@@ -14,6 +14,7 @@ CircuitRenderManager::CircuitRenderManager(Circuit* circuit, ViewportId viewport
 }
 
 CircuitRenderManager::~CircuitRenderManager() {
+	MainRenderer::get().resetCircuit(viewportId);
 	circuit->disconnectListener(this);
 }
 
@@ -23,7 +24,7 @@ void CircuitRenderManager::addDifference(DifferenceSharedPtr diff) {
 #endif
 	if (diff->clearsAll()) {
 		renderedBlocks.clear();
-		MainRenderer::get().reset(viewportId);
+		MainRenderer::get().resetCircuit(viewportId);
 		return;
 	}
 
